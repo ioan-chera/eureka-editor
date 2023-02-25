@@ -303,8 +303,8 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 	{
 		const auto &L = doc.linedefs[*it];
 
-		if (L->right >= 0) side_sel.set(L->right);
-		if (L->left  >= 0) side_sel.set(L->left);
+		if (L.right >= 0) side_sel.set(L.right);
+		if (L.left  >= 0) side_sel.set(L.left);
 	}
 
 
@@ -348,7 +348,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
-		clip_board->lines.push_back(*doc.linedefs[*it]);
+		clip_board->lines.push_back(doc.linedefs[*it]);
 		LineDef &L = clip_board->lines.back();
 
 		// adjust vertex references
@@ -515,36 +515,36 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 		int new_l = op.addNew(ObjType::linedefs);
 		auto &L = op.doc.linedefs[new_l];
 
-		*L = clip_board->lines[i];
+		L = clip_board->lines[i];
 
 		// adjust vertex references
-		SYS_ASSERT(vert_map.find(L->start) != vert_map.end());
-		SYS_ASSERT(vert_map.find(L->end)   != vert_map.end());
+		SYS_ASSERT(vert_map.find(L.start) != vert_map.end());
+		SYS_ASSERT(vert_map.find(L.end)   != vert_map.end());
 
-		L->start = vert_map[L->start];
-		L->end   = vert_map[L->end  ];
+		L.start = vert_map[L.start];
+		L.end   = vert_map[L.end  ];
 
 		// adjust sidedef references
-		if (op.doc.getRight(*L))
+		if (op.doc.getRight(L))
 		{
-			SYS_ASSERT(side_map.find(L->right) != side_map.end());
-			L->right = side_map[L->right];
+			SYS_ASSERT(side_map.find(L.right) != side_map.end());
+			L.right = side_map[L.right];
 		}
 
-		if (op.doc.getLeft(*L))
+		if (op.doc.getLeft(L))
 		{
-			SYS_ASSERT(side_map.find(L->left) != side_map.end());
-			L->left = side_map[L->left];
+			SYS_ASSERT(side_map.find(L.left) != side_map.end());
+			L.left = side_map[L.left];
 		}
 
 		// flip linedef if necessary
-		if (op.doc.getLeft(*L) && ! op.doc.getRight(*L))
+		if (op.doc.getLeft(L) && ! op.doc.getRight(L))
 		{
 			op.doc.linemod.flipLinedef(op, new_l);
 		}
 
 		// if the linedef lost a side, fix texturing
-		if (L->OneSided() && is_null_tex(op.doc.getRight(*L)->MidTex()))
+		if (L.OneSided() && is_null_tex(op.doc.getRight(L)->MidTex()))
 			op.doc.linemod.fixForLostSide(op, new_l);
 	}
 
@@ -798,8 +798,8 @@ void UnusedVertices(const Document &doc, const selection_c &lines, selection_c &
 
 		const auto &L = doc.linedefs[n];
 
-		result.clear(L->start);
-		result.clear(L->end);
+		result.clear(L.start);
+		result.clear(L.end);
 	}
 }
 
@@ -818,8 +818,8 @@ void UnusedSideDefs(const Document &doc, const selection_c &lines, const selecti
 
 		const auto &L = doc.linedefs[n];
 
-		if (doc.getRight(*L)) result.clear(L->right);
-		if (doc.getLeft(*L))  result.clear(L->left);
+		if (doc.getRight(L)) result.clear(L.right);
+		if (doc.getLeft(L))  result.clear(L.left);
 	}
 
 	for (int i = 0 ; i < doc.numSidedefs(); i++)
@@ -844,8 +844,8 @@ static void UnusedLineDefs(const Document &doc, const selection_c &sectors, sele
 		//    -1 : no side
 		//     0 : deleted side
 		//    +1 : kept side
-		int right_m = (L->right < 0) ? -1 : sectors.get(doc.getRight(*L)->sector) ? 0 : 1;
-		int  left_m = (L->left  < 0) ? -1 : sectors.get(doc.getLeft(*L) ->sector) ? 0 : 1;
+		int right_m = (L.right < 0) ? -1 : sectors.get(doc.getRight(L)->sector) ? 0 : 1;
+		int  left_m = (L.left  < 0) ? -1 : sectors.get(doc.getLeft(L) ->sector) ? 0 : 1;
 
 		if (std::max(right_m, left_m) == 0)
 		{
@@ -868,14 +868,14 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 	{
 		const auto &linedef = doc.linedefs[n];
 
-		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
+		if (lines.get(n) || verts.get(linedef.start) || verts.get(linedef.end))
 		{
 			del_lines.set(n);
 
-			if (doc.getSectorID(*linedef, Side::left) >= 0)
-				result.set(doc.getSectorID(*linedef, Side::left));
-			if (doc.getSectorID(*linedef, Side::right) >= 0)
-				result.set(doc.getSectorID(*linedef, Side::right));
+			if (doc.getSectorID(linedef, Side::left) >= 0)
+				result.set(doc.getSectorID(linedef, Side::left));
+			if (doc.getSectorID(linedef, Side::right) >= 0)
+				result.set(doc.getSectorID(linedef, Side::right));
 		}
 	}
 
@@ -889,12 +889,12 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 
 		const auto &linedef = doc.linedefs[n];
 
-		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
+		if (lines.get(n) || verts.get(linedef.start) || verts.get(linedef.end))
 			continue;
 
 		for (Side what_side : kSides)
 		{
-			int sec_num = doc.getSectorID(*linedef, what_side);
+			int sec_num = doc.getSectorID(linedef, what_side);
 
 			if (sec_num < 0)
 				continue;
@@ -916,7 +916,7 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 
 			const auto &oppositeLinedef = doc.linedefs[opp_ld];
 
-			if (doc.getSectorID(*oppositeLinedef, opp_side) == sec_num)
+			if (doc.getSectorID(oppositeLinedef, opp_side) == sec_num)
 				result.clear(sec_num);
 		}
 	}
@@ -932,8 +932,8 @@ static void FixupLineDefs(EditOperation &op, const Document &doc, selection_c *l
 		// the logic is ugly here mainly to handle flipping (in particular,
 		// not to flip the line when _both_ sides are unlinked).
 
-		bool do_right = doc.getRight(*L) ? sectors->get(doc.getRight(*L)->sector) : false;
-		bool do_left  = doc.getLeft(*L)  ? sectors->get(doc.getLeft(*L) ->sector) : false;
+		bool do_right = doc.getRight(L) ? sectors->get(doc.getRight(L)->sector) : false;
+		bool do_left  = doc.getLeft(L)  ? sectors->get(doc.getLeft(L) ->sector) : false;
 
 		// line shouldn't be in list unless it touches the sector
 		SYS_ASSERT(do_right || do_left);
@@ -969,7 +969,7 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	{
 		const auto &L = doc.linedefs[n];
 
-		if (L->start == v_num || L->end == v_num)
+		if (L.start == v_num || L.end == v_num)
 		{
 			SYS_ASSERT(ld2 < 0);
 
@@ -983,8 +983,8 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	SYS_ASSERT(ld1 >= 0);
 	SYS_ASSERT(ld2 >= 0);
 
-	const LineDef *L1 = doc.linedefs[ld1].get();
-	const LineDef *L2 = doc.linedefs[ld2].get();
+	const LineDef *L1 = &doc.linedefs[ld1];
+	const LineDef *L2 = &doc.linedefs[ld2];
 
 	// we merge L2 into L1, unless L1 is significantly shorter
 	if (doc.calcLength(*L1) < doc.calcLength(*L2) * 0.7)
@@ -1062,7 +1062,7 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const sele
 		{
 			const auto &L = doc.linedefs[n];
 
-			if (list.get(L->start) || list.get(L->end))
+			if (list.get(L.start) || list.get(L.end))
 				line_sel.set(n);
 		}
 	}

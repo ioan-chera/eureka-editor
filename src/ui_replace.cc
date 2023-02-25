@@ -1480,14 +1480,14 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 {
 	const auto &L = inst.level.linedefs[idx];
 
-	if (! Filter_Tag(L->tag) || ! Filter_Sides(L.get()))
+	if (! Filter_Tag(L.tag) || ! Filter_Sides(&L))
 		return false;
 
 	const char *pattern = find_match->value();
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		const SideDef *SD = (pass == 0) ? inst.level.getRight(*L) : inst.level.getLeft(*L);
+		const SideDef *SD = (pass == 0) ? inst.level.getRight(L) : inst.level.getLeft(L);
 
 		if (! SD)
 			continue;
@@ -1496,7 +1496,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 		SString U_tex = SD->UpperTex();
 		SString R_tex = SD->MidTex();
 
-		if (! L->TwoSided())
+		if (! L.TwoSided())
 		{
 			L_tex = R_tex;
 			R_tex = U_tex = NULL;
@@ -1547,10 +1547,10 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 {
 	const auto &L = inst.level.linedefs[idx];
 
-	if (! find_numbers->get(L->type))
+	if (! find_numbers->get(L.type))
 		return false;
 
-	if (! Filter_Tag(L->tag) || ! Filter_Sides(L.get()))
+	if (! Filter_Tag(L.tag) || ! Filter_Sides(&L))
 		return false;
 
 	return true;
@@ -1713,9 +1713,9 @@ void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		int sd_num = (pass == 0) ? L->right : L->left;
+		int sd_num = (pass == 0) ? L.right : L.left;
 
-		const SideDef *SD = (pass == 0) ? inst.level.getRight(*L) : inst.level.getLeft(*L);
+		const SideDef *SD = (pass == 0) ? inst.level.getRight(L) : inst.level.getLeft(L);
 
 		if (! SD)
 			continue;
@@ -1724,7 +1724,7 @@ void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new
 		SString U_tex = SD->UpperTex();
 		SString R_tex = SD->MidTex();
 
-		if (! L->TwoSided())
+		if (! L.TwoSided())
 		{
 			if (!filter_toggle->value() || o_lowers->value())
 				if (R_tex.good() && Pattern_Match(R_tex, pattern))

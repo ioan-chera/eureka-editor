@@ -56,8 +56,8 @@ bool LinedefModule::linedefAlreadyExists(int v1, int v2) const
 	{
 		const auto &L = doc.linedefs[n];
 
-		if (L->start == v1 && L->end == v2) return true;
-		if (L->start == v2 && L->end == v1) return true;
+		if (L.start == v1 && L.end == v2) return true;
+		if (L.start == v2 && L.end == v1) return true;
 	}
 
 	return false;
@@ -72,7 +72,7 @@ bool LinedefModule::linedefAlreadyExists(int v1, int v2) const
 //
 inline const LineDef * LinedefModule::pointer(const Objid& obj) const
 {
-	return doc.linedefs[obj.num].get();
+	return &doc.linedefs[obj.num];
 }
 
 //
@@ -343,13 +343,13 @@ void LinedefModule::determineAdjoiner(Objid& result,
 	{
 		const auto &N = doc.linedefs[n];
 
-		if (N.get() == L)
+		if (&N == L)
 			continue;
 
-		if (doc.isZeroLength(*N))
+		if (doc.isZeroLength(N))
 			continue;
 
-		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
+		if (! (N.TouchesVertex(L->start) || N.TouchesVertex(L->end)))
 			continue;
 
 		for (int side = 0 ; side < 2 ; side++)
@@ -585,16 +585,16 @@ bool LinedefModule::alignCheckAdjacent(const std::vector<Objid> & group,
 	int vj = 0;
 
 	if (((ob_j.parts & PART_LF_ALL) ? 0 : 1) == (do_right ? 1 : 0))
-		vj = doc.linedefs[ob_j.num]->end;
+		vj = doc.linedefs[ob_j.num].end;
 	else
-		vj = doc.linedefs[ob_j.num]->start;
+		vj = doc.linedefs[ob_j.num].start;
 
 	int vk = 0;
 
 	if (((ob_k.parts & PART_LF_ALL) ? 0 : 1) == (do_right ? 1 : 0))
-		vk = doc.linedefs[ob_k.num]->start;
+		vk = doc.linedefs[ob_k.num].start;
 	else
-		vk = doc.linedefs[ob_k.num]->end;
+		vk = doc.linedefs[ob_k.num].end;
 
 	return (vj == vk);
 }
@@ -720,8 +720,8 @@ void Instance::CMD_LIN_Align()
 		const auto &L = level.linedefs[*it];
 
 		// safety check
-		if (L->left  < 0) parts &= ~PART_LF_ALL;
-		if (L->right < 0) parts &= ~PART_RT_ALL;
+		if (L.left  < 0) parts &= ~PART_LF_ALL;
+		if (L.right < 0) parts &= ~PART_RT_ALL;
 
 		Objid obj(ObjType::linedefs, *it);
 
@@ -744,7 +744,7 @@ void Instance::CMD_LIN_Align()
 		{
 			Side where = pass ? Side::left : Side::right;
 
-			if (L->WhatSideDef(where) < 0)
+			if (L.WhatSideDef(where) < 0)
 				continue;
 
 			// decide whether to use upper or lower
@@ -793,8 +793,8 @@ void Instance::CMD_LIN_Align()
 //
 void LinedefModule::flipLine_verts(EditOperation &op, int ld) const
 {
-	int old_start = doc.linedefs[ld]->start;
-	int old_end   = doc.linedefs[ld]->end;
+	int old_start = doc.linedefs[ld].start;
+	int old_end   = doc.linedefs[ld].end;
 
 	op.changeLinedef(ld, LineDef::F_START, old_end);
 	op.changeLinedef(ld, LineDef::F_END, old_start);
@@ -805,8 +805,8 @@ void LinedefModule::flipLine_verts(EditOperation &op, int ld) const
 //
 void LinedefModule::flipLine_sides(EditOperation &op, int ld) const
 {
-	int old_right = doc.linedefs[ld]->right;
-	int old_left  = doc.linedefs[ld]->left;
+	int old_right = doc.linedefs[ld].right;
+	int old_left  = doc.linedefs[ld].left;
 
 	op.changeLinedef(ld, LineDef::F_RIGHT, old_left);
 	op.changeLinedef(ld, LineDef::F_LEFT, old_right);
@@ -828,7 +828,7 @@ void LinedefModule::flipLinedef_safe(EditOperation &op, int ld) const
 
 	flipLine_verts(op, ld);
 
-	if (!doc.linedefs[ld]->OneSided())
+	if (!doc.linedefs[ld].OneSided())
 		flipLine_sides(op, ld);
 }
 
@@ -927,46 +927,46 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 	auto &L2 = doc.linedefs[new_l];
 
 	// it is OK to directly set fields of newly created objects
-	*L2 = *L;
+	L2 = L;
 
-	L2->start = new_v;
-	L2->end   = L->end;
+	L2.start = new_v;
+	L2.end   = L.end;
 
-	int orig_length = iround(doc.calcLength(*L));
+	int orig_length = iround(doc.calcLength(L));
 
 	// update vertex on original line
 	op.changeLinedef(ld, LineDef::F_END, new_v);
 
 	// compute lengths (to update sidedef X offsets)
-	int new_length  = iround(doc.calcLength(*L));
+	int new_length  = iround(doc.calcLength(L));
 
 	// update sidedefs
 
-	if (doc.getRight(*L))
+	if (doc.getRight(L))
 	{
-		L2->right = op.addNew(ObjType::sidedefs);
-		*doc.getRight(*L2) = *doc.getRight(*L);
+		L2.right = op.addNew(ObjType::sidedefs);
+		*doc.getRight(L2) = *doc.getRight(L);
 
 		if (! config::leave_offsets_alone)
 		{
-			doc.getRight(*L2)->x_offset += new_length;
-			int width = getTileWidth(*doc.getRight(*L2), inst.wad.images, inst.conf);
-			doc.getRight(*L2)->x_offset %= width;
+			doc.getRight(L2)->x_offset += new_length;
+			int width = getTileWidth(*doc.getRight(L2), inst.wad.images, inst.conf);
+			doc.getRight(L2)->x_offset %= width;
 		}
 	}
 
-	if (doc.getLeft(*L))
+	if (doc.getLeft(L))
 	{
-		L2->left = op.addNew(ObjType::sidedefs);
-		*doc.getLeft(*L2) = *doc.getLeft(*L);
+		L2.left = op.addNew(ObjType::sidedefs);
+		*doc.getLeft(L2) = *doc.getLeft(L);
 
 		if (! config::leave_offsets_alone)
 		{
-			int new_x_ofs = doc.getLeft(*L)->x_offset + orig_length - new_length;
-			int width = getTileWidth(*doc.getLeft(*L), inst.wad.images, inst.conf);
+			int new_x_ofs = doc.getLeft(L)->x_offset + orig_length - new_length;
+			int width = getTileWidth(*doc.getLeft(L), inst.wad.images, inst.conf);
 			new_x_ofs %= width;
 
-			op.changeSidedef(L->left, SideDef::F_X_OFFSET, new_x_ofs);
+			op.changeSidedef(L.left, SideDef::F_X_OFFSET, new_x_ofs);
 		}
 	}
 
@@ -978,11 +978,11 @@ bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 	const auto &L = doc.linedefs[ld];
 
 	// prevent creating tiny lines (especially zero-length)
-	if (fabs(doc.getStart(*L).x() - doc.getEnd(*L).x()) < 4 &&
-		fabs(doc.getStart(*L).y() - doc.getEnd(*L).y()) < 4)
+	if (fabs(doc.getStart(L).x() - doc.getEnd(L).x()) < 4 &&
+		fabs(doc.getStart(L).y() - doc.getEnd(L).y()) < 4)
 		return false;
 
-	v2double_t new_p = (doc.getStart(*L).xy() + doc.getEnd(*L).xy()) / 2;
+	v2double_t new_p = (doc.getStart(L).xy() + doc.getEnd(L).xy()) / 2;
 
 	int new_v = op.addNew(ObjType::vertices);
 
@@ -1042,7 +1042,7 @@ void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int 
 	const auto &L  = doc.linedefs[ld];
 	auto &SD = doc.sidedefs[new_sd];
 
-	int new_flags = L->flags;
+	int new_flags = L.flags;
 
 	new_flags |=  MLF_TwoSided;
 	new_flags &= ~MLF_Blocking;
@@ -1077,9 +1077,9 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 
 	const auto &L = doc.linedefs[ld];
 
-	SYS_ASSERT(L->TwoSided());
+	SYS_ASSERT(L.TwoSided());
 
-	int new_flags = L->flags;
+	int new_flags = L.flags;
 
 	new_flags |=  MLF_TwoSided;
 	new_flags &= ~MLF_Blocking;
@@ -1093,11 +1093,11 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 	StringID  left_tex;
 	StringID right_tex;
 
-	if (! is_null_tex(doc.getLeft(*L)->MidTex()))
-		left_tex = doc.getLeft(*L)->mid_tex;
+	if (! is_null_tex(doc.getLeft(L)->MidTex()))
+		left_tex = doc.getLeft(L)->mid_tex;
 
-	if (! is_null_tex(doc.getRight(*L)->MidTex()))
-		right_tex = doc.getRight(*L)->mid_tex;
+	if (! is_null_tex(doc.getRight(L)->MidTex()))
+		right_tex = doc.getRight(L)->mid_tex;
 
 	if (! left_tex)  left_tex = right_tex;
 	if (! right_tex) right_tex = left_tex;
@@ -1109,14 +1109,14 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 		right_tex = left_tex;
 	}
 
-	op.changeSidedef(L->left,  SideDef::F_MID_TEX, null_tex);
-	op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+	op.changeSidedef(L.left,  SideDef::F_MID_TEX, null_tex);
+	op.changeSidedef(L.right, SideDef::F_MID_TEX, null_tex);
 
-	op.changeSidedef(L->left,  SideDef::F_LOWER_TEX, left_tex);
-	op.changeSidedef(L->left,  SideDef::F_UPPER_TEX, left_tex);
+	op.changeSidedef(L.left,  SideDef::F_LOWER_TEX, left_tex);
+	op.changeSidedef(L.left,  SideDef::F_UPPER_TEX, left_tex);
 
-	op.changeSidedef(L->right, SideDef::F_LOWER_TEX, right_tex);
-	op.changeSidedef(L->right, SideDef::F_UPPER_TEX, right_tex);
+	op.changeSidedef(L.right, SideDef::F_LOWER_TEX, right_tex);
+	op.changeSidedef(L.right, SideDef::F_UPPER_TEX, right_tex);
 }
 
 //
@@ -1126,8 +1126,8 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 {
 	const auto &L = doc.linedefs[ld];
 
-	int gone_sd  = (ld_side == Side::right) ? L->right : L->left;
-	int other_sd = (ld_side == Side::right) ? L->left : L->right;
+	int gone_sd  = (ld_side == Side::right) ? L.right : L.left;
+	int other_sd = (ld_side == Side::right) ? L.left : L.right;
 
 	if (ld_side == Side::right)
 		op.changeLinedef(ld, LineDef::F_RIGHT, -1);
@@ -1144,7 +1144,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 	//	  (3) flip the linedef if right side was removed
 	//    (4) set the middle texture
 
-	int new_flags = L->flags;
+	int new_flags = L.flags;
 
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
@@ -1197,7 +1197,7 @@ void Instance::commandLinedefMergeTwo()
 	const auto & L1 = level.linedefs[ld1];
 	const auto & L2 = level.linedefs[ld2];
 
-	if (! (L1->OneSided() && L2->OneSided()))
+	if (! (L1.OneSided() && L2.OneSided()))
 	{
 		Beep("Linedefs to merge must be single sided.");
 		return;
@@ -1210,7 +1210,7 @@ void Instance::commandLinedefMergeTwo()
 
 	// ld2 steals the sidedef from ld1
 
-	op.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+	op.changeLinedef(ld2, LineDef::F_LEFT, L1.right);
 	op.changeLinedef(ld1, LineDef::F_RIGHT, -1);
 
 	level.linemod.mergedSecondSidedef(op, ld2);
@@ -1224,15 +1224,15 @@ void Instance::commandLinedefMergeTwo()
 
 		const auto & L = level.linedefs[n];
 
-		if (L->start == L1->start)
-			op.changeLinedef(n, LineDef::F_START, L2->end);
-		else if (L->start == L1->end)
-			op.changeLinedef(n, LineDef::F_START, L2->start);
+		if (L.start == L1.start)
+			op.changeLinedef(n, LineDef::F_START, L2.end);
+		else if (L.start == L1.end)
+			op.changeLinedef(n, LineDef::F_START, L2.start);
 
-		if (L->end == L1->start)
-			op.changeLinedef(n, LineDef::F_END, L2->end);
-		else if (L->end == L1->end)
-			op.changeLinedef(n, LineDef::F_END, L2->start);
+		if (L.end == L1.start)
+			op.changeLinedef(n, LineDef::F_END, L2.end);
+		else if (L.end == L1.end)
+			op.changeLinedef(n, LineDef::F_END, L2.start);
 	}
 
 	// delete ld1 and any unused vertices
@@ -1253,8 +1253,8 @@ void linemod::moveCoordOntoLinedef(const Document &doc, int ld, v2double_t &v)
 {
 	const auto &L = doc.linedefs[ld];
 
-	v2double_t v1 = doc.getStart(*L).xy();
-	v2double_t v2 = doc.getEnd(*L).xy();
+	v2double_t v1 = doc.getStart(L).xy();
+	v2double_t v2 = doc.getEnd(L).xy();
 
 	v2double_t dv = v2 - v1;
 
@@ -1278,7 +1278,7 @@ bool LinedefModule::linedefStartWillBeMoved(int ld, selection_c &list) const
 	{
 		const auto &L = doc.linedefs[*it];
 
-		if (*it != ld && L->end == doc.linedefs[ld]->start)
+		if (*it != ld && L.end == doc.linedefs[ld].start)
 			return true;
 	}
 
@@ -1294,7 +1294,7 @@ bool LinedefModule::linedefEndWillBeMoved(int ld, selection_c &list) const
 	{
 		const auto &L = doc.linedefs[*it];
 
-		if (*it != ld && L->start == doc.linedefs[ld]->end)
+		if (*it != ld && L.start == doc.linedefs[ld].end)
 			return true;
 	}
 
@@ -1355,13 +1355,13 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 
 	if (new_len < 0)
 	{
-		op.changeVertex(L->start, Vertex::F_X, doc.getEnd(*L).raw_x - FFixedPoint(idx));
-		op.changeVertex(L->start, Vertex::F_Y, doc.getEnd(*L).raw_y - FFixedPoint(idy));
+		op.changeVertex(L.start, Vertex::F_X, doc.getEnd(L).raw_x - FFixedPoint(idx));
+		op.changeVertex(L.start, Vertex::F_Y, doc.getEnd(L).raw_y - FFixedPoint(idy));
 	}
 	else
 	{
-		op.changeVertex(L->end, Vertex::F_X, doc.getStart(*L).raw_x + FFixedPoint(idx));
-		op.changeVertex(L->end, Vertex::F_Y, doc.getStart(*L).raw_y + FFixedPoint(idy));
+		op.changeVertex(L.end, Vertex::F_X, doc.getStart(L).raw_x + FFixedPoint(idx));
+		op.changeVertex(L.end, Vertex::F_Y, doc.getStart(L).raw_y + FFixedPoint(idy));
 	}
 }
 
@@ -1386,7 +1386,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 	{
 		const auto &L = doc.linedefs[n];
 
-		angles[n] = atan2(doc.getEnd(*L).y() - doc.getStart(*L).y(), doc.getEnd(*L).x() - doc.getStart(*L).x());
+		angles[n] = atan2(doc.getEnd(L).y() - doc.getStart(L).y(), doc.getEnd(L).x() - doc.getStart(L).x());
 	}
 
 	EditOperation op(doc.basis);
@@ -1409,18 +1409,18 @@ void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 {
 	const auto &L = doc.linedefs[ld];
 
-	SYS_ASSERT(doc.getRight(*L));
+	SYS_ASSERT(doc.getRight(L));
 
 	StringID tex;
 
-	if (! is_null_tex(doc.getRight(*L)->LowerTex()))
-		tex = doc.getRight(*L)->lower_tex;
-	else if (! is_null_tex(doc.getRight(*L)->UpperTex()))
-		tex = doc.getRight(*L)->upper_tex;
+	if (! is_null_tex(doc.getRight(L)->LowerTex()))
+		tex = doc.getRight(L)->lower_tex;
+	else if (! is_null_tex(doc.getRight(L)->UpperTex()))
+		tex = doc.getRight(L)->upper_tex;
 	else
 		tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	op.changeSidedef(L->right, SideDef::F_MID_TEX, tex);
+	op.changeSidedef(L.right, SideDef::F_MID_TEX, tex);
 }
 
 //

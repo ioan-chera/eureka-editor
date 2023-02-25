@@ -114,10 +114,10 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 
 		auto &L = doc.linedefs[new_ld];
 
-		L->start = new_v;
-		L->end   = (i == 3) ? (new_v - 3) : new_v + 1;
-		L->flags = MLF_Blocking;
-		L->right = new_sd;
+		L.start = new_v;
+		L.end   = (i == 3) ? (new_v - 3) : new_v + 1;
+		L.flags = MLF_Blocking;
+		L.right = new_sd;
 	}
 
 	// select it
@@ -344,9 +344,9 @@ void ObjectsModule::insertLinedef(EditOperation &op, int v1, int v2, bool no_fil
 
 	auto &L = doc.linedefs[new_ld];
 
-	L->start = v1;
-	L->end   = v2;
-	L->flags = MLF_Blocking;
+	L.start = v1;
+	L.end   = v2;
+	L.flags = MLF_Blocking;
 
 	if (no_fill)
 		return;
@@ -425,7 +425,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		// prevent creating an overlapping line when splitting
 		if (old_vert >= 0 &&
-			doc.linedefs[split_ld]->TouchesVertex(old_vert))
+			doc.linedefs[split_ld].TouchesVertex(old_vert))
 		{
 			old_vert = -1;
 		}
@@ -686,10 +686,10 @@ void Instance::CMD_ObjectInsert()
 //
 bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const
 {
-	double lx0 = doc.getStart(*doc.linedefs[ld]).x();
-	double ly0 = doc.getStart(*doc.linedefs[ld]).y();
-	double lx1 = doc.getEnd(*doc.linedefs[ld]).x();
-	double ly1 = doc.getEnd(*doc.linedefs[ld]).y();
+	double lx0 = doc.getStart(doc.linedefs[ld]).x();
+	double ly0 = doc.getStart(doc.linedefs[ld]).y();
+	double lx1 = doc.getEnd(doc.linedefs[ld]).x();
+	double ly1 = doc.getEnd(doc.linedefs[ld]).y();
 
 	double i;
 
@@ -821,15 +821,15 @@ int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 	for(int i = 0; i < doc.numLinedefs(); ++i)
 	{
 		const auto &otherLine = doc.linedefs[i];
-		if(!otherLine->TouchesVertex(vertID) || i == lineID)
+		if(!otherLine.TouchesVertex(vertID) || i == lineID)
 			continue;
 
 		// We have a linedef that is going to overlap the other one to be
 		// split. We need to handle it like above, with merging vertices
 
 		// Identify the hinge, common vertex
-		int otherLineOtherVertexID = otherLine->OtherVertex(vertID);
-		if(!doc.linedefs[lineID]->TouchesVertex(otherLineOtherVertexID))
+		int otherLineOtherVertexID = otherLine.OtherVertex(vertID);
+		if(!doc.linedefs[lineID].TouchesVertex(otherLineOtherVertexID))
 			continue;	// not a hinge between them
 
 		return i;
@@ -971,11 +971,11 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 	const auto &L2 = doc.linedefs[dest_line];
 
 	// don't transfer certain flags
-	int flags = doc.linedefs[dest_line]->flags;
-	flags = (flags & LINEDEF_FLAG_KEEP) | (L1->flags & ~LINEDEF_FLAG_KEEP);
+	int flags = doc.linedefs[dest_line].flags;
+	flags = (flags & LINEDEF_FLAG_KEEP) | (L1.flags & ~LINEDEF_FLAG_KEEP);
 
 	// handle textures
-	if (do_tex && doc.getRight(*L1) && doc.getRight(*L2))
+	if (do_tex && doc.getRight(L1) && doc.getRight(L2))
 	{
 		/* There are four cases, depending on number of sides:
 		 *
@@ -989,38 +989,38 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		 * (d) double --> double : copy each side, but possibly flip the
 		 *                         second linedef based on floor or ceil diff.
 		 */
-		if (! doc.getLeft(*L1))
+		if (! doc.getLeft(L1))
 		{
-			StringID tex = doc.getRight(*L1)->mid_tex;
+			StringID tex = doc.getRight(L1)->mid_tex;
 
-			if (! doc.getLeft(*L2))
+			if (! doc.getLeft(L2))
 			{
-				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				op.changeSidedef(L2.right, SideDef::F_MID_TEX, tex);
 			}
 			else
 			{
-				op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex);
-				op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex);
+				op.changeSidedef(L2.right, SideDef::F_LOWER_TEX, tex);
+				op.changeSidedef(L2.right, SideDef::F_UPPER_TEX, tex);
 
-				op.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex);
-				op.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex);
+				op.changeSidedef(L2.left,  SideDef::F_LOWER_TEX, tex);
+				op.changeSidedef(L2.left,  SideDef::F_UPPER_TEX, tex);
 
 				// this is debatable....   CONFIG ITEM?
 				flags |= MLF_LowerUnpegged;
 				flags |= MLF_UpperUnpegged;
 			}
 		}
-		else if (! doc.getLeft(*L2))
+		else if (! doc.getLeft(L2))
 		{
 			/* pick which texture to copy */
 
-			const Sector &front = doc.getSector(*doc.getRight(*L1));
-			const Sector &back  = doc.getSector(*doc.getLeft(*L1));
+			const Sector &front = doc.getSector(*doc.getRight(L1));
+			const Sector &back  = doc.getSector(*doc.getLeft(L1));
 
-			StringID f_l = doc.getRight(*L1)->lower_tex;
-			StringID f_u = doc.getRight(*L1)->upper_tex;
-			StringID b_l = doc.getLeft(*L1)->lower_tex;
-			StringID b_u = doc.getLeft(*L1)->upper_tex;
+			StringID f_l = doc.getRight(L1)->lower_tex;
+			StringID f_u = doc.getRight(L1)->upper_tex;
+			StringID b_l = doc.getLeft(L1)->lower_tex;
+			StringID b_u = doc.getLeft(L1)->upper_tex;
 
 			// ignore missing textures
 			if (is_null_tex(BA_GetString(f_l))) f_l = StringID();
@@ -1042,18 +1042,18 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 
 			if (tex.hasContent())
 			{
-				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				op.changeSidedef(L2.right, SideDef::F_MID_TEX, tex);
 			}
 		}
 		else
 		{
-			const SideDef *RS = doc.getRight(*L1);
-			const SideDef *LS = doc.getLeft(*L1);
+			const SideDef *RS = doc.getRight(L1);
+			const SideDef *LS = doc.getLeft(L1);
 
-			const Sector *F1 = &doc.getSector(*doc.getRight(*L1));
-			const Sector *B1 = &doc.getSector(*doc.getLeft(*L1));
-			const Sector *F2 = &doc.getSector(*doc.getRight(*L2));
-			const Sector *B2 = &doc.getSector(*doc.getLeft(*L2));
+			const Sector *F1 = &doc.getSector(*doc.getRight(L1));
+			const Sector *B1 = &doc.getSector(*doc.getLeft(L1));
+			const Sector *F2 = &doc.getSector(*doc.getRight(L2));
+			const Sector *B2 = &doc.getSector(*doc.getLeft(L2));
 
 			// logic to determine which sides we copy
 
@@ -1070,9 +1070,9 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 			  { /* no change */ }
 			else if (c_diff1 * c_diff2 < 0)
 			  std::swap(LS, RS);
-			else if (L1->start == L2->end || L1->end == L2->start)
+			else if (L1.start == L2.end || L1.end == L2.start)
 			  { /* no change */ }
-			else if (L1->start == L2->start || L1->end == L2->end)
+			else if (L1.start == L2.start || L1.end == L2.end)
 			  std::swap(LS, RS);
 			else if (F1 == F2 || B1 == B2)
 			  { /* no change */ }
@@ -1081,25 +1081,25 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 
 			// TODO; review if we should copy '-' into lowers or uppers
 
-			op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
-			op.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
-			op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
+			op.changeSidedef(L2.right, SideDef::F_LOWER_TEX, RS->lower_tex);
+			op.changeSidedef(L2.right, SideDef::F_MID_TEX,   RS->mid_tex);
+			op.changeSidedef(L2.right, SideDef::F_UPPER_TEX, RS->upper_tex);
 
-			op.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
-			op.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
-			op.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
+			op.changeSidedef(L2.left, SideDef::F_LOWER_TEX, LS->lower_tex);
+			op.changeSidedef(L2.left, SideDef::F_MID_TEX,   LS->mid_tex);
+			op.changeSidedef(L2.left, SideDef::F_UPPER_TEX, LS->upper_tex);
 		}
 	}
 
 	op.changeLinedef(dest_line, LineDef::F_FLAGS, flags);
 
-	op.changeLinedef(dest_line, LineDef::F_TYPE, L1->type);
-	op.changeLinedef(dest_line, LineDef::F_TAG,  L1->tag);
+	op.changeLinedef(dest_line, LineDef::F_TYPE, L1.type);
+	op.changeLinedef(dest_line, LineDef::F_TAG,  L1.tag);
 
-	op.changeLinedef(dest_line, LineDef::F_ARG2, L1->arg2);
-	op.changeLinedef(dest_line, LineDef::F_ARG3, L1->arg3);
-	op.changeLinedef(dest_line, LineDef::F_ARG4, L1->arg4);
-	op.changeLinedef(dest_line, LineDef::F_ARG5, L1->arg5);
+	op.changeLinedef(dest_line, LineDef::F_ARG2, L1.arg2);
+	op.changeLinedef(dest_line, LineDef::F_ARG3, L1.arg3);
+	op.changeLinedef(dest_line, LineDef::F_ARG4, L1.arg4);
+	op.changeLinedef(dest_line, LineDef::F_ARG5, L1.arg5);
 }
 
 
@@ -1215,8 +1215,8 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 			break;
 
 		case ObjType::linedefs:
-			dragCountOnGridWorker(ObjType::vertices, doc.linedefs[objnum]->start, count, total);
-			dragCountOnGridWorker(ObjType::vertices, doc.linedefs[objnum]->end,   count, total);
+			dragCountOnGridWorker(ObjType::vertices, doc.linedefs[objnum].start, count, total);
+			dragCountOnGridWorker(ObjType::vertices, doc.linedefs[objnum].end,   count, total);
 			break;
 
 		case ObjType::sectors:
@@ -1224,7 +1224,7 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 			{
 				const auto &L = doc.linedefs[n];
 
-				if (! doc.touchesSector(*L, objnum))
+				if (! doc.touchesSector(L, objnum))
 					continue;
 
 				dragCountOnGridWorker(ObjType::linedefs, n, count, total);
@@ -1271,10 +1271,10 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 			{
 				const auto &L = doc.linedefs[objnum];
 
-				dragUpdateCurrentDist(ObjType::vertices, L->start, x, y, best_dist,
+				dragUpdateCurrentDist(ObjType::vertices, L.start, x, y, best_dist,
 									   ptr_x, ptr_y, only_grid);
 
-				dragUpdateCurrentDist(ObjType::vertices, L->end,   x, y, best_dist,
+				dragUpdateCurrentDist(ObjType::vertices, L.end,   x, y, best_dist,
 				                       ptr_x, ptr_y, only_grid);
 			}
 			return;
@@ -1288,7 +1288,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 			{
 				const auto &L = doc.linedefs[n];
 
-				if (! doc.touchesSector(*L, objnum))
+				if (! doc.touchesSector(L, objnum))
 					continue;
 
 				dragUpdateCurrentDist(ObjType::linedefs, n, x, y, best_dist,
@@ -1588,8 +1588,8 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 	{
 		const auto &L = doc.linedefs[*it];
 
-		int start = L->start;
-		int end   = L->end;
+		int start = L.start;
+		int end   = L.end;
 
 		op.changeLinedef(*it, LineDef::F_START, end);
 		op.changeLinedef(*it, LineDef::F_END, start);
@@ -2126,34 +2126,34 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 	for (const auto &L : doc.linedefs)
 	{
 		// require both vertices of the linedef to be in the selection
-		if (! (list.get(L->start) && list.get(L->end)))
+		if (! (list.get(L.start) && list.get(L.end)))
 			continue;
 
 		// IDEA: make this a method of LineDef
-		double x1 = doc.getStart(*L).x();
-		double y1 = doc.getStart(*L).y();
-		double x2 = doc.getEnd(*L).x();
-		double y2 = doc.getEnd(*L).y();
+		double x1 = doc.getStart(L).x();
+		double y1 = doc.getStart(L).y();
+		double x2 = doc.getEnd(L).x();
+		double y2 = doc.getEnd(L).y();
 
-		if (doc.isHorizontal(*L))
+		if (doc.isHorizontal(L))
 		{
-			vert_modes[L->start] |= V_HORIZ;
-			vert_modes[L->end]   |= V_HORIZ;
+			vert_modes[L.start] |= V_HORIZ;
+			vert_modes[L.end]   |= V_HORIZ;
 		}
-		else if (doc.isVertical(*L))
+		else if (doc.isVertical(L))
 		{
-			vert_modes[L->start] |= V_VERT;
-			vert_modes[L->end]   |= V_VERT;
+			vert_modes[L.start] |= V_VERT;
+			vert_modes[L.end]   |= V_VERT;
 		}
 		else if ((x1 < x2 && y1 < y2) || (x1 > x2 && y1 > y2))
 		{
-			vert_modes[L->start] |= V_DIAG_NE;
-			vert_modes[L->end]   |= V_DIAG_NE;
+			vert_modes[L.start] |= V_DIAG_NE;
+			vert_modes[L.end]   |= V_DIAG_NE;
 		}
 		else
 		{
-			vert_modes[L->start] |= V_DIAG_SE;
-			vert_modes[L->end]   |= V_DIAG_SE;
+			vert_modes[L.start] |= V_DIAG_SE;
+			vert_modes[L.end]   |= V_DIAG_SE;
 		}
 	}
 

@@ -92,24 +92,24 @@ void Instance::FreshLevel()
 	sec->SetDefaults(conf);
 	level.sectors.push_back(std::move(sec));
 
-	for (int i = 0 ; i < 4 ; i++)
+	for(int i = 0; i < 4; i++)
 	{
 		Vertex v{};
 
 		v.SetRawX(loaded.levelFormat, (i >= 2) ? 256 : -256);
-		v.SetRawY(loaded.levelFormat, (i==1 || i==2) ? 256 :-256);
+		v.SetRawY(loaded.levelFormat, (i == 1 || i == 2) ? 256 : -256);
 		level.addVertex(v);
 
 		auto sd = std::make_unique<SideDef>();
 		sd->SetDefaults(conf, false);
 		level.sidedefs.push_back(std::move(sd));
 
-		auto ld = std::make_unique<LineDef>();
-		ld->start = i;
-		ld->end   = (i+1) % 4;
-		ld->flags = MLF_Blocking;
-		ld->right = i;
-		level.linedefs.push_back(std::move(ld));
+		LineDef ld{};
+		ld.start = i;
+		ld.end   = (i+1) % 4;
+		ld.flags = MLF_Blocking;
+		ld.right = i;
+		level.linedefs.push_back(ld);
 	}
 
 	for (int pl = 1 ; pl <= 4 ; pl++)
@@ -765,25 +765,25 @@ void Instance::LoadLineDefs(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
-		auto ld = std::make_unique<LineDef>();
+		LineDef ld{};
 
-		ld->start = LE_U16(raw.start);
-		ld->end   = LE_U16(raw.end);
+		ld.start = LE_U16(raw.start);
+		ld.end   = LE_U16(raw.end);
 
-		ld->flags = LE_U16(raw.flags);
-		ld->type  = LE_U16(raw.type);
-		ld->tag   = LE_S16(raw.tag);
+		ld.flags = LE_U16(raw.flags);
+		ld.type  = LE_U16(raw.type);
+		ld.tag   = LE_S16(raw.tag);
 
-		ld->right = LE_U16(raw.right);
-		ld->left  = LE_U16(raw.left);
+		ld.right = LE_U16(raw.right);
+		ld.left  = LE_U16(raw.left);
 
-		if (ld->right == 0xFFFF) ld->right = -1;
-		if (ld-> left == 0xFFFF) ld-> left = -1;
+		if (ld.right == 0xFFFF) ld.right = -1;
+		if (ld. left == 0xFFFF) ld. left = -1;
 
-		ValidateVertexRefs(ld.get(), i);
-		ValidateSidedefRefs(ld.get(), i);
+		ValidateVertexRefs(&ld, i);
+		ValidateSidedefRefs(&ld, i);
 
-		level.linedefs.push_back(std::move(ld));
+		level.linedefs.push_back(ld);
 	}
 }
 
@@ -811,29 +811,29 @@ void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
-		auto ld = std::make_unique<LineDef>();
+		LineDef ld{};
 
-		ld->start = LE_U16(raw.start);
-		ld->end   = LE_U16(raw.end);
+		ld.start = LE_U16(raw.start);
+		ld.end   = LE_U16(raw.end);
 
-		ld->flags = LE_U16(raw.flags);
-		ld->type = raw.type;
-		ld->tag  = raw.args[0];
-		ld->arg2 = raw.args[1];
-		ld->arg3 = raw.args[2];
-		ld->arg4 = raw.args[3];
-		ld->arg5 = raw.args[4];
+		ld.flags = LE_U16(raw.flags);
+		ld.type = raw.type;
+		ld.tag  = raw.args[0];
+		ld.arg2 = raw.args[1];
+		ld.arg3 = raw.args[2];
+		ld.arg4 = raw.args[3];
+		ld.arg5 = raw.args[4];
 
-		ld->right = LE_U16(raw.right);
-		ld->left  = LE_U16(raw.left);
+		ld.right = LE_U16(raw.right);
+		ld.left  = LE_U16(raw.left);
 
-		if (ld->right == 0xFFFF) ld->right = -1;
-		if (ld-> left == 0xFFFF) ld-> left = -1;
+		if (ld.right == 0xFFFF) ld.right = -1;
+		if (ld. left == 0xFFFF) ld. left = -1;
 
-		ValidateVertexRefs(ld.get(), i);
-		ValidateSidedefRefs(ld.get(), i);
+		ValidateVertexRefs(&ld, i);
+		ValidateSidedefRefs(&ld, i);
 
-		level.linedefs.push_back(std::move(ld));
+		level.linedefs.push_back(ld);
 	}
 }
 
@@ -847,8 +847,8 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 
 	for (const auto &linedef : doc.linedefs)
 	{
-		used_verts.set(linedef->start);
-		used_verts.set(linedef->end);
+		used_verts.set(linedef.start);
+		used_verts.set(linedef.end);
 	}
 
 	int new_count = doc.numVertices();
@@ -1445,15 +1445,15 @@ void Instance::SaveLineDefs()
 	{
 		raw_linedef_t raw;
 
-		raw.start = LE_U16(ld->start);
-		raw.end   = LE_U16(ld->end);
+		raw.start = LE_U16(ld.start);
+		raw.end   = LE_U16(ld.end);
 
-		raw.flags = LE_U16(ld->flags);
-		raw.type  = LE_U16(ld->type);
-		raw.tag   = LE_S16(ld->tag);
+		raw.flags = LE_U16(ld.flags);
+		raw.type  = LE_U16(ld.type);
+		raw.tag   = LE_S16(ld.tag);
 
-		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
-		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
+		raw.right = (ld.right >= 0) ? LE_U16(ld.right) : 0xFFFF;
+		raw.left  = (ld.left  >= 0) ? LE_U16(ld.left)  : 0xFFFF;
 
 		lump->Write(&raw, sizeof(raw));
 	}
@@ -1469,20 +1469,20 @@ void Instance::SaveLineDefs_Hexen()
 	{
 		raw_hexen_linedef_t raw;
 
-		raw.start = LE_U16(ld->start);
-		raw.end   = LE_U16(ld->end);
+		raw.start = LE_U16(ld.start);
+		raw.end   = LE_U16(ld.end);
 
-		raw.flags = LE_U16(ld->flags);
-		raw.type  = static_cast<u8_t>(ld->type);
+		raw.flags = LE_U16(ld.flags);
+		raw.type  = static_cast<u8_t>(ld.type);
 
-		raw.args[0] = static_cast<u8_t>(ld->tag);
-		raw.args[1] = static_cast<u8_t>(ld->arg2);
-		raw.args[2] = static_cast<u8_t>(ld->arg3);
-		raw.args[3] = static_cast<u8_t>(ld->arg4);
-		raw.args[4] = static_cast<u8_t>(ld->arg5);
+		raw.args[0] = static_cast<u8_t>(ld.tag);
+		raw.args[1] = static_cast<u8_t>(ld.arg2);
+		raw.args[2] = static_cast<u8_t>(ld.arg3);
+		raw.args[3] = static_cast<u8_t>(ld.arg4);
+		raw.args[4] = static_cast<u8_t>(ld.arg5);
 
-		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
-		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
+		raw.right = (ld.right >= 0) ? LE_U16(ld.right) : 0xFFFF;
+		raw.left  = (ld.left  >= 0) ? LE_U16(ld.left)  : 0xFFFF;
 
 		lump->Write(&raw, sizeof(raw));
 	}

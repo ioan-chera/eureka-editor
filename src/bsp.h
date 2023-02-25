@@ -83,7 +83,7 @@ enum build_result_e
 };
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &inst);
 
 
 //======================================================================
@@ -451,8 +451,8 @@ void ZLibFinishLump(void);
 
 // detection routines
 void DetectOverlappingVertices(const Document &doc);
-void DetectOverlappingLines(const Document &doc);
-void DetectPolyobjSectors(const Instance &inst);
+void DetectOverlappingLines(Document &doc);
+void DetectPolyobjSectors(Instance &inst);
 
 // computes the wall tips for all of the vertices
 void CalculateWallTips(const Document &doc);

@@ -88,12 +88,12 @@ TEST(Commands, SelectNeighborLinesByTexture)
     };
     auto addLine = [&doc](int v1, int v2, int s1, int s2)
     {
-        LineDef *line = new LineDef{};
-        line->start = v1;
-        line->end = v2;
-        line->right = s1;
-        line->left = s2;
-        doc.linedefs.emplace_back(line);
+        LineDef line{};
+        line.start = v1;
+        line.end = v2;
+        line.right = s1;
+        line.left = s2;
+        doc.linedefs.push_back(line);
     };
 
     addVertex(0, 0);

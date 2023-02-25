@@ -141,7 +141,7 @@ public:
 			col = static_cast<img_pixel_t>(HashedPalColor(fname, inst.conf.miscInfo.floor_colors));
 	}
 
-	void FindTex(const SString & tname, LineDef *ld)
+	void FindTex(const SString & tname)
 	{
 		fullbright = false;
 
@@ -188,7 +188,7 @@ public:
 	// 'sd' will be NULL.  Sprites use the info in the 'ceil' surface.
 	int th;
 
-	LineDef *ld;
+	const LineDef *ld;
 	SideDef *sd;
 	const Sector *sec;
 
@@ -437,7 +437,7 @@ public:
 			lower.h2 = front->ceilh;
 			lower.y_clip = DrawSurf::SOLID_ABOVE | DrawSurf::SOLID_BELOW;
 
-			lower.FindTex(sd->MidTex(), ld);
+			lower.FindTex(sd->MidTex());
 
 			if (lower.img && (ld->flags & MLF_LowerUnpegged))
 				lower.tex_h = lower.h1 + lower.img->height();
@@ -457,7 +457,7 @@ public:
 			upper.h2 = front->ceilh;
 			upper.y_clip = DrawSurf::SOLID_ABOVE;
 
-			upper.FindTex(sd->UpperTex(), ld);
+			upper.FindTex(sd->UpperTex());
 
 			if (upper.img && ! (ld->flags & MLF_UpperUnpegged))
 				upper.tex_h = upper.h1 + upper.img->height();
@@ -474,7 +474,7 @@ public:
 			lower.h2 = back->floorh;
 			lower.y_clip = DrawSurf::SOLID_BELOW;
 
-			lower.FindTex(sd->LowerTex(), ld);
+			lower.FindTex(sd->LowerTex());
 
 			// note "sky_upper" here, needed to match original DOOM behavior
 			if (ld->flags & MLF_LowerUnpegged)
@@ -493,7 +493,7 @@ public:
 		if (is_null_tex(sd->MidTex()))
 			return;
 
-		rail.FindTex(sd->MidTex(), ld);
+		rail.FindTex(sd->MidTex());
 		if (! rail.img)
 			return;
 
@@ -719,16 +719,16 @@ public:
 	{
 		const auto &ld = inst.level.linedefs[ld_index];
 
-		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
+		if (!inst.level.isVertex(ld.start) || !inst.level.isVertex(ld.end))
 			return;
 
-		if (! inst.level.getRight(*ld))
+		if (! inst.level.getRight(ld))
 			return;
 
-		float x1 = static_cast<float>(inst.level.getStart(*ld).x() - inst.r_view.x);
-		float y1 = static_cast<float>(inst.level.getStart(*ld).y() - inst.r_view.y);
-		float x2 = static_cast<float>(inst.level.getEnd(*ld).x() - inst.r_view.x);
-		float y2 = static_cast<float>(inst.level.getEnd(*ld).y() - inst.r_view.y);
+		float x1 = static_cast<float>(inst.level.getStart(ld).x() - inst.r_view.x);
+		float y1 = static_cast<float>(inst.level.getStart(ld).y() - inst.r_view.y);
+		float x2 = static_cast<float>(inst.level.getEnd(ld).x() - inst.r_view.x);
+		float y2 = static_cast<float>(inst.level.getEnd(ld).y() - inst.r_view.y);
 
 		float tx1 = static_cast<float>(x1 * inst.r_view.Sin - y1 * inst.r_view.Cos);
 		float ty1 = static_cast<float>(x1 * inst.r_view.Cos + y1 * inst.r_view.Sin);
@@ -752,7 +752,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		SideDef *sd = (side == Side::left) ? inst.level.getLeft(*ld) : inst.level.getRight(*ld);
+		SideDef *sd = (side == Side::left) ? inst.level.getLeft(ld) : inst.level.getRight(ld);
 
 		if (! sd)
 			return;
@@ -835,7 +835,7 @@ public:
 		DrawWall *dw = new DrawWall(inst);
 
 		dw->th = -1;
-		dw->ld = ld.get();
+		dw->ld = &ld;
 		dw->ld_index = ld_index;
 
 		dw->sd = sd;
@@ -846,9 +846,9 @@ public:
 		dw->wall_light = dw->sec->light;
 
 		// add "fake constrast" for axis-aligned walls
-		if (inst.level.isVertical(*ld))
+		if (inst.level.isVertical(ld))
 			dw->wall_light += 16;
-		else if (inst.level.isHorizontal(*ld))
+		else if (inst.level.isHorizontal(ld))
 			dw->wall_light -= 16;
 
 		dw->delta_ang = angle1 + XToAngle(sx1) - normal;

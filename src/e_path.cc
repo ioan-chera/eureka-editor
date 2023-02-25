@@ -60,44 +60,44 @@ static bool MatchingTextures(const Document &doc, int index1, int index2)
 	const auto &L2 = doc.linedefs[index2];
 
 	// lines with no sidedefs only match each other
-	if (! doc.getRight(*L1) || ! doc.getRight(*L2))
-		return doc.getRight(*L1) == doc.getRight(*L2);
+	if (! doc.getRight(L1) || ! doc.getRight(L2))
+		return doc.getRight(L1) == doc.getRight(L2);
 
 	// determine texture to match from first line
 	StringID texture;
 
-	if (! L1->TwoSided())
+	if (! L1.TwoSided())
 	{
-		texture = doc.getRight(*L1)->mid_tex;
+		texture = doc.getRight(L1)->mid_tex;
 	}
 	else
 	{
-		int f_diff = doc.getSector(*doc.getLeft(*L1)).floorh - doc.getSector(*doc.getRight(*L1)).floorh;
-		int c_diff = doc.getSector(*doc.getLeft(*L1)).ceilh  - doc.getSector(*doc.getRight(*L1)).ceilh;
+		int f_diff = doc.getSector(*doc.getLeft(L1)).floorh - doc.getSector(*doc.getRight(L1)).floorh;
+		int c_diff = doc.getSector(*doc.getLeft(L1)).ceilh  - doc.getSector(*doc.getRight(L1)).ceilh;
 
 		if (f_diff == 0 && c_diff != 0)
-			texture = (c_diff > 0) ? doc.getLeft(*L1)->upper_tex : doc.getRight(*L1)->upper_tex;
+			texture = (c_diff > 0) ? doc.getLeft(L1)->upper_tex : doc.getRight(L1)->upper_tex;
 		else
-			texture = (f_diff < 0) ? doc.getLeft(*L1)->lower_tex : doc.getRight(*L1)->lower_tex;
+			texture = (f_diff < 0) ? doc.getLeft(L1)->lower_tex : doc.getRight(L1)->lower_tex;
 	}
 
 	// match texture with other line
 
-	if (! L2->TwoSided())
+	if (! L2.TwoSided())
 	{
-		return (doc.getRight(*L2)->mid_tex == texture);
+		return (doc.getRight(L2)->mid_tex == texture);
 	}
 	else
 	{
-		int f_diff = doc.getSector(*doc.getLeft(*L2)).floorh - doc.getSector(*doc.getRight(*L2)).floorh;
-		int c_diff = doc.getSector(*doc.getLeft(*L2)).ceilh  - doc.getSector(*doc.getRight(*L2)).ceilh;
+		int f_diff = doc.getSector(*doc.getLeft(L2)).floorh - doc.getSector(*doc.getRight(L2)).floorh;
+		int c_diff = doc.getSector(*doc.getLeft(L2)).ceilh  - doc.getSector(*doc.getRight(L2)).ceilh;
 
 		if (c_diff != 0)
-			if (texture == ((c_diff > 0) ? doc.getLeft(*L2)->upper_tex : doc.getRight(*L2)->upper_tex))
+			if (texture == ((c_diff > 0) ? doc.getLeft(L2)->upper_tex : doc.getRight(L2)->upper_tex))
 				return true;
 
 		if (f_diff != 0)
-			if (texture == ((f_diff < 0) ? doc.getLeft(*L2)->lower_tex : doc.getRight(*L2)->lower_tex))
+			if (texture == ((f_diff < 0) ? doc.getLeft(L2)->lower_tex : doc.getRight(L2)->lower_tex))
 				return true;
 
 		return false;
@@ -116,13 +116,13 @@ static bool OtherLineDef(const Document &doc, int L, int V, int *L_other, int *V
 		if (n == L)
 			continue;
 
-		if ((match & SLP_OneSided) && !doc.linedefs[n]->OneSided())
+		if ((match & SLP_OneSided) && !doc.linedefs[n].OneSided())
 			continue;
 
 		for (int k = 0 ; k < 2 ; k++)
 		{
-			int v1 = doc.linedefs[n]->start;
-			int v2 = doc.linedefs[n]->end;
+			int v1 = doc.linedefs[n].start;
+			int v2 = doc.linedefs[n].end;
 
 			if (k == 1)
 				std::swap(v1, v2);
@@ -197,7 +197,7 @@ void Instance::CMD_LIN_SelectPath()
 
 	int start_L = edit.highlight.num;
 
-	if ((match & SLP_OneSided) && !level.linedefs[start_L]->OneSided())
+	if ((match & SLP_OneSided) && !level.linedefs[start_L].OneSided())
 		return;
 
 	bool unset_them = false;
@@ -209,8 +209,8 @@ void Instance::CMD_LIN_SelectPath()
 
 	seen.set(start_L);
 
-	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L]->start, seen, match);
-	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L]->end,   seen, match);
+	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L].start, seen, match);
+	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L].end,   seen, match);
 
 	Editor_ClearErrorMode();
 
@@ -250,11 +250,11 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 
 	for (const auto &L : inst.level.linedefs)
 	{
-		if (! L->TwoSided())
+		if (! L.TwoSided())
 			continue;
 
-		int sec1 = inst.level.getRight(*L)->sector;
-		int sec2 = inst.level.getLeft(*L)->sector;
+		int sec1 = inst.level.getRight(L)->sector;
+		int sec2 = inst.level.getLeft(L)->sector;
 
 		if (sec1 == sec2)
 			continue;
@@ -268,7 +268,7 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 
 		if (can_walk)
 		{
-			if (L->flags & MLF_Blocking)
+			if (L.flags & MLF_Blocking)
 				continue;
 
 			// too big a step?
@@ -471,19 +471,19 @@ void Instance::CMD_PruneUnused()
 
 	for (const auto &L : level.linedefs)
 	{
-		used_verts.set(L->start);
-		used_verts.set(L->end);
+		used_verts.set(L.start);
+		used_verts.set(L.end);
 
-		if (L->left >= 0)
+		if (L.left >= 0)
 		{
-			used_sides.set(L->left);
-			used_secs.set(level.getLeft(*L)->sector);
+			used_sides.set(L.left);
+			used_secs.set(level.getLeft(L)->sector);
 		}
 
-		if (L->right >= 0)
+		if (L.right >= 0)
 		{
-			used_sides.set(L->right);
-			used_secs.set(level.getRight(*L)->sector);
+			used_sides.set(L.right);
+			used_secs.set(level.getRight(L)->sector);
 		}
 	}
 
@@ -527,11 +527,11 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 
 		for (const auto &L : inst.level.linedefs)
 		{
-			if (! L->TwoSided())
+			if (! L.TwoSided())
 				continue;
 
-			int sec1 = inst.level.getSectorID(*L, Side::right);
-			int sec2 = inst.level.getSectorID(*L, Side::left);
+			int sec1 = inst.level.getSectorID(L, Side::right);
+			int sec2 = inst.level.getSectorID(L, Side::left);
 
 			SYS_ASSERT(sec1 >= 0);
 			SYS_ASSERT(sec2 >= 0);
@@ -549,7 +549,7 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 
 			int new_val = std::max(val1, val2);
 
-			if (L->flags & MLF_SoundBlock)
+			if (L.flags & MLF_SoundBlock)
 				new_val -= 1;
 
 			if (new_val > val1 || new_val > val2)

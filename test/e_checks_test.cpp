@@ -49,13 +49,7 @@ TEST(EChecks, FindFreeTag)
 	std::vector<LineDef> lines;
 	auto assignLines = [&inst, &lines]()
 	{
-		inst.level.linedefs.clear();
-		for(LineDef &line : lines)
-		{
-			auto addedLine = std::make_unique<LineDef>();
-			*addedLine = line;
-			inst.level.linedefs.push_back(std::move(addedLine));
-		}
+		inst.level.linedefs = lines;
 	};
 	std::vector<Sector> sectors;
 	auto assignSectors = [&inst, &sectors]()
@@ -104,7 +98,7 @@ TEST(EChecks, FindFreeTag)
 	sectors.push_back(Sector());
 	assignLines();
 	assignSectors();
-	inst.level.linedefs[1]->tag = 1;
+	inst.level.linedefs[1].tag = 1;
 	ASSERT_EQ(findFreeTag(inst, false), 2);
 	ASSERT_EQ(findFreeTag(inst, true), 2);
 
@@ -114,14 +108,14 @@ TEST(EChecks, FindFreeTag)
 	ASSERT_EQ(findFreeTag(inst, true), 2);
 
 	// Tag all of them 1: result should be 0 by now
-	inst.level.linedefs[0]->tag = inst.level.linedefs[2]->tag = 1;
+	inst.level.linedefs[0].tag = inst.level.linedefs[2].tag = 1;
 	inst.level.sectors[0]->tag = inst.level.sectors[1]->tag = 1;
 	ASSERT_EQ(findFreeTag(inst, false), 0);
 	ASSERT_EQ(findFreeTag(inst, true), 0);
 
 	// Restore their tags but tag one by a bigger amount
-	inst.level.linedefs[0]->tag = inst.level.linedefs[2]->tag = 0;
-	inst.level.linedefs[2]->tag = 4;
+	inst.level.linedefs[0].tag = inst.level.linedefs[2].tag = 0;
+	inst.level.linedefs[2].tag = 4;
 	inst.level.sectors[0]->tag = inst.level.sectors[1]->tag = 0;
 	ASSERT_EQ(findFreeTag(inst, false), 2);
 	ASSERT_EQ(findFreeTag(inst, true), 2);
@@ -132,7 +126,7 @@ TEST(EChecks, FindFreeTag)
 	ASSERT_EQ(findFreeTag(inst, true), 3);
 
 	// Finally no more space
-	inst.level.linedefs[0]->tag = 3;
+	inst.level.linedefs[0].tag = 3;
 	ASSERT_EQ(findFreeTag(inst, false), 5);
 	ASSERT_EQ(findFreeTag(inst, true), 5);
 
@@ -169,7 +163,7 @@ TEST(EChecks, FindFreeTag)
 	ASSERT_EQ(findFreeTag(inst, false), 666);
 	ASSERT_EQ(findFreeTag(inst, true), 666);
 	// Add one more and re-test
-	inst.level.linedefs[666]->tag = 666;
+	inst.level.linedefs[666].tag = 666;
 	inst.conf.features.tag_666 = Tag666Rules::doom;	// enable it
 	ASSERT_EQ(findFreeTag(inst, false), 667);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
@@ -206,9 +200,7 @@ TEST(EChecks, TagsApplyNewValue)
 
 	for(LineDef &line : lines)
 	{
-		auto newLine = std::make_unique<LineDef>();
-		*newLine = line;
-		inst.level.linedefs.push_back(std::move(newLine));
+		inst.level.linedefs.push_back(line);
 	}
 	for(Sector &sector : sectors)
 	{
@@ -228,7 +220,7 @@ TEST(EChecks, TagsApplyNewValue)
 	// Nothing selected: check that nothing happens
 	inst.level.checks.tagsApplyNewValue(1);
 	for(const auto &line : inst.level.linedefs)
-		ASSERT_EQ(line->tag, 0);
+		ASSERT_EQ(line.tag, 0);
 	for(const auto &sector : inst.level.sectors)
 		ASSERT_EQ(sector->tag, 0);
 	ASSERT_EQ(inst.level.checks.mLastTag, 0);	// didn't change
@@ -238,10 +230,10 @@ TEST(EChecks, TagsApplyNewValue)
 	inst.edit.Selected->set(2);
 	inst.level.checks.tagsApplyNewValue(1);
 	for(const auto &line : inst.level.linedefs)
-		if(line == inst.level.linedefs[1] || line == inst.level.linedefs[2])
-			ASSERT_EQ(line->tag, 1);
+		if(&line == &inst.level.linedefs[1] || &line == &inst.level.linedefs[2])
+			ASSERT_EQ(line.tag, 1);
 		else
-			ASSERT_EQ(line->tag, 0);
+			ASSERT_EQ(line.tag, 0);
 	for(const auto &sector : inst.level.sectors)
 		ASSERT_EQ(sector->tag, 0);
 	ASSERT_EQ(inst.level.checks.mLastTag, 1);	// changed
@@ -253,10 +245,10 @@ TEST(EChecks, TagsApplyNewValue)
 	inst.edit.Selected->set(4);
 	inst.level.checks.tagsApplyNewValue(2);
 	for(const auto &line : inst.level.linedefs)
-		if(line == inst.level.linedefs[1] || line == inst.level.linedefs[2])
-			ASSERT_EQ(line->tag, 1);
+		if(&line == &inst.level.linedefs[1] || &line == &inst.level.linedefs[2])
+			ASSERT_EQ(line.tag, 1);
 		else
-			ASSERT_EQ(line->tag, 0);
+			ASSERT_EQ(line.tag, 0);
 	for(const auto &sector : inst.level.sectors)
 		if(sector.get() == inst.level.sectors[2].get() || sector.get() == inst.level.sectors[4].get())
 			ASSERT_EQ(sector->tag, 2);
@@ -267,10 +259,10 @@ TEST(EChecks, TagsApplyNewValue)
 	inst.edit.Selected->clear(4);
 	inst.level.checks.tagsApplyNewValue(1);
 	for(const auto &line : inst.level.linedefs)
-		if(line == inst.level.linedefs[1] || line == inst.level.linedefs[2])
-			ASSERT_EQ(line->tag, 1);
+		if(&line == &inst.level.linedefs[1] || &line == &inst.level.linedefs[2])
+			ASSERT_EQ(line.tag, 1);
 		else
-			ASSERT_EQ(line->tag, 0);
+			ASSERT_EQ(line.tag, 0);
 	for(const auto &sector : inst.level.sectors)
 		if(sector.get() == inst.level.sectors[2].get())
 			ASSERT_EQ(sector->tag, 1);

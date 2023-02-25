@@ -365,7 +365,7 @@ private:
 				return reinterpret_cast<int *>(inst.level.sidedefs[objnum].get());
 
 			case ObjType::linedefs:
-				return reinterpret_cast<int *>(inst.level.linedefs[objnum].get());
+				return reinterpret_cast<int *>(&inst.level.linedefs[objnum]);
 
 			default:
 				BugError("SaveBucket with bad mode\n");
@@ -391,10 +391,10 @@ static void AdjustOfs_UpdateBBox(Instance &inst, int ld_num)
 {
 	const auto &L = inst.level.linedefs[ld_num];
 
-	float lx1 = static_cast<float>(inst.level.getStart(*L).x());
-	float ly1 = static_cast<float>(inst.level.getStart(*L).y());
-	float lx2 = static_cast<float>(inst.level.getEnd(*L).x());
-	float ly2 = static_cast<float>(inst.level.getEnd(*L).y());
+	float lx1 = static_cast<float>(inst.level.getStart(L).x());
+	float ly1 = static_cast<float>(inst.level.getStart(L).y());
+	float lx2 = static_cast<float>(inst.level.getEnd(L).x());
+	float ly2 = static_cast<float>(inst.level.getEnd(L).y());
 
 	if (lx1 > lx2) std::swap(lx1, lx2);
 	if (ly1 > ly2) std::swap(ly1, ly2);
@@ -435,7 +435,7 @@ static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
 	const auto &L = inst.level.linedefs[ld_num];
 
 	// ignore invalid sides (sanity check)
-	int sd_num = (part & PART_LF_ALL) ? L->left : L->right;
+	int sd_num = (part & PART_LF_ALL) ? L.left : L.right;
 	if (sd_num < 0)
 		return;
 
@@ -1329,7 +1329,7 @@ StringID Instance::GrabSelectedTexture()
 
 		const auto &L = level.linedefs[edit.highlight.num];
 
-		result = LD_GrabTex(L.get(), edit.highlight.parts);
+		result = LD_GrabTex(&L, edit.highlight.parts);
 	}
 	else
 	{
@@ -1338,7 +1338,7 @@ StringID Instance::GrabSelectedTexture()
 			const auto &L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			StringID tex = LD_GrabTex(L.get(), parts & ~1);
+			StringID tex = LD_GrabTex(&L, parts & ~1);
 
 			if (result.isValid() && tex != result)
 			{
@@ -1375,34 +1375,34 @@ void Instance::StoreSelectedTexture(StringID new_tex)
 			const auto &L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			if (L->NoSided())
+			if (L.NoSided())
 				continue;
 
-			if (L->OneSided())
+			if (L.OneSided())
 			{
-				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+				op.changeSidedef(L.right, SideDef::F_MID_TEX, new_tex);
 				continue;
 			}
 
 			/* right side */
 			if (parts == 1 || (parts & PART_RT_LOWER))
-				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+				op.changeSidedef(L.right, SideDef::F_LOWER_TEX, new_tex);
 
 			if (parts == 1 || (parts & PART_RT_UPPER))
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+				op.changeSidedef(L.right, SideDef::F_UPPER_TEX, new_tex);
 
 			if (parts & PART_RT_RAIL)
-				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+				op.changeSidedef(L.right, SideDef::F_MID_TEX, new_tex);
 
 			/* left side */
 			if (parts == 1 || (parts & PART_LF_LOWER))
-				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+				op.changeSidedef(L.left, SideDef::F_LOWER_TEX, new_tex);
 
 			if (parts == 1 || (parts & PART_LF_UPPER))
-				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+				op.changeSidedef(L.left, SideDef::F_UPPER_TEX, new_tex);
 
 			if (parts & PART_LF_RAIL)
-				op.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
+				op.changeSidedef(L.left, SideDef::F_MID_TEX, new_tex);
 		}
 
 	}

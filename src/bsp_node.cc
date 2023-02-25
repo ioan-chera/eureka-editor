@@ -425,7 +425,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 
 		if (fa <= DIST_EPSILON || fb <= DIST_EPSILON)
 		{
-			if (check->linedef >= 0 && (doc.linedefs[check->linedef]->flags & MLF_IS_PRECIOUS))
+			if (check->linedef >= 0 && (doc.linedefs[check->linedef].flags & MLF_IS_PRECIOUS))
 				info->cost += 40 * factor * PRECIOUS_MULTIPLY;
 		}
 
@@ -493,7 +493,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		// are exhausted.  This is used to protect deep water and invisible
 		// lifts/stairs from being messed up accidentally by splits.
 
-		if (check->linedef >= 0 && (doc.linedefs[check->linedef]->flags & MLF_IS_PRECIOUS))
+		if (check->linedef >= 0 && (doc.linedefs[check->linedef].flags & MLF_IS_PRECIOUS))
 			info->cost += 100 * factor * PRECIOUS_MULTIPLY;
 		else
 			info->cost += 100 * factor;
@@ -812,7 +812,7 @@ static void DivideOneSeg(seg_t *seg, seg_t *part,
 	double a = part->PerpDist(seg->psx, seg->psy);
 	double b = part->PerpDist(seg->pex, seg->pey);
 
-	bool self_ref = (seg->linedef >= 0) ? doc.isSelfRef(*doc.linedefs[seg->linedef]) : false;
+	bool self_ref = (seg->linedef >= 0) ? doc.isSelfRef(doc.linedefs[seg->linedef]) : false;
 
 	if (seg->source_line == part->source_line)
 		a = b = 0;
@@ -1158,17 +1158,17 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 
 	if (part->side == 0)  /* right side */
 	{
-		x  = inst.level.getStart(*part_L).x();
-		y  = inst.level.getStart(*part_L).y();
-		dx = inst.level.getEnd(*part_L).x() - x;
-		dy = inst.level.getEnd(*part_L).y() - y;
+		x  = inst.level.getStart(part_L).x();
+		y  = inst.level.getStart(part_L).y();
+		dx = inst.level.getEnd(part_L).x() - x;
+		dy = inst.level.getEnd(part_L).y() - y;
 	}
 	else  /* left side */
 	{
-		x  = inst.level.getEnd(*part_L).x();
-		y  = inst.level.getEnd(*part_L).y();
-		dx = inst.level.getStart(*part_L).x() - x;
-		dy = inst.level.getStart(*part_L).y() - y;
+		x  = inst.level.getEnd(part_L).x();
+		y  = inst.level.getEnd(part_L).y();
+		dx = inst.level.getStart(part_L).x() - x;
+		dy = inst.level.getStart(part_L).y() - y;
 	}
 
 	/* check for very long partition (overflow of dx,dy in NODES) */
@@ -1368,20 +1368,20 @@ seg_t *CreateSegs(const Instance &inst)
 		seg_t *right = NULL;
 
 		// ignore zero-length lines
-		if (inst.level.isZeroLength(*line))
+		if (inst.level.isZeroLength(line))
 			continue;
 
 		// ignore overlapping lines
-		if (line->flags & MLF_IS_OVERLAP)
+		if (line.flags & MLF_IS_OVERLAP)
 			continue;
 
 		// check for extremely long lines
-		if (inst.level.calcLength(*line) >= 30000)
+		if (inst.level.calcLength(line) >= 30000)
 			Warning(inst, "Linedef #%d is VERY long, it may cause problems\n", i);
 
-		if (line->right >= 0)
+		if (line.right >= 0)
 		{
-			right = CreateOneSeg(i, lev_vertices[line->start], lev_vertices[line->end], line->right, 0, inst);
+			right = CreateOneSeg(i, lev_vertices[line.start], lev_vertices[line.end], line.right, 0, inst);
 
 			ListAddSeg(&list, right);
 		}
@@ -1390,9 +1390,9 @@ seg_t *CreateSegs(const Instance &inst)
 			Warning(inst, "Linedef #%d has no right sidedef!\n", i);
 		}
 
-		if (line->left >= 0)
+		if (line.left >= 0)
 		{
-			left = CreateOneSeg(i, lev_vertices[line->end], lev_vertices[line->start], line->left, 1, inst);
+			left = CreateOneSeg(i, lev_vertices[line.end], lev_vertices[line.start], line.left, 1, inst);
 
 			ListAddSeg(&list, left);
 
@@ -1408,7 +1408,7 @@ seg_t *CreateSegs(const Instance &inst)
 		}
 		else
 		{
-			if (line->flags & MLF_TwoSided)
+			if (line.flags & MLF_TwoSided)
 				Warning(inst, "Linedef #%d is 2s but has no left sidedef\n", i);
 		}
 	}
@@ -1526,7 +1526,7 @@ void subsec_t::ClockwiseOrder(const Document &doc)
 		// miniseg?
 		if (array[i]->linedef < 0)
 			cur_score = 0;
-		else if (doc.isSelfRef(*doc.linedefs[array[i]->linedef]))
+		else if (doc.isSelfRef(doc.linedefs[array[i]->linedef]))
 			cur_score = 2;
 
 		if (cur_score > best_score)

@@ -211,7 +211,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 			{
 				const auto &L = box->inst.level.linedefs[*it];
 
-				int sd = box->is_front ? L->right : L->left;
+				int sd = box->is_front ? L.right : L.left;
 
 				if (box->inst.level.isSidedef(sd))
 				{
@@ -297,8 +297,8 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		{
 			const auto &L = box->inst.level.linedefs[*it];
 
-			int sd    = box->is_front ? L->right : L->left;
-			int other = box->is_front ? L->left : L->right;
+			int sd    = box->is_front ? L.right : L.left;
+			int other = box->is_front ? L.left : L.right;
 
 			// skip lines which already have this sidedef
 			if (box->inst.level.isSidedef(sd))
@@ -351,7 +351,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 		{
 			const auto &L = box->inst.level.linedefs[*it];
 
-			int sd = box->is_front ? L->right : L->left;
+			int sd = box->is_front ? L.right : L.left;
 
 			if (sd < 0)
 				continue;
@@ -390,7 +390,7 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 		{
 			const auto &L = box->inst.level.linedefs[*it];
 
-			int sd = box->is_front ? L->right : L->left;
+			int sd = box->is_front ? L.right : L.left;
 
 			if (box->inst.level.isSidedef(sd))
 			{
@@ -422,7 +422,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 		{
 			const auto &L = box->inst.level.linedefs[*it];
 
-			int sd = box->is_front ? L->right : L->left;
+			int sd = box->is_front ? L.right : L.left;
 
 			if (box->inst.level.isSidedef(sd))
 				op.changeSidedef(sd, SideDef::F_SECTOR, new_sec);

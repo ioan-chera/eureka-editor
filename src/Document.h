@@ -92,7 +92,7 @@ public:
 	std::vector<Thing> things;
 	std::vector<std::unique_ptr<Sector>> sectors;
 	std::vector<std::unique_ptr<SideDef>> sidedefs;
-	std::vector<std::unique_ptr<LineDef>> linedefs;
+	std::vector<LineDef> linedefs;
 
 	std::vector<byte> headerData;
 	std::vector<byte> behaviorData;

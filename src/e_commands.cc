@@ -788,7 +788,7 @@ void Instance::CMD_ACT_Click()
 		// shall we select the new vertex
 		const auto &L = level.linedefs[split_ld];
 
-		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
+		bool want_select = edit.Selected->get(L.start) && edit.Selected->get(L.end);
 		int new_vert;
 		{
 			EditOperation op(level.basis);

@@ -396,7 +396,7 @@ void UI_Canvas::DrawEverything()
 		if (inst.edit.mode == ObjType::linedefs && !inst.edit.show_object_numbers)
 		{
 			const auto &L = inst.level.linedefs[inst.edit.highlight.num];
-			DrawLineInfo(inst.level.getStart(*L).x(), inst.level.getStart(*L).y(), inst.level.getEnd(*L).x(), inst.level.getEnd(*L).y(), false);
+			DrawLineInfo(inst.level.getStart(L).x(), inst.level.getStart(L).y(), inst.level.getEnd(L).x(), inst.level.getEnd(L).y(), false);
 		}
 
 		RenderThickness(1);
@@ -720,15 +720,15 @@ void UI_Canvas::DrawLinedefs()
 	{
 		const auto &L = inst.level.linedefs[n];
 
-		double x1 = inst.level.getStart(*L).x();
-		double y1 = inst.level.getStart(*L).y();
-		double x2 = inst.level.getEnd(*L).x();
-		double y2 = inst.level.getEnd(*L).y();
+		double x1 = inst.level.getStart(L).x();
+		double y1 = inst.level.getStart(L).y();
+		double x2 = inst.level.getEnd(L).x();
+		double y2 = inst.level.getEnd(L).y();
 
 		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
 
-		bool one_sided = (! inst.level.getLeft(*L));
+		bool one_sided = (! inst.level.getLeft(L));
 
 		Fl_Color col = LIGHTGREY;
 
@@ -743,7 +743,7 @@ void UI_Canvas::DrawLinedefs()
 					col = HI_AND_SEL_COL;
 				else if (inst.edit.error_mode)
 					col = LIGHTGREY;
-				else if (L->right < 0)
+				else if (L.right < 0)
 					col = RED;
 				else if (one_sided)
 					col = WHITE;
@@ -766,18 +766,18 @@ void UI_Canvas::DrawLinedefs()
 			{
 				if (inst.edit.error_mode)
 					col = LIGHTGREY;
-				else if (! inst.level.getRight(*L)) // no first sidedef?
+				else if (! inst.level.getRight(L)) // no first sidedef?
 					col = RED;
-				else if (L->type != 0)
+				else if (L.type != 0)
 				{
-					if (L->tag != 0)
+					if (L.tag != 0)
 						col = LIGHTMAGENTA;
 					else
 						col = LIGHTGREEN;
 				}
 				else if (one_sided)
 					col = WHITE;
-				else if (L->flags & MLF_Blocking)
+				else if (L.flags & MLF_Blocking)
 					col = FL_CYAN;
 
 				line_kind = 'k';
@@ -786,8 +786,8 @@ void UI_Canvas::DrawLinedefs()
 
 			case ObjType::sectors:
 			{
-				int sd1 = L->right;
-				int sd2 = L->left;
+				int sd1 = L.right;
+				int sd2 = L.left;
 
 				int s1  = (sd1 < 0) ? NIL_OBJ : inst.level.sidedefs[sd1]->sector;
 				int s2  = (sd2 < 0) ? NIL_OBJ : inst.level.sidedefs[sd2]->sector;
@@ -798,7 +798,7 @@ void UI_Canvas::DrawLinedefs()
 					col = RED;
 				else if (inst.edit.sector_render_mode == SREND_SoundProp)
 				{
-					if (L->flags & MLF_SoundBlock)
+					if (L.flags & MLF_SoundBlock)
 						col = FL_MAGENTA;
 					else if (one_sided)
 						col = WHITE;
@@ -875,10 +875,10 @@ void UI_Canvas::DrawLinedefs()
 	{
 		for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 		{
-			double x1 = inst.level.getStart(*inst.level.linedefs[n]).x();
-			double y1 = inst.level.getStart(*inst.level.linedefs[n]).y();
-			double x2 = inst.level.getEnd(*inst.level.linedefs[n]).x();
-			double y2 = inst.level.getEnd(*inst.level.linedefs[n]).y();
+			double x1 = inst.level.getStart(inst.level.linedefs[n]).x();
+			double y1 = inst.level.getStart(inst.level.linedefs[n]).y();
+			double x2 = inst.level.getEnd(inst.level.linedefs[n]).x();
+			double y2 = inst.level.getEnd(inst.level.linedefs[n]).y();
 
 			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				continue;
@@ -1374,10 +1374,10 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::linedefs:
 		{
-			double x1 = dx + inst.level.getStart(*inst.level.linedefs[objnum]).x();
-			double y1 = dy + inst.level.getStart(*inst.level.linedefs[objnum]).y();
-			double x2 = dx + inst.level.getEnd(*inst.level.linedefs[objnum]).x();
-			double y2 = dy + inst.level.getEnd(*inst.level.linedefs[objnum]).y();
+			double x1 = dx + inst.level.getStart(inst.level.linedefs[objnum]).x();
+			double y1 = dy + inst.level.getStart(inst.level.linedefs[objnum]).y();
+			double x2 = dx + inst.level.getEnd(inst.level.linedefs[objnum]).x();
+			double y2 = dy + inst.level.getEnd(inst.level.linedefs[objnum]).y();
 
 			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				break;
@@ -1416,16 +1416,16 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 		{
 			for (const auto &L : inst.level.linedefs)
 			{
-				if (! inst.level.touchesSector(*L, objnum))
+				if (! inst.level.touchesSector(L, objnum))
 					continue;
 
 				bool reverse = false;
 
 				// skip lines if both sides are in the selection
-				if (skip_lines && L->TwoSided())
+				if (skip_lines && L.TwoSided())
 				{
-					int sec1 = inst.level.getRight(*L)->sector;
-					int sec2 = inst.level.getLeft(*L)->sector;
+					int sec1 = inst.level.getRight(L)->sector;
+					int sec2 = inst.level.getLeft(L)->sector;
 
 					if ((sec1 == objnum || inst.edit.Selected->get(sec1)) &&
 					    (sec2 == objnum || inst.edit.Selected->get(sec2)))
@@ -1435,10 +1435,10 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 						reverse = true;
 				}
 
-				double x1 = dx + inst.level.getStart(*L).x();
-				double y1 = dy + inst.level.getStart(*L).y();
-				double x2 = dx + inst.level.getEnd(*L).x();
-				double y2 = dy + inst.level.getEnd(*L).y();
+				double x1 = dx + inst.level.getStart(L).x();
+				double y1 = dy + inst.level.getStart(L).y();
+				double x2 = dx + inst.level.getEnd(L).x();
+				double y2 = dy + inst.level.getEnd(L).y();
 
 				if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 					continue;
@@ -1511,10 +1511,10 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::linedefs:
 		{
-			double x1 = inst.level.getStart(*inst.level.linedefs[objnum]).x();
-			double y1 = inst.level.getStart(*inst.level.linedefs[objnum]).y();
-			double x2 = inst.level.getEnd(*inst.level.linedefs[objnum]).x();
-			double y2 = inst.level.getEnd(*inst.level.linedefs[objnum]).y();
+			double x1 = inst.level.getStart(inst.level.linedefs[objnum]).x();
+			double y1 = inst.level.getStart(inst.level.linedefs[objnum]).y();
+			double x2 = inst.level.getEnd(inst.level.linedefs[objnum]).x();
+			double y2 = inst.level.getEnd(inst.level.linedefs[objnum]).y();
 
 			inst.edit.trans_param.Apply(&x1, &y1);
 			inst.edit.trans_param.Apply(&x2, &y2);
@@ -1530,13 +1530,13 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 		{
 			for (const auto &linedef : inst.level.linedefs)
 			{
-				if (! inst.level.touchesSector(*linedef, objnum))
+				if (! inst.level.touchesSector(linedef, objnum))
 					continue;
 
-				double x1 = inst.level.getStart(*linedef).x();
-				double y1 = inst.level.getStart(*linedef).y();
-				double x2 = inst.level.getEnd(*linedef).x();
-				double y2 = inst.level.getEnd(*linedef).y();
+				double x1 = inst.level.getStart(linedef).x();
+				double y1 = inst.level.getStart(linedef).y();
+				double x2 = inst.level.getEnd(linedef).x();
+				double y2 = inst.level.getEnd(linedef).y();
 
 				inst.edit.trans_param.Apply(&x1, &y1);
 				inst.edit.trans_param.Apply(&x2, &y2);
@@ -1588,7 +1588,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             {
                 if(info.type == ObjType::linedefs && info.objnum == m)
                     continue;   // don't highlight the trigger again
-                const LineDef &line = *inst.level.linedefs[m];
+                const LineDef &line = inst.level.linedefs[m];
                 if(inst.loaded.levelFormat == MapFormat::doom)
                 {
                     if(line.tag > 0)
@@ -1640,9 +1640,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             if(objtype == ObjType::linedefs && m == objnum)
                 continue;
             const auto &line = inst.level.linedefs[m];
-            assert(line);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, line.get(), inst.conf, info))
+            if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, &line, inst.conf, info))
                 continue;
 
             for(int i = 0; i < info.*numtags; ++i)
@@ -1675,19 +1674,18 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 	if (objtype == ObjType::linedefs)
     {
         const auto &line = inst.level.linedefs[objnum];
-        assert(line);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, line.type, &line, inst.conf, info))
             highlightTaggedItems(info);
         if(inst.loaded.levelFormat == MapFormat::doom)
         {
-            highlightTaggingTriggers(line->tag, &SpecialTagInfo::lineids,
+            highlightTaggingTriggers(line.tag, &SpecialTagInfo::lineids,
                                      &SpecialTagInfo::numlineids);
         }
         else
         {
             SpecialTagInfo linfo;
-            if(!getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, linfo))
+            if(!getSpecialTagInfo(objtype, objnum, line.type, &line, inst.conf, linfo))
                 return;
             // TODO: also UDMF line ID
             if(inst.loaded.levelFormat == MapFormat::hexen && linfo.selflineid > 0)
@@ -1722,22 +1720,22 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 
 	for (const auto &L : inst.level.linedefs)
 	{
-		double x1 = dx + inst.level.getStart(*L).x();
-		double y1 = dy + inst.level.getStart(*L).y();
-		double x2 = dx + inst.level.getEnd(*L).x();
-		double y2 = dy + inst.level.getEnd(*L).y();
+		double x1 = dx + inst.level.getStart(L).x();
+		double y1 = dy + inst.level.getStart(L).y();
+		double x2 = dx + inst.level.getEnd(L).x();
+		double y2 = dy + inst.level.getEnd(L).y();
 
 		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
 
-		if (L->right < 0 && L->left < 0)
+		if (L.right < 0 && L.left < 0)
 			continue;
 
 		int sec1 = -1;
 		int sec2 = -1;
 
-		if (L->right >= 0) sec1 = inst.level.getRight(*L)->sector;
-		if (L->left  >= 0) sec2 = inst.level.getLeft(*L) ->sector;
+		if (L.right >= 0) sec1 = inst.level.getRight(L)->sector;
+		if (L.left  >= 0) sec2 = inst.level.getLeft(L) ->sector;
 
 		bool touches1 = (sec1 >= 0) && list->get(sec1);
 		bool touches2 = (sec2 >= 0) && list->get(sec2);

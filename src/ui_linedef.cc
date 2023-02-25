@@ -302,34 +302,34 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 	// handle the selected texture boxes
 	if (parts != 0)
 	{
-		if (L->OneSided())
+		if (L.OneSided())
 		{
 			if (parts & PART_RT_RAIL)
-				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
+				op.changeSidedef(L.right, SideDef::F_MID_TEX,   new_tex);
 			if (parts & PART_RT_UPPER)
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+				op.changeSidedef(L.right, SideDef::F_UPPER_TEX, new_tex);
 
 			return;
 		}
 
-		if (inst.level.getRight(*L))
+		if (inst.level.getRight(L))
 		{
 			if (parts & PART_RT_LOWER)
-				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+				op.changeSidedef(L.right, SideDef::F_LOWER_TEX, new_tex);
 			if (parts & PART_RT_UPPER)
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+				op.changeSidedef(L.right, SideDef::F_UPPER_TEX, new_tex);
 			if (parts & PART_RT_RAIL)
-				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
+				op.changeSidedef(L.right, SideDef::F_MID_TEX,   new_tex);
 		}
 
-		if (inst.level.getLeft(*L))
+		if (inst.level.getLeft(L))
 		{
 			if (parts & PART_LF_LOWER)
-				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+				op.changeSidedef(L.left, SideDef::F_LOWER_TEX, new_tex);
 			if (parts & PART_LF_UPPER)
-				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+				op.changeSidedef(L.left, SideDef::F_UPPER_TEX, new_tex);
 			if (parts & PART_LF_RAIL)
-				op.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex);
+				op.changeSidedef(L.left, SideDef::F_MID_TEX,   new_tex);
 		}
 		return;
 	}
@@ -337,26 +337,26 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 	// middle click : set mid-masked texture on both sides
 	if (e_state & FL_BUTTON2)
 	{
-		if (! L->TwoSided())
+		if (! L.TwoSided())
 			return;
 
 		// convenience: set lower unpeg on first change
-		if (! (L->flags & MLF_LowerUnpegged)  &&
-		    is_null_tex(inst.level.getRight(*L)->MidTex()) &&
-		    is_null_tex(inst.level.getLeft(*L)->MidTex()) )
+		if (! (L.flags & MLF_LowerUnpegged)  &&
+		    is_null_tex(inst.level.getRight(L)->MidTex()) &&
+		    is_null_tex(inst.level.getLeft(L)->MidTex()) )
 		{
-			op.changeLinedef(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
+			op.changeLinedef(ld, LineDef::F_FLAGS, L.flags | MLF_LowerUnpegged);
 		}
 
-		op.changeSidedef(L->left,  SideDef::F_MID_TEX, new_tex);
-		op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+		op.changeSidedef(L.left,  SideDef::F_MID_TEX, new_tex);
+		op.changeSidedef(L.right, SideDef::F_MID_TEX, new_tex);
 		return;
 	}
 
 	// one-sided case: set the middle texture only
-	if (! L->TwoSided())
+	if (! L.TwoSided())
 	{
-		int sd = (L->right >= 0) ? L->right : L->left;
+		int sd = (L.right >= 0) ? L.right : L.left;
 
 		if (sd < 0)
 			return;
@@ -366,13 +366,13 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 	}
 
 	// modify an upper texture
-	int sd1 = L->right;
-	int sd2 = L->left;
+	int sd1 = L.right;
+	int sd2 = L.left;
 
 	if (e_state & FL_BUTTON3)
 	{
 		// back ceiling is higher?
-		if (inst.level.getSector(*inst.level.getLeft(*L)).ceilh > inst.level.getSector(*inst.level.getRight(*L)).ceilh)
+		if (inst.level.getSector(*inst.level.getLeft(L)).ceilh > inst.level.getSector(*inst.level.getRight(L)).ceilh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
@@ -384,7 +384,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 	else
 	{
 		// back floor is lower?
-		if (inst.level.getSector(*inst.level.getLeft(*L)).floorh < inst.level.getSector(*inst.level.getRight(*L)).floorh)
+		if (inst.level.getSector(*inst.level.getLeft(L)).floorh < inst.level.getSector(*inst.level.getRight(L)).floorh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
@@ -528,13 +528,13 @@ void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
-				int sd = (pass == 0) ? L->right : L->left;
+				int sd = (pass == 0) ? L.right : L.left;
 				if (sd < 0)
 					continue;
 
 				int parts2 = pass ? (parts >> 4) : parts;
 
-				if (L->TwoSided())
+				if (L.TwoSided())
 				{
 					if (parts2 & PART_RT_LOWER)
 						op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
@@ -650,7 +650,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
-			op.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
+			op.changeLinedef(*it, LineDef::F_FLAGS, (L.flags & ~mask) | (new_flags & mask));
 		}
 	}
 }
@@ -757,17 +757,17 @@ void UI_LineBox::UpdateField(int field)
 		{
 			const auto &L = inst.level.linedefs[obj];
 
-			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
+			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj].tag).c_str());
 
-			const linetype_t &info = inst.M_GetLineType(L->type);
+			const linetype_t &info = inst.M_GetLineType(L.type);
 
 			if (inst.loaded.levelFormat != MapFormat::doom)
 			{
 				for (int a = 0 ; a < 5 ; a++)
 				{
-					int arg_val = L->Arg(1 + a);
+					int arg_val = L.Arg(1 + a);
 
-					if(arg_val || L->type)
+					if(arg_val || L.type)
 						mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
 					// set the tooltip
@@ -791,11 +791,11 @@ void UI_LineBox::UpdateField(int field)
 		{
 			const auto &L = inst.level.linedefs[obj];
 
-			int right_mask = SolidMask(L.get(), Side::right);
-			int  left_mask = SolidMask(L.get(), Side::left);
+			int right_mask = SolidMask(&L, Side::right);
+			int  left_mask = SolidMask(&L, Side::left);
 
-			front->SetObj(L->right, right_mask, L->TwoSided());
-			 back->SetObj(L->left,   left_mask, L->TwoSided());
+			front->SetObj(L.right, right_mask, L.TwoSided());
+			 back->SetObj(L.left,   left_mask, L.TwoSided());
 		}
 		else
 		{
@@ -808,7 +808,7 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (inst.level.isLinedef(obj))
 		{
-			int type_num = inst.level.linedefs[obj]->type;
+			int type_num = inst.level.linedefs[obj].type;
 
 			mFixUp.setInputValue(type, SString(type_num).c_str());
 
@@ -842,7 +842,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			actkind->activate();
 
-			FlagsFromInt(inst.level.linedefs[obj]->flags);
+			FlagsFromInt(inst.level.linedefs[obj].flags);
 		}
 		else
 		{
@@ -875,7 +875,7 @@ void UI_LineBox::CalcLength()
 
 	int n = obj;
 
-	float len_f = static_cast<float>(inst.level.calcLength(*inst.level.linedefs[n]));
+	float len_f = static_cast<float>(inst.level.calcLength(inst.level.linedefs[n]));
 
 	char buffer[128];
 	snprintf(buffer, sizeof(buffer), "%1.0f", len_f);

@@ -562,9 +562,9 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	else if (name.Match("linedef"))
 	{
 		kind = Objid(ObjType::linedefs, 1);
-		auto addedLine = std::make_unique<LineDef>();
-		doc.linedefs.push_back(std::move(addedLine));
-		new_LD = doc.linedefs.back().get();
+		LineDef addedLine{};
+		doc.linedefs.push_back(addedLine);
+		new_LD = &doc.linedefs.back();
 	}
 	else if (name.Match("sidedef"))
 	{
@@ -647,8 +647,8 @@ void Instance::ValidateLevel_UDMF()
 	{
 		auto &L = level.linedefs[n];
 
-		ValidateVertexRefs(L.get(), n);
-		ValidateSidedefRefs(L.get(), n);
+		ValidateVertexRefs(&L, n);
+		ValidateSidedefRefs(&L, n);
 	}
 }
 
@@ -785,44 +785,44 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 
 		const auto &ld = inst.level.linedefs[i];
 
-		lump->Printf("v1 = %d;\n", ld->start);
-		lump->Printf("v2 = %d;\n", ld->end);
+		lump->Printf("v1 = %d;\n", ld.start);
+		lump->Printf("v2 = %d;\n", ld.end);
 
-		if (ld->right >= 0)
-			lump->Printf("sidefront = %d;\n", ld->right);
-		if (ld->left >= 0)
-			lump->Printf("sideback = %d;\n", ld->left);
+		if (ld.right >= 0)
+			lump->Printf("sidefront = %d;\n", ld.right);
+		if (ld.left >= 0)
+			lump->Printf("sideback = %d;\n", ld.left);
 
-		if (ld->type != 0)
-			lump->Printf("special = %d;\n", ld->type);
+		if (ld.type != 0)
+			lump->Printf("special = %d;\n", ld.type);
 
-		if (ld->tag != 0)
-			lump->Printf("arg0 = %d;\n", ld->tag);
-		if (ld->arg2 != 0)
-			lump->Printf("arg1 = %d;\n", ld->arg2);
-		if (ld->arg3 != 0)
-			lump->Printf("arg2 = %d;\n", ld->arg3);
-		if (ld->arg4 != 0)
-			lump->Printf("arg3 = %d;\n", ld->arg4);
-		if (ld->arg5 != 0)
-			lump->Printf("arg4 = %d;\n", ld->arg5);
+		if (ld.tag != 0)
+			lump->Printf("arg0 = %d;\n", ld.tag);
+		if (ld.arg2 != 0)
+			lump->Printf("arg1 = %d;\n", ld.arg2);
+		if (ld.arg3 != 0)
+			lump->Printf("arg2 = %d;\n", ld.arg3);
+		if (ld.arg4 != 0)
+			lump->Printf("arg3 = %d;\n", ld.arg4);
+		if (ld.arg5 != 0)
+			lump->Printf("arg4 = %d;\n", ld.arg5);
 
 		// linedef flags
-		WrFlag(lump, ld->flags, "blocking",      MLF_Blocking);
-		WrFlag(lump, ld->flags, "blockmonsters", MLF_BlockMonsters);
-		WrFlag(lump, ld->flags, "twosided",      MLF_TwoSided);
-		WrFlag(lump, ld->flags, "dontpegtop",    MLF_UpperUnpegged);
-		WrFlag(lump, ld->flags, "dontpegbottom", MLF_LowerUnpegged);
-		WrFlag(lump, ld->flags, "secret",        MLF_Secret);
-		WrFlag(lump, ld->flags, "blocksound",    MLF_SoundBlock);
-		WrFlag(lump, ld->flags, "dontdraw",      MLF_DontDraw);
-		WrFlag(lump, ld->flags, "mapped",        MLF_Mapped);
+		WrFlag(lump, ld.flags, "blocking",      MLF_Blocking);
+		WrFlag(lump, ld.flags, "blockmonsters", MLF_BlockMonsters);
+		WrFlag(lump, ld.flags, "twosided",      MLF_TwoSided);
+		WrFlag(lump, ld.flags, "dontpegtop",    MLF_UpperUnpegged);
+		WrFlag(lump, ld.flags, "dontpegbottom", MLF_LowerUnpegged);
+		WrFlag(lump, ld.flags, "secret",        MLF_Secret);
+		WrFlag(lump, ld.flags, "blocksound",    MLF_SoundBlock);
+		WrFlag(lump, ld.flags, "dontdraw",      MLF_DontDraw);
+		WrFlag(lump, ld.flags, "mapped",        MLF_Mapped);
 
 		if (inst.conf.features.pass_through)
-			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
+			WrFlag(lump, ld.flags, "passuse", MLF_Boom_PassThru);
 
 		if (inst.conf.features.midtex_3d)
-			WrFlag(lump, ld->flags, "midtex3d", MLF_Eternity_3DMidTex);
+			WrFlag(lump, ld.flags, "midtex3d", MLF_Eternity_3DMidTex);
 
 		// TODO : hexen stuff (SPAC flags, etc)
 

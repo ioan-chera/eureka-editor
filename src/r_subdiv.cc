@@ -175,13 +175,13 @@ void sector_info_cache_c::Rebuild()
 	{
 		const auto &L = inst.level.linedefs[n];
 
-		CheckBoom242(L.get());
-		CheckExtraFloor(L.get(), n);
-		CheckLineSlope(L.get());
+		CheckBoom242(&L);
+		CheckExtraFloor(&L, n);
+		CheckLineSlope(&L);
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
-			int sd_num = side ? L->left : L->right;
+			int sd_num = side ? L.left : L.right;
 			if (sd_num < 0)
 				continue;
 
@@ -191,8 +191,8 @@ void sector_info_cache_c::Rebuild()
 
 			info.AddLine(n);
 
-			info.AddVertex(&inst.level.getStart(*L));
-			info.AddVertex(&inst.level.getEnd(*L));
+			info.AddVertex(&inst.level.getStart(L));
+			info.AddVertex(&inst.level.getEnd(L));
 		}
 	}
 
@@ -207,7 +207,7 @@ void sector_info_cache_c::Rebuild()
 
 	for (const auto &linedef : inst.level.linedefs)
 	{
-		CheckPlaneCopy(linedef.get());
+		CheckPlaneCopy(&linedef);
 	}
 }
 
@@ -467,11 +467,11 @@ void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 
 	for (const auto &L2 : inst.level.linedefs)
 	{
-		if (inst.level.touchesSector(*L2, sec_num))
+		if (inst.level.touchesSector(L2, sec_num))
 		{
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
-				const Vertex *v2 = pass ? &inst.level.getEnd(*L2) : &inst.level.getStart(*L2);
+				const Vertex *v2 = pass ? &inst.level.getEnd(L2) : &inst.level.getStart(L2);
 				double dist = PerpDist(v2->xy(), v2double_t{ lx1,ly1 }, v2double_t{ lx2, ly2 });
 
 				if (dist > best_dist)
@@ -682,25 +682,25 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 	{
 		const auto &L = inst.level.linedefs[n];
 
-		if (! inst.level.touchesSector(*L, num))
+		if (! inst.level.touchesSector(L, num))
 			continue;
 
 		// ignore 2S lines with same sector on both sides
-		if (inst.level.getSectorID(*L, Side::left) == inst.level.getSectorID(*L, Side::right))
+		if (inst.level.getSectorID(L, Side::left) == inst.level.getSectorID(L, Side::right))
 			continue;
 
 		sector_edge_t edge;
 
-		edge.x1 = static_cast<int>(inst.level.getStart(*L).x());
-		edge.y1 = static_cast<int>(inst.level.getStart(*L).y());
-		edge.x2 = static_cast<int>(inst.level.getEnd(*L).x());
-		edge.y2 = static_cast<int>(inst.level.getEnd(*L).y());
+		edge.x1 = static_cast<int>(inst.level.getStart(L).x());
+		edge.y1 = static_cast<int>(inst.level.getStart(L).y());
+		edge.x2 = static_cast<int>(inst.level.getEnd(L).x());
+		edge.y2 = static_cast<int>(inst.level.getEnd(L).y());
 
 		// skip purely horizontal lines
 		if (edge.y1 == edge.y2)
 			continue;
 
-		edge.line = L.get();
+		edge.line = &L;
 		edge.flipped = 0;
 
 		if (edge.y1 > edge.y2)
@@ -712,7 +712,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 		}
 
 		// compute side
-		bool is_right = (inst.level.getSectorID(*L, Side::right) == num);
+		bool is_right = (inst.level.getSectorID(L, Side::right) == num);
 
 		if (edge.flipped)
 			is_right = !is_right;

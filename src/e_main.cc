@@ -661,8 +661,8 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const auto &L = doc.linedefs[l];
 
-			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
-				 (doc.getLeft(*L)  && src.get(doc.getLeft(*L)->sector)) )
+			if ( (doc.getRight(L) && src.get(doc.getRight(L)->sector)) ||
+				 (doc.getLeft(L)  && src.get(doc.getLeft(L)->sector)) )
 			{
 				dest.set(l);
 			}
@@ -675,11 +675,11 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (const auto &L : doc.linedefs)
 		{
-			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
-				 (doc.getLeft(*L)  && src.get(doc.getLeft(*L)->sector)) )
+			if ( (doc.getRight(L) && src.get(doc.getRight(L)->sector)) ||
+				 (doc.getLeft(L)  && src.get(doc.getLeft(L)->sector)) )
 			{
-				dest.set(L->start);
-				dest.set(L->end);
+				dest.set(L.start);
+				dest.set(L.end);
 			}
 		}
 		return;
@@ -692,8 +692,8 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const auto &L = doc.linedefs[*it];
 
-			if (doc.getRight(*L)) dest.set(L->right);
-			if (doc.getLeft(*L))  dest.set(L->left);
+			if (doc.getRight(L)) dest.set(L.right);
+			if (doc.getLeft(L))  dest.set(L.left);
 		}
 		return;
 	}
@@ -717,8 +717,8 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const auto &L = doc.linedefs[*it];
 
-			dest.set(L->start);
-			dest.set(L->end);
+			dest.set(L.start);
+			dest.set(L.end);
 		}
 		return;
 	}
@@ -731,7 +731,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const auto &L = doc.linedefs[l];
 
-			if (src.get(L->start) && src.get(L->end))
+			if (src.get(L.start) && src.get(L.end))
 			{
 				dest.set(l);
 			}
@@ -755,8 +755,8 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		const auto &L = doc.linedefs[l];
 
-		if (doc.getRight(*L)) dest.set(doc.getRight(*L)->sector);
-		if (doc.getLeft(*L))  dest.set(doc.getLeft(*L)->sector);
+		if (doc.getRight(L)) dest.set(doc.getRight(L)->sector);
+		if (doc.getLeft(L))  dest.set(doc.getLeft(L)->sector);
 	}
 
 	// step 2: unselect any sectors if a component is not selected
@@ -767,7 +767,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 		if (src.what_type() == ObjType::vertices)
 		{
-			if (src.get(L->start) && src.get(L->end))
+			if (src.get(L.start) && src.get(L.end))
 				continue;
 		}
 		else
@@ -776,8 +776,8 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 				continue;
 		}
 
-		if (doc.getRight(*L)) dest.clear(doc.getRight(*L)->sector);
-		if (doc.getLeft(*L))  dest.clear(doc.getLeft(*L)->sector);
+		if (doc.getRight(L)) dest.clear(doc.getRight(L)->sector);
+		if (doc.getLeft(L))  dest.clear(doc.getLeft(L)->sector);
 	}
 }
 
@@ -795,7 +795,7 @@ static int Selection_FirstLine(const Document &doc, selection_c *list)
 	{
 		const auto &L = doc.linedefs[*it];
 
-		if (L->TwoSided())
+		if (L.TwoSided())
 			return *it;
 	}
 
@@ -867,8 +867,8 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 				const auto &L = doc.linedefs[n];
 
 				/* the two ends of the line must be in the box */
-				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
-				   doc.getEnd(*L).xy().inbounds(pos1, pos2))
+				if(doc.getStart(L).xy().inbounds(pos1, pos2) &&
+				   doc.getEnd(L).xy().inbounds(pos1, pos2))
 				{
 					list->toggle(n);
 				}
@@ -885,11 +885,11 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 				const auto &L = doc.linedefs[n];
 
 				// Get the numbers of the sectors on both sides of the linedef
-				int s1 = doc.getRight(*L) ? doc.getRight(*L)->sector : -1;
-				int s2 = doc.getLeft(*L) ? doc.getLeft(*L) ->sector : -1;
+				int s1 = doc.getRight(L) ? doc.getRight(L)->sector : -1;
+				int s2 = doc.getLeft(L) ? doc.getLeft(L) ->sector : -1;
 
-				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
-				   doc.getEnd(*L).xy().inbounds(pos1, pos2))
+				if(doc.getStart(L).xy().inbounds(pos1, pos2) &&
+				   doc.getEnd(L).xy().inbounds(pos1, pos2))
 				{
 					if (s1 >= 0) in_sectors.set(s1);
 					if (s2 >= 0) in_sectors.set(s2);
@@ -969,19 +969,19 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 
 		const auto &line2 = level.linedefs[i];
 
-		if (line1->OneSided() != line2->OneSided())
+		if (line1.OneSided() != line2.OneSided())
 			continue;
 
-		if ((forward && line2->start == line1->end) || (!forward && line2->end == line1->start))
+		if ((forward && line2.start == line1.end) || (!forward && line2.end == line1.start))
 		{
-			const SideDef *side1 = frontside ? level.getRight(*line1) : level.getLeft(*line1);
-			const SideDef *side2 = frontside ? level.getRight(*line2) : level.getLeft(*line2);
+			const SideDef *side1 = frontside ? level.getRight(line1) : level.getLeft(line1);
+			const SideDef *side2 = frontside ? level.getRight(line2) : level.getLeft(line2);
 
 			bool match = false;
 
 			if (option == SelectNeighborCriterion::texture)
 			{
-				if (line1->OneSided() || (parts & PART_RT_RAIL || parts & PART_LF_RAIL))
+				if (line1.OneSided() || (parts & PART_RT_RAIL || parts & PART_LF_RAIL))
 					match = (side2->MidTex() == side1->MidTex() && side2->MidTex() != "-");
 
 				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
@@ -993,16 +993,16 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 			}
 			else
 			{
-				const Sector &l1front = level.getSector(*level.getRight(*line1));
-				const Sector &l2front = level.getSector(*level.getRight(*line2));
+				const Sector &l1front = level.getSector(*level.getRight(line1));
+				const Sector &l2front = level.getSector(*level.getRight(line2));
 				const Sector *l1back = NULL, *l2back = NULL;
 
-				if (!line1->OneSided())
+				if (!line1.OneSided())
 				{
-					l1back = &level.getSector(*level.getLeft(*line1));
-					l2back = &level.getSector(*level.getLeft(*line2));
+					l1back = &level.getSector(*level.getLeft(line1));
+					l2back = &level.getSector(*level.getLeft(line2));
 				}
-				if (line1->OneSided())
+				if (line1.OneSided())
 					match = (l1front.floorh == l2front.floorh && l1front.ceilh == l2front.ceilh);
 
 				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
@@ -1055,25 +1055,25 @@ void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
 	{
 		const auto &line = level.linedefs[i];
 
-		if (line->OneSided())
+		if (line.OneSided())
 			continue;
 
-		if (level.getRight(*line)->sector == objnum || level.getLeft(*line)->sector == objnum)
+		if (level.getRight(line)->sector == objnum || level.getLeft(line)->sector == objnum)
 		{
 			const Sector *sector2;
 			int sectornum;
 
 			bool match = false;
 
-			if (level.getRight(*line)->sector == objnum)
+			if (level.getRight(line)->sector == objnum)
 			{
-				sector2 = &level.getSector(*level.getLeft(*line));
-				sectornum = level.getLeft(*line)->sector;
+				sector2 = &level.getSector(*level.getLeft(line));
+				sectornum = level.getLeft(line)->sector;
 			}
 			else
 			{
-				sector2 = &level.getSector(*level.getRight(*line));
-				sectornum = level.getRight(*line)->sector;
+				sector2 = &level.getSector(*level.getRight(line));
+				sectornum = level.getRight(line)->sector;
 			}
 
 			if (edit.Selected->get(sectornum))

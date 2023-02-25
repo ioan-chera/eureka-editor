@@ -187,10 +187,10 @@ static void BlockAddLine(int line_index, const Document &doc)
 {
 	const auto &L = doc.linedefs[line_index];
 
-	int x1 = (int) doc.getStart(*L).x();
-	int y1 = (int) doc.getStart(*L).y();
-	int x2 = (int) doc.getEnd(*L).x();
-	int y2 = (int) doc.getEnd(*L).y();
+	int x1 = (int) doc.getStart(L).x();
+	int y1 = (int) doc.getStart(L).y();
+	int x2 = (int) doc.getEnd(L).x();
+	int y2 = (int) doc.getEnd(L).y();
 
 	int bx1 = (std::min(x1,x2) - block_x) / 128;
 	int by1 = (std::min(y1,y2) - block_y) / 128;
@@ -262,7 +262,7 @@ static void CreateBlockmap(const Document &doc)
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
 		// ignore zero-length lines
-		if (doc.isZeroLength(*doc.linedefs[i]))
+		if (doc.isZeroLength(doc.linedefs[i]))
 			continue;
 
 		BlockAddLine(i, doc);
@@ -471,12 +471,12 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 	{
 		const auto &L = doc.linedefs[i];
 
-		if (!doc.isZeroLength(*L))
+		if (!doc.isZeroLength(L))
 		{
-			double x1 = doc.getStart(*L).x();
-			double y1 = doc.getStart(*L).y();
-			double x2 = doc.getEnd(*L).x();
-			double y2 = doc.getEnd(*L).y();
+			double x1 = doc.getStart(L).x();
+			double y1 = doc.getStart(L).y();
+			double x2 = doc.getEnd(L).x();
+			double y2 = doc.getEnd(L).y();
 
 			int lx = (int)floor(std::min(x1, x2));
 			int ly = (int)floor(std::min(y1, y2));
@@ -622,11 +622,11 @@ static void Reject_GroupSectors(const Document &doc)
 {
 	for(const auto &L : doc.linedefs)
 	{
-		if (L->right < 0 || L->left < 0)
+		if (L.right < 0 || L.left < 0)
 			continue;
 
-		int sec1 = doc.getRight(*L)->sector;
-		int sec2 = doc.getLeft(*L) ->sector;
+		int sec1 = doc.getRight(L)->sector;
+		int sec2 = doc.getLeft(L) ->sector;
 
 		if (sec1 < 0 || sec2 < 0 || sec1 == sec2)
 			continue;
@@ -886,8 +886,8 @@ static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 {
 	const auto &L = doc.linedefs[seg->linedef];
 
-	double lx = seg->side ? doc.getEnd(*L).x() : doc.getStart(*L).x();
-	double ly = seg->side ? doc.getEnd(*L).y() : doc.getStart(*L).y();
+	double lx = seg->side ? doc.getEnd(L).x() : doc.getStart(L).x();
+	double ly = seg->side ? doc.getEnd(L).y() : doc.getStart(L).y();
 
 	// use the "true" starting coord (as stored in the wad)
 	double sx = round(seg->start->x);
@@ -1714,7 +1714,7 @@ static void SaveXGL3Format(const Instance &inst, node_t *root_node)
 
 /* ----- whole-level routines --------------------------- */
 
-static void LoadLevel(const Instance &inst)
+static void LoadLevel(Instance &inst)
 {
 	Lump_c *LEV = inst.wad.master.edit_wad->GetLump(lev_current_start);
 
@@ -1730,14 +1730,14 @@ static void LoadLevel(const Instance &inst)
 
 	for(auto &L : inst.level.linedefs)
 	{
-		if (L->right >= 0 || L->left >= 0)
+		if (L.right >= 0 || L.left >= 0)
 			num_real_lines++;
 
 		// init some fake flags
-		L->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
+		L.flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
-		if (L->tag >= 900 && L->tag < 1000)
-			L->flags |= MLF_IS_PRECIOUS;
+		if (L.tag >= 900 && L.tag < 1000)
+			L.flags |= MLF_IS_PRECIOUS;
 	}
 
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
@@ -2163,7 +2163,7 @@ static Lump_c * CreateGLMarker(const Instance &inst)
 nodebuildinfo_t * cur_info = NULL;
 
 
-static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst)
+static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &inst)
 {
 	cur_info = info;
 
@@ -2222,7 +2222,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 
 	// clear some fake line flags
 	for(auto &linedef : inst.level.linedefs)
-		linedef->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
+		linedef.flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
 	return ret;
 }
@@ -2230,7 +2230,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 }  // namespace ajbsp
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst)
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &inst)
 {
 	return ajbsp::BuildLevel(info, lev_idx, inst);
 }

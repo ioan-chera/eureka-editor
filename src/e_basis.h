@@ -112,7 +112,7 @@ private:
 		Vertex vertex = {};
 		std::unique_ptr<Sector> sector;
 		std::unique_ptr<SideDef> sidedef;
-		std::unique_ptr<LineDef> linedef;
+		LineDef linedef;
 		int value = 0;
 
 		void apply(Basis &basis);
@@ -126,7 +126,7 @@ private:
 		Vertex rawDeleteVertex(Document &doc) const;
 		std::unique_ptr<Sector> rawDeleteSector(Document &doc) const;
 		std::unique_ptr<SideDef> rawDeleteSidedef(Document &doc) const;
-		std::unique_ptr<LineDef> rawDeleteLinedef(Document &doc) const;
+		LineDef rawDeleteLinedef(Document &doc) const;
 
 		void rawInsert(Basis &basis);
 		void rawInsertThing(Document &doc);

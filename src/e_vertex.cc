@@ -70,11 +70,11 @@ int VertexModule::findDragOther(int v_num) const
 	{
 		const auto &L = doc.linedefs[i];
 
-		if (L->end == v_num)
-			return L->start;
+		if (L.end == v_num)
+			return L.start;
 
-		if (L->start == v_num && fallback < 0)
-			fallback = L->end;
+		if (L.start == v_num && fallback < 0)
+			fallback = L.end;
 	}
 
 	return fallback;
@@ -89,7 +89,7 @@ int VertexModule::howManyLinedefs(int v_num) const
 	{
 		const auto &L = doc.linedefs[n];
 
-		if (L->start == v_num || L->end == v_num)
+		if (L.start == v_num || L.end == v_num)
 			count++;
 	}
 
@@ -107,21 +107,21 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 	const auto &L1 = doc.linedefs[ld1];
 	const auto &L2 = doc.linedefs[ld2];
 
-	bool ld1_onesided = L1->OneSided();
-	bool ld2_onesided = L2->OneSided();
+	bool ld1_onesided = L1.OneSided();
+	bool ld2_onesided = L2.OneSided();
 
-	StringID new_mid_tex = (ld1_onesided) ? doc.getRight(*L1)->mid_tex :
-			     		  (ld2_onesided) ? doc.getRight(*L2)->mid_tex : StringID();
+	StringID new_mid_tex = (ld1_onesided) ? doc.getRight(L1)->mid_tex :
+			     		  (ld2_onesided) ? doc.getRight(L2)->mid_tex : StringID();
 
 	// flip L1 so it would be parallel with L2 (after merging the other
 	// endpoint) but going the opposite direction.
-	if ((L2->end == v) == (L1->end == v))
+	if ((L2.end == v) == (L1.end == v))
 	{
 		doc.linemod.flipLinedef(op, ld1);
 	}
 
-	bool same_left  = (doc.getSectorID(*L2, Side::left)  == doc.getSectorID(*L1, Side::left));
-	bool same_right = (doc.getSectorID(*L2, Side::right) == doc.getSectorID(*L1, Side::right));
+	bool same_left  = (doc.getSectorID(L2, Side::left)  == doc.getSectorID(L1, Side::left));
+	bool same_right = (doc.getSectorID(L2, Side::right) == doc.getSectorID(L1, Side::right));
 
 	if (same_left && same_right)
 	{
@@ -135,11 +135,11 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 
 	if (same_left)
 	{
-		op.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+		op.changeLinedef(ld2, LineDef::F_LEFT, L1.right);
 	}
 	else if (same_right)
 	{
-		op.changeLinedef(ld2, LineDef::F_RIGHT, L1->left);
+		op.changeLinedef(ld2, LineDef::F_RIGHT, L1.left);
 	}
 	else
 	{
@@ -150,20 +150,20 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 
 
 	// fix orientation of remaining linedef if needed
-	if (doc.getLeft(*L2) && ! doc.getRight(*L2))
+	if (doc.getLeft(L2) && ! doc.getRight(L2))
 	{
 		doc.linemod.flipLinedef(op, ld2);
 	}
 
-	if (L2->OneSided() && new_mid_tex.hasContent())
+	if (L2.OneSided() && new_mid_tex.hasContent())
 	{
-		op.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
+		op.changeSidedef(L2.right, SideDef::F_MID_TEX, new_mid_tex);
 	}
 
 	// fix flags of remaining linedef
-	int new_flags = L2->flags;
+	int new_flags = L2.flags;
 
-	if (L2->TwoSided())
+	if (L2.TwoSided())
 	{
 		new_flags |=  MLF_TwoSided;
 		new_flags &= ~MLF_Blocking;
@@ -194,13 +194,13 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 	{
 		const auto &L = doc.linedefs[n];
 
-		if (! L->TouchesVertex(v1))
+		if (! L.TouchesVertex(v1))
 			continue;
 
 		if (del_lines.get(n))
 			continue;
 
-		int v3 = (L->start == v1) ? L->end : L->start;
+		int v3 = (L.start == v1) ? L.end : L.start;
 
 		int found = -1;
 
@@ -211,8 +211,8 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 
 			const auto &K = doc.linedefs[k];
 
-			if ((K->start == v3 && K->end == v2) ||
-				(K->start == v2 && K->end == v3))
+			if ((K.start == v3 && K.end == v2) ||
+				(K.start == v2 && K.end == v3))
 			{
 				found = k;
 				break;
@@ -237,13 +237,13 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 		// change *ALL* references, this is critical
 		// [ to-be-deleted lines will get start == end, that is OK ]
 
-		if (L->start == v1)
+		if (L.start == v1)
 			op.changeLinedef(n, LineDef::F_START, v2);
 
-		if (L->end == v1)
+		if (L.end == v1)
 			op.changeLinedef(n, LineDef::F_END, v2);
 
-		if (L->start == v2 && L->end == v2)
+		if (L.start == v2 && L.end == v2)
 			del_lines.set(n);
 	}
 }
@@ -465,10 +465,10 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 	{
 		const auto &L = doc.linedefs[n];
 
-		if (L->start == v_num || L->end == v_num)
+		if (L.start == v_num || L.end == v_num)
 		{
 			double new_x, new_y;
-			calcDisconnectCoord(L.get(), v_num, &new_x, &new_y);
+			calcDisconnectCoord(&L, v_num, &new_x, &new_y);
 
 			// the _LAST_ linedef keeps the current vertex, the rest
 			// need a new one.
@@ -478,7 +478,7 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 
 				doc.getMutableVertex(new_v).SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
-				if (L->start == v_num)
+				if (L.start == v_num)
 					op.changeLinedef(n, LineDef::F_START, new_v);
 				else
 					op.changeLinedef(n, LineDef::F_END, new_v);
@@ -541,7 +541,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 {
 	const auto &L = doc.linedefs[ld];
 
-	int v_num = which_vert ? L->end : L->start;
+	int v_num = which_vert ? L.end : L.start;
 
 	// see if there are any linedefs NOT in the selection which are
 	// connected to this vertex.
@@ -555,7 +555,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 
 		const auto &N = doc.linedefs[n];
 
-		if (N->start == v_num || N->end == v_num)
+		if (N.start == v_num || N.end == v_num)
 		{
 			touches_non_sel = true;
 			break;
@@ -566,7 +566,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 		return;
 
 	double new_x, new_y;
-	calcDisconnectCoord(doc.linedefs[ld].get(), v_num, &new_x, &new_y);
+	calcDisconnectCoord(&doc.linedefs[ld], v_num, &new_x, &new_y);
 
 	int new_v = op.addNew(ObjType::vertices);
 
@@ -577,10 +577,10 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 	{
 		const auto &L2 = doc.linedefs[*it];
 
-		if (L2->start == v_num)
+		if (L2.start == v_num)
 			op.changeLinedef(*it, LineDef::F_START, new_v);
 
-		if (L2->end == v_num)
+		if (L2.end == v_num)
 			op.changeLinedef(*it, LineDef::F_END, new_v);
 	}
 
@@ -637,8 +637,8 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 		const auto &L = doc.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = doc.getLeft(*L)  && inst.edit.Selected->get(doc.getLeft(*L)->sector);
-		bool right_in = doc.getRight(*L) && inst.edit.Selected->get(doc.getRight(*L)->sector);
+		bool  left_in = doc.getLeft(L)  && inst.edit.Selected->get(doc.getLeft(L)->sector);
+		bool right_in = doc.getRight(L) && inst.edit.Selected->get(doc.getRight(L)->sector);
 
 		if (! (left_in || right_in))
 			continue;
@@ -646,7 +646,7 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 		bool innie = false;
 		bool outie = false;
 
-		if (doc.getRight(*L))
+		if (doc.getRight(L))
 		{
 			if (right_in)
 				innie = true;
@@ -654,7 +654,7 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 				outie = true;
 		}
 
-		if (doc.getLeft(*L))
+		if (doc.getLeft(L))
 		{
 			if (left_in)
 				innie = true;
@@ -664,14 +664,14 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 
 		if (innie)
 		{
-			in_verts.set(L->start);
-			in_verts.set(L->end);
+			in_verts.set(L.start);
+			in_verts.set(L.end);
 		}
 
 		if (outie)
 		{
-			out_verts.set(L->start);
-			out_verts.set(L->end);
+			out_verts.set(L.start);
+			out_verts.set(L.end);
 		}
 	}
 
@@ -690,23 +690,23 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 	int new_ld = op.addNew(ObjType::linedefs);
 	int lost_sd;
 
-	const auto &L2 = doc.linedefs[new_ld];
+	auto &L2 = doc.linedefs[new_ld];
 
 	if (in_side == Side::left)
 	{
-		L2->start = end2;
-		L2->end   = start2;
-		L2->right = L1->left;
+		L2.start = end2;
+		L2.end   = start2;
+		L2.right = L1.left;
 
-		lost_sd = L1->left;
+		lost_sd = L1.left;
 	}
 	else
 	{
-		L2->start = start2;
-		L2->end   = end2;
-		L2->right = L1->right;
+		L2.start = start2;
+		L2.end   = end2;
+		L2.right = L1.right;
 
-		lost_sd = L1->right;
+		lost_sd = L1.right;
 
 		doc.linemod.flipLinedef(op, ld_num);
 	}
@@ -716,28 +716,28 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 	// determine new flags
 
-	int new_flags = L1->flags;
+	int new_flags = L1.flags;
 
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
 
 	op.changeLinedef(ld_num, LineDef::F_FLAGS, new_flags);
 
-	L2->flags = L1->flags;
+	L2.flags = L1.flags;
 
 
 	// fix the first line's textures
 
 	StringID tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	const SideDef * SD = doc.sidedefs[L1->right].get();
+	const SideDef * SD = doc.sidedefs[L1.right].get();
 
 	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	op.changeSidedef(L1->right, SideDef::F_MID_TEX, tex);
+	op.changeSidedef(L1.right, SideDef::F_MID_TEX, tex);
 
 
 	// now fix the second line's textures
@@ -848,18 +848,18 @@ void Instance::commandSectorDisconnect()
 			const auto &L = level.linedefs[n];
 
 			// only process lines which touch a selected sector
-			bool  left_in = level.getLeft(*L)  && edit.Selected->get(level.getLeft(*L)->sector);
-			bool right_in = level.getRight(*L) && edit.Selected->get(level.getRight(*L)->sector);
+			bool  left_in = level.getLeft(L)  && edit.Selected->get(level.getLeft(L)->sector);
+			bool right_in = level.getRight(L) && edit.Selected->get(level.getRight(L)->sector);
 
 			if (! (left_in || right_in))
 				continue;
 
 			bool between_two = (left_in && right_in);
 
-			int start2 = mapping[L->start];
-			int end2   = mapping[L->end];
+			int start2 = mapping[L.start];
+			int end2   = mapping[L.end];
 
-			if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
+			if (start2 >= 0 && end2 >= 0 && L.TwoSided() && ! between_two)
 			{
 				level.vertmod.DETSEC_SeparateLine(op, n, start2, end2, left_in ? Side::left : Side::right);
 			}

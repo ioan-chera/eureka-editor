@@ -877,16 +877,16 @@ public:
 	{
 		const auto &ld = inst.level.linedefs[ld_index];
 
-		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
+		if (!inst.level.isVertex(ld.start) || !inst.level.isVertex(ld.end))
 			return;
 
-		if (! inst.level.getRight(*ld))
+		if (! inst.level.getRight(ld))
 			return;
 
-		float x1 = static_cast<float>(inst.level.getStart(*ld).x() - inst.r_view.x);
-		float y1 = static_cast<float>(inst.level.getStart(*ld).y() - inst.r_view.y);
-		float x2 = static_cast<float>(inst.level.getEnd(*ld).x() - inst.r_view.x);
-		float y2 = static_cast<float>(inst.level.getEnd(*ld).y() - inst.r_view.y);
+		float x1 = static_cast<float>(inst.level.getStart(ld).x() - inst.r_view.x);
+		float y1 = static_cast<float>(inst.level.getStart(ld).y() - inst.r_view.y);
+		float x2 = static_cast<float>(inst.level.getEnd(ld).x() - inst.r_view.x);
+		float y2 = static_cast<float>(inst.level.getEnd(ld).y() - inst.r_view.y);
 
 		float tx1 = static_cast<float>(x1 * inst.r_view.Sin - y1 * inst.r_view.Cos);
 		float ty1 = static_cast<float>(x1 * inst.r_view.Cos + y1 * inst.r_view.Sin);
@@ -914,7 +914,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		const SideDef *sd = (side == Side::left) ? inst.level.getLeft(*ld) : inst.level.getRight(*ld);
+		const SideDef *sd = (side == Side::left) ? inst.level.getLeft(ld) : inst.level.getRight(ld);
 
 		if (! sd)
 			return;
@@ -973,26 +973,26 @@ public:
 			return;
 
 		bool self_ref = false;
-		if (inst.level.getLeft(*ld) && inst.level.getRight(*ld) && inst.level.getLeft(*ld)->sector == inst.level.getRight(*ld)->sector)
+		if (inst.level.getLeft(ld) && inst.level.getRight(ld) && inst.level.getLeft(ld)->sector == inst.level.getRight(ld)->sector)
 			self_ref = true;
 
 		// mark sectors to be drawn
 		// [ this method means we don't need to check visibility of sectors ]
 		if (! self_ref)
 		{
-			if (inst.level.getLeft(*ld) && inst.level.isSector(inst.level.getLeft(*ld)->sector))
-				seen_sectors.set(inst.level.getLeft(*ld)->sector);
+			if (inst.level.getLeft(ld) && inst.level.isSector(inst.level.getLeft(ld)->sector))
+				seen_sectors.set(inst.level.getLeft(ld)->sector);
 
-			if (inst.level.getRight(*ld) && inst.level.isSector(inst.level.getRight(*ld)->sector))
-				seen_sectors.set(inst.level.getRight(*ld)->sector);
+			if (inst.level.getRight(ld) && inst.level.isSector(inst.level.getRight(ld)->sector))
+				seen_sectors.set(inst.level.getRight(ld)->sector);
 		}
 
 		/* actually draw it... */
 
-		x1 = static_cast<float>(inst.level.getStart(*ld).x());
-		y1 = static_cast<float>(inst.level.getStart(*ld).y());
-		x2 = static_cast<float>(inst.level.getEnd(*ld).x());
-		y2 = static_cast<float>(inst.level.getEnd(*ld).y());
+		x1 = static_cast<float>(inst.level.getStart(ld).x());
+		y1 = static_cast<float>(inst.level.getStart(ld).y());
+		x2 = static_cast<float>(inst.level.getEnd(ld).x());
+		y2 = static_cast<float>(inst.level.getEnd(ld).y());
 
 		if (side == Side::left)
 		{
@@ -1007,16 +1007,16 @@ public:
 		bool sky_front = inst.is_sky(front->CeilTex());
 		bool sky_upper = false;
 
-		if (ld->OneSided())
+		if (ld.OneSided())
 		{
 			sector_3dfloors_c *ex = inst.Subdiv_3DFloorsForSector(sd->sector);
 
-			DrawSide('W', ld.get(), sd, sd->MidTex(), front, NULL, false,
+			DrawSide('W', &ld, sd, sd->MidTex(), front, NULL, false,
 				ld_len, x1, y1, &ex->f_plane, x2, y2, &ex->c_plane);
 		}
 		else
 		{
-			const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(*ld) : inst.level.getLeft(*ld);
+			const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(ld) : inst.level.getLeft(ld);
 			const Sector *back  = sd_back ? &inst.level.getSector(*sd_back) : NULL;
 
 			sky_upper = sky_front && inst.is_sky(back->CeilTex());
@@ -1050,17 +1050,17 @@ public:
 
 			// lower part
 			if ((back->floorh > front->floorh || f_sloped) && !self_ref && !invis_back)
-				DrawSide('L', ld.get(), sd, sd->LowerTex(), front, back, sky_upper,
+				DrawSide('L', &ld, sd, sd->LowerTex(), front, back, sky_upper,
 					ld_len, x1, y1, f_floorp, x2, y2, &b_ex->f_plane);
 
 			// upper part
 			if ((back->ceilh < front->ceilh || c_sloped) && !self_ref && !sky_upper)
-				DrawSide('U', ld.get(), sd, sd->UpperTex(), front, back, sky_upper,
+				DrawSide('U', &ld, sd, sd->UpperTex(), front, back, sky_upper,
 					ld_len, x1, y1, &b_ex->c_plane, x2, y2, &f_ex->c_plane);
 
 			// railing tex
 			if (!is_null_tex(sd->MidTex()) && inst.r_view.texturing)
-				DrawMidMasker(ld.get(), sd, front, back, sky_upper,
+				DrawMidMasker(&ld, sd, front, back, sky_upper,
 					ld_len, x1, y1, x2, y2);
 
 			// draw sides of extrafloors
@@ -1095,7 +1095,7 @@ public:
 					slope_plane_c p1; p1.Init(static_cast<float>(bottom_h));
 					slope_plane_c p2; p2.Init(static_cast<float>(top_h));
 
-					DrawSide('E', ld.get(), sd, tex, front, back, false,
+					DrawSide('E', &ld, sd, tex, front, back, false,
 						ld_len, x1, y1, &p1, x2, y2, &p2);
 				}
 			}
@@ -1113,7 +1113,7 @@ public:
 			slope_plane_c p1; p1.Init(static_cast<float>(front->ceilh));
 			slope_plane_c p2; p2.Init(static_cast<float>(front->ceilh + 16384.0));
 
-			DrawSide('U', ld.get(), sd, "-", front, NULL, true /* sky_upper */,
+			DrawSide('U', &ld, sd, "-", front, NULL, true /* sky_upper */,
 				ld_len, x1, y1, &p1, x2, y2, &p2);
 		}
 	}
@@ -1333,28 +1333,28 @@ public:
 
 		Side side = (part & PART_LF_ALL) ? Side::left : Side::right;
 
-		const SideDef *sd = (side == Side::left) ? inst.level.getLeft(*L) : inst.level.getRight(*L);
+		const SideDef *sd = (side == Side::left) ? inst.level.getLeft(L) : inst.level.getRight(L);
 		if (sd == NULL)
 			return;
 
-		float x1 = static_cast<float>(inst.level.getStart(*L).x());
-		float y1 = static_cast<float>(inst.level.getStart(*L).y());
-		float x2 = static_cast<float>(inst.level.getEnd(*L).x());
-		float y2 = static_cast<float>(inst.level.getEnd(*L).y());
+		float x1 = static_cast<float>(inst.level.getStart(L).x());
+		float y1 = static_cast<float>(inst.level.getStart(L).y());
+		float x2 = static_cast<float>(inst.level.getEnd(L).x());
+		float y2 = static_cast<float>(inst.level.getEnd(L).y());
 
 		// check that this side is facing the camera
 		Side cam_side = PointOnLineSide(inst.r_view.x, inst.r_view.y, x1,y1,x2,y2);
 		if (cam_side != side)
 			return;
 
-		const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(*L) : inst.level.getLeft(*L);
+		const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(L) : inst.level.getLeft(L);
 
 		const Sector *front = &inst.level.getSector(*sd);
 		const Sector *back  = sd_back ? &inst.level.getSector(*sd_back) : NULL;
 
 		float z1, z2;
 
-		if (L->TwoSided())
+		if (L.TwoSided())
 		{
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
@@ -1370,7 +1370,7 @@ public:
 			{
 				int zi1, zi2;
 
-				if (! inst.LD_RailHeights(zi1, zi2, L.get(), sd, front, back))
+				if (! inst.LD_RailHeights(zi1, zi2, &L, sd, front, back))
 					return;
 
 				z1 = static_cast<float>(zi1); z2 = static_cast<float>(zi2);
@@ -1420,12 +1420,12 @@ public:
 
 		for (const auto &L : inst.level.linedefs)
 		{
-			if (inst.level.touchesSector(*L, sec_index))
+			if (inst.level.touchesSector(L, sec_index))
 			{
-				float x1 = static_cast<float>(inst.level.getStart(*L).x());
-				float y1 = static_cast<float>(inst.level.getStart(*L).y());
-				float x2 = static_cast<float>(inst.level.getEnd(*L).x());
-				float y2 = static_cast<float>(inst.level.getEnd(*L).y());
+				float x1 = static_cast<float>(inst.level.getStart(L).x());
+				float y1 = static_cast<float>(inst.level.getStart(L).y());
+				float x2 = static_cast<float>(inst.level.getEnd(L).x());
+				float y2 = static_cast<float>(inst.level.getEnd(L).y());
 
 				glBegin(GL_LINE_STRIP);
 				glVertex3f(x1, y1, z);

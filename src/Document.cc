@@ -34,10 +34,10 @@ Vertex Document::removeVertex(int index)
 		for(auto it = linedefs.rbegin(); it != linedefs.rend(); ++it)
 		{
 			auto &L = *it;
-			if(L->start > index)
-				L->start--;
-			if(L->end > index)
-				L->end--;
+			if(L.start > index)
+				L.start--;
+			if(L.end > index)
+				L.end--;
 		}
 
 	return result;
@@ -108,20 +108,20 @@ static void ChecksumSideDef(crc32_c &crc, const SideDef *S, const Document &doc)
 	ChecksumSector(crc, &doc.getSector(*S));
 }
 
-static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
+static void ChecksumLineDef(crc32_c &crc, const LineDef &L, const Document &doc)
 {
-	crc += L->flags;
-	crc += L->type;
-	crc += L->tag;
+	crc += L.flags;
+	crc += L.type;
+	crc += L.tag;
 
-	ChecksumVertex(crc, doc.getStart(*L));
-	ChecksumVertex(crc, doc.getEnd(*L));
+	ChecksumVertex(crc, doc.getStart(L));
+	ChecksumVertex(crc, doc.getEnd(L));
 
-	if(doc.getRight(*L))
-		ChecksumSideDef(crc, doc.getRight(*L), doc);
+	if(doc.getRight(L))
+		ChecksumSideDef(crc, doc.getRight(L), doc);
 
-	if(doc.getLeft(*L))
-		ChecksumSideDef(crc, doc.getLeft(*L), doc);
+	if(doc.getLeft(L))
+		ChecksumSideDef(crc, doc.getLeft(L), doc);
 }
 
 //
@@ -140,7 +140,7 @@ void Document::getLevelChecksum(crc32_c &crc) const
 		ChecksumThing(crc, things[i]);
 
 	for(i = 0; i < numLinedefs(); i++)
-		ChecksumLineDef(crc, linedefs[i].get(), *this);
+		ChecksumLineDef(crc, linedefs[i], *this);
 }
 
 const Sector &Document::getSector(const SideDef &side) const
