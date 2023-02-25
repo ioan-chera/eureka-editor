@@ -927,13 +927,13 @@ void UI_Canvas::DrawThings()
 
 	for (const auto &thing : inst.level.things)
 	{
-		double x = thing->x();
-		double y = thing->y();
+		double x = thing.x();
+		double y = thing.y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = inst.conf.getThingType(thing->type);
+		const thingtype_t &info = inst.conf.getThingType(thing.type);
 
 		if (inst.edit.mode == ObjType::things && !inst.edit.error_mode)
 		{
@@ -943,7 +943,7 @@ void UI_Canvas::DrawThings()
 
 		int r = info.radius;
 
-		DrawThing(x, y, r, thing->angle, false);
+		DrawThing(x, y, r, thing.angle, false);
 	}
 
 	// draw the thing numbers
@@ -951,13 +951,13 @@ void UI_Canvas::DrawThings()
 	{
 		for (int n = 0 ; n < inst.level.numThings(); n++)
 		{
-			double x = inst.level.things[n]->x();
-			double y = inst.level.things[n]->y();
+			double x = inst.level.things[n].x();
+			double y = inst.level.things[n].y();
 
 			if (! Vis(x, y, MAX_RADIUS))
 				continue;
 
-			const thingtype_t &info = inst.conf.getThingType(inst.level.things[n]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[n].type);
 
 			x += info.radius + 8;
 			y += info.radius + 8;
@@ -978,13 +978,13 @@ void UI_Canvas::DrawThingBodies()
 
 	for (const auto &thing : inst.level.things)
 	{
-		double x = thing->x();
-		double y = thing->y();
+		double x = thing.x();
+		double y = thing.y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = inst.conf.getThingType(thing->type);
+		const thingtype_t &info = inst.conf.getThingType(thing.type);
 
 		Fl_Color col = (Fl_Color)info.color;
 		RenderColor(DarkerColor(DarkerColor(col)));
@@ -1012,16 +1012,16 @@ void UI_Canvas::DrawThingSprites()
 
 	for (const auto &thing : inst.level.things)
 	{
-		double x = thing->x();
-		double y = thing->y();
+		double x = thing.x();
+		double y = thing.y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = inst.conf.getThingType(thing->type);
+		const thingtype_t &info = inst.conf.getThingType(thing.type);
 		float scale = info.scale;
 
-		Img_c *sprite = inst.wad.getMutableSprite(inst.conf, thing->type);
+		Img_c *sprite = inst.wad.getMutableSprite(inst.conf, thing.type);
 
 		if (! sprite)
 		{
@@ -1353,22 +1353,22 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 	{
 		case ObjType::things:
 		{
-			double x = dx + inst.level.things[objnum]->x();
-			double y = dy + inst.level.things[objnum]->y();
+			double x = dx + inst.level.things[objnum].x();
+			double y = dy + inst.level.things[objnum].y();
 
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = inst.conf.getThingType(inst.level.things[objnum]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[objnum].type);
 
 			int r = info.radius;
 
 			if (inst.edit.error_mode)
-				DrawThing(x, y, r, inst.level.things[objnum]->angle, false /* big_arrow */);
+				DrawThing(x, y, r, inst.level.things[objnum].angle, false /* big_arrow */);
 
 			r += r / 10 + 4;
 
-			DrawThing(x, y, r, inst.level.things[objnum]->angle, true);
+			DrawThing(x, y, r, inst.level.things[objnum].angle, true);
 		}
 		break;
 
@@ -1465,19 +1465,19 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 	{
 		case ObjType::things:
 		{
-			double x = inst.level.things[objnum]->x();
-			double y = inst.level.things[objnum]->y();
+			double x = inst.level.things[objnum].x();
+			double y = inst.level.things[objnum].y();
 
 			inst.edit.trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = inst.conf.getThingType(inst.level.things[objnum]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[objnum].type);
 
 			int r = info.radius;
 
-			DrawThing(x, y, r * 3 / 2, inst.level.things[objnum]->angle, true);
+			DrawThing(x, y, r * 3 / 2, inst.level.things[objnum].angle, true);
 		}
 		break;
 
@@ -1573,12 +1573,12 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                             DrawHighlight(ObjType::sectors, m);
         if(info.numtids)
             for(int m = 0; m < inst.level.numThings(); m++)
-                if(inst.level.things[m]->tid > 0)
+                if(inst.level.things[m].tid > 0)
                 {
                     if(info.type == ObjType::things && info.objnum == m)
                         continue;   // don't highlight the trigger again
                     for(int i = 0; i < info.numtids; ++i)
-                        if(inst.level.things[m]->tid == info.tids[i])
+                        if(inst.level.things[m].tid == info.tids[i])
                             DrawHighlight(ObjType::things, m);
                 }
 
@@ -1617,7 +1617,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         if(info.numpo)
             for(int m = 0; m < inst.level.numThings(); ++m)
             {
-                const Thing &thing = *inst.level.things[m];
+                const Thing &thing = inst.level.things[m];
                 const thingtype_t *type = get(inst.conf.thing_types, thing.type);
                 if(!type || !(type->flags & THINGDEF_POLYSPOT))
                     continue;
@@ -1659,9 +1659,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             if(objtype == ObjType::things && m == objnum)
                 continue;
             const auto &thing = inst.level.things[m];
-            assert(thing);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing.get(), inst.conf, info))
+            if(!getSpecialTagInfo(ObjType::things, m, thing.special, &thing, inst.conf, info))
                 continue;
 
             for(int i = 0; i < info.*numtags; ++i)
@@ -1701,14 +1700,13 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
     {
         const auto &thing = inst.level.things[objnum];
-        assert(thing);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, thing->special, thing.get(), inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, thing.special, &thing, inst.conf, info))
             highlightTaggedItems(info);
-        highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
-        const thingtype_t *type = get(inst.conf.thing_types, thing->type);
+        highlightTaggingTriggers(thing.tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
+        const thingtype_t *type = get(inst.conf.thing_types, thing.type);
         if(type && type->flags & THINGDEF_POLYSPOT)
-            highlightTaggingTriggers(thing->angle, &SpecialTagInfo::po, &SpecialTagInfo::numpo);
+            highlightTaggingTriggers(thing.angle, &SpecialTagInfo::po, &SpecialTagInfo::numpo);
     }
 	else if (objtype == ObjType::sectors)
     {

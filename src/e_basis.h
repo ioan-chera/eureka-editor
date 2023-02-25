@@ -108,7 +108,7 @@ private:
 		ObjType objtype = ObjType::things;
 		byte field = 0;
 		int objnum = 0;
-		std::unique_ptr<Thing> thing;
+		Thing thing = {};
 		Vertex vertex = {};
 		std::unique_ptr<Sector> sector;
 		std::unique_ptr<SideDef> sidedef;
@@ -122,7 +122,7 @@ private:
 		void rawChange(Basis &basis);
 
 		void rawDelete(Basis &basis);
-		std::unique_ptr<Thing> rawDeleteThing(Document &doc) const;
+		Thing rawDeleteThing(Document &doc) const;
 		Vertex rawDeleteVertex(Document &doc) const;
 		std::unique_ptr<Sector> rawDeleteSector(Document &doc) const;
 		std::unique_ptr<SideDef> rawDeleteSidedef(Document &doc) const;

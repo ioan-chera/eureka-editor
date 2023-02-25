@@ -1462,14 +1462,14 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 {
 	const auto &T = inst.level.things[idx];
 
-	if (! find_numbers->get(T->type))
+	if (! find_numbers->get(T.type))
 		return false;
 
 	// skill/mode flag filter
-	if ((T->options & options_mask) != options_value)
+	if ((T.options & options_mask) != options_value)
 		return false;
 
-	if (inst.loaded.levelFormat == MapFormat::hexen && ! Filter_Tag(T->tid))
+	if (inst.loaded.levelFormat == MapFormat::hexen && ! Filter_Tag(T.tid))
 		return false;
 
 	return true;

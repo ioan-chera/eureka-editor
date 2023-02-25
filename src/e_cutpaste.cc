@@ -380,7 +380,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 		ConvertSelection(doc, list, thing_sel);
 
 		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
-			clip_board->things.push_back(*doc.things[*it]);
+			clip_board->things.push_back(doc.things[*it]);
 	}
 }
 
@@ -403,7 +403,7 @@ bool Instance::Clipboard_DoCopy()
 	{
 		case ObjType::things:
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
-				clip_board->things.push_back(*level.things[*it]);
+				clip_board->things.push_back(level.things[*it]);
 			break;
 
 		case ObjType::vertices:
@@ -553,9 +553,9 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 		int new_t = op.addNew(ObjType::things);
 		auto & T = op.doc.things[new_t];
 
-		*T = clip_board->things[i];
+		T = clip_board->things[i];
 
-		T->SetRawXY(format, T->xy() + pos - cpos);
+		T.SetRawXY(format, T.xy() + pos - cpos);
 	}
 }
 
@@ -657,11 +657,11 @@ bool Instance::Clipboard_DoPaste()
 					int new_t = op.addNew(ObjType::things);
 					auto &T = level.things[new_t];
 
-					*T = clip_board->things[i];
+					T = clip_board->things[i];
 
-					T->SetRawXY(loaded.levelFormat, T->xy() + pos - cpos);
+					T.SetRawXY(loaded.levelFormat, T.xy() + pos - cpos);
 
-					recent_things.insert_number(T->type);
+					recent_things.insert_number(T.type);
 				}
 				break;
 			}

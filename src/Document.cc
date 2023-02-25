@@ -69,13 +69,13 @@ int Document::numObjects(ObjType type) const
 //   CHECKSUM LOGIC
 //------------------------------------------------------------------------
 
-static void ChecksumThing(crc32_c &crc, const Thing *T)
+static void ChecksumThing(crc32_c &crc, const Thing &T)
 {
-	crc += T->raw_x.raw();
-	crc += T->raw_y.raw();
-	crc += T->angle;
-	crc += T->type;
-	crc += T->options;
+	crc += T.raw_x.raw();
+	crc += T.raw_y.raw();
+	crc += T.angle;
+	crc += T.type;
+	crc += T.options;
 }
 
 static void ChecksumVertex(crc32_c &crc, const Vertex &V)
@@ -137,7 +137,7 @@ void Document::getLevelChecksum(crc32_c &crc) const
 	int i;
 
 	for(i = 0; i < numThings(); i++)
-		ChecksumThing(crc, things[i].get());
+		ChecksumThing(crc, things[i]);
 
 	for(i = 0; i < numLinedefs(); i++)
 		ChecksumLineDef(crc, linedefs[i].get(), *this);

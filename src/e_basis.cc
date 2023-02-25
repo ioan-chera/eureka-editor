@@ -197,7 +197,7 @@ int Basis::addNew(ObjType type)
 	{
 	case ObjType::things:
 		op.objnum = doc.numThings();
-		op.thing = std::make_unique<Thing>();
+		op.thing = Thing();
 		break;
 
 	case ObjType::vertices:
@@ -510,7 +510,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 	{
 	case ObjType::things:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
-		pos = reinterpret_cast<int *>(basis.doc.things[objnum].get());
+		pos = reinterpret_cast<int *>(&basis.doc.things[objnum]);
 		break;
 	case ObjType::vertices:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
@@ -589,11 +589,11 @@ void Basis::EditUnit::rawDelete(Basis &basis)
 //
 // Thing deletion
 //
-std::unique_ptr<Thing> Basis::EditUnit::rawDeleteThing(Document &doc) const
+Thing Basis::EditUnit::rawDeleteThing(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numThings());
 
-	auto result = std::move(doc.things[objnum]);
+	auto result = doc.things[objnum];
 	doc.things.erase(doc.things.begin() + objnum);
 
 	return result;
@@ -695,7 +695,7 @@ void Basis::EditUnit::rawInsert(Basis &basis)
 	{
 	case ObjType::things:
 		rawInsertThing(basis.doc);
-		thing.reset();	// normally already reset
+		thing = {};	// normally already reset
 		break;
 
 	case ObjType::vertices:
@@ -729,7 +729,7 @@ void Basis::EditUnit::rawInsert(Basis &basis)
 void Basis::EditUnit::rawInsertThing(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numThings());
-	doc.things.insert(doc.things.begin() + objnum, std::move(thing));
+	doc.things.insert(doc.things.begin() + objnum, thing);
 }
 
 //
@@ -820,7 +820,7 @@ void Basis::EditUnit::deleteFinally()
 {
 	switch(objtype)
 	{
-	case ObjType::things:   thing.reset(); break;
+	case ObjType::things:   thing = {}; break;
 	case ObjType::vertices: vertex = {}; break;
 	case ObjType::sectors:  sector.reset(); break;
 	case ObjType::sidedefs: sidedef.reset(); break;

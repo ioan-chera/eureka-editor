@@ -547,10 +547,10 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	if (name.Match("thing"))
 	{
 		kind = Objid(ObjType::things, 1);
-		auto addedThing = std::make_unique<Thing>();
-		addedThing->options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
-		doc.things.push_back(std::move(addedThing));
-		new_T = doc.things.back().get();
+		auto addedThing = Thing();
+		addedThing.options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
+		doc.things.push_back(addedThing);
+		new_T = &doc.things.back();
 	}
 	else if (name.Match("vertex"))
 	{
@@ -725,30 +725,30 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 
 		const auto &th = inst.level.things[i];
 
-		lump->Printf("x = %1.3f;\n", th->x());
-		lump->Printf("y = %1.3f;\n", th->y());
+		lump->Printf("x = %1.3f;\n", th.x());
+		lump->Printf("y = %1.3f;\n", th.y());
 
-		if (th->raw_h != FFixedPoint{})
-			lump->Printf("height = %1.3f;\n", th->h());
+		if (th.raw_h != FFixedPoint{})
+			lump->Printf("height = %1.3f;\n", th.h());
 
-		lump->Printf("angle = %d;\n", th->angle);
-		lump->Printf("type = %d;\n", th->type);
+		lump->Printf("angle = %d;\n", th.angle);
+		lump->Printf("type = %d;\n", th.type);
 
 		// thing options
-		WrFlag(lump, th->options, "skill1", MTF_Easy);
-		WrFlag(lump, th->options, "skill2", MTF_Easy);
-		WrFlag(lump, th->options, "skill3", MTF_Medium);
-		WrFlag(lump, th->options, "skill4", MTF_Hard);
-		WrFlag(lump, th->options, "skill5", MTF_Hard);
+		WrFlag(lump, th.options, "skill1", MTF_Easy);
+		WrFlag(lump, th.options, "skill2", MTF_Easy);
+		WrFlag(lump, th.options, "skill3", MTF_Medium);
+		WrFlag(lump, th.options, "skill4", MTF_Hard);
+		WrFlag(lump, th.options, "skill5", MTF_Hard);
 
-		WrFlag(lump, ~ th->options, "single", MTF_Not_SP);
-		WrFlag(lump, ~ th->options, "coop",   MTF_Not_COOP);
-		WrFlag(lump, ~ th->options, "dm",     MTF_Not_DM);
+		WrFlag(lump, ~ th.options, "single", MTF_Not_SP);
+		WrFlag(lump, ~ th.options, "coop",   MTF_Not_COOP);
+		WrFlag(lump, ~ th.options, "dm",     MTF_Not_DM);
 
-		WrFlag(lump, th->options, "ambush", MTF_Ambush);
+		WrFlag(lump, th.options, "ambush", MTF_Ambush);
 
 		if (inst.conf.features.friend_flag)
-			WrFlag(lump, th->options, "friend", MTF_Friend);
+			WrFlag(lump, th.options, "friend", MTF_Friend);
 
 		// TODO Hexen flags
 

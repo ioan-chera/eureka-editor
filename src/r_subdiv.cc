@@ -198,11 +198,11 @@ void sector_info_cache_c::Rebuild()
 
 	for (const auto &thing : inst.level.things)
 	{
-		CheckSlopeThing(thing.get());
+		CheckSlopeThing(&thing);
 	}
 	for (const auto &thing : inst.level.things)
 	{
-		CheckSlopeCopyThing(thing.get());
+		CheckSlopeCopyThing(&thing);
 	}
 
 	for (const auto &linedef : inst.level.linedefs)

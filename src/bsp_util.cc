@@ -418,11 +418,11 @@ void DetectPolyobjSectors(const Instance &inst)
 	{
 		const auto &T = inst.level.things[i];
 
-		double x = T->x();
-		double y = T->y();
+		double x = T.x();
+		double y = T.y();
 
         // ignore everything except polyobj start spots
-        const thingtype_t *type = get(inst.conf.thing_types, T->type);
+        const thingtype_t *type = get(inst.conf.thing_types, T.type);
         if(!type || !(type->flags & THINGDEF_POLYSPOT))
             continue;
 

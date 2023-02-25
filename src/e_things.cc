@@ -73,7 +73,7 @@ void Instance::CMD_TH_SpinThings()
 		{
 			const auto &T = level.things[*it];
 
-			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
+			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T.angle, degrees));
 		}
 	}
 
@@ -89,8 +89,8 @@ static bool ThingsAtSameLoc(const Document &doc, int th1, int th2)
 	const auto &T1 = doc.things[th1];
 	const auto &T2 = doc.things[th2];
 
-	double dx = fabs(T1->x() - T2->x());
-	double dy = fabs(T1->y() - T2->y());
+	double dx = fabs(T1.x() - T2.x());
+	double dy = fabs(T1.y() - T2.y());
 
 	return (dx < 8 && dy < 8);
 }
@@ -122,8 +122,8 @@ static void MoveOverlapThing(EditOperation &op, Instance &inst, int th, int mid_
 
 	const auto &T = inst.level.things[th];
 
-	op.changeThing(th, Thing::F_X, T->raw_x + fdx);
-	op.changeThing(th, Thing::F_Y, T->raw_y + fdy);
+	op.changeThing(th, Thing::F_X, T.raw_x + fdx);
+	op.changeThing(th, Thing::F_Y, T.raw_y + fdy);
 }
 
 

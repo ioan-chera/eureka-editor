@@ -142,23 +142,23 @@ void ObjectsModule::insertThing() const
 		auto &T = doc.things[new_t];
 
 		if(model >= 0)
-			*T = *doc.things[model];
+			T = doc.things[model];
 		else
 		{
-			T->type = inst.conf.default_thing;
-			T->options = MTF_Easy | MTF_Medium | MTF_Hard;
+			T.type = inst.conf.default_thing;
+			T.options = MTF_Easy | MTF_Medium | MTF_Hard;
 
 			if (inst.loaded.levelFormat != MapFormat::doom)
 			{
-				T->options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
-				T->options |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
+				T.options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
+				T.options |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
 			}
 		}
 
-		T->SetRawX(inst.loaded.levelFormat, inst.grid.SnapX(inst.edit.map.x));
-		T->SetRawY(inst.loaded.levelFormat, inst.grid.SnapY(inst.edit.map.y));
+		T.SetRawX(inst.loaded.levelFormat, inst.grid.SnapX(inst.edit.map.x));
+		T.SetRawY(inst.loaded.levelFormat, inst.grid.SnapY(inst.edit.map.y));
 
-		inst.recent_things.insert_number(T->type);
+		inst.recent_things.insert_number(T.type);
 
 		op.setMessage("added thing #%d", new_t);
 	}
@@ -744,9 +744,9 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			{
 				const auto &T = doc.things[*it];
 
-				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
-				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
-				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz));
+				op.changeThing(*it, Thing::F_X, T.raw_x + fdx);
+				op.changeThing(*it, Thing::F_Y, T.raw_y + fdy);
+				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T.raw_h + fdz));
 			}
 			break;
 
@@ -933,18 +933,18 @@ void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, in
 {
 	const auto &T = doc.things[src_thing];
 
-	op.changeThing(dest_thing, Thing::F_TYPE,    T->type);
-	op.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
+	op.changeThing(dest_thing, Thing::F_TYPE,    T.type);
+	op.changeThing(dest_thing, Thing::F_OPTIONS, T.options);
 //	BA_ChangeTH(dest_thing, Thing::F_ANGLE,   T->angle);
 
-	op.changeThing(dest_thing, Thing::F_TID,     T->tid);
-	op.changeThing(dest_thing, Thing::F_SPECIAL, T->special);
+	op.changeThing(dest_thing, Thing::F_TID,     T.tid);
+	op.changeThing(dest_thing, Thing::F_SPECIAL, T.special);
 
-	op.changeThing(dest_thing, Thing::F_ARG1, T->arg1);
-	op.changeThing(dest_thing, Thing::F_ARG2, T->arg2);
-	op.changeThing(dest_thing, Thing::F_ARG3, T->arg3);
-	op.changeThing(dest_thing, Thing::F_ARG4, T->arg4);
-	op.changeThing(dest_thing, Thing::F_ARG5, T->arg5);
+	op.changeThing(dest_thing, Thing::F_ARG1, T.arg1);
+	op.changeThing(dest_thing, Thing::F_ARG2, T.arg2);
+	op.changeThing(dest_thing, Thing::F_ARG3, T.arg3);
+	op.changeThing(dest_thing, Thing::F_ARG4, T.arg4);
+	op.changeThing(dest_thing, Thing::F_ARG5, T.arg5);
 }
 
 
@@ -1204,7 +1204,7 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 	{
 		case ObjType::things:
 			*total += 1;
-			if (inst.grid.OnGrid(doc.things[objnum]->x(), doc.things[objnum]->y()))
+			if (inst.grid.OnGrid(doc.things[objnum].x(), doc.things[objnum].y()))
 				*count += 1;
 			break;
 
@@ -1258,8 +1258,8 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 	switch (obj_type)
 	{
 		case ObjType::things:
-			x2 = doc.things[objnum]->x();
-			y2 = doc.things[objnum]->y();
+			x2 = doc.things[objnum].x();
+			y2 = doc.things[objnum].y();
 			break;
 
 		case ObjType::vertices:
@@ -1430,8 +1430,8 @@ v2double_t ObjectsModule::calcMiddle(const selection_c & list) const
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next(), ++count)
 			{
-				sum_x += doc.things[*it]->x();
-				sum_y += doc.things[*it]->y();
+				sum_x += doc.things[*it].x();
+				sum_y += doc.things[*it].y();
 			}
 			break;
 		}
@@ -1487,10 +1487,10 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const auto &T = doc.things[*it];
-				double Tx = T->x();
-				double Ty = T->y();
+				double Tx = T.x();
+				double Ty = T.y();
 
-				const thingtype_t &info = inst.conf.getThingType(T->type);
+				const thingtype_t &info = inst.conf.getThingType(T.type);
 				int r = info.radius;
 
 				if (Tx - r < pos1.x) pos1.x = Tx - r;
@@ -1544,19 +1544,19 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 		if (is_vert)
 		{
-			op.changeThing(*it, Thing::F_Y, fix_my * 2 - T->raw_y);
+			op.changeThing(*it, Thing::F_Y, fix_my * 2 - T.raw_y);
 
-			if (T->angle != 0)
-				op.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
+			if (T.angle != 0)
+				op.changeThing(*it, Thing::F_ANGLE, 360 - T.angle);
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, fix_mx * 2 - T->raw_x);
+			op.changeThing(*it, Thing::F_X, fix_mx * 2 - T.raw_x);
 
-			if (T->angle > 180)
-				op.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
+			if (T.angle > 180)
+				op.changeThing(*it, Thing::F_ANGLE, 540 - T.angle);
 			else
-				op.changeThing(*it, Thing::F_ANGLE, 180 - T->angle);
+				op.changeThing(*it, Thing::F_ANGLE, 180 - T.angle);
 		}
 	}
 }
@@ -1659,22 +1659,22 @@ void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list,
 	{
 		const auto &T = doc.things[*it];
 
-		FFixedPoint old_x = T->raw_x;
-		FFixedPoint old_y = T->raw_y;
+		FFixedPoint old_x = T.raw_x;
+		FFixedPoint old_y = T.raw_y;
 
 		if (anti_clockwise)
 		{
 			op.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
 			op.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
 
-			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
+			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T.angle, +90));
 		}
 		else
 		{
 			op.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
 			op.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
 
-			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
+			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T.angle, -90));
 		}
 	}
 }
@@ -1757,8 +1757,8 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 	{
 		const auto &T = doc.things[*it];
 
-		double new_x = T->x();
-		double new_y = T->y();
+		double new_x = T.x();
+		double new_y = T.y();
 
 		param.Apply(&new_x, &new_y);
 
@@ -1771,7 +1771,7 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 
 		if (ang_diff)
 		{
-			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, ang_diff));
+			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T.angle, ang_diff));
 		}
 	}
 }
@@ -1981,7 +1981,7 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 	{
 		case ObjType::things:
 			for (const auto &thing : doc.things)
-				if (iround(thing->x()) == x && iround(thing->y()) == y)
+				if (iround(thing.x()) == x && iround(thing.y()) == y)
 					return true;
 			return false;
 
@@ -2077,7 +2077,7 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 	{
 		const auto &T = doc.things[*it];
 
-		if (inst.grid.OnGrid(T->x(), T->y()))
+		if (inst.grid.OnGrid(T.x(), T.y()))
 		{
 			moved.set(*it);
 			continue;
@@ -2085,8 +2085,8 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 		for (int pass = 0 ; pass < 4 ; pass++)
 		{
-			int new_x = inst.grid.QuantSnapX(T->x(), pass & 1);
-			int new_y = inst.grid.QuantSnapY(T->y(), pass & 2);
+			int new_x = inst.grid.QuantSnapX(T.x(), pass & 1);
+			int new_y = inst.grid.QuantSnapY(T.y(), pass & 2);
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{

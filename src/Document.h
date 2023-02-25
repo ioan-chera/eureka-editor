@@ -89,7 +89,7 @@ public:
 		return vertices[index];
 	}
 
-	std::vector<std::unique_ptr<Thing>> things;
+	std::vector<Thing> things;
 	std::vector<std::unique_ptr<Sector>> sectors;
 	std::vector<std::unique_ptr<SideDef>> sidedefs;
 	std::vector<std::unique_ptr<LineDef>> linedefs;

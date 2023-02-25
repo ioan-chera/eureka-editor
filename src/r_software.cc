@@ -290,7 +290,7 @@ public:
 			const auto &TA = inst.level.things[A->th];
 			const auto &TB = inst.level.things[B->th];
 
-			if (TA->raw_x == TB->raw_x && TA->raw_y == TB->raw_y)
+			if (TA.raw_x == TB.raw_x && TA.raw_y == TB.raw_y)
 				return A->th > B->th;
 		}
 
@@ -872,10 +872,10 @@ public:
 	{
 		const auto &th = inst.level.things[th_index];
 
-		const thingtype_t &info = inst.conf.getThingType(th->type);
+		const thingtype_t &info = inst.conf.getThingType(th.type);
 
-		float x = static_cast<float>(th->x() - inst.r_view.x);
-		float y = static_cast<float>(th->y() - inst.r_view.y);
+		float x = static_cast<float>(th.x() - inst.r_view.x);
+		float y = static_cast<float>(th.y() - inst.r_view.y);
 
 		float tx = static_cast<float>(x * inst.r_view.Sin - y * inst.r_view.Cos);
 		float ty = static_cast<float>(x * inst.r_view.Cos + y * inst.r_view.Sin);
@@ -888,7 +888,7 @@ public:
 
 		float scale = info.scale;
 
-		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type);
+		const Img_c *sprite = inst.wad.getSprite(inst.conf, th.type);
 		if (! sprite)
 		{
 			sprite = inst.wad.images.IM_UnknownSprite(inst.conf);
@@ -942,12 +942,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: also add z
-			h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - th->h());
+			h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - th.h());
 			h1 = static_cast<int>(h2 - sprite->height() * scale);
 		}
 		else
 		{
-			h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + th->h());
+			h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + th.h());
 			h2 = static_cast<int>(h1 + sprite->height() * scale);
 		}
 
@@ -1285,8 +1285,8 @@ public:
 
 				const auto &T = inst.level.things[dw->th];
 
-				float x = static_cast<float>(T->x() + dx - inst.r_view.x);
-				float y = static_cast<float>(T->y() + dy - inst.r_view.y);
+				float x = static_cast<float>(T.x() + dx - inst.r_view.x);
+				float y = static_cast<float>(T.y() + dy - inst.r_view.y);
 
 				float tx = static_cast<float>(x * inst.r_view.Sin - y * inst.r_view.Cos);
 				float ty = static_cast<float>(x * inst.r_view.Cos + y * inst.r_view.Sin);
@@ -1308,12 +1308,12 @@ public:
 
 				if (dw->thingFlags & THINGDEF_CEIL)
 				{
-					h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - T->h());
+					h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - T.h());
 					h1 = static_cast<int>(h2 - sprite->height() * scale);
 				}
 				else
 				{
-					h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + T->h());
+					h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + T.h());
 					h2 = static_cast<int>(h1 + sprite->height() * scale);
 				}
 

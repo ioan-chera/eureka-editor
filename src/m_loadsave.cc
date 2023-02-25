@@ -114,14 +114,14 @@ void Instance::FreshLevel()
 
 	for (int pl = 1 ; pl <= 4 ; pl++)
 	{
-		auto th = std::make_unique<Thing>();
+		auto th = Thing();
 
-		th->type  = pl;
-		th->angle = 90;
+		th.type  = pl;
+		th.angle = 90;
 
-		th->SetRawX(loaded.levelFormat, (pl == 1) ? 0 : (pl - 3) * 48);
-		th->SetRawY(loaded.levelFormat, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
-		level.things.push_back(std::move(th));
+		th.SetRawX(loaded.levelFormat, (pl == 1) ? 0 : (pl - 3) * 48);
+		th.SetRawY(loaded.levelFormat, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
+		level.things.push_back(th);
 	}
 
 	CalculateLevelBounds();
@@ -645,16 +645,16 @@ void Instance::LoadThings(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading things.\n");
 
-		auto th = std::make_unique<Thing>();
+		auto th = Thing();
 
-		th->raw_x = FFixedPoint(LE_S16(raw.x));
-		th->raw_y = FFixedPoint(LE_S16(raw.y));
+		th.raw_x = FFixedPoint(LE_S16(raw.x));
+		th.raw_y = FFixedPoint(LE_S16(raw.y));
 
-		th->angle   = LE_U16(raw.angle);
-		th->type    = LE_U16(raw.type);
-		th->options = LE_U16(raw.options);
+		th.angle   = LE_U16(raw.angle);
+		th.type    = LE_U16(raw.type);
+		th.options = LE_U16(raw.options);
 
-		level.things.push_back(std::move(th));
+		level.things.push_back(th);
 	}
 }
 
@@ -679,25 +679,25 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading things.\n");
 
-		auto th = std::make_unique<Thing>();
+		auto th = Thing();
 
-		th->tid = LE_S16(raw.tid);
-		th->raw_x = FFixedPoint(LE_S16(raw.x));
-		th->raw_y = FFixedPoint(LE_S16(raw.y));
-		th->raw_h = FFixedPoint(LE_S16(raw.height));
+		th.tid = LE_S16(raw.tid);
+		th.raw_x = FFixedPoint(LE_S16(raw.x));
+		th.raw_y = FFixedPoint(LE_S16(raw.y));
+		th.raw_h = FFixedPoint(LE_S16(raw.height));
 
-		th->angle = LE_U16(raw.angle);
-		th->type = LE_U16(raw.type);
-		th->options = LE_U16(raw.options);
+		th.angle = LE_U16(raw.angle);
+		th.type = LE_U16(raw.type);
+		th.options = LE_U16(raw.options);
 
-		th->special = raw.special;
-		th->arg1 = raw.args[0];
-		th->arg2 = raw.args[1];
-		th->arg3 = raw.args[2];
-		th->arg4 = raw.args[3];
-		th->arg5 = raw.args[4];
+		th.special = raw.special;
+		th.arg1 = raw.args[0];
+		th.arg2 = raw.args[1];
+		th.arg3 = raw.args[2];
+		th.arg4 = raw.args[3];
+		th.arg5 = raw.args[4];
 
-		level.things.push_back(std::move(th));
+		level.things.push_back(th);
 	}
 }
 
@@ -1372,12 +1372,12 @@ void Instance::SaveThings()
 	{
 		raw_thing_t raw;
 
-		raw.x = LE_S16(static_cast<int>(th->raw_x));
-		raw.y = LE_S16(static_cast<int>(th->raw_y));
+		raw.x = LE_S16(static_cast<int>(th.raw_x));
+		raw.y = LE_S16(static_cast<int>(th.raw_y));
 
-		raw.angle   = LE_U16(th->angle);
-		raw.type    = LE_U16(th->type);
-		raw.options = LE_U16(th->options);
+		raw.angle   = LE_U16(th.angle);
+		raw.type    = LE_U16(th.type);
+		raw.options = LE_U16(th.options);
 
 		lump->Write(&raw, sizeof(raw));
 	}
@@ -1393,22 +1393,22 @@ void Instance::SaveThings_Hexen()
 	{
 		raw_hexen_thing_t raw;
 
-		raw.tid = LE_S16(th->tid);
+		raw.tid = LE_S16(th.tid);
 
-		raw.x = LE_S16(static_cast<int>(th->raw_x));
-		raw.y = LE_S16(static_cast<int>(th->raw_y));
-		raw.height = LE_S16(static_cast<int>(th->raw_h));
+		raw.x = LE_S16(static_cast<int>(th.raw_x));
+		raw.y = LE_S16(static_cast<int>(th.raw_y));
+		raw.height = LE_S16(static_cast<int>(th.raw_h));
 
-		raw.angle   = LE_U16(th->angle);
-		raw.type    = LE_U16(th->type);
-		raw.options = LE_U16(th->options);
+		raw.angle   = LE_U16(th.angle);
+		raw.type    = LE_U16(th.type);
+		raw.options = LE_U16(th.options);
 
-		raw.special = static_cast<u8_t>(th->special);
-		raw.args[0] = static_cast<u8_t>(th->arg1);
-		raw.args[1] = static_cast<u8_t>(th->arg2);
-		raw.args[2] = static_cast<u8_t>(th->arg3);
-		raw.args[3] = static_cast<u8_t>(th->arg4);
-		raw.args[4] = static_cast<u8_t>(th->arg5);
+		raw.special = static_cast<u8_t>(th.special);
+		raw.args[0] = static_cast<u8_t>(th.arg1);
+		raw.args[1] = static_cast<u8_t>(th.arg2);
+		raw.args[2] = static_cast<u8_t>(th.arg3);
+		raw.args[3] = static_cast<u8_t>(th.arg4);
+		raw.args[4] = static_cast<u8_t>(th.arg5);
 
 		lump->Write(&raw, sizeof(raw));
 	}

@@ -599,7 +599,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
-			op.changeThing(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
+			op.changeThing(*it, Thing::F_OPTIONS, (T.options & ~mask) | (new_opts & mask));
 		}
 	}
 }
@@ -810,9 +810,9 @@ void UI_ThingBox::UpdateField(int field)
 			const auto &T = inst.level.things[obj];
 
 			// @@ FIXME show decimals in UDMF
-			mFixUp.setInputValue(pos_x, SString(static_cast<int>(T->x())).c_str());
-			mFixUp.setInputValue(pos_y, SString(static_cast<int>(T->y())).c_str());
-			mFixUp.setInputValue(pos_z, SString(static_cast<int>(T->h())).c_str());
+			mFixUp.setInputValue(pos_x, SString(static_cast<int>(T.x())).c_str());
+			mFixUp.setInputValue(pos_y, SString(static_cast<int>(T.y())).c_str());
+			mFixUp.setInputValue(pos_z, SString(static_cast<int>(T.h())).c_str());
 		}
 		else
 		{
@@ -825,7 +825,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_ANGLE)
 	{
 		if(inst.level.isThing(obj))
-			mFixUp.setInputValue(angle, SString(inst.level.things[obj]->angle).c_str());
+			mFixUp.setInputValue(angle, SString(inst.level.things[obj].angle).c_str());
 		else
 			mFixUp.setInputValue(angle, "");
 	}
@@ -834,7 +834,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_TID)
 	{
 		if(inst.level.isThing(obj))
-			mFixUp.setInputValue(tid, SString(inst.level.things[obj]->tid).c_str());
+			mFixUp.setInputValue(tid, SString(inst.level.things[obj].tid).c_str());
 		else
 			mFixUp.setInputValue(tid, "");
 	}
@@ -843,10 +843,10 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (inst.level.isThing(obj))
 		{
-			const thingtype_t &info = inst.conf.getThingType(inst.level.things[obj]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[obj].type);
 			desc->value(info.desc.c_str());
-			mFixUp.setInputValue(type, SString(inst.level.things[obj]->type).c_str());
-			sprite->GetSprite(inst.level.things[obj]->type, FL_DARK2);
+			mFixUp.setInputValue(type, SString(inst.level.things[obj].type).c_str());
+			sprite->GetSprite(inst.level.things[obj].type, FL_DARK2);
 		}
 		else
 		{
@@ -859,7 +859,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_OPTIONS)
 	{
 		if (inst.level.isThing(obj))
-			OptionsFromInt(inst.level.things[obj]->options);
+			OptionsFromInt(inst.level.things[obj].options);
 		else
 			OptionsFromInt(0);
 	}
@@ -869,11 +869,11 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_SPECIAL)
 	{
-		if (inst.level.isThing(obj) && inst.level.things[obj]->special)
+		if (inst.level.isThing(obj) && inst.level.things[obj].special)
 		{
-			const linetype_t &info = inst.M_GetLineType(inst.level.things[obj]->special);
+			const linetype_t &info = inst.M_GetLineType(inst.level.things[obj].special);
 			spec_desc->value(info.desc.c_str());
-			mFixUp.setInputValue(spec_type, SString(inst.level.things[obj]->special).c_str());
+			mFixUp.setInputValue(spec_type, SString(inst.level.things[obj].special).c_str());
 		}
 		else
 		{
@@ -895,15 +895,15 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const auto &T = inst.level.things[obj];
 
-			const thingtype_t &info = inst.conf.getThingType(T->type);
-			const linetype_t  &spec = inst.M_GetLineType (T->special);
+			const thingtype_t &info = inst.conf.getThingType(T.type);
+			const linetype_t  &spec = inst.M_GetLineType (T.special);
 
 			// set argument values and tooltips
 			for (int a = 0 ; a < 5 ; a++)
 			{
-				int arg_val = T->Arg(1 + a);
+				int arg_val = T.Arg(1 + a);
 
-				if (T->special)
+				if (T.special)
 				{
 					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 

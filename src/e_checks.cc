@@ -1346,11 +1346,11 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types, const Inst
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const thingtype_t &info = inst.conf.getThingType(inst.level.things[n]->type);
+		const thingtype_t &info = inst.conf.getThingType(inst.level.things[n].type);
 
 		if (info.desc.startsWith("UNKNOWN"))
 		{
-			bump_unknown_type(types, inst.level.things[n]->type);
+			bump_unknown_type(types, inst.level.things[n].type);
 
 			list.set(n);
 		}
@@ -1419,7 +1419,7 @@ static int Things_FindStarts(int *dm_num, const Document &doc)
 	{
 		// ideally, these type numbers would not be hard-coded....
 
-		switch (T->type)
+		switch (T.type)
 		{
 			case 1: mask |= (1 << 0); break;
 			case 2: mask |= (1 << 1); break;
@@ -1440,7 +1440,7 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		v2double_t pos = inst.level.things[n]->xy();
+		v2double_t pos = inst.level.things[n].xy();
 
 		Objid obj = hover::getNearestSector(inst.level, pos);
 
@@ -1448,7 +1448,7 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 			continue;
 
 		// allow certain things in the void (Heretic sounds)
-		const thingtype_t &info = inst.conf.getThingType(inst.level.things[n]->type);
+		const thingtype_t &info = inst.conf.getThingType(inst.level.things[n].type);
 
 		if (info.flags & THINGDEF_VOID)
 			continue;
@@ -1533,30 +1533,30 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 	{
 		const auto &T = inst.level.things[n];
 
-		if (T->type == CAMERA_PEST)
+		if (T.type == CAMERA_PEST)
 			continue;
 
-		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		int skills  = T.options & (MTF_Easy | MTF_Medium | MTF_Hard);
 		int modes   = 1;
 		int classes = 1;
 
 		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
-			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
+			modes = T.options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 		}
 		else if (inst.conf.features.coop_dm_flags)
 		{
-			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
+			modes = (~T.options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
 		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
-			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
+			classes = T.options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 		}
 
 		if (skills == 0 || modes == 0 || classes == 0)
 		{
-			if (! TH_always_spawned(inst, T->type))
+			if (! TH_always_spawned(inst, T.type))
 				list.set(n);
 		}
 	}
@@ -1586,12 +1586,12 @@ void Things_FixDuds(Instance &inst)
 		// NOTE: we also "fix" things that are always spawned
 		////   if (TH_always_spawned(T->type)) continue;
 
-		if (T->type == CAMERA_PEST)
+		if (T.type == CAMERA_PEST)
 			continue;
 
-		int new_options = T->options;
+		int new_options = T.options;
 
-		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		int skills  = T.options & (MTF_Easy | MTF_Medium | MTF_Hard);
 		int modes   = 1;
 		int classes = 1;
 
@@ -1600,14 +1600,14 @@ void Things_FixDuds(Instance &inst)
 
 		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
-			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
+			modes = T.options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 
 			if (modes == 0)
 				new_options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
 		}
 		else if (inst.conf.features.coop_dm_flags)
 		{
-			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
+			modes = (~T.options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 
 			if (modes == 0)
 				new_options &= ~(MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
@@ -1615,13 +1615,13 @@ void Things_FixDuds(Instance &inst)
 
 		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
-			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
+			classes = T.options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 
 			if (classes == 0)
 				new_options |= MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage;
 		}
 
-		if (new_options != T->options)
+		if (new_options != T.options)
 		{
 			op.changeThing(n, Thing::F_OPTIONS, new_options);
 		}
@@ -1638,7 +1638,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 	{
 		const auto &T = inst.level.things[n];
 
-		const thingtype_t &info = inst.conf.getThingType(T->type);
+		const thingtype_t &info = inst.conf.getThingType(T.type);
 
 		if (info.flags & THINGDEF_PASS)
 			continue;
@@ -1808,18 +1808,18 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 	{
 		const auto &T = inst.level.things[blockers[n]];
 
-		const thingtype_t &info = inst.conf.getThingType(T->type);
+		const thingtype_t &info = inst.conf.getThingType(T.type);
 
-		if (ThingStuckInWall(T.get(), info.radius, info.group, inst.level))
+		if (ThingStuckInWall(&T, info.radius, info.group, inst.level))
 			list.set(blockers[n]);
 
 		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
 			const auto &T2 = inst.level.things[blockers[n2]];
 
-			const thingtype_t &info2 = inst.conf.getThingType(T2->type);
+			const thingtype_t &info2 = inst.conf.getThingType(T2.type);
 
-			if (ThingStuckInThing(inst, T.get(), &info, T2.get(), &info2))
+			if (ThingStuckInThing(inst, &T, &info, &T2, &info2))
 				list.set(blockers[n]);
 		}
 	}
@@ -3238,7 +3238,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 
 		for (const auto &thing : inst.level.things)
 		{
-			const thingtype_t &info = inst.conf.getThingType(thing->type);
+			const thingtype_t &info = inst.conf.getThingType(thing.type);
 
 			if (info.desc.noCaseEqual("Commander Keen"))
 				return true;

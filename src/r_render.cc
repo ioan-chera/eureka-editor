@@ -199,8 +199,8 @@ static const Thing *FindPlayer(const Document &doc, int typenum)
 	// need to search backwards (to handle Voodoo dolls properly)
 
 	for ( int i = doc.numThings()-1 ; i >= 0 ; i--)
-		if (doc.things[i]->type == typenum)
-			return doc.things[i].get();
+		if (doc.things[i].type == typenum)
+			return &doc.things[i];
 
 	return nullptr;  // not found
 }
@@ -226,7 +226,7 @@ namespace thing_sec_cache
 
 		for (int i = invalid_low ; i <= invalid_high ; i++)
 		{
-			Objid obj = hover::getNearestSector(inst.level, inst.level.things[i]->xy());
+			Objid obj = hover::getNearestSector(inst.level, inst.level.things[i].xy());
 
 			inst.r_view.thing_sectors[i] = obj.num;
 		}
@@ -353,7 +353,7 @@ private:
 		switch (type)
 		{
 			case ObjType::things:
-				return reinterpret_cast<int*>(inst.level.things[objnum].get());
+				return reinterpret_cast<int*>(&inst.level.things[objnum]);
 
 			case ObjType::vertices:
 				return reinterpret_cast<int *>(&inst.level.getMutableVertex(objnum));
@@ -901,8 +901,8 @@ static void DragThings_Update(Instance &inst)
 
 	const auto &T = inst.level.things[inst.edit.drag_thing_num];
 
-	float old_x = static_cast<float>(T->x());
-	float old_y = static_cast<float>(T->y());
+	float old_x = static_cast<float>(T.x());
+	float old_y = static_cast<float>(T.y());
 
 	float new_x = static_cast<float>(old_x + dx * side_vx);
 	float new_y = static_cast<float>(old_y + dx * side_vy);
@@ -1103,20 +1103,20 @@ int Instance::GrabSelectedThing()
 			return -1;
 		}
 
-		result = level.things[edit.highlight.num]->type;
+		result = level.things[edit.highlight.num].type;
 	}
 	else
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &T = level.things[*it];
-			if (result >= 0 && T->type != result)
+			if (result >= 0 && T.type != result)
 			{
 				Beep("multiple thing types");
 				return -2;
 			}
 
-			result = T->type;
+			result = T.type;
 		}
 	}
 

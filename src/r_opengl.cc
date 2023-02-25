@@ -1216,12 +1216,12 @@ public:
 	{
 		const auto &th = inst.level.things[th_index];
 
-		const thingtype_t &info = inst.conf.getThingType(th->type);
+		const thingtype_t &info = inst.conf.getThingType(th.type);
 
 		// project sprite to check if it is off-screen
 
-		float x = static_cast<float>(th->x() - inst.r_view.x);
-		float y = static_cast<float>(th->y() - inst.r_view.y);
+		float x = static_cast<float>(th.x() - inst.r_view.x);
+		float y = static_cast<float>(th.y() - inst.r_view.y);
 
 		float tx = static_cast<float>(x * inst.r_view.Sin - y * inst.r_view.Cos);
 		float ty = static_cast<float>(x * inst.r_view.Cos + y * inst.r_view.Sin);
@@ -1239,7 +1239,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *img = inst.wad.getMutableSprite(inst.conf, th->type);
+		Img_c *img = inst.wad.getMutableSprite(inst.conf, th.type);
 		if (! img)
 		{
 			img = inst.wad.images.IM_UnknownSprite(inst.conf);
@@ -1265,11 +1265,11 @@ public:
 		// sprite is potentially visible, so draw it
 
 		// choose X/Y coordinates so quad faces the camera
-		float x1 = static_cast<float>(th->x() - inst.r_view.Sin * scale_w * 0.5);
-		float y1 = static_cast<float>(th->y() + inst.r_view.Cos * scale_w * 0.5);
+		float x1 = static_cast<float>(th.x() - inst.r_view.Sin * scale_w * 0.5);
+		float y1 = static_cast<float>(th.y() + inst.r_view.Cos * scale_w * 0.5);
 
-		float x2 = static_cast<float>(th->x() + inst.r_view.Sin * scale_w * 0.5);
-		float y2 = static_cast<float>(th->y() - inst.r_view.Cos * scale_w * 0.5);
+		float x2 = static_cast<float>(th.x() + inst.r_view.Sin * scale_w * 0.5);
+		float y2 = static_cast<float>(th.y() - inst.r_view.Cos * scale_w * 0.5);
 
 		int sec_num = inst.r_view.thing_sectors[th_index];
 
@@ -1278,12 +1278,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->ceilh : 192) - th->h());
+			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->ceilh : 192) - th.h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th->h());
+			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th.h());
 			z2 = z1 + scale_h;
 		}
 
@@ -1438,8 +1438,8 @@ public:
 	void HighlightThing(int th_index)
 	{
 		const auto &th = inst.level.things[th_index];
-		float tx = static_cast<float>(th->x());
-		float ty = static_cast<float>(th->y());
+		float tx = static_cast<float>(th.x());
+		float ty = static_cast<float>(th.y());
 
 		float drag_dz = 0;
 
@@ -1452,11 +1452,11 @@ public:
 			drag_dz = static_cast<float>(inst.edit.drag_cur.z - inst.edit.drag_start.z);
 		}
 
-		const thingtype_t &info = inst.conf.getThingType(th->type);
+		const thingtype_t &info = inst.conf.getThingType(th.type);
 
 		float scale = info.scale;
 
-		const Img_c *img = inst.wad.getSprite(inst.conf, th->type);
+		const Img_c *img = inst.wad.getSprite(inst.conf, th.type);
 		if (! img)
 		{
 			img = inst.wad.images.IM_UnknownSprite(inst.conf);
@@ -1479,12 +1479,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->ceilh : 192) - th->h());
+			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->ceilh : 192) - th.h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th->h());
+			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th.h());
 			z2 = z1 + scale_h;
 		}
 

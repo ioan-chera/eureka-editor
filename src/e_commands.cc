@@ -594,7 +594,7 @@ void Instance::DoBeginDrag()
 			{
 				const auto &T = level.things[edit.drag_thing_num];
 
-				Objid sec = hover::getNearestSector(level, T->xy());
+				Objid sec = hover::getNearestSector(level, T.xy());
 
 				if (sec.valid())
 					edit.drag_thing_floorh = static_cast<float>(level.sectors[sec.num]->floorh);
@@ -761,7 +761,7 @@ void Instance::CMD_ACT_Click()
 		if (edit.highlight.type == ObjType::things)
 		{
 			const auto &T = level.things[edit.highlight.num];
-			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->xy()));
+			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T.xy()));
 		}
 		else
 		{
