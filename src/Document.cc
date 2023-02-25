@@ -24,6 +24,23 @@
 #include "Thing.h"
 #include "Vertex.h"
 
+void Document::insertVertex(const Vertex &vertex, int index)
+{
+	vertices.insert(vertices.begin() + index, vertex);
+
+	// fix references in linedefs
+
+	if(index + 1 < numVertices())
+		for(auto it = linedefs.rbegin(); it != linedefs.rend(); ++it)
+		{
+			auto &L = *it;
+			if(L.start >= index)
+				L.start++;
+			if(L.end >= index)
+				L.end++;
+		}
+}
+
 Vertex Document::removeVertex(int index)
 {
 	auto result = vertices[index];

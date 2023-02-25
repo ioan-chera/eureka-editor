@@ -123,14 +123,12 @@ private:
 
 		void rawDelete(Basis &basis);
 		Thing rawDeleteThing(Document &doc) const;
-		Vertex rawDeleteVertex(Document &doc) const;
 		Sector rawDeleteSector(Document &doc) const;
 		SideDef rawDeleteSidedef(Document &doc) const;
 		LineDef rawDeleteLinedef(Document &doc) const;
 
 		void rawInsert(Basis &basis);
 		void rawInsertThing(Document &doc);
-		void rawInsertVertex(Document &doc);
 		void rawInsertSector(Document &doc);
 		void rawInsertSidedef(Document &doc);
 		void rawInsertLinedef(Document &doc);

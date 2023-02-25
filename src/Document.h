@@ -64,10 +64,7 @@ public:
 		vertices.push_back(vertex);
 	}
 
-	void insertVertex(const Vertex &vertex, int index)
-	{
-		vertices.insert(vertices.begin() + index, vertex);
-	}
+	void insertVertex(const Vertex &vertex, int index);
 
 	void deleteAllVertices()
 	{

@@ -565,7 +565,7 @@ void Basis::EditUnit::rawDelete(Basis &basis)
 		return;
 
 	case ObjType::vertices:
-		vertex = rawDeleteVertex(basis.doc);
+		vertex = basis.doc.removeVertex(objnum);
 		return;
 
 	case ObjType::sectors:
@@ -597,16 +597,6 @@ Thing Basis::EditUnit::rawDeleteThing(Document &doc) const
 	doc.things.erase(doc.things.begin() + objnum);
 
 	return result;
-}
-
-//
-// Vertex deletion (and update linedef refs)
-//
-Vertex Basis::EditUnit::rawDeleteVertex(Document &doc) const
-{
-	SYS_ASSERT(0 <= objnum && objnum < doc.numVertices());
-
-	return doc.removeVertex(objnum);
 }
 
 //
@@ -699,7 +689,7 @@ void Basis::EditUnit::rawInsert(Basis &basis)
 		break;
 
 	case ObjType::vertices:
-		rawInsertVertex(basis.doc);
+		basis.doc.insertVertex(vertex, objnum);
 		vertex = {};
 		break;
 
@@ -730,31 +720,6 @@ void Basis::EditUnit::rawInsertThing(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numThings());
 	doc.things.insert(doc.things.begin() + objnum, thing);
-}
-
-//
-// Vertex insertion
-//
-void Basis::EditUnit::rawInsertVertex(Document &doc)
-{
-	SYS_ASSERT(0 <= objnum && objnum <= doc.numVertices());
-	doc.insertVertex(vertex, objnum);
-
-	// fix references in linedefs
-
-	if(objnum + 1 < doc.numVertices())
-	{
-		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
-		{
-			auto &L = doc.linedefs[n];
-
-			if(L.start >= objnum)
-				L.start++;
-
-			if(L.end >= objnum)
-				L.end++;
-		}
-	}
 }
 
 //
