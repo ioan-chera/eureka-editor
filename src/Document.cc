@@ -24,9 +24,24 @@
 #include "Thing.h"
 #include "Vertex.h"
 
+void Document::trimVertexArray(int count)
+{
+	if(count < (int)vertices.size())
+		vertices.resize(count);
+}
+
+void Document::addVertex(const Vertex &vertex)
+{
+	VertexInfo info{};
+	info.vertex = vertex;
+	vertices.push_back(info);
+}
+
 void Document::insertVertex(const Vertex &vertex, int index)
 {
-	vertices.insert(vertices.begin() + index, vertex);
+	VertexInfo info{};
+	info.vertex = vertex;
+	vertices.insert(vertices.begin() + index, info);
 
 	// fix references in linedefs
 
@@ -56,6 +71,35 @@ Vertex Document::removeVertex(int index)
 			if(L.end > index)
 				L.end--;
 		}
+
+	return result.vertex;
+}
+
+void Document::deleteAllLinedefs()
+{
+	linedefs.clear();
+	for(auto &info : vertices)
+		info.lines.clear();
+}
+
+LineDef Document::removeLinedef(int index)
+{
+	auto result = linedefs[index];
+	linedefs.erase(linedefs.begin() + index);
+
+	// Now also adjust vertices
+	// Also adjust counts
+	for(auto &info : vertices)
+		for(auto it = info.lines.rbegin(); it != info.lines.rend(); ++it)
+			if(*it > index)
+				--*it;
+			else if(*it == index)
+			{
+				info.lines.erase(std::next(it).base());
+				break;
+			}
+			else
+				break;
 
 	return result;
 }
@@ -182,12 +226,12 @@ int Document::getSectorID(const LineDef &line, Side side) const
 
 const Vertex &Document::getStart(const LineDef &line) const
 {
-	return vertices[line.start];
+	return vertices[line.start].vertex;
 }
 
 const Vertex &Document::getEnd(const LineDef &line) const
 {
-	return vertices[line.end];
+	return vertices[line.end].vertex;
 }
 
 const SideDef *Document::getRight(const LineDef &line) const

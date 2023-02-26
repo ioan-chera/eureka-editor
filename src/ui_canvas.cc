@@ -681,10 +681,10 @@ void UI_Canvas::DrawVertices()
 
 	RenderColor(FL_GREEN);
 
-	for (const auto &vertex : inst.level.getVertices())
+	for (auto it = inst.level.vertBegin(); it != inst.level.vertEnd(); ++it)
 	{
-		double x = vertex.x();
-		double y = vertex.y();
+		double x = it->x();
+		double y = it->y();
 
 		if (Vis(x, y, r))
 		{

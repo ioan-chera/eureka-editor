@@ -29,6 +29,7 @@
 #include "LineDef.h"
 #include "Vertex.h"
 #include <memory>
+#include <set>
 #include <vector>
 
 class crc32_c;
@@ -43,9 +44,40 @@ private:
 	Instance &inst;	// make this private because we don't want to access it from Document
 public:
 
-	const std::vector<Vertex> &getVertices() const
+	class VertexIterator
 	{
-		return vertices;
+	public:
+		const Vertex *operator ->() const
+		{
+			return &doc.getVertex(index);
+		}
+		VertexIterator &operator++()
+		{
+			++index;
+			return *this;
+		}
+		bool operator != (const VertexIterator &it) const
+		{
+			return index != it.index;
+		}
+	private:
+		friend struct Document;
+
+		VertexIterator(const Document &doc, int index) : doc(doc), index(index)
+		{
+		}
+
+		const Document &doc;
+		int index;
+	};
+
+	VertexIterator vertBegin() const
+	{
+		return VertexIterator{*this, 0};
+	}
+	VertexIterator vertEnd() const
+	{
+		return VertexIterator{*this, (int)vertices.size()};
 	}
 
 	void reserveVertexArray(int count)
@@ -53,17 +85,8 @@ public:
 		vertices.reserve(count);
 	}
 
-	void trimVertexArray(int count)
-	{
-		if(count < (int)vertices.size())
-			vertices.resize(count);
-	}
-
-	void addVertex(const Vertex &vertex)
-	{
-		vertices.push_back(vertex);
-	}
-
+	void trimVertexArray(int count);
+	void addVertex(const Vertex &vertex);
 	void insertVertex(const Vertex &vertex, int index);
 
 	void deleteAllVertices()
@@ -75,15 +98,15 @@ public:
 
 	Vertex &getMutableVertex(int index)
 	{
-		return vertices[index];
+		return vertices[index].vertex;
 	}
 	Vertex &getLastMutableVertex()
 	{
-		return vertices.back();
+		return vertices.back().vertex;
 	}
 	const Vertex &getVertex(int index) const
 	{
-		return vertices[index];
+		return vertices[index].vertex;
 	}
 
 	const LineDef &getLinedef(int index) const
@@ -102,16 +125,10 @@ public:
 	{
 		return linedefs;
 	}
-	void deleteAllLinedefs()
-	{
-		linedefs.clear();
-	}
-	LineDef removeLinedef(int index)
-	{
-		auto result = linedefs[index];
-		linedefs.erase(linedefs.begin() + index);
-		return result;
-	}
+
+	void deleteAllLinedefs();
+	LineDef removeLinedef(int index);
+
 	void insertLinedef(const LineDef &linedef, int index)
 	{
 		linedefs.insert(linedefs.begin() + index, linedef);
@@ -217,7 +234,16 @@ public:
 private:
 	friend class DocumentModule;
 
-	std::vector<Vertex> vertices;
+	struct VertexInfo
+	{
+		Vertex vertex;
+
+		// Use vector since it's easier to modify when we shift indices.
+		// Must always be sorted
+		std::vector<int> lines;
+	};
+
+	std::vector<VertexInfo> vertices;
 	std::vector<LineDef> linedefs;
 };
 

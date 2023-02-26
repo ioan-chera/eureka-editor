@@ -1986,8 +1986,8 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 			return false;
 
 		case ObjType::vertices:
-			for (const auto &vertex : doc.getVertices())
-				if (iround(vertex.x()) == x && iround(vertex.y()) == y)
+			for (auto it = doc.vertBegin(); it != doc.vertEnd(); ++it)
+				if (iround(it->x()) == x && iround(it->y()) == y)
 					return true;
 			return false;
 

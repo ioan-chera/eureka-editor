@@ -956,8 +956,8 @@ void Instance::Selection_Clear(bool no_save)
 	RedrawMap();
 }
 
-void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts,
-								   bool forward)
+void Instance::SelectNeighborLines(const int objnum, const SelectNeighborCriterion option,
+								   const byte parts, const bool forward)
 {
 	const auto &line1 = level.getLinedef(objnum);
 	bool frontside = parts < PART_LF_LOWER;
@@ -983,10 +983,8 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 			{
 				if (line1.OneSided() || (parts & PART_RT_RAIL || parts & PART_LF_RAIL))
 					match = (side2->MidTex() == side1->MidTex() && side2->MidTex() != "-");
-
 				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
 					match = (side2->LowerTex() == side1->LowerTex() && side2->LowerTex() != "-");
-
 				else if (parts & PART_RT_UPPER || parts & PART_LF_UPPER)
 					match = (side2->UpperTex() == side1->UpperTex() && side2->UpperTex() != "-");
 
