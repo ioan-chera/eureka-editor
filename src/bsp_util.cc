@@ -416,7 +416,7 @@ void DetectPolyobjSectors(Instance &inst)
 
 	for (i = 0 ; i < inst.level.numThings(); i++)
 	{
-		const auto &T = inst.level.things[i];
+		const auto &T = inst.level.getThing(i);
 
 		double x = T.x();
 		double y = T.y();

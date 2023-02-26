@@ -438,7 +438,7 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	doc.things.clear();
+	doc.deleteAllThings();
 	doc.deleteAllVertices();
 	doc.sectors.clear();
 	doc.sidedefs.clear();
@@ -510,7 +510,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 	{
 	case ObjType::things:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
-		pos = reinterpret_cast<int *>(&basis.doc.things[objnum]);
+		pos = reinterpret_cast<int *>(&basis.doc.getMutableThing(objnum));
 		break;
 	case ObjType::vertices:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
@@ -592,11 +592,7 @@ void Basis::EditUnit::rawDelete(Basis &basis)
 Thing Basis::EditUnit::rawDeleteThing(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numThings());
-
-	auto result = doc.things[objnum];
-	doc.things.erase(doc.things.begin() + objnum);
-
-	return result;
+	return doc.removeThing(objnum);
 }
 
 //
@@ -716,7 +712,7 @@ void Basis::EditUnit::rawInsert(Basis &basis)
 void Basis::EditUnit::rawInsertThing(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numThings());
-	doc.things.insert(doc.things.begin() + objnum, thing);
+	doc.insertThing(thing, objnum);
 }
 
 //

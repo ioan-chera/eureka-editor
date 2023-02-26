@@ -142,7 +142,48 @@ public:
 		return linedefs.back();
 	}
 
-	std::vector<Thing> things;
+	const Thing &getThing(int index) const
+	{
+		return things[index];
+	}
+
+	Thing &getMutableThing(int index)
+	{
+		return things[index];
+	}
+
+	Thing removeThing(int index)
+	{
+		auto result = getThing(index);
+		things.erase(things.begin() + index);
+		return result;
+	}
+
+	void insertThing(const Thing &thing, int index)
+	{
+		things.insert(things.begin() + index, thing);
+	}
+
+	void deleteAllThings()
+	{
+		things.clear();
+	}
+
+	const std::vector<Thing> &getThings() const
+	{
+		return things;
+	}
+
+	void addThing(const Thing &thing)
+	{
+		things.push_back(thing);
+	}
+
+	Thing &getLastMutableThing()
+	{
+		return things.back();
+	}
+
 	std::vector<Sector> sectors;
 	std::vector<SideDef> sidedefs;
 
@@ -238,13 +279,13 @@ private:
 	{
 		Vertex vertex;
 
-		// Use vector since it's easier to modify when we shift indices.
-		// Must always be sorted
-		std::vector<int> lines;
+		std::set<int> linesOut;
+		std::set<int> linesIn;
 	};
 
 	std::vector<VertexInfo> vertices;
 	std::vector<LineDef> linedefs;
+	std::vector<Thing> things;
 };
 
 #endif /* Document_hpp */

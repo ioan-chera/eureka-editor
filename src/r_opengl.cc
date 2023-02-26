@@ -1214,7 +1214,7 @@ public:
 
 	void DrawThing(int th_index)
 	{
-		const auto &th = inst.level.things[th_index];
+		const auto &th = inst.level.getThing(th_index);
 
 		const thingtype_t &info = inst.conf.getThingType(th.type);
 
@@ -1437,7 +1437,7 @@ public:
 
 	void HighlightThing(int th_index)
 	{
-		const auto &th = inst.level.things[th_index];
+		const auto &th = inst.level.getThing(th_index);
 		float tx = static_cast<float>(th.x());
 		float ty = static_cast<float>(th.y());
 

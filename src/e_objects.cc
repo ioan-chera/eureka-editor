@@ -139,10 +139,10 @@ void ObjectsModule::insertThing() const
 		EditOperation op(doc.basis);
 
 		new_t = op.addNew(ObjType::things);
-		auto &T = doc.things[new_t];
+		auto &T = doc.getMutableThing(new_t);
 
 		if(model >= 0)
-			T = doc.things[model];
+			T = doc.getThing(model);
 		else
 		{
 			T.type = inst.conf.default_thing;
@@ -742,7 +742,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 		case ObjType::things:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto &T = doc.things[*it];
+				const auto &T = doc.getThing(*it);
 
 				op.changeThing(*it, Thing::F_X, T.raw_x + fdx);
 				op.changeThing(*it, Thing::F_Y, T.raw_y + fdy);
@@ -931,7 +931,7 @@ void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 
 void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const
 {
-	const auto &T = doc.things[src_thing];
+	const auto &T = doc.getThing(src_thing);
 
 	op.changeThing(dest_thing, Thing::F_TYPE,    T.type);
 	op.changeThing(dest_thing, Thing::F_OPTIONS, T.options);
@@ -1204,7 +1204,7 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 	{
 		case ObjType::things:
 			*total += 1;
-			if (inst.grid.OnGrid(doc.things[objnum].x(), doc.things[objnum].y()))
+			if (inst.grid.OnGrid(doc.getThing(objnum).x(), doc.getThing(objnum).y()))
 				*count += 1;
 			break;
 
@@ -1258,8 +1258,8 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 	switch (obj_type)
 	{
 		case ObjType::things:
-			x2 = doc.things[objnum].x();
-			y2 = doc.things[objnum].y();
+			x2 = doc.getThing(objnum).x();
+			y2 = doc.getThing(objnum).y();
 			break;
 
 		case ObjType::vertices:
@@ -1430,8 +1430,8 @@ v2double_t ObjectsModule::calcMiddle(const selection_c & list) const
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next(), ++count)
 			{
-				sum_x += doc.things[*it].x();
-				sum_y += doc.things[*it].y();
+				sum_x += doc.getThing(*it).x();
+				sum_y += doc.getThing(*it).y();
 			}
 			break;
 		}
@@ -1486,7 +1486,7 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto &T = doc.things[*it];
+				const auto &T = doc.getThing(*it);
 				double Tx = T.x();
 				double Ty = T.y();
 
@@ -1540,7 +1540,7 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &T = doc.things[*it];
+		const auto &T = doc.getThing(*it);
 
 		if (is_vert)
 		{
@@ -1657,7 +1657,7 @@ void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &T = doc.things[*it];
+		const auto &T = doc.getThing(*it);
 
 		FFixedPoint old_x = T.raw_x;
 		FFixedPoint old_y = T.raw_y;
@@ -1755,7 +1755,7 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &T = doc.things[*it];
+		const auto &T = doc.getThing(*it);
 
 		double new_x = T.x();
 		double new_y = T.y();
@@ -1980,7 +1980,7 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 	switch (obj_type)
 	{
 		case ObjType::things:
-			for (const auto &thing : doc.things)
+			for (const auto &thing : doc.getThings())
 				if (iround(thing.x()) == x && iround(thing.y()) == y)
 					return true;
 			return false;
@@ -2075,7 +2075,7 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &T = doc.things[*it];
+		const auto &T = doc.getThing(*it);
 
 		if (inst.grid.OnGrid(T.x(), T.y()))
 		{

@@ -812,7 +812,7 @@ static Objid getNearestThing(const Document &doc, const ConfigData &config,
 
 	for(int n = 0; n < doc.numThings(); n++)
 	{
-		const auto &thing = doc.things[n];
+		const auto &thing = doc.getThing(n);
 		v2double_t tpos = thing.xy();
 
 		// filter out things that are outside the search bbox.

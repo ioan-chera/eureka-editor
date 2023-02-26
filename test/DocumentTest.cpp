@@ -45,9 +45,9 @@ TEST_F(DocumentFixture, CheckObjects)
 	ASSERT_FALSE(doc.numLinedefs());
 
 	// Add some objects
-	doc.things.push_back(Thing());
-	doc.things.push_back(Thing());
-	doc.things.push_back(Thing());
+	doc.addThing(Thing());
+	doc.addThing(Thing());
+	doc.addThing(Thing());
 	doc.addVertex(Vertex());
 	doc.addVertex(Vertex());
 	doc.addVertex(Vertex());
@@ -97,9 +97,9 @@ TEST_F(DocumentFixture, CheckObjects)
 TEST_F(DocumentFixture, CRC)
 {
 	// Add some objects
-	doc.things.push_back(Thing());
-	doc.things.push_back(Thing());
-	doc.things.push_back(Thing());
+	doc.addThing(Thing());
+	doc.addThing(Thing());
+	doc.addThing(Thing());
 	doc.addVertex(Vertex());
 	doc.addVertex(Vertex());
 	doc.addVertex(Vertex());
@@ -113,7 +113,7 @@ TEST_F(DocumentFixture, CRC)
 	doc.getLevelChecksum(crc);
 
 	// Now remove one thing
-	doc.things.pop_back();
+	doc.removeThing(doc.numThings() - 1);
 
 	crc32_c crc2;
 	doc.getLevelChecksum(crc2);
@@ -122,7 +122,7 @@ TEST_F(DocumentFixture, CRC)
 	ASSERT_NE(crc.extra, crc2.extra);
 
 	// Now add back one thing
-	doc.things.push_back(Thing());
+	doc.addThing(Thing());
 
 	crc32_c crc3;
 	doc.getLevelChecksum(crc3);

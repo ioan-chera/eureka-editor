@@ -196,11 +196,11 @@ void sector_info_cache_c::Rebuild()
 		}
 	}
 
-	for (const auto &thing : inst.level.things)
+	for (const auto &thing : inst.level.getThings())
 	{
 		CheckSlopeThing(&thing);
 	}
-	for (const auto &thing : inst.level.things)
+	for (const auto &thing : inst.level.getThings())
 	{
 		CheckSlopeCopyThing(&thing);
 	}

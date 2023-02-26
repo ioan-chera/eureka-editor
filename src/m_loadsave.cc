@@ -121,7 +121,7 @@ void Instance::FreshLevel()
 
 		th.SetRawX(loaded.levelFormat, (pl == 1) ? 0 : (pl - 3) * 48);
 		th.SetRawY(loaded.levelFormat, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
-		level.things.push_back(th);
+		level.addThing(th);
 	}
 
 	CalculateLevelBounds();
@@ -654,7 +654,7 @@ void Instance::LoadThings(const Wad_file *load_wad)
 		th.type    = LE_U16(raw.type);
 		th.options = LE_U16(raw.options);
 
-		level.things.push_back(th);
+		level.addThing(th);
 	}
 }
 
@@ -697,7 +697,7 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 		th.arg4 = raw.args[3];
 		th.arg5 = raw.args[4];
 
-		level.things.push_back(th);
+		level.addThing(th);
 	}
 }
 
@@ -1368,7 +1368,7 @@ void Instance::SaveThings()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("THINGS");
 
-	for (const auto &th : level.things)
+	for (const auto &th : level.getThings())
 	{
 		raw_thing_t raw;
 
@@ -1389,7 +1389,7 @@ void Instance::SaveThings_Hexen()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("THINGS");
 
-	for (const auto &th : level.things)
+	for (const auto &th : level.getThings())
 	{
 		raw_hexen_thing_t raw;
 

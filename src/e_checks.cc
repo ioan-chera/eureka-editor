@@ -1346,11 +1346,11 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types, const Inst
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const thingtype_t &info = inst.conf.getThingType(inst.level.things[n].type);
+		const thingtype_t &info = inst.conf.getThingType(inst.level.getThing(n).type);
 
 		if (info.desc.startsWith("UNKNOWN"))
 		{
-			bump_unknown_type(types, inst.level.things[n].type);
+			bump_unknown_type(types, inst.level.getThing(n).type);
 
 			list.set(n);
 		}
@@ -1415,7 +1415,7 @@ static int Things_FindStarts(int *dm_num, const Document &doc)
 
 	int mask = 0;
 
-	for(const auto &T : doc.things)
+	for(const auto &T : doc.getThings())
 	{
 		// ideally, these type numbers would not be hard-coded....
 
@@ -1440,7 +1440,7 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		v2double_t pos = inst.level.things[n].xy();
+		v2double_t pos = inst.level.getThing(n).xy();
 
 		Objid obj = hover::getNearestSector(inst.level, pos);
 
@@ -1448,7 +1448,7 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 			continue;
 
 		// allow certain things in the void (Heretic sounds)
-		const thingtype_t &info = inst.conf.getThingType(inst.level.things[n].type);
+		const thingtype_t &info = inst.conf.getThingType(inst.level.getThing(n).type);
 
 		if (info.flags & THINGDEF_VOID)
 			continue;
@@ -1531,7 +1531,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const auto &T = inst.level.things[n];
+		const auto &T = inst.level.getThing(n);
 
 		if (T.type == CAMERA_PEST)
 			continue;
@@ -1581,7 +1581,7 @@ void Things_FixDuds(Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const auto &T = inst.level.things[n];
+		const auto &T = inst.level.getThing(n);
 
 		// NOTE: we also "fix" things that are always spawned
 		////   if (TH_always_spawned(T->type)) continue;
@@ -1636,7 +1636,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 {
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const auto &T = inst.level.things[n];
+		const auto &T = inst.level.getThing(n);
 
 		const thingtype_t &info = inst.conf.getThingType(T.type);
 
@@ -1806,7 +1806,7 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 
 	for (int n = 0 ; n < (int)blockers.size() ; n++)
 	{
-		const auto &T = inst.level.things[blockers[n]];
+		const auto &T = inst.level.getThing(blockers[n]);
 
 		const thingtype_t &info = inst.conf.getThingType(T.type);
 
@@ -1815,7 +1815,7 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 
 		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
-			const auto &T2 = inst.level.things[blockers[n2]];
+			const auto &T2 = inst.level.getThing(blockers[n2]);
 
 			const thingtype_t &info2 = inst.conf.getThingType(T2.type);
 
@@ -3236,7 +3236,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 			return true;
 		}
 
-		for (const auto &thing : inst.level.things)
+		for (const auto &thing : inst.level.getThings())
 		{
 			const thingtype_t &info = inst.conf.getThingType(thing.type);
 

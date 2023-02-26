@@ -592,7 +592,7 @@ void Instance::DoBeginDrag()
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
 			{
-				const auto &T = level.things[edit.drag_thing_num];
+				const auto &T = level.getThing(edit.drag_thing_num);
 
 				Objid sec = hover::getNearestSector(level, T.xy());
 
@@ -760,7 +760,7 @@ void Instance::CMD_ACT_Click()
 	{
 		if (edit.highlight.type == ObjType::things)
 		{
-			const auto &T = level.things[edit.highlight.num];
+			const auto &T = level.getThing(edit.highlight.num);
 			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T.xy()));
 		}
 		else

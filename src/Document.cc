@@ -78,8 +78,8 @@ Vertex Document::removeVertex(int index)
 void Document::deleteAllLinedefs()
 {
 	linedefs.clear();
-	for(auto &info : vertices)
-		info.lines.clear();
+	//for(auto &info : vertices)
+	//	info.lines.clear();
 }
 
 LineDef Document::removeLinedef(int index)
@@ -87,22 +87,15 @@ LineDef Document::removeLinedef(int index)
 	auto result = linedefs[index];
 	linedefs.erase(linedefs.begin() + index);
 
+
 	// Now also adjust vertices
 	// Also adjust counts
-	for(auto &info : vertices)
-		for(auto it = info.lines.rbegin(); it != info.lines.rend(); ++it)
-			if(*it > index)
-				--*it;
-			else if(*it == index)
-			{
-				info.lines.erase(std::next(it).base());
-				break;
-			}
-			else
-				break;
+	//for(auto &info : vertices)
+	//	info.removeLineAndShiftBack(index);
 
 	return result;
 }
+
 
 //
 // Get number of objects based on enum
@@ -198,7 +191,7 @@ void Document::getLevelChecksum(crc32_c &crc) const
 	int i;
 
 	for(i = 0; i < numThings(); i++)
-		ChecksumThing(crc, things[i]);
+		ChecksumThing(crc, getThing(i));
 
 	for(i = 0; i < numLinedefs(); i++)
 		ChecksumLineDef(crc, linedefs[i], *this);
@@ -285,3 +278,17 @@ bool Document::isVertical(const LineDef &line) const
 {
 	return (getStart(line).raw_x == getEnd(line).raw_x);
 }
+
+//void Document::VertexInfo::removeLineAndShiftBack(int index)
+//{
+//	for(auto it = lines.rbegin(); it != lines.rend(); ++it)
+//		if(*it > index)
+//			-- *it;
+//		else if(*it == index)
+//		{
+//			lines.erase(std::next(it).base());
+//			return;
+//		}
+//		else
+//			return;
+//}

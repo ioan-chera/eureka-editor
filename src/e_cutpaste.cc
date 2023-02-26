@@ -380,7 +380,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 		ConvertSelection(doc, list, thing_sel);
 
 		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
-			clip_board->things.push_back(doc.things[*it]);
+			clip_board->things.push_back(doc.getThing(*it));
 	}
 }
 
@@ -403,7 +403,7 @@ bool Instance::Clipboard_DoCopy()
 	{
 		case ObjType::things:
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
-				clip_board->things.push_back(level.things[*it]);
+				clip_board->things.push_back(level.getThing(*it));
 			break;
 
 		case ObjType::vertices:
@@ -551,7 +551,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
 		int new_t = op.addNew(ObjType::things);
-		auto & T = op.doc.things[new_t];
+		auto & T = op.doc.getMutableThing(new_t);
 
 		T = clip_board->things[i];
 
@@ -655,7 +655,7 @@ bool Instance::Clipboard_DoPaste()
 				for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 				{
 					int new_t = op.addNew(ObjType::things);
-					auto &T = level.things[new_t];
+					auto &T = level.getMutableThing(new_t);
 
 					T = clip_board->things[i];
 
