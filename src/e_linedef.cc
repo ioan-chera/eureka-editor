@@ -1355,13 +1355,13 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 
 	if (new_len < 0)
 	{
-		op.changeVertex(L.start, Vertex::F_X, doc.getEnd(L).raw_x - FFixedPoint(idx));
-		op.changeVertex(L.start, Vertex::F_Y, doc.getEnd(L).raw_y - FFixedPoint(idy));
+		op.changeVertex(L.start, &Vertex::raw_x, doc.getEnd(L).raw_x - FFixedPoint(idx));
+		op.changeVertex(L.start, &Vertex::raw_y, doc.getEnd(L).raw_y - FFixedPoint(idy));
 	}
 	else
 	{
-		op.changeVertex(L.end, Vertex::F_X, doc.getStart(L).raw_x + FFixedPoint(idx));
-		op.changeVertex(L.end, Vertex::F_Y, doc.getStart(L).raw_y + FFixedPoint(idy));
+		op.changeVertex(L.end, &Vertex::raw_x, doc.getStart(L).raw_x + FFixedPoint(idx));
+		op.changeVertex(L.end, &Vertex::raw_y, doc.getStart(L).raw_y + FFixedPoint(idy));
 	}
 }
 

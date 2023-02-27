@@ -755,8 +755,8 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			{
 				const auto &V = doc.getVertex(*it);
 
-				op.changeVertex(*it, Vertex::F_X, V.raw_x + fdx);
-				op.changeVertex(*it, Vertex::F_Y, V.raw_y + fdy);
+				op.changeVertex(*it, &Vertex::raw_x, V.raw_x + fdx);
+				op.changeVertex(*it, &Vertex::raw_y, V.raw_y + fdy);
 			}
 			break;
 
@@ -1575,9 +1575,9 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 		const auto &V = doc.getVertex(*it);
 
 		if (is_vert)
-			op.changeVertex(*it, Vertex::F_Y, fix_my * 2 - V.raw_y);
+			op.changeVertex(*it, &Vertex::raw_y, fix_my * 2 - V.raw_y);
 		else
-			op.changeVertex(*it, Vertex::F_X, fix_mx * 2 - V.raw_x);
+			op.changeVertex(*it, &Vertex::raw_x, fix_mx * 2 - V.raw_x);
 	}
 
 	// flip linedefs too !!
@@ -1734,13 +1734,13 @@ void Instance::CMD_Rotate90()
 
 				if (anti_clockwise)
 				{
-					op.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-					op.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+					op.changeVertex(*it, &Vertex::raw_x, fix_mx - old_y + fix_my);
+					op.changeVertex(*it, &Vertex::raw_y, fix_my + old_x - fix_mx);
 				}
 				else
 				{
-					op.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-					op.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+					op.changeVertex(*it, &Vertex::raw_x, fix_mx + old_y - fix_my);
+					op.changeVertex(*it, &Vertex::raw_y, fix_my - old_x + fix_mx);
 				}
 			}
 		}
@@ -1791,8 +1791,8 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &lis
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-		op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+		op.changeVertex(*it, &Vertex::raw_x, MakeValidCoord(inst.loaded.levelFormat, new_x));
+		op.changeVertex(*it, &Vertex::raw_y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 	}
 }
 
@@ -2192,8 +2192,8 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-				op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+				op.changeVertex(*it, &Vertex::raw_x, MakeValidCoord(inst.loaded.levelFormat, new_x));
+				op.changeVertex(*it, &Vertex::raw_y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 
 				moved.set(*it);
 				break;

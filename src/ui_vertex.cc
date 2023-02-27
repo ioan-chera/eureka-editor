@@ -118,7 +118,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeVertex(*it, Vertex::F_X, MakeValidCoord(box->inst.loaded.levelFormat, new_x));
+			op.changeVertex(*it, &Vertex::raw_x, MakeValidCoord(box->inst.loaded.levelFormat, new_x));
 		}
 	}
 }
@@ -136,7 +136,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(box->inst.loaded.levelFormat, new_y));
+			op.changeVertex(*it, &Vertex::raw_y, MakeValidCoord(box->inst.loaded.levelFormat, new_y));
 		}
 	}
 }
@@ -177,8 +177,8 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		{
 			const auto &V = box->inst.level.getVertex(*it);
 
-			op.changeVertex(*it, Vertex::F_X, V.raw_x + fdx);
-			op.changeVertex(*it, Vertex::F_Y, V.raw_y + fdy);
+			op.changeVertex(*it, &Vertex::raw_x, V.raw_x + fdx);
+			op.changeVertex(*it, &Vertex::raw_y, V.raw_y + fdy);
 		}
 	}
 }

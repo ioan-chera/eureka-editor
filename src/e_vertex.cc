@@ -485,8 +485,8 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 			}
 			else
 			{
-				op.changeVertex(v_num, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-				op.changeVertex(v_num, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+				op.changeVertex(v_num, &Vertex::raw_x, MakeValidCoord(inst.loaded.levelFormat, new_x));
+				op.changeVertex(v_num, &Vertex::raw_y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 			}
 
 			which++;
@@ -885,8 +885,8 @@ void Instance::commandSectorDisconnect()
 		{
 			const auto &V = level.getVertex(*it);
 
-			op.changeVertex(*it, Vertex::F_X, V.raw_x + MakeValidCoord(loaded.levelFormat, move_dx));
-			op.changeVertex(*it, Vertex::F_Y, V.raw_y + MakeValidCoord(loaded.levelFormat, move_dy));
+			op.changeVertex(*it, &Vertex::raw_x, V.raw_x + MakeValidCoord(loaded.levelFormat, move_dx));
+			op.changeVertex(*it, &Vertex::raw_y, V.raw_y + MakeValidCoord(loaded.levelFormat, move_dy));
 		}
 	}
 
@@ -1091,8 +1091,8 @@ void Instance::CMD_VT_ShapeLine()
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		op.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(loaded.levelFormat, nx));
-		op.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(loaded.levelFormat, ny));
+		op.changeVertex(along_list[i].vert_num, &Vertex::raw_x, MakeValidCoord(loaded.levelFormat, nx));
+		op.changeVertex(along_list[i].vert_num, &Vertex::raw_y, MakeValidCoord(loaded.levelFormat, ny));
 	}
 }
 
@@ -1159,8 +1159,8 @@ double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_
 
 		if (move_vertices)
 		{
-			op->changeVertex(along_list[k].vert_num, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-			op->changeVertex(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+			op->changeVertex(along_list[k].vert_num, &Vertex::raw_x, MakeValidCoord(inst.loaded.levelFormat, new_x));
+			op->changeVertex(along_list[k].vert_num, &Vertex::raw_y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 		}
 		else
 		{

@@ -233,7 +233,7 @@ private:
 	bool change(ObjType type, int objnum, byte field, int value);
 	bool changeThing(int thing, Thing::IntAddress field, int value);
 	bool changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value);
-	bool changeVertex(int vert, byte field, FFixedPoint value);
+	bool changeVertex(int vert, FFixedPoint Vertex::*field, FFixedPoint value);
 	bool changeSector(int sec, Sector::IntAddress field, int value);
 	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
@@ -298,7 +298,7 @@ public:
 		return basis.changeThing(thing, field, value);
 	}
 
-	bool changeVertex(int vert, byte field, FFixedPoint value)
+	bool changeVertex(int vert, FFixedPoint Vertex::*field, FFixedPoint value)
 	{
 		return basis.changeVertex(vert, field, value);
 	}
