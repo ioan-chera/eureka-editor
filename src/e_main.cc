@@ -1039,7 +1039,17 @@ static byte linedefFacetContinuation(const Document &doc, const LineDef &source,
 					{
 						nextFacets |= PART_RT_LOWER;
 					}
+					if(nextLeftSector->ceilh < nextRightSector->ceilh &&
+						sourceRightSector->ceilh > nextLeftSector->ceilh &&
+						nextRightSector->ceilh > sourceRightSector->floorh)
+					{
+						nextFacets |= PART_RT_UPPER;
+					}
 				}
+			}
+			else // two-sided
+			{
+
 			}
 		}
 	}
