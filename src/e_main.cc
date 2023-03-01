@@ -956,6 +956,97 @@ void Instance::Selection_Clear(bool no_save)
 	RedrawMap();
 }
 
+static byte linedefFacetContinuation(const Document &doc, const LineDef &source, byte sourceFacets, 
+	const LineDef &next)
+{
+	if(&source == &next)
+		return;
+	if(next.start != source.end && next.start != source.start &&
+		next.end != source.start && next.end != source.end)
+	{
+		return;
+	}
+	bool flipped = next.start == source.start || next.end == source.end;
+	const SideDef *sourceRight, *sourceLeft, *nextRight, *nextLeft;
+	sourceRight = doc.getRight(source);
+	sourceLeft = doc.getLeft(source);
+	if(flipped)
+	{
+		nextRight = doc.getLeft(next);
+		nextLeft = doc.getRight(next);
+	}
+	else
+	{
+		nextRight = doc.getRight(next);
+		nextLeft = doc.getLeft(next);
+	}
+	const Sector *sourceRightSector, *sourceLeftSector, *nextRightSector, *nextLeftSector;
+	sourceRightSector = sourceRight ? &doc.getSector(*sourceRight) : nullptr;
+	sourceLeftSector = sourceLeft ? &doc.getSector(*sourceLeft) : nullptr;
+	nextRightSector = nextRight ? &doc.getSector(*nextRight) : nullptr;
+	nextLeftSector = nextLeft? &doc.getSector(*nextLeft) : nullptr;
+
+	byte nextFacets = 0;
+
+	// Front
+	if(sourceRight && nextRight && sourceRightSector->ceilh > sourceRightSector->floorh && 
+		nextRightSector->ceilh > nextRightSector->floorh)
+	{
+		if(sourceFacets & PART_RT_LOWER && sourceLeft && 
+			sourceLeftSector->floorh > sourceRightSector->floorh)
+		{
+			if(!nextLeft)	// lead to one-sided wall
+			{
+				if(sourceLeftSector->floorh > nextRightSector->floorh &&
+					sourceRightSector->floorh < nextRightSector->ceilh)
+				{
+					nextFacets |= PART_RT_RAIL;
+				}
+			}
+			else // lead to two-sided wall
+			{
+				if(nextLeftSector->floorh > nextRightSector->floorh &&
+					sourceLeftSector->floorh > nextRightSector->floorh &&
+					nextLeftSector->floorh > sourceRightSector->floorh)
+				{
+					nextFacets |= PART_RT_LOWER;
+				}
+				if(nextLeftSector->ceilh < nextRightSector->ceilh && 
+					sourceLeftSector->floorh > nextLeftSector->ceilh && 
+					nextRightSector->ceilh > sourceRightSector->floorh)
+				{
+					nextFacets |= PART_RT_UPPER;
+				}
+			}
+		}
+		if(sourceFacets & PART_RT_RAIL)
+		{
+			if(!sourceLeft)
+			{
+				if(!nextLeft)
+				{
+					if(sourceRightSector->ceilh > nextRightSector->floorh &&
+						nextRightSector->ceilh > sourceRightSector->floorh)
+					{
+						nextFacets |= PART_RT_RAIL;
+					}
+				}
+				else
+				{
+					if(nextLeftSector->floorh > nextRightSector->floorh &&
+						nextLeftSector->floorh > sourceRightSector->floorh &&
+						sourceRightSector->ceilh > nextRightSector->floorh)
+					{
+						nextFacets |= PART_RT_LOWER;
+					}
+				}
+			}
+		}
+	}
+	
+	// Back
+}
+
 void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts,
 								   bool forward)
 {
