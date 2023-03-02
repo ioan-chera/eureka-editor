@@ -956,6 +956,11 @@ void Instance::Selection_Clear(bool no_save)
 	RedrawMap();
 }
 
+//
+// Given a source line, a next line, and their facing sides, it returns the visible faces which
+// touch each other for selecting neighbors by texture.
+//
+
 struct WallContinuity
 {
 	byte top;
