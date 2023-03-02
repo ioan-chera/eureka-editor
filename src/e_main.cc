@@ -956,116 +956,132 @@ void Instance::Selection_Clear(bool no_save)
 	RedrawMap();
 }
 
-static const SideDef *getNextSide(const Document &doc, const LineDef &source, Side sourceSide,
-								  const LineDef &next)
+struct WallContinuity
 {
-	if(source.end == next.start || source.start == next.end)
-		return doc.getSide(next, sourceSide);
-	if(source.end == next.end || source.start == next.start)
-		return doc.getSide(next, -sourceSide);
-	return nullptr;
-}
+	byte top;
+	byte middle;
+	byte bottom;
+};
 
-static byte linedefFacetContinuation(const Document &doc, const LineDef &source, byte sourceFacets, 
-	const LineDef &next)
+static WallContinuity getWallContinuity(const Document &doc, const LineDef &source, Side sourceSide,
+	const LineDef &next, Side nextSide)
 {
-	if(&source == &next)
-		return 0;
-	if(next.start != source.end && next.start != source.start &&
-		next.end != source.start && next.end != source.end)
-	{
-		return 0;
-	}
-	bool flipped = next.start == source.start || next.end == source.end;
-	const SideDef *sourceRight, *sourceLeft, *nextRight, *nextLeft;
-	sourceRight = doc.getRight(source);
-	sourceLeft = doc.getLeft(source);
-	if(flipped)
-	{
-		nextRight = doc.getLeft(next);
-		nextLeft = doc.getRight(next);
-	}
-	else
-	{
-		nextRight = doc.getRight(next);
-		nextLeft = doc.getLeft(next);
-	}
-	const Sector *sourceRightSector, *sourceLeftSector, *nextRightSector, *nextLeftSector;
-	sourceRightSector = sourceRight ? &doc.getSector(*sourceRight) : nullptr;
-	sourceLeftSector = sourceLeft ? &doc.getSector(*sourceLeft) : nullptr;
-	nextRightSector = nextRight ? &doc.getSector(*nextRight) : nullptr;
-	nextLeftSector = nextLeft? &doc.getSector(*nextLeft) : nullptr;
+	WallContinuity result = {};
 
-	byte nextFacets = 0;
-
-	// Front
-	if(sourceRight && nextRight && sourceRightSector->ceilh > sourceRightSector->floorh && 
-		nextRightSector->ceilh > nextRightSector->floorh)
-	{
-		if(sourceFacets & PART_RT_LOWER && sourceLeft && 
-			sourceLeftSector->floorh > sourceRightSector->floorh)
-		{
-			if(!nextLeft)	// lead to one-sided wall
-			{
-				if(sourceLeftSector->floorh > nextRightSector->floorh &&
-					sourceRightSector->floorh < nextRightSector->ceilh)
-				{
-					nextFacets |= PART_RT_RAIL;
-				}
-			}
-			else // lead to two-sided wall
-			{
-				if(nextLeftSector->floorh > nextRightSector->floorh &&
-					sourceLeftSector->floorh > nextRightSector->floorh &&
-					nextLeftSector->floorh > sourceRightSector->floorh)
-				{
-					nextFacets |= PART_RT_LOWER;
-				}
-				if(nextLeftSector->ceilh < nextRightSector->ceilh && 
-					sourceLeftSector->floorh > nextLeftSector->ceilh && 
-					nextRightSector->ceilh > sourceRightSector->floorh)
-				{
-					nextFacets |= PART_RT_UPPER;
-				}
-			}
-		}
-		if(sourceFacets & PART_RT_RAIL)
-		{
-			if(!sourceLeft)
-			{
-				if(!nextLeft)
-				{
-					if(sourceRightSector->ceilh > nextRightSector->floorh &&
-						nextRightSector->ceilh > sourceRightSector->floorh)
-					{
-						nextFacets |= PART_RT_RAIL;
-					}
-				}
-				else
-				{
-					if(nextLeftSector->floorh > nextRightSector->floorh &&
-						nextLeftSector->floorh > sourceRightSector->floorh &&
-						sourceRightSector->ceilh > nextRightSector->floorh)
-					{
-						nextFacets |= PART_RT_LOWER;
-					}
-					if(nextLeftSector->ceilh < nextRightSector->ceilh &&
-						sourceRightSector->ceilh > nextLeftSector->ceilh &&
-						nextRightSector->ceilh > sourceRightSector->floorh)
-					{
-						nextFacets |= PART_RT_UPPER;
-					}
-				}
-			}
-			else // two-sided
-			{
-
-			}
-		}
-	}
+	const SideDef *sourceFront = doc.getSide(source, sourceSide);
+	const Sector *sourceFrontSector = sourceFront ? &doc.getSector(*sourceFront) : nullptr;
+	const SideDef *sourceBack = doc.getSide(source, -sourceSide);
+	const Sector *sourceBackSector = sourceBack ? &doc.getSector(*sourceBack) : nullptr;
+	const SideDef *nextFront = doc.getSide(next, nextSide);
+	const Sector *nextFrontSector = nextFront ? &doc.getSector(*nextFront) : nullptr;
+	const SideDef *nextBack = doc.getSide(next, -nextSide);
+	const Sector *nextBackSector = nextBack ? &doc.getSector(*nextBack) : nullptr;
 	
-	// Back
+	// Shut lines are over. Same if they have no common heights.
+	if(!sourceFrontSector || !nextFrontSector ||
+		sourceFrontSector->ceilh <= sourceFrontSector->floorh ||
+		nextFrontSector->ceilh <= nextFrontSector->floorh || 
+		sourceFrontSector->floorh >= nextFrontSector->ceilh ||
+		nextFrontSector->floorh >= sourceFrontSector->ceilh)
+	{
+		return result;
+	}
+
+	// If source is two-sided...
+	if(sourceBackSector)
+	{
+		// We have top, so check it
+		if(sourceFrontSector->ceilh > sourceBackSector->ceilh)
+		{
+			// 1-sided next
+			if(!nextBackSector)
+			{
+				if(nextFrontSector->ceilh > sourceBackSector->ceilh)
+					result.top |= PART_RT_RAIL;
+			}
+			else // 2-sided next
+			{
+				// Continuous top facet
+				if(nextFrontSector->ceilh > nextBackSector->ceilh &&
+					nextFrontSector->ceilh > sourceBackSector->ceilh &&
+					sourceFrontSector->ceilh > nextBackSector->ceilh)
+				{
+					result.top |= PART_RT_UPPER;
+				}
+				// Continuous top to bottom facet. Cannot match with railings this way (extremities 
+				// already tested)
+				if(nextBackSector->floorh > nextFrontSector->floorh &&
+					nextBackSector->floorh > sourceBackSector->ceilh)
+				{
+					result.top |= PART_RT_LOWER;
+				}
+			}
+		}
+		// We have bottom, so check it
+		if(sourceBackSector->floorh > sourceFrontSector->floorh)
+		{
+			// 1-sided next
+			if(!nextBackSector)
+			{
+				if(sourceBackSector->floorh > nextFrontSector->floorh)
+					result.bottom |= PART_RT_RAIL;
+			}
+			else // 2-sided next
+			{
+				// Continuous bottom facet
+				if(nextBackSector->floorh > nextFrontSector->floorh &&
+					nextBackSector->floorh > sourceFrontSector->floorh &&
+					sourceBackSector->floorh > nextFrontSector->floorh)
+				{
+					result.bottom |= PART_RT_LOWER;
+				}
+				// Continuous bottom to top facet. Same thing about railings not being compatible.
+				if(nextFrontSector->ceilh > nextBackSector->ceilh &&
+					sourceBackSector->floorh > nextBackSector->ceilh)
+				{
+					result.bottom |= PART_RT_UPPER;
+				}
+			}
+		}
+		// We have window, so check middle (railing) continuity
+		if(sourceBackSector->ceilh > sourceBackSector->floorh && nextBackSector && 
+			nextBackSector->ceilh > nextBackSector->floorh && 
+			sourceBackSector->ceilh > nextBackSector->floorh && 
+			nextBackSector->ceilh > sourceBackSector->floorh)
+		{
+			result.middle |= PART_RT_RAIL;
+		}
+	}
+	else // 1-sided source
+	{
+		if(!nextBackSector)	// simple wall-wall continuity
+			result.middle |= PART_RT_RAIL;
+		else // wall - 2-sided continuity
+		{
+			// wall - top continuity
+			if(nextFrontSector->ceilh > nextBackSector->ceilh &&
+				sourceFrontSector->ceilh > nextBackSector->ceilh)
+			{
+				result.middle |= PART_RT_UPPER;
+			}
+			if(nextBackSector->floorh > nextFrontSector->floorh &&
+				nextBackSector->floorh > sourceFrontSector->floorh)
+			{
+				result.middle |= PART_RT_LOWER;
+			}
+		}
+	}
+
+	// Finally, flip the front/back to match nextSide
+	if(nextSide == Side::left)
+	{
+		result.top *= PART_LF_LOWER / PART_RT_LOWER;	// gross hack to move flags
+		result.middle *= PART_LF_LOWER / PART_RT_LOWER;
+		result.bottom *= PART_LF_LOWER / PART_RT_LOWER;
+	}
+	return result;
 }
+
 
 void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts,
 								   bool forward)
