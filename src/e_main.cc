@@ -956,15 +956,25 @@ void Instance::Selection_Clear(bool no_save)
 	RedrawMap();
 }
 
+static const SideDef *getNextSide(const Document &doc, const LineDef &source, Side sourceSide,
+								  const LineDef &next)
+{
+	if(source.end == next.start || source.start == next.end)
+		return doc.getSide(next, sourceSide);
+	if(source.end == next.end || source.start == next.start)
+		return doc.getSide(next, -sourceSide);
+	return nullptr;
+}
+
 static byte linedefFacetContinuation(const Document &doc, const LineDef &source, byte sourceFacets, 
 	const LineDef &next)
 {
 	if(&source == &next)
-		return;
+		return 0;
 	if(next.start != source.end && next.start != source.start &&
 		next.end != source.start && next.end != source.end)
 	{
-		return;
+		return 0;
 	}
 	bool flipped = next.start == source.start || next.end == source.end;
 	const SideDef *sourceRight, *sourceLeft, *nextRight, *nextLeft;
