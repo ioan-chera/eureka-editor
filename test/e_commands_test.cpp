@@ -147,3 +147,17 @@ TEST_F(SelectNeighborFixture, SelectFromMidWall)
     ASSERT_EQ(inst.edit.Selected->get_ext(1), PART_RT_LOWER);
     ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);    
 }
+
+TEST_F(SelectNeighborFixture, SelectFromBottom)
+{
+    inst.EXEC_Param[0] = "texture";
+    inst.edit.mode = ObjType::linedefs;
+    inst.edit.highlight.num = 2;
+    inst.edit.highlight.parts = PART_RT_LOWER;
+
+    inst.CMD_SelectNeighbors();
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 3);
+    ASSERT_EQ(inst.edit.Selected->get_ext(0), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(1), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);    
+}

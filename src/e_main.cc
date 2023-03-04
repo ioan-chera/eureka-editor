@@ -982,11 +982,11 @@ static WallContinuity getWallTextureContinuity(const Document &doc, const LineDe
 	const Sector *nextFrontSector = nextFront ? &doc.getSector(*nextFront) : nullptr;
 	const SideDef *nextBack = doc.getSide(next, -nextSide);
 	const Sector *nextBackSector = nextBack ? &doc.getSector(*nextBack) : nullptr;
-	
+
 	// Shut lines are over. Same if they have no common heights.
 	if(!sourceFrontSector || !nextFrontSector ||
 		sourceFrontSector->ceilh <= sourceFrontSector->floorh ||
-		nextFrontSector->ceilh <= nextFrontSector->floorh || 
+		nextFrontSector->ceilh <= nextFrontSector->floorh ||
 		sourceFrontSector->floorh >= nextFrontSector->ceilh ||
 		nextFrontSector->floorh >= sourceFrontSector->ceilh)
 	{
@@ -1020,7 +1020,7 @@ static WallContinuity getWallTextureContinuity(const Document &doc, const LineDe
 				{
 					result.top |= PART_RT_UPPER;
 				}
-				// Continuous top to bottom facet. Cannot match with railings this way (extremities 
+				// Continuous top to bottom facet. Cannot match with railings this way (extremities
 				// already tested)
 				if(nextBackSector->floorh > nextFrontSector->floorh &&
 					nextBackSector->floorh > sourceBackSector->ceilh &&
@@ -1062,9 +1062,9 @@ static WallContinuity getWallTextureContinuity(const Document &doc, const LineDe
 			}
 		}
 		// We have window, so check middle (railing) continuity
-		if(sourceBackSector->ceilh > sourceBackSector->floorh && nextBackSector && 
-			nextBackSector->ceilh > nextBackSector->floorh && 
-			sourceBackSector->ceilh > nextBackSector->floorh && 
+		if(sourceBackSector->ceilh > sourceBackSector->floorh && nextBackSector &&
+			nextBackSector->ceilh > nextBackSector->floorh &&
+			sourceBackSector->ceilh > nextBackSector->floorh &&
 			nextBackSector->ceilh > sourceBackSector->floorh &&
 		   nextFront->MidTex() == sourceFront->MidTex())
 		{
@@ -1149,9 +1149,9 @@ void Instance::SelectNeighborLines_texture(int objnum, byte parts)
 		{
 			for(int neigh : vertLineMap[vertNum])
 			{
-				if(neigh == objnum)
-					continue;
 				const auto &otherLine = level.linedefs[neigh];
+				if(otherLine.get() == entry.line)
+					continue;
 				bool flipped = otherLine->start == entry.line->start ||
 				               otherLine->end == entry.line->end;
 
@@ -1164,18 +1164,18 @@ void Instance::SelectNeighborLines_texture(int objnum, byte parts)
 					byte upper;
 				};
 
-				for(auto iteration : {Iteration{PART_RT_ALL, Side::right, 
-				                                PART_RT_LOWER, PART_RT_RAIL, PART_RT_UPPER}, 
+				for(auto iteration : {Iteration{PART_RT_ALL, Side::right,
+				                                PART_RT_LOWER, PART_RT_RAIL, PART_RT_UPPER},
 									  Iteration{PART_LF_ALL, Side::left,
 									            PART_LF_LOWER, PART_LF_RAIL, PART_LF_UPPER}})
 				{
 					if(entry.parts & iteration.parts)
 					{
-						WallContinuity continuity = getWallTextureContinuity(level, *entry.line, 
-								iteration.side, *otherLine, flipped ? -iteration.side : 
+						WallContinuity continuity = getWallTextureContinuity(level, *entry.line,
+								iteration.side, *otherLine, flipped ? -iteration.side :
 																	   iteration.side);
-						byte otherParts = (entry.parts & iteration.lower ? continuity.bottom : 0) | 
-										  (entry.parts & iteration.rail  ? continuity.middle : 0) | 
+						byte otherParts = (entry.parts & iteration.lower ? continuity.bottom : 0) |
+										  (entry.parts & iteration.rail  ? continuity.middle : 0) |
 										  (entry.parts & iteration.upper ? continuity.top    : 0);
 						byte otherCurrentlySelected = edit.Selected->get_ext(neigh);
 						if((otherCurrentlySelected & otherParts) < otherParts)
