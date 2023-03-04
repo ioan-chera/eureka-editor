@@ -59,9 +59,12 @@ void SelectNeighborFixture::SetUp()
               *
              / \
     *---*---*---*
-      \_     _/
-        \_ _/
-          *
+    |           |
+    |   *---*   |
+    |   |mid|   |
+    |   *---*   |
+    |        \._|
+    *-----------*
 
     */
 
@@ -108,8 +111,14 @@ void SelectNeighborFixture::SetUp()
     addVertex(64, 0);
     addVertex(128, 0);
     addVertex(192, 0);
-    addVertex(96, -64); // bottom V
+    addVertex(0, -192); // bottom vertices
+    addVertex(192, -192); // bottom vertices
     addVertex(160, 32); // top V
+    // Middle cage
+    addVertex(64, -64);
+    addVertex(128, -64);
+    addVertex(128, -128);
+    addVertex(64, -128);
 
     addSector(0, 128);
     addSector(32, 96);
@@ -120,18 +129,43 @@ void SelectNeighborFixture::SetUp()
     // bottom walls
     addSide("-", "OTHER", "-", 0);
     addSide("-", "OTHER", "-", 0);
-    // top walls
+    addSide("-", "OTHER", "-", 0);
+    // top walls (differently textured)
     addSide("-", "-", "-", 1);
-    addSide("-", "OTHER", "-", 1);
-    addSide("-", "OTHER", "-", 1);
+    addSide("-", "NICHE", "-", 1);
+    addSide("-", "NICHE", "-", 1);
+    // middle cage: all are same textured, except for one to show which get picked
+    addSide("-", "CAGE", "-", 0);
+    addSide("-", "CAGE2", "-", 0);
+    addSide("-", "CAGE", "-", 0);
+    addSide("-", "CAGE", "-", 0);
+    addSide("-", "CAGE", "-", 0);
+    addSide("-", "CAGE", "-", 0);
+    addSide("-", "CAGE", "-", 0);
+    addSide("-", "CAGE", "-", 0);
+    // Bottom right beam (midtexture though)
+    addSide("-", "OTHER", "-", 0);
+    addSide("-", "-", "-", 0);
 
     addLine(0, 1, 0, -1);
     addLine(1, 2, 1, -1);
-    addLine(2, 3, 2, 5);
-    addLine(3, 4, 3, -1);
-    addLine(4, 0, 4, -1);
-    addLine(2, 5, 6, -1);
-    addLine(5, 3, 7, -1);
+    addLine(2, 3, 2, 6);
+
+    addLine(3, 5, 3, -1);
+    addLine(5, 4, 4, -1);
+    addLine(4, 0, 5, -1);
+
+    addLine(2, 6, 7, -1);
+    addLine(6, 3, 8, -1);
+
+    // Cage (8-11)
+    addLine(7, 8, 9, 10);   // ----> (top)
+    addLine(9, 8, 11, 12);  // up (right)
+    addLine(9, 10, 13, 14); // <---- (bottom)
+    addLine(7, 10, 15, 16); // down (left)
+
+    // Bottom right beam (midtexture)
+    addLine(5, 9, 18, 17);
 }
 
 TEST_F(SelectNeighborFixture, SelectFromMidWall)
@@ -145,10 +179,10 @@ TEST_F(SelectNeighborFixture, SelectFromMidWall)
     ASSERT_EQ(inst.edit.Selected->count_obj(), 3);
     ASSERT_EQ(inst.edit.Selected->get_ext(0), PART_RT_LOWER);
     ASSERT_EQ(inst.edit.Selected->get_ext(1), PART_RT_LOWER);
-    ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);    
+    ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);
 }
 
-TEST_F(SelectNeighborFixture, SelectFromBottom)
+TEST_F(SelectNeighborFixture, SelectFromBottomThenAddThenClearAll)
 {
     inst.EXEC_Param[0] = "texture";
     inst.edit.mode = ObjType::linedefs;
@@ -159,5 +193,76 @@ TEST_F(SelectNeighborFixture, SelectFromBottom)
     ASSERT_EQ(inst.edit.Selected->count_obj(), 3);
     ASSERT_EQ(inst.edit.Selected->get_ext(0), PART_RT_LOWER);
     ASSERT_EQ(inst.edit.Selected->get_ext(1), PART_RT_LOWER);
-    ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);    
+    ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);
+
+    // Now select the two textures from north to show they get added
+    inst.edit.highlight.num = 7;
+    inst.edit.highlight.parts = PART_RT_LOWER;
+    inst.CMD_SelectNeighbors();
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 5);
+    ASSERT_EQ(inst.edit.Selected->get_ext(0), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(1), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(6), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(7), PART_RT_LOWER);
+
+    // Now manually select a bottom one
+    inst.edit.Selected->set_ext(4, PART_RT_LOWER);
+
+    // And apply the command on it
+    inst.edit.highlight.num = 4;
+    inst.CMD_SelectNeighbors();
+    ASSERT_TRUE(inst.edit.Selected->empty());
+}
+
+TEST_F(SelectNeighborFixture, SelectCage)
+{
+    // Select interior
+    inst.EXEC_Param[0] = "texture";
+    inst.edit.mode = ObjType::linedefs;
+    inst.edit.highlight.num = 8;
+    inst.edit.highlight.parts = PART_RT_RAIL;
+
+    inst.CMD_SelectNeighbors();
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 4);
+    ASSERT_EQ(inst.edit.Selected->get_ext(8), PART_RT_RAIL);
+    ASSERT_EQ(inst.edit.Selected->get_ext(9), PART_LF_RAIL);
+    ASSERT_EQ(inst.edit.Selected->get_ext(10), PART_RT_RAIL);
+    ASSERT_EQ(inst.edit.Selected->get_ext(11), PART_LF_RAIL);
+
+    // Now select exterior
+    inst.edit.highlight.num = 9;
+    inst.edit.highlight.parts = PART_RT_RAIL;
+    inst.CMD_SelectNeighbors();
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 4);
+    ASSERT_EQ(inst.edit.Selected->get_ext(8), PART_RT_RAIL);
+    ASSERT_EQ(inst.edit.Selected->get_ext(9), PART_LF_RAIL | PART_RT_RAIL);
+    ASSERT_EQ(inst.edit.Selected->get_ext(10), PART_RT_RAIL | PART_LF_RAIL);
+    ASSERT_EQ(inst.edit.Selected->get_ext(11), PART_LF_RAIL | PART_RT_RAIL);
+}
+
+TEST_F(SelectNeighborFixture, WallsDoNotPropagateToRails)
+{
+    inst.EXEC_Param[0] = "texture";
+    inst.edit.mode = ObjType::linedefs;
+    inst.edit.highlight.num = 3;
+    inst.edit.highlight.parts = PART_RT_LOWER;
+    inst.CMD_SelectNeighbors();
+
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 3);
+    ASSERT_EQ(inst.edit.Selected->get_ext(3), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(4), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(5), PART_RT_LOWER);
+}
+
+TEST_F(SelectNeighborFixture, RailsDoNotPropagateToWalls)
+{
+    inst.EXEC_Param[0] = "texture";
+    inst.edit.mode = ObjType::linedefs;
+    inst.edit.highlight.num = 12;
+    inst.edit.highlight.parts = PART_LF_RAIL;
+    inst.CMD_SelectNeighbors();
+
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 1);
+    ASSERT_EQ(inst.edit.Selected->get_ext(12), PART_LF_RAIL);
 }
