@@ -50,6 +50,7 @@
 #include "ui_window.h"
 
 #include <algorithm>
+#include <queue>
 
 // config items
 int config::default_edit_mode = 3;  // Vertices
@@ -968,8 +969,8 @@ struct WallContinuity
 	byte bottom;
 };
 
-static WallContinuity getWallContinuity(const Document &doc, const LineDef &source, Side sourceSide,
-	const LineDef &next, Side nextSide)
+static WallContinuity getWallTextureContinuity(const Document &doc, const LineDef &source,
+											   Side sourceSide, const LineDef &next, Side nextSide)
 {
 	WallContinuity result = {};
 
@@ -1001,22 +1002,27 @@ static WallContinuity getWallContinuity(const Document &doc, const LineDef &sour
 			// 1-sided next
 			if(!nextBackSector)
 			{
-				if(nextFrontSector->ceilh > sourceBackSector->ceilh)
+				if(nextFrontSector->ceilh > sourceBackSector->ceilh &&
+				   nextFront->MidTex() == sourceFront->UpperTex())
+				{
 					result.top |= PART_RT_RAIL;
+				}
 			}
 			else // 2-sided next
 			{
 				// Continuous top facet
 				if(nextFrontSector->ceilh > nextBackSector->ceilh &&
 					nextFrontSector->ceilh > sourceBackSector->ceilh &&
-					sourceFrontSector->ceilh > nextBackSector->ceilh)
+					sourceFrontSector->ceilh > nextBackSector->ceilh &&
+				   nextFront->UpperTex() == sourceFront->UpperTex())
 				{
 					result.top |= PART_RT_UPPER;
 				}
 				// Continuous top to bottom facet. Cannot match with railings this way (extremities 
 				// already tested)
 				if(nextBackSector->floorh > nextFrontSector->floorh &&
-					nextBackSector->floorh > sourceBackSector->ceilh)
+					nextBackSector->floorh > sourceBackSector->ceilh &&
+				   nextFront->LowerTex() == sourceFront->UpperTex())
 				{
 					result.top |= PART_RT_LOWER;
 				}
@@ -1028,21 +1034,26 @@ static WallContinuity getWallContinuity(const Document &doc, const LineDef &sour
 			// 1-sided next
 			if(!nextBackSector)
 			{
-				if(sourceBackSector->floorh > nextFrontSector->floorh)
+				if(sourceBackSector->floorh > nextFrontSector->floorh &&
+				   nextFront->MidTex() == sourceFront->LowerTex())
+				{
 					result.bottom |= PART_RT_RAIL;
+				}
 			}
 			else // 2-sided next
 			{
 				// Continuous bottom facet
 				if(nextBackSector->floorh > nextFrontSector->floorh &&
 					nextBackSector->floorh > sourceFrontSector->floorh &&
-					sourceBackSector->floorh > nextFrontSector->floorh)
+					sourceBackSector->floorh > nextFrontSector->floorh &&
+				   nextFront->LowerTex() == sourceFront->LowerTex())
 				{
 					result.bottom |= PART_RT_LOWER;
 				}
 				// Continuous bottom to top facet. Same thing about railings not being compatible.
 				if(nextFrontSector->ceilh > nextBackSector->ceilh &&
-					sourceBackSector->floorh > nextBackSector->ceilh)
+					sourceBackSector->floorh > nextBackSector->ceilh &&
+				   nextFront->UpperTex() == sourceFront->LowerTex())
 				{
 					result.bottom |= PART_RT_UPPER;
 				}
@@ -1052,25 +1063,32 @@ static WallContinuity getWallContinuity(const Document &doc, const LineDef &sour
 		if(sourceBackSector->ceilh > sourceBackSector->floorh && nextBackSector && 
 			nextBackSector->ceilh > nextBackSector->floorh && 
 			sourceBackSector->ceilh > nextBackSector->floorh && 
-			nextBackSector->ceilh > sourceBackSector->floorh)
+			nextBackSector->ceilh > sourceBackSector->floorh &&
+		   nextFront->MidTex() == sourceFront->MidTex())
 		{
 			result.middle |= PART_RT_RAIL;
 		}
 	}
 	else // 1-sided source
 	{
-		if(!nextBackSector)	// simple wall-wall continuity
-			result.middle |= PART_RT_RAIL;
+		// simple wall-wall continuity
+		if(!nextBackSector)
+		{
+			if(nextFront->MidTex() == sourceFront->MidTex())
+				result.middle |= PART_RT_RAIL;
+		}
 		else // wall - 2-sided continuity
 		{
 			// wall - top continuity
 			if(nextFrontSector->ceilh > nextBackSector->ceilh &&
-				sourceFrontSector->ceilh > nextBackSector->ceilh)
+				sourceFrontSector->ceilh > nextBackSector->ceilh &&
+			   nextFront->UpperTex() == sourceFront->MidTex())
 			{
 				result.middle |= PART_RT_UPPER;
 			}
 			if(nextBackSector->floorh > nextFrontSector->floorh &&
-				nextBackSector->floorh > sourceFrontSector->floorh)
+				nextBackSector->floorh > sourceFrontSector->floorh &&
+			   nextFront->LowerTex() == sourceFront->MidTex())
 			{
 				result.middle |= PART_RT_LOWER;
 			}
@@ -1087,6 +1105,62 @@ static WallContinuity getWallContinuity(const Document &doc, const LineDef &sour
 	return result;
 }
 
+static std::vector<std::vector<int>> makeVertexLineMap(const Document &doc)
+{
+	std::vector<std::vector<int>> result;
+	result.resize(doc.numVertices());
+	for(int i = 0; i < doc.numLinedefs(); ++i)
+	{
+		const auto &line = doc.linedefs[i];
+		for(int vertNum : {line->start, line->end})
+			if(doc.isVertex(vertNum))
+				result[vertNum].push_back(i);
+	}
+	return result;
+}
+
+void Instance::SelectNeighborLines_texture(int objnum, byte parts)
+{
+	if(!level.isLinedef(objnum) || !(parts & (PART_RT_ALL | PART_LF_ALL)))
+		return;
+
+	auto vertLineMap = makeVertexLineMap(level);
+
+	const auto &source = level.linedefs[objnum];
+	struct Entry
+	{
+		const LineDef *line;
+		byte parts;
+	};
+	std::queue<Entry> queue;
+	queue.push({source.get(), parts});
+
+	while(!queue.empty())
+	{
+		Entry entry = queue.front();
+		queue.pop();
+
+		for(int vertNum : {entry.line->start, entry.line->end})
+		{
+			for(int neigh : vertLineMap[vertNum])
+			{
+				if(neigh == objnum)
+					continue;
+				const auto &otherLine = level.linedefs[neigh];
+				bool flipped = otherLine->start == entry.line->start ||
+				               otherLine->end == entry.line->end;
+				if(entry.parts & PART_RT_ALL)
+				{
+					WallContinuity continuity = getWallTextureContinuity(level, *entry.line, Side::right, *otherLine, flipped ? Side::left : Side::right);
+					if(entry.parts & PART_RT_LOWER)
+					{
+
+					}
+				}
+			}
+		}
+	}
+}
 
 void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts,
 								   bool forward)
