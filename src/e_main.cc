@@ -1135,6 +1135,9 @@ void Instance::SelectNeighborLines_texture(int objnum, byte parts)
 	std::queue<Entry> queue;
 	queue.push({source.get(), parts});
 
+	// Also select the current line
+	edit.Selected->set_ext(objnum, edit.Selected->get_ext(objnum) | parts);
+
 	while(!queue.empty())
 	{
 		Entry entry = queue.front();
@@ -1149,12 +1152,35 @@ void Instance::SelectNeighborLines_texture(int objnum, byte parts)
 				const auto &otherLine = level.linedefs[neigh];
 				bool flipped = otherLine->start == entry.line->start ||
 				               otherLine->end == entry.line->end;
-				if(entry.parts & PART_RT_ALL)
-				{
-					WallContinuity continuity = getWallTextureContinuity(level, *entry.line, Side::right, *otherLine, flipped ? Side::left : Side::right);
-					if(entry.parts & PART_RT_LOWER)
-					{
 
+				struct Iteration
+				{
+					byte parts;
+					Side side;
+					byte lower;
+					byte rail;
+					byte upper;
+				};
+
+				for(auto iteration : {Iteration{PART_RT_ALL, Side::right, 
+				                                PART_RT_LOWER, PART_RT_RAIL, PART_RT_UPPER}, 
+									  Iteration{PART_LF_ALL, Side::left,
+									            PART_LF_LOWER, PART_LF_RAIL, PART_LF_UPPER}})
+				{
+					if(entry.parts & iteration.parts)
+					{
+						WallContinuity continuity = getWallTextureContinuity(level, *entry.line, 
+								iteration.side, *otherLine, flipped ? -iteration.side : 
+																	   iteration.side);
+						byte otherParts = (entry.parts & iteration.lower ? continuity.bottom : 0) | 
+										  (entry.parts & iteration.rail  ? continuity.middle : 0) | 
+										  (entry.parts & iteration.upper ? continuity.top    : 0);
+						byte otherCurrentlySelected = edit.Selected->get_ext(neigh);
+						if((otherCurrentlySelected & otherParts) < otherParts)
+						{
+							edit.Selected->set_ext(neigh, otherCurrentlySelected | otherParts);
+							queue.push({otherLine.get(), otherParts});
+						}
 					}
 				}
 			}

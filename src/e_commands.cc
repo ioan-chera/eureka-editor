@@ -159,8 +159,13 @@ void Instance::CMD_SelectNeighbors()
 		edit.Selected->set_ext(num, edit.Selected->get_ext(num) | parts);
 		if (edit.mode == ObjType::linedefs)
 		{
-			SelectNeighborLines(num, criterion, parts, true);
-			SelectNeighborLines(num, criterion, parts, false);
+			if(criterion == SelectNeighborCriterion::texture)
+				SelectNeighborLines_texture(num, parts);
+			else
+			{
+				SelectNeighborLines(num, criterion, parts, true);
+				SelectNeighborLines(num, criterion, parts, false);
+			}
 		}
 		else
 		{
