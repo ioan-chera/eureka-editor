@@ -993,6 +993,8 @@ static WallContinuity getWallTextureContinuity(const Document &doc, const LineDe
 		return result;
 	}
 
+	// WARNING: one-sided lines actually use the lower part, not the rail!
+
 	// If source is two-sided...
 	if(sourceBackSector)
 	{
@@ -1005,7 +1007,7 @@ static WallContinuity getWallTextureContinuity(const Document &doc, const LineDe
 				if(nextFrontSector->ceilh > sourceBackSector->ceilh &&
 				   nextFront->MidTex() == sourceFront->UpperTex())
 				{
-					result.top |= PART_RT_RAIL;
+					result.top |= PART_RT_LOWER;
 				}
 			}
 			else // 2-sided next
@@ -1037,7 +1039,7 @@ static WallContinuity getWallTextureContinuity(const Document &doc, const LineDe
 				if(sourceBackSector->floorh > nextFrontSector->floorh &&
 				   nextFront->MidTex() == sourceFront->LowerTex())
 				{
-					result.bottom |= PART_RT_RAIL;
+					result.bottom |= PART_RT_LOWER;
 				}
 			}
 			else // 2-sided next
@@ -1075,7 +1077,7 @@ static WallContinuity getWallTextureContinuity(const Document &doc, const LineDe
 		if(!nextBackSector)
 		{
 			if(nextFront->MidTex() == sourceFront->MidTex())
-				result.middle |= PART_RT_RAIL;
+				result.bottom |= PART_RT_LOWER;
 		}
 		else // wall - 2-sided continuity
 		{
@@ -1084,13 +1086,13 @@ static WallContinuity getWallTextureContinuity(const Document &doc, const LineDe
 				sourceFrontSector->ceilh > nextBackSector->ceilh &&
 			   nextFront->UpperTex() == sourceFront->MidTex())
 			{
-				result.middle |= PART_RT_UPPER;
+				result.bottom |= PART_RT_UPPER;
 			}
 			if(nextBackSector->floorh > nextFrontSector->floorh &&
 				nextBackSector->floorh > sourceFrontSector->floorh &&
 			   nextFront->LowerTex() == sourceFront->MidTex())
 			{
-				result.middle |= PART_RT_LOWER;
+				result.bottom |= PART_RT_LOWER;
 			}
 		}
 	}

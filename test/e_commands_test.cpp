@@ -21,13 +21,21 @@
 #include "Vertex.h"
 #include "gtest/gtest.h"
 
-TEST(Commands, SelectNeighborLinesByTexture)
+class SelectNeighborFixture : public ::testing::Test
 {
+protected:
+    void SetUp() override;
+    void TearDown() override
+    {
+        // Cleanup
+        delete inst.edit.Selected;
+    }
+
     Instance inst;
-    inst.EXEC_Param[0] = "texture";
-    inst.edit.mode = ObjType::linedefs;
-    inst.edit.highlight.num = 1;
-    inst.edit.highlight.parts = PART_RT_RAIL;
+};
+
+void SelectNeighborFixture::SetUp()
+{
     inst.edit.Selected = new selection_c(inst.edit.mode, true);
 
     // Use case: highlight a wall and see selection spread to:
@@ -124,14 +132,18 @@ TEST(Commands, SelectNeighborLinesByTexture)
     addLine(4, 0, 4, -1);
     addLine(2, 5, 6, -1);
     addLine(5, 3, 7, -1);
+}
 
-    // Now we have it
+TEST_F(SelectNeighborFixture, SelectFromMidWall)
+{
+    inst.EXEC_Param[0] = "texture";
+    inst.edit.mode = ObjType::linedefs;
+    inst.edit.highlight.num = 1;
+    inst.edit.highlight.parts = PART_RT_LOWER;
+
     inst.CMD_SelectNeighbors();
     ASSERT_EQ(inst.edit.Selected->count_obj(), 3);
-    ASSERT_EQ(inst.edit.Selected->get_ext(0), PART_RT_RAIL);
-    ASSERT_EQ(inst.edit.Selected->get_ext(1), PART_RT_RAIL);
-    ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);
-
-    // Cleanup
-    delete inst.edit.Selected;
+    ASSERT_EQ(inst.edit.Selected->get_ext(0), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(1), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);    
 }
