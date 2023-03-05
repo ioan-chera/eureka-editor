@@ -114,6 +114,7 @@ public:
 
 	const Sector &getSector(const SideDef &side) const;
 	int getSectorID(const LineDef &line, Side side) const;
+	const Sector *getSector(const LineDef &line, Side side) const;
 	const Vertex &getStart(const LineDef &line) const;
 	const Vertex &getEnd(const LineDef &line) const;
 	const SideDef *getRight(const LineDef &line) const;

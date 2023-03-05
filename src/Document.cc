@@ -144,6 +144,14 @@ int Document::getSectorID(const LineDef &line, Side side) const
 	}
 }
 
+const Sector *Document::getSector(const LineDef &line, Side side) const
+{
+	int sid = getSectorID(line, side);
+	if(isSector(sid))
+		return sectors[sid].get();
+	return nullptr;
+}
+
 const Vertex &Document::getStart(const LineDef &line) const
 {
 	return *vertices[line.start];

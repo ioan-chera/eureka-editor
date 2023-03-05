@@ -287,7 +287,7 @@ public:
 	void ValidateVertexRefs(LineDef *ld, int num);
 	void ValidateSectorRef(SideDef *sd, int num);
 	void ValidateSidedefRefs(LineDef *ld, int num);
-	
+
 	// M_NODES
 	void BuildNodesAfterSave(int lev_idx);
 	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const EUR_PRINTF(2, 3);
@@ -361,6 +361,7 @@ private:
 	void zoom_fit();
 	void SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts, bool forward);
 	void SelectNeighborLines_texture(int objnum, byte parts);
+	void SelectNeighborLines_height(int objnum, byte parts);
 	void SelectNeighborSectors(int objnum, SString option, byte parts);
 
 	// E_SECTOR

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------
 
 #include "Instance.h"
+#include "w_rawdef.h"
 #include <queue>
 
 //
@@ -258,6 +259,129 @@ void Instance::SelectNeighborLines_texture(int objnum, byte parts)
 				}
 			}
 		}
+	}
+}
+
+static bool checkMatchingSectorHeights(const Instance &inst, byte parts,
+									   const LineDef &source, Side sourceSide, const LineDef &next,
+									   Side nextSide)
+{
+	const Document &doc = inst.level;
+	const SideDef *sourceSidedef = doc.getSide(source, sourceSide);
+	const SideDef *nextSidedef = doc.getSide(next, nextSide);
+	if(!sourceSidedef || !nextSidedef)
+		return false;
+	const Sector &sourceSector = doc.getSector(*sourceSidedef);
+	const Sector &nextSector = doc.getSector(*nextSidedef);
+
+	if(parts & (PART_RT_LOWER | PART_LF_LOWER) && sourceSector.floorh != nextSector.floorh)
+		return false;
+	if(parts & (PART_RT_UPPER | PART_LF_UPPER) && sourceSector.ceilh != nextSector.ceilh)
+		return false;
+	if(parts & (PART_RT_RAIL | PART_LF_RAIL))
+	{
+		const Sector *sourceBackSector = doc.getSector(source, -sourceSide);
+		if(!sourceBackSector)
+			return false;
+		const Sector *nextBackSector = doc.getSector(next, -nextSide);
+		if(!nextBackSector)
+			return false;
+
+		int lowestceil1 = std::min(sourceSector.ceilh, sourceBackSector->ceilh);
+		int highestfloor1 = std::max(sourceSector.floorh, sourceBackSector->floorh);
+		int midheight1 = lowestceil1 - highestfloor1;
+
+		int lowestceil2 = std::min(nextSector.ceilh, nextBackSector->ceilh);
+		int highestfloor2 = std::max(nextSector.floorh, nextBackSector->floorh);
+		int midheight2 = lowestceil2 - highestfloor2;
+
+		int texheight1 = inst.wad.images.W_GetTextureHeight(inst.conf, sourceSidedef->MidTex());
+		int texheight2 = inst.wad.images.W_GetTextureHeight(inst.conf, nextSidedef->MidTex());
+
+		if (midheight1 == midheight2 && midheight1 <= std::min(texheight1, texheight2)
+			&& lowestceil1 == lowestceil2 && highestfloor1 == highestfloor2)
+		{
+			return true;
+		}
+
+		auto translatedOffset = [](const LineDef &line, const SideDef &side, int midheight,
+								   int texheight)
+		{
+			if(line.flags & MLF_LowerUnpegged)
+				return texheight - midheight + side.y_offset;
+			return side.y_offset;
+		};
+
+		if (texheight1 == texheight2 && texheight1 <= std::min(midheight1, midheight2)
+			&& translatedOffset(source, *sourceSidedef, midheight1, texheight1) ==
+			   translatedOffset(next, *nextSidedef, midheight2, texheight2))
+		{
+			return true;
+		}
+		return false;
+	}
+	return true;
+}
+
+void Instance::SelectNeighborLines_height(int objnum, byte parts)
+{
+	if(!level.isLinedef(objnum) || !(parts & (PART_RT_ALL | PART_LF_ALL)))
+		return;
+
+	auto vertLineMap = makeVertexLineMap(level);
+
+	const auto &source = level.linedefs[objnum];
+	struct Entry
+	{
+		const LineDef *line;
+		byte parts;
+	};
+	// NOTE: the meaning of the parts is stricly thus:
+	// - lower, upper: floor or ceiling height on that side of the line
+	// - rail: apply the opening OR texture size.
+	// The parts assigned here may not match the user selection parts, so processing may need to be
+	// done.
+
+	Entry start = {source.get(), parts};
+	if(source->OneSided() && start.parts & PART_RT_LOWER)
+		start.parts |= PART_RT_UPPER;
+
+	std::queue<Entry> queue;
+	queue.push(start);
+
+	// Also select the current line
+	edit.Selected->set_ext(objnum, edit.Selected->get_ext(objnum) | parts);
+
+	while(!queue.empty())
+	{
+		Entry entry = queue.front();
+		queue.pop();
+
+		for(int vertNum : {entry.line->start, entry.line->end})
+		{
+			for(int neigh : vertLineMap[vertNum])
+			{
+				const auto &otherLine = level.linedefs[neigh];
+				if(otherLine.get() == entry.line)
+					continue;
+				bool flipped = otherLine->start == entry.line->start ||
+							   otherLine->end == entry.line->end;
+				struct Iteration
+				{
+					byte parts;
+					Side side;
+				};
+				for(auto iteration : {Iteration{PART_RT_ALL, Side::right},
+									  Iteration{PART_LF_ALL, Side::left}})
+				{
+					if(!(entry.parts & iteration.parts))
+						continue;
+					// TODO
+				}
+			}
+			// TODO
+		}
+		// TODO
 	}
 }
 
