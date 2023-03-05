@@ -376,7 +376,18 @@ void Instance::SelectNeighborLines_height(int objnum, byte parts)
 				{
 					if(!(entry.parts & iteration.parts))
 						continue;
-					// TODO
+					bool match = checkMatchingSectorHeights(*this, entry.parts, *entry.line,
+															iteration.side, *otherLine,
+															flipped ? -iteration.side :
+															iteration.side);
+					if(!match)
+						continue;
+					byte nextParts = flipped ? (byte)((entry.parts & PART_LF_ALL) >> 4) |
+					                           (byte)((entry.parts & PART_RT_ALL) << 4) :
+					                           entry.parts;
+
+					
+//					if(edit.Selected->get_ext(neigh) & entry.parts)
 				}
 			}
 			// TODO
