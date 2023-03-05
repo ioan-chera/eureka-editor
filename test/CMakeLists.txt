@@ -149,6 +149,7 @@ unit_test(general
         e_objects.cc
         e_path.cc
         e_sector.cc
+        e_select.cc
         e_things.cc
         e_vertex.cc
         im_color.cc

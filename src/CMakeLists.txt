@@ -63,6 +63,7 @@ set(source_e
     e_objects.h
     e_path.cc
     e_path.h
+    e_select.cc
     e_sector.cc
     e_sector.h
     e_things.cc
