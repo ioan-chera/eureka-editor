@@ -323,6 +323,40 @@ static bool checkMatchingSectorHeights(const Instance &inst, byte parts,
 	return true;
 }
 
+static byte removeUnselectableFacets(const Document &doc, const LineDef &line, byte parts)
+{
+	const SideDef *right = doc.getSide(line, Side::right);
+	const SideDef *left = doc.getSide(line, Side::left);
+
+	if(!left && !right)
+		return 0;
+	if(!left)
+		return parts & PART_RT_LOWER;
+	if(!right)
+		return parts & PART_LF_LOWER;
+
+	// two sided here
+	const Sector &rightSector = doc.getSector(*right);
+	const Sector &leftSector = doc.getSector(*left);
+
+	if(rightSector.floorh >= leftSector.floorh)
+		parts &= ~PART_RT_LOWER;
+	else if(leftSector.floorh >= rightSector.floorh)
+		parts &= ~PART_LF_LOWER;
+	if(rightSector.ceilh >= leftSector.ceilh)
+		parts &= ~PART_LF_UPPER;
+	else if(leftSector.ceilh >= rightSector.ceilh)
+		parts &= ~PART_RT_UPPER;
+	if(rightSector.ceilh <= rightSector.floorh || leftSector.ceilh <= leftSector.floorh || leftSector.floorh >= rightSector.ceilh || rightSector.floorh >= leftSector.ceilh)
+	{
+		parts &= ~(PART_RT_RAIL | PART_LF_RAIL);
+	}
+
+	// TODO: still something wrong
+
+	return parts;
+}
+
 void Instance::SelectNeighborLines_height(int objnum, byte parts)
 {
 	if(!level.isLinedef(objnum) || !(parts & (PART_RT_ALL | PART_LF_ALL)))
@@ -385,14 +419,17 @@ void Instance::SelectNeighborLines_height(int objnum, byte parts)
 					byte nextParts = flipped ? (byte)((entry.parts & PART_LF_ALL) >> 4) |
 					                           (byte)((entry.parts & PART_RT_ALL) << 4) :
 					                           entry.parts;
-
-					
-//					if(edit.Selected->get_ext(neigh) & entry.parts)
+					byte nextPartsSel = removeUnselectableFacets(level, *otherLine,
+																 otherLine->OneSided() ?
+																 PART_RT_LOWER : nextParts);
+					byte cursel = edit.Selected->get_ext(neigh);
+					if((cursel & nextPartsSel) == nextPartsSel)
+						continue;
+					edit.Selected->set_ext(neigh, cursel | nextPartsSel);
+					queue.push({otherLine.get(), nextParts});
 				}
 			}
-			// TODO
 		}
-		// TODO
 	}
 }
 
@@ -575,10 +612,7 @@ void Instance::CMD_SelectNeighbors()
 			if(criterion == SelectNeighborCriterion::texture)
 				SelectNeighborLines_texture(num, parts);
 			else
-			{
-				SelectNeighborLines(num, criterion, parts, true);
-				SelectNeighborLines(num, criterion, parts, false);
-			}
+				SelectNeighborLines_height(num, parts);
 		}
 		else
 		{
