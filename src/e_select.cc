@@ -29,6 +29,15 @@
 #include "w_rawdef.h"
 #include <queue>
 
+struct SideIteration
+{
+	byte parts;
+	Side side;
+	byte lower;
+	byte rail;
+	byte upper;
+};
+
 //
 // Given a source line, a next line, and their facing sides, it returns the visible faces which
 // touch each other for selecting neighbors by texture.
@@ -36,14 +45,33 @@
 
 struct WallContinuity
 {
-	byte top;
-	byte middle;
-	byte bottom;
+	WallContinuity &moveLeft(Side side);
+	byte otherParts(byte parts, const SideIteration &iteration) const;
+
+	byte top, middle, bottom;
 };
 
-static WallContinuity getWallTextureContinuity(const Document &doc, const LineDef &source,
+WallContinuity &WallContinuity::moveLeft(Side side)
+{
+	if(side == Side::left)
+	{
+		top *= PART_LF_LOWER / PART_RT_LOWER;	// gross hack to move flags
+		middle *= PART_LF_LOWER / PART_RT_LOWER;
+		bottom *= PART_LF_LOWER / PART_RT_LOWER;
+	}
+	return *this;
+}
+
+byte WallContinuity::otherParts(byte parts, const SideIteration &iteration) const
+{
+	return (parts & iteration.lower ? bottom : 0) | (parts & iteration.rail ? middle : 0) |
+		   (parts & iteration.upper ? top : 0);
+}
+
+static WallContinuity getWallTextureContinuity(const Instance &inst, const LineDef &source,
 											   Side sourceSide, const LineDef &next, Side nextSide)
 {
+	const Document &doc = inst.level;
 	WallContinuity result = {};
 
 	const SideDef *sourceFront = doc.getSide(source, sourceSide);
@@ -169,14 +197,108 @@ static WallContinuity getWallTextureContinuity(const Document &doc, const LineDe
 		}
 	}
 
-	// Finally, flip the front/back to match nextSide
-	if(nextSide == Side::left)
+	return result.moveLeft(nextSide);
+}
+
+static WallContinuity matchingWallHeights(const Instance &inst, const LineDef &source,
+	Side sourceSide, const LineDef &next, Side nextSide)
+{
+	WallContinuity result = {};
+
+	const Document &doc = inst.level;
+	const SideDef *sourceSidedef = doc.getSide(source, sourceSide);
+	const SideDef *nextSidedef = doc.getSide(next, nextSide);
+	if(!sourceSidedef || !nextSidedef)
+		return result;
+	const Sector &sourceSector = doc.getSector(*sourceSidedef);
+	const Sector &nextSector = doc.getSector(*nextSidedef);
+
+	// Any shut sector is removed
+	if(sourceSector.floorh >= sourceSector.ceilh || nextSector.floorh >= nextSector.ceilh)
+		return result;
+
+	const SideDef *sourceBack = doc.getSide(source, -sourceSide);
+	const SideDef *nextBack = doc.getSide(next, -nextSide);
+	const Sector *sourceBackSector = sourceBack ? &doc.getSector(*sourceBack) : nullptr;
+	const Sector *nextBackSector = nextBack ? &doc.getSector(*nextBack) : nullptr;
+
+	// Check lower
+
+	int bottom, top;
+	auto checkNextLine = [&bottom, &top, nextBack, &nextSector, nextBackSector]()
 	{
-		result.top *= PART_LF_LOWER / PART_RT_LOWER;	// gross hack to move flags
-		result.middle *= PART_LF_LOWER / PART_RT_LOWER;
-		result.bottom *= PART_LF_LOWER / PART_RT_LOWER;
+		if(nextBack)
+		{
+			if(std::max(nextSector.floorh, nextBackSector->ceilh) == bottom && nextSector.ceilh == top)
+				return PART_RT_UPPER;
+			if(std::min(nextSector.ceilh, nextBackSector->floorh) == top && nextSector.floorh == bottom)
+				return PART_RT_LOWER;
+		}
+		else
+		{
+			if(nextSector.ceilh == top && nextSector.floorh == bottom)
+				return PART_RT_LOWER;
+		}
+		return 0;
+	};
+	if(sourceBack)
+	{
+		if(sourceBackSector->floorh > sourceSector.floorh)
+		{
+			bottom = sourceSector.floorh;
+			top = std::min(sourceSector.ceilh, sourceBackSector->floorh);
+			result.bottom = checkNextLine();
+		}
+		if(sourceBackSector->ceilh < sourceSector.ceilh)
+		{
+			bottom = std::max(sourceSector.floorh, sourceBackSector->ceilh);
+			top = sourceSector.ceilh;
+			result.top = checkNextLine();
+		}
+		if(sourceBackSector->ceilh > sourceSector.floorh &&
+			sourceSector.ceilh > sourceBackSector->floorh &&
+			sourceBackSector->ceilh > sourceBackSector->floorh && nextBack)
+		{
+			int lowestceil1 = std::min(sourceSector.ceilh, sourceBackSector->ceilh);
+			int highestfloor1 = std::max(sourceSector.floorh, sourceBackSector->floorh);
+			int midheight1 = lowestceil1 - highestfloor1;
+
+			int lowestceil2 = std::min(nextSector.ceilh, nextBackSector->ceilh);
+			int highestfloor2 = std::max(nextSector.floorh, nextBackSector->floorh);
+			int midheight2 = lowestceil2 - highestfloor2;
+
+			int texheight1 = inst.wad.images.W_GetTextureHeight(inst.conf, sourceSidedef->MidTex());
+			int texheight2 = inst.wad.images.W_GetTextureHeight(inst.conf, nextSidedef->MidTex());
+
+			auto translatedOffset = [](const LineDef &line, const SideDef &side, int midheight,
+				int texheight)
+			{
+				if(line.flags & MLF_LowerUnpegged)
+					return texheight - midheight + side.y_offset;
+				return side.y_offset;
+			};
+
+			if(midheight1 == midheight2 && midheight1 <= std::min(texheight1, texheight2)
+				&& lowestceil1 == lowestceil2 && highestfloor1 == highestfloor2)
+			{
+				result.middle = PART_RT_RAIL;
+			}
+			else if(texheight1 == texheight2 && texheight1 <= std::min(midheight1, midheight2)
+				&& translatedOffset(source, *sourceSidedef, midheight1, texheight1) ==
+				translatedOffset(next, *nextSidedef, midheight2, texheight2))
+			{
+				result.middle = PART_RT_RAIL;
+			}
+		}
 	}
-	return result;
+	else
+	{
+		// single sided
+		bottom = sourceSector.floorh;
+		top = sourceSector.ceilh;
+		result.bottom = checkNextLine();
+	}
+	return result.moveLeft(nextSide);
 }
 
 static std::vector<std::vector<int>> makeVertexLineMap(const Document &doc)
@@ -193,14 +315,18 @@ static std::vector<std::vector<int>> makeVertexLineMap(const Document &doc)
 	return result;
 }
 
-void Instance::SelectNeighborLines_texture(int objnum, byte parts)
+
+static void selectNeighborLines(Instance &inst, int objnum, byte parts, WallContinuity (*func)(
+	const Instance &inst, const LineDef &source, Side sourceSide, const LineDef &next, 
+	Side nextSide))
 {
-	if(!level.isLinedef(objnum) || !(parts & (PART_RT_ALL | PART_LF_ALL)))
+	const Document &doc = inst.level;
+	if(!doc.isLinedef(objnum) || !(parts & (PART_RT_ALL | PART_LF_ALL)))
 		return;
 
-	auto vertLineMap = makeVertexLineMap(level);
+	auto vertLineMap = makeVertexLineMap(doc);
 
-	const auto &source = level.linedefs[objnum];
+	const auto &source = doc.linedefs[objnum];
 	struct Entry
 	{
 		const LineDef *line;
@@ -210,7 +336,7 @@ void Instance::SelectNeighborLines_texture(int objnum, byte parts)
 	queue.push({source.get(), parts});
 
 	// Also select the current line
-	edit.Selected->set_ext(objnum, edit.Selected->get_ext(objnum) | parts);
+	inst.edit.Selected->set_ext(objnum, inst.edit.Selected->get_ext(objnum) | parts);
 
 	while(!queue.empty())
 	{
@@ -221,304 +347,30 @@ void Instance::SelectNeighborLines_texture(int objnum, byte parts)
 		{
 			for(int neigh : vertLineMap[vertNum])
 			{
-				const auto &otherLine = level.linedefs[neigh];
+				const auto &otherLine = doc.linedefs[neigh];
 				if(otherLine.get() == entry.line)
 					continue;
 				bool flipped = otherLine->start == entry.line->start ||
 							   otherLine->end == entry.line->end;
 
-				struct Iteration
-				{
-					byte parts;
-					Side side;
-					byte lower;
-					byte rail;
-					byte upper;
-				};
-
-				for(auto iteration : {Iteration{PART_RT_ALL, Side::right,
-												PART_RT_LOWER, PART_RT_RAIL, PART_RT_UPPER},
-									  Iteration{PART_LF_ALL, Side::left,
-												PART_LF_LOWER, PART_LF_RAIL, PART_LF_UPPER}})
+				for(auto iteration : {SideIteration{PART_RT_ALL, Side::right,
+													PART_RT_LOWER, PART_RT_RAIL, PART_RT_UPPER},
+									  SideIteration{PART_LF_ALL, Side::left,
+													PART_LF_LOWER, PART_LF_RAIL, PART_LF_UPPER}})
 				{
 					if(entry.parts & iteration.parts)
 					{
-						WallContinuity continuity = getWallTextureContinuity(level, *entry.line,
-								iteration.side, *otherLine, flipped ? -iteration.side :
-																	   iteration.side);
-						byte otherParts = (entry.parts & iteration.lower ? continuity.bottom : 0) |
-										  (entry.parts & iteration.rail  ? continuity.middle : 0) |
-										  (entry.parts & iteration.upper ? continuity.top    : 0);
-						byte otherCurrentlySelected = edit.Selected->get_ext(neigh);
+						WallContinuity continuity = func(inst, *entry.line, iteration.side, 
+							*otherLine, flipped ? -iteration.side : iteration.side);
+						byte otherParts = continuity.otherParts(entry.parts, iteration);
+						byte otherCurrentlySelected = inst.edit.Selected->get_ext(neigh);
 						if((otherCurrentlySelected & otherParts) < otherParts)
 						{
-							edit.Selected->set_ext(neigh, otherCurrentlySelected | otherParts);
+							inst.edit.Selected->set_ext(neigh, otherCurrentlySelected | otherParts);
 							queue.push({otherLine.get(), otherParts});
 						}
 					}
 				}
-			}
-		}
-	}
-}
-
-static bool checkMatchingSectorHeights(const Instance &inst, byte parts,
-									   const LineDef &source, Side sourceSide, const LineDef &next,
-									   Side nextSide)
-{
-	const Document &doc = inst.level;
-	const SideDef *sourceSidedef = doc.getSide(source, sourceSide);
-	const SideDef *nextSidedef = doc.getSide(next, nextSide);
-	if(!sourceSidedef || !nextSidedef)
-		return false;
-	const Sector &sourceSector = doc.getSector(*sourceSidedef);
-	const Sector &nextSector = doc.getSector(*nextSidedef);
-
-	if(parts & (PART_RT_LOWER | PART_LF_LOWER) && sourceSector.floorh != nextSector.floorh)
-		return false;
-	if(parts & (PART_RT_UPPER | PART_LF_UPPER) && sourceSector.ceilh != nextSector.ceilh)
-		return false;
-	if(parts & (PART_RT_RAIL | PART_LF_RAIL))
-	{
-		const Sector *sourceBackSector = doc.getSector(source, -sourceSide);
-		if(!sourceBackSector)
-			return false;
-		const Sector *nextBackSector = doc.getSector(next, -nextSide);
-		if(!nextBackSector)
-			return false;
-
-		int lowestceil1 = std::min(sourceSector.ceilh, sourceBackSector->ceilh);
-		int highestfloor1 = std::max(sourceSector.floorh, sourceBackSector->floorh);
-		int midheight1 = lowestceil1 - highestfloor1;
-
-		int lowestceil2 = std::min(nextSector.ceilh, nextBackSector->ceilh);
-		int highestfloor2 = std::max(nextSector.floorh, nextBackSector->floorh);
-		int midheight2 = lowestceil2 - highestfloor2;
-
-		int texheight1 = inst.wad.images.W_GetTextureHeight(inst.conf, sourceSidedef->MidTex());
-		int texheight2 = inst.wad.images.W_GetTextureHeight(inst.conf, nextSidedef->MidTex());
-
-		if (midheight1 == midheight2 && midheight1 <= std::min(texheight1, texheight2)
-			&& lowestceil1 == lowestceil2 && highestfloor1 == highestfloor2)
-		{
-			return true;
-		}
-
-		auto translatedOffset = [](const LineDef &line, const SideDef &side, int midheight,
-								   int texheight)
-		{
-			if(line.flags & MLF_LowerUnpegged)
-				return texheight - midheight + side.y_offset;
-			return side.y_offset;
-		};
-
-		if (texheight1 == texheight2 && texheight1 <= std::min(midheight1, midheight2)
-			&& translatedOffset(source, *sourceSidedef, midheight1, texheight1) ==
-			   translatedOffset(next, *nextSidedef, midheight2, texheight2))
-		{
-			return true;
-		}
-		return false;
-	}
-	return true;
-}
-
-static byte removeUnselectableFacets(const Document &doc, const LineDef &line, byte parts)
-{
-	const SideDef *right = doc.getSide(line, Side::right);
-	const SideDef *left = doc.getSide(line, Side::left);
-
-	if(!left && !right)
-		return 0;
-	if(!left)
-		return parts & PART_RT_LOWER;
-	if(!right)
-		return parts & PART_LF_LOWER;
-
-	// two sided here
-	const Sector &rightSector = doc.getSector(*right);
-	const Sector &leftSector = doc.getSector(*left);
-
-	if(rightSector.floorh >= leftSector.floorh)
-		parts &= ~PART_RT_LOWER;
-	else if(leftSector.floorh >= rightSector.floorh)
-		parts &= ~PART_LF_LOWER;
-	if(rightSector.ceilh >= leftSector.ceilh)
-		parts &= ~PART_LF_UPPER;
-	else if(leftSector.ceilh >= rightSector.ceilh)
-		parts &= ~PART_RT_UPPER;
-	if(rightSector.ceilh <= rightSector.floorh || leftSector.ceilh <= leftSector.floorh || leftSector.floorh >= rightSector.ceilh || rightSector.floorh >= leftSector.ceilh)
-	{
-		parts &= ~(PART_RT_RAIL | PART_LF_RAIL);
-	}
-
-	// TODO: still something wrong
-
-	return parts;
-}
-
-void Instance::SelectNeighborLines_height(int objnum, byte parts)
-{
-	if(!level.isLinedef(objnum) || !(parts & (PART_RT_ALL | PART_LF_ALL)))
-		return;
-
-	auto vertLineMap = makeVertexLineMap(level);
-
-	const auto &source = level.linedefs[objnum];
-	struct Entry
-	{
-		const LineDef *line;
-		byte parts;
-	};
-	// NOTE: the meaning of the parts is stricly thus:
-	// - lower, upper: floor or ceiling height on that side of the line
-	// - rail: apply the opening OR texture size.
-	// The parts assigned here may not match the user selection parts, so processing may need to be
-	// done.
-
-	Entry start = {source.get(), parts};
-	if(source->OneSided() && start.parts & PART_RT_LOWER)
-		start.parts |= PART_RT_UPPER;
-
-	std::queue<Entry> queue;
-	queue.push(start);
-
-	// Also select the current line
-	edit.Selected->set_ext(objnum, edit.Selected->get_ext(objnum) | parts);
-
-	while(!queue.empty())
-	{
-		Entry entry = queue.front();
-		queue.pop();
-
-		for(int vertNum : {entry.line->start, entry.line->end})
-		{
-			for(int neigh : vertLineMap[vertNum])
-			{
-				const auto &otherLine = level.linedefs[neigh];
-				if(otherLine.get() == entry.line)
-					continue;
-				bool flipped = otherLine->start == entry.line->start ||
-							   otherLine->end == entry.line->end;
-				struct Iteration
-				{
-					byte parts;
-					Side side;
-				};
-				for(auto iteration : {Iteration{PART_RT_ALL, Side::right},
-									  Iteration{PART_LF_ALL, Side::left}})
-				{
-					if(!(entry.parts & iteration.parts))
-						continue;
-					bool match = checkMatchingSectorHeights(*this, entry.parts, *entry.line,
-															iteration.side, *otherLine,
-															flipped ? -iteration.side :
-															iteration.side);
-					if(!match)
-						continue;
-					byte nextParts = flipped ? (byte)((entry.parts & PART_LF_ALL) >> 4) |
-					                           (byte)((entry.parts & PART_RT_ALL) << 4) :
-					                           entry.parts;
-					byte nextPartsSel = removeUnselectableFacets(level, *otherLine,
-																 otherLine->OneSided() ?
-																 PART_RT_LOWER : nextParts);
-					byte cursel = edit.Selected->get_ext(neigh);
-					if((cursel & nextPartsSel) == nextPartsSel)
-						continue;
-					edit.Selected->set_ext(neigh, cursel | nextPartsSel);
-					queue.push({otherLine.get(), nextParts});
-				}
-			}
-		}
-	}
-}
-
-void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts,
-								   bool forward)
-{
-	const auto &line1 = level.linedefs[objnum];
-	bool frontside = parts < PART_LF_LOWER;
-
-	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
-	{
-		if (objnum == i || edit.Selected->get(i))
-			continue;
-
-		const auto &line2 = level.linedefs[i];
-
-		if (line1->OneSided() != line2->OneSided())
-			continue;
-
-		if ((forward && line2->start == line1->end) || (!forward && line2->end == line1->start))
-		{
-			const SideDef *side1 = frontside ? level.getRight(*line1) : level.getLeft(*line1);
-			const SideDef *side2 = frontside ? level.getRight(*line2) : level.getLeft(*line2);
-
-			bool match = false;
-
-			if (option == SelectNeighborCriterion::texture)
-			{
-				if (line1->OneSided() || (parts & PART_RT_RAIL || parts & PART_LF_RAIL))
-					match = (side2->MidTex() == side1->MidTex() && side2->MidTex() != "-");
-
-				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
-					match = (side2->LowerTex() == side1->LowerTex() && side2->LowerTex() != "-");
-
-				else if (parts & PART_RT_UPPER || parts & PART_LF_UPPER)
-					match = (side2->UpperTex() == side1->UpperTex() && side2->UpperTex() != "-");
-
-			}
-			else
-			{
-				const Sector &l1front = level.getSector(*level.getRight(*line1));
-				const Sector &l2front = level.getSector(*level.getRight(*line2));
-				const Sector *l1back = NULL, *l2back = NULL;
-
-				if (!line1->OneSided())
-				{
-					l1back = &level.getSector(*level.getLeft(*line1));
-					l2back = &level.getSector(*level.getLeft(*line2));
-				}
-				if (line1->OneSided())
-					match = (l1front.floorh == l2front.floorh && l1front.ceilh == l2front.ceilh);
-
-				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
-					match = (l1front.floorh == l2front.floorh && l1back->floorh == l2back->floorh);
-
-				else if (parts & PART_RT_UPPER || parts & PART_LF_UPPER)
-					match = (l1front.ceilh == l2front.ceilh && l1back->ceilh == l2back->ceilh);
-
-				else
-				{
-					int lowestceil1 = std::min(l1front.ceilh, l1back->ceilh);
-					int highestfloor1 = std::max(l1front.floorh, l1back->floorh);
-					int midheight1 = lowestceil1 - highestfloor1;
-
-					int lowestceil2 = std::min(l2front.ceilh, l2back->ceilh);
-					int highestfloor2 = std::max(l2front.floorh, l2back->floorh);
-					int midheight2 = lowestceil2 - highestfloor2;
-
-					int texheight1 = wad.images.W_GetTextureHeight(conf, side1->MidTex());
-					int texheight2 = wad.images.W_GetTextureHeight(conf, side2->MidTex());
-
-					if (midheight1 == midheight2 && midheight1 < std::min(texheight1, texheight2)
-						&& lowestceil1 == lowestceil2 && highestfloor1 == highestfloor2)
-					{
-						match = true;
-					}
-					else if (texheight1 == texheight2 && texheight1 < std::min(midheight1, midheight2)
-						&& (side1->x_offset == side2->x_offset && side1->y_offset == side2->y_offset))
-					{
-						match = true;
-					}
-				}
-			}
-
-			if (match)
-			{
-				edit.Selected->set_ext(i, parts);
-				SelectNeighborLines(i, option, parts, true);
-				SelectNeighborLines(i, option, parts, false);
 			}
 		}
 	}
@@ -610,9 +462,9 @@ void Instance::CMD_SelectNeighbors()
 		if (edit.mode == ObjType::linedefs)
 		{
 			if(criterion == SelectNeighborCriterion::texture)
-				SelectNeighborLines_texture(num, parts);
+				selectNeighborLines(*this, num, parts, getWallTextureContinuity);
 			else
-				SelectNeighborLines_height(num, parts);
+				selectNeighborLines(*this, num, parts, matchingWallHeights);
 		}
 		else
 		{
@@ -622,4 +474,3 @@ void Instance::CMD_SelectNeighbors()
 	}
 	RedrawMap();
 }
-

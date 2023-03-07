@@ -359,9 +359,6 @@ private:
 	void Editor_ClearErrorMode();
 	void UpdateDrawLine();
 	void zoom_fit();
-	void SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts, bool forward);
-	void SelectNeighborLines_texture(int objnum, byte parts);
-	void SelectNeighborLines_height(int objnum, byte parts);
 	void SelectNeighborSectors(int objnum, SString option, byte parts);
 
 	// E_SECTOR
