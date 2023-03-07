@@ -359,7 +359,7 @@ private:
 	void Editor_ClearErrorMode();
 	void UpdateDrawLine();
 	void zoom_fit();
-	void SelectNeighborSectors(int objnum, SString option, byte parts);
+	void SelectNeighborSectors(int objnum, SelectNeighborCriterion option, byte parts);
 
 	// E_SECTOR
 	void commandSectorMerge();

@@ -376,14 +376,12 @@ static void selectNeighborLines(Instance &inst, int objnum, byte parts, WallCont
 	}
 }
 
-void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
+void Instance::SelectNeighborSectors(int objnum, SelectNeighborCriterion option, byte parts)
 {
 	const auto &sector1 = level.sectors[objnum];
 
-	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
+	for (const auto &line : level.linedefs)
 	{
-		const auto &line = level.linedefs[i];
-
 		if (line->OneSided())
 			continue;
 
@@ -408,7 +406,7 @@ void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
 			if (edit.Selected->get(sectornum))
 				continue;
 
-			if (option == "texture")
+			if (option == SelectNeighborCriterion::texture)
 			{
 				if (parts & PART_FLOOR)
 					match = (sector1->FloorTex() == sector2->FloorTex());
@@ -468,7 +466,7 @@ void Instance::CMD_SelectNeighbors()
 		}
 		else
 		{
-			SelectNeighborSectors(num, option, parts);
+			SelectNeighborSectors(num, criterion, parts);
 		}
 
 	}
