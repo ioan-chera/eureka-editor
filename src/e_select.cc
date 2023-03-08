@@ -225,7 +225,7 @@ static WallContinuity matchingWallHeights(const Instance &inst, const LineDef &s
 	// Check lower
 
 	int bottom, top;
-	auto checkNextLine = [&bottom, &top, nextBack, &nextSector, nextBackSector]()
+	auto checkNextLine = [&bottom, &top, nextBack, &nextSector, nextBackSector]() -> byte
 	{
 		if(nextBack)
 		{
