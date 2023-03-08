@@ -275,8 +275,15 @@ TEST_F(SelectNeighborFixture, RailsDoNotPropagateToWalls)
  |                                       |
  |       x-------x-------x-------x       |
  |       | step  | st+he | head  |       |
- |       x-------x-------x-------x       |
+ |       x---x---x-------x-------x       |
+ |       | s+|               | h+|       |
+ |       x---x               x---x       |
  |                                       |
  x---------------------------------------x
 
  */
+
+// TODO: masked mid-line height equivalence
+// What to consider: taller textures will check opening size
+//                   shorter textures will check their equality and position
+//                   need to combine them
