@@ -271,13 +271,13 @@ TEST_F(SelectNeighborFixture, RailsDoNotPropagateToWalls)
  Alcoves: shut door, shut lift, open door, open lift, open mid
      x---x   x---x---x   x---x   x---x
      |OD |   |SD |SL |   |OL |   |OM |
- x---x---x---x---x---x---x---x---x---x---x
+ x---x-->x---x<--x-->x---x<--x---x-->x---x
  |                                       |
- |       x-------x-------x-------x       |
- |       | step  | st+he | head  |       |
- |       x---x---x-------x-------x       |
- |       | s+|               | h+|       |
- |       x---x               x---x       |
+ |       x<------x------>x<------x       |
+ |       ^ step  | st+he | head  v       |
+ |       x---x-->x<------x-->x---x       |
+ |       v s+^               ^ h+v       |
+ |       x<--x               x-->x       |
  |                                       |
  x---------------------------------------x
 
