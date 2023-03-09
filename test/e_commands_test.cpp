@@ -281,9 +281,9 @@ TEST_F(SelectNeighborTexture, RailsDoNotPropagateToWalls)
 }
 
 /*
- Alcoves: shut door, shut lift, open door, open lift, open mid
+ Alcoves: open door, shut door, shut lift, shut mid, open all
      x---x   x---x---x   x---x   x---x
-     |OD |   |SD vSL |   |OL |   |OM |
+     |OD |   |SD vSL |   |SM |   |OA |
  x---x-->x---x<--x-->x---x<--x---x-->x---x
  |                                       |
  |       x<------x------>x<------x       |
@@ -364,8 +364,8 @@ void SelectNeighborHeight::SetUp()
     addSector(0, 48);   // 6
     addSector(0, 0);
     addSector(128, 128);
-    addSector(48, 128);
-    addSector(32, 64);
+    addSector(48, 48);
+    addSector(0, 128);
     // 11
 
     addSide("-", "wall", "-", 0);   // 0
@@ -417,7 +417,7 @@ void SelectNeighborHeight::SetUp()
     addSide("-", "-", "-", 8);
     addSide("-", "wall", "-", 0);
     addSide("-", "-", "-", 9);
-    addSide("-", "-", "lift", 0);
+    addSide("door", "-", "lift", 0);
     addSide("-", "wall", "-", 0);
     addSide("door", "-", "lift", 0);
     addSide("-", "-", "-", 10);
@@ -441,31 +441,31 @@ void SelectNeighborHeight::SetUp()
     addSide("-", "wall", "-", 10);
     // 63
 
-    addLine(1, 0, 0, -1);
+    addLine(1, 0, 0, -1);	// 0
 
-    addLine(0, 16, 1, -1);
+    addLine(0, 16, 1, -1);	// 1
     addLine(26, 1, 2, -1);
 
-    addLine(3, 2, 3, 4);
+    addLine(3, 2, 3, 4);	// 3
     addLine(4, 5, 5, 6);
 
-    addLine(6, 2, 7, 8);
+    addLine(6, 2, 7, 8);	// 5
     addLine(3, 7, 9, 10);
     addLine(4, 10, 11, 12);
     addLine(11, 5, 13, 14);
 
-    addLine(7, 6, 15, 16);
+    addLine(7, 6, 15, 16);	// 9
     addLine(7, 8, 17, 18);
     addLine(9, 8, 19, 20);
     addLine(9, 10, 21, 22);
     addLine(10, 11, 23, 24);
 
-    addLine(6, 12, 25, 26);
+    addLine(6, 12, 25, 26);	// 14
     addLine(8, 13, 27, 28);
     addLine(14, 9, 29, 30);
     addLine(15, 11, 31, 32);
 
-    addLine(16, 17, 33, -1);
+    addLine(16, 17, 33, -1);	// 18
     addLine(17, 18, 34, 35);
     addLine(18, 19, 36, -1);
     addLine(20, 19, 37, 38);
@@ -476,7 +476,7 @@ void SelectNeighborHeight::SetUp()
     addLine(24, 25, 45, 46);
     addLine(25, 26, 47, -1);
     
-    addLine(17, 27, 48, -1);
+    addLine(17, 27, 48, -1);	// 28
     addLine(28, 18, 49, -1);
     addLine(19, 29, 50, -1);
     addLine(30, 20, 51, 52);
@@ -486,9 +486,47 @@ void SelectNeighborHeight::SetUp()
     addLine(24, 34, 56, -1);
     addLine(35, 25, 57, -1);
 
-    addLine(27, 28, 58, -1);
+    addLine(27, 28, 58, -1);	// 37
     addLine(29, 30, 59, -1);
     addLine(30, 31, 60, -1);
     addLine(32, 33, 61, -1);
     addLine(34, 35, 62, -1);
+	// 42
+}
+
+TEST_F(SelectNeighborHeight, WallGetsClosedDoorsButNotMids)
+{
+	inst.EXEC_Param[0] = "height";
+	inst.edit.mode = ObjType::linedefs;
+	inst.edit.highlight.num = 20;
+	inst.edit.highlight.parts = PART_RT_LOWER;
+
+	inst.CMD_SelectNeighbors();
+
+	ASSERT_EQ(inst.edit.Selected->count_obj(), 4);
+	ASSERT_EQ(inst.edit.Selected->get_ext(20), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(21), PART_LF_UPPER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(22), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(23), PART_RT_LOWER);
+}
+
+TEST_F(SelectNeighborHeight, WallGoesAcrossSectors)
+{
+	inst.EXEC_Param[0] = "height";
+	inst.edit.mode = ObjType::linedefs;
+	inst.edit.highlight.num = 0;
+	inst.edit.highlight.parts = PART_RT_LOWER;
+
+	inst.CMD_SelectNeighbors();
+
+	ASSERT_EQ(inst.edit.Selected->count_obj(), 9);
+	ASSERT_EQ(inst.edit.Selected->get_ext(0), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(1), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(18), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(25), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(27), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(35), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(36), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(41), PART_RT_LOWER);
 }
