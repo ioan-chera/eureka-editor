@@ -281,6 +281,8 @@ TEST_F(SelectNeighborTexture, RailsDoNotPropagateToWalls)
 }
 
 /*
+ Same height selection
+
  Alcoves: open door, shut door, shut lift, shut mid, open all
      x---x   x---x---x   x---x   x---x
      |OD |   |SD vSL |   |SM |   |OA |
@@ -296,7 +298,6 @@ TEST_F(SelectNeighborTexture, RailsDoNotPropagateToWalls)
 
  */
 
-// TODO: masked mid-line height equivalence
 // What to consider: taller textures will check opening size
 //                   shorter textures will check their equality and position
 //                   need to combine them
@@ -610,3 +611,9 @@ TEST_F(SelectNeighborHeight, SelectSteps)
     ASSERT_EQ(inst.edit.Selected->get_ext(5), PART_RT_LOWER);
     ASSERT_EQ(inst.edit.Selected->get_ext(6), PART_RT_LOWER);
 }
+
+/*
+Mid-line same-height selection
+
+
+*/
