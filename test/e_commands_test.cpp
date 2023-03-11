@@ -61,7 +61,7 @@ void SelectNeighbor::addSector(int floorh, int ceilh)
     doc.sectors.emplace_back(sector);
 }
 
-void SelectNeighbor::addSide(const SString &upper, const SString &middle, const SString &lower, 
+void SelectNeighbor::addSide(const SString &upper, const SString &middle, const SString &lower,
     int sector)
 {
     SideDef *side = new SideDef{};
@@ -360,7 +360,7 @@ void SelectNeighborHeight::SetUp()
     addSector(8, 128);  // 3
     addSector(8, 120);
     addSector(0, 120);
-    
+
     addSector(0, 48);   // 6
     addSector(0, 0);
     addSector(128, 128);
@@ -369,7 +369,7 @@ void SelectNeighborHeight::SetUp()
     // 11
 
     addSide("-", "wall", "-", 0);   // 0
-    
+
     addSide("-", "wall", "-", 0);   // 1
     addSide("-", "wall", "-", 0);
 
@@ -407,7 +407,14 @@ void SelectNeighborHeight::SetUp()
     addSide("-", "-", "-", 5);
     addSide("top", "-", "-", 0);
 
-    addSide("-", "wall", "-", 0);   // 33
+    addSide("-", "-", "step", 0);   // 33
+    addSide("-", "-", "-", 3);
+    addSide("-", "-", "-", 4);
+    addSide("top", "-", "step", 0);
+    addSide("top", "-", "-", 0);
+    addSide("-", "-", "-", 5);
+
+    addSide("-", "wall", "-", 0);   // 39
     addSide("door", "-", "-", 0);
     addSide("-", "-", "-", 6);
     addSide("-", "wall", "-", 0);
@@ -423,7 +430,7 @@ void SelectNeighborHeight::SetUp()
     addSide("-", "-", "-", 10);
     addSide("-", "wall", "-", 0);
 
-    addSide("-", "wall", "-", 6);   // 48
+    addSide("-", "wall", "-", 6);   // 54
     addSide("-", "wall", "-", 6);
     addSide("-", "wall", "-", 7);
     addSide("-", "-", "low", 7);
@@ -434,12 +441,12 @@ void SelectNeighborHeight::SetUp()
     addSide("-", "wall", "-", 10);
     addSide("-", "wall", "-", 10);
 
-    addSide("-", "wall", "-", 6);   // 58
+    addSide("-", "wall", "-", 6);   // 64
     addSide("-", "wall", "-", 7);
     addSide("-", "wall", "-", 8);
     addSide("-", "wall", "-", 9);
     addSide("-", "wall", "-", 10);
-    // 63
+    // 69
 
     addLine(1, 0, 0, -1);	// 0
 
@@ -465,49 +472,53 @@ void SelectNeighborHeight::SetUp()
     addLine(14, 9, 29, 30);
     addLine(15, 11, 31, 32);
 
-    addLine(16, 17, 33, -1);	// 18
-    addLine(17, 18, 34, 35);
-    addLine(18, 19, 36, -1);
-    addLine(20, 19, 37, 38);
-    addLine(20, 21, 39, 40);
-    addLine(21, 22, 41, -1);
-    addLine(23, 22, 42, 43);
-    addLine(23, 24, 44, -1);
-    addLine(24, 25, 45, 46);
-    addLine(25, 26, 47, -1);
-    
-    addLine(17, 27, 48, -1);	// 28
-    addLine(28, 18, 49, -1);
-    addLine(19, 29, 50, -1);
-    addLine(30, 20, 51, 52);
-    addLine(31, 21, 53, -1);
-    addLine(22, 32, 54, -1);
-    addLine(33, 23, 55, -1);
-    addLine(24, 34, 56, -1);
-    addLine(35, 25, 57, -1);
+    addLine(13, 12, 33, 34),
+    addLine(13, 14, 35, 36),
+    addLine(15, 14, 37, 38),
 
-    addLine(27, 28, 58, -1);	// 37
-    addLine(29, 30, 59, -1);
-    addLine(30, 31, 60, -1);
-    addLine(32, 33, 61, -1);
-    addLine(34, 35, 62, -1);
-	// 42
+    addLine(16, 17, 39, -1);	// 21
+    addLine(17, 18, 40, 41);
+    addLine(18, 19, 42, -1);
+    addLine(20, 19, 43, 44);
+    addLine(20, 21, 45, 46);
+    addLine(21, 22, 47, -1);
+    addLine(23, 22, 48, 49);
+    addLine(23, 24, 50, -1);
+    addLine(24, 25, 51, 52);
+    addLine(25, 26, 53, -1);
+
+    addLine(17, 27, 54, -1);	// 31
+    addLine(28, 18, 55, -1);
+    addLine(19, 29, 56, -1);
+    addLine(30, 20, 57, 58);
+    addLine(31, 21, 59, -1);
+    addLine(22, 32, 60, -1);
+    addLine(33, 23, 61, -1);
+    addLine(24, 34, 62, -1);
+    addLine(35, 25, 63, -1);
+
+    addLine(27, 28, 64, -1);	// 40
+    addLine(29, 30, 65, -1);
+    addLine(30, 31, 66, -1);
+    addLine(32, 33, 67, -1);
+    addLine(34, 35, 68, -1);
+	// 45
 }
 
 TEST_F(SelectNeighborHeight, WallGetsClosedDoorsButNotMids)
 {
 	inst.EXEC_Param[0] = "height";
 	inst.edit.mode = ObjType::linedefs;
-	inst.edit.highlight.num = 20;
+	inst.edit.highlight.num = 23;
 	inst.edit.highlight.parts = PART_RT_LOWER;
 
 	inst.CMD_SelectNeighbors();
 
 	ASSERT_EQ(inst.edit.Selected->count_obj(), 4);
-	ASSERT_EQ(inst.edit.Selected->get_ext(20), PART_RT_LOWER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(21), PART_LF_UPPER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(22), PART_RT_LOWER);
 	ASSERT_EQ(inst.edit.Selected->get_ext(23), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(24), PART_LF_UPPER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(25), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(26), PART_RT_LOWER);
 }
 
 TEST_F(SelectNeighborHeight, WallGoesAcrossSectorsThenAddAnotherThenClear)
@@ -523,24 +534,33 @@ TEST_F(SelectNeighborHeight, WallGoesAcrossSectorsThenAddAnotherThenClear)
 	ASSERT_EQ(inst.edit.Selected->get_ext(0), PART_RT_LOWER);
 	ASSERT_EQ(inst.edit.Selected->get_ext(1), PART_RT_LOWER);
 	ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(18), PART_RT_LOWER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(25), PART_RT_LOWER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(27), PART_RT_LOWER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(35), PART_RT_LOWER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(36), PART_RT_LOWER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(41), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(21), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(28), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(30), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(38), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(39), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(44), PART_RT_LOWER);
 
 	// Now select the open sector
-	inst.edit.highlight.num = 28;
+	inst.edit.highlight.num = 31;
 	inst.CMD_SelectNeighbors();
 
 	ASSERT_EQ(inst.edit.Selected->count_obj(), 12);
-	ASSERT_EQ(inst.edit.Selected->get_ext(28), PART_RT_LOWER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(29), PART_RT_LOWER);
-	ASSERT_EQ(inst.edit.Selected->get_ext(37), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(31), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(32), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(40), PART_RT_LOWER);
 
 	// Now apply the same command on a selected line and see how all gets deselected.
-	inst.edit.highlight.num = 27;
+	inst.edit.highlight.num = 30;
 	inst.CMD_SelectNeighbors();
 	ASSERT_TRUE(inst.edit.Selected->empty());
 }
+
+// TEST_F(SelectNeighborHeight, SelectSteps)
+// {
+// 	inst.EXEC_Param[0] = "height";
+// 	inst.edit.mode = ObjType::linedefs;
+// 	inst.edit.highlight.num = 23;
+// 	inst.edit.highlight.parts = PART_RT_LOWER;
+
+// }
