@@ -510,7 +510,7 @@ TEST_F(SelectNeighborHeight, WallGetsClosedDoorsButNotMids)
 	ASSERT_EQ(inst.edit.Selected->get_ext(23), PART_RT_LOWER);
 }
 
-TEST_F(SelectNeighborHeight, WallGoesAcrossSectors)
+TEST_F(SelectNeighborHeight, WallGoesAcrossSectorsThenAddAnotherThenClear)
 {
 	inst.EXEC_Param[0] = "height";
 	inst.edit.mode = ObjType::linedefs;
@@ -529,4 +529,18 @@ TEST_F(SelectNeighborHeight, WallGoesAcrossSectors)
 	ASSERT_EQ(inst.edit.Selected->get_ext(35), PART_RT_LOWER);
 	ASSERT_EQ(inst.edit.Selected->get_ext(36), PART_RT_LOWER);
 	ASSERT_EQ(inst.edit.Selected->get_ext(41), PART_RT_LOWER);
+
+	// Now select the open sector
+	inst.edit.highlight.num = 28;
+	inst.CMD_SelectNeighbors();
+
+	ASSERT_EQ(inst.edit.Selected->count_obj(), 12);
+	ASSERT_EQ(inst.edit.Selected->get_ext(28), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(29), PART_RT_LOWER);
+	ASSERT_EQ(inst.edit.Selected->get_ext(37), PART_RT_LOWER);
+
+	// Now apply the same command on a selected line and see how all gets deselected.
+	inst.edit.highlight.num = 27;
+	inst.CMD_SelectNeighbors();
+	ASSERT_TRUE(inst.edit.Selected->empty());
 }
