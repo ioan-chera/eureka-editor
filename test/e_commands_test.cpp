@@ -388,7 +388,7 @@ void SelectNeighborHeight::SetUp()
     addSide("top", "-", "-", 0);
 
     addSide("-", "-", "step", 3);   // 15
-    addSide("-", "-", "-", 2);
+    addSide("-", "-", "-", 1);
     addSide("-", "-", "step", 0);
     addSide("-", "-", "-", 3);
     addSide("-", "-", "-", 4);
@@ -472,7 +472,7 @@ void SelectNeighborHeight::SetUp()
     addLine(14, 9, 29, 30);
     addLine(15, 11, 31, 32);
 
-    addLine(13, 12, 33, 34),
+    addLine(13, 12, 33, 34),    // 18
     addLine(13, 14, 35, 36),
     addLine(15, 14, 37, 38),
 
@@ -556,11 +556,57 @@ TEST_F(SelectNeighborHeight, WallGoesAcrossSectorsThenAddAnotherThenClear)
 	ASSERT_TRUE(inst.edit.Selected->empty());
 }
 
-// TEST_F(SelectNeighborHeight, SelectSteps)
-// {
-// 	inst.EXEC_Param[0] = "height";
-// 	inst.edit.mode = ObjType::linedefs;
-// 	inst.edit.highlight.num = 23;
-// 	inst.edit.highlight.parts = PART_RT_LOWER;
+TEST_F(SelectNeighborHeight, SelectSteps)
+{
+	inst.EXEC_Param[0] = "height";
+	inst.edit.mode = ObjType::linedefs;
+	inst.edit.highlight.num = 14;
+	inst.edit.highlight.parts = PART_LF_LOWER;
 
-// }
+    // Select smaller steps
+    inst.CMD_SelectNeighbors();
+
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 6);
+    ASSERT_EQ(inst.edit.Selected->get_ext(10), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(11), PART_LF_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(14), PART_LF_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(16), PART_LF_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(18), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(19), PART_LF_LOWER);
+
+    // Now select a top
+    inst.edit.highlight.num = 15;
+    inst.edit.highlight.parts = PART_LF_UPPER;
+    inst.CMD_SelectNeighbors();
+
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 10);
+    ASSERT_EQ(inst.edit.Selected->get_ext(10), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(11), PART_LF_LOWER | PART_LF_UPPER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(12), PART_RT_UPPER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(14), PART_LF_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(15), PART_LF_UPPER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(16), PART_LF_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(17), PART_LF_UPPER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(18), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(19), PART_LF_LOWER | PART_LF_UPPER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(20), PART_RT_UPPER);
+
+    // Select an inner top+
+    inst.edit.highlight.num = 13;
+    inst.edit.highlight.parts = PART_LF_UPPER;
+    inst.CMD_SelectNeighbors();
+
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 11);
+    ASSERT_EQ(inst.edit.Selected->get_ext(13), PART_LF_UPPER);
+    // Nothing else
+
+    // Select an outer step+
+    inst.edit.highlight.num = 6;
+    inst.edit.highlight.parts = PART_RT_LOWER;
+    inst.CMD_SelectNeighbors();
+
+    ASSERT_EQ(inst.edit.Selected->count_obj(), 14);
+    ASSERT_EQ(inst.edit.Selected->get_ext(3), PART_LF_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(5), PART_RT_LOWER);
+    ASSERT_EQ(inst.edit.Selected->get_ext(6), PART_RT_LOWER);
+}
