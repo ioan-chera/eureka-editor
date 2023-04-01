@@ -19,6 +19,7 @@
 #include "Instance.h"
 #include "LineDef.h"
 #include "Vertex.h"
+#include "w_wad.h"
 #include "gtest/gtest.h"
 
 class SelectNeighbor : public ::testing::Test
@@ -648,3 +649,44 @@ static const byte texHeight8[] =
 	0x60, 0x82
 };
 
+class SelectNeighborMidLines : public SelectNeighbor
+{
+protected:
+	void SetUp() override;
+
+private:
+	void initTextures();
+};
+
+/*
+
+ 1. Same sector height, different texture heights
+
+ */
+
+void SelectNeighborMidLines::SetUp()
+{
+	initTextures();
+
+	// Now we have the texes
+}
+
+void SelectNeighborMidLines::initTextures()
+{
+	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	ASSERT_TRUE(wad);
+	wad->AddLump("TX_START");
+	Lump_c *lump;
+	lump = wad->AddLump("PIC4");
+	lump->Write(texHeight4, sizeof(texHeight4));
+	lump = wad->AddLump("PIC6");
+	lump->Write(texHeight4, sizeof(texHeight6));
+	lump = wad->AddLump("PIC8");
+	lump->Write(texHeight4, sizeof(texHeight8));
+	wad->AddLump("TX_END");
+
+	inst.wad.master.MasterDir_Add(wad);
+
+	inst.conf.features.tx_start = 1;
+	inst.wad.W_LoadTextures(inst.conf);
+}
