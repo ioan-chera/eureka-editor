@@ -561,6 +561,15 @@ const opt_desc_t options[] =
 		&config::map_scroll_bars
 	},
 
+	{	"teleport_for_test",
+		0,
+        OptType::boolean,
+		OptFlag_preference,
+		"When testing, teleport player to current 3D view position.",
+		NULL,
+		&config::teleport_for_test
+	},
+
 	{	"minimum_drag_pixels",
 		0,
         OptType::integer,

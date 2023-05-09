@@ -23,12 +23,14 @@
 
 #include "main.h"
 
+#include "m_config.h"
 #include "m_files.h"
 #include "m_loadsave.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
 
+bool config::teleport_for_test = false;
 
 static SString QueryName(const SString &port, const SString &cgame)
 {
@@ -392,6 +394,14 @@ void Instance::CMD_TestMap()
 	SString cmd_buffer = SString::printf("%s %s %s",
 										 CalcEXEName(info).c_str(), GrabWadNames(*this, info).c_str(),
 										 CalcWarpString(*this).c_str());
+
+	if(config::teleport_for_test)
+	{
+		// Append position warp console command, to teleport to the current camera position
+		int warp_x = r_view.x;
+		int warp_y = r_view.y;
+		cmd_buffer = SString::printf("%s \"+warp %d %d\"", cmd_buffer.c_str(), warp_x, warp_y);
+	}
 
 	gLog.printf("Testing map using the following command:\n");
 	gLog.printf("--> %s\n", cmd_buffer.c_str());

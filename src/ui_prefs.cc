@@ -649,6 +649,7 @@ public:
 	Fl_Check_Button *gen_autoload;
 	Fl_Check_Button *gen_maximized;
 	Fl_Check_Button *gen_swapsides;
+	Fl_Check_Button *gen_teleport_for_test;
 
 	/* Keys Tab */
 
@@ -823,7 +824,9 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		}
 		{ gen_swapsides = new Fl_Check_Button(50, 310, 380, 25, " swap upper and lower sidedefs in Linedef panel");
 		}
-		{ gen_maximized = new Fl_Check_Button(50, 340, 380, 25, " maximize the window when Eureka starts");
+		{ gen_teleport_for_test = new Fl_Check_Button(50, 340, 380, 25, " when testing, teleport player to 3D view position (ZDOOM only)");
+		}
+		{ gen_maximized = new Fl_Check_Button(50, 370, 380, 25, " maximize the window when Eureka starts");
 		  // not supported on MacOS X
 		  // (on that platform we should restore last window position, but I don't
 		  //  know how to code that)
@@ -1453,6 +1456,7 @@ void UI_Preferences::LoadValues()
 	gen_autoload   ->value(config::auto_load_recent ? 1 : 0);
 	gen_maximized  ->value(config::begin_maximized  ? 1 : 0);
 	gen_swapsides  ->value(config::swap_sidedefs    ? 1 : 0);
+	gen_teleport_for_test ->value(config::teleport_for_test ? 1 : 0);
 
 	/* Edit Tab */
 
@@ -1600,6 +1604,7 @@ void UI_Preferences::SaveValues()
 
 	config::auto_load_recent  = gen_autoload   ->value() ? true : false;
 	config::begin_maximized   = gen_maximized  ->value() ? true : false;
+	config::teleport_for_test = gen_teleport_for_test ->value() ? true : false;
 	config::swap_sidedefs     = gen_swapsides  ->value() ? true : false;
 
 	/* Edit Tab */
