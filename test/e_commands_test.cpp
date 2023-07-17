@@ -36,7 +36,8 @@ protected:
 
     void addVertex(int x, int y);
     void addSector(int floorh, int ceilh);
-    void addSide(const SString &upper, const SString &middle, const SString &lower, int sector);
+	void addSide(const SString &upper, const SString &middle, const SString &lower, int sector,
+				 int yoffset = 0);
     void addLine(int v1, int v2, int s1, int s2);
 
     Instance inst;
@@ -63,13 +64,14 @@ void SelectNeighbor::addSector(int floorh, int ceilh)
 }
 
 void SelectNeighbor::addSide(const SString &upper, const SString &middle, const SString &lower,
-    int sector)
+    int sector, int yoffset)
 {
     SideDef *side = new SideDef{};
     side->upper_tex = BA_InternaliseString(upper);
     side->mid_tex = BA_InternaliseString(middle);
     side->lower_tex = BA_InternaliseString(lower);
     side->sector = sector;
+	side->y_offset = yoffset;
     doc.sidedefs.emplace_back(side);
 }
 
@@ -669,6 +671,26 @@ void SelectNeighborMidLines::SetUp()
 	initTextures();
 
 	// Now we have the texes
+   
+   // corners
+   addVertex(0, 0);
+   addVertex(0, 256);
+   addVertex(256, 256);
+   addVertex(256, 0);
+      
+   addSector(0, 128);
+   
+   // walls
+   addSide("-", "WALL", "-", 0);
+   addSide("-", "WALL", "-", 0);
+   addSide("-", "WALL", "-", 0);
+   addSide("-", "WALL", "-", 0);
+      
+   // walls
+   addLine(0, 1, 0, -1);
+   addLine(1, 2, 1, -1);
+   addLine(2, 3, 2, -1);
+   addLine(3, 0, 3, -1);
 }
 
 void SelectNeighborMidLines::initTextures()
@@ -680,13 +702,94 @@ void SelectNeighborMidLines::initTextures()
 	lump = wad->AddLump("PIC4");
 	lump->Write(texHeight4, sizeof(texHeight4));
 	lump = wad->AddLump("PIC6");
-	lump->Write(texHeight4, sizeof(texHeight6));
+	lump->Write(texHeight6, sizeof(texHeight6));
 	lump = wad->AddLump("PIC8");
-	lump->Write(texHeight4, sizeof(texHeight8));
+	lump->Write(texHeight8, sizeof(texHeight8));
 	wad->AddLump("TX_END");
 
 	inst.wad.master.MasterDir_Add(wad);
 
 	inst.conf.features.tx_start = 1;
 	inst.wad.W_LoadTextures(inst.conf);
+}
+
+TEST_F(SelectNeighborMidLines, CheckDifferentTextureHeights)
+{
+	addVertex(64, 128);
+	addVertex(80, 128);
+	addVertex(96, 128);
+	addVertex(128, 128);
+	addVertex(144, 128);
+	addVertex(160, 128);
+	addVertex(176, 128);
+	addVertex(192, 128);
+	addVertex(208, 128);
+	addVertex(224, 128);
+	
+	addSide("-", "PIC4", "-", 0);
+	addSide("-", "PIC4", "-", 0);
+	
+	addSide("-", "PIC4", "-", 0);
+	addSide("-", "PIC6", "-", 0);
+	
+	addSide("-", "PIC6", "-", 0);
+	addSide("-", "PIC6", "-", 0);
+	
+	addSide("-", "PIC6", "-", 0);
+	addSide("-", "PIC6", "-", 0);
+	
+	addSide("-", "PIC8", "-", 0);
+	addSide("-", "PIC8", "-", 0);
+	
+	addSide("-", "PIC8", "-", 0);
+	addSide("-", "PIC8", "-", 0);
+	
+	addSide("-", "PIC8", "-", 0);
+	addSide("-", "PIC8", "-", 0);
+	
+	addSide("-", "PIC8", "-", 0, 1);
+	addSide("-", "PIC8", "-", 0);
+	
+	addLine(4, 5, 4, 5);
+	addLine(5, 6, 6, 7);
+	addLine(6, 7, 8, 9);
+	addLine(7, 8, 10, 11);
+	addLine(8, 9, 12, 13);
+	addLine(9, 10, 14, 15);
+	addLine(10, 11, 16, 17);
+	addLine(11, 12, 18, 19);
+	
+	inst.EXEC_Param[0] = "height";
+	inst.edit.mode = ObjType::linedefs;
+	inst.edit.highlight.num = 5;
+	inst.edit.highlight.parts = PART_RT_RAIL;
+
+	inst.CMD_SelectNeighbors();
+	
+	ASSERT_EQ(inst.edit.Selected->count_obj(), 2);
+	ASSERT_EQ(inst.edit.Selected->get_ext(4), PART_RT_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(5), PART_RT_RAIL);
+	
+	inst.edit.highlight.num = 6;
+	inst.edit.highlight.parts = PART_LF_RAIL;
+	inst.CMD_SelectNeighbors();
+	
+	ASSERT_EQ(inst.edit.Selected->count_obj(), 4);
+	ASSERT_EQ(inst.edit.Selected->get_ext(4), PART_RT_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(5), PART_RT_RAIL | PART_LF_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(6), PART_LF_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(7), PART_LF_RAIL);
+	
+	inst.edit.highlight.num = 8;
+	inst.edit.highlight.parts = PART_RT_RAIL;
+	inst.CMD_SelectNeighbors();
+	
+	ASSERT_EQ(inst.edit.Selected->count_obj(), 7);
+	ASSERT_EQ(inst.edit.Selected->get_ext(4), PART_RT_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(5), PART_RT_RAIL | PART_LF_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(6), PART_LF_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(7), PART_LF_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(8), PART_RT_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(9), PART_RT_RAIL);
+	ASSERT_EQ(inst.edit.Selected->get_ext(10), PART_RT_RAIL);
 }
