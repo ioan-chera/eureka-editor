@@ -303,6 +303,7 @@ static void CompressBlockmap(void)
 	int i;
 	int cur_offset;
 	int dup_count=0;
+   (void)dup_count;
 
 	int orig_size, new_size;
 

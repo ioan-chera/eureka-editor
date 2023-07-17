@@ -68,7 +68,7 @@ static inline u16_t UT_Swap16(u16_t x)
 }
 #else
 static inline u16_t UT_Swap16(u16_t x) {
-  return((x<<8)|(x>>8));
+  return(u16_t)((x<<8)|(x>>8));
 }
 #endif
 

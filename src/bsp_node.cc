@@ -1890,6 +1890,7 @@ void subsec_t::RoundOff()
 
 	int real_total  = 0;
 	int degen_total = 0;
+   (void)degen_total;
 
 # if DEBUG_SUBSEC
 	gLog.debugPrintf("Subsec: Rounding off %d\n", index);
