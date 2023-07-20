@@ -534,6 +534,8 @@ void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
 
 void Instance::ObjectBox_NotifyEnd() const
 {
+	if(!main_win)
+		return;
 	if (invalidated_totals)
 		main_win->UpdateTotals();
 
@@ -564,7 +566,7 @@ void Instance::Selection_NotifyBegin()
 
 void Instance::Selection_NotifyInsert(ObjType type, int objnum)
 {
-	if (type == edit.Selected->what_type() &&
+	if (edit.Selected && type == edit.Selected->what_type() &&
 		objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
@@ -580,7 +582,7 @@ void Instance::Selection_NotifyInsert(ObjType type, int objnum)
 
 void Instance::Selection_NotifyDelete(ObjType type, int objnum)
 {
-	if (objnum <= edit.Selected->max_obj())
+	if (edit.Selected && objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
 	}
