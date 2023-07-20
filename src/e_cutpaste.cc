@@ -1029,8 +1029,8 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 }
 
 
-void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list,
-							  bool keep_things, bool keep_verts, bool keep_lines)
+void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list, bool keep_things,
+							  bool keep_verts, bool keep_lines)
 {
 	selection_c vert_sel(ObjType::vertices);
 	selection_c side_sel(ObjType::sidedefs);
