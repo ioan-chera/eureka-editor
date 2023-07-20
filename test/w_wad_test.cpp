@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------
 
 #include "w_wad.h"
+#include "WadData.h"
 #include "testUtils/TempDirContext.hpp"
 #ifdef None	// fix pollution
 #undef None
@@ -33,9 +34,9 @@ class WadFileTest : public TempDirContext
 // NOTE: Google Test doesn't allow its assertion macros to be called in non-void
 // functions.
 //
-static void readFromPath(const SString &path, std::vector<uint8_t> &data)
+static void readFromPath(const fs::path &path, std::vector<uint8_t> &data)
 {
-	FILE *f = fopen(path.c_str(), "rb");
+	FILE *f = fopen(path.u8string().c_str(), "rb");
 	ASSERT_NE(f, nullptr);
 	uint8_t buffer[4096];
 	data.clear();
@@ -90,7 +91,7 @@ TEST_F(WadFileTest, WriteRead)
 	std::shared_ptr<Wad_file> read;
 
 	// Prepare the test path
-	SString path = getChildPath("newwad.wad");
+	fs::path path = getChildPath("newwad.wad");
 	wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_EQ(wad->PathName(), path);
 	ASSERT_FALSE(wad->IsReadOnly());
@@ -153,7 +154,7 @@ TEST_F(WadFileTest, WriteRead)
 	ASSERT_EQ(read->NumLumps(), 1);
 	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
 	ASSERT_EQ(read->GetLump(0)->Length(), 13);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(0), wadReadData), 13);
+	wadReadData = read->GetLump(0)->getData();
 	assertVecString(wadReadData, "Hello, world!");
 
 	// Now add yet another lump at the end
@@ -188,15 +189,15 @@ TEST_F(WadFileTest, WriteRead)
 	ASSERT_EQ(read->NumLumps(), 3);
 	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
 	ASSERT_EQ(read->GetLump(0)->Length(), 13);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(0), wadReadData), 13);
+	wadReadData = read->GetLump(0)->getData();
 	assertVecString(wadReadData, "Hello, world!");
 	ASSERT_EQ(read->GetLump(1)->Name(), "MIDLUMP");
 	ASSERT_EQ(read->GetLump(1)->Length(), 4);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(1), wadReadData), 4);
+	wadReadData = read->GetLump(1)->getData();
 	assertVecString(wadReadData, "Doom");
 	ASSERT_EQ(read->GetLump(2)->Name(), "LUMPLUMP");
 	ASSERT_EQ(read->GetLump(2)->Length(), 2);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(2), wadReadData), 2);
+	wadReadData = read->GetLump(2)->getData();
 	ASSERT_EQ(read->TotalSize(), 12 + 13 + 4 + 2 + 48);
 	assertVecString(wadReadData, "Ah");
 
@@ -228,9 +229,9 @@ TEST_F(WadFileTest, Validate)
 	// Inexistent path should fail validation
 	ASSERT_FALSE(Wad_file::Validate(getChildPath("None.wad")));
 
-	SString path = getChildPath("wad.wad");
+	fs::path path = getChildPath("wad.wad");
 
-	FILE *f = fopen(path.c_str(), "wb");
+	FILE *f = fopen(path.u8string().c_str(), "wb");
 	ASSERT_NE(f, nullptr);
 	mDeleteList.push(path);
 	fprintf(f, "abcdefghijklmnopq");
@@ -239,7 +240,7 @@ TEST_F(WadFileTest, Validate)
 	// Will not work: no WAD signature
 	ASSERT_FALSE(Wad_file::Validate(path));
 
-	f = fopen(path.c_str(), "r+b");
+	f = fopen(path.u8string().c_str(), "r+b");
 	ASSERT_NE(f, nullptr);
 	ASSERT_EQ(fseek(f, 1, SEEK_SET), 0);
 	fprintf(f, "WAD");	// put WAD on the second char
@@ -249,7 +250,7 @@ TEST_F(WadFileTest, Validate)
 	ASSERT_TRUE(Wad_file::Validate(path));
 
 	// Now have it
-	f = fopen(path.c_str(), "wb");
+	f = fopen(path.u8string().c_str(), "wb");
 	ASSERT_NE(f, nullptr);
 	fprintf(f, "%s", "PWAD\0\0\01");
 	ASSERT_EQ(fclose(f), 0);
@@ -321,7 +322,7 @@ TEST_F(WadFileTest, FindLumpInNamespace)
 //
 TEST_F(WadFileTest, LevelQuery)
 {
-	SString path = getChildPath("wad.wad");
+	fs::path path = getChildPath("wad.wad");
 	auto wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
@@ -437,8 +438,8 @@ TEST_F(WadFileTest, LevelQuery)
 //
 TEST_F(WadFileTest, Backup)
 {
-	SString path = getChildPath("wad.wad");
-	SString path2 = getChildPath("wad2.wad");
+	fs::path path = getChildPath("wad.wad");
+	fs::path path2 = getChildPath("wad2.wad");
 	auto wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
@@ -447,7 +448,7 @@ TEST_F(WadFileTest, Backup)
 	ASSERT_TRUE(wad->AddLump("LUMP2"));
 	wad->GetLump(wad->NumLumps() - 1)->Printf("Goodbye!");
 
-	ASSERT_TRUE(wad->Backup(path2.c_str()));
+	ASSERT_TRUE(wad->Backup(path2));
 	mDeleteList.push(path2);
 	wad->writeToDisk();
 	mDeleteList.push(path);
@@ -499,7 +500,7 @@ TEST_F(WadFileTest, LumpIO)
 
 TEST_F(WadFileTest, LumpFromFile)
 {
-	SString path = getChildPath("wad.wad");
+	fs::path path = getChildPath("wad.wad");
 	auto wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 	wad->writeToDisk();
@@ -508,12 +509,43 @@ TEST_F(WadFileTest, LumpFromFile)
 	Lump_c *lump = wad->AddLump("Test");
 	ASSERT_TRUE(lump);
 
-	FILE *f = fopen(path.c_str(), "rb");
+	FILE *f = fopen(path.u8string().c_str(), "rb");
 	ASSERT_TRUE(f);
 	ASSERT_EQ(lump->writeData(f, 32), 12);
 	ASSERT_EQ(fclose(f), 0);
 
 	ASSERT_EQ(lump->Length(), 12);
 	// Test getData
-	ASSERT_FALSE(memcmp(lump->getData(), "PWAD\0\0\0\0\x0c\0\0\0", 12));
+	ASSERT_FALSE(memcmp(lump->getData().data(), "PWAD\0\0\0\0\x0c\0\0\0", 12));
+}
+
+TEST_F(WadFileTest, FindFirstSpriteLump)
+{
+	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	ASSERT_TRUE(wad);
+	Lump_c *firstlump = wad->AddLump("POSSA1");
+	wad->AddLump("S_START");
+	Lump_c *possa1 = wad->AddLump("POSSA1");
+	possa1->Printf("a");	// need to have content to be considered
+	Lump_c *possa2d3 = wad->AddLump("POSSA2D3");
+	possa2d3->Printf("a");
+	Lump_c *trooc1 = wad->AddLump("TROOC1");
+	trooc1->Printf("a");
+	Lump_c *possa3d2 = wad->AddLump("POSSA3D2");
+	possa3d2->Printf("a");
+	Lump_c *troob1 = wad->AddLump("TROOB1");
+	troob1->Printf("a");
+	Lump_c *trood1 = wad->AddLump("TROOD1");
+	trood1->Printf("a");
+	wad->AddLump("S_END");
+
+	ASSERT_TRUE(firstlump && possa1 && possa2d3 && trooc1 && possa3d2 && troob1 && trood1);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSS"), possa1);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSSA"), possa1);
+	ASSERT_EQ(wad->findFirstSpriteLump("TROOC"), trooc1);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSSD"), possa2d3);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSSD2"), possa3d2);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSSA3"), possa3d2);
+	ASSERT_EQ(wad->findFirstSpriteLump("TROO"), troob1);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSSD4"), nullptr);
 }

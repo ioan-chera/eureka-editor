@@ -197,7 +197,7 @@ public:
 	MapFormat map_format;
 	SString  name_space;
 
-	SString res[RES_NUM];
+	fs::path res[RES_NUM];
 
 	Fl_Button* mResourceButtons[RES_NUM] = {};
 	Fl_Button* mClearButtons[RES_NUM] = {};

@@ -507,7 +507,7 @@ void Instance::CMD_AddBehaviorLump()
 
 	chooser.title("Pick bytecode file to insert");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-	chooser.directory(Main_FileOpFolder().c_str());
+	chooser.directory(Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{
@@ -527,7 +527,7 @@ void Instance::CMD_AddBehaviorLump()
 	SString filename = chooser.filename();
 
 	std::vector<u8_t> data;
-	bool success = FileLoad(filename, data);
+	bool success = FileLoad(filename.get(), data);
 
 	if (! success)
 	{

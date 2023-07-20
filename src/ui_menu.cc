@@ -81,15 +81,16 @@ static void file_do_delete(Fl_Widget *w, void * data)
 
 static void file_do_load_given(Fl_Widget *w, void *data)
 {
-	const char *filename = (const char *) data;
+	auto filename = static_cast<const fs::path *>(data);
+	assert(filename);
 
-	int given_idx = M_FindGivenFile(filename);
+	int given_idx = M_FindGivenFile(*filename);
 
 	// TODO: think up the right instance to get this
 	if (given_idx >= 0)
 		gInstance.last_given_file = given_idx;
 
-	OpenFileMap(filename);
+	OpenFileMap(*filename);
 }
 
 static void file_do_load_recent(Fl_Widget *w, void *data)
@@ -817,14 +818,14 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		SString short_name = fl_filename_name(global::Pwad_list[k].c_str());
+		SString short_name = fl_filename_name(global::Pwad_list[k].u8string().c_str());
 
 		short_name = SString::printf("%s%s%d:  %s", (k < 9) ? "  " : "",
 									 (k < 9) ? "&" : "", 1+k, short_name.c_str());
 
 		Menu_AddItem(pos, short_name.c_str(),
 					 FCAL file_do_load_given,
-					 (void *)global::Pwad_list[k].c_str(), 0);
+					 &global::Pwad_list[k], 0);
 	}
 
 	for ( ; menu_pos < total ; menu_pos++)
@@ -836,7 +837,7 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback *cb)
 {
-	int count = M_RecentCount();
+	int count = global::recent.getFiles().getSize();
 
 	if (count < 1)
 		return items;
@@ -862,9 +863,9 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		SString name = M_RecentShortName(k);
+		SString name = global::recent.getFiles().Format(k);
 
-		void *data = M_RecentData(k);
+		auto data = new RecentMap(global::recent.getFiles().Lookup(k));
 
 		Menu_AddItem(pos, name.c_str(), cb, data, 0);
 	}

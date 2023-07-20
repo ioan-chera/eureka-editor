@@ -4,7 +4,7 @@ include(FetchContent)
 FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG release-1.10.0
+    GIT_TAG release-1.12.1
 )
 FetchContent_GetProperties(googletest)
 if(NOT googletest_POPULATED)
@@ -31,6 +31,8 @@ set(_testUtils
     testUtils/FatalHandler.hpp
     testUtils/TempDirContext.cpp
     testUtils/TempDirContext.hpp
+    testUtils/Palette.cpp
+    testUtils/Palette.hpp
     ${src}/Errors.cc
     ${src}/lib_adler.cc
     ${src}/lib_util.cc
@@ -99,57 +101,38 @@ function(unit_test _name)
     if(WIN32 AND _windows_libs)
         target_link_libraries(${_name} PRIVATE ${_windows_libs})
     endif()
+    if(UNIX AND NOT APPLE)
+        find_package(ZLIB REQUIRED)
+        find_package(X11 REQUIRED)
+        target_link_libraries(${_name} PRIVATE ${X11_X11_LIB} ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
+    endif()
 
     add_test(NAME ${_name} COMMAND $<TARGET_FILE:${_name}>)
 endfunction()
 
 # IMPORTANT: the eurekasrc files from testutils are already linked!
 
-unit_test(document
+unit_test(general
     DocumentTest.cpp
-    stub/e_cutpaste_stub.cpp
-    stub/e_main_stub.cpp
-    stub/r_render_stub.cpp
-    stub/ui_infobar_stub.cpp
+    e_checks_test.cpp
+    e_commands_test.cpp
+    im_color_test.cpp
+    im_img_test.cpp
+    lib_file_test.cpp
+    lib_tga_test.cpp
+    m_files_test.cpp
+    m_game_test.cpp
+    m_parse_test.cpp
+    main_test.cpp
+	SafeOutFileTest.cpp
     SectorTest.cpp
+    SStringTest.cpp
     ThingTest.cpp
     VertexTest.cpp
-    SRC Document.cc
-        DocumentModule.cc
-        e_basis.cc
-        LineDef.cc
-        m_bitvec.cc
-        m_select.cc
-        Sector.cc
-        SideDef.cc
-        Thing.cc
-)
-
-unit_test(e_checks
-    e_checks_test.cpp
-    stub/e_cutpaste_stub.cpp
-    stub/e_hover_stub.cpp
-    stub/e_main_stub.cpp
-    stub/e_path_stub.cpp
-    stub/im_img_stub.cpp
-    stub/m_game_stub.cpp
-    stub/m_keys_stub.cpp
-    stub/r_render_stub.cpp
-    stub/ui_dialog_stub.cpp
-    stub/ui_infobar_stub.cpp
-    SRC DocumentModule.cc
-        e_basis.cc
-        e_checks.cc
-        LineDef.cc
-        m_bitvec.cc
-        m_select.cc
-        Sector.cc
-        SideDef.cc
-    FLTK
-)
-
-unit_test(e_objects
-    e_objects_test.cpp
+    w_loadpic_test.cpp
+    w_texture_test.cpp
+    w_wad_test.cpp
+    WadDataTest.cpp
     stub/osxcalls_stub.cpp
     SRC bsp_level.cc
         bsp_node.cc
@@ -166,6 +149,7 @@ unit_test(e_objects
         e_objects.cc
         e_path.cc
         e_sector.cc
+        e_select.cc
         e_things.cc
         e_vertex.cc
         im_color.cc
@@ -222,43 +206,24 @@ unit_test(e_objects
         ui_tile.cc
         ui_vertex.cc
         ui_window.cc
+        Vertex.cc
         w_loadpic.cc
         w_texture.cc
         w_wad.cc
-    FLTK
-)
-
-unit_test(lib_file
-    lib_file_test.cpp
-    SRC lib_file.cc
-    FLTK
-)
-
-unit_test(m_game
-    m_game_test.cpp
-    SRC e_basis.cc
-        lib_file.cc
-        m_bitvec.cc
-        m_game.cc
-        m_select.cc
-        m_streams.cc
+        WadData.cc
     FLTK
 )
 
 unit_test(m_config_keys
     m_config_test.cpp
     m_keys_test.cpp
-    SRC lib_file.cc
+    SRC im_color.cc
+        im_img.cc
+        lib_file.cc
         m_config.cc
         m_keys.cc
         m_parse.cc
         m_streams.cc
-    FLTK
-)
-
-unit_test(w_wad
-    w_wad_test.cpp
-    SRC lib_file.cc
         SafeOutFile.cc
         w_wad.cc
     FLTK
@@ -269,19 +234,15 @@ unit_test(independent
     FixedPointTest.cpp
     lib_util_test.cpp
     m_bitvec_test.cpp
-    m_parse_test.cpp
     m_select_test.cpp
     m_streams_test.cpp
-    SafeOutFileTest.cpp
     SideTest.cpp
-    SStringTest.cpp
     StringTableTest.cpp
     sys_debug_test.cpp
     SRC m_bitvec.cc
         m_parse.cc
         m_select.cc
         m_streams.cc
-        SafeOutFile.cc
 )
 
 find_package(Python3)

@@ -27,10 +27,15 @@ set(source_base
     SideDef.h
     Thing.cc
     Thing.h
-    version.h
+    Vertex.cc
     Vertex.h
     WadData.cc
     WadData.h
+)
+
+set(source_thirdparty
+    filesystem.hpp
+    tl/optional.hpp
 )
 
 set(source_bsp
@@ -58,6 +63,7 @@ set(source_e
     e_objects.h
     e_path.cc
     e_path.h
+    e_select.cc
     e_sector.cc
     e_sector.h
     e_things.cc
@@ -204,6 +210,7 @@ add_library(
     ${source_m}
     ${source_r}
     ${source_sys}
+    ${source_thirdparty}
     ${source_ui}
     ${source_w}
 )
@@ -249,6 +256,13 @@ if(APPLE OR WIN32)
             COMMAND "${CMAKE_COMMAND}" -E tar xzf "${LOCAL_FLTK_ARCHIVE}"
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         )
+        # Patch needed to prevent optimization bug
+        if(APPLE)
+            execute_process(
+                COMMAND patch "${LOCAL_FLTK_SOURCE}/src/Fl_JPEG_Image.cxx" 
+                              "${CMAKE_CURRENT_SOURCE_DIR}/fltk-patch/Fl_JPEG_Image-fltk1.3.8-macos.diff"
+            )
+        endif()
     endif()
     if(NOT EXISTS "${LOCAL_FLTK_BUILD}/lib")
 
@@ -357,5 +371,6 @@ source_group("r_ source" FILES ${source_r})
 source_group("sys_ source" FILES ${source_sys})
 source_group("ui_ source" FILES ${source_ui})
 source_group("w_ source" FILES ${source_w})
+source_group("third-party" FILES ${source_thirdparty})
 
 # TODO: add the warnings and warnings-as-errors

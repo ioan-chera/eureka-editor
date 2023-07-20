@@ -327,7 +327,7 @@ std::shared_ptr<Wad_file> UI_OpenMap::Run(SString* map_v, bool * did_load)
 	*did_load = false;
 
 	if (inst.wad.master.edit_wad)
-		SetPWAD(inst.wad.master.edit_wad->PathName());
+		SetPWAD(inst.wad.master.edit_wad->PathName().u8string());
 
 	Populate();
 
@@ -402,7 +402,7 @@ void UI_OpenMap::Populate()
 	else if (look_where->value() >= LOOK_Resource)
 	{
 		int first = 1;
-		int last  = (int)inst.wad.master.dir.size() - 1;
+		int last  = (int)inst.wad.master.getDir().size() - 1;
 
 		if (inst.wad.master.edit_wad)
 			last--;
@@ -413,9 +413,9 @@ void UI_OpenMap::Populate()
 
 		for (int r = last ; r >= first ; r--)
 		{
-			if (inst.wad.master.dir[r]->LevelCount() >= 0)
+			if (inst.wad.master.getDir()[r]->LevelCount() >= 0)
 			{
-				using_wad = inst.wad.master.dir[r];
+				using_wad = inst.wad.master.getDir()[r];
 				PopulateButtons();
 				break;
 			}
@@ -592,7 +592,7 @@ void UI_OpenMap::LoadFile()
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(inst.Main_FileOpFolder().c_str());
+	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
 
 	// Show native chooser
 	switch (chooser.show())
@@ -614,7 +614,7 @@ void UI_OpenMap::LoadFile()
 	}
 
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(chooser.filename(),
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(fs::u8path(chooser.filename()),
 												   WadOpenMode::append);
 
 	if (! wad)
@@ -638,7 +638,7 @@ void UI_OpenMap::LoadFile()
 
 	loaded_wad = wad;
 
-	SetPWAD(loaded_wad->PathName());
+	SetPWAD(loaded_wad->PathName().u8string());
 
 	if (using_wad == loaded_wad)
 		using_wad = wad;
@@ -813,8 +813,10 @@ void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
     loading.gameName = game;
     loading.portName = port;
 
-    loading.iwadName = M_QueryKnownIWAD(game);
-	SYS_ASSERT(loading.iwadName.good());
+	const fs::path *iwad = global::recent.queryIWAD(game);
+
+	SYS_ASSERT(!!iwad);
+	loading.iwadName = *iwad;
 
     loading.levelFormat = map_format;
     loading.udmfNamespace = name_space;
@@ -822,7 +824,7 @@ void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
 	SYS_ASSERT(loading.levelFormat != MapFormat::invalid);
 
 	for(int i = 0; i < RES_NUM; ++i)
-		if(res[i].good())
+		if(!res[i].empty())
             loading.resourceList.push_back(res[i]);
 }
 
@@ -847,7 +849,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	SString menu_string;
 	int menu_value = 0;
 
-	menu_string = M_CollectGamesForMenu(&menu_value, prev_game.c_str());
+	menu_string = global::recent.collectGamesForMenu(&menu_value, prev_game.c_str());
 
 	if (!menu_string.empty())
 	{
@@ -1057,7 +1059,7 @@ void UI_ProjectSetup::PopulateResources()
 		{
 			res[r] = inst.loaded.resourceList[r];
 
-			res_name[r]->value(fl_filename_name(res[r].c_str()));
+			res_name[r]->value(res[r].filename().u8string().c_str());
 		}
 	}
 }
@@ -1085,7 +1087,7 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 
 	const char * name = w->mvalue()->text;
 
-	if (!M_QueryKnownIWAD(name).empty())
+	if (global::recent.queryIWAD(name))
 	{
 		that->game = name;
 		that->ok_but->activate();
@@ -1147,7 +1149,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(that->inst.Main_FileOpFolder().c_str());
+	chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{
@@ -1164,18 +1166,17 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	// check that a game definition exists
 
-	SString game = GameNameFromIWAD(chooser.filename());
+	SString game = GameNameFromIWAD(fs::u8path(chooser.filename()));
 
-	if (! M_CanLoadDefinitions(GAMES_DIR, game))
+	if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
 	{
 		DLG_Notify("That game is not supported (no definition file).\n\n"
 		           "Please try again.");
 		return;
 	}
 
-
-	M_AddKnownIWAD(chooser.filename());
-	M_SaveRecent();
+	global::recent.addIWAD(fs::u8path(chooser.filename()));
+	global::recent.save(global::home_dir);
 
 	that->game = game;
 
@@ -1215,7 +1216,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh");
-	chooser.directory(that->inst.Main_FileOpFolder().c_str());
+	chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{
@@ -1230,9 +1231,9 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 			break;  // OK
 	}
 
-	that->res[r] = chooser.filename();
+	that->res[r] = fs::u8path(chooser.filename());
 
-	that->res_name[r]->value(fl_filename_name(that->res[r].c_str()));
+	that->res_name[r]->value(that->res[r].filename().u8string().c_str());
 }
 
 

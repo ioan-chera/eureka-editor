@@ -50,9 +50,3 @@ void SideDef::SetDefaults(const ConfigData &config, bool two_sided, StringID new
 	else
 		mid_tex = new_tex;
 }
-
-
-Sector * SideDef::SecRef(const Document &doc) const
-{
-	return doc.sectors[sector];
-}

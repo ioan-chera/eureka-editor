@@ -21,6 +21,10 @@
 #ifndef __SYS_DEBUG_H__
 #define __SYS_DEBUG_H__
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+#include "WindowsSanitization.h"
+
 #include <stdio.h>
 #include "PrintfMacros.h"
 #include <ostream>
@@ -45,7 +49,7 @@ class Log
 public:
 	typedef void (*WindowAddCallback)(const SString &text, void *userData);
 
-	bool openFile(const SString &filename);
+	bool openFile(const fs::path &filename);
 	void openWindow();
     void openWindow(WindowAddCallback callback, void *userData);
 	void close();

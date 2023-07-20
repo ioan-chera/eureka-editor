@@ -6,7 +6,7 @@
 //
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C)      2015 Ioan Chera
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr√© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Rapha√´l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -86,43 +86,42 @@ void Instance::FreshLevel()
 {
 	level.basis.clearAll();
 
-	Sector *sec = new Sector;
-	level.sectors.push_back(sec);
+	auto sec = std::make_unique<Sector>();
+
 
 	sec->SetDefaults(conf);
+	level.sectors.push_back(std::move(sec));
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
-		Vertex *v = new Vertex;
-		level.vertices.push_back(v);
+		auto v = std::make_unique<Vertex>();
 
 		v->SetRawX(loaded.levelFormat, (i >= 2) ? 256 : -256);
 		v->SetRawY(loaded.levelFormat, (i==1 || i==2) ? 256 :-256);
+		level.vertices.push_back(std::move(v));
 
-		SideDef *sd = new SideDef;
-		level.sidedefs.push_back(sd);
-
+		auto sd = std::make_unique<SideDef>();
 		sd->SetDefaults(conf, false);
+		level.sidedefs.push_back(std::move(sd));
 
-		LineDef *ld = new LineDef;
-		level.linedefs.push_back(ld);
-
+		auto ld = std::make_unique<LineDef>();
 		ld->start = i;
 		ld->end   = (i+1) % 4;
 		ld->flags = MLF_Blocking;
 		ld->right = i;
+		level.linedefs.push_back(std::move(ld));
 	}
 
 	for (int pl = 1 ; pl <= 4 ; pl++)
 	{
-		Thing *th = new Thing;
-		level.things.push_back(th);
+		auto th = std::make_unique<Thing>();
 
 		th->type  = pl;
 		th->angle = 90;
 
 		th->SetRawX(loaded.levelFormat, (pl == 1) ? 0 : (pl - 3) * 48);
 		th->SetRawY(loaded.levelFormat, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
+		level.things.push_back(std::move(th));
 	}
 
 	CalculateLevelBounds();
@@ -133,7 +132,7 @@ void Instance::FreshLevel()
 }
 
 
-bool Instance::Project_AskFile(SString &filename) const
+bool Instance::Project_AskFile(fs::path &filename) const
 {
 	// this returns false if user cancelled
 
@@ -143,7 +142,7 @@ bool Instance::Project_AskFile(SString &filename) const
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(Main_FileOpFolder().c_str());
+	chooser.directory(Main_FileOpFolder().u8string().c_str());
 
 	// Show native chooser
 	switch (chooser.show())
@@ -164,11 +163,11 @@ bool Instance::Project_AskFile(SString &filename) const
 	}
 
 	// if extension is missing, add ".wad"
-	filename = chooser.filename();
+	filename = fs::u8path(chooser.filename());
 
-	const char *pos = fl_filename_ext(filename.c_str());
-	if(!*pos)
-		filename += ".wad";
+	fs::path extension = filename.extension();
+	if(extension.empty())
+		filename = fs::u8path(filename.u8string() + ".wad");
 
 	return true;
 }
@@ -212,7 +211,7 @@ void Instance::CMD_NewProject()
 
 	/* first, ask for the output file */
 
-	SString filename;
+	fs::path filename;
 
 	if (! Project_AskFile(filename))
 		return;
@@ -272,8 +271,7 @@ void Instance::CMD_NewProject()
 	gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
 
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
-												   WadOpenMode::write);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename, WadOpenMode::write);
 
 	if (! wad)
 	{
@@ -305,8 +303,9 @@ bool Instance::MissingIWAD_Dialog()
 		loaded.gameName = dialog->game;
 		SYS_ASSERT(!loaded.gameName.empty());
 
-		loaded.iwadName = M_QueryKnownIWAD(loaded.gameName);
-		SYS_ASSERT(!loaded.iwadName.empty());
+		const fs::path *iwad = global::recent.queryIWAD(loaded.gameName);
+		SYS_ASSERT(!!iwad);
+		loaded.iwadName = *iwad;
 	}
 
 	delete dialog;
@@ -418,12 +417,12 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading vertices.\n");
 
-		Vertex *vert = new Vertex;
+		auto vert = std::make_unique<Vertex>();
 
 		vert->raw_x = FFixedPoint(LE_S16(raw.x));
 		vert->raw_y = FFixedPoint(LE_S16(raw.y));
 
-		level.vertices.push_back(vert);
+		level.vertices.push_back(std::move(vert));
 	}
 }
 
@@ -449,7 +448,7 @@ void Instance::LoadSectors(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading sectors.\n");
 
-		Sector *sec = new Sector;
+		auto sec = std::make_unique<Sector>();
 
 		sec->floorh = LE_S16(raw.floorh);
 		sec->ceilh  = LE_S16(raw.ceilh);
@@ -464,7 +463,7 @@ void Instance::LoadSectors(const Wad_file *load_wad)
 		sec->type  = LE_U16(raw.type);
 		sec->tag   = LE_S16(raw.tag);
 
-		level.sectors.push_back(sec);
+		level.sectors.push_back(std::move(sec));
 	}
 }
 
@@ -473,11 +472,11 @@ void Instance::CreateFallbackSector()
 {
 	gLog.printf("Creating a fallback sector.\n");
 
-	Sector *sec = new Sector;
+	auto sec = std::make_unique<Sector>();
 
 	sec->SetDefaults(conf);
 
-	level.sectors.push_back(sec);
+	level.sectors.push_back(std::move(sec));
 }
 
 void Instance::CreateFallbackSideDef()
@@ -488,19 +487,19 @@ void Instance::CreateFallbackSideDef()
 
 	gLog.printf("Creating a fallback sidedef.\n");
 
-	SideDef *sd = new SideDef;
+	auto sd = std::make_unique<SideDef>();
 
 	sd->SetDefaults(conf, false);
 
-	level.sidedefs.push_back(sd);
+	level.sidedefs.push_back(std::move(sd));
 }
 
 static void CreateFallbackVertices(Document &doc)
 {
 	gLog.printf("Creating two fallback vertices.\n");
 
-	Vertex *v1 = new Vertex;
-	Vertex *v2 = new Vertex;
+	auto v1 = std::make_unique<Vertex>();
+	auto v2 = std::make_unique<Vertex>();
 
 	v1->raw_x = FFixedPoint(-777);
 	v1->raw_y = FFixedPoint(-777);
@@ -508,8 +507,8 @@ static void CreateFallbackVertices(Document &doc)
 	v2->raw_x = FFixedPoint(555);
 	v2->raw_y = FFixedPoint(555);
 
-	doc.vertices.push_back(v1);
-	doc.vertices.push_back(v2);
+	doc.vertices.push_back(std::move(v1));
+	doc.vertices.push_back(std::move(v2));
 }
 
 
@@ -646,7 +645,7 @@ void Instance::LoadThings(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading things.\n");
 
-		Thing *th = new Thing;
+		auto th = std::make_unique<Thing>();
 
 		th->raw_x = FFixedPoint(LE_S16(raw.x));
 		th->raw_y = FFixedPoint(LE_S16(raw.y));
@@ -655,7 +654,7 @@ void Instance::LoadThings(const Wad_file *load_wad)
 		th->type    = LE_U16(raw.type);
 		th->options = LE_U16(raw.options);
 
-		level.things.push_back(th);
+		level.things.push_back(std::move(th));
 	}
 }
 
@@ -680,7 +679,7 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading things.\n");
 
-		Thing *th = new Thing;
+		auto th = std::make_unique<Thing>();
 
 		th->tid = LE_S16(raw.tid);
 		th->raw_x = FFixedPoint(LE_S16(raw.x));
@@ -698,7 +697,7 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 		th->arg4 = raw.args[3];
 		th->arg5 = raw.args[4];
 
-		level.things.push_back(th);
+		level.things.push_back(std::move(th));
 	}
 }
 
@@ -722,7 +721,7 @@ void Instance::LoadSideDefs(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading sidedefs.\n");
 
-		SideDef *sd = new SideDef;
+		auto sd = std::make_unique<SideDef>();
 
 		sd->x_offset = LE_S16(raw.x_offset);
 		sd->y_offset = LE_S16(raw.y_offset);
@@ -737,9 +736,9 @@ void Instance::LoadSideDefs(const Wad_file *load_wad)
 
 		sd->sector = LE_U16(raw.sector);
 
-		ValidateSectorRef(sd, i);
+		ValidateSectorRef(sd.get(), i);
 
-		level.sidedefs.push_back(sd);
+		level.sidedefs.push_back(std::move(sd));
 	}
 }
 
@@ -766,7 +765,7 @@ void Instance::LoadLineDefs(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
-		LineDef *ld = new LineDef;
+		auto ld = std::make_unique<LineDef>();
 
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
@@ -781,10 +780,10 @@ void Instance::LoadLineDefs(const Wad_file *load_wad)
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld, i);
-		ValidateSidedefRefs(ld, i);
+		ValidateVertexRefs(ld.get(), i);
+		ValidateSidedefRefs(ld.get(), i);
 
-		level.linedefs.push_back(ld);
+		level.linedefs.push_back(std::move(ld));
 	}
 }
 
@@ -812,7 +811,7 @@ void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
-		LineDef *ld = new LineDef;
+		auto ld = std::make_unique<LineDef>();
 
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
@@ -831,10 +830,10 @@ void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld, i);
-		ValidateSidedefRefs(ld, i);
+		ValidateVertexRefs(ld.get(), i);
+		ValidateSidedefRefs(ld.get(), i);
 
-		level.linedefs.push_back(ld);
+		level.linedefs.push_back(std::move(ld));
 	}
 }
 
@@ -846,7 +845,7 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 
 	bitvec_c used_verts(doc.numVertices());
 
-	for (const LineDef *linedef : doc.linedefs)
+	for (const auto &linedef : doc.linedefs)
 	{
 		used_verts.set(linedef->start);
 		used_verts.set(linedef->end);
@@ -862,9 +861,6 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 	if (new_count < doc.numVertices())
 	{
 		gLog.printf("Removing %d unused vertices at end\n", doc.numVertices() - new_count);
-
-		for (int i = new_count ; i < doc.numVertices(); i++)
-			delete doc.vertices[i];
 
 		doc.vertices.resize(new_count);
 	}
@@ -923,7 +919,7 @@ void Instance::LoadLevel(Wad_file *wad, const SString &level)
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
+		main_win->SetTitle(wad->PathName().u8string(), level, wad->IsReadOnly());
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
@@ -1008,7 +1004,7 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 // open a new wad file.
 // when 'map_name' is not NULL, try to open that map.
 //
-void OpenFileMap(const SString &filename, const SString &map_namem)
+void OpenFileMap(const fs::path &filename, const SString &map_namem)
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
@@ -1055,7 +1051,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (! gInstance.M_ParseEurekaLump(wad.get()))
+		if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
 		{
 			return;
 		}
@@ -1077,7 +1073,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 		map_name  = gInstance.wad.master.edit_wad->GetLump(idx)->Name();
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.master.edit_wad->PathName().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.master.edit_wad->PathName().u8string().c_str());
 
 	// TODO: new instance
 	gInstance.LoadLevel(gInstance.wad.master.edit_wad.get(), map_name);
@@ -1118,7 +1114,7 @@ void Instance::CMD_OpenMap()
 
 	if (did_load && wad->FindLump(EUREKA_LUMP))
 	{
-		if (! M_ParseEurekaLump(wad.get()))
+		if (! loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
 			return;
 	}
 
@@ -1143,7 +1139,7 @@ void Instance::CMD_OpenMap()
 		new_resources = true;
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// TODO: overhaul the interface to select map from the same wad
 	LoadLevel(wad.get(), map_name);
@@ -1333,7 +1329,7 @@ void Instance::SaveVertices()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("VERTEXES");
 
-	for (const Vertex *vert : level.vertices)
+	for (const auto &vert : level.vertices)
 	{
 		raw_vertex_t raw;
 
@@ -1349,7 +1345,7 @@ void Instance::SaveSectors()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("SECTORS");
 
-	for (const Sector *sec : level.sectors)
+	for (const auto &sec : level.sectors)
 	{
 		raw_sector_t raw;
 
@@ -1372,7 +1368,7 @@ void Instance::SaveThings()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("THINGS");
 
-	for (const Thing *th : level.things)
+	for (const auto &th : level.things)
 	{
 		raw_thing_t raw;
 
@@ -1393,7 +1389,7 @@ void Instance::SaveThings_Hexen()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("THINGS");
 
-	for (const Thing *th : level.things)
+	for (const auto &th : level.things)
 	{
 		raw_hexen_thing_t raw;
 
@@ -1423,7 +1419,7 @@ void Instance::SaveSideDefs()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("SIDEDEFS");
 
-	for (const SideDef *side : level.sidedefs)
+	for (const auto &side : level.sidedefs)
 	{
 		raw_sidedef_t raw;
 
@@ -1445,7 +1441,7 @@ void Instance::SaveLineDefs()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("LINEDEFS");
 
-	for (const LineDef *ld : level.linedefs)
+	for (const auto &ld : level.linedefs)
 	{
 		raw_linedef_t raw;
 
@@ -1469,7 +1465,7 @@ void Instance::SaveLineDefs_Hexen()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("LINEDEFS");
 
-	for (const LineDef *ld : level.linedefs)
+	for (const auto &ld : level.linedefs)
 	{
 		raw_hexen_linedef_t raw;
 
@@ -1575,15 +1571,16 @@ void Instance::SaveLevel(const SString &level)
 	// [ it doesn't change the on-disk wad file at all ]
 	wad.master.edit_wad->SortLevels();
 
-	M_WriteEurekaLump(wad.master.edit_wad.get());
+	loaded.writeEurekaLump(wad.master.edit_wad.get());
+	wad.master.edit_wad->writeToDisk();
 
-	M_AddRecent(wad.master.edit_wad->PathName(), loaded.levelName);
+	global::recent.addRecent(wad.master.edit_wad->PathName(), loaded.levelName, global::home_dir);
 
 	Status_Set("Saved %s", loaded.levelName.c_str());
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad.master.edit_wad->PathName(), loaded.levelName, false);
+		main_win->SetTitle(wad.master.edit_wad->PathName().u8string(), loaded.levelName, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1593,7 +1590,7 @@ void Instance::SaveLevel(const SString &level)
 }
 
 // these return false if user cancelled
-bool Instance::M_SaveMap() 
+bool Instance::M_SaveMap()
 {
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
@@ -1618,7 +1615,7 @@ bool Instance::M_SaveMap()
 
 	M_BackupWad(wad.master.edit_wad.get());
 
-	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.edit_wad->PathName().c_str());
+	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.edit_wad->PathName().u8string().c_str());
 
 	SaveLevel(loaded.levelName);
 
@@ -1633,7 +1630,7 @@ bool Instance::M_ExportMap()
 	chooser.title("Pick file to export to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(Main_FileOpFolder().c_str());
+	chooser.directory(Main_FileOpFolder().u8string().c_str());
 
 	// Show native chooser
 	switch (chooser.show())
@@ -1654,15 +1651,14 @@ bool Instance::M_ExportMap()
 	}
 
 	// if extension is missing then add ".wad"
-	SString filename = chooser.filename();
+	fs::path filename = fs::u8path(chooser.filename());
 
-	const char *pos = fl_filename_ext(filename.c_str());
-	if(!*pos)
-		filename += ".wad";
-
+	fs::path extension = filename.extension();
+	if(extension.empty())
+		filename = fs::u8path(filename.u8string() + ".wad");
 
 	// don't export into a file we currently have open
-	if (wad.master.MasterDir_HaveFilename(filename))
+	if (wad.master.MasterDir_HaveFilename(filename.u8string()))
 	{
 		DLG_Notify("Unable to export the map:\n\nFile already in use");
 		return false;
@@ -1688,7 +1684,7 @@ bool Instance::M_ExportMap()
 		// adopt iwad/port/resources of the target wad
 		if (wad->FindLump(EUREKA_LUMP))
 		{
-			if (! M_ParseEurekaLump(wad.get()))
+			if (! loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
 				return false;
 		}
 	}
@@ -1743,7 +1739,7 @@ bool Instance::M_ExportMap()
 	}
 
 
-	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().c_str());
+	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);
@@ -1893,7 +1889,7 @@ void Instance::CMD_RenameMap()
 
 	loaded.levelName = new_name.asUpper();
 
-	main_win->SetTitle(wad.master.edit_wad->PathName(), loaded.levelName, false);
+	main_win->SetTitle(wad.master.edit_wad->PathName().u8string(), loaded.levelName, false);
 
 	Status_Set("Renamed to %s", loaded.levelName.c_str());
 }

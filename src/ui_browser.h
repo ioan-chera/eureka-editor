@@ -22,6 +22,7 @@
 #define __EUREKA_UI_BROWSER_H__
 
 #include <map>
+#include <memory>
 #include <string>
 
 
@@ -157,7 +158,7 @@ private:
 
 	bool SearchMatch(Browser_Item *item) const;
 
-	void Populate_Images(BrowserMode imkind, const std::map<SString, Img_c *> & img_list);
+	void Populate_Images(BrowserMode imkind, const std::map<SString, Img_c> & img_list);
 	void Populate_Sprites();
 
 	void Populate_ThingTypes();

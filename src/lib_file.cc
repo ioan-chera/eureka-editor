@@ -41,64 +41,25 @@
 #endif
 
 
-bool FileExists(const SString &filename)
+bool FileExists(const fs::path &filename)
 {
-	// TODO: #55 unicode
-	FILE *fp = fopen(filename.c_str(), "rb");
-
-	if (fp)
+	try
 	{
-		fclose(fp);
-		return true;
+		return fs::is_regular_file(filename);
 	}
-
-	return false;
+	catch(const fs::filesystem_error &e)
+	{
+		// Let's print any errors before we throw anything
+		gLog.printf("File check error: %s\n", e.what());
+		return false;
+	}
 }
 
 
-bool HasExtension(const SString &filename)
+bool HasExtension(const fs::path &filename)
 {
-	int A = (int)filename.length() - 1;
-
-	if (A > 0 && filename[A] == '.')
-		return false;
-
-	if(filename == ".")	// must also cover this special case
-		return false;
-
-	bool foundPotentialExtension = false;
-
-	for (; A >= 0 ; A--)
-	{
-		if (filename[A] == '.')
-		{
-			if(foundPotentialExtension)	// this would be the next pass
-				return true;
-			foundPotentialExtension = true;
-			continue;
-		}
-
-		if (filename[A] == '/')
-		{
-			if(foundPotentialExtension)	// immediately before point
-				return false;
-			break;
-		}
-
-#ifdef WIN32
-		if (filename[A] == '\\' || filename[A] == ':')
-		{
-			if(foundPotentialExtension)
-				return false;
-			break;
-		}
-#endif
-		// Neither dot, / or \ (Windows)
-		if(foundPotentialExtension)
-			return true;
-	}
-
-	return false;
+	fs::path extension = filename.extension();
+	return extension != "." && !extension.empty();
 }
 
 //
@@ -106,16 +67,14 @@ bool HasExtension(const SString &filename)
 //
 // When ext is NULL, checks if the file has no extension.
 //
-bool MatchExtension(const SString &filename, const SString &ext)
+bool MatchExtensionNoCase(const fs::path &filename, const char *extension)
 {
-	if (ext.empty())
+	if (!extension || !*extension)
 		return ! HasExtension(filename);
-	if(!HasExtension(filename))	// don't acknowledge extension if set
+	if(!HasExtension(filename))
 		return false;
 
-	if(ext[0] == '.')
-		return filename.noCaseEndsWith(ext);
-	return filename.noCaseEndsWith("." + ext);
+	return SString(filename.extension().u8string()).noCaseEqual(extension);
 }
 
 
@@ -126,59 +85,30 @@ bool MatchExtension(const SString &filename, const SString &ext)
 //
 // Returned string is a COPY.
 //
-SString ReplaceExtension(const SString &filename, const SString &ext)
+fs::path ReplaceExtension(const fs::path &filename, const char *extension)
 {
-	SString actualExt;
-	if(ext.good() && ext[0] == '.')
-		actualExt = ext;
-	else
-		actualExt = "." + ext;
-	if(!HasExtension(filename))
-	{
-		if(ext.good())
-			return filename + actualExt;
+	if(filename.filename() == ".." && (!extension || !*extension))
 		return filename;
-	}
-	size_t dotPos = filename.rfind('.');
-	SString result = filename;
-	result.erase(dotPos, SString::npos);
-	if(ext.good())
-		result += actualExt;
+	fs::path result(filename);
+	result.replace_extension(extension ? extension : "");
 	return result;
-}
-
-static size_t FindBaseName(const SString &filename)
-{
-	// Find the base name of the file (i.e. without any path).
-	// The result always points within the given string.
-	//
-	// Example:  "C:\Foo\Bar.wad"  ->  "Bar.wad"
-
-#ifdef WIN32
-	size_t s = filename.find_last_of("/\\");
-#else
-	size_t s = filename.rfind('/');
-#endif
-	if(s != std::string::npos)
-		return s + 1;
-	return 0;
 }
 
 //
 // Get the basename of a path
 //
-SString GetBaseName(const SString &path)
+fs::path GetBaseName(const fs::path &path)
 {
 	// Find the base name of the file (i.e. without any path).
 	// The result always points within the given string.
 	//
 	// Example:  "C:\Foo\Bar.wad"  ->  "Bar.wad"
-	return path.substr(FindBaseName(path));
+	return path.filename();
 }
 
-bool FilenameIsBare(const SString &filename)
+bool FilenameIsBare(const fs::path &filename)
 {
-	return filename.find_first_of("./\\:") == std::string::npos;
+	return !filename.has_extension() && filename == filename.filename();
 }
 
 
@@ -266,116 +196,28 @@ static void FilenameStripBase(SString &path)
 #endif
 }
 
-
-//
-// takes the basename in 'filename' and prepends the path from 'othername'.
-// returns a newly allocated string.
-//
-SString FilenameReposition(const SString &cfilename, const SString &othername)
-{
-	SString filename = GetBaseName(cfilename);
-
-	size_t otherBaseNameLoc = FindBaseName(othername);
-
-	if (otherBaseNameLoc == 0 || otherBaseNameLoc == SString::npos)
-		return filename;
-
-	SString result = othername;
-	result.erase(otherBaseNameLoc, SString::npos);
-	result += filename;
-	return result;
-}
-
 //
 // Get path
 //
-SString FilenameGetPath(const SString &filename)
+fs::path FilenameGetPath(const fs::path &filename)
 {
-	size_t baseNamePosition = FindBaseName(filename);
-
-	SString directory = filename;
-	directory.erase(baseNamePosition, SString::npos);
-
-	if(directory.empty())
-		return ".";
-
-#ifdef _WIN32
-	directory.trimTrailingSet("/\\");
-#else
-	directory.trimTrailingSet("/");
-#endif
-	if(directory.empty())
-		return DIR_SEP_STR;
-
-#ifdef _WIN32
-	if(directory.length() == 2 && directory[1] == ':' && isalpha(directory[0]))
-	{
-		directory.push_back(DIR_SEP_CH);
-	}
-#endif
-
-	return directory;
+	fs::path parent(filename.parent_path());
+	return parent.empty() ? "." : parent;
 }
 
 //
 // Safe wrapper around fl_filename_absolute
 //
-SString GetAbsolutePath(const SString &path)
+fs::path GetAbsolutePath(const fs::path &path)
 {
-	size_t sz = 64;
-	std::vector<char> stringBuffer;
-
-	do
-	{
-		sz *= 2;
-		stringBuffer.resize(sz);
-		fl_filename_absolute(stringBuffer.data(), (int)stringBuffer.size(), path.c_str());
-	} while(stringBuffer.back() == '\0' && stringBuffer[stringBuffer.size() - 2] != 0);
-	// repeat until we know it's large enough
-
-	return stringBuffer.data();
+	return fs::absolute(path);
 }
 
-bool FileCopy(const SString &src_name, const SString &dest_name)
-{
-	char buffer[1024];
-
-	FILE *src = fopen(src_name.c_str(), "rb");
-	if (! src)
-		return false;
-
-	FILE *dest = fopen(dest_name.c_str(), "wb");
-	if (! dest)
-	{
-		fclose(src);
-		return false;
-	}
-
-	while (true)
-	{
-		size_t rlen = fread(buffer, 1, sizeof(buffer), src);
-		if (rlen == 0)
-			break;
-
-		size_t wlen = fwrite(buffer, 1, rlen, dest);
-		if (wlen != rlen)
-			break;
-	}
-
-	bool was_OK = !ferror(src) && !ferror(dest);
-
-	fclose(dest);
-	fclose(src);
-
-	return was_OK;
-}
-
-
-bool FileDelete(const SString &filename)
+bool FileDelete(const fs::path &filename)
 {
 #ifdef WIN32
 	// TODO: set wide character here
-	return (::DeleteFile(filename.c_str()) != 0);
+	return (::DeleteFileW(filename.c_str()) != 0);
 
 #else // UNIX or MACOSX
 
@@ -384,68 +226,67 @@ bool FileDelete(const SString &filename)
 }
 
 
-bool FileChangeDir(const SString &dir_name)
+bool FileChangeDir(const fs::path &dir_name)
 {
-#ifdef WIN32
-	// TODO: set wide character here
-	return (::SetCurrentDirectory(dir_name.c_str()) != 0);
-
-#else // UNIX or MACOSX
-
-	return (chdir(dir_name.c_str()) == 0);
-#endif
+	try
+	{
+		fs::current_path(dir_name);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Error changing directory to %s: %s\n", dir_name.u8string().c_str(), e.what());
+		return false;
+	}
+	return true;
 }
 
 
-bool FileMakeDir(const SString &dir_name)
+bool FileMakeDir(const fs::path &dir_name)
 {
-#ifdef WIN32
-	return (::CreateDirectory(dir_name.c_str(), NULL) != 0);
-
-#else // UNIX or MACOSX
-
-	return (mkdir(dir_name.c_str(), 0775) == 0);
-#endif
+	try
+	{
+		return fs::create_directory(dir_name);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Error creating directory %s: %s\n", dir_name.u8string().c_str(), e.what());
+		return false;
+	}
 }
 
-bool FileLoad(const SString &filename, std::vector<u8_t> &data)
+bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data)
 {
-	struct stat filestat = {};
-	int n = stat(filename.c_str(), &filestat);
-	if(n == -1)
-		return false;
-	if(filestat.st_mode & S_IFDIR || !(filestat.st_mode & S_IFREG))
-		return false;	// reject directories and unusual files
-
-	FILE *fp = fopen(filename.c_str(), "rb");
-
-	if(!fp)
-		return false;
-
-	long length;
-
-	// determine size of file (via seeking)
-	fseek(fp, 0, SEEK_END);
-	length = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-
-	if(ferror(fp) || length < 0)
+	try
 	{
-		fclose(fp);
+		// Don't try to read unusual files
+		if(!fs::is_regular_file(filename))
+			return false;
+
+		uintmax_t size = fs::file_size(filename);
+
+		std::ifstream stream(filename, std::ios::binary);
+		if(!stream.is_open())
+			return false;
+
+		std::vector<uint8_t> trydata;
+		trydata.resize(size);
+
+		size_t pos = 0;
+
+		while(!stream.eof() && pos < size)
+		{
+			if(!stream.read(reinterpret_cast<char *>(trydata.data() + pos), size - pos))
+				return false;
+			pos += stream.gcount();
+		}
+
+		data = std::move(trydata);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Error loading file %s: %s\n", filename.u8string().c_str(), e.what());
 		return false;
 	}
-
-	data.resize(length);
-
-	if(length > 0 && 1 != fread(data.data(), length, 1, fp))
-	{
-		data.clear();
-		fclose(fp);
-		return false;
-	}
-
-	fclose(fp);
-
 	return true;
 }
 
@@ -454,122 +295,46 @@ bool FileLoad(const SString &filename, std::vector<u8_t> &data)
 //
 // Scan a directory
 //
-int ScanDirectory(const SString &path, const std::function<void(const SString &, int)> &func)
+int ScanDirectory(const fs::path &path, const std::function<void(const fs::path &, int)> &func)
 {
-	SString actualPath = path;
-	if(actualPath.empty())
-		actualPath = ".";
-	int count = 0;
-
-#ifdef WIN32
-
-	DWORD attributes = GetFileAttributesA(path.c_str());
-	if(attributes == INVALID_FILE_ATTRIBUTES)
-		return SCAN_ERR_NoExist;
-	if(!(attributes & FILE_ATTRIBUTE_DIRECTORY))
-		return SCAN_ERR_NotDir;
-	SString pattern;
-	if(actualPath.back() == '/' || actualPath.back() == DIR_SEP_CH)
-		pattern = actualPath + "*";
-	else
-		pattern = actualPath + DIR_SEP_STR "*";
-
-	WIN32_FIND_DATA fdata;
-
-	HANDLE handle = FindFirstFile(pattern.c_str(), &fdata);
-	if (handle == INVALID_HANDLE_VALUE)
-		return 0;  //??? (GetLastError() == ERROR_FILE_NOT_FOUND) ? 0 : SCAN_ERROR;
-
-	do
+	try
 	{
-		int flags = 0;
-
-		if (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			flags |= SCAN_F_IsDir;
-
-		if (fdata.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
-			flags |= SCAN_F_ReadOnly;
-
-		if (fdata.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
-			flags |= SCAN_F_Hidden;
-
-		// minor kludge for consistency with Unix
-		if (fdata.cFileName[0] == '.' && isalpha(fdata.cFileName[1]))
-			flags |= SCAN_F_Hidden;
-
-		if (strcmp(fdata.cFileName, ".")  == 0 ||
-				strcmp(fdata.cFileName, "..") == 0)
+		int count = 0;
+		for(const auto &dir_entry : fs::directory_iterator(path))
 		{
-			// skip the funky "." and ".." dirs
-		}
-		else
-		{
-			func(fdata.cFileName, flags);
+			int flags = 0;
+			if(fs::is_directory(dir_entry))
+				flags |= SCAN_F_IsDir;
+			if((fs::status(dir_entry).permissions() & (fs::perms::owner_write | fs::perms::group_write | fs::perms::others_write)) == fs::perms::none)
+			{
+				flags |= SCAN_F_ReadOnly;
+			}
+			fs::path entry_name = dir_entry.path().filename();
+			SString entry_string = entry_name.u8string();
+			if(entry_string.length() >= 2 && entry_string[0] == '.' && isalnum(entry_string[1]))
+			{
+				flags |= SCAN_F_Hidden;
+			}
 
-			count++;
+			func(entry_name, flags);
+			++count;
 		}
+		return count;
 	}
-	while (FindNextFile(handle, &fdata) != FALSE);
-
-	FindClose(handle);
-
-
-#else // ---- UNIX ------------------------------------------------
-
-	DIR *handle = opendir(path.c_str());
-	if (handle == NULL)
-		return errno == ENOTDIR ? SCAN_ERR_NotDir : SCAN_ERR_NoExist;
-
-	for (;;)
+	catch(const fs::filesystem_error &e)
 	{
-		const struct dirent *fdata = readdir(handle);
-		if (fdata == NULL)
-			break;
-
-		if (strlen(fdata->d_name) == 0)
-			continue;
-
-		// skip the funky "." and ".." dirs
-		if (strcmp(fdata->d_name, ".")  == 0 ||
-				strcmp(fdata->d_name, "..") == 0)
-			continue;
-
-		SString full_name = path + "/" + fdata->d_name;
-
-		struct stat finfo;
-
-		if (stat(full_name.c_str(), &finfo) != 0)
-		{
-			gLog.debugPrintf(".... stat failed: %s\n", GetErrorMessage(errno).c_str());
-			continue;
-		}
-
-
-		int flags = 0;
-
-		if (S_ISDIR(finfo.st_mode))
-			flags |= SCAN_F_IsDir;
-
-		if ((finfo.st_mode & (S_IWUSR | S_IWGRP | S_IWOTH)) == 0)
-			flags |= SCAN_F_ReadOnly;
-
-		if (fdata->d_name[0] == '.' && isalpha(fdata->d_name[1]))
-			flags |= SCAN_F_Hidden;
-
-		func(fdata->d_name, flags);
-
-		count++;
+		gLog.printf("%s (%d)\n", e.what(), e.code().value());
+		if(!fs::exists(path))
+			return SCAN_ERR_NoExist;
+		if(!fs::is_directory(path))
+			return SCAN_ERR_NotDir;
+		return SCAN_ERROR;
 	}
-
-	closedir(handle);
-#endif
-
-	return count;
 }
 
-int ScanDirectory(const SString &path, directory_iter_f func, void *priv_dat)
+int ScanDirectory(const fs::path &path, directory_iter_f func, void *priv_dat)
 {
-	return ScanDirectory(path, [func, priv_dat](const SString &name, int flags)
+	return ScanDirectory(path, [func, priv_dat](const fs::path &name, int flags)
 						 {
 		func(name, flags, priv_dat);
 	});
@@ -577,7 +342,7 @@ int ScanDirectory(const SString &path, directory_iter_f func, void *priv_dat)
 
 //------------------------------------------------------------------------
 
-SString GetExecutablePath(const char *argv0)
+fs::path GetExecutablePath(const char *argv0)
 {
 	SString path;
 
@@ -590,7 +355,7 @@ SString GetExecutablePath(const char *argv0)
 		{
 			SString retpath = WideToUTF8(wpath);
 			FilenameStripBase(retpath);
-			return retpath;
+			return fs::u8path(retpath.get());
 		}
 	}
 
@@ -606,7 +371,7 @@ SString GetExecutablePath(const char *argv0)
 		if (access(rawpath, 0) == 0)  // sanity check
 		{
 			FilenameStripBase(rawpath);
-			return rawpath;
+			return fs::u8path(rawpath);
 		}
 	}
 
@@ -629,7 +394,7 @@ SString GetExecutablePath(const char *argv0)
 	{
 		// FIXME: will this be _inside_ the .app folder???
 		FilenameStripBase(rawpath);
-		return rawpath;
+		return fs::u8path(rawpath);
 	}
 #endif
 
@@ -641,7 +406,17 @@ SString GetExecutablePath(const char *argv0)
 #endif
 
 	FilenameStripBase(path);
-	return path;
+	return fs::u8path(path.get());
+}
+
+//
+// Helper to escape path for writing. It adds quotes if needed, and any internal quotes are doubled
+// (like in MS-DOS)
+//
+SString escape(const fs::path &path)
+{
+	std::string str = path.generic_u8string();
+	return SString(str).spaceEscape();
 }
 
 //--- editor settings ---

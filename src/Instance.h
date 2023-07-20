@@ -43,6 +43,15 @@ struct v2double_t;
 struct v2int_t;
 
 //
+// For SelectNeighborLines and SelectNeighborSectors
+//
+enum SelectNeighborCriterion
+{
+	height,
+	texture,
+};
+
+//
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
 //
@@ -137,6 +146,7 @@ public:
 	void CMD_SEC_SwapFlats();
 	void CMD_Select();
 	void CMD_SelectAll();
+	void CMD_SelectNeighbors();
 	void CMD_SetVar();
 	void CMD_Shrink();
 	void CMD_TestMap();
@@ -247,10 +257,8 @@ public:
 	unsigned Nav_TimeDiff();
 
 	// M_FILES
-	bool M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args = false);
-	SString M_PickDefaultIWAD() const;
+	fs::path M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
-	void M_WriteEurekaLump(Wad_file *wad) const;
 
 	// M_GAME
 	bool is_sky(const SString &flat) const;
@@ -279,7 +287,7 @@ public:
 	void ValidateVertexRefs(LineDef *ld, int num);
 	void ValidateSectorRef(SideDef *sd, int num);
 	void ValidateSidedefRefs(LineDef *ld, int num);
-	
+
 	// M_NODES
 	void BuildNodesAfterSave(int lev_idx);
 	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const EUR_PRINTF(2, 3);
@@ -293,7 +301,7 @@ public:
 
 	// MAIN
 	bool Main_ConfirmQuit(const char *action) const;
-	SString Main_FileOpFolder() const;
+	fs::path Main_FileOpFolder() const;
 	bool Main_LoadIWAD();
 	void Main_LoadResources(LoadingData &loading);
 
@@ -351,6 +359,7 @@ private:
 	void Editor_ClearErrorMode();
 	void UpdateDrawLine();
 	void zoom_fit();
+	void SelectNeighborSectors(int objnum, SelectNeighborCriterion option, byte parts);
 
 	// E_SECTOR
 	void commandSectorMerge();
@@ -394,7 +403,7 @@ private:
 	bool M_ExportMap();
 	void Navigate2D();
 	void Project_ApplyChanges(UI_ProjectSetup *dialog);
-	bool Project_AskFile(SString& filename) const;
+	bool Project_AskFile(fs::path& filename) const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);
 	void SaveLevel(const SString &level);

@@ -25,6 +25,9 @@
 #include <functional>
 #include <vector>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 #ifdef WIN32
 #define DIR_SEP_CH   '\\'
 #define DIR_SEP_STR  "\\"
@@ -36,26 +39,24 @@
 class SString;
 
 // filename functions
-bool HasExtension(const SString &filename);
-bool MatchExtension(const SString &filename, const SString &ext);
-SString ReplaceExtension(const SString &filename, const SString &ext);
-SString GetBaseName(const SString &path);
-bool FilenameIsBare(const SString &filename);
-SString FilenameReposition(const SString &filename, const SString &othername);
-SString FilenameGetPath(const SString &filename);
-SString GetAbsolutePath(const SString &path);
+bool HasExtension(const fs::path &filename);
+bool MatchExtensionNoCase(const fs::path &filename, const char *extension);
+fs::path ReplaceExtension(const fs::path &filename, const char *extension);
+fs::path GetBaseName(const fs::path &path);
+bool FilenameIsBare(const fs::path &filename);
+fs::path FilenameGetPath(const fs::path &filename);
+fs::path GetAbsolutePath(const fs::path &path);
 
 // file utilities
-bool FileExists(const SString &filename);
-bool FileCopy(const SString &src_name, const SString &dest_name);
-bool FileDelete(const SString &filename);
-bool FileChangeDir(const SString &dir_name);
-bool FileMakeDir(const SString &dir_name);
+bool FileExists(const fs::path &filename);
+bool FileDelete(const fs::path &filename);
+bool FileChangeDir(const fs::path &dir_name);
+bool FileMakeDir(const fs::path &dir_name);
 
-bool FileLoad(const SString &filename, std::vector<uint8_t> &data);
+bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data);
 
 // miscellaneous
-SString GetExecutablePath(const char *argv0);
+fs::path GetExecutablePath(const char *argv0);
 
 //------------------------------------------------------------------------
 
@@ -74,14 +75,16 @@ enum scan_error_e
 	SCAN_ERR_NotDir   = -3,  // path was not a directory
 };
 
-typedef void (* directory_iter_f)(const SString &name, int flags, void *priv_dat);
+typedef void (* directory_iter_f)(const fs::path &name, int flags, void *priv_dat);
 
-int ScanDirectory(const SString &path, directory_iter_f func, void *priv_dat);
-int ScanDirectory(const SString &path, const std::function<void(const SString &, int)> &func);
+int ScanDirectory(const fs::path &path, directory_iter_f func, void *priv_dat);
+int ScanDirectory(const fs::path &path, const std::function<void(const fs::path &, int)> &func);
 // scan the directory with the given path and call the given
 // function (passing the private data pointer to it) for each
 // entry in the directory.  Returns the total number of entries,
 // or a negative value on error (SCAN_ERR_xx value).
+
+SString escape(const fs::path &path);
 
 #endif /* __LIB_FILE_H__ */
 

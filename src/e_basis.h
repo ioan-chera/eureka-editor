@@ -28,11 +28,14 @@
 #define __EUREKA_E_BASIS_H__
 
 #include "DocumentModule.h"
+#include "LineDef.h"
 #include "m_strings.h"
 #include "objid.h"
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
+#include <memory>
 #include <stack>
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
@@ -105,15 +108,11 @@ private:
 		ObjType objtype = ObjType::things;
 		byte field = 0;
 		int objnum = 0;
-		union
-		{
-			int *ptr = nullptr;
-			Thing *thing;
-			Vertex *vertex;
-			Sector *sector;
-			SideDef *sidedef;
-			LineDef *linedef;
-		};
+		std::unique_ptr<Thing> thing;
+		std::unique_ptr<Vertex> vertex;
+		std::unique_ptr<Sector> sector;
+		std::unique_ptr<SideDef> sidedef;
+		std::unique_ptr<LineDef> linedef;
 		int value = 0;
 
 		void apply(Basis &basis);
@@ -122,19 +121,19 @@ private:
 	private:
 		void rawChange(Basis &basis);
 
-		void *rawDelete(Basis &basis) const;
-		Thing *rawDeleteThing(Document &doc) const;
-		Vertex *rawDeleteVertex(Document &doc) const;
-		Sector *rawDeleteSector(Document &doc) const;
-		SideDef *rawDeleteSidedef(Document &doc) const;
-		LineDef *rawDeleteLinedef(Document &doc) const;
+		void rawDelete(Basis &basis);
+		std::unique_ptr<Thing> rawDeleteThing(Document &doc) const;
+		std::unique_ptr<Vertex> rawDeleteVertex(Document &doc) const;
+		std::unique_ptr<Sector> rawDeleteSector(Document &doc) const;
+		std::unique_ptr<SideDef> rawDeleteSidedef(Document &doc) const;
+		std::unique_ptr<LineDef> rawDeleteLinedef(Document &doc) const;
 
-		void rawInsert(Basis &basis) const;
-		void rawInsertThing(Document &doc) const;
-		void rawInsertVertex(Document &doc) const;
-		void rawInsertSector(Document &doc) const;
-		void rawInsertSidedef(Document &doc) const;
-		void rawInsertLinedef(Document &doc) const;
+		void rawInsert(Basis &basis);
+		void rawInsertThing(Document &doc);
+		void rawInsertVertex(Document &doc);
+		void rawInsertSector(Document &doc);
+		void rawInsertSidedef(Document &doc);
+		void rawInsertLinedef(Document &doc);
 
 		void deleteFinally();
 	};
@@ -154,7 +153,7 @@ private:
 			for(auto it = mOps.rbegin(); it != mOps.rend(); ++it)
 				it->destroy();
 		}
-		
+
 		// Ensure we only use move semantics
 		UndoGroup(const UndoGroup &other) = delete;
 		UndoGroup &operator = (const UndoGroup &other) = delete;
@@ -169,7 +168,7 @@ private:
 		UndoGroup &operator = (UndoGroup &&other) noexcept;
 
 		void reset();
-		
+
 		//
 		// Mark if active and ready to use
 		//
@@ -194,7 +193,7 @@ private:
 			return mOps.empty();
 		}
 
-		void addApply(const EditUnit &op, Basis &basis);
+		void addApply(EditUnit &&op, Basis &basis);
 
 		//
 		// End current action
@@ -215,7 +214,7 @@ private:
 		}
 
 		//
-		// Put the message 
+		// Put the message
 		//
 		void setMessage(const SString &message)
 		{

@@ -52,8 +52,6 @@ struct SideDef
 	SString MidTex()   const;
 	SString LowerTex() const;
 
-	Sector *SecRef(const Document &doc) const;
-
 	// use new_tex when >= 0, otherwise use default_wall_tex
 	void SetDefaults(const ConfigData &config, bool two_sided, StringID new_tex = StringID(-1));
 };

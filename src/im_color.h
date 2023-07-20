@@ -32,6 +32,7 @@
 #include "WindowsSanitization.h"	// needed for Windows
 #include <algorithm>
 
+class Lump_c;
 class SString;
 struct WadData;
 
@@ -41,8 +42,13 @@ typedef u32_t rgb_color_t;
 #define RGB_GREEN(col)  ((col >> 16) & 255)
 #define RGB_BLUE(col)   ((col >>  8) & 255)
 
-#define RGB_MAKE(r, g, b)  (((r) << 24) | ((g) << 16) | ((b) << 8))
-
+//
+// Constexpr maker
+//
+static constexpr rgb_color_t rgbMake(int r, int g, int b)
+{
+	return static_cast<rgb_color_t>(r << 24 | g << 16 | b << 8);
+}
 
 // this is a version of rgb_color_t with an alpha channel
 // [ currently only used by the TGA loading code ]
@@ -79,6 +85,57 @@ inline int R_DoomLightingEquation(int L, float dist)
 	return clamp(min_L, index, 31);
 }
 
+
+// this is a 16-bit value:
+//   - when high bit is clear, it is a palette index 0-255
+//     (value 255 is used to represent fully transparent).
+//   - when high bit is set, the remainder is 5:5:5 RGB
+typedef unsigned short  img_pixel_t;
+
+//
+// Wad palette info
+//
+class Palette
+{
+public:
+	bool updateGamma(int usegamma, int panel_gamma);
+	void decodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const;
+	void decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const;
+	void createBrightMap();
+
+	rgb_color_t getPaletteColor(int index) const
+	{
+		return palette[index];
+	}
+
+	bool loadPalette(Lump_c &lump, int usegamma, int panel_gamma);
+	void loadColormap(Lump_c *lump);
+
+	byte findPaletteColor(int r, int g, int b) const;
+	rgb_color_t pixelToRGB(img_pixel_t p) const;
+	byte getColormapIndex(int cmap, int pos) const
+	{
+		return raw_colormap[cmap][pos];
+	}
+
+	int getTransReplace() const
+	{
+		return trans_replace;
+	}
+
+private:
+	// this palette has the gamma setting applied
+	rgb_color_t palette[256] = {};
+	rgb_color_t palette_medium[256] = {};
+	byte rgb555_gamma[32];
+	byte rgb555_medium[32];
+	byte bright_map[256] = {};
+	byte raw_palette[256][3] = {};
+	byte raw_colormap[32][256] = {};
+	// the palette color closest to what TRANS_PIXEL really is
+	int trans_replace = 0;
+
+};
 
 //------------------------------------------------------------//
 

@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <random>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 struct ReportedResult;
 
 //
@@ -35,7 +38,7 @@ struct ReportedResult;
 class SafeOutFile
 {
 public:
-	explicit SafeOutFile(const SString &path);
+	explicit SafeOutFile(const fs::path &path);
 	~SafeOutFile()
 	{
 		close();
@@ -45,17 +48,17 @@ public:
 	ReportedResult commit();
 	void close();
 
-	ReportedResult write(const void *data, size_t size) const;
+	ReportedResult write(const void *data, size_t size);
 
 private:
-	SString generateRandomPath() const;
-	ReportedResult makeValidRandomPath(SString &path) const;
+	fs::path generateRandomPath() const;
+	ReportedResult makeValidRandomPath(fs::path &path) const;
 
-	const SString mPath;	// the target path
+	const fs::path mPath;	// the target path
 	// the random temporary path. Only valid if mFile non-null
-	SString mRandomPath;
+	fs::path mRandomPath;
 
-	FILE *mFile = nullptr;
+	std::ofstream mStream;
 	mutable std::mt19937 mRandom;
 };
 

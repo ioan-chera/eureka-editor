@@ -42,37 +42,39 @@ TEST(LibFile, HasExtension)
 	ASSERT_FALSE(HasExtension("/."));
 	ASSERT_FALSE(HasExtension("."));
 	ASSERT_FALSE(HasExtension(".."));
+	ASSERT_FALSE(HasExtension("abc/.."));
+	ASSERT_FALSE(HasExtension("../.."));
 	ASSERT_FALSE(HasExtension(""));
 }
 
 TEST(LibFile, MatchExtension)
 {
-	ASSERT_TRUE(MatchExtension("man/doc.", nullptr));
-	ASSERT_TRUE(MatchExtension("man/doc.", ""));
-	ASSERT_FALSE(MatchExtension("man/.doc.", "doc"));
-	ASSERT_TRUE(MatchExtension("man/doc. ", " "));
-	ASSERT_TRUE(MatchExtension("man.wad/doom", nullptr));
-	ASSERT_FALSE(MatchExtension("man.wad/doom", "doom"));
-	ASSERT_TRUE(MatchExtension("man.wad/doom.wad", ".WAD"));
-	ASSERT_TRUE(MatchExtension("man.wad/doom..wad", ".WAD"));
-	ASSERT_TRUE(MatchExtension(".okay", ""));
-	ASSERT_FALSE(MatchExtension(".okay", "okay"));
-	ASSERT_TRUE(MatchExtension("man/.okay", ""));
-	ASSERT_FALSE(MatchExtension("man/.okay", "okay"));
-	ASSERT_TRUE(MatchExtension("man/.okay.WAD", "wad"));
-	ASSERT_TRUE(MatchExtension("/.", nullptr));
-	ASSERT_TRUE(MatchExtension(".", nullptr));
-	ASSERT_TRUE(MatchExtension("..", nullptr));
-	ASSERT_FALSE(MatchExtension("..", "."));
-	ASSERT_TRUE(MatchExtension("", nullptr));
+	ASSERT_TRUE(MatchExtensionNoCase("man/doc.", nullptr));
+	ASSERT_TRUE(MatchExtensionNoCase("man/doc.", ""));
+	ASSERT_FALSE(MatchExtensionNoCase("man/.doc.", ".doc"));
+	ASSERT_TRUE(MatchExtensionNoCase("man/doc. ", ". "));
+	ASSERT_TRUE(MatchExtensionNoCase("man.wad/doom", nullptr));
+	ASSERT_FALSE(MatchExtensionNoCase("man.wad/doom", "doom"));
+	ASSERT_TRUE(MatchExtensionNoCase("man.wad/doom.wad", ".WAD"));
+	ASSERT_TRUE(MatchExtensionNoCase("man.wad/doom..wad", ".WAD"));
+	ASSERT_TRUE(MatchExtensionNoCase(".okay", ""));
+	ASSERT_FALSE(MatchExtensionNoCase(".okay", ".okay"));
+	ASSERT_TRUE(MatchExtensionNoCase("man/.okay", ""));
+	ASSERT_FALSE(MatchExtensionNoCase("man/.okay", ".okay"));
+	ASSERT_TRUE(MatchExtensionNoCase("man/.okay.WAD", ".wad"));
+	ASSERT_TRUE(MatchExtensionNoCase("/.", nullptr));
+	ASSERT_TRUE(MatchExtensionNoCase(".", nullptr));
+	ASSERT_TRUE(MatchExtensionNoCase("..", nullptr));
+	ASSERT_FALSE(MatchExtensionNoCase("..", "."));
+	ASSERT_TRUE(MatchExtensionNoCase("", nullptr));
 }
 
 TEST(LibFile, ReplaceExtension)
 {
-	ASSERT_EQ(ReplaceExtension("man/doc.", "wad"), "man/doc..wad");
-	ASSERT_EQ(ReplaceExtension("man/doc.", "WAD"), "man/doc..WAD");
-	ASSERT_EQ(ReplaceExtension("man/doc.", ""), "man/doc.");
-	ASSERT_EQ(ReplaceExtension("man/doc.", nullptr), "man/doc.");
+	ASSERT_EQ(ReplaceExtension("man/doc.", "wad"), "man/doc.wad");
+	ASSERT_EQ(ReplaceExtension("man/doc.", "WAD"), "man/doc.WAD");
+	ASSERT_EQ(ReplaceExtension("man/doc.", ""), "man/doc");
+	ASSERT_EQ(ReplaceExtension("man/doc.", nullptr), "man/doc");
 	ASSERT_EQ(ReplaceExtension("man/.doc", ""), "man/.doc");
 	ASSERT_EQ(ReplaceExtension("man/.doc", nullptr), "man/.doc");
 	ASSERT_EQ(ReplaceExtension("man/.doc", "wad"), "man/.doc.wad");
@@ -94,7 +96,7 @@ TEST(LibFile, ReplaceExtension)
 	ASSERT_EQ(ReplaceExtension(".", nullptr), ".");
 	ASSERT_EQ(ReplaceExtension("..", ""), "..");
 	ASSERT_EQ(ReplaceExtension("..", nullptr), "..");
-	ASSERT_EQ(ReplaceExtension("..", "txt"), "...txt");
+	ASSERT_EQ(ReplaceExtension("..", "txt"), "..txt");
 	ASSERT_EQ(ReplaceExtension("..txt", "wad"), "..wad");
 	ASSERT_EQ(ReplaceExtension("..txt", ""), ".");
 	ASSERT_EQ(ReplaceExtension("..txt", nullptr), ".");
@@ -122,7 +124,9 @@ TEST(LibFile, GetBaseName)
 	ASSERT_EQ(GetBaseName("path/to///fileA.wad"), "fileA.wad");
     ASSERT_EQ(GetBaseName("path/to/fileB"), "fileB");
     ASSERT_EQ(GetBaseName("/fileC.txt"), "fileC.txt");
-    ASSERT_EQ(GetBaseName("//file"), "file");
+	ASSERT_EQ(GetBaseName("/file"), "file");
+	ASSERT_EQ(GetBaseName("//dir/file"), "file");
+    ASSERT_EQ(GetBaseName("/file"), "file");
     ASSERT_EQ(GetBaseName("fil"), "fil");
 	ASSERT_EQ(GetBaseName(""), "");
 }
@@ -134,24 +138,9 @@ TEST(LibFile, FilenameIsBare)
 	ASSERT_TRUE(FilenameIsBare("DOOM"));
 	ASSERT_TRUE(FilenameIsBare("doom"));
 	ASSERT_FALSE(FilenameIsBare("/doom"));
-	ASSERT_FALSE(FilenameIsBare(":doom"));
 	ASSERT_FALSE(FilenameIsBare("/doom.wad"));
 	ASSERT_FALSE(FilenameIsBare("doom.wad"));
 	ASSERT_FALSE(FilenameIsBare("C:\\doom"));
-	ASSERT_FALSE(FilenameIsBare("\\doom"));
-}
-
-TEST(LibFile, FilenameReposition)
-{
-	ASSERT_EQ(FilenameReposition("/doom/doom.wad", "doom2/"), "doom2/doom.wad");
-	ASSERT_EQ(FilenameReposition("/wherever/doom.wad", "/"), "/doom.wad");
-	ASSERT_EQ(FilenameReposition("doom.wad", "/"), "/doom.wad");
-	ASSERT_EQ(FilenameReposition("/drag/doom.wad", nullptr), "doom.wad");
-	ASSERT_EQ(FilenameReposition("doom.wad", "lamb/"), "lamb/doom.wad");
-	ASSERT_EQ(FilenameReposition("", "lamb/"), "lamb/");
-	ASSERT_EQ(FilenameReposition(nullptr, nullptr), "");
-	ASSERT_EQ(FilenameReposition("/manipulate/doom.wad", "lamb"), "doom.wad");
-	ASSERT_EQ(FilenameReposition("/manipulate/doom.wad", "/abc/def/lamb"), "/abc/def/doom.wad");
 }
 
 TEST(LibFile, GetAbsolutePath)
@@ -160,87 +149,42 @@ TEST(LibFile, GetAbsolutePath)
 	int result = fl_filename_absolute(path, sizeof(path), "Hello");
 	ASSERT_NE(result, 0);	// absolute path stays absolute
 
-	SString stringResult = GetAbsolutePath("Hello");
+	SString stringResult = GetAbsolutePath("Hello").generic_u8string();
 	ASSERT_STREQ(stringResult.c_str(), path);
+}
+
+TEST(LibFile, Escape)
+{
+	ASSERT_EQ(escape("/path with spaces and a quote\"/ okay"), "\"/path with spaces and a quote\"\"/ okay\"");
 }
 
 TEST_F(LibFileTempDir, FileExists)
 {
-	SString path = getChildPath("hello");
+	fs::path path = getChildPath("hello");
 	ASSERT_FALSE(FileExists(path));
-	std::ofstream os(path.get());
+	std::ofstream os(path);
 	ASSERT_TRUE(os.is_open());
 	os.close();
 	mDeleteList.push(path);
 	ASSERT_TRUE(FileExists(path));
 
-	int result = remove(path.c_str());
-	ASSERT_EQ(result, 0);
+	fs::remove(path);
 	mDeleteList.pop();
 
 	// Deleted, now must be back to false
 	ASSERT_FALSE(FileExists(path));
-}
 
-TEST_F(LibFileTempDir, FileCopy)
-{
-	SString path = getChildPath("file1");
-
-	std::ofstream os(path.get());
-	ASSERT_TRUE(os.is_open());
+	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	os << "HelloWorld!";
-	os.close();
-
-	SString path2 = getChildPath("file2");
-	bool result = FileCopy(path, path2);
-	ASSERT_TRUE(result);
-	mDeleteList.push(path2);
-
-	std::ifstream is(path2.get());
-	ASSERT_TRUE(is.is_open());
-	std::string str;
-	is >> str;
-	ASSERT_TRUE(is.eof());
-	is.close();
-
-	ASSERT_EQ(str, "HelloWorld!");
-
-	// Now attempt other impossible operations
-	// Inexisting source
-	result = FileCopy(getChildPath("file3"), path2);
-	ASSERT_FALSE(result);
-	// Bad kind of destination
-	result = FileCopy(path, mTempDir);
-	ASSERT_FALSE(result);
-	// Inexistent folder
-	result = FileCopy(path, getChildPath("subpath/file"));
-	ASSERT_FALSE(result);
-
-	// Now test overwriting
-	std::ofstream os2(path.get(), std::ios::trunc);
-	ASSERT_TRUE(os2.is_open());
-	os2 << "SecondSight";
-	os2.close();
-
-	result = FileCopy(path, path2);
-	ASSERT_TRUE(result);
-
-	std::ifstream is2(path2.get());
-	ASSERT_TRUE(is2.is_open());
-	str.clear();
-	is2 >> str;
-	ASSERT_TRUE(is2.eof());
-	ASSERT_EQ(str, "SecondSight");
-	is2.close();
+	ASSERT_FALSE(FileExists(path));
 }
 
 TEST_F(LibFileTempDir, FileDelete)
 {
-	SString path = getChildPath("file");
+	fs::path path = getChildPath("file");
 	ASSERT_FALSE(FileDelete(path));	// can't delete what is not there
 
-	std::ofstream os(path.get());
+	std::ofstream os(path);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path);
 	os << "Hello";
@@ -255,13 +199,13 @@ TEST_F(LibFileTempDir, FileDelete)
 
 TEST_F(LibFileTempDir, FileMakeDir)
 {
-	SString path = getChildPath("dir");
+	fs::path path = getChildPath("dir");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
 	// Disallow overwriting
 	ASSERT_FALSE(FileMakeDir(path));
 	// Disallow inexistent intermediary paths
-	ASSERT_FALSE(FileMakeDir(getChildPath("dir2/dir3")));
+	ASSERT_FALSE(FileMakeDir(getChildPath(fs::path("dir2") / "dir3")));
 
 }
 
@@ -273,8 +217,8 @@ TEST_F(LibFileTempDir, FileLoad)
 	for(int i = 0; i < 40000; ++i)
 		randomData.push_back(static_cast<char>(rand() & 0xff));
 
-	SString path = getChildPath("file");
-	std::ofstream os(path.get(), std::ios::binary);
+	fs::path path = getChildPath("file");
+	std::ofstream os(path, std::ios::binary);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path);
 	os.write(randomData.data(), randomData.size());
@@ -299,17 +243,17 @@ TEST_F(LibFileTempDir, FileLoad)
 TEST_F(LibFileTempDir, ScanDirectory)
 {
 	// 1. Add a file, a "hidden" file, a folder and a "hidden" folder
-	SString path = getChildPath("file");
-	std::ofstream os(path.get());
+	fs::path path = getChildPath("file");
+	std::ofstream os(path);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path);
 	os << "hello";
 	os.close();
 
-	SString filePath = path;
+	fs::path filePath = path;
 
 	path = getChildPath(".file");
-	os.open(path.c_str());
+	os.open(path);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path);
 	os << "shadow";
@@ -322,17 +266,17 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
 
-	SString dotDirPath = path;
+	fs::path dotDirPath = path;
 
 	// Also nest another file, to check it doesn't get listed
-	path = getChildPath("dir/file2");
-	os.open(path.c_str());
+	path = getChildPath(fs::path("dir") / "file2");
+	os.open(path);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path);
 	os << "shadow2";
 	os.close();
 
-	int result = ScanDirectory(mTempDir, [](const SString &name, int flags)
+	int result = ScanDirectory(mTempDir, [](const fs::path &name, int flags)
 		{
 			if(name == "file")
 				ASSERT_EQ(flags, 0);
@@ -348,20 +292,20 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	ASSERT_EQ(result, 4);	// scan no more
 
 	// Now also try on some non-folder files
-	result = ScanDirectory(filePath, [](const SString &name, int flags)
+	result = ScanDirectory(filePath, [](const fs::path &name, int flags)
 		{
 			ASSERT_FALSE(true);	// should not get here
 		});
 	ASSERT_EQ(result, SCAN_ERR_NotDir);
 
-	result = ScanDirectory(getChildPath("illegal"), [](const SString &name, int flags)
+	result = ScanDirectory(getChildPath("illegal"), [](const fs::path &name, int flags)
 		{
 			ASSERT_FALSE(true);	// should not get here
 		});
 	ASSERT_EQ(result, SCAN_ERR_NoExist);
 
 	// Also scan an empty dir
-	result = ScanDirectory(dotDirPath, [](const SString &name, int flags)
+	result = ScanDirectory(dotDirPath, [](const fs::path &name, int flags)
 		{
 			ASSERT_FALSE(true);	// should not get here
 		});

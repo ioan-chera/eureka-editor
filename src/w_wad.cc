@@ -186,11 +186,11 @@ int64_t Lump_c::getName8() const noexcept
 
 Wad_file::~Wad_file()
 {
-	gLog.printf("Closing WAD file: %s\n", filename.c_str());
+	gLog.printf("Closing WAD file: %s\n", filename.u8string().c_str());
 }
 
 
-std::shared_ptr<Wad_file> Wad_file::Open(const SString &filename,
+std::shared_ptr<Wad_file> Wad_file::Open(const fs::path &filename,
 										 WadOpenMode mode)
 {
 	SYS_ASSERT(mode == WadOpenMode::read || mode == WadOpenMode::write || mode == WadOpenMode::append);
@@ -198,13 +198,13 @@ std::shared_ptr<Wad_file> Wad_file::Open(const SString &filename,
 	if (mode == WadOpenMode::write)
 		return Create(filename, mode);
 
-	gLog.printf("Opening WAD file: %s\n", filename.c_str());
+	gLog.printf("Opening WAD file: %s\n", filename.u8string().c_str());
 
 	FILE *fp = NULL;
 
 retry:
 	// TODO: #55 unicode
-	fp = fopen(filename.c_str(), (mode == WadOpenMode::read ? "rb" : "r+b"));
+	fp = fopen(filename.u8string().c_str(), (mode == WadOpenMode::read ? "rb" : "r+b"));
 
 	if (! fp)
 	{
@@ -262,39 +262,38 @@ retry:
 }
 
 
-std::shared_ptr<Wad_file> Wad_file::Create(const SString &filename,
+std::shared_ptr<Wad_file> Wad_file::Create(const fs::path &filename,
 										   WadOpenMode mode)
 {
-	gLog.printf("Creating new WAD file: %s\n", filename.c_str());
+	gLog.printf("Creating new WAD file: %s\n", filename.u8string().c_str());
 
 	return std::shared_ptr<Wad_file>(new Wad_file(filename, mode));
 }
 
 
-bool Wad_file::Validate(const SString &filename)
+bool Wad_file::Validate(const fs::path &filename)
 {
-	FILE *fp = fopen(filename.c_str(), "rb");
+	std::ifstream stream(filename, std::ios::binary);
 
-	if (! fp)
+	if (! stream.is_open())
 		return false;
 
 	raw_wad_header_t header;
 
-	if (fread(&header, sizeof(header), 1, fp) != 1)
+	if(!stream.read(reinterpret_cast<char *>(&header), sizeof(header)) ||
+	   stream.gcount() != sizeof(header))
 	{
-		fclose(fp);
 		return false;
 	}
+
+	stream.close();
 
 	if (! ( header.ident[1] == 'W' &&
 			header.ident[2] == 'A' &&
 			header.ident[3] == 'D'))
 	{
-		fclose(fp);
 		return false;
 	}
-
-	fclose(fp);
 
 	return true;  // OK
 }
@@ -519,6 +518,65 @@ Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) 
 	return nullptr; // not found!
 }
 
+//
+// Searches for the 
+//
+Lump_c *Wad_file::findFirstSpriteLump(const SString &stem) const
+{
+	SString firstName;
+	Lump_c *result = nullptr;
+	for(const LumpRef &lumpRef : directory)
+	{
+		if(lumpRef.ns != WadNamespace::Sprites)
+			continue;
+		const SString &name = lumpRef.lump->name;
+		if(name.length() != 6 && name.length() != 8)
+			continue;
+		if(stem.length() <= 4)
+		{
+			if(!name.startsWith(stem.c_str()))
+				continue;
+		}
+		else
+		{
+			if(!name.startsWith(stem.substr(0, 4).c_str()))
+				continue;
+			if(stem.length() == 5)
+			{
+				char letter = stem[4];
+				if(name[4] != letter && (name.length() != 8 || name[6] != letter))
+					continue;
+			}
+			else if(stem.length() == 6)
+			{
+				const char *pair = stem.c_str() + 4;
+				if((name[4] != pair[0] || name[5] != pair[1]) &&
+				   (name.length() != 8 || name[6] != pair[0] || name[7] != pair[1]))
+				{
+					continue;
+				}
+			}
+			else if(stem.length() == 7)
+			{
+				if(name.startsWith(stem.c_str()))
+				{
+					return lumpRef.lump.get();
+				}
+			}
+			else if(stem.length() == 8)
+			{
+				if(name == stem)
+					return lumpRef.lump.get();
+			}
+		}
+		if(firstName.empty() || firstName.get() > name.get())
+		{
+			firstName = name;
+			result = lumpRef.lump.get();
+		}
+	}
+	return result;
+}
 
 bool Wad_file::ReadDirectory(FILE *fp, int total_size)
 {
@@ -798,7 +856,7 @@ void Wad_file::writeToDisk() noexcept(false)
 	if(IsReadOnly())
 	{
 		ThrowException("Cannot overwrite a read-only file (%s)!",
-					   filename.c_str());
+					   filename.u8string().c_str());
 	}
 
 	// Write to our path now
@@ -927,12 +985,12 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 //
 // Writes to the given path
 //
-void Wad_file::writeToPath(const SString &path) const noexcept(false)
+void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 {
 	auto check = [&path](const ReportedResult &result)
 	{
 		if(!result.success)
-			throw WadWriteException(SString::printf("Failed writing WAD to file '%s': %s", path.c_str(), result.message.c_str()));
+			throw WadWriteException(SString::printf("Failed writing WAD to file '%s': %s", path.u8string().c_str(), result.message.c_str()));
 	};
 
 	SafeOutFile sof(path);
@@ -955,7 +1013,7 @@ void Wad_file::writeToPath(const SString &path) const noexcept(false)
 	{
 		assert(ref.lump.get() != nullptr);
 		const Lump_c &lump = *ref.lump;
-		check(sof.write(lump.getData(), lump.Length()));
+		check(sof.write(lump.getData().data(), lump.Length()));
 	}
 	infotableofs = 12;
 	for(const LumpRef &ref : directory)
@@ -1031,7 +1089,7 @@ void Wad_file::InsertPoint(int index)
 //
 // This one merely saves it as a new filename
 //
-bool Wad_file::Backup(const char *new_filename)
+bool Wad_file::Backup(const fs::path &new_filename)
 {
 	try
 	{
@@ -1053,69 +1111,32 @@ bool Wad_file::Backup(const char *new_filename)
 // find a lump in any loaded wad (later ones tried first),
 // returning NULL if not found.
 //
-Lump_c *MasterDir::W_FindGlobalLump(const SString &name) const
+Lump_c *MasterDir::findGlobalLump(const SString &name) const
 {
-	for (int i = (int)dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)getDir().size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
+		Lump_c *L = getDir()[i]->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}
 
 	return NULL;  // not found
 }
-
-//
-// find a lump that only exists in a certain namespace (sprite,
-// or patch) of a loaded wad (later ones tried first).
-//
-Lump_c *MasterDir::W_FindSpriteLump(const SString &name) const
-{
-	for (int i = (int)dir.size()-1 ; i >= 0 ; i--)
-	{
-		Lump_c *L = dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
-		if (L)
-			return L;
-	}
-
-	return NULL;  // not found
-}
-
-
-int W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer)
-{
-	// include an extra byte, used to NUL-terminate a text buffer
-	buffer.resize(lump->Length() + 1);
-
-	if (lump->Length() > 0)
-	{
-		lump->Seek();
-		if (! lump->Read(buffer.data(), lump->Length()))
-			ThrowException("W_LoadLumpData: read error loading lump.\n");
-	}
-
-	buffer[lump->Length()] = 0;
-
-	return lump->Length();
-}
-
 
 //------------------------------------------------------------------------
 
 void MasterDir::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
 {
-	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
+	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().u8string().c_str());
 
 	dir.push_back(wad);
 }
 
-
 void MasterDir::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
 {
-	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
+	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().u8string().c_str());
 
 	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
-
 	dir.erase(ENDP, dir.end());
 }
 
@@ -1128,8 +1149,8 @@ void MasterDir::MasterDir_CloseAll()
 
 static bool W_FilenameAbsEqual(const SString &A, const SString &B)
 {
-	const SString &A_path = GetAbsolutePath(A);
-	const SString &B_path = GetAbsolutePath(B);
+	const SString &A_path = GetAbsolutePath(A.get()).u8string();
+	const SString &B_path = GetAbsolutePath(B.get()).u8string();
 	return A_path.noCaseEqual(B_path);
 }
 
@@ -1144,9 +1165,9 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 
 bool MasterDir::MasterDir_HaveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < dir.size() ; k++)
+	for (unsigned int k = 0 ; k < getDir().size() ; k++)
 	{
-		const SString &wad_path = dir[k]->PathName();
+		SString wad_path = getDir()[k]->PathName().u8string();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;

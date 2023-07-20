@@ -18,8 +18,14 @@
 //
 //------------------------------------------------------------------------
 
+#ifndef M_STREAMS_H_
+#define M_STREAMS_H_
+
 #include <fstream>
 #include <istream>
+
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
 
 class SString;
 
@@ -40,10 +46,10 @@ public:
         return M_ReadTextLine(line, is);
     }
 
-    bool open(const SString &path) noexcept;
+    bool open(const fs::path &path) noexcept;
     void close() noexcept;
     LineFile() = default;
-    explicit LineFile(const SString &path) noexcept
+    explicit LineFile(const fs::path &path) noexcept
     {
         open(path);
     }
@@ -62,3 +68,5 @@ public:
 private:
     std::ifstream is;
 };
+
+#endif

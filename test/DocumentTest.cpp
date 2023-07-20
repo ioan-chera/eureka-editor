@@ -31,26 +31,9 @@ protected:
 	{
 	}
 
-	~DocumentFixture();
-
 	Instance inst;
 	Document doc;
 };
-
-// Cleanup objects
-DocumentFixture::~DocumentFixture()
-{
-	for(Thing *thing : doc.things)
-		delete thing;
-	for(Vertex *vertex : doc.vertices)
-		delete vertex;
-	for(Sector *sector : doc.sectors)
-		delete sector;
-	for(SideDef *sidedef : doc.sidedefs)
-		delete sidedef;
-	for(LineDef *linedef : doc.linedefs)
-		delete linedef;
-}
 
 TEST_F(DocumentFixture, CheckObjects)
 {
@@ -62,17 +45,17 @@ TEST_F(DocumentFixture, CheckObjects)
 	ASSERT_FALSE(doc.numLinedefs());
 
 	// Add some objects
-	doc.things.push_back(new Thing);
-	doc.things.push_back(new Thing);
-	doc.things.push_back(new Thing);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
+	doc.things.push_back(std::make_unique<Thing>());
+	doc.things.push_back(std::make_unique<Thing>());
+	doc.things.push_back(std::make_unique<Thing>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
 	// no sectors
-	doc.sidedefs.push_back(new SideDef);
-	doc.sidedefs.push_back(new SideDef);
-	doc.linedefs.push_back(new LineDef);
+	doc.sidedefs.push_back(std::make_unique<SideDef>());
+	doc.sidedefs.push_back(std::make_unique<SideDef>());
+	doc.linedefs.push_back(std::make_unique<LineDef>());
 
 	ASSERT_EQ(doc.numThings(), 3);
 	ASSERT_EQ(doc.numVertices(), 4);
@@ -114,23 +97,22 @@ TEST_F(DocumentFixture, CheckObjects)
 TEST_F(DocumentFixture, CRC)
 {
 	// Add some objects
-	doc.things.push_back(new Thing);
-	doc.things.push_back(new Thing);
-	doc.things.push_back(new Thing);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
+	doc.things.push_back(std::make_unique<Thing>());
+	doc.things.push_back(std::make_unique<Thing>());
+	doc.things.push_back(std::make_unique<Thing>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
 	// no sectors
-	doc.sidedefs.push_back(new SideDef);
-	doc.sidedefs.push_back(new SideDef);
-	doc.linedefs.push_back(new LineDef);
+	doc.sidedefs.push_back(std::make_unique<SideDef>());
+	doc.sidedefs.push_back(std::make_unique<SideDef>());
+	doc.linedefs.push_back(std::make_unique<LineDef>());
 
 	crc32_c crc;
 	doc.getLevelChecksum(crc);
 
 	// Now remove one thing
-	delete doc.things.back();
 	doc.things.pop_back();
 
 	crc32_c crc2;
@@ -140,7 +122,7 @@ TEST_F(DocumentFixture, CRC)
 	ASSERT_NE(crc.extra, crc2.extra);
 
 	// Now add back one thing
-	doc.things.push_back(new Thing);
+	doc.things.push_back(std::make_unique<Thing>());
 
 	crc32_c crc3;
 	doc.getLevelChecksum(crc3);

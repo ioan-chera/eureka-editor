@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2016 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ void Instance::CMD_TH_SpinThings()
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Thing *T = level.things[*it];
+			const auto &T = level.things[*it];
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
 		}
@@ -86,8 +86,8 @@ void Instance::CMD_TH_SpinThings()
 
 static bool ThingsAtSameLoc(const Document &doc, int th1, int th2)
 {
-	const Thing *T1 = doc.things[th1];
-	const Thing *T2 = doc.things[th2];
+	const auto &T1 = doc.things[th1];
+	const auto &T2 = doc.things[th2];
 
 	double dx = fabs(T1->x() - T2->x());
 	double dy = fabs(T1->y() - T2->y());
@@ -117,10 +117,10 @@ static void MoveOverlapThing(EditOperation &op, Instance &inst, int th, int mid_
 
 	float dist = static_cast<float>(8 + 6 * std::min(100, total));
 
-	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, vec_x * dist);
-	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, vec_y * dist);
+	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, static_cast<double>(vec_x) * dist);
+	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, static_cast<double>(vec_y) * dist);
 
-	const Thing *T = inst.level.things[th];
+	const auto &T = inst.level.things[th];
 
 	op.changeThing(th, Thing::F_X, T->raw_x + fdx);
 	op.changeThing(th, Thing::F_Y, T->raw_y + fdy);

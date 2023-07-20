@@ -29,8 +29,12 @@
 
 #include "im_color.h"
 #include "m_strings.h"
+#include <initializer_list>
 #include <map>
 #include <unordered_map>
+
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
 
 struct ConfigData;
 class Instance;
@@ -310,9 +314,9 @@ struct generalized_linetype_t
 static const char GAMES_DIR[] = "games";
 static const char PORTS_DIR[] = "ports";
 
-bool M_CanLoadDefinitions(const SString &folder, const SString &name);
+bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name);
 void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
-					   const SString &folder, const SString &name,
+					   const fs::path &folder, const SString &name,
 					   ConfigData &config) noexcept(false);
 
 enum class ParsePurpose
@@ -361,6 +365,7 @@ struct ConfigData
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
 
 	void clearExceptDefaults();
+	const thingtype_t &getThingType(int type) const;
 };
 
 //
@@ -390,14 +395,15 @@ union ParseTarget
 void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   ParsePurpose purpose,
 						   ParseTarget target,
-						   const SString &filename,
-						   const SString &folder = NULL,
-						   const SString &prettyname = NULL,
+						   const fs::path &filename,
+						   const fs::path &folder = "",
+						   const fs::path &prettyname = "",
                            int include_level = 0);
 
 const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false);
 
-std::vector<SString> M_CollectKnownDefs(const char *folder);
+std::vector<SString> M_CollectKnownDefs(const std::initializer_list<fs::path> &dirList,
+										const fs::path &folder);
 
 bool M_CheckPortSupportsGame(const SString &base_game,
 							 const SString &port) noexcept(false);
@@ -411,8 +417,6 @@ map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
 
 bool is_null_tex(const SString &tex);		// the "-" texture
 bool is_special_tex(const SString &tex);	// begins with "#"
-
-const thingtype_t &M_GetThingType(const ConfigData &config, int type);
 
 #endif  /* __EUREKA_M_GAME_H__ */
 

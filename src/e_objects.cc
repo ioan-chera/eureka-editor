@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr√© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Rapha√´l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -100,7 +100,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		Vertex *V = doc.vertices[new_v];
+		auto &V = doc.vertices[new_v];
 
 		V->SetRawX(inst.loaded.levelFormat, (i >= 2) ? x2 : x1);
 		V->SetRawY(inst.loaded.levelFormat, (i==1 || i==2) ? y2 : y1);
@@ -112,7 +112,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 
 		int new_ld = op.addNew(ObjType::linedefs);
 
-		LineDef * L = doc.linedefs[new_ld];
+		auto &L = doc.linedefs[new_ld];
 
 		L->start = new_v;
 		L->end   = (i == 3) ? (new_v - 3) : new_v + 1;
@@ -139,7 +139,7 @@ void ObjectsModule::insertThing() const
 		EditOperation op(doc.basis);
 
 		new_t = op.addNew(ObjType::things);
-		Thing *T = doc.things[new_t];
+		auto &T = doc.things[new_t];
 
 		if(model >= 0)
 			*T = *doc.things[model];
@@ -342,7 +342,7 @@ void ObjectsModule::insertLinedef(EditOperation &op, int v1, int v2, bool no_fil
 
 	int new_ld = op.addNew(ObjType::linedefs);
 
-	LineDef * L = doc.linedefs[new_ld];
+	auto &L = doc.linedefs[new_ld];
 
 	L->start = v1;
 	L->end   = v2;
@@ -505,7 +505,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 		{
 			new_vert = op.addNew(ObjType::vertices);
 
-			Vertex *V = doc.vertices[new_vert];
+			auto &V = doc.vertices[new_vert];
 
 			V->SetRawXY(inst.loaded.levelFormat, newpos);
 
@@ -688,10 +688,10 @@ void Instance::CMD_ObjectInsert()
 //
 bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const
 {
-	double lx0 = doc.linedefs[ld]->Start(doc)->x();
-	double ly0 = doc.linedefs[ld]->Start(doc)->y();
-	double lx1 = doc.linedefs[ld]->End(doc)->x();
-	double ly1 = doc.linedefs[ld]->End(doc)->y();
+	double lx0 = doc.getStart(*doc.linedefs[ld]).x();
+	double ly0 = doc.getStart(*doc.linedefs[ld]).y();
+	double lx1 = doc.getEnd(*doc.linedefs[ld]).x();
+	double ly1 = doc.getEnd(*doc.linedefs[ld]).y();
 
 	double i;
 
@@ -797,7 +797,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Thing * T = doc.things[*it];
+				const auto &T = doc.things[*it];
 
 				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
 				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
@@ -826,7 +826,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 			// apply the Z delta first
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Sector * S = doc.sectors[*it];
+				const auto & S = doc.sectors[*it];
 
 				op.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta.z);
 				op.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta.z);
@@ -883,18 +883,18 @@ void ObjectsModule::move(const selection_c &list, const v3double_t &delta) const
 // Returns, if found, a linedef ID between a given line and vertex, if existing.
 // Only returns the first one found, if multiple available.
 // Normally only 2 can exist, when there's a triangle between lineID and vertID.
-// 
+//
 // Returns -1 if none found
 //
 int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 {
 	for(int i = 0; i < doc.numLinedefs(); ++i)
 	{
-		const LineDef *otherLine = doc.linedefs[i];
+		const auto &otherLine = doc.linedefs[i];
 		if(!otherLine->TouchesVertex(vertID) || i == lineID)
 			continue;
 
-		// We have a linedef that is going to overlap the other one to be 
+		// We have a linedef that is going to overlap the other one to be
 		// split. We need to handle it like above, with merging vertices
 
 		// Identify the hinge, common vertex
@@ -917,7 +917,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 {
 	// Add a vertex there and do the split
 	int newVID = op.addNew(ObjType::vertices);
-	Vertex *newV = doc.vertices[newVID];
+	auto &newV = doc.vertices[newVID];
 	*newV = *doc.vertices[vertID];
 
 	// Move it to the actual destination
@@ -1010,7 +1010,7 @@ void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 
 void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const
 {
-	const Thing * T = doc.things[src_thing];
+	const auto &T = doc.things[src_thing];
 
 	op.changeThing(dest_thing, Thing::F_TYPE,    T->type);
 	op.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
@@ -1029,7 +1029,7 @@ void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, in
 
 void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int dest_sec) const
 {
-	const Sector * sector = doc.sectors[src_sec];
+	const auto & sector = doc.sectors[src_sec];
 
 	op.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
 	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
@@ -1046,15 +1046,15 @@ void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int
 
 void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, int dest_line, bool do_tex) const
 {
-	const LineDef * L1 = doc.linedefs[src_line];
-	const LineDef * L2 = doc.linedefs[dest_line];
+	const auto &L1 = doc.linedefs[src_line];
+	const auto &L2 = doc.linedefs[dest_line];
 
 	// don't transfer certain flags
 	int flags = doc.linedefs[dest_line]->flags;
 	flags = (flags & LINEDEF_FLAG_KEEP) | (L1->flags & ~LINEDEF_FLAG_KEEP);
 
 	// handle textures
-	if (do_tex && L1->Right(doc) && L2->Right(doc))
+	if (do_tex && doc.getRight(*L1) && doc.getRight(*L2))
 	{
 		/* There are four cases, depending on number of sides:
 		 *
@@ -1068,11 +1068,11 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		 * (d) double --> double : copy each side, but possibly flip the
 		 *                         second linedef based on floor or ceil diff.
 		 */
-		if (! L1->Left(doc))
+		if (! doc.getLeft(*L1))
 		{
-			StringID tex = L1->Right(doc)->mid_tex;
+			StringID tex = doc.getRight(*L1)->mid_tex;
 
-			if (! L2->Left(doc))
+			if (! doc.getLeft(*L2))
 			{
 				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
@@ -1089,17 +1089,17 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 				flags |= MLF_UpperUnpegged;
 			}
 		}
-		else if (! L2->Left(doc))
+		else if (! doc.getLeft(*L2))
 		{
 			/* pick which texture to copy */
 
-			const Sector *front = L1->Right(doc)->SecRef(doc);
-			const Sector *back  = L1-> Left(doc)->SecRef(doc);
+			const Sector &front = doc.getSector(*doc.getRight(*L1));
+			const Sector &back  = doc.getSector(*doc.getLeft(*L1));
 
-			StringID f_l = L1->Right(doc)->lower_tex;
-			StringID f_u = L1->Right(doc)->upper_tex;
-			StringID b_l = L1-> Left(doc)->lower_tex;
-			StringID b_u = L1-> Left(doc)->upper_tex;
+			StringID f_l = doc.getRight(*L1)->lower_tex;
+			StringID f_u = doc.getRight(*L1)->upper_tex;
+			StringID b_l = doc.getLeft(*L1)->lower_tex;
+			StringID b_u = doc.getLeft(*L1)->upper_tex;
 
 			// ignore missing textures
 			if (is_null_tex(BA_GetString(f_l))) f_l = StringID();
@@ -1110,10 +1110,10 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 			// try hard to find a usable texture
 			StringID tex = StringID(-1);
 
-				 if (front->floorh < back->floorh && f_l.hasContent()) tex = f_l;
-			else if (front->floorh > back->floorh && b_l.hasContent()) tex = b_l;
-			else if (front-> ceilh > back-> ceilh && f_u.hasContent()) tex = f_u;
-			else if (front-> ceilh < back-> ceilh && b_u.hasContent()) tex = b_u;
+				 if (front.floorh < back.floorh && f_l.hasContent()) tex = f_l;
+			else if (front.floorh > back.floorh && b_l.hasContent()) tex = b_l;
+			else if (front. ceilh > back. ceilh && f_u.hasContent()) tex = f_u;
+			else if (front. ceilh < back. ceilh && b_u.hasContent()) tex = b_u;
 			else if (f_l.hasContent()) tex = f_l;
 			else if (b_l.hasContent()) tex = b_l;
 			else if (f_u.hasContent()) tex = f_u;
@@ -1126,13 +1126,13 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		}
 		else
 		{
-			const SideDef *RS = L1->Right(doc);
-			const SideDef *LS = L1->Left(doc);
+			const SideDef *RS = doc.getRight(*L1);
+			const SideDef *LS = doc.getLeft(*L1);
 
-			const Sector *F1 = L1->Right(doc)->SecRef(doc);
-			const Sector *B1 = L1-> Left(doc)->SecRef(doc);
-			const Sector *F2 = L2->Right(doc)->SecRef(doc);
-			const Sector *B2 = L2-> Left(doc)->SecRef(doc);
+			const Sector *F1 = &doc.getSector(*doc.getRight(*L1));
+			const Sector *B1 = &doc.getSector(*doc.getLeft(*L1));
+			const Sector *F2 = &doc.getSector(*doc.getRight(*L2));
+			const Sector *B2 = &doc.getSector(*doc.getLeft(*L2));
 
 			// logic to determine which sides we copy
 
@@ -1301,9 +1301,9 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 		case ObjType::sectors:
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				LineDef *L = doc.linedefs[n];
+				const auto &L = doc.linedefs[n];
 
-				if (! L->TouchesSector(objnum, doc))
+				if (! doc.touchesSector(*L, objnum))
 					continue;
 
 				dragCountOnGridWorker(ObjType::linedefs, n, count, total);
@@ -1348,7 +1348,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 
 		case ObjType::linedefs:
 			{
-				LineDef *L = doc.linedefs[objnum];
+				const auto &L = doc.linedefs[objnum];
 
 				dragUpdateCurrentDist(ObjType::vertices, L->start, x, y, best_dist,
 									   ptr_x, ptr_y, only_grid);
@@ -1365,9 +1365,9 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				LineDef *L = doc.linedefs[n];
+				const auto &L = doc.linedefs[n];
 
-				if (! L->TouchesSector(objnum, doc))
+				if (! doc.touchesSector(*L, objnum))
 					continue;
 
 				dragUpdateCurrentDist(ObjType::linedefs, n, x, y, best_dist,
@@ -1565,11 +1565,11 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Thing *T = doc.things[*it];
+				const auto &T = doc.things[*it];
 				double Tx = T->x();
 				double Ty = T->y();
 
-				const thingtype_t &info = M_GetThingType(inst.conf, T->type);
+				const thingtype_t &info = inst.conf.getThingType(T->type);
 				int r = info.radius;
 
 				if (Tx - r < pos1.x) pos1.x = Tx - r;
@@ -1584,7 +1584,7 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Vertex *V = doc.vertices[*it];
+				const auto &V = doc.vertices[*it];
 				double Vx = V->x();
 				double Vy = V->y();
 
@@ -1619,7 +1619,7 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const auto &T = doc.things[*it];
 
 		if (is_vert)
 		{
@@ -1651,7 +1651,7 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = doc.vertices[*it];
+		const auto &V = doc.vertices[*it];
 
 		if (is_vert)
 			op.changeVertex(*it, Vertex::F_Y, fix_my * 2 - V->raw_y);
@@ -1665,7 +1665,7 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
-		LineDef * L = doc.linedefs[*it];
+		const auto &L = doc.linedefs[*it];
 
 		int start = L->start;
 		int end   = L->end;
@@ -1736,7 +1736,7 @@ void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const auto &T = doc.things[*it];
 
 		FFixedPoint old_x = T->raw_x;
 		FFixedPoint old_y = T->raw_y;
@@ -1806,7 +1806,7 @@ void Instance::CMD_Rotate90()
 
 			for (sel_iter_c it(verts) ; !it.done() ; it.next())
 			{
-				const Vertex * V = level.vertices[*it];
+				const auto &V = level.vertices[*it];
 
 				FFixedPoint old_x = V->raw_x;
 				FFixedPoint old_y = V->raw_y;
@@ -1834,7 +1834,7 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const auto &T = doc.things[*it];
 
 		double new_x = T->x();
 		double new_y = T->y();
@@ -1863,7 +1863,7 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &lis
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = doc.vertices[*it];
+		const auto &V = doc.vertices[*it];
 
 		double new_x = V->x();
 		double new_y = V->y();
@@ -1924,7 +1924,7 @@ void ObjectsModule::transform(transform_t& param) const
 }
 
 
-void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos_y) const 
+void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos_y) const
 {
 	if (pos_x == 0 && pos_y == 0)
 	{
@@ -1984,7 +1984,7 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Sector * S = doc.sectors[*it];
+		const auto & S = doc.sectors[*it];
 
 		lz = std::min(lz, S->floorh);
 		hz = std::max(hz, S->ceilh);
@@ -2003,7 +2003,7 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Sector * S = doc.sectors[*it];
+		const auto & S = doc.sectors[*it];
 
 		int new_f = mid_z + iround((S->floorh - mid_z) * scale_z);
 		int new_c = mid_z + iround((S-> ceilh - mid_z) * scale_z);
@@ -2059,13 +2059,13 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 	switch (obj_type)
 	{
 		case ObjType::things:
-			for (const Thing *thing : doc.things)
+			for (const auto &thing : doc.things)
 				if (iround(thing->x()) == x && iround(thing->y()) == y)
 					return true;
 			return false;
 
 		case ObjType::vertices:
-			for (const Vertex *vertex : doc.vertices)
+			for (const auto &vertex : doc.vertices)
 				if (iround(vertex->x()) == x && iround(vertex->y()) == y)
 					return true;
 			return false;
@@ -2154,7 +2154,7 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const auto &T = doc.things[*it];
 
 		if (inst.grid.OnGrid(T->x(), T->y()))
 		{
@@ -2202,24 +2202,24 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 	byte * vert_modes = new byte[doc.numVertices()];
 
-	for (const LineDef *L : doc.linedefs)
+	for (const auto &L : doc.linedefs)
 	{
 		// require both vertices of the linedef to be in the selection
 		if (! (list.get(L->start) && list.get(L->end)))
 			continue;
 
 		// IDEA: make this a method of LineDef
-		double x1 = L->Start(doc)->x();
-		double y1 = L->Start(doc)->y();
-		double x2 = L->End(doc)->x();
-		double y2 = L->End(doc)->y();
+		double x1 = doc.getStart(*L).x();
+		double y1 = doc.getStart(*L).y();
+		double x2 = doc.getEnd(*L).x();
+		double y2 = doc.getEnd(*L).y();
 
-		if (L->IsHorizontal(doc))
+		if (doc.isHorizontal(*L))
 		{
 			vert_modes[L->start] |= V_HORIZ;
 			vert_modes[L->end]   |= V_HORIZ;
 		}
-		else if (L->IsVertical(doc))
+		else if (doc.isVertical(*L))
 		{
 			vert_modes[L->start] |= V_VERT;
 			vert_modes[L->end]   |= V_VERT;
@@ -2242,7 +2242,7 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Vertex * V = doc.vertices[*it];
+		const auto &V = doc.vertices[*it];
 
 		if (inst.grid.OnGrid(V->x(), V->y()))
 		{
