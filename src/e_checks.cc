@@ -4112,7 +4112,7 @@ class UI_Check_Textures : public UI_Check_base
 {
 public:
 	UI_Check_Textures(bool all_mode, Instance &inst) :
-		UI_Check_base(580, 286, all_mode, "Check : Textures",
+		UI_Check_base(580, 386, all_mode, "Check : Textures",
 		              "Texture test results"), inst(inst)
 	{ }
 
