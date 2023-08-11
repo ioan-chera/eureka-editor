@@ -332,98 +332,106 @@ static SString GrabWadNames(const Instance &inst, const fs::path *info)
 
 void Instance::CMD_TestMap()
 {
-	if (MadeChanges)
+	try
 	{
-		if (DLG_Confirm({ "Cancel", "&Save" },
-		                "You have unsaved changes, do you want to save them now "
-						"and build the nodes?") <= 0)
+		if (MadeChanges)
 		{
+			if (DLG_Confirm({ "Cancel", "&Save" },
+				"You have unsaved changes, do you want to save them now "
+				"and build the nodes?") <= 0)
+			{
+				return;
+			}
+
+			if (!M_SaveMap())
+				return;
+		}
+
+
+		// check if we know the executable path, if not then ask
+		const fs::path* info = global::recent.queryPortPath(QueryName(loaded.portName,
+			loaded.gameName));
+
+		if (!(info && M_IsPortPathValid(*info)))
+		{
+			if (!M_PortSetupDialog(loaded.portName, loaded.gameName))
+				return;
+
+			info = global::recent.queryPortPath(QueryName(loaded.portName, loaded.gameName));
+		}
+
+		// this generally can't happen, but we check anyway...
+		if (!(info && M_IsPortPathValid(*info)))
+		{
+			Beep("invalid path to executable");
 			return;
 		}
 
-		if (! M_SaveMap())
+
+		// remember the previous working directory
+		static char old_dir[FL_PATH_MAX];
+
+		if (getcwd(old_dir, sizeof(old_dir)) == NULL)
+		{
+			old_dir[0] = 0;
+		}
+
+		// change working directory to be same as the executable
+		SString folder = FilenameGetPath(*info).u8string();
+
+		gLog.printf("Changing current dir to: %s\n", folder.c_str());
+
+		if (!FileChangeDir(folder.get()))
+		{
+			// FIXME : a notify dialog
+			Beep("chdir failed!");
 			return;
+		}
+
+
+		// build the command string
+
+		SString cmd_buffer = SString::printf("%s %s %s",
+			CalcEXEName(info).c_str(), GrabWadNames(*this, info).c_str(),
+			CalcWarpString(*this).c_str());
+
+		gLog.printf("Testing map using the following command:\n");
+		gLog.printf("--> %s\n", cmd_buffer.c_str());
+
+		Status_Set("TESTING MAP");
+
+		main_win->redraw();
+		Fl::wait(0.1);
+		Fl::wait(0.1);
+
+
+		/* Go baby! */
+
+		int status = system(cmd_buffer.c_str());
+
+		if (status == 0)
+			Status_Set("Result: OK");
+		else
+			Status_Set("Result code: %d\n", status);
+
+		gLog.printf("--> result code: %d\n", status);
+
+
+		// restore previous working directory
+		if (old_dir[0])
+		{
+			FileChangeDir(old_dir);
+		}
+
+		main_win->redraw();
+		Fl::wait(0.1);
+		Fl::wait(0.1);
 	}
-
-
-	// check if we know the executable path, if not then ask
-	const fs::path *info = global::recent.queryPortPath(QueryName(loaded.portName,
-																  loaded.gameName));
-
-	if (! (info && M_IsPortPathValid(*info)))
+	catch(const std::runtime_error &e)
 	{
-		if (! M_PortSetupDialog(loaded.portName, loaded.gameName))
-			return;
-
-		info = global::recent.queryPortPath(QueryName(loaded.portName, loaded.gameName));
+		DLG_ShowError(false, "Could not start map for testing: %s", e.what());
 	}
-
-	// this generally can't happen, but we check anyway...
-	if (! (info && M_IsPortPathValid(*info)))
-	{
-		Beep("invalid path to executable");
-		return;
-	}
-
-
-	// remember the previous working directory
-	static char old_dir[FL_PATH_MAX];
-
-	if (getcwd(old_dir, sizeof(old_dir)) == NULL)
-	{
-		old_dir[0] = 0;
-	}
-
-	// change working directory to be same as the executable
-	SString folder = FilenameGetPath(*info).u8string();
-
-	gLog.printf("Changing current dir to: %s\n", folder.c_str());
-
-	if (! FileChangeDir(folder.get()))
-	{
-		// FIXME : a notify dialog
-		Beep("chdir failed!");
-		return;
-	}
-
-
-	// build the command string
-
-	SString cmd_buffer = SString::printf("%s %s %s",
-										 CalcEXEName(info).c_str(), GrabWadNames(*this, info).c_str(),
-										 CalcWarpString(*this).c_str());
-
-	gLog.printf("Testing map using the following command:\n");
-	gLog.printf("--> %s\n", cmd_buffer.c_str());
-
-	Status_Set("TESTING MAP");
-
-	main_win->redraw();
-	Fl::wait(0.1);
-	Fl::wait(0.1);
-
-
-	/* Go baby! */
-
-	int status = system(cmd_buffer.c_str());
-
-	if (status == 0)
-		Status_Set("Result: OK");
-	else
-		Status_Set("Result code: %d\n", status);
-
-	gLog.printf("--> result code: %d\n", status);
-
-
-	// restore previous working directory
-	if (old_dir[0])
-	{
-		FileChangeDir(old_dir);
-	}
-
-	main_win->redraw();
-	Fl::wait(0.1);
-	Fl::wait(0.1);
+	
 }
 
 
