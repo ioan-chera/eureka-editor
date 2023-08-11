@@ -214,6 +214,7 @@ struct port_features_t
 	int strife_flags;	// Strife flags
 
 	int medusa_fixed;	// the Medusa Effect has been fixed (cannot occur)
+	int tuttifrutti_fixed;	// the tutti-frutti effect has been fixed (Boom and modern ZDoom)
 	int lax_sprites;	// sprites can be found outside of S_START..S_END
 	int mix_textures_flats;	// allow mixing textures and flats (adv. ports)
 	int neg_patch_offsets;	// honors negative patch offsets in textures (ZDoom)
