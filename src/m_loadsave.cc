@@ -1932,7 +1932,7 @@ void Instance::CMD_RenameMap()
 	}
 	catch (const std::runtime_error& e)
 	{
-		DLG_ShowError("Could not rename map: %s", e.what());
+		DLG_ShowError(false, "Could not rename map: %s", e.what());
 	}
 	
 }
