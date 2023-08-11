@@ -987,12 +987,6 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 //
 void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 {
-	auto check = [&path](const ReportedResult &result)
-	{
-		if(!result.success)
-			throw WadWriteException(SString::printf("Failed writing WAD to file '%s': %s", path.u8string().c_str(), result.message.c_str()));
-	};
-
 	BufferedOutFile sof(path);
 	// Write the header
 	if(kind == WadKind::PWAD)
