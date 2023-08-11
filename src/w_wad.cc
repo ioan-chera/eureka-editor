@@ -993,40 +993,39 @@ void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 			throw WadWriteException(SString::printf("Failed writing WAD to file '%s': %s", path.u8string().c_str(), result.message.c_str()));
 	};
 
-	SafeOutFile sof(path);
-	check(sof.openForWriting());
+	BufferedOutFile sof(path);
 	// Write the header
 	if(kind == WadKind::PWAD)
-		check(sof.write("PWAD", 4));
+		sof.write("PWAD", 4);
 	else
-		check(sof.write("IWAD", 4));
+		sof.write("IWAD", 4);
 
 	int32_t numlumps = (int32_t)directory.size();
-	check(sof.write(&numlumps, 4));
+	sof.write(&numlumps, 4);
 
 	int32_t infotableofs = 12;
 	for(const LumpRef &ref : directory)
 		infotableofs += (int32_t)ref.lump->Length();
 
-	check(sof.write(&infotableofs, 4));
+	sof.write(&infotableofs, 4);
 	for(const LumpRef &ref : directory)
 	{
 		assert(ref.lump.get() != nullptr);
 		const Lump_c &lump = *ref.lump;
-		check(sof.write(lump.getData().data(), lump.Length()));
+		sof.write(lump.getData().data(), lump.Length());
 	}
 	infotableofs = 12;
 	for(const LumpRef &ref : directory)
 	{
-		check(sof.write(&infotableofs, 4));
+		sof.write(&infotableofs, 4);
 		const Lump_c &lump = *ref.lump;
 		numlumps = lump.Length();
-		check(sof.write(&numlumps, 4));
+		sof.write(&numlumps, 4);
 		infotableofs += numlumps;
 		int64_t nm = lump.getName8();
-		check(sof.write(&nm, 8));
+		sof.write(&nm, 8);
 	}
-	check(sof.commit());
+	sof.commit();
 }
 
 

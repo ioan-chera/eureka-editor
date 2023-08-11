@@ -1072,7 +1072,14 @@ extern void Debug_CheckUnusedStuff(Document &doc);
 
 void Instance::DoExecuteCommand(const editor_command_t *cmd)
 {
-	(this->*cmd->func)();
+	try
+	{
+		(this->*cmd->func)();
+	}
+	catch (const std::runtime_error& e)
+	{
+		DLG_ShowError(false, "Could not execute command %s: %s", cmd->name, e.what());
+	}
 
 //	Debug_CheckUnusedStuff();
 }
