@@ -29,7 +29,7 @@
 //
 void BufferedOutFile::write(const void *vdata, size_t size)
 {
-	auto data = static_cast<const byte*>(vdata);
+	auto data = static_cast<const uint8_t*>(vdata);
 	mData.insert(mData.end(), data, data + size);
 }
 

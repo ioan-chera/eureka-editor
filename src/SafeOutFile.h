@@ -22,6 +22,8 @@
 #include "filesystem.hpp"
 namespace fs = ghc::filesystem;
 
+#include <stdint.h>
+
 //
 // Exception-safe, atomic file writer. It starts by writing everything to an
 // authorized temp path, only replacing the target path by committing to it.
@@ -40,7 +42,7 @@ public:
 
 private:
 	const fs::path mPath;	// the target path
-	std::vector<byte> mData;
+	std::vector<uint8_t> mData;
 };
 
 #endif /* SafeOutFile_h */
