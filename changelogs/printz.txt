@@ -7,6 +7,7 @@ dd.mm.yyyy
 11.08.2023
 * Added tutti-frutti texture check
 * Fixed Heretic torches looking wrong in the 3D mode
+* Fixed Heretic multiplayer sprite color translation
 
 ----------
 24.10.2022

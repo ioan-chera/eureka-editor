@@ -888,7 +888,7 @@ public:
 
 		float scale = info.scale;
 
-		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type);
+		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type, inst.loaded);
 		if (! sprite)
 		{
 			sprite = inst.wad.images.IM_UnknownSprite(inst.conf);

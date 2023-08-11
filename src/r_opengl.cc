@@ -1239,7 +1239,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *img = inst.wad.getMutableSprite(inst.conf, th->type);
+		Img_c *img = inst.wad.getMutableSprite(inst.conf, th->type, inst.loaded);
 		if (! img)
 		{
 			img = inst.wad.images.IM_UnknownSprite(inst.conf);
@@ -1459,7 +1459,7 @@ public:
 
 		float scale = info.scale;
 
-		const Img_c *img = inst.wad.getSprite(inst.conf, th->type);
+		const Img_c *img = inst.wad.getSprite(inst.conf, th->type, inst.loaded);
 		if (! img)
 		{
 			img = inst.wad.images.IM_UnknownSprite(inst.conf);

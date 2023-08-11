@@ -18,6 +18,7 @@
 
 #include "WadData.h"
 #include "m_game.h"
+#include "m_loadsave.h"
 #include "w_wad.h"
 #include "gtest/gtest.h"
 
@@ -55,7 +56,9 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
     WadData wadData;
     wadData.master.MasterDir_Add(wad);
 
-    auto image = wadData.getSprite(config, 3004);
+    LoadingData loading;
+
+    auto image = wadData.getSprite(config, 3004, loading);
     ASSERT_TRUE(image);
 }
 
@@ -66,10 +69,12 @@ TEST(Texture, WadDataGetNullSprite)
     type.desc = "UNKNOWN";
     config.thing_types[1234] = type;
 
+    LoadingData loading;
+
     WadData wadData;
-    auto image = wadData.getSprite(config, 1234);
+    auto image = wadData.getSprite(config, 1234, loading);
     ASSERT_FALSE(image);
     // Try twice to make sure we don't crash (happened before)
-    image = wadData.getSprite(config, 1234);
+    image = wadData.getSprite(config, 1234, loading);
     ASSERT_FALSE(image);
 }
