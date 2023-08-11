@@ -70,6 +70,7 @@ rgb_color_t Palette::pixelToRGB(img_pixel_t p) const
 Img_c::Img_c(int width, int height, bool _dummy)
 {
 	resize(width, height);
+	setSpriteOffset(width / 2, height);
 }
 
 //
@@ -170,6 +171,8 @@ void Img_c::compose(const Img_c &other, int x, int y)
 Img_c Img_c::spectrify(const ConfigData &config) const
 {
 	Img_c omg(width(), height());
+	omg.spriteOffsetX = spriteOffsetX;
+	omg.spriteOffsetY = spriteOffsetY;
 
 	int invis_start = config.miscInfo.invis_colors[0];
 	int invis_len   = config.miscInfo.invis_colors[1] - invis_start + 1;
@@ -211,6 +214,8 @@ Img_c Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 	SYS_ASSERT(targ1 <= targ2);
 
 	Img_c omg(width(), height());
+	omg.spriteOffsetX = spriteOffsetX;
+	omg.spriteOffsetY = spriteOffsetY;
 
 	int W = width();
 	int H = height();

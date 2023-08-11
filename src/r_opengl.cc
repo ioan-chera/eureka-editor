@@ -1286,7 +1286,7 @@ public:
 		}
 		else
 		{
-			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th->h() + offsetY - img->height());
+			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th->h() + std::max(0, offsetY - img->height()));
 			z2 = z1 + scale_h;
 		}
 
