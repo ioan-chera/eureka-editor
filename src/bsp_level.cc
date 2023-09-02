@@ -1859,7 +1859,7 @@ static void AddMissingLump(const Instance &inst, const char *name, const char *a
 	inst.wad.master.edit_wad->AddLump(name);
 }
 
-static Lump_c *CreateGLMarker(const Instance &inst);
+static Lump_c &CreateGLMarker(const Instance &inst);
 
 static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 {
@@ -1893,7 +1893,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 		SortSegs();
 
 		// create empty marker now, flesh it out later
-		gl_marker = CreateGLMarker(inst);
+		gl_marker = &CreateGLMarker(inst);
 
 		PutGLVertices(inst, force_v5);
 
@@ -2133,7 +2133,7 @@ static Lump_c * CreateLevelLump(const Instance &inst, const char *name)
 }
 
 
-static Lump_c * CreateGLMarker(const Instance &inst)
+static Lump_c & CreateGLMarker(const Instance &inst)
 {
 	SString name_buf;
 
@@ -2151,9 +2151,7 @@ static Lump_c * CreateGLMarker(const Instance &inst)
 
 	inst.wad.master.edit_wad->InsertPoint(last_idx + 1);
 
-	Lump_c *marker = &inst.wad.master.edit_wad->AddLump(name_buf);
-
-	return marker;
+	return inst.wad.master.edit_wad->AddLump(name_buf);
 }
 
 
