@@ -208,7 +208,7 @@ SString SString::vprintf(const char *format, va_list ap)
 	// Algorithm: keep doubling the allocated buffer size
 	// until the output fits. Based on code by Darren Salt.
 
-	char *buf = NULL;
+	std::vector<char> buf;
 	int buf_size = 128;
 
 	for (;;)
@@ -217,19 +217,16 @@ SString SString::vprintf(const char *format, va_list ap)
 
 		buf_size *= 2;
 
-		buf = (char*)realloc(buf, buf_size);
-		if (!buf)
-			ThrowException("Out of memory (formatting string)\n");
+		buf.resize(buf_size);
 
-		out_len = vsnprintf(buf, buf_size, format, ap);
+		out_len = vsnprintf(buf.data(), buf_size, format, ap);
 
 		// old versions of vsnprintf() simply return -1 when
 		// the output doesn't fit.
 		if (out_len < 0 || out_len >= buf_size)
 			continue;
 
-		SString result(buf);
-		free(buf);
+		SString result(buf.data());
 		return result;
 	}
 }
