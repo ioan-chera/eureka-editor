@@ -520,7 +520,7 @@ TEST_F(WadFileTest, FindFirstSpriteLump)
 {
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad);
-	Lump_c &firstlump = wad->AddLump("POSSA1");
+	wad->AddLump("POSSA1");
 	wad->AddLump("S_START");
 	Lump_c &possa1 = wad->AddLump("POSSA1");
 	possa1.Printf("a");	// need to have content to be considered
