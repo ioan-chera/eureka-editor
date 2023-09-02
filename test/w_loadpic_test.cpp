@@ -41,7 +41,7 @@ void DetectImageFormat::SetUp()
 {
 	wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad);
-	lump = wad->AddLump("PIC");
+	lump = &wad->AddLump("PIC");
 	ASSERT_TRUE(lump);
 }
 
@@ -151,7 +151,7 @@ static auto prepareData(const std::vector<uint8_t> &data)
 {
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	EXPECT_TRUE(wad);
-	auto lump = wad->AddLump("LUMP");
+	auto lump = &wad->AddLump("LUMP");
 	EXPECT_TRUE(lump);
 	lump->Write(data.data(), (int)data.size());
 

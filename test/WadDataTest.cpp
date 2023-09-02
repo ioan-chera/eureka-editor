@@ -25,7 +25,7 @@
 //
 static void addValidLump(const std::shared_ptr<Wad_file> &wad, const char *name)
 {
-	Lump_c *lump = wad->AddLump(name);
+	Lump_c *lump = &wad->AddLump(name);
 	ASSERT_TRUE(lump);
 	lump->Printf("a");
 }
@@ -83,12 +83,12 @@ TEST(MasterDir, FindFirstSpriteLump)
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad);
 	wad->AddLump("S_START");
-	Lump_c *wad1possa1 = wad->AddLump("POSSA1");
+	Lump_c *wad1possa1 = &wad->AddLump("POSSA1");
 	wad1possa1->Printf("a");	// need to have content to be considered
-	wad->AddLump("TROOC1")->Printf("a");
-	Lump_c *wad1troob1 = wad->AddLump("TROOB1");
+	wad->AddLump("TROOC1").Printf("a");
+	Lump_c *wad1troob1 = &wad->AddLump("TROOB1");
 	wad1troob1->Printf("a");
-	wad->AddLump("TROOD1")->Printf("a");
+	wad->AddLump("TROOD1").Printf("a");
 	wad->AddLump("S_END");
 
 	master.MasterDir_Add(wad);
@@ -97,9 +97,9 @@ TEST(MasterDir, FindFirstSpriteLump)
 	ASSERT_TRUE(wad2);
 
 	wad2->AddLump("S_START");
-	Lump_c *wad2possa1 = wad2->AddLump("POSSA1");
+	Lump_c *wad2possa1 = &wad2->AddLump("POSSA1");
 	wad2possa1->Printf("a");
-	wad2->AddLump("TROOE1")->Printf("a");
+	wad2->AddLump("TROOE1").Printf("a");
 	wad2->AddLump("S_END");
 
 	master.MasterDir_Add(wad2);

@@ -40,7 +40,7 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
     auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
     ASSERT_TRUE(wad);
     wad->AddLump("S_START");
-    auto spritelump = wad->AddLump("POSSA3D7");
+    auto spritelump = &wad->AddLump("POSSA3D7");
     ASSERT_TRUE(spritelump);
 
     static const uint8_t tga[] = {
@@ -51,7 +51,7 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
     };
 
     spritelump->Write(tga, sizeof(tga));
-    wad->AddLump("S_END");
+    &wad->AddLump("S_END");
 
     WadData wadData;
     wadData.master.MasterDir_Add(wad);

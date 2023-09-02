@@ -1319,7 +1319,7 @@ void Instance::SaveBehavior()
 {
 	int size = (int)level.behaviorData.size();
 
-	Lump_c *lump = wad.master.edit_wad->AddLump("BEHAVIOR");
+	Lump_c *lump = &wad.master.edit_wad->AddLump("BEHAVIOR");
 
 	if (size > 0)
 	{
@@ -1334,7 +1334,7 @@ void Instance::SaveScripts()
 
 	if (size > 0)
 	{
-		Lump_c *lump = wad.master.edit_wad->AddLump("SCRIPTS");
+		Lump_c *lump = &wad.master.edit_wad->AddLump("SCRIPTS");
 
 		lump->Write(&level.scriptsData[0], size);
 	}
@@ -1343,7 +1343,7 @@ void Instance::SaveScripts()
 
 void Instance::SaveVertices()
 {
-	Lump_c *lump = wad.master.edit_wad->AddLump("VERTEXES");
+	Lump_c *lump = &wad.master.edit_wad->AddLump("VERTEXES");
 
 	for (const auto &vert : level.vertices)
 	{
@@ -1359,7 +1359,7 @@ void Instance::SaveVertices()
 
 void Instance::SaveSectors()
 {
-	Lump_c *lump = wad.master.edit_wad->AddLump("SECTORS");
+	Lump_c *lump = &wad.master.edit_wad->AddLump("SECTORS");
 
 	for (const auto &sec : level.sectors)
 	{
@@ -1382,7 +1382,7 @@ void Instance::SaveSectors()
 
 void Instance::SaveThings()
 {
-	Lump_c *lump = wad.master.edit_wad->AddLump("THINGS");
+	Lump_c *lump = &wad.master.edit_wad->AddLump("THINGS");
 
 	for (const auto &th : level.things)
 	{
@@ -1403,7 +1403,7 @@ void Instance::SaveThings()
 // IOANCH 9/2015
 void Instance::SaveThings_Hexen()
 {
-	Lump_c *lump = wad.master.edit_wad->AddLump("THINGS");
+	Lump_c *lump = &wad.master.edit_wad->AddLump("THINGS");
 
 	for (const auto &th : level.things)
 	{
@@ -1433,7 +1433,7 @@ void Instance::SaveThings_Hexen()
 
 void Instance::SaveSideDefs()
 {
-	Lump_c *lump = wad.master.edit_wad->AddLump("SIDEDEFS");
+	Lump_c *lump = &wad.master.edit_wad->AddLump("SIDEDEFS");
 
 	for (const auto &side : level.sidedefs)
 	{
@@ -1455,7 +1455,7 @@ void Instance::SaveSideDefs()
 
 void Instance::SaveLineDefs()
 {
-	Lump_c *lump = wad.master.edit_wad->AddLump("LINEDEFS");
+	Lump_c *lump = &wad.master.edit_wad->AddLump("LINEDEFS");
 
 	for (const auto &ld : level.linedefs)
 	{
@@ -1479,7 +1479,7 @@ void Instance::SaveLineDefs()
 // IOANCH 9/2015
 void Instance::SaveLineDefs_Hexen()
 {
-	Lump_c *lump = wad.master.edit_wad->AddLump("LINEDEFS");
+	Lump_c *lump = &wad.master.edit_wad->AddLump("LINEDEFS");
 
 	for (const auto &ld : level.linedefs)
 	{

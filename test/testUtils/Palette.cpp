@@ -29,7 +29,7 @@ void makeCommonPalette(Palette &palette)
 {
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	EXPECT_TRUE(wad);
-	Lump_c *lump = wad->AddLump("PALETTE");
+	Lump_c *lump = &wad->AddLump("PALETTE");
 	EXPECT_TRUE(lump);
 
 	// Use 6:8:5 RGB + gray levels

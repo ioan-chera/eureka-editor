@@ -97,10 +97,10 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	// Now make a change: remove port and resources, see that the lump is updated (not deleted).
 	// Add a couple of lumps before and after before doing it, to see how it gets updated alone.
 	wad->InsertPoint(0);
-	Lump_c *beforelump = wad->AddLump("BEFORE");
+	Lump_c *beforelump = &wad->AddLump("BEFORE");
 	ASSERT_TRUE(beforelump);
 	wad->InsertPoint();
-	Lump_c *lastlump = wad->AddLump("LAST");
+	Lump_c *lastlump = &wad->AddLump("LAST");
 	ASSERT_TRUE(lastlump);
 	ASSERT_EQ(wad->NumLumps(), 3);
 
@@ -235,11 +235,11 @@ TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 	assertEmptyLoading();
 
 	// Safe on wad with some lumps
-	Lump_c *lump1 = wad->AddLump("LUMP1");
+	Lump_c *lump1 = &wad->AddLump("LUMP1");
 	ASSERT_TRUE(lump1);
 	lump1->Printf("Data 1");
 
-	Lump_c *lump2 = wad->AddLump("LUMP2");
+	Lump_c *lump2 = &wad->AddLump("LUMP2");
 	ASSERT_TRUE(lump2);
 	lump2->Printf("Data 2");
 
@@ -251,7 +251,7 @@ TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 
 TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 {
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
+	Lump_c *eureka = &wad->AddLump(EUREKA_LUMP);
 	ASSERT_TRUE(eureka);
 	eureka->Printf("game emag\n");	// have a game name there
 	eureka->Printf("invalid syntax here\n");
@@ -366,7 +366,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 TEST_F(ParseEurekaLumpFixture, TryResources)
 {
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
+	Lump_c *eureka = &wad->AddLump(EUREKA_LUMP);
 	ASSERT_TRUE(eureka);
 	eureka->Printf("game doom\n");
 	eureka->Printf("resource samepath.wad\n");
@@ -436,7 +436,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 
 TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 {
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
+	Lump_c *eureka = &wad->AddLump(EUREKA_LUMP);
 	ASSERT_TRUE(eureka);
 	eureka->Printf("game doom\n");
 	eureka->Printf("resource samename.wad\n");
@@ -496,7 +496,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	mDeleteList.push(getChildPath("res.wad"));
 
 	// Prepare the lump
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
+	Lump_c *eureka = &wad->AddLump(EUREKA_LUMP);
 	ASSERT_TRUE(eureka);
 
 	// Try to use just path: won't be found

@@ -518,7 +518,7 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 	if (oldie >= 0)
 		wad->RemoveLumps(oldie, 1);
 
-	Lump_c *lump = wad->AddLump(lump_name);
+	Lump_c *lump = &wad->AddLump(lump_name);
 
 	int len = tbuf->length();
 

@@ -2125,7 +2125,7 @@ static Lump_c * CreateLevelLump(const Instance &inst, const char *name)
 
 		inst.wad.master.edit_wad->InsertPoint(last_idx);
 
-		lump = inst.wad.master.edit_wad->AddLump(name);
+		lump = &inst.wad.master.edit_wad->AddLump(name);
 	}
 
     lump->clearData();
@@ -2151,7 +2151,7 @@ static Lump_c * CreateGLMarker(const Instance &inst)
 
 	inst.wad.master.edit_wad->InsertPoint(last_idx + 1);
 
-	Lump_c *marker = inst.wad.master.edit_wad->AddLump(name_buf);
+	Lump_c *marker = &inst.wad.master.edit_wad->AddLump(name_buf);
 
 	return marker;
 }

@@ -793,7 +793,7 @@ void LoadingData::writeEurekaLump(Wad_file &wad) const
 	if (oldie >= 0)
 		wad.RemoveLumps(oldie, 1);
 
-	Lump_c *lump = wad.AddLump(EUREKA_LUMP);
+	Lump_c *lump = &wad.AddLump(EUREKA_LUMP);
 
 	lump->Printf("# Eureka project info\n");
 
