@@ -1060,7 +1060,7 @@ Lump_c * Wad_file::AddLevel(const SString &name, int *lev_num)
 	if (actual_point < 0 || actual_point > NumLumps())
 		actual_point = NumLumps();
 
-	Lump_c * lump = &AddLump(name);
+	Lump_c & lump = AddLump(name);
 
 	if (lev_num)
 	{
@@ -1069,7 +1069,7 @@ Lump_c * Wad_file::AddLevel(const SString &name, int *lev_num)
 
 	levels.push_back(actual_point);
 
-	return lump;
+	return &lump;
 }
 
 

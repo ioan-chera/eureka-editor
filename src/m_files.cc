@@ -793,15 +793,15 @@ void LoadingData::writeEurekaLump(Wad_file &wad) const
 	if (oldie >= 0)
 		wad.RemoveLumps(oldie, 1);
 
-	Lump_c *lump = &wad.AddLump(EUREKA_LUMP);
+	Lump_c &lump = wad.AddLump(EUREKA_LUMP);
 
-	lump->Printf("# Eureka project info\n");
+	lump.Printf("# Eureka project info\n");
 
 	if (!gameName.empty())
-		lump->Printf("game %s\n", gameName.c_str());
+		lump.Printf("game %s\n", gameName.c_str());
 
 	if (!portName.empty())
-		lump->Printf("port %s\n", portName.c_str());
+		lump.Printf("port %s\n", portName.c_str());
 
 	fs::path pwadPath = fs::absolute(wad.PathName()).remove_filename();
 
@@ -810,7 +810,7 @@ void LoadingData::writeEurekaLump(Wad_file &wad) const
 		fs::path absoluteResourcePath = fs::absolute(resource);
 		fs::path relative = fs::proximate(absoluteResourcePath, pwadPath);
 
-		lump->Printf("resource %s\n", relative.generic_u8string().c_str());
+		lump.Printf("resource %s\n", relative.generic_u8string().c_str());
 	}
 }
 

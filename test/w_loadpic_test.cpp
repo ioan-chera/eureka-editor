@@ -42,7 +42,6 @@ void DetectImageFormat::SetUp()
 	wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad);
 	lump = &wad->AddLump("PIC");
-	ASSERT_TRUE(lump);
 }
 
 TEST_F(DetectImageFormat, ShortFile)
@@ -151,12 +150,11 @@ static auto prepareData(const std::vector<uint8_t> &data)
 {
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	EXPECT_TRUE(wad);
-	auto lump = &wad->AddLump("LUMP");
-	EXPECT_TRUE(lump);
-	lump->Write(data.data(), (int)data.size());
+	auto &lump = wad->AddLump("LUMP");
+	lump.Write(data.data(), (int)data.size());
 
 	// IMPORTANT: must return pair because we must preserve the wad lifetime for the lump!
-	return std::make_pair(wad, lump);
+	return std::make_pair(wad, &lump);
 }
 
 static void assertImageValid(const tl::optional<Img_c> &image)

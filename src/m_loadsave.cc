@@ -1319,11 +1319,11 @@ void Instance::SaveBehavior()
 {
 	int size = (int)level.behaviorData.size();
 
-	Lump_c *lump = &wad.master.edit_wad->AddLump("BEHAVIOR");
+	Lump_c &lump = wad.master.edit_wad->AddLump("BEHAVIOR");
 
 	if (size > 0)
 	{
-		lump->Write(&level.behaviorData[0], size);
+		lump.Write(&level.behaviorData[0], size);
 	}
 }
 
@@ -1334,36 +1334,36 @@ void Instance::SaveScripts()
 
 	if (size > 0)
 	{
-		Lump_c *lump = &wad.master.edit_wad->AddLump("SCRIPTS");
+		Lump_c &lump = wad.master.edit_wad->AddLump("SCRIPTS");
 
-		lump->Write(&level.scriptsData[0], size);
+		lump.Write(&level.scriptsData[0], size);
 	}
 }
 
 
 void Instance::SaveVertices()
 {
-	Lump_c *lump = &wad.master.edit_wad->AddLump("VERTEXES");
+	Lump_c &lump = wad.master.edit_wad->AddLump("VERTEXES");
 
 	for (const auto &vert : level.vertices)
 	{
-		raw_vertex_t raw;
+		raw_vertex_t raw{};
 
 		raw.x = LE_S16(static_cast<int>(vert->raw_x));
 		raw.y = LE_S16(static_cast<int>(vert->raw_y));
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 	}
 }
 
 
 void Instance::SaveSectors()
 {
-	Lump_c *lump = &wad.master.edit_wad->AddLump("SECTORS");
+	Lump_c &lump = wad.master.edit_wad->AddLump("SECTORS");
 
-	for (const auto &sec : level.sectors)
+	for (const auto& sec : level.sectors)
 	{
-		raw_sector_t raw;
+		raw_sector_t raw{};
 
 		raw.floorh = LE_S16(sec->floorh);
 		raw.ceilh  = LE_S16(sec->ceilh);
@@ -1375,18 +1375,18 @@ void Instance::SaveSectors()
 		raw.type  = LE_U16(sec->type);
 		raw.tag   = LE_U16(sec->tag);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 	}
 }
 
 
 void Instance::SaveThings()
 {
-	Lump_c *lump = &wad.master.edit_wad->AddLump("THINGS");
+	Lump_c &lump = wad.master.edit_wad->AddLump("THINGS");
 
 	for (const auto &th : level.things)
 	{
-		raw_thing_t raw;
+		raw_thing_t raw{};
 
 		raw.x = LE_S16(static_cast<int>(th->raw_x));
 		raw.y = LE_S16(static_cast<int>(th->raw_y));
@@ -1395,7 +1395,7 @@ void Instance::SaveThings()
 		raw.type    = LE_U16(th->type);
 		raw.options = LE_U16(th->options);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 	}
 }
 
@@ -1403,11 +1403,11 @@ void Instance::SaveThings()
 // IOANCH 9/2015
 void Instance::SaveThings_Hexen()
 {
-	Lump_c *lump = &wad.master.edit_wad->AddLump("THINGS");
+	Lump_c &lump = wad.master.edit_wad->AddLump("THINGS");
 
 	for (const auto &th : level.things)
 	{
-		raw_hexen_thing_t raw;
+		raw_hexen_thing_t raw{};
 
 		raw.tid = LE_S16(th->tid);
 
@@ -1426,18 +1426,18 @@ void Instance::SaveThings_Hexen()
 		raw.args[3] = static_cast<u8_t>(th->arg4);
 		raw.args[4] = static_cast<u8_t>(th->arg5);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 	}
 }
 
 
 void Instance::SaveSideDefs()
 {
-	Lump_c *lump = &wad.master.edit_wad->AddLump("SIDEDEFS");
+	Lump_c &lump = wad.master.edit_wad->AddLump("SIDEDEFS");
 
 	for (const auto &side : level.sidedefs)
 	{
-		raw_sidedef_t raw;
+		raw_sidedef_t raw{};
 
 		raw.x_offset = LE_S16(side->x_offset);
 		raw.y_offset = LE_S16(side->y_offset);
@@ -1448,18 +1448,18 @@ void Instance::SaveSideDefs()
 
 		raw.sector = LE_U16(side->sector);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 	}
 }
 
 
 void Instance::SaveLineDefs()
 {
-	Lump_c *lump = &wad.master.edit_wad->AddLump("LINEDEFS");
+	Lump_c &lump = wad.master.edit_wad->AddLump("LINEDEFS");
 
 	for (const auto &ld : level.linedefs)
 	{
-		raw_linedef_t raw;
+		raw_linedef_t raw{};
 
 		raw.start = LE_U16(ld->start);
 		raw.end   = LE_U16(ld->end);
@@ -1471,7 +1471,7 @@ void Instance::SaveLineDefs()
 		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
 		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 	}
 }
 
@@ -1479,11 +1479,11 @@ void Instance::SaveLineDefs()
 // IOANCH 9/2015
 void Instance::SaveLineDefs_Hexen()
 {
-	Lump_c *lump = &wad.master.edit_wad->AddLump("LINEDEFS");
+	Lump_c &lump = wad.master.edit_wad->AddLump("LINEDEFS");
 
 	for (const auto &ld : level.linedefs)
 	{
-		raw_hexen_linedef_t raw;
+		raw_hexen_linedef_t raw{};
 
 		raw.start = LE_U16(ld->start);
 		raw.end   = LE_U16(ld->end);
@@ -1500,7 +1500,7 @@ void Instance::SaveLineDefs_Hexen()
 		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
 		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 	}
 }
 

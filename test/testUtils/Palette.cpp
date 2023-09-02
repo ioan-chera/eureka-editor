@@ -29,8 +29,7 @@ void makeCommonPalette(Palette &palette)
 {
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	EXPECT_TRUE(wad);
-	Lump_c *lump = &wad->AddLump("PALETTE");
-	EXPECT_TRUE(lump);
+	Lump_c &lump = wad->AddLump("PALETTE");
 
 	// Use 6:8:5 RGB + gray levels
 	static const uint8_t redLevels[6] = {0, 51, 102, 153, 204, 255};
@@ -41,19 +40,19 @@ void makeCommonPalette(Palette &palette)
 			for(uint8_t blue : blueLevels)
 			{
 				uint8_t data[3] = {red, green, blue};
-				lump->Write(data, 3);
+				lump.Write(data, 3);
 			}
 	constexpr int numGrays = 256 - lengthof(redLevels) * lengthof(greenLevels) *
 			lengthof(blueLevels);
 	for(int i = 0; i < numGrays; ++i)
 	{
 		uint8_t data = (uint8_t)(256 / numGrays * i + 256 / numGrays / 2);
-		lump->Write(&data, 1);
-		lump->Write(&data, 1);
-		lump->Write(&data, 1);
+		lump.Write(&data, 1);
+		lump.Write(&data, 1);
+		lump.Write(&data, 1);
 	}
 
-	EXPECT_TRUE(palette.loadPalette(*lump, 2, 2));
+	EXPECT_TRUE(palette.loadPalette(lump, 2, 2));
 }
 
 //
