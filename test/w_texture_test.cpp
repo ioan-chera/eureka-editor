@@ -51,7 +51,7 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
     };
 
     spritelump->Write(tga, sizeof(tga));
-    &wad->AddLump("S_END");
+    wad->AddLump("S_END");
 
     WadData wadData;
     wadData.master.MasterDir_Add(wad);
