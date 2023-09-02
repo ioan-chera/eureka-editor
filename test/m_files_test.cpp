@@ -69,7 +69,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 		loaded.resourceList.push_back(otherpath);
 	}
 
-	loaded.writeEurekaLump(wad.get());
+	loaded.writeEurekaLump(*wad.get());
 
 	Lump_c *lump = wad->FindLump(EUREKA_LUMP);
 	ASSERT_TRUE(lump);
@@ -106,7 +106,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 
 	loaded.portName.clear();
 	loaded.resourceList.clear();
-	loaded.writeEurekaLump(wad.get());
+	loaded.writeEurekaLump(*wad.get());
 
 	// Check we still have 3 lumps
 	ASSERT_EQ(wad->NumLumps(), 3);

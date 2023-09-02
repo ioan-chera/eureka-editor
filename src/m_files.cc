@@ -785,15 +785,15 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 }
 
 
-void LoadingData::writeEurekaLump(Wad_file *wad) const
+void LoadingData::writeEurekaLump(Wad_file &wad) const
 {
 	gLog.printf("Writing '%s' lump\n", EUREKA_LUMP);
 
-	int oldie = wad->FindLumpNum(EUREKA_LUMP);
+	int oldie = wad.FindLumpNum(EUREKA_LUMP);
 	if (oldie >= 0)
-		wad->RemoveLumps(oldie, 1);
+		wad.RemoveLumps(oldie, 1);
 
-	Lump_c *lump = wad->AddLump(EUREKA_LUMP);
+	Lump_c *lump = wad.AddLump(EUREKA_LUMP);
 
 	lump->Printf("# Eureka project info\n");
 
@@ -803,7 +803,7 @@ void LoadingData::writeEurekaLump(Wad_file *wad) const
 	if (!portName.empty())
 		lump->Printf("port %s\n", portName.c_str());
 
-	fs::path pwadPath = fs::absolute(wad->PathName()).remove_filename();
+	fs::path pwadPath = fs::absolute(wad.PathName()).remove_filename();
 
 	for (const fs::path &resource : resourceList)
 	{

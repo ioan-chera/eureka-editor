@@ -1587,7 +1587,7 @@ void Instance::SaveLevel(const SString &level)
 	// [ it doesn't change the on-disk wad file at all ]
 	wad.master.edit_wad->SortLevels();
 
-	loaded.writeEurekaLump(wad.master.edit_wad.get());
+	loaded.writeEurekaLump(*wad.master.edit_wad.get());
 	wad.master.edit_wad->writeToDisk();
 
 	global::recent.addRecent(wad.master.edit_wad->PathName(), loaded.levelName, global::home_dir);
