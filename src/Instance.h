@@ -402,7 +402,7 @@ private:
 	void LoadVertices(const Wad_file *load_wad);
 	bool M_ExportMap();
 	void Navigate2D();
-	void Project_ApplyChanges(UI_ProjectSetup *dialog);
+	void Project_ApplyChanges(const UI_ProjectSetup &dialog);
 	bool Project_AskFile(fs::path& filename) const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);

@@ -173,11 +173,11 @@ bool Instance::Project_AskFile(fs::path &filename) const
 }
 
 
-void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
+void Instance::Project_ApplyChanges(const UI_ProjectSetup &dialog)
 {
 	// grab the new information
     LoadingData loading = loaded;
-    dialog->prepareLoadingData(loading);
+    dialog.prepareLoadingData(loading);
 	Fl::wait(0.1);
 	Main_LoadResources(loading);
 	Fl::wait(0.1);
@@ -188,12 +188,12 @@ void Instance::CMD_ManageProject()
 {
 	try
 	{
-		auto dialog = std::make_unique<UI_ProjectSetup>(*this, false /* new_project */, false /* is_startup */);
-		bool ok = dialog->Run();
+		UI_ProjectSetup dialog(*this, false /* new_project */, false /* is_startup */);
+		bool ok = dialog.Run();
 
 		if (ok)
 		{
-			Project_ApplyChanges(dialog.get());
+			Project_ApplyChanges(dialog);
 		}
 	}
 	catch(const ParseException &e)
@@ -221,9 +221,9 @@ void Instance::CMD_NewProject()
 
 		/* second, query what Game, Port and Resources to use */
 		// TODO: new instance
-		auto dialog = std::make_unique<UI_ProjectSetup>(*this, true /* new_project */, false /* is_startup */);
+		UI_ProjectSetup dialog(*this, true /* new_project */, false /* is_startup */);
 
-		bool ok = dialog->Run();
+		bool ok = dialog.Run();
 
 		if (!ok)
 		{
@@ -254,10 +254,7 @@ void Instance::CMD_NewProject()
 		wad.master.RemoveEditWad();
 
 		// this calls Main_LoadResources which resets the master directory
-		Project_ApplyChanges(dialog.get());
-
-		dialog.reset();
-
+		Project_ApplyChanges(dialog);
 
 		// determine map name (same as first level in the IWAD)
 		SString map_name = "MAP01";
@@ -302,21 +299,19 @@ void Instance::CMD_NewProject()
 
 bool Instance::MissingIWAD_Dialog()
 {
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(*this, false /* new_project */, true /* is_startup */);
+	UI_ProjectSetup dialog(*this, false /* new_project */, true /* is_startup */);
 
-	bool ok = dialog->Run();
+	bool ok = dialog.Run();
 
 	if (ok)
 	{
-		loaded.gameName = dialog->game;
+		loaded.gameName = dialog.game;
 		SYS_ASSERT(!loaded.gameName.empty());
 
 		const fs::path *iwad = global::recent.queryIWAD(loaded.gameName);
 		SYS_ASSERT(!!iwad);
 		loaded.iwadName = *iwad;
 	}
-
-	delete dialog;
 
 	return ok;
 }

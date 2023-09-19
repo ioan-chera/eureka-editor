@@ -413,8 +413,7 @@ SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char 
 
 SString M_GetBaseGame(const SString &game) noexcept(false);
 
-map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
-										  const char *port);
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
 bool is_null_tex(const SString &tex);		// the "-" texture
 bool is_special_tex(const SString &tex);	// begins with "#"

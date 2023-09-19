@@ -1263,8 +1263,7 @@ SString M_GetBaseGame(const SString &game) noexcept(false)
 }
 
 
-map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
-										  const char *port)
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 {
 	const PortInfo_c *pinfo = M_LoadPortInfo(port);
 	if (pinfo && pinfo->formats != 0)
