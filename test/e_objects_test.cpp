@@ -76,22 +76,22 @@ TEST_F(EObjectsFixture, DragWallLineToCancelSurroundingLines)
 
 	for(size_t i = 0; i < 8; ++i)
 	{
-		auto vertex = new Vertex;
+		auto vertex = std::make_unique<Vertex>();
 		vertex->raw_x = vertexCoordinates[i][0];
 		vertex->raw_y = vertexCoordinates[i][1];
 		doc.vertices.push_back(vertex);
 	}
 
-	Sector *sector = new Sector;
+	auto sector = std::make_unique<Sector>();
 	doc.sectors.push_back(sector);
 
 	for(int i = 0; i < 8; ++i)
 	{
-		auto side = new SideDef;
+		auto side = std::make_unique<SideDef>();
 		side->sector = 0;
 		doc.sidedefs.push_back(side);
 
-		auto line = new LineDef;
+		auto line = std::make_unique<LineDef>();
 		line->start = i;
 		line->end = (i + 1) % 8;
 		line->right = i;
@@ -114,7 +114,7 @@ TEST_F(EObjectsFixture, DragWallLineToCancelSurroundingLines)
 	ASSERT_EQ(doc.numLinedefs(), 6);
 
 	// Now we must check the coordinates. We do NOT care about order
-	std::vector<Vertex *> vertices = doc.vertices;
+	std::vector<std::unique_ptr<Vertex>> vertices = doc.vertices;
 	std::sort(vertices.begin(), vertices.end(), vertexCompare);
 	ASSERT_EQ(vertices[0]->xy(), v2double_t(-64, -64));
 	ASSERT_EQ(vertices[1]->xy(), v2double_t(-64, 0));
@@ -123,22 +123,22 @@ TEST_F(EObjectsFixture, DragWallLineToCancelSurroundingLines)
 	ASSERT_EQ(vertices[4]->xy(), v2double_t(128, -64));
 	ASSERT_EQ(vertices[5]->xy(), v2double_t(128, 0));
 
-	std::vector<LineDef *> lines = doc.linedefs;
+	std::vector<std::unique_ptr<LineDef>> lines = doc.linedefs;
 	std::sort(lines.begin(), lines.end(), [&doc](const LineDef *L1, const LineDef *L2){
-		return vertexCompare(doc.vertices[L1->start], doc.vertices[L2->start]);
+		return vertexCompare(doc.vertices[L1->start].get(), doc.vertices[L2->start].get());
 	});
-	ASSERT_EQ(lines[0]->Start(doc)->xy(), v2double_t(-64, -64));
-	ASSERT_EQ(lines[0]->End(doc)->xy(), v2double_t(-64, 0));
-	ASSERT_EQ(lines[1]->Start(doc)->xy(), v2double_t(-64, 0));
-	ASSERT_EQ(lines[1]->End(doc)->xy(), v2double_t(0, 0));
-	ASSERT_EQ(lines[2]->Start(doc)->xy(), v2double_t(0, 0));
-	ASSERT_EQ(lines[2]->End(doc)->xy(), v2double_t(64, 0));
-	ASSERT_EQ(lines[3]->Start(doc)->xy(), v2double_t(64, 0));
-	ASSERT_EQ(lines[3]->End(doc)->xy(), v2double_t(128, 0));
-	ASSERT_EQ(lines[4]->Start(doc)->xy(), v2double_t(128, -64));
-	ASSERT_EQ(lines[4]->End(doc)->xy(), v2double_t(-64, -64));
-	ASSERT_EQ(lines[5]->Start(doc)->xy(), v2double_t(128, 0));
-	ASSERT_EQ(lines[5]->End(doc)->xy(), v2double_t(128, -64));
+	ASSERT_EQ(doc.getStart(*lines[0]).xy(), v2double_t(-64, -64));
+	ASSERT_EQ(doc.getEnd(*lines[0]).xy(), v2double_t(-64, 0));
+	ASSERT_EQ(doc.getStart(*lines[1]).xy(), v2double_t(-64, 0));
+	ASSERT_EQ(doc.getEnd(*lines[1]).xy(), v2double_t(0, 0));
+	ASSERT_EQ(doc.getStart(*lines[2]).xy(), v2double_t(0, 0));
+	ASSERT_EQ(doc.getEnd(*lines[2]).xy(), v2double_t(64, 0));
+	ASSERT_EQ(doc.getStart(*lines[3]).xy(), v2double_t(64, 0));
+	ASSERT_EQ(doc.getEnd(*lines[3]).xy(), v2double_t(128, 0));
+	ASSERT_EQ(doc.getStart(*lines[4]).xy(), v2double_t(128, -64));
+	ASSERT_EQ(doc.getEnd(*lines[4]).xy(), v2double_t(-64, -64));
+	ASSERT_EQ(doc.getStart(*lines[5]).xy(), v2double_t(128, 0));
+	ASSERT_EQ(doc.getEnd(*lines[5]).xy(), v2double_t(128, -64));
 
 	std::sort(lines.begin(), lines.end(), [](const LineDef *L1, const LineDef *L2) {
 		return L1->right < L2->right;
@@ -170,27 +170,27 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 
 	for(size_t i = 0; i < 10; ++i)
 	{
-		auto vertex = new Vertex;
+		auto vertex = std::make_unique<Vertex>();
 		vertex->raw_x = vertexCoordinates[i][0];
 		vertex->raw_y = vertexCoordinates[i][1];
 		doc.vertices.push_back(vertex);
 	}
 
-	auto topLeftSector = new Sector;
+	auto topLeftSector = std::make_unique<Sector>();
 	topLeftSector->floor_tex = BA_InternaliseString("FTOPLEFT");
-	auto topRightSector = new Sector;
+	auto topRightSector = std::make_unique<Sector>();
 	topRightSector->floor_tex = BA_InternaliseString("FTOPRITE");
-	auto bottomSector = new Sector;
+	auto bottomSector = std::make_unique<Sector>();
 	bottomSector->floor_tex = BA_InternaliseString("FBOTTOM");
 	doc.sectors.push_back(bottomSector);
 	doc.sectors.push_back(topLeftSector);
 	doc.sectors.push_back(topRightSector);
 
-	SideDef *side;
+	std::unique_ptr<SideDef> side;
 	// bottom room
 	for(int i = 0; i < 6; ++i)
 	{
-		side = new SideDef;
+		side = std::make_unique<SideDef>();
 		side->sector = 0;
 		if(i != 0 && i != 2)	// do not texture mid sides
 			side->mid_tex = BA_InternaliseString("BOTTOM");
@@ -201,7 +201,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	// top-left room
 	for(int i = 0; i < 4; ++i)
 	{
-		side = new SideDef;
+		side = std::make_unique<SideDef>();
 		side->sector = 1;
 		if(i != 3)	// do not texture mid sides
 			side->mid_tex = BA_InternaliseString("TOPLEFT");
@@ -212,7 +212,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	// top-right room
 	for(int i = 0; i < 4; ++i)
 	{
-		side = new SideDef;
+		side = std::make_unique<SideDef>();
 		side->sector = 2;
 		if(i != 3)	// do not texture mid sides
 			side->mid_tex = BA_InternaliseString("TOPRIGHT");
@@ -222,10 +222,10 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	}
 
 	// Too many lines to concern about, so just create them here
-	LineDef *lines[12];
+	std::unique_ptr<LineDef> lines[12];
 	for(int i = 0; i < 12; ++i)
 	{
-		lines[i] = new LineDef;
+		lines[i] = std::make_unique<LineDef>();
 		doc.linedefs.push_back(lines[i]);
 	}
 	for(int i = 0; i < 10; ++i)
@@ -279,7 +279,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	ASSERT_EQ(doc.numLinedefs(), 9);
 	ASSERT_EQ(doc.numSectors(), 2);
 
-	std::vector<Vertex *> vertices = doc.vertices;
+	std::vector<std::unique_ptr<Vertex>> vertices = doc.vertices;
 	std::sort(vertices.begin(), vertices.end(), vertexCompare);
 
 	ASSERT_EQ(vertices[0]->xy(), v2double_t(-64, -64));
@@ -291,46 +291,48 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	ASSERT_EQ(vertices[6]->xy(), v2double_t(128, 0));
 	ASSERT_EQ(vertices[7]->xy(), v2double_t(128, 64));
 
-	std::vector<LineDef *> vlines = doc.linedefs;
+	std::vector<std::unique_ptr<LineDef>> vlines = doc.linedefs;
 	std::sort(vlines.begin(), vlines.end(), [&doc](const LineDef *L1, const LineDef *L2){
 		return doc.vertices[L1->start]->xy() == doc.vertices[L2->start]->xy() ?
-			vertexCompare(doc.vertices[L1->end], doc.vertices[L2->end]) :
-			vertexCompare(doc.vertices[L1->start], doc.vertices[L2->start]);
+			vertexCompare(doc.vertices[L1->end].get(), doc.vertices[L2->end].get()) :
+			vertexCompare(doc.vertices[L1->start].get(), doc.vertices[L2->start].get());
 	});
-	ASSERT_EQ(vlines[0]->Start(doc)->xy(), v2double_t(-64, -64));
-	ASSERT_EQ(vlines[0]->End(doc)->xy(), v2double_t(-64, 0));
-	ASSERT_EQ(vlines[0]->Right(doc)->MidTex(), "BOTTOM");
-	ASSERT_EQ(vlines[0]->Right(doc)->SecRef(doc)->FloorTex(), "FBOTTOM");
-	ASSERT_FALSE(vlines[0]->Left(doc));
+	ASSERT_EQ(doc.getStart(*vlines[0]).xy(), v2double_t(-64, -64));
+	ASSERT_EQ(doc.getEnd(*vlines[0]).xy(), v2double_t(-64, 0));
+	ASSERT_EQ(doc.getRight(*vlines[0])->MidTex(), "BOTTOM");
+	ASSERT_EQ(doc.getSector(*doc.getRight(*vlines[0])).FloorTex(), "FBOTTOM");
+	ASSERT_FALSE(doc.getLeft(*vlines[0]));
 	ASSERT_EQ(vlines[0]->flags, MLF_Blocking);
 
-	ASSERT_EQ(vlines[1]->Start(doc)->xy(), v2double_t(-64, 0));
-	ASSERT_EQ(vlines[1]->End(doc)->xy(), v2double_t(0, 0));
-	ASSERT_EQ(vlines[1]->Right(doc)->MidTex(), "TOPLEFT");	// texture copied
-	ASSERT_EQ(vlines[1]->Right(doc)->SecRef(doc)->FloorTex(), "FBOTTOM");
-	ASSERT_FALSE(vlines[1]->Left(doc));
+	ASSERT_EQ(doc.getStart(*vlines[1]).xy(), v2double_t(-64, 0));
+	ASSERT_EQ(doc.getEnd(*vlines[1]).xy(), v2double_t(0, 0));
+	ASSERT_EQ(doc.getRight(*vlines[1])->MidTex(), "TOPLEFT");	// texture copied
+	ASSERT_EQ(doc.getSector(*doc.getRight(*vlines[1])).FloorTex(), "FBOTTOM");
+	ASSERT_FALSE(doc.getLeft(*vlines[1]));
 	ASSERT_EQ(vlines[1]->flags, MLF_Blocking);
 
-	ASSERT_EQ(vlines[2]->Start(doc)->xy(), v2double_t(0, 0));
-	ASSERT_EQ(vlines[2]->End(doc)->xy(), v2double_t(64, 0));
-	ASSERT_EQ(vlines[2]->Right(doc)->MidTex(), "BOTTOM");
-	ASSERT_EQ(vlines[2]->Right(doc)->SecRef(doc)->FloorTex(), "FBOTTOM");
-	ASSERT_FALSE(vlines[2]->Left(doc));
+	ASSERT_EQ(doc.getStart(*vlines[2]).xy(), v2double_t(0, 0));
+	ASSERT_EQ(doc.getEnd(*vlines[2]).xy(), v2double_t(64, 0));
+	ASSERT_EQ(doc.getRight(*vlines[2])->MidTex(), "BOTTOM");
+	ASSERT_EQ(doc.getSector(*doc.getRight(*vlines[2])).FloorTex(), "FBOTTOM");
+	ASSERT_FALSE(doc.getLeft(*vlines[2]));
 	ASSERT_EQ(vlines[2]->flags, MLF_Blocking);
 
-	ASSERT_EQ(vlines[3]->Start(doc)->xy(), v2double_t(64, 0));
-	ASSERT_EQ(vlines[3]->End(doc)->xy(), v2double_t(64, 64));
-	ASSERT_EQ(vlines[3]->Right(doc)->MidTex(), "TOPRIGHT");
-	ASSERT_EQ(vlines[3]->Right(doc)->SecRef(doc)->FloorTex(), "FTOPRITE");
-	ASSERT_FALSE(vlines[3]->Left(doc));
+	ASSERT_EQ(doc.getStart(*vlines[3]).xy(), v2double_t(64, 0));
+	ASSERT_EQ(doc.getEnd(*vlines[3]).xy(), v2double_t(64, 64));
+	ASSERT_EQ(doc.getRight(*vlines[3])->MidTex(), "TOPRIGHT");
+	ASSERT_EQ(doc.getSector(*doc.getRight(*vlines[3])).FloorTex(), "FTOPRITE");
+	ASSERT_FALSE(doc.getLeft(*vlines[3]));
 	ASSERT_EQ(vlines[3]->flags, MLF_Blocking);
 
-	ASSERT_EQ(vlines[4]->Start(doc)->xy(), v2double_t(64, 64));
-	ASSERT_EQ(vlines[4]->End(doc)->xy(), v2double_t(128, 64));
-	ASSERT_EQ(vlines[4]->Right(doc)->MidTex(), "TOPRIGHT");
-	ASSERT_EQ(vlines[4]->Right(doc)->SecRef(doc)->FloorTex(), "FTOPRITE");
-	ASSERT_FALSE(vlines[4]->Left(doc));
+	ASSERT_EQ(doc.getStart(*vlines[4]).xy(), v2double_t(64, 64));
+	ASSERT_EQ(doc.getEnd(*vlines[4]).xy(), v2double_t(128, 64));
+	ASSERT_EQ(doc.getRight(*vlines[4])->MidTex(), "TOPRIGHT");
+	ASSERT_EQ(doc.getSector(*doc.getRight(*vlines[4])).FloorTex(), "FTOPRITE");
+	ASSERT_FALSE(doc.getLeft(*vlines[4]));
 	ASSERT_EQ(vlines[4]->flags, MLF_Blocking);
+	
+	// TODO
 
 	ASSERT_EQ(vlines[5]->Start(doc)->xy(), v2double_t(128, -64));
 	ASSERT_EQ(vlines[5]->End(doc)->xy(), v2double_t(-64, -64));
