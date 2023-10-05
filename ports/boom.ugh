@@ -36,6 +36,7 @@ feature coop_dm_flags 1
 feature pass_through  1
 
 feature medusa_fixed 1
+feature tuttifrutti_fixed 1
 feature lax_sprites  1
 
 

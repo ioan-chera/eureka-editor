@@ -104,7 +104,7 @@ TEST_F(WadFileTest, WriteRead)
 
 	// Right now add some data to it. Since writeToDisk won't be called yet,
 	// the lump should only be there in memory.
-	Lump_c *lump = wad->AddLump("HelloWorld");
+	Lump_c *lump = &wad->AddLump("HelloWorld");
 	ASSERT_NE(lump, nullptr);
 	// Check that the name gets upper-cased and truncated.
 	ASSERT_EQ(lump->Name(), "HELLOWOR");
@@ -158,13 +158,13 @@ TEST_F(WadFileTest, WriteRead)
 	assertVecString(wadReadData, "Hello, world!");
 
 	// Now add yet another lump at the end
-	lump = wad->AddLump("LUMPLUMP");
+	lump = &wad->AddLump("LUMPLUMP");
 	ASSERT_NE(lump, nullptr);
 	lump->Printf("Ah");
 
 	// Also add a lump in the middle. Test the insertion point feature
 	wad->InsertPoint(1);
-	lump = wad->AddLump("MIDLump");
+	lump = &wad->AddLump("MIDLump");
 	ASSERT_NE(lump, nullptr);
 	lump->Printf("Doom");
 
@@ -268,35 +268,35 @@ TEST_F(WadFileTest, FindLumpInNamespace)
 	ASSERT_TRUE(wad);
 
 	// Print data for each new lump so it gets namespaced correctly
-	ASSERT_TRUE(wad->AddLump("F_START"));	// 0
-	ASSERT_TRUE(wad->AddLump("LUMP"));
+	wad->AddLump("F_START");	// 0
+	wad->AddLump("LUMP");
 	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
-	ASSERT_TRUE(wad->AddLump("F_END"));
-	ASSERT_TRUE(wad->AddLump("FF_START"));
-	ASSERT_TRUE(wad->AddLump("LUMP2"));		// 4
+	wad->AddLump("F_END");
+	wad->AddLump("FF_START");
+	wad->AddLump("LUMP2");		// 4
 	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
-	ASSERT_TRUE(wad->AddLump("F_END"));
-	ASSERT_TRUE(wad->AddLump("FF_START"));
-	ASSERT_TRUE(wad->AddLump("LUMP3"));
+	wad->AddLump("F_END");
+	wad->AddLump("FF_START");
+	wad->AddLump("LUMP3");
 	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
-	ASSERT_TRUE(wad->AddLump("FF_END"));	// 8
-	ASSERT_TRUE(wad->AddLump("S_START"));
-	ASSERT_TRUE(wad->AddLump("LUMP"));
+	wad->AddLump("FF_END");	// 8
+	wad->AddLump("S_START");
+	wad->AddLump("LUMP");
 	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
-	ASSERT_TRUE(wad->AddLump("S_END"));
-	ASSERT_TRUE(wad->AddLump("SS_START"));	// 12
-	ASSERT_TRUE(wad->AddLump("LUMP2"));
+	wad->AddLump("S_END");
+	wad->AddLump("SS_START");	// 12
+	wad->AddLump("LUMP2");
 	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
-	ASSERT_TRUE(wad->AddLump("S_END"));
-	ASSERT_TRUE(wad->AddLump("SS_START"));
-	ASSERT_TRUE(wad->AddLump("LUMP3"));		// 16
+	wad->AddLump("S_END");
+	wad->AddLump("SS_START");
+	wad->AddLump("LUMP3");		// 16
 	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
-	ASSERT_TRUE(wad->AddLump("SS_END"));
-	ASSERT_TRUE(wad->AddLump("TX_START"));
-	ASSERT_TRUE(wad->AddLump("LUMP"));
+	wad->AddLump("SS_END");
+	wad->AddLump("TX_START");
+	wad->AddLump("LUMP");
 	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
-	ASSERT_TRUE(wad->AddLump("TX_END"));	// 20
-	ASSERT_TRUE(wad->AddLump("LUMP"));
+	wad->AddLump("TX_END");	// 20
+	wad->AddLump("LUMP");
 	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
 
 	ASSERT_EQ(wad->FindLumpInNamespace("LUMP", WadNamespace::Global),
@@ -328,26 +328,26 @@ TEST_F(WadFileTest, LevelQuery)
 
 	// Classic Doom map. Give it a nonstandard name
 	// NOTE: when adding, we must explicitly state if the lump is a level
-	ASSERT_TRUE(wad->AddLevel("MAP45"));	// 0 (deliberately after UDMF)
-	ASSERT_TRUE(wad->AddLump("THINGS"));
-	ASSERT_TRUE(wad->AddLump("LINEDEFS"));
-	ASSERT_TRUE(wad->AddLump("SIDEDEFS"));
-	ASSERT_TRUE(wad->AddLump("VERTEXES"));	// 4
-	ASSERT_TRUE(wad->AddLump("SEGS"));
-	ASSERT_TRUE(wad->AddLump("SSECTORS"));
-	ASSERT_TRUE(wad->AddLump("NODES"));
-	ASSERT_TRUE(wad->AddLump("SECTORS"));	// 8
-	ASSERT_TRUE(wad->AddLump("REJECT"));
-	ASSERT_TRUE(wad->AddLump("BLOCKMAP"));
-	ASSERT_TRUE(wad->AddLump("BEHAVIOR"));
-	ASSERT_TRUE(wad->AddLump("GL_JACK"));	// 12, random name
+	wad->AddLevel("MAP45");	// 0 (deliberately after UDMF)
+	wad->AddLump("THINGS");
+	wad->AddLump("LINEDEFS");
+	wad->AddLump("SIDEDEFS");
+	wad->AddLump("VERTEXES");	// 4
+	wad->AddLump("SEGS");
+	wad->AddLump("SSECTORS");
+	wad->AddLump("NODES");
+	wad->AddLump("SECTORS");	// 8
+	wad->AddLump("REJECT");
+	wad->AddLump("BLOCKMAP");
+	wad->AddLump("BEHAVIOR");
+	wad->AddLump("GL_JACK");	// 12, random name
 	// UDMF map
 	ASSERT_TRUE(wad->AddLevel("E2M4"));
-	ASSERT_TRUE(wad->AddLump("TEXTMAP"));
-	ASSERT_TRUE(wad->AddLump("ZNODES"));
-	ASSERT_TRUE(wad->AddLump("BLOCKMAP"));	// 16, give these rarely-used lumps
-	ASSERT_TRUE(wad->AddLump("REJECT"));
-	ASSERT_TRUE(wad->AddLump("ENDMAP"));
+	wad->AddLump("TEXTMAP");
+	wad->AddLump("ZNODES");
+	wad->AddLump("BLOCKMAP");	// 16, give these rarely-used lumps
+	wad->AddLump("REJECT");
+	wad->AddLump("ENDMAP");
 
 	// Test the sorting...
 	ASSERT_EQ(wad->LevelHeader(0), 0);
@@ -443,9 +443,9 @@ TEST_F(WadFileTest, Backup)
 	auto wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
-	ASSERT_TRUE(wad->AddLump("LUMP1"));
+	wad->AddLump("LUMP1");
 	wad->GetLump(wad->NumLumps() - 1)->Printf("Hello, world!");
-	ASSERT_TRUE(wad->AddLump("LUMP2"));
+	wad->AddLump("LUMP2");
 	wad->GetLump(wad->NumLumps() - 1)->Printf("Goodbye!");
 
 	ASSERT_TRUE(wad->Backup(path2));
@@ -464,38 +464,36 @@ TEST_F(WadFileTest, Backup)
 TEST_F(WadFileTest, LumpIO)
 {
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
-	Lump_c *lump = wad->AddLump("LUMP");
-	ASSERT_TRUE(lump);
+	Lump_c &lump = wad->AddLump("LUMP");
 
-	lump->Printf("Hello, world!");
-	lump->Seek(7);
+	lump.Printf("Hello, world!");
+	lump.Seek(7);
 	char data[20] = {};
-	ASSERT_TRUE(lump->Read(data, 5));
+	ASSERT_TRUE(lump.Read(data, 5));
 	ASSERT_STREQ(data, "world");
 	// Won't accept post-EOF
-	ASSERT_FALSE(lump->Read(data, 2));
+	ASSERT_FALSE(lump.Read(data, 2));
 	// If we got false, we're now at EOF and must rewind
-	ASSERT_FALSE(lump->Read(data, 1));
+	ASSERT_FALSE(lump.Read(data, 1));
 
-	lump->Seek();
+	lump.Seek();
 	memset(data, 0, sizeof(data));
-	ASSERT_TRUE(lump->Read(data, 5));
-	ASSERT_TRUE(lump->Read(data + 5, 7));
+	ASSERT_TRUE(lump.Read(data, 5));
+	ASSERT_TRUE(lump.Read(data + 5, 7));
 	ASSERT_STREQ(data, "Hello, world");
 
 	// Now test GetLine
-	Lump_c *lump2 = wad->AddLump("LUMP2");
-	ASSERT_TRUE(lump2);
-	lump2->Printf("Hello\nworld\nand you!");
-	lump2->Seek();
+	Lump_c &lump2 = wad->AddLump("LUMP2");
+	lump2.Printf("Hello\nworld\nand you!");
+	lump2.Seek();
 	SString line;
-	ASSERT_TRUE(lump2->GetLine(line));
+	ASSERT_TRUE(lump2.GetLine(line));
 	ASSERT_EQ(line, "Hello\n");
-	ASSERT_TRUE(lump2->GetLine(line));
+	ASSERT_TRUE(lump2.GetLine(line));
 	ASSERT_EQ(line, "world\n");
-	ASSERT_TRUE(lump2->GetLine(line));
+	ASSERT_TRUE(lump2.GetLine(line));
 	ASSERT_EQ(line, "and you!");
-	ASSERT_FALSE(lump2->GetLine(line));
+	ASSERT_FALSE(lump2.GetLine(line));
 }
 
 TEST_F(WadFileTest, LumpFromFile)
@@ -506,46 +504,44 @@ TEST_F(WadFileTest, LumpFromFile)
 	wad->writeToDisk();
 	mDeleteList.push(path);
 
-	Lump_c *lump = wad->AddLump("Test");
-	ASSERT_TRUE(lump);
+	Lump_c &lump = wad->AddLump("Test");
 
 	FILE *f = fopen(path.u8string().c_str(), "rb");
 	ASSERT_TRUE(f);
-	ASSERT_EQ(lump->writeData(f, 32), 12);
+	ASSERT_EQ(lump.writeData(f, 32), 12);
 	ASSERT_EQ(fclose(f), 0);
 
-	ASSERT_EQ(lump->Length(), 12);
+	ASSERT_EQ(lump.Length(), 12);
 	// Test getData
-	ASSERT_FALSE(memcmp(lump->getData().data(), "PWAD\0\0\0\0\x0c\0\0\0", 12));
+	ASSERT_FALSE(memcmp(lump.getData().data(), "PWAD\0\0\0\0\x0c\0\0\0", 12));
 }
 
 TEST_F(WadFileTest, FindFirstSpriteLump)
 {
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad);
-	Lump_c *firstlump = wad->AddLump("POSSA1");
+	wad->AddLump("POSSA1");
 	wad->AddLump("S_START");
-	Lump_c *possa1 = wad->AddLump("POSSA1");
-	possa1->Printf("a");	// need to have content to be considered
-	Lump_c *possa2d3 = wad->AddLump("POSSA2D3");
-	possa2d3->Printf("a");
-	Lump_c *trooc1 = wad->AddLump("TROOC1");
-	trooc1->Printf("a");
-	Lump_c *possa3d2 = wad->AddLump("POSSA3D2");
-	possa3d2->Printf("a");
-	Lump_c *troob1 = wad->AddLump("TROOB1");
-	troob1->Printf("a");
-	Lump_c *trood1 = wad->AddLump("TROOD1");
-	trood1->Printf("a");
+	Lump_c &possa1 = wad->AddLump("POSSA1");
+	possa1.Printf("a");	// need to have content to be considered
+	Lump_c &possa2d3 = wad->AddLump("POSSA2D3");
+	possa2d3.Printf("a");
+	Lump_c &trooc1 = wad->AddLump("TROOC1");
+	trooc1.Printf("a");
+	Lump_c &possa3d2 = wad->AddLump("POSSA3D2");
+	possa3d2.Printf("a");
+	Lump_c &troob1 = wad->AddLump("TROOB1");
+	troob1.Printf("a");
+	Lump_c &trood1 = wad->AddLump("TROOD1");
+	trood1.Printf("a");
 	wad->AddLump("S_END");
 
-	ASSERT_TRUE(firstlump && possa1 && possa2d3 && trooc1 && possa3d2 && troob1 && trood1);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSS"), possa1);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSSA"), possa1);
-	ASSERT_EQ(wad->findFirstSpriteLump("TROOC"), trooc1);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSSD"), possa2d3);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSSD2"), possa3d2);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSSA3"), possa3d2);
-	ASSERT_EQ(wad->findFirstSpriteLump("TROO"), troob1);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSS"), &possa1);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSSA"), &possa1);
+	ASSERT_EQ(wad->findFirstSpriteLump("TROOC"), &trooc1);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSSD"), &possa2d3);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSSD2"), &possa3d2);
+	ASSERT_EQ(wad->findFirstSpriteLump("POSSA3"), &possa3d2);
+	ASSERT_EQ(wad->findFirstSpriteLump("TROO"), &troob1);
 	ASSERT_EQ(wad->findFirstSpriteLump("POSSD4"), nullptr);
 }

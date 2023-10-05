@@ -4,6 +4,12 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+11.08.2023
+* Added tutti-frutti texture check
+* Fixed Heretic torches looking wrong in the 3D mode
+* Fixed Heretic multiplayer sprite color translation
+
+----------
 24.10.2022
 * Thing definition sprite lookup is now smarter and doesn't need full names for certain frames (e.g.
   BOSA1C1). In consequence, mods which change the rotation distributions won't be affected.

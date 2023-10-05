@@ -68,6 +68,8 @@ private:
 
 	int  w = 0;  // Width
 	int  h = 0;  // Height
+	int spriteOffsetX = 0;
+	int spriteOffsetY = 0;
 
 	// texture identifier for OpenGL, 0 if not uploaded yet
 	GLuint gl_tex = 0;
@@ -129,6 +131,17 @@ public:
 	void unload_gl(bool can_delete);
 
 	void bind_gl(const WadData &wad);
+
+	void setSpriteOffset(int x, int y)
+	{
+		spriteOffsetX = x;
+		spriteOffsetY = y;
+	}
+	void getSpriteOffset(int& x, int& y) const
+	{
+		x = spriteOffsetX;
+		y = spriteOffsetY;
+	}
 
 
 	Img_c            (const Img_c&) = delete;  // No need to implement it

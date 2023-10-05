@@ -397,100 +397,108 @@ void Instance::BuildNodesAfterSave(int lev_idx)
 
 void Instance::CMD_BuildAllNodes()
 {
-	if (!wad.master.edit_wad)
+	try
 	{
-		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
-		return;
-	}
-
-	if (wad.master.edit_wad->IsReadOnly())
-	{
-		DLG_Notify("Cannot build nodes on a read-only file.");
-		return;
-	}
-
-	if (MadeChanges)
-	{
-		if (DLG_Confirm({ "Cancel", "&Save" },
-		                "You have unsaved changes, do you want to save them now "
-						"and then build all the nodes?") <= 0)
+		if (!wad.master.edit_wad)
 		{
+			DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
 			return;
 		}
 
-		inhibit_node_build = true;
-
-		bool save_result = M_SaveMap();
-
-		inhibit_node_build = false;
-
-		// user cancelled the save?
-		if (! save_result)
+		if (wad.master.edit_wad->IsReadOnly())
+		{
+			DLG_Notify("Cannot build nodes on a read-only file.");
 			return;
+		}
+
+		if (MadeChanges)
+		{
+			if (DLG_Confirm({ "Cancel", "&Save" },
+				"You have unsaved changes, do you want to save them now "
+				"and then build all the nodes?") <= 0)
+			{
+				return;
+			}
+
+			inhibit_node_build = true;
+
+			bool save_result = M_SaveMap();
+
+			inhibit_node_build = false;
+
+			// user cancelled the save?
+			if (!save_result)
+				return;
+		}
+
+
+		// this probably cannot happen, but check anyway
+		if (wad.master.edit_wad->LevelCount() == 0)
+		{
+			DLG_Notify("Cannot build nodes: no levels found!");
+			return;
+		}
+
+
+		// remember current level
+		SString CurLevel(loaded.levelName);
+
+		// reset various editor state
+		Editor_ClearAction();
+		Selection_InvalidateLast();
+
+		edit.Selected->clear_all();
+		edit.highlight.clear();
+
+
+		nodeialog = new UI_NodeDialog();
+
+		nodeialog->set_modal();
+		nodeialog->show();
+
+		Fl::check();
+
+
+		nb_info = new nodebuildinfo_t;
+
+		PrepareInfo(nb_info);
+
+		build_result_e ret = BuildAllNodes(nb_info);
+
+		if (ret == BUILD_OK)
+		{
+			nodeialog->Finish_OK();
+			Status_Set("Built nodes OK");
+		}
+		else if (nb_info->cancelled)
+		{
+			nodeialog->Finish_Cancel();
+			Status_Set("Cancelled building nodes");
+		}
+		else
+		{
+			nodeialog->Finish_Error();
+			Status_Set("Error building nodes");
+		}
+
+		while (!nodeialog->WantClose())
+		{
+			Fl::wait(0.2);
+		}
+
+		delete nb_info; nb_info = NULL;
+		delete nodeialog;  nodeialog = NULL;
+
+
+		// reload the previous level
+		// TODO: improve this to NOT mean reloading the level
+		LoadLevel(wad.master.edit_wad.get(), CurLevel);
 	}
-
-
-	// this probably cannot happen, but check anyway
-	if (wad.master.edit_wad->LevelCount() == 0)
+	catch (const std::runtime_error& e)
 	{
-		DLG_Notify("Cannot build nodes: no levels found!");
-		return;
+		DLG_ShowError(false, "Could not build nodes: %s", e.what());
 	}
 
-
-	// remember current level
-	SString CurLevel(loaded.levelName);
-
-	// reset various editor state
-	Editor_ClearAction();
-	Selection_InvalidateLast();
-
-	edit.Selected->clear_all();
-	edit.highlight.clear();
-
-
-	nodeialog = new UI_NodeDialog();
-
-	nodeialog->set_modal();
-	nodeialog->show();
-
-	Fl::check();
-
-
-	nb_info = new nodebuildinfo_t;
-
-	PrepareInfo(nb_info);
-
-	build_result_e ret = BuildAllNodes(nb_info);
-
-	if (ret == BUILD_OK)
-	{
-		nodeialog->Finish_OK();
-		Status_Set("Built nodes OK");
-	}
-	else if (nb_info->cancelled)
-	{
-		nodeialog->Finish_Cancel();
-		Status_Set("Cancelled building nodes");
-	}
-	else
-	{
-		nodeialog->Finish_Error();
-		Status_Set("Error building nodes");
-	}
-
-	while (!nodeialog->WantClose())
-	{
-		Fl::wait(0.2);
-	}
-
-	delete nb_info; nb_info = NULL;
-	delete nodeialog;  nodeialog = NULL;
-
-
-	// reload the previous level
-	// TODO: improve this to NOT mean reloading the level
-	LoadLevel(wad.master.edit_wad.get(), CurLevel);
 }
 
 

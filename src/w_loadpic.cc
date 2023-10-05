@@ -224,6 +224,9 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 {
 	ImageFormat img_fmt = W_DetectImageFormat(lump);
 	tl::optional<Img_c> sub;
+	
+	bool result;
+	int localPicWidth = 0, localPicHeight = 0;
 
 	switch (img_fmt)
 	{
@@ -233,15 +236,33 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 
 	case ImageFormat::png:
 		sub = LoadImage_PNG(lump, pic_name);
-		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+		result = ComposePicture(dest, sub, pic_x_offset, pic_y_offset, &localPicWidth, &localPicHeight);
+		if (pic_width)
+			*pic_width = localPicWidth;
+		if (pic_height)
+			*pic_height = localPicHeight;
+		dest.setSpriteOffset(localPicWidth / 2, localPicHeight);
+		return result;
 
 	case ImageFormat::jpeg:
 		sub = LoadImage_JPEG(lump, pic_name);
-		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+		result = ComposePicture(dest, sub, pic_x_offset, pic_y_offset, &localPicWidth, &localPicHeight);
+		if (pic_width)
+			*pic_width = localPicWidth;
+		if (pic_height)
+			*pic_height = localPicHeight;
+		dest.setSpriteOffset(localPicWidth / 2, localPicHeight);
+		return result;
 
 	case ImageFormat::tga:
 		sub = LoadImage_TGA(lump, pic_name);
-		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+		result = ComposePicture(dest, sub, pic_x_offset, pic_y_offset, &localPicWidth, &localPicHeight);
+		if (pic_width)
+			*pic_width = localPicWidth;
+		if (pic_height)
+			*pic_height = localPicHeight;
+		dest.setSpriteOffset(localPicWidth / 2, localPicHeight);
+		return result;
 
 	case ImageFormat::unrecognized:
 		gLog.printf("Unknown image format in '%s' lump\n", pic_name.c_str());
@@ -260,8 +281,10 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 
 	int width    = LE_S16(pat->width);
 	int height   = LE_S16(pat->height);
-//	int offset_x = LE_S16(pat->leftoffset);
-//	int offset_y = LE_S16(pat->topoffset);
+	int offset_x = LE_S16(pat->leftoffset);
+	int offset_y = LE_S16(pat->topoffset);
+
+	dest.setSpriteOffset(offset_x, offset_y);
 
 	// FIXME: validate values (in case we got flat data or so)
 

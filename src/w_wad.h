@@ -275,7 +275,7 @@ public:
 	// The 'max_size' parameter (if >= 0) specifies the most data
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
-	Lump_c * AddLump (const SString &name);
+	Lump_c & AddLump (const SString &name);
 	Lump_c * AddLevel(const SString &name, int *lev_num = nullptr);
 
 	// set the insertion point -- the next lump will be added _before_

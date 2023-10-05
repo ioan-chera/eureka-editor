@@ -29,29 +29,28 @@ TEST(Palette, LoadPalette)
 	// Need a wad
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad);
-	Lump_c *lump = wad->AddLump("PALETTE");
-	ASSERT_TRUE(lump);
+	Lump_c &lump = wad->AddLump("PALETTE");
 
 	// Try on empty lump: should fail
-	ASSERT_FALSE(palette.loadPalette(*lump, 2, 2));
+	ASSERT_FALSE(palette.loadPalette(lump, 2, 2));
 
 	// Try insufficient lump: should still fail
 	std::vector<uint8_t> data;
 	data.resize(256);
-	lump->Write(data.data(), (int)data.size());
-	ASSERT_FALSE(palette.loadPalette(*lump, 2, 2));
+	lump.Write(data.data(), (int)data.size());
+	ASSERT_FALSE(palette.loadPalette(lump, 2, 2));
 
 	// Repopulate lump, this time valid
 	data = makeGrayscale();
-	lump->clearData();
-	lump->Write(data.data(), (int)data.size());
-	ASSERT_TRUE(palette.loadPalette(*lump, 2, 2));
-	ASSERT_TRUE(palette.loadPalette(*lump, 0, 0));
-	ASSERT_FALSE(palette.loadPalette(*lump, -1, 0));
-	ASSERT_FALSE(palette.loadPalette(*lump, 0, -1));
-	ASSERT_TRUE(palette.loadPalette(*lump, 4, 4));
-	ASSERT_FALSE(palette.loadPalette(*lump, 4, 5));
-	ASSERT_FALSE(palette.loadPalette(*lump, 5, 4));
+	lump.clearData();
+	lump.Write(data.data(), (int)data.size());
+	ASSERT_TRUE(palette.loadPalette(lump, 2, 2));
+	ASSERT_TRUE(palette.loadPalette(lump, 0, 0));
+	ASSERT_FALSE(palette.loadPalette(lump, -1, 0));
+	ASSERT_FALSE(palette.loadPalette(lump, 0, -1));
+	ASSERT_TRUE(palette.loadPalette(lump, 4, 4));
+	ASSERT_FALSE(palette.loadPalette(lump, 4, 5));
+	ASSERT_FALSE(palette.loadPalette(lump, 5, 4));
 }
 
 TEST(Palette, FindPaletteColor)
@@ -59,12 +58,11 @@ TEST(Palette, FindPaletteColor)
 	Palette palette;
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad);
-	Lump_c *lump = wad->AddLump("PALETTE");
-	ASSERT_TRUE(lump);
+	Lump_c &lump = wad->AddLump("PALETTE");
 	std::vector<uint8_t> data = makeGrayscale();
-	lump->Write(data.data(), (int)data.size());
+	lump.Write(data.data(), (int)data.size());
 
-	ASSERT_TRUE(palette.loadPalette(*lump, 2, 2));
+	ASSERT_TRUE(palette.loadPalette(lump, 2, 2));
 	// Now look for some
 	ASSERT_EQ(palette.findPaletteColor(100, 100, 98), 99);
 	ASSERT_EQ(palette.findPaletteColor(63, 64, 65), 64);

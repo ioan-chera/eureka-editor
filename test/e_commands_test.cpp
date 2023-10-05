@@ -699,11 +699,11 @@ void SelectNeighborMidLines::initTextures()
 	ASSERT_TRUE(wad);
 	wad->AddLump("TX_START");
 	Lump_c *lump;
-	lump = wad->AddLump("PIC4");
+	lump = &wad->AddLump("PIC4");
 	lump->Write(texHeight4, sizeof(texHeight4));
-	lump = wad->AddLump("PIC6");
+	lump = &wad->AddLump("PIC6");
 	lump->Write(texHeight6, sizeof(texHeight6));
-	lump = wad->AddLump("PIC8");
+	lump = &wad->AddLump("PIC8");
 	lump->Write(texHeight8, sizeof(texHeight8));
 	wad->AddLump("TX_END");
 

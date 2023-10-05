@@ -987,50 +987,43 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 //
 void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 {
-	auto check = [&path](const ReportedResult &result)
-	{
-		if(!result.success)
-			throw WadWriteException(SString::printf("Failed writing WAD to file '%s': %s", path.u8string().c_str(), result.message.c_str()));
-	};
-
-	SafeOutFile sof(path);
-	check(sof.openForWriting());
+	BufferedOutFile sof(path);
 	// Write the header
 	if(kind == WadKind::PWAD)
-		check(sof.write("PWAD", 4));
+		sof.write("PWAD", 4);
 	else
-		check(sof.write("IWAD", 4));
+		sof.write("IWAD", 4);
 
 	int32_t numlumps = (int32_t)directory.size();
-	check(sof.write(&numlumps, 4));
+	sof.write(&numlumps, 4);
 
 	int32_t infotableofs = 12;
 	for(const LumpRef &ref : directory)
 		infotableofs += (int32_t)ref.lump->Length();
 
-	check(sof.write(&infotableofs, 4));
+	sof.write(&infotableofs, 4);
 	for(const LumpRef &ref : directory)
 	{
 		assert(ref.lump.get() != nullptr);
 		const Lump_c &lump = *ref.lump;
-		check(sof.write(lump.getData().data(), lump.Length()));
+		sof.write(lump.getData().data(), lump.Length());
 	}
 	infotableofs = 12;
 	for(const LumpRef &ref : directory)
 	{
-		check(sof.write(&infotableofs, 4));
+		sof.write(&infotableofs, 4);
 		const Lump_c &lump = *ref.lump;
 		numlumps = lump.Length();
-		check(sof.write(&numlumps, 4));
+		sof.write(&numlumps, 4);
 		infotableofs += numlumps;
 		int64_t nm = lump.getName8();
-		check(sof.write(&nm, 8));
+		sof.write(&nm, 8);
 	}
-	check(sof.commit());
+	sof.commit();
 }
 
 
-Lump_c * Wad_file::AddLump(const SString &name)
+Lump_c & Wad_file::AddLump(const SString &name)
 {
 	Lump_c *lump = new Lump_c(name);
 
@@ -1057,7 +1050,7 @@ Lump_c * Wad_file::AddLump(const SString &name)
 
 	ProcessNamespaces();
 
-	return lump;
+	return *lump;
 }
 
 Lump_c * Wad_file::AddLevel(const SString &name, int *lev_num)
@@ -1067,7 +1060,7 @@ Lump_c * Wad_file::AddLevel(const SString &name, int *lev_num)
 	if (actual_point < 0 || actual_point > NumLumps())
 		actual_point = NumLumps();
 
-	Lump_c * lump = AddLump(name);
+	Lump_c & lump = AddLump(name);
 
 	if (lev_num)
 	{
@@ -1076,7 +1069,7 @@ Lump_c * Wad_file::AddLevel(const SString &name, int *lev_num)
 
 	levels.push_back(actual_point);
 
-	return lump;
+	return &lump;
 }
 
 

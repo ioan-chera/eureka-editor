@@ -206,7 +206,6 @@ public:
 
 public:
 	UI_ProjectSetup(Instance &inst, bool new_project = false, bool is_startup = false);
-	virtual ~UI_ProjectSetup();
 
 	// returns true if something changed
 	bool Run();

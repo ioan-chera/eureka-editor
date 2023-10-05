@@ -3796,6 +3796,57 @@ static void Textures_LogMedusa(const Instance &inst)
 }
 
 
+static void Textures_FindTuttiFrutti(selection_c& lines, const Instance& inst)
+{
+	lines.change_type(ObjType::linedefs);
+
+	for (int n = 0; n < inst.level.numLinedefs(); n++)
+	{
+		const auto& L = inst.level.linedefs[n];
+
+		if (L->right < 0)
+			continue;
+
+		if (L->left < 0)	// single sided
+		{
+			const Img_c* texture = inst.wad.images.getTexture(inst.conf, inst.level.getRight(*L)->MidTex());
+			if (!texture)
+				continue;
+			if (texture->has_transparent())
+			{
+				lines.set(n);
+				continue;
+			}
+			if (texture->height() >= 128)
+				continue;
+			const SideDef* side = inst.level.getSide(*L, Side::right);
+			if (!side)
+				continue;
+			const Sector &sector = inst.level.getSector(*side);
+			int headroom = sector.ceilh - sector.floorh;
+			if (headroom > texture->height() || 
+				(L->flags & MLF_LowerUnpegged && (side->y_offset > 0 || side->y_offset < texture->height() - headroom)) || 
+				(!(L->flags & MLF_LowerUnpegged) && (side->y_offset < 0 || side->y_offset > texture->height() - headroom)))
+			{
+				lines.set(n);
+			}
+			continue;
+		}
+		// two sided
+		// TODO
+	}
+}
+
+static void Textures_ShowTuttiFrutti(Instance& inst)
+{
+	if (inst.edit.mode != ObjType::linedefs)
+		inst.Editor_ChangeMode('l');
+
+	Textures_FindTuttiFrutti(*inst.edit.Selected, inst);
+
+	inst.GoToErrors();
+}
+
 static void Textures_FindUnknownTex(selection_c& lines,
                              std::map<SString, int>& names, const Instance &inst)
 {
@@ -4112,7 +4163,7 @@ class UI_Check_Textures : public UI_Check_base
 {
 public:
 	UI_Check_Textures(bool all_mode, Instance &inst) :
-		UI_Check_base(580, 286, all_mode, "Check : Textures",
+		UI_Check_base(580, 386, all_mode, "Check : Textures",
 		              "Texture test results"), inst(inst)
 	{ }
 
@@ -4219,6 +4270,13 @@ public:
 		dialog->user_action = CheckResult::highlight;
 	}
 
+	static void action_show_tuttifrutti(Fl_Widget* w, void* data)
+	{
+		auto dialog = static_cast<UI_Check_Textures*>(data);
+		Textures_ShowTuttiFrutti(dialog->inst);
+		dialog->user_action = CheckResult::highlight;
+	}
+
 	static void action_remove_medusa(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
@@ -4293,6 +4351,18 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 								"Show", &UI_Check_Textures::action_show_medusa,
 								"Log",  &UI_Check_Textures::action_log_medusa,
 								"Fix",  &UI_Check_Textures::action_remove_medusa);
+			}
+		}
+
+		if (!inst.conf.features.tuttifrutti_fixed)
+		{
+			Textures_FindTuttiFrutti(sel, inst);
+			if (sel.empty())
+				dialog->AddLine("No tutti-frutti walls");
+			else
+			{
+				check_buffer = SString::printf("%d tutti-frutti walls", sel.count_obj());
+				dialog->AddLine(check_buffer, 2, 200, "Show", &UI_Check_Textures::action_show_tuttifrutti);
 			}
 		}
 

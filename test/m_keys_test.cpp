@@ -30,6 +30,10 @@ void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 {
 }
 
+void DLG_ShowError(bool fatal, EUR_FORMAT_STRING(const char* msg), ...)
+{
+}
+
 static int sUpdates;
 void updateMenuBindings()
 {

@@ -369,6 +369,7 @@ static const FeatureMapping skFeatureMappings[] =
 	{ "3d_midtex", &port_features_t::midtex_3d },
 	MAPPING(strife_flags),
 	MAPPING(medusa_fixed),
+	MAPPING(tuttifrutti_fixed),
 	MAPPING(lax_sprites),
 	MAPPING(no_need_players),
 	{ "tag_666", &port_features_t::tag_666raw },
@@ -1262,8 +1263,7 @@ SString M_GetBaseGame(const SString &game) noexcept(false)
 }
 
 
-map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
-										  const char *port)
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 {
 	const PortInfo_c *pinfo = M_LoadPortInfo(port);
 	if (pinfo && pinfo->formats != 0)

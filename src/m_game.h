@@ -214,6 +214,7 @@ struct port_features_t
 	int strife_flags;	// Strife flags
 
 	int medusa_fixed;	// the Medusa Effect has been fixed (cannot occur)
+	int tuttifrutti_fixed;	// the tutti-frutti effect has been fixed (Boom and modern ZDoom)
 	int lax_sprites;	// sprites can be found outside of S_START..S_END
 	int mix_textures_flats;	// allow mixing textures and flats (adv. ports)
 	int neg_patch_offsets;	// honors negative patch offsets in textures (ZDoom)
@@ -412,8 +413,7 @@ SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char 
 
 SString M_GetBaseGame(const SString &game) noexcept(false);
 
-map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
-										  const char *port);
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
 bool is_null_tex(const SString &tex);		// the "-" texture
 bool is_special_tex(const SString &tex);	// begins with "#"

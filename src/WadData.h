@@ -38,6 +38,7 @@ class Lump_c;
 class Palette;
 class Wad_file;
 struct ConfigData;
+struct LoadingData;
 
 // maps type number to an image
 typedef std::map<int, tl::optional<Img_c>> sprite_map_t;
@@ -185,10 +186,10 @@ struct WadData
 
 	void W_LoadFlats();
 
-	const Img_c *getSprite(const ConfigData &config, int type);
-	Img_c *getMutableSprite(const ConfigData &config, int type)
+	const Img_c *getSprite(const ConfigData &config, int type, const LoadingData &loading);
+	Img_c *getMutableSprite(const ConfigData &config, int type, const LoadingData &loading)
 	{
-		return const_cast<Img_c *>(getSprite(config, type));
+		return const_cast<Img_c *>(getSprite(config, type, loading));
 	}
 	
 	void W_LoadPalette();

@@ -69,7 +69,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 		loaded.resourceList.push_back(otherpath);
 	}
 
-	loaded.writeEurekaLump(wad.get());
+	loaded.writeEurekaLump(*wad.get());
 
 	Lump_c *lump = wad->FindLump(EUREKA_LUMP);
 	ASSERT_TRUE(lump);
@@ -97,16 +97,14 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	// Now make a change: remove port and resources, see that the lump is updated (not deleted).
 	// Add a couple of lumps before and after before doing it, to see how it gets updated alone.
 	wad->InsertPoint(0);
-	Lump_c *beforelump = wad->AddLump("BEFORE");
-	ASSERT_TRUE(beforelump);
+	wad->AddLump("BEFORE");
 	wad->InsertPoint();
-	Lump_c *lastlump = wad->AddLump("LAST");
-	ASSERT_TRUE(lastlump);
+	wad->AddLump("LAST");
 	ASSERT_EQ(wad->NumLumps(), 3);
 
 	loaded.portName.clear();
 	loaded.resourceList.clear();
-	loaded.writeEurekaLump(wad.get());
+	loaded.writeEurekaLump(*wad.get());
 
 	// Check we still have 3 lumps
 	ASSERT_EQ(wad->NumLumps(), 3);
@@ -235,13 +233,11 @@ TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 	assertEmptyLoading();
 
 	// Safe on wad with some lumps
-	Lump_c *lump1 = wad->AddLump("LUMP1");
-	ASSERT_TRUE(lump1);
-	lump1->Printf("Data 1");
+	Lump_c &lump1 = wad->AddLump("LUMP1");
+	lump1.Printf("Data 1");
 
-	Lump_c *lump2 = wad->AddLump("LUMP2");
-	ASSERT_TRUE(lump2);
-	lump2->Printf("Data 2");
+	Lump_c &lump2 = wad->AddLump("LUMP2");
+	lump2.Printf("Data 2");
 
 	ASSERT_EQ(wad->NumLumps(), 2);
 
@@ -251,11 +247,10 @@ TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 
 TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 {
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
-	ASSERT_TRUE(eureka);
-	eureka->Printf("game emag\n");	// have a game name there
-	eureka->Printf("invalid syntax here\n");
-	eureka->Printf("port trop\n");	// add something else to check how we go
+	Lump_c &eureka = wad->AddLump(EUREKA_LUMP);
+	eureka.Printf("game emag\n");	// have a game name there
+	eureka.Printf("invalid syntax here\n");
+	eureka.Printf("port trop\n");	// add something else to check how we go
 
 	// Situation 1: home, install dir unset
 	// Prerequisite: set the DLG_Confirm override
@@ -366,16 +361,15 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 TEST_F(ParseEurekaLumpFixture, TryResources)
 {
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
-	ASSERT_TRUE(eureka);
-	eureka->Printf("game doom\n");
-	eureka->Printf("resource samepath.wad\n");
-	eureka->Printf("resource samepath.wad\n");	// repeat so we check we don't add it again
-	eureka->Printf("resource bogus/subpath.wad\n");
-	eureka->Printf("resource iwadpath.wad\n");
-	eureka->Printf("resource nopath.wad\n");
-	eureka->Printf("resource %s\n", getChildPath(fs::path("abs") / "abspath.wad").u8string().c_str());
-	eureka->Printf("resource \n");	// add something else to check how we go
+	Lump_c &eureka = wad->AddLump(EUREKA_LUMP);
+	eureka.Printf("game doom\n");
+	eureka.Printf("resource samepath.wad\n");
+	eureka.Printf("resource samepath.wad\n");	// repeat so we check we don't add it again
+	eureka.Printf("resource bogus/subpath.wad\n");
+	eureka.Printf("resource iwadpath.wad\n");
+	eureka.Printf("resource nopath.wad\n");
+	eureka.Printf("resource %s\n", getChildPath(fs::path("abs") / "abspath.wad").u8string().c_str());
+	eureka.Printf("resource \n");	// add something else to check how we go
 
 	auto makesubfile = [this](const char *path)
 	{
@@ -436,12 +430,11 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 
 TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 {
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
-	ASSERT_TRUE(eureka);
-	eureka->Printf("game doom\n");
-	eureka->Printf("resource samename.wad\n");
-	eureka->Printf("resource sub/SameName.Wad\n");	// repeat so we check we don't add it again
-	eureka->Printf("resource othername.wad\n");
+	Lump_c &eureka = wad->AddLump(EUREKA_LUMP);
+	eureka.Printf("game doom\n");
+	eureka.Printf("resource samename.wad\n");
+	eureka.Printf("resource sub/SameName.Wad\n");	// repeat so we check we don't add it again
+	eureka.Printf("resource othername.wad\n");
 
 	// Make the files
 	std::ofstream stream;
@@ -496,11 +489,10 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	mDeleteList.push(getChildPath("res.wad"));
 
 	// Prepare the lump
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
-	ASSERT_TRUE(eureka);
+	Lump_c &eureka = wad->AddLump(EUREKA_LUMP);
 
 	// Try to use just path: won't be found
-	eureka->Printf("resource res.wad\n");
+	eureka.Printf("resource res.wad\n");
 
 	int errorcount = 0;
 	DLG_Notify_Override = [&errorcount](const char *message, va_list ap)
@@ -514,8 +506,8 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	ASSERT_TRUE(loading.resourceList.empty());
 
 	// Now change content and add a relative path
-	eureka->clearData();
-	eureka->Printf("resource ../res.wad\n");
+	eureka.clearData();
+	eureka.Printf("resource ../res.wad\n");
 	loading.parseEurekaLump(home_dir, install_dir, recent, wad.get());
 
 	ASSERT_EQ(errorcount, 1);

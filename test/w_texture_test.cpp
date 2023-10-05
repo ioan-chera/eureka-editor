@@ -18,6 +18,7 @@
 
 #include "WadData.h"
 #include "m_game.h"
+#include "m_loadsave.h"
 #include "w_wad.h"
 #include "gtest/gtest.h"
 
@@ -39,8 +40,7 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
     auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
     ASSERT_TRUE(wad);
     wad->AddLump("S_START");
-    auto spritelump = wad->AddLump("POSSA3D7");
-    ASSERT_TRUE(spritelump);
+    auto &spritelump = wad->AddLump("POSSA3D7");
 
     static const uint8_t tga[] = {
         17, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 3, 0, 32, 8, 16, 67, 114, 101, 97, 116, 101, 100,
@@ -49,13 +49,15 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
         146, 192, 255, 0, 0, 255, 255, 143, 143, 255, 255, 247, 199, 255, 255, 237, 127, 255, 255,
     };
 
-    spritelump->Write(tga, sizeof(tga));
+    spritelump.Write(tga, sizeof(tga));
     wad->AddLump("S_END");
 
     WadData wadData;
     wadData.master.MasterDir_Add(wad);
 
-    auto image = wadData.getSprite(config, 3004);
+    LoadingData loading;
+
+    auto image = wadData.getSprite(config, 3004, loading);
     ASSERT_TRUE(image);
 }
 
@@ -66,10 +68,12 @@ TEST(Texture, WadDataGetNullSprite)
     type.desc = "UNKNOWN";
     config.thing_types[1234] = type;
 
+    LoadingData loading;
+
     WadData wadData;
-    auto image = wadData.getSprite(config, 1234);
+    auto image = wadData.getSprite(config, 1234, loading);
     ASSERT_FALSE(image);
     // Try twice to make sure we don't crash (happened before)
-    image = wadData.getSprite(config, 1234);
+    image = wadData.getSprite(config, 1234, loading);
     ASSERT_FALSE(image);
 }

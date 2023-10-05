@@ -643,7 +643,7 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 }
 
 
-const Img_c *WadData::getSprite(const ConfigData &config, int type)
+const Img_c *WadData::getSprite(const ConfigData &config, int type, const LoadingData &loading)
 {
 	const tl::optional<Img_c> *existing = get(images.sprites, type);
 	if(existing)
@@ -702,6 +702,34 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type)
 	{
 		tl::optional<Img_c> new_img;
 
+		int src1, src2;
+		int targ1[4], targ2[4];
+		if (M_GetBaseGame(loading.gameName) == "heretic")
+		{
+			src1 = 225;
+			src2 = 240;
+			targ1[0] = 114;
+			targ2[0] = 129;
+			targ1[1] = 145;
+			targ2[1] = 160;
+			targ1[2] = targ1[3] = 190;
+			targ2[2] = targ2[3] = 205;
+			
+		}
+		else
+		{
+			src1 = 0x70;
+			src2 = 0x7f;
+			targ1[0] = 0x60;
+			targ2[0] = 0x6f;
+			targ1[1] = 0x40;
+			targ2[1] = 0x4f;
+			targ1[2] = 0x20;
+			targ2[2] = 0x2f;
+			targ1[3] = 0xc4;
+			targ2[3] = 0xcf;
+		}
+
 		switch (type)
 		{
 			case 1:
@@ -709,15 +737,15 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type)
 				break;
 
 			case 2:
-				new_img = result->color_remap(0x70, 0x7f, 0x60, 0x6f);
+				new_img = result->color_remap(src1, src2, targ1[0], targ2[0]);
 				break;
 
 			case 3:
-				new_img = result->color_remap(0x70, 0x7f, 0x40, 0x4f);
+				new_img = result->color_remap(src1, src2, targ1[1], targ2[1]);
 				break;
 
 			case 4:
-				new_img = result->color_remap(0x70, 0x7f, 0x20, 0x2f);
+				new_img = result->color_remap(src1, src2, targ1[2], targ2[2]);
 				break;
 
 			// blue for the extra coop starts
@@ -725,7 +753,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type)
 			case 4002:
 			case 4003:
 			case 4004:
-				new_img = result->color_remap(0x70, 0x7f, 0xc4, 0xcf);
+				new_img = result->color_remap(src1, src2, targ1[3], targ2[3]);
 				break;
 		}
 
