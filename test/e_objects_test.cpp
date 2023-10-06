@@ -521,6 +521,11 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 //     |/
 TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 {
+	/*
+	  1 2
+	 0   3
+	 4
+	*/
 	static const FFixedPoint vertexCoordinates[5][2] = {
 		{ FFixedPoint(0), FFixedPoint(0) },
 		{ FFixedPoint(32), FFixedPoint(64) },
@@ -530,6 +535,7 @@ TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 	};
 
 	Document &doc = inst.level;
+	inst.grid.step = 8;
 
 	for(size_t i = 0; i < 5; ++i)
 	{
@@ -547,36 +553,38 @@ TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 	sector->floor_tex = BA_InternaliseString("FTOP");
 	doc.sectors.push_back(std::move(sector));
 
-	std::unique_ptr<SideDef> side;
+	std::unique_ptr<SideDef> side;	// 0
 	side = std::make_unique<SideDef>();
 	side->mid_tex = BA_InternaliseString("BOTTOM");
 	side->sector = 0;
 	doc.sidedefs.push_back(std::move(side));
-	side = std::make_unique<SideDef>();
+	
+	side = std::make_unique<SideDef>();	// 1
 	side->mid_tex = BA_InternaliseString("-");
 	side->sector = 0;
 	doc.sidedefs.push_back(std::move(side));
-	side = std::make_unique<SideDef>();
+	
+	side = std::make_unique<SideDef>();	// 2
 	side->mid_tex = BA_InternaliseString("BOTTOM");
 	side->sector = 0;
 	doc.sidedefs.push_back(std::move(side));
 
-	side = std::make_unique<SideDef>();
+	side = std::make_unique<SideDef>();	// 3
 	side->mid_tex = BA_InternaliseString("TOP");
 	side->sector = 1;
 	doc.sidedefs.push_back(std::move(side));
 
-	side = std::make_unique<SideDef>();
+	side = std::make_unique<SideDef>();	// 4
 	side->mid_tex = BA_InternaliseString("TOP");
 	side->sector = 1;
 	doc.sidedefs.push_back(std::move(side));
 
-	side = std::make_unique<SideDef>();
+	side = std::make_unique<SideDef>();	// 5
 	side->mid_tex = BA_InternaliseString("TOP");
 	side->sector = 1;
 	doc.sidedefs.push_back(std::move(side));
 
-	side = std::make_unique<SideDef>();
+	side = std::make_unique<SideDef>();	// 6
 	side->mid_tex = BA_InternaliseString("-");
 	side->sector = 1;
 	doc.sidedefs.push_back(std::move(side));
