@@ -226,11 +226,10 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	}
 
 	// Too many lines to concern about, so just create them here
-	std::unique_ptr<LineDef> lines[12];
+	std::vector<std::unique_ptr<LineDef>> &lines = doc.linedefs;
 	for(int i = 0; i < 12; ++i)
 	{
-		lines[i] = std::make_unique<LineDef>();
-		doc.linedefs.push_back(std::move(lines[i]));
+		lines.push_back(std::make_unique<LineDef>());
 	}
 	for(int i = 0; i < 10; ++i)
 	{
