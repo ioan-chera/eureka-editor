@@ -4,6 +4,11 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+07.10.2023
+* Now dragging lines or sectors can also split other lines. Currently still no support for the 
+  dragged lines getting split by existing vertices.
+
+----------
 11.08.2023
 * Added tutti-frutti texture check
 * Fixed Heretic torches looking wrong in the 3D mode
