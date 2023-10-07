@@ -132,7 +132,7 @@ void Instance::FreshLevel()
 }
 
 
-bool Instance::Project_AskFile(fs::path &filename) const
+tl::optional<fs::path> Instance::Project_AskFile() const
 {
 	// this returns false if user cancelled
 
@@ -152,24 +152,24 @@ bool Instance::Project_AskFile(fs::path &filename) const
 			gLog.printf("   %s\n", chooser.errmsg());
 
 			DLG_Notify("Unable to create a new project:\n\n%s", chooser.errmsg());
-			return false;
+			return {};
 
 		case 1:
 			gLog.printf("New Project: cancelled by user\n");
-			return false;
+			return {};
 
 		default:
 			break;  // OK
 	}
 
 	// if extension is missing, add ".wad"
-	filename = fs::u8path(chooser.filename());
+	fs::path filename = fs::u8path(chooser.filename());
 
 	fs::path extension = filename.extension();
 	if(extension.empty())
 		filename = fs::u8path(filename.u8string() + ".wad");
 
-	return true;
+	return filename;
 }
 
 
@@ -213,9 +213,9 @@ void Instance::CMD_NewProject()
 
 		/* first, ask for the output file */
 
-		fs::path filename;
+		tl::optional<fs::path> filename = Project_AskFile();
 
-		if (!Project_AskFile(filename))
+		if (!filename)
 			return;
 
 
@@ -235,11 +235,11 @@ void Instance::CMD_NewProject()
 		   [ the file chooser should have asked for confirmation ]
 		 */
 
-		if (FileExists(filename))
+		if (FileExists(*filename))
 		{
 			// TODO??  M_BackupWad(wad);
 
-			if (!FileDelete(filename))
+			if (!FileDelete(*filename))
 			{
 				DLG_Notify("Unable to delete the existing file.");
 
@@ -267,10 +267,10 @@ void Instance::CMD_NewProject()
 			map_name = wad.master.game_wad->GetLump(idx)->Name();
 		}
 
-		gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
+		gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename->u8string().c_str());
 
 
-		std::shared_ptr<Wad_file> wad = Wad_file::Open(filename, WadOpenMode::write);
+		std::shared_ptr<Wad_file> wad = Wad_file::Open(*filename, WadOpenMode::write);
 
 		if (!wad)
 		{

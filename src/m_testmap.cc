@@ -61,7 +61,7 @@ public:
 
 	bool want_close;
 
-	Instance& inst;
+	const Instance& inst;
 
 public:
 	void SetEXE(const fs::path &newbie)
@@ -128,7 +128,7 @@ public:
 	}
 
 public:
-	UI_PortPathDialog(const SString &port_name, Instance &inst) :
+	UI_PortPathDialog(const SString &port_name, const Instance &inst) :
 		UI_Escapable_Window(560, 250, "Port Settings"),
 		want_close(false), inst(inst)
 	{
@@ -191,7 +191,7 @@ public:
 };
 
 
-bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
+bool Instance::M_PortSetupDialog(const SString &port, const SString &game) const
 {
 	SString name_buf;
 

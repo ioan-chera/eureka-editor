@@ -202,10 +202,10 @@ public:
 	Fl_Button* mResourceButtons[RES_NUM] = {};
 	Fl_Button* mClearButtons[RES_NUM] = {};
 
-	Instance &inst;
+	const Instance &inst;
 
 public:
-	UI_ProjectSetup(Instance &inst, bool new_project = false, bool is_startup = false);
+	UI_ProjectSetup(const Instance &inst, bool new_project = false, bool is_startup = false);
 
 	// returns true if something changed
 	bool Run();
