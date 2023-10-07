@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------
 
 #include "Instance.h"
+#include "m_parse.h"
 #include "m_streams.h"
 #include <assert.h>
 
@@ -68,7 +69,7 @@ public:
 
 	// the line parsed into tokens
 	int    argc = 0;
-	char * argv[MAX_TOKENS] = {};
+	const char * argv[MAX_TOKENS] = {};
 
 	// state for handling if/else/endif
 	std::vector<parsing_cond_state_t> cond_stack;
@@ -113,7 +114,7 @@ public:
 
 private:
 	// filename for error messages (lacks the directory)
-	fs::path fname;
+	const fs::path fname;
 
 	// buffer containing the raw line
 	SString readstring;
@@ -121,8 +122,7 @@ private:
 	// current line number
 	int lineno = 0;
 
-	// buffer storing the tokens
-	char tokenbuf[512] = {};
+	std::vector<SString> args;
 };
 
 void PortInfo_c::AddSupportedGame(const SString &game)
@@ -234,7 +234,7 @@ static short ParseThingdefFlags(const char *s)
 }
 
 
-static void ParseColorDef(ConfigData &config, char ** argv, int argc)
+static void ParseColorDef(ConfigData &config, const char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "sky") == 0)
 	{
@@ -278,7 +278,7 @@ static void ParseColorDef(ConfigData &config, char ** argv, int argc)
 }
 
 
-static map_format_bitset_t ParseMapFormats(parser_state_c *pst, char ** argv,
+static map_format_bitset_t ParseMapFormats(parser_state_c *pst, const char ** argv,
 										   int argc)
 {
 	map_format_bitset_t result = 0;
@@ -302,7 +302,7 @@ static map_format_bitset_t ParseMapFormats(parser_state_c *pst, char ** argv,
 }
 
 
-static void ParseClearKeywords(ConfigData &config, char ** argv, int argc, parser_state_c *pst)
+static void ParseClearKeywords(ConfigData &config, const char ** argv, int argc, parser_state_c *pst)
 {
 	for ( ; argc > 0 ; argv++, argc--)
 	{
@@ -384,7 +384,7 @@ static const FeatureMapping skFeatureMappings[] =
 //
 // Parses features
 //
-static void ParseFeatureDef(ConfigData &config, char **argv, int argc)
+static void ParseFeatureDef(ConfigData &config, const char **argv, int argc)
 {
 	bool found = false;
 	for(const FeatureMapping &mapping : skFeatureMappings)
@@ -501,64 +501,20 @@ void parser_state_c::tokenize()
 {
 	// break the line into whitespace-separated tokens.
 	// whitespace can be enclosed in double quotes.
-
-	size_t srcpos = 0;
-	char		*dest = tokenbuf;
-
-	bool		in_token = false;
-	bool		quoted   = false;
-
+	
+	TokenWordParse parse(readstring);
+	SString word;
+	args.clear();
 	argc = 0;
-
-	for ( ; ; srcpos++)
+	while(parse.getNext(word))
 	{
-		char srcc = readstring[srcpos];
-		if (srcc == 0 || srcc == '\n')
-		{
-			if (in_token)
-				*dest = 0;
-			break;
-		}
-
-		if (srcc == '"')
-		{
-			quoted = !quoted;
-			continue;
-		}
-
-		// found a comment?   [ we allow # in the middle of a token ]
-		if (srcc == '#' && !in_token && !quoted)
-			break;
-
-		// beginning a new token?
-		if (!in_token && (quoted || !isspace(srcc)))
-		{
-			if(argc >= MAX_TOKENS)
-				fail("more than %d tokens on the line", MAX_TOKENS);
-
-			in_token = true;
-
-			argv[argc++] = dest;
-
-			*dest++ = srcc;
-			continue;
-		}
-
-		// whitespace will end a token (unless quoted)
-		if (isspace(srcc) && in_token && !quoted)
-		{
-			in_token = false;
-			*dest++  = 0;
-			continue;
-		}
-
-		// normal token character?
-		if (in_token)
-			*dest++ = srcc;
+		if(args.size() >= MAX_TOKENS)
+			fail("more than %d tokens on the line", MAX_TOKENS);
+		args.push_back(word);
 	}
-
-	if (quoted)
-		fail("unmatched double quote");
+	argc = (int)args.size();
+	for(int i = 0; i < argc; ++i)
+		argv[i] = args[i].c_str();	// safe if we lock the std::vector
 }
 
 //
@@ -598,7 +554,7 @@ static bool parseArg(const char *text, SpecialArg &arg)
 
 static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 {
-	char **argv  = pst->argv;
+	const char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
 
 
@@ -900,7 +856,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 
 static void M_ParseGameInfoLine(parser_state_c *pst, GameInfo &loadingGame)
 {
-	char **argv  = pst->argv;
+	const char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
 
 	if (y_stricmp(argv[0], "map_formats") == 0 ||
@@ -922,7 +878,7 @@ static void M_ParseGameInfoLine(parser_state_c *pst, GameInfo &loadingGame)
 
 static void M_ParsePortInfoLine(parser_state_c *pst, PortInfo_c &port)
 {
-	char **argv  = pst->argv;
+	const char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
 
 	if (y_stricmp(argv[0], "base_game") == 0)
@@ -958,7 +914,7 @@ static ParsingCondition M_ParseConditional(const std::unordered_map<SString, SSt
 {
 	// returns the result of the "IF" test, true or false.
 
-	char **argv  = pst->argv + 1;
+	const char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
 
 	bool op_is  = (nargs >= 3 && y_stricmp(argv[1], "is")  == 0);
@@ -970,9 +926,10 @@ static ParsingCondition M_ParseConditional(const std::unordered_map<SString, SSt
 			pst->fail("expected variable in if statement");
 
 		// tokens are stored in pst->tokenbuf, so this is OK
-		y_strupr(argv[0]);
+		SString argvUpper = argv[0];
+		argvUpper = argvUpper.asUpper();
 
-		auto it = parse_vars.find(argv[0]);
+		auto it = parse_vars.find(argvUpper);
 		if(it != parse_vars.end())
 		{
 			const SString &var_value = it->second;
@@ -993,7 +950,7 @@ static ParsingCondition M_ParseConditional(const std::unordered_map<SString, SSt
 
 static void M_ParseSetVar(std::unordered_map<SString, SString> &parse_vars, parser_state_c *pst)
 {
-	char **argv  = pst->argv + 1;
+	const char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
 
 	if (nargs != 2)
@@ -1002,10 +959,9 @@ static void M_ParseSetVar(std::unordered_map<SString, SString> &parse_vars, pars
 	if (strlen(argv[0]) < 2 || argv[0][0] != '$')
 		pst->fail("variable name too short or lacks '$' prefix");
 
-	// tokens are stored in pst->tokenbuf, so this is OK
-	y_strupr(argv[0]);
+	SString argvUpper = SString(argv[0]).asUpper();
 
-	parse_vars[argv[0]] = argv[1];
+	parse_vars[argvUpper] = argv[1];
 }
 
 //
