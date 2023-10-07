@@ -517,7 +517,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 
 //
 //      _     Drag the line here below, causing a split and eliminating a sector
-//     /_\
+//     /_\    .
 //     |/
 TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 {
