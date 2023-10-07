@@ -822,7 +822,7 @@ bool Instance::Main_LoadIWAD()
 }
 
 
-static void readGameInfo(LoadingData &loading, ConfigData &config)
+static void readGameInfo(std::unordered_map<SString, SString> &parseVars, LoadingData &loading, ConfigData &config)
 		noexcept(false)
 {
 	loading.gameName = GameNameFromIWAD(loading.iwadName);
@@ -830,11 +830,11 @@ static void readGameInfo(LoadingData &loading, ConfigData &config)
 	gLog.printf("Game name: '%s'\n", loading.gameName.c_str());
 	gLog.printf("IWAD file: '%s'\n", loading.iwadName.u8string().c_str());
 
-	readConfiguration(loading.parse_vars, "games", loading.gameName, config);
+	readConfiguration(parseVars, "games", loading.gameName, config);
 }
 
 
-void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
+static void readPortInfo(std::unordered_map<SString, SString> &parseVars, LoadingData &loading, ConfigData &config) noexcept(false)
 {
 	// we assume that the port name is valid, i.e. a config file
 	// exists for it.  That is checked by DeterminePort() and
@@ -868,7 +868,7 @@ void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 
 	gLog.printf("Port name: '%s'\n", loading.portName.c_str());
 
-	readConfiguration(loading.parse_vars, "ports", loading.portName, config);
+	readConfiguration(parseVars, "ports", loading.portName, config);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (config.features.strife_flags)
@@ -885,10 +885,11 @@ void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 // open all wads in the master directory.
 // read important content from the wads (palette, textures, etc).
 //
-void Instance::Main_LoadResources(LoadingData &loading)
+void Instance::Main_LoadResources(const LoadingData &loading)
 {
 	ConfigData config = conf;
 	std::vector<std::shared_ptr<Wad_file>> resourceWads;
+	LoadingData newLoading = loading;
 	try
 	{
 		// FIXME: avoid doing this in case of error
@@ -901,16 +902,16 @@ void Instance::Main_LoadResources(LoadingData &loading)
 		config.clearExceptDefaults();
 
 		// clear the parse variables, pre-set a few vars
-		loading.prepareConfigVariables();
+		std::unordered_map<SString, SString> parseVars = loading.prepareConfigVariables();
 
-		readGameInfo(loading, config);
-		readPortInfo(loading, config);
+		readGameInfo(parseVars, newLoading, config);
+		readPortInfo(parseVars, newLoading, config);
 
 		for(const fs::path &resource : loading.resourceList)
 		{
 			if(MatchExtensionNoCase(resource, ".ugh"))
 			{
-				M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::resource,
+				M_ParseDefinitionFile(parseVars, ParsePurpose::resource,
 									  &config, resource);
 				continue;
 			}
@@ -934,7 +935,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 
 	// Commit it
 	conf = config;
-	loaded = loading;
+	loaded = newLoading;
 
 	// reset the master directory
 	if (wad.master.edit_wad)

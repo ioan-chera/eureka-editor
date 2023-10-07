@@ -303,7 +303,7 @@ public:
 	bool Main_ConfirmQuit(const char *action) const;
 	fs::path Main_FileOpFolder() const;
 	bool Main_LoadIWAD();
-	void Main_LoadResources(LoadingData &loading);
+	void Main_LoadResources(const LoadingData &loading);
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;

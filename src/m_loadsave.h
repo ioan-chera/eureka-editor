@@ -37,7 +37,7 @@ class RecentKnowledge;
 //
 struct LoadingData
 {
-	void prepareConfigVariables();
+	std::unordered_map<SString, SString> prepareConfigVariables() const;
 	bool parseEurekaLump(const fs::path &home_dir, const fs::path &install_dir, const RecentKnowledge &recent, const Wad_file *wad, bool keep_cmd_line_args = false);
 	void writeEurekaLump(Wad_file &wad) const;
 
@@ -48,8 +48,6 @@ struct LoadingData
 	SString udmfNamespace;	// for UDMF, the current namespace
 	std::vector<fs::path> resourceList;
 	MapFormat levelFormat = {};	// format of current map
-
-	std::unordered_map<SString, SString> parse_vars;
 };
 
 void OpenFileMap(const fs::path &filename, const SString &map_name = "");

@@ -171,9 +171,9 @@ void ConfigData::clearExceptDefaults()
 //
 // Called only from Main_LoadResources
 //
-void LoadingData::prepareConfigVariables()
+std::unordered_map<SString, SString> LoadingData::prepareConfigVariables() const
 {
-	parse_vars.clear();
+	std::unordered_map<SString, SString> parse_vars;
 
 	switch (levelFormat)
 	{
@@ -213,6 +213,7 @@ void LoadingData::prepareConfigVariables()
 	{
 		parse_vars["$PORT_NAME"] = portName;
 	}
+	return parse_vars;
 }
 
 
