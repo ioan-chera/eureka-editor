@@ -52,6 +52,8 @@
 #include "ui_about.h"
 #include "ui_file.h"
 
+#include "tl/expected.hpp"
+
 #ifndef WIN32
 #include <time.h>
 #ifndef __APPLE__
@@ -238,7 +240,7 @@ static void CreateHomeDirs()
 }
 
 
-static void Determine_HomeDir(const char *argv0) noexcept(false)
+static ReportedResult Determine_HomeDir(const char *argv0) noexcept(false)
 {
 	// already set by cmd-line option?
 	if (global::home_dir.empty())
@@ -283,7 +285,7 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 	}
 
 	if (global::home_dir.empty())
-		ThrowException("Unable to find home directory!\n");
+		return {false, "Unable to find home directory!"};
 
 	if (global::cache_dir.empty())
 		global::cache_dir = global::home_dir;
@@ -296,10 +298,11 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 
 	// determine log filename
 	global::log_file = global::home_dir / "logs.txt";
+	return {true};
 }
 
 
-static void Determine_InstallPath(const char *argv0) noexcept(false)
+static ReportedResult Determine_InstallPath(const char *argv0) noexcept(false)
 {
 	// already set by cmd-line option?
 	if (global::install_dir.empty())
@@ -343,9 +346,10 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 	}
 
 	if (global::install_dir.empty())
-		ThrowException("Unable to find install directory!\n");
+		return {false, "Unable to find install directory!"};
 
 	gLog.printf("Install dir: %s\n", global::install_dir.u8string().c_str());
+	return { true };
 }
 
 
@@ -355,7 +359,7 @@ SString GameNameFromIWAD(const fs::path &iwad_name)
 }
 
 
-static bool DetermineIWAD(Instance &inst)
+static tl::expected<bool, SString> DetermineIWAD(Instance &inst)
 {
 	// this mainly handles a value specified on the command-line,
 	// since values in a EUREKA_LUMP are already vetted.  Hence
@@ -370,12 +374,18 @@ static bool DetermineIWAD(Instance &inst)
 		inst.loaded.iwadName = fs::u8path(game.get());
 
 		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
-			ThrowException("Unknown game '%s' (no definition file)\n", game.c_str());
+		{
+			return tl::make_unexpected(SString::printf("Unknown game '%s' (no definition file)",
+													   game.c_str()));
+		}
 
 		const fs::path *path = global::recent.queryIWAD(game);
 
 		if (!path)
-			ThrowException("Cannot find IWAD for game '%s'\n", game.c_str());
+		{
+			return tl::make_unexpected(SString::printf("Cannot find IWAD for game '%s'",
+													   game.c_str()));
+		}
 
 		inst.loaded.iwadName = *path;
 	}
@@ -386,12 +396,18 @@ static bool DetermineIWAD(Instance &inst)
 			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName, "wad");
 
 		if (! Wad_file::Validate(inst.loaded.iwadName))
-			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.u8string().c_str());
+		{
+			return tl::make_unexpected(SString::printf("IWAD does not exist or is invalid: %s",
+													   inst.loaded.iwadName.u8string().c_str()));
+		}
 
 		SString game = GameNameFromIWAD(inst.loaded.iwadName);
 
 		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
-			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.u8string().c_str());
+		{
+			return tl::make_unexpected(SString::printf("Unknown game '%s' (no definition file)",
+													   inst.loaded.iwadName.u8string().c_str()));
+		}
 
 		global::recent.addIWAD(inst.loaded.iwadName);
 		global::recent.save(global::home_dir);
@@ -415,17 +431,20 @@ static bool DetermineIWAD(Instance &inst)
 }
 
 
-static void DeterminePort(Instance &inst)
+static ReportedResult DeterminePort(Instance &inst)
 {
 	// user supplied value?
 	// NOTE: values from the EUREKA_LUMP are already verified.
 	if (!inst.loaded.portName.empty())
 	{
-		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, PORTS_DIR, inst.loaded.portName))
-			ThrowException("Unknown port '%s' (no definition file)\n",
-						   inst.loaded.portName.c_str());
+		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, PORTS_DIR,
+								   inst.loaded.portName))
+		{
+			return { false, SString::printf("Unknown port '%s' (no definition file)\n",
+											inst.loaded.portName.c_str()) };
+		}
 
-		return;
+		return { true };
 	}
 
 	SString base_game = M_GetBaseGame(inst.loaded.gameName);
@@ -450,10 +469,11 @@ static void DeterminePort(Instance &inst)
 	}
 
 	inst.loaded.portName = config::default_port;
+	return { true };
 }
 
 
-static SString DetermineLevel(const Instance &inst)
+static tl::expected<SString, SString> DetermineLevel(const Instance &inst)
 {
 	// most of the logic here is to handle a numeric level number
 	// e.g. -warp 15
@@ -484,14 +504,19 @@ static SString DetermineLevel(const Instance &inst)
 		{
 			lev_num = wad->LevelFindByNumber(level_number);
 			if (lev_num < 0)
-				ThrowException("Level '%d' not found (no matches)\n", level_number);
-
+			{
+				return tl::make_unexpected(SString::printf("Level '%d' not found (no matches)",
+														   level_number));
+			}
 		}
 		else
 		{
 			lev_num = wad->LevelFindFirst();
 			if (lev_num < 0)
-				ThrowException("No levels found in the %s!\n", (pass == 0) ? "PWAD" : "IWAD");
+			{
+				return tl::make_unexpected(SString::printf("No levels found in the %s!",
+														   (pass == 0) ? "PWAD" : "IWAD"));
+			}
 		}
 
 		int idx = wad->LevelHeader(lev_num);
@@ -885,7 +910,7 @@ static void readPortInfo(std::unordered_map<SString, SString> &parseVars, Loadin
 // open all wads in the master directory.
 // read important content from the wads (palette, textures, etc).
 //
-void Instance::Main_LoadResources(const LoadingData &loading)
+ReportedResult Instance::Main_LoadResources(const LoadingData &loading)
 {
 	ConfigData config = conf;
 	std::vector<std::shared_ptr<Wad_file>> resourceWads;
@@ -917,12 +942,14 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 			}
 			// Otherwise wad
 			if(!Wad_file::Validate(resource))
-				throw ParseException(SString("Invalid WAD file: ") + resource.u8string());
+				return { false, SString("Invalid WAD file: ") + resource.u8string() };
 
 			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
 														   WadOpenMode::read);
 			if(!wad)
-				throw ParseException(SString("Cannot load resource: ") + resource.u8string());
+			{
+				return { false, SString("Cannot load resource: ") + resource.u8string() };
+			}
 
 			resourceWads.push_back(wad);
 		}
@@ -954,8 +981,13 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 		wad.master.MasterDir_Add(wad.master.edit_wad);
 
 	// finally, load textures and stuff...
-	wad.W_LoadPalette();
-	wad.W_LoadColormap();
+	ReportedResult result = wad.W_LoadPalette();
+	if(!result.success)
+		return result;
+
+	result = wad.W_LoadColormap();
+	if(!result.success)
+		return result;
 
 	wad.W_LoadFlats();
 	wad.W_LoadTextures(conf);
@@ -980,6 +1012,7 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 		// TODO: only call this when the IWAD has changed
 		Props_LoadValues(*this);
 	}
+	return { true };
 }
 
 
@@ -1047,15 +1080,16 @@ static void ShowTime()
 //
 // Sets up the config path before using it
 //
-static void prepareConfigPath()
+static ReportedResult prepareConfigPath()
 {
 	if (global::config_file.empty())
 	{
 		if(global::home_dir.empty())
-			ThrowException("Home directory not set.");
+			return {true, "Home directory not set."};
 
 		global::config_file = global::home_dir / "config.cfg";
 	}
+	return { false };
 }
 
 //
@@ -1070,7 +1104,9 @@ int main(int argc, char *argv[])
 
 		// a quick pass through the command line arguments
 		// to handle special options, like --help, --install, --config
-		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::early, global::Pwad_list, options);
+		ReportedResult result = M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::early, global::Pwad_list, options);
+		if(!result.success)
+			FatalError("%s", result.message.c_str());
 
 		if (global::show_help)
 		{
@@ -1096,8 +1132,12 @@ int main(int argc, char *argv[])
 		ShowTime();
 
 
-		Determine_InstallPath(argv[0]);
-		Determine_HomeDir(argv[0]);
+		result = Determine_InstallPath(argv[0]);
+		if(!result.success)
+			FatalError("%s", result.message.c_str());
+		result = Determine_HomeDir(argv[0]);
+		if(!result.success)
+			FatalError("%s", result.message.c_str());
 
 		if(!gLog.openFile(global::log_file))
 			gLog.printf("WARNING: failed opening log file '%s'\n",
@@ -1105,14 +1145,18 @@ int main(int argc, char *argv[])
 
 
 		// load all the config settings
-		prepareConfigPath();
+		result = prepareConfigPath();
+		if(!result.success)
+			FatalError("%s", result.message.c_str());
 		M_ParseConfigFile(global::config_file, options);
 
 		// environment variables can override them
 		M_ParseEnvironmentVars();
 
 		// and command line arguments will override both
-		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal, global::Pwad_list, options);
+		result = M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal, global::Pwad_list, options);
+		if(!result.success)
+			FatalError("%s", result.message.c_str());
 
 		// TODO: create a new instance
 		gInstance.Editor_Init();
@@ -1123,7 +1167,9 @@ int main(int argc, char *argv[])
 
 		global::recent.load(global::home_dir);
 
-		M_LoadBindings();
+		ReportedResult bindingResult = M_LoadBindings();
+		if(!bindingResult.success)
+			FatalError("%s", bindingResult.message.c_str());
 
 		global::recent.lookForIWADs(global::install_dir, global::home_dir);
 
@@ -1131,7 +1177,9 @@ int main(int argc, char *argv[])
 
 		init_progress = ProgressStatus::window;
 
-		gInstance.M_LoadOperationMenus();
+		result = gInstance.M_LoadOperationMenus();
+		if(!result.success)
+			FatalError("%s", result.message.c_str());
 
 
 		// open a specified PWAD now
@@ -1141,7 +1189,9 @@ int main(int argc, char *argv[])
 		{
 			// this fatal errors on any missing file
 			// [ hence the Open() below is very unlikely to fail ]
-			M_ValidateGivenFiles();
+			result = M_ValidateGivenFiles();
+			if(!result.success)
+				FatalError("%s", result.message.c_str());
 
 			gInstance.wad.master.Pwad_name = global::Pwad_list[0];
 
@@ -1149,7 +1199,7 @@ int main(int argc, char *argv[])
 			gInstance.wad.master.edit_wad = Wad_file::Open(gInstance.wad.master.Pwad_name,
 												WadOpenMode::append);
 			if (!gInstance.wad.master.edit_wad)
-				ThrowException("Cannot load pwad: %s\n", gInstance.wad.master.Pwad_name.u8string().c_str());
+				FatalError("Cannot load pwad: %s\n", gInstance.wad.master.Pwad_name.u8string().c_str());
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
@@ -1181,13 +1231,19 @@ int main(int argc, char *argv[])
 			}
 		}
 
+		tl::expected<SString, SString> determinedLevel;
 
 		// determine which IWAD to use
 		// TODO: instance management
-		if (! DetermineIWAD(gInstance))
+		tl::expected<bool, SString> expect = DetermineIWAD(gInstance);
+		if(!expect)
+			FatalError("%s", expect.error().c_str());
+		if (! *expect)
 			goto quit;
 
-		DeterminePort(gInstance);
+		result = DeterminePort(gInstance);
+		if(!result.success)
+			FatalError("%s", result.message.c_str());
 
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
@@ -1197,16 +1253,23 @@ int main(int argc, char *argv[])
 
 		// load the initial level
 		// TODO: first instance
-		gInstance.loaded.levelName = DetermineLevel(gInstance);
+		determinedLevel = DetermineLevel(gInstance);
+		if(!determinedLevel)
+			FatalError("%s", determinedLevel.error().c_str());
+		gInstance.loaded.levelName = *determinedLevel;
 
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.wad.master.edit_wad ? gInstance.wad.master.edit_wad.get() : gInstance.wad.master.game_wad.get(), gInstance.loaded.levelName);
+		result = gInstance.LoadLevel(gInstance.wad.master.edit_wad ? gInstance.wad.master.edit_wad.get() : gInstance.wad.master.game_wad.get(), gInstance.loaded.levelName);
+		if(!result.success)
+			FatalError("%s", result.message.c_str());
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
-		gInstance.Main_LoadResources(gInstance.loaded);	// TODO: instance management
+		result = gInstance.Main_LoadResources(gInstance.loaded);	// TODO: instance management
+		if(!result.success)
+			FatalError("%s", result.message.c_str());
 
 
 		Main_Loop();

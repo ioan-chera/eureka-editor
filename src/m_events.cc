@@ -760,13 +760,13 @@ struct operation_command_t
 };
 
 
-static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Button *menu)
+static ReportedResult ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Button *menu)
 {
 	// just a divider?
 	if (tokens[0].noCaseEqual("divider"))
 	{
 		menu->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
-		return;
+		return {true};
 	}
 
 	// parse the key
@@ -781,17 +781,17 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 
 	// parse the command and its parameters...
 	if (tokens.size() < 2)
-		ThrowException("operations.cfg: entry missing description.\n");
+		return {false, "operations.cfg: entry missing description."};
 
 	if (tokens.size() < 3)
-		ThrowException("operations.cfg: entry missing command name.\n");
+		return {false, "operations.cfg: entry missing command name."};
 
 	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
 
 	if (! cmd)
 	{
 		gLog.printf("operations.cfg: unknown function: %s\n", tokens[2].c_str());
-		return;
+		return {true};
 	}
 
 	operation_command_t * info = new operation_command_t;
@@ -803,15 +803,15 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 			info->param[p] = tokens[3 + p];
 
 	menu->add(tokens[1].c_str(), shortcut, 0 /* callback */, (void *)info, 0 /* flags */);
+	return {true};
 }
 
 
-void Instance::M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu)
+ReportedResult Instance::M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu)
 {
 	if (menu->size() < 2)
 	{
-		ThrowException("operations.cfg: no %s items.\n", context.c_str());
-		return;
+		return {false, SString::printf("operations.cfg: no %s items.", context.c_str())};
 	}
 
 	// enable the menu
@@ -835,12 +835,13 @@ void Instance::M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu)
 	op_all_menus[context] = menu;
 
 	main_win->add(menu);
+	return {true};
 }
 
 
 #define MAX_TOKENS  30
 
-bool Instance::M_ParseOperationFile()
+tl::expected<bool, SString> Instance::M_ParseOperationFile()
 {
 	// open the file and build all the menus it contains.
 
@@ -869,6 +870,8 @@ bool Instance::M_ParseOperationFile()
 	Fl_Menu_Button *menu = NULL;
 
 	SString context;
+	
+	ReportedResult result;
 
 	while (file.readLine(line))
 	{
@@ -891,7 +894,11 @@ bool Instance::M_ParseOperationFile()
 			}
 
 			if (menu != NULL)
-				M_AddOperationMenu(context, menu);
+			{
+				result = M_AddOperationMenu(context, menu);
+				if(!result.success)
+					return tl::make_unexpected(result.message);
+			}
 
 			// create new menu
 			menu = new Fl_Menu_Button(0, 0, 99, 99, "");
@@ -903,27 +910,40 @@ bool Instance::M_ParseOperationFile()
 		}
 
 		if (menu != NULL)
-			ParseOperationLine(tokens, menu);
+		{
+			ReportedResult result = ParseOperationLine(tokens, menu);
+			if(!result.success)
+				return tl::make_unexpected(result.message);
+		}
 	}
 
 	file.close();
 
 	if (menu != NULL)
-		M_AddOperationMenu(context, menu);
+	{
+		result = M_AddOperationMenu(context, menu);
+		if(!result.success)
+			return tl::make_unexpected(result.message);
+	}
 
 	return true;
 }
 
 
-void Instance::M_LoadOperationMenus()
+ReportedResult Instance::M_LoadOperationMenus()
 {
 	gLog.printf("Loading Operation menus...\n");
+	
+	tl::expected<bool, SString> parseResult = M_ParseOperationFile();
+	if(!parseResult)
+		return {false, parseResult.error()};
 
-	if (! M_ParseOperationFile())
+	if (! *parseResult)
 	{
 		no_operation_cfg = true;
 		DLG_Notify("Installation problem: cannot find \"operations.cfg\" file!");
 	}
+	return {true};
 }
 
 

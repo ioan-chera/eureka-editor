@@ -33,6 +33,8 @@
 #include "w_wad.h"
 #include "WadData.h"
 
+#include "tl/expected.hpp"
+
 #include <unordered_map>
 
 class Fl_RGB_Image;
@@ -249,7 +251,7 @@ public:
 	void Editor_SetAction(EditorAction new_action);
 	void EV_EscapeKey();
 	int EV_HandleEvent(int event);
-	void M_LoadOperationMenus();
+	ReportedResult M_LoadOperationMenus();
 	bool Nav_ActionKey(keycode_t key, nav_release_func_t func);
 	void Nav_Clear();
 	void Nav_Navigate();
@@ -279,8 +281,8 @@ public:
 
 	// M_LOADSAVE
 	Lump_c *Load_LookupAndSeek(const Wad_file *wad, const char *name) const;
-	void LoadLevel(Wad_file *wad, const SString &level);
-	void LoadLevelNum(Wad_file *wad, int lev_num);
+	ReportedResult LoadLevel(Wad_file *wad, const SString &level);
+	ReportedResult LoadLevelNum(Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	void ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad);
 	bool M_SaveMap();
@@ -303,7 +305,7 @@ public:
 	bool Main_ConfirmQuit(const char *action) const;
 	fs::path Main_FileOpFolder() const;
 	bool Main_LoadIWAD();
-	void Main_LoadResources(const LoadingData &loading);
+	ReportedResult Main_LoadResources(const LoadingData &loading);
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;
@@ -379,8 +381,8 @@ private:
 	int EV_RawKey(int event);
 	int EV_RawMouse(int event);
 	int EV_RawWheel(int event);
-	void M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu);
-	bool M_ParseOperationFile();
+	ReportedResult M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu);
+	tl::expected<bool, SString> M_ParseOperationFile();
 
 	// M_KEYS
 	void DoExecuteCommand(const editor_command_t *cmd);
@@ -390,19 +392,19 @@ private:
 	void CreateFallbackSideDef();
 	void EmptyLump(const char *name) const;
 	void FreshLevel();
-	void LoadBehavior(const Wad_file *load_wad);
-	void LoadHeader(const Wad_file *load_wad);
-	void LoadLineDefs(const Wad_file *load_wad);
-	void LoadLineDefs_Hexen(const Wad_file *load_wad);
-	void LoadScripts(const Wad_file *load_wad);
-	void LoadSectors(const Wad_file *load_wad);
-	void LoadSideDefs(const Wad_file *load_wad);
-	void LoadThings(const Wad_file *load_wad);
-	void LoadThings_Hexen(const Wad_file *load_wad);
-	void LoadVertices(const Wad_file *load_wad);
+	ReportedResult LoadBehavior(const Wad_file *load_wad);
+	ReportedResult LoadHeader(const Wad_file *load_wad);
+	ReportedResult LoadLineDefs(const Wad_file *load_wad);
+	ReportedResult LoadLineDefs_Hexen(const Wad_file *load_wad);
+	ReportedResult LoadScripts(const Wad_file *load_wad);
+	ReportedResult LoadSectors(const Wad_file *load_wad);
+	ReportedResult LoadSideDefs(const Wad_file *load_wad);
+	ReportedResult LoadThings(const Wad_file *load_wad);
+	ReportedResult LoadThings_Hexen(const Wad_file *load_wad);
+	ReportedResult LoadVertices(const Wad_file *load_wad);
 	bool M_ExportMap();
 	void Navigate2D();
-	void Project_ApplyChanges(const UI_ProjectSetup &dialog);
+	ReportedResult Project_ApplyChanges(const UI_ProjectSetup &dialog);
 	tl::optional<fs::path> Project_AskFile() const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);

@@ -326,7 +326,9 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
-		LoadLevelNum(wad.master.edit_wad.get(), n);
+		ReportedResult result = LoadLevelNum(wad.master.edit_wad.get(), n);
+		if(!result.success)
+			ThrowException("%s", result.message.c_str());
 
 		ret = AJBSP_BuildLevel(info, n, *this);
 
@@ -492,7 +494,9 @@ void Instance::CMD_BuildAllNodes()
 
 		// reload the previous level
 		// TODO: improve this to NOT mean reloading the level
-		LoadLevel(wad.master.edit_wad.get(), CurLevel);
+		ReportedResult result = LoadLevel(wad.master.edit_wad.get(), CurLevel);
+		if(!result.success)
+			ThrowException("%s", result.message.c_str());
 	}
 	catch (const std::runtime_error& e)
 	{

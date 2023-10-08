@@ -34,6 +34,7 @@
 #include "e_basis.h"
 #include "e_checks.h"
 #include "e_main.h"  // CalculateLevelBounds()
+#include "Errors.h"
 #include "LineDef.h"
 #include "m_config.h"
 #include "m_files.h"
@@ -173,14 +174,17 @@ tl::optional<fs::path> Instance::Project_AskFile() const
 }
 
 
-void Instance::Project_ApplyChanges(const UI_ProjectSetup &dialog)
+ReportedResult Instance::Project_ApplyChanges(const UI_ProjectSetup &dialog)
 {
 	// grab the new information
     LoadingData loading = loaded;
     dialog.prepareLoadingData(loading);
 	Fl::wait(0.1);
-	Main_LoadResources(loading);
+	ReportedResult result = Main_LoadResources(loading);
+	if(!result.success)
+		return result;
 	Fl::wait(0.1);
+	return {true};
 }
 
 
@@ -193,7 +197,9 @@ void Instance::CMD_ManageProject()
 
 		if (ok)
 		{
-			Project_ApplyChanges(dialog);
+			ReportedResult result = Project_ApplyChanges(dialog);
+			if(!result.success)
+				ThrowException("%s", result.message.c_str());
 		}
 	}
 	catch(const ParseException &e)
@@ -254,7 +260,9 @@ void Instance::CMD_NewProject()
 		wad.master.RemoveEditWad();
 
 		// this calls Main_LoadResources which resets the master directory
-		Project_ApplyChanges(dialog);
+		ReportedResult result = Project_ApplyChanges(dialog);
+		if(!result.success)
+			ThrowException("%s", result.message.c_str());
 
 		// determine map name (same as first level in the IWAD)
 		SString map_name = "MAP01";
@@ -407,11 +415,11 @@ Lump_c *Instance::Load_LookupAndSeek(const Wad_file *load_wad, const char *name)
 }
 
 
-void Instance::LoadVertices(const Wad_file *load_wad)
+ReportedResult Instance::LoadVertices(const Wad_file *load_wad)
 {
 	Lump_c *lump = Load_LookupAndSeek(load_wad, "VERTEXES");
 	if (! lump)
-		ThrowException("No vertex lump!\n");
+		return {false, "No vertex lump!"};
 
 	int count = lump->Length() / sizeof(raw_vertex_t);
 
@@ -426,7 +434,7 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 		raw_vertex_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading vertices.\n");
+			return {false, "Error reading vertices."};
 
 		auto vert = std::make_unique<Vertex>();
 
@@ -435,14 +443,15 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 
 		level.vertices.push_back(std::move(vert));
 	}
+	return {true};
 }
 
 
-void Instance::LoadSectors(const Wad_file *load_wad)
+ReportedResult Instance::LoadSectors(const Wad_file *load_wad)
 {
 	Lump_c *lump = Load_LookupAndSeek(load_wad, "SECTORS");
 	if (! lump)
-		ThrowException("No sector lump!\n");
+		return {false, "No sector lump!"};
 
 	int count = lump->Length() / sizeof(raw_sector_t);
 
@@ -457,7 +466,7 @@ void Instance::LoadSectors(const Wad_file *load_wad)
 		raw_sector_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading sectors.\n");
+			return {false, "Error reading sectors."};
 
 		auto sec = std::make_unique<Sector>();
 
@@ -476,6 +485,7 @@ void Instance::LoadSectors(const Wad_file *load_wad)
 
 		level.sectors.push_back(std::move(sec));
 	}
+	return {true};
 }
 
 
@@ -581,67 +591,70 @@ void Instance::ValidateSectorRef(SideDef *sd, int num)
 }
 
 
-void Instance::LoadHeader(const Wad_file *load_wad)
+ReportedResult Instance::LoadHeader(const Wad_file *load_wad)
 {
 	Lump_c *lump = load_wad->GetLump(load_wad->LevelHeader(loading_level));
 
 	int length = lump->Length();
 
 	if (length == 0)
-		return;
+		return {true};
 
 	level.headerData.resize(length);
 
 	lump->Seek();
 
 	if (! lump->Read(&level.headerData[0], length))
-		ThrowException("Error reading header lump.\n");
+		return {false, "Error reading header lump."};
+	return {true};
 }
 
 
-void Instance::LoadBehavior(const Wad_file *load_wad)
+ReportedResult Instance::LoadBehavior(const Wad_file *load_wad)
 {
 	// IOANCH 9/2015: support Hexen maps
 	Lump_c *lump = Load_LookupAndSeek(load_wad, "BEHAVIOR");
 	if (! lump)
-		ThrowException("No BEHAVIOR lump!\n");
+		return {false, "No BEHAVIOR lump!"};
 
 	int length = lump->Length();
 
 	level.behaviorData.resize(length);
 
 	if (length == 0)
-		return;
+		return {true};
 
 	if (! lump->Read(&level.behaviorData[0], length))
-		ThrowException("Error reading BEHAVIOR.\n");
+		return {false, "Error reading BEHAVIOR."};
+	return {true};
 }
 
 
-void Instance::LoadScripts(const Wad_file *load_wad)
+ReportedResult Instance::LoadScripts(const Wad_file *load_wad)
 {
 	// the SCRIPTS lump is usually absent
 	Lump_c *lump = Load_LookupAndSeek(load_wad, "SCRIPTS");
 	if (! lump)
-		return;
+		return {true};
 
 	int length = lump->Length();
 
 	level.scriptsData.resize(length);
 
 	if (length == 0)
-		return;
+		return {true};
 
 	if (! lump->Read(&level.scriptsData[0], length))
-		ThrowException("Error reading SCRIPTS.\n");
+		return {false, "Error reading SCRIPTS."};
+	return {true};
 }
 
 
-void Instance::LoadThings(const Wad_file *load_wad)
+ReportedResult Instance::LoadThings(const Wad_file *load_wad)
 {
 	Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
 	if (! lump)
-		ThrowException("No things lump!\n");
+		return {false, "No things lump!"};
 
 	int count = lump->Length() / sizeof(raw_thing_t);
 
@@ -654,7 +667,7 @@ void Instance::LoadThings(const Wad_file *load_wad)
 		raw_thing_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading things.\n");
+			return {false, "Error reading things."};
 
 		auto th = std::make_unique<Thing>();
 
@@ -667,15 +680,16 @@ void Instance::LoadThings(const Wad_file *load_wad)
 
 		level.things.push_back(std::move(th));
 	}
+	return {true};
 }
 
 
 // IOANCH 9/2015
-void Instance::LoadThings_Hexen(const Wad_file *load_wad)
+ReportedResult Instance::LoadThings_Hexen(const Wad_file *load_wad)
 {
 	Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
 	if (! lump)
-		ThrowException("No things lump!\n");
+		return {false, "No things lump!"};
 
 	int count = lump->Length() / sizeof(raw_hexen_thing_t);
 
@@ -688,7 +702,7 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 		raw_hexen_thing_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading things.\n");
+			return {false, "Error reading things."};
 
 		auto th = std::make_unique<Thing>();
 
@@ -710,14 +724,15 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 
 		level.things.push_back(std::move(th));
 	}
+	return {true};
 }
 
 
-void Instance::LoadSideDefs(const Wad_file *load_wad)
+ReportedResult Instance::LoadSideDefs(const Wad_file *load_wad)
 {
 	Lump_c *lump = Load_LookupAndSeek(load_wad, "SIDEDEFS");
 	if(!lump)
-		ThrowException("No sidedefs lump!\n");
+		return {false, "No sidedefs lump!"};
 
 	int count = lump->Length() / sizeof(raw_sidedef_t);
 
@@ -730,7 +745,7 @@ void Instance::LoadSideDefs(const Wad_file *load_wad)
 		raw_sidedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading sidedefs.\n");
+			return {false, "Error reading sidedefs."};
 
 		auto sd = std::make_unique<SideDef>();
 
@@ -751,14 +766,15 @@ void Instance::LoadSideDefs(const Wad_file *load_wad)
 
 		level.sidedefs.push_back(std::move(sd));
 	}
+	return {true};
 }
 
 
-void Instance::LoadLineDefs(const Wad_file *load_wad)
+ReportedResult Instance::LoadLineDefs(const Wad_file *load_wad)
 {
 	Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
 	if (! lump)
-		ThrowException("No linedefs lump!\n");
+		return {false, "No linedefs lump!"};
 
 	int count = lump->Length() / sizeof(raw_linedef_t);
 
@@ -767,14 +783,14 @@ void Instance::LoadLineDefs(const Wad_file *load_wad)
 # endif
 
 	if (count == 0)
-		return;
+		return {true};
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_linedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading linedefs.\n");
+			return {false, "Error reading linedefs."};
 
 		auto ld = std::make_unique<LineDef>();
 
@@ -796,15 +812,16 @@ void Instance::LoadLineDefs(const Wad_file *load_wad)
 
 		level.linedefs.push_back(std::move(ld));
 	}
+	return {true};
 }
 
 
 // IOANCH 9/2015
-void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
+ReportedResult Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 {
 	Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
 	if (! lump)
-		ThrowException("No linedefs lump!\n");
+		return {false, "No linedefs lump!"};
 
 	int count = lump->Length() / sizeof(raw_hexen_linedef_t);
 
@@ -813,14 +830,14 @@ void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 # endif
 
 	if (count == 0)
-		return;
+		return {true};
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_hexen_linedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading linedefs.\n");
+			return {false, "Error reading linedefs."};
 
 		auto ld = std::make_unique<LineDef>();
 
@@ -846,6 +863,7 @@ void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 
 		level.linedefs.push_back(std::move(ld));
 	}
+	return {true};
 }
 
 
@@ -907,14 +925,16 @@ void Instance::ShowLoadProblem() const
 // Read in the level data
 //
 
-void Instance::LoadLevel(Wad_file *wad, const SString &level)
+ReportedResult Instance::LoadLevel(Wad_file *wad, const SString &level)
 {
 	int lev_num = wad->LevelFind(level);
 
 	if (lev_num < 0)
-		ThrowException("No such map: %s\n", level.c_str());
+		return {false, SString::printf("No such map: %s", level.c_str())};
 
-	LoadLevelNum(wad, lev_num);
+	ReportedResult result = LoadLevelNum(wad, lev_num);
+	if(!result.success)
+		return result;
 
 	// reset various editor state
 	Editor_ClearAction();
@@ -948,10 +968,11 @@ void Instance::LoadLevel(Wad_file *wad, const SString &level)
 	Status_Set("Loaded %s", loaded.levelName.c_str());
 
 	RedrawMap();
+	return {true};
 }
 
 
-void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
+ReportedResult Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 {
 	loading_level = lev_num;
 
@@ -963,7 +984,9 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 	bad_sector_refs   = 0;
 	bad_sidedef_refs  = 0;
 
-	LoadHeader(wad);
+	ReportedResult result = LoadHeader(wad);
+	if(!result.success)
+		return result;
 
 	if (loaded.levelFormat == MapFormat::udmf)
 	{
@@ -972,24 +995,46 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 	else
 	{
 		if (loaded.levelFormat == MapFormat::hexen)
-			LoadThings_Hexen(wad);
-		else
-			LoadThings(wad);
-
-		LoadVertices(wad);
-		LoadSectors(wad);
-		LoadSideDefs(wad);
-
-		if (loaded.levelFormat == MapFormat::hexen)
 		{
-			LoadLineDefs_Hexen(wad);
-
-			LoadBehavior(wad);
-			LoadScripts(wad);
+			result = LoadThings_Hexen(wad);
+			if(!result.success)
+				return result;
 		}
 		else
 		{
-			LoadLineDefs(wad);
+			result = LoadThings(wad);
+			if(!result.success)
+				return result;
+		}
+
+		result = LoadVertices(wad);
+		if(!result.success)
+			return result;
+		result = LoadSectors(wad);
+		if(!result.success)
+			return result;
+		result = LoadSideDefs(wad);
+		if(!result.success)
+			return result;
+
+		if (loaded.levelFormat == MapFormat::hexen)
+		{
+			result = LoadLineDefs_Hexen(wad);
+			if(!result.success)
+				return result;
+
+			result = LoadBehavior(wad);
+			if(!result.success)
+				return result;
+			result = LoadScripts(wad);
+			if(!result.success)
+				return result;
+		}
+		else
+		{
+			result = LoadLineDefs(wad);
+			if(!result.success)
+				return result;
 		}
 	}
 
@@ -1008,6 +1053,7 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 	Subdiv_InvalidateAll();
 
 	MadeChanges = false;
+	return {true};
 }
 
 
@@ -1015,12 +1061,12 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 // open a new wad file.
 // when 'map_name' is not NULL, try to open that map.
 //
-void OpenFileMap(const fs::path &filename, const SString &map_namem)
+ReportedResult OpenFileMap(const fs::path &filename, const SString &map_namem)
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
 	if (! gInstance.Main_ConfirmQuit("open another map"))
-		return;
+		return {true};
 
 
 	std::shared_ptr<Wad_file> wad;
@@ -1036,7 +1082,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem)
 		// FIXME: get an error message, add it here
 
 		DLG_Notify("Unable to open that WAD file.");
-		return;
+		return {true};
 	}
 
 
@@ -1057,14 +1103,14 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem)
 	{
 		DLG_Notify("No levels found in that WAD.");
 
-		return;
+		return {true};
 	}
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
 		if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
 		{
-			return;
+			return {true};
 		}
 	}
 
@@ -1087,11 +1133,16 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem)
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.master.edit_wad->PathName().u8string().c_str());
 
 	// TODO: new instance
-	gInstance.LoadLevel(gInstance.wad.master.edit_wad.get(), map_name);
+	ReportedResult result = gInstance.LoadLevel(gInstance.wad.master.edit_wad.get(), map_name);
+	if(!result.success)
+		return result;
 
 	// must be after LoadLevel as we need the Level_format
 	// TODO: same here
-	gInstance.Main_LoadResources(gInstance.loaded);
+	result = gInstance.Main_LoadResources(gInstance.loaded);
+	if(!result.success)
+		return result;
+	return {true};
 }
 
 
@@ -1153,14 +1204,18 @@ void Instance::CMD_OpenMap()
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// TODO: overhaul the interface to select map from the same wad
-	LoadLevel(wad.get(), map_name);
+	ReportedResult result = LoadLevel(wad.get(), map_name);
+	if(!result.success)
+		ThrowException("%s", result.message.c_str());
 
 	if (new_resources)
 	{
 		// this can invalidate the 'wad' var (since it closes/reopens
 		// all wads in the master_dir), so it MUST be after LoadLevel.
 		// less importantly, we need to know the Level_format.
-		Main_LoadResources(loaded);
+		result = Main_LoadResources(loaded);
+		if(!result.success)
+			ThrowException("%s", result.message.c_str());
 	}
 }
 
@@ -1207,7 +1262,9 @@ void Instance::CMD_GivenFile()
 
 	// TODO: remember last map visited in this wad
 
-	OpenFileMap(global::Pwad_list[index], NULL);
+	ReportedResult result = OpenFileMap(global::Pwad_list[index], NULL);
+	if(!result.success)
+		ThrowException("%s", result.message.c_str());
 }
 
 
@@ -1289,7 +1346,9 @@ void Instance::CMD_FlipMap()
 
 	gLog.printf("Flipping Map to : %s\n", map_name.c_str());
 
-	LoadLevel(wad, map_name);
+	ReportedResult result = LoadLevel(wad, map_name);
+	if(!result.success)
+		ThrowException("%s", result.message.c_str());
 }
 
 
@@ -1758,7 +1817,9 @@ bool Instance::M_ExportMap()
 	SaveLevel(map_name);
 
 	// do this after the save (in case it fatal errors)
-	Main_LoadResources(loaded);
+	ReportedResult result = Main_LoadResources(loaded);
+	if(!result.success)
+		ThrowException("%s", result.message.c_str());
 
 	return true;
 }
@@ -1992,7 +2053,9 @@ void Instance::CMD_DeleteMap()
 			gLog.printf("OK.  Loading : %s....\n", map_name.c_str());
 
 			// TODO: overhaul the interface to NOT go back to the IWAD
-			LoadLevel(wad.master.edit_wad.get(), map_name);
+			ReportedResult result = LoadLevel(wad.master.edit_wad.get(), map_name);
+			if(!result.success)
+				ThrowException("%s", result.message.c_str());
 		}
 	}
 	catch (const std::runtime_error& e)

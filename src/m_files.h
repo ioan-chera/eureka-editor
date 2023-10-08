@@ -136,9 +136,9 @@ private:
 	std::map<SString, fs::path> port_paths;
 };
 
-void M_OpenRecentFromMenu(void *priv_data);
+ReportedResult M_OpenRecentFromMenu(void *priv_data);
 
-void M_ValidateGivenFiles();
+ReportedResult M_ValidateGivenFiles();
 int  M_FindGivenFile(const fs::path &filename);
 
 void M_BackupWad(Wad_file *wad);

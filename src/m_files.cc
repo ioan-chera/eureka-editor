@@ -84,14 +84,17 @@ void RecentKnowledge::writeKnownIWADs(std::ostream &os) const
 }
 
 
-void M_ValidateGivenFiles()
+ReportedResult M_ValidateGivenFiles()
 {
 	for (const fs::path &pwad : global::Pwad_list)
 	{
 		if (! Wad_file::Validate(pwad))
-			ThrowException("Given pwad does not exist or is invalid: %s\n",
-						   pwad.u8string().c_str());
+		{
+			return {false, SString::printf("Given pwad does not exist or is invalid: %s\n",
+										   pwad.u8string().c_str())};
+		}
 	}
+	return {true};
 }
 
 
@@ -343,13 +346,16 @@ void RecentKnowledge::save(const fs::path &home_dir) const
 	writePortPaths(os);
 }
 
-void M_OpenRecentFromMenu(void *priv_data)
+ReportedResult M_OpenRecentFromMenu(void *priv_data)
 {
 	SYS_ASSERT(priv_data);
 
 	RecentMap *data = (RecentMap *)priv_data;
 
-	OpenFileMap(data->file, data->map);
+	ReportedResult result = OpenFileMap(data->file, data->map);
+	if(!result.success)
+		return result;
+	return {true};
 }
 
 void RecentKnowledge::addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir)

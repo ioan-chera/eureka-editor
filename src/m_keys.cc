@@ -525,7 +525,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 #define MAX_TOKENS  (MAX_EXEC_PARAM + 8)
 
-static bool LoadBindingsFromPath(const SString &path, bool required)
+static tl::expected<bool, SString> LoadBindingsFromPath(const SString &path, bool required)
 {
 	SString filename = path + "/bindings.cfg";
 
@@ -535,7 +535,8 @@ static bool LoadBindingsFromPath(const SString &path, bool required)
 		if (! required)
 			return false;
 
-		ThrowException("Missing key bindings file:\n\n%s\n", filename.c_str());
+		return tl::make_unexpected(SString::printf("Missing key bindings file:\n\n%s",
+												   filename.c_str()));
 	}
 
 	gLog.printf("Reading key bindings from: %s\n", filename.c_str());
@@ -606,18 +607,24 @@ static bool BindingExists(std::vector<key_binding_t>& list, const key_binding_t&
 }
 
 
-void M_LoadBindings()
+ReportedResult M_LoadBindings()
 {
 	global::all_bindings.clear();
 
-	LoadBindingsFromPath(global::install_dir.u8string(), true /* required */);
+	tl::expected<bool, SString> bindingResult;
+	bindingResult = LoadBindingsFromPath(global::install_dir.u8string(), true /* required */);
+	if(!bindingResult)
+		return {false, bindingResult.error()};
 
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();
 
-	LoadBindingsFromPath(global::home_dir.u8string(), false);
+	bindingResult = LoadBindingsFromPath(global::home_dir.u8string(), false);
+	if(!bindingResult)
+		return {false, bindingResult.error()};
 
 	updateMenuBindings();
+	return {true};
 }
 
 

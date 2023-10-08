@@ -35,6 +35,7 @@
 class Lump_c;
 class SString;
 struct WadData;
+struct ReportedResult;
 
 typedef u32_t rgb_color_t;
 
@@ -109,7 +110,7 @@ public:
 	}
 
 	bool loadPalette(Lump_c &lump, int usegamma, int panel_gamma);
-	void loadColormap(Lump_c *lump);
+	ReportedResult loadColormap(Lump_c *lump);
 
 	byte findPaletteColor(int r, int g, int b) const;
 	rgb_color_t pixelToRGB(img_pixel_t p) const;

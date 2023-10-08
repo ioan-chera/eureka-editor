@@ -920,11 +920,11 @@ void M_ParseEnvironmentVars()
 // Common function to populate a list of strings or paths
 //
 template<typename T>
-static void readArgsForList(bool ignore, int &argc, const char *const *&argv, void *data_ptr)
+static ReportedResult readArgsForList(bool ignore, int &argc, const char *const *&argv, void *data_ptr)
 {
 	if(argc < 2)
 	{
-		ThrowException("missing argument after '%s'\n", argv[0]);
+		return {false, SString::printf("missing argument after '%s'", argv[0])};
 		/* NOT REACHED */
 	}
 	while(argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
@@ -938,6 +938,7 @@ static void readArgsForList(bool ignore, int &argc, const char *const *&argv, vo
 			list->push_back(argv[0]);
 		}
 	}
+	return {true};
 }
 
 //
@@ -948,7 +949,7 @@ static void readArgsForList(bool ignore, int &argc, const char *const *&argv, vo
 //
 // Otherwise, ignores all options that have the "1" flag.
 //
-void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass, std::vector<fs::path> &Pwad_list, const opt_desc_t *options)
+ReportedResult M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass, std::vector<fs::path> &Pwad_list, const opt_desc_t *options)
 {
 	const opt_desc_t *o;
 
@@ -972,10 +973,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		for (o = options; ; o++)
 		{
 			if (o->opt_type == OptType::end)
-			{
-				ThrowException("unknown option: '%s'\n", argv[0]);
-				/* NOT REACHED */
-			}
+				return {false, SString::printf("unknown option: '%s'", argv[0])};
 
 			if ( (o->short_name && strcmp (argv[0]+1, o->short_name) == 0) ||
 				 (o->long_name  && strcmp (argv[0]+1, o->long_name ) == 0) ||
@@ -987,6 +985,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		ignore = !!(o->flags & OptFlag_pass1) !=
 				(pass == CommandLinePass::early);
 
+		ReportedResult result;
 		switch (o->opt_type)
 		{
             case OptType::boolean:
@@ -1020,7 +1019,8 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
             case OptType::integer:
 				if (argc < 2)
 				{
-					ThrowException("missing argument after '%s'\n", argv[0]);
+					return {false,
+						SString::printf("missing argument after '%s'", argv[0])};
 					/* NOT REACHED */
 				}
 
@@ -1036,7 +1036,8 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
             case OptType::color:
 				if (argc < 2)
 				{
-					ThrowException("missing argument after '%s'\n", argv[0]);
+					return {false,
+						SString::printf("missing argument after '%s'", argv[0])};
 					/* NOT REACHED */
 				}
 
@@ -1052,7 +1053,8 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
             case OptType::string:
 				if (argc < 2)
 				{
-					ThrowException("missing argument after '%s'\n", argv[0]);
+					return {false,
+						SString::printf("missing argument after '%s'", argv[0])};
 					/* NOT REACHED */
 				}
 				argv++;
@@ -1077,7 +1079,8 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 			case OptType::path:
 				if(argc < 2)
 				{
-					ThrowException("missing argument after '%s'\n", argv[0]);
+					return {false,
+						SString::printf("missing argument after '%s'", argv[0])};
 				}
 				++argv;
 				--argc;
@@ -1087,11 +1090,15 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 
 
             case OptType::stringList:
-				readArgsForList<SString>(ignore, argc, argv, o->data_ptr);
+				result = readArgsForList<SString>(ignore, argc, argv, o->data_ptr);
+				if(!result.success)
+					return result;
 				break;
 
 			case OptType::pathList:
-				readArgsForList<fs::path>(ignore, argc, argv, o->data_ptr);
+				result = readArgsForList<fs::path>(ignore, argc, argv, o->data_ptr);
+				if(!result.success)
+					return result;
 				break;
 
 			default:
@@ -1102,6 +1109,8 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		argv++;
 		argc--;
 	}
+	
+	return {true};
 }
 
 

@@ -90,12 +90,16 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 	if (given_idx >= 0)
 		gInstance.last_given_file = given_idx;
 
-	OpenFileMap(*filename);
+	ReportedResult result = OpenFileMap(*filename);
+	if(!result.success)
+		ThrowException("%s", result.message.c_str());
 }
 
 static void file_do_load_recent(Fl_Widget *w, void *data)
 {
-	M_OpenRecentFromMenu(data);
+	ReportedResult result = M_OpenRecentFromMenu(data);
+	if(!result.success)
+		ThrowException("%s", result.message.c_str());
 }
 
 static void file_do_quit(Fl_Widget *w, void * data)

@@ -21,6 +21,7 @@
 #ifndef __EUREKA_M_KEYS_H__
 #define __EUREKA_M_KEYS_H__
 
+#include "Errors.h"
 #include "m_strings.h"
 #include "objid.h"
 
@@ -131,7 +132,7 @@ const char * M_AddLocalBinding(int after, keycode_t key, KeyContext context,
 void M_DeleteLocalBinding(int index);
 
 
-void M_LoadBindings();
+ReportedResult M_LoadBindings();
 void M_SaveBindings();
 
 bool M_IsKeyBound   (keycode_t key, KeyContext context);

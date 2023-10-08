@@ -19,6 +19,7 @@
 #ifndef WadData_h
 #define WadData_h
 
+#include "Errors.h"
 #include "im_color.h"
 #include "im_img.h"
 #include "m_strings.h"
@@ -192,11 +193,11 @@ struct WadData
 		return const_cast<Img_c *>(getSprite(config, type, loading));
 	}
 	
-	void W_LoadPalette();
+	ReportedResult W_LoadPalette();
 
-	void W_LoadColormap()
+	ReportedResult W_LoadColormap()
 	{
-		palette.loadColormap(master.findGlobalLump("COLORMAP"));
+		return palette.loadColormap(master.findGlobalLump("COLORMAP"));
 	}
 
 	ImageSet images;

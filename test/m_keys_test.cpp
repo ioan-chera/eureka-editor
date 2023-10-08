@@ -80,7 +80,8 @@ protected:
         mDeleteList.push(global::install_dir);
 
         writeBindingsFile();
-        M_LoadBindings();
+        auto result = M_LoadBindings();
+		ASSERT_TRUE(result);
         --sUpdates; // don't increment it here
     }
 
@@ -157,7 +158,8 @@ TEST_F(MKeys, MRemoveBindingAndSave)
     ASSERT_FALSE(M_IsKeyBound(EMOD_ALT | FL_Left, KeyContext::render));
     M_SaveBindings();
 
-    M_LoadBindings();
+	auto result = M_LoadBindings();
+	ASSERT_TRUE(result);
 
     ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::browser));
     ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KeyContext::browser));
@@ -196,7 +198,8 @@ TEST_F(MKeys, FindKeyCodeForCommandName)
 TEST_F(MKeys, UpdateMenuBindingsCall)
 {
     ASSERT_EQ(sUpdates, 0);
-    M_LoadBindings();
+    auto result = M_LoadBindings();
+	ASSERT_TRUE(result);
     ASSERT_EQ(sUpdates, 1);
 
     // Restore

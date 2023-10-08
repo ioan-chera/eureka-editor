@@ -50,7 +50,7 @@ struct LoadingData
 	MapFormat levelFormat = {};	// format of current map
 };
 
-void OpenFileMap(const fs::path &filename, const SString &map_name = "");
+ReportedResult OpenFileMap(const fs::path &filename, const SString &map_name = "");
 
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 
