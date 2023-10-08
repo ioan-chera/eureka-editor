@@ -32,15 +32,15 @@ struct Vertex
 
 	enum { F_X, F_Y };
 
-	inline double x() const
+	inline double x() const noexcept
 	{
 		return static_cast<double>(raw_x);
 	}
-	inline double y() const
+	inline double y() const noexcept
 	{
 		return static_cast<double>(raw_y);
 	}
-	inline v2double_t xy() const
+	inline v2double_t xy() const noexcept
 	{
 		return { x(), y() };
 	}

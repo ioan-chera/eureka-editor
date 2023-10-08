@@ -200,7 +200,7 @@ public:
 		const Sector *front, const Sector *back) const;
 
 	// E_MAIN
-	void CalculateLevelBounds();
+	void CalculateLevelBounds() noexcept;
 	void Editor_ChangeMode(char mode_char);
 	void Editor_ChangeMode_Raw(ObjType new_mode);
 	void Editor_ClearAction();

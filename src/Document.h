@@ -72,7 +72,7 @@ public:
 	{
 		return static_cast<int>(things.size());
 	}
-	int numVertices() const
+	int numVertices() const noexcept
 	{
 		return static_cast<int>(vertices.size());
 	}

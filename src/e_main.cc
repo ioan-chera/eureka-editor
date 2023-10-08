@@ -373,7 +373,7 @@ void Instance::Editor_ChangeMode(char mode_char)
 //------------------------------------------------------------------------
 
 
-static void UpdateLevelBounds(Instance &inst, int start_vert)
+static void UpdateLevelBounds(Instance &inst, int start_vert) noexcept
 {
 	for(int i = start_vert; i < inst.level.numVertices(); i++)
 	{
@@ -387,7 +387,7 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 	}
 }
 
-void Instance::CalculateLevelBounds()
+void Instance::CalculateLevelBounds() noexcept
 {
 	if (level.numVertices() == 0)
 	{
