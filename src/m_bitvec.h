@@ -54,7 +54,7 @@ public:
 	explicit bitvec_c(int n_elements = 64);
 
 	bitvec_c(const bitvec_c &other) = default;
-	bitvec_c(bitvec_c &&other) : data(std::move(other.data)), num_elem(other.num_elem)
+	bitvec_c(bitvec_c &&other) noexcept : data(std::move(other.data)), num_elem(other.num_elem)
 	{
 		other.num_elem = 0;
 	}

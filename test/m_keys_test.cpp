@@ -81,7 +81,7 @@ protected:
 
         writeBindingsFile();
         auto result = M_LoadBindings();
-		ASSERT_TRUE(result);
+		ASSERT_TRUE(result.success);
         --sUpdates; // don't increment it here
     }
 
@@ -159,7 +159,7 @@ TEST_F(MKeys, MRemoveBindingAndSave)
     M_SaveBindings();
 
 	auto result = M_LoadBindings();
-	ASSERT_TRUE(result);
+	ASSERT_TRUE(result.success);
 
     ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::browser));
     ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KeyContext::browser));
@@ -199,7 +199,7 @@ TEST_F(MKeys, UpdateMenuBindingsCall)
 {
     ASSERT_EQ(sUpdates, 0);
     auto result = M_LoadBindings();
-	ASSERT_TRUE(result);
+	ASSERT_TRUE(result.success);
     ASSERT_EQ(sUpdates, 1);
 
     // Restore

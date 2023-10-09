@@ -21,6 +21,7 @@
 
 #include "bsp.h"
 #include "Document.h"
+#include "Errors.h"
 #include "e_main.h"
 #include "im_img.h"
 #include "m_game.h"

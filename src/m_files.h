@@ -24,6 +24,7 @@
 #include "lib_util.h"
 #include "m_strings.h"
 #include "sys_type.h"
+#include "Errors.h"
 
 #include <deque>
 #include <ostream>
