@@ -184,24 +184,26 @@ struct WadData
 {
 	void W_LoadTextures(const ConfigData &config);
 
-	void W_LoadFlats();
-
 	const Img_c *getSprite(const ConfigData &config, int type, const LoadingData &loading);
 	Img_c *getMutableSprite(const ConfigData &config, int type, const LoadingData &loading)
 	{
 		return const_cast<Img_c *>(getSprite(config, type, loading));
 	}
 	
-	void W_LoadPalette();
-
-	void W_LoadColormap()
-	{
-		palette.loadColormap(master.findGlobalLump("COLORMAP"));
-	}
+	bool Main_LoadIWAD(const LoadingData &loading);
+	void reloadResources(const LoadingData &loading, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads);
 
 	ImageSet images;
 	Palette palette;
 	MasterDir master;
+	
+private:
+	void W_LoadPalette();
+	void W_LoadColormap()
+	{
+		palette.loadColormap(master.findGlobalLump("COLORMAP"));
+	}
+	void W_LoadFlats();
 };
 
 #endif /* WadData_h */

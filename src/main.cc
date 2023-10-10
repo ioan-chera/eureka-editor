@@ -804,20 +804,20 @@ void Main_Loop()
 }
 
 
-bool Instance::Main_LoadIWAD()
+bool WadData::Main_LoadIWAD(const LoadingData &loading)
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(loaded.iwadName,
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(loading.iwadName,
 												   WadOpenMode::read);
 	if (!wad)
 	{
-		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.u8string().c_str());
+		gLog.printf("Failed to open game IWAD: %s\n", loading.iwadName.u8string().c_str());
 		return false;
 	}
-	this->wad.master.game_wad = wad;
+	master.game_wad = wad;
 
-	this->wad.master.MasterDir_Add(this->wad.master.game_wad);
+	master.MasterDir_Add(master.game_wad);
 	return true;
 }
 
@@ -936,30 +936,8 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 	// Commit it
 	conf = config;
 	loaded = newLoading;
-
-	// reset the master directory
-	if (wad.master.edit_wad)
-		wad.master.MasterDir_Remove(wad.master.edit_wad);
-
-	wad.master.MasterDir_CloseAll();
-
-	// TODO: check result
-	Main_LoadIWAD();
-
-	// load all resource wads
-	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
-		this->wad.master.MasterDir_Add(wad);
-
-	if (wad.master.edit_wad)
-		wad.master.MasterDir_Add(wad.master.edit_wad);
-
-	// finally, load textures and stuff...
-	wad.W_LoadPalette();
-	wad.W_LoadColormap();
-
-	wad.W_LoadFlats();
-	wad.W_LoadTextures(conf);
-	wad.images.W_ClearSprites();
+	
+	wad.reloadResources(loaded, conf, resourceWads);
 
 	gLog.printf("--- DONE ---\n");
 	gLog.printf("\n");
@@ -1192,7 +1170,7 @@ int main(int argc, char *argv[])
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
 		// TODO: check result
-		gInstance.Main_LoadIWAD();
+		gInstance.wad.Main_LoadIWAD(gInstance.loaded);
 
 
 		// load the initial level
