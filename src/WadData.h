@@ -69,10 +69,10 @@ public:
 	{
 		return const_cast<Img_c &>(IM_UnknownFlat(config));
 	}
-	Img_c *IM_UnknownSprite(const ConfigData &config);
+	Img_c &IM_UnknownSprite(const ConfigData &config);
 
-	Img_c *IM_DigitFont_11x14();
-	Img_c *IM_DigitFont_14x19();
+	Img_c &IM_DigitFont_11x14();
+	Img_c &IM_DigitFont_14x19();
 
 	void IM_UnloadDummyTextures();
 	void IM_ResetDummyTextures();
@@ -132,10 +132,10 @@ private:
 	tl::optional<Img_c> unknown_flat_image;
 
 	int unknown_sprite_color = 0;
-	std::unique_ptr<Img_c> unknown_sprite_image;
+	tl::optional<Img_c> unknown_sprite_image;
 
-	std::unique_ptr<Img_c> digit_font_11x14;
-	std::unique_ptr<Img_c> digit_font_14x19;
+	tl::optional<Img_c> digit_font_11x14;
+	tl::optional<Img_c> digit_font_14x19;
 };
 
 

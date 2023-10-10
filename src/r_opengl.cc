@@ -1242,7 +1242,7 @@ public:
 		Img_c *img = inst.wad.getMutableSprite(inst.conf, th->type, inst.loaded);
 		if (! img)
 		{
-			img = inst.wad.images.IM_UnknownSprite(inst.conf);
+			img = &inst.wad.images.IM_UnknownSprite(inst.conf);
 			fullbright = true;
 			scale = 0.33f;
 		}
@@ -1462,7 +1462,7 @@ public:
 		const Img_c *img = inst.wad.getSprite(inst.conf, th->type, inst.loaded);
 		if (! img)
 		{
-			img = inst.wad.images.IM_UnknownSprite(inst.conf);
+			img = &inst.wad.images.IM_UnknownSprite(inst.conf);
 			scale = 0.33f;
 		}
 

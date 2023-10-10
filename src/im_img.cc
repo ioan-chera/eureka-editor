@@ -524,7 +524,7 @@ const Img_c &ImageSet::IM_UnknownFlat(const ConfigData &config)
 }
 
 
-Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
+Img_c &ImageSet::IM_UnknownSprite(const ConfigData &config)
 {
 	int unk_col = config.miscInfo.unknown_thing;
 	if (unk_col == 0)
@@ -534,7 +534,7 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 	{
 		unknown_sprite_color = unk_col;
 
-		unknown_sprite_image = std::make_unique<Img_c>(64, 64, true);
+		unknown_sprite_image = Img_c(64, 64, true);
 
 		img_pixel_t *obuf = unknown_sprite_image->wbuf();
 
@@ -546,7 +546,7 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 		}
 	}
 
-	return unknown_sprite_image.get();
+	return unknown_sprite_image.value();
 }
 
 
@@ -586,13 +586,13 @@ Img_c Img_c::createFromText(const Palette &pal, int W, int H,
 }
 
 
-static std::unique_ptr<Img_c> IM_CreateFont(int W, int H, const char *const *text,
+static Img_c IM_CreateFont(int W, int H, const char *const *text,
 							 const int *intensities, int ity_size,
 							 rgb_color_t color)
 {
-	auto result = std::make_unique<Img_c>(W, H);
+	Img_c result(W, H);
 
-	result->clear();
+	result.clear();
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -611,7 +611,7 @@ static std::unique_ptr<Img_c> IM_CreateFont(int W, int H, const char *const *tex
 		int g = (RGB_GREEN(color) * ity) >> 11;
 		int b = (RGB_BLUE(color)  * ity) >> 11;
 
-		result->wbuf() [y * W + x] = pixelMakeRGB(r, g, b);
+		result.wbuf() [y * W + x] = pixelMakeRGB(r, g, b);
 	}
 
 	return result;
@@ -1051,7 +1051,7 @@ static const char *const digit_14x19_text[] =
 };
 
 
-Img_c *ImageSet::IM_DigitFont_11x14()
+Img_c &ImageSet::IM_DigitFont_11x14()
 {
 	if (!digit_font_11x14)
 	{
@@ -1059,10 +1059,10 @@ Img_c *ImageSet::IM_DigitFont_11x14()
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return digit_font_11x14.get();
+	return digit_font_11x14.value();
 }
 
-Img_c *ImageSet::IM_DigitFont_14x19()
+Img_c &ImageSet::IM_DigitFont_14x19()
 {
 	if (!digit_font_14x19)
 	{
@@ -1070,7 +1070,7 @@ Img_c *ImageSet::IM_DigitFont_14x19()
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return digit_font_14x19.get();
+	return digit_font_14x19.value();
 }
 
 // this one applies the current gamma.

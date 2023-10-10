@@ -891,7 +891,7 @@ public:
 		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type, inst.loaded);
 		if (! sprite)
 		{
-			sprite = inst.wad.images.IM_UnknownSprite(inst.conf);
+			sprite = &inst.wad.images.IM_UnknownSprite(inst.conf);
 			is_unknown = true;
 			scale = 0.33f;
 		}
