@@ -424,12 +424,14 @@ void Instance::CMD_BuildAllNodes()
 
 			inhibit_node_build = true;
 
-			bool save_result = M_SaveMap();
+			tl::expected<bool, SString> save_result = M_SaveMap();
+			if(!save_result)
+				ThrowException("%s", save_result.error().c_str());
 
 			inhibit_node_build = false;
 
 			// user cancelled the save?
-			if (!save_result)
+			if (!*save_result)
 				return;
 		}
 

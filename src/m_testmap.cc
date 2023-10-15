@@ -342,8 +342,12 @@ void Instance::CMD_TestMap()
 			{
 				return;
 			}
+			
+			tl::expected<bool, SString> saveResult = M_SaveMap();
+			if(!saveResult)
+				ThrowException("%s", saveResult.error().c_str());
 
-			if (!M_SaveMap())
+			if (!*saveResult)
 				return;
 		}
 

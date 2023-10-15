@@ -286,7 +286,7 @@ public:
 	ReportedResult LoadLevelNum(Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	void ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad);
-	bool M_SaveMap();
+	tl::expected<bool, SString> M_SaveMap();
 	void ValidateVertexRefs(LineDef *ld, int num);
 	void ValidateSectorRef(SideDef *sd, int num);
 	void ValidateSidedefRefs(LineDef *ld, int num);

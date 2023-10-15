@@ -1660,19 +1660,14 @@ void Instance::SaveLevel(const SString &level)
 }
 
 // these return false if user cancelled
-bool Instance::M_SaveMap()
+tl::expected<bool, SString> Instance::M_SaveMap()
 {
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
 
-	tl::expected<bool, SString> exportResult = M_ExportMap();
+	tl::expected<bool, SString> exportResult;
 	if (!wad.master.edit_wad)
-	{
-		exportResult = M_ExportMap();
-		if(!exportResult)
-			ThrowException("%s", exportResult.error().c_str());
-		return *exportResult;
-	}
+		return M_ExportMap();
 
 	if (wad.master.edit_wad->IsReadOnly())
 	{
@@ -1683,10 +1678,7 @@ bool Instance::M_SaveMap()
 			return false;
 		}
 
-		exportResult = M_ExportMap();
-		if(!exportResult)
-			ThrowException("%s", exportResult.error().c_str());
-		return *exportResult;
+		return M_ExportMap();
 	}
 
 
@@ -1836,7 +1828,9 @@ void Instance::CMD_SaveMap()
 {
 	try
 	{
-		M_SaveMap();
+		M_SaveMap().or_else([](const SString &error) {
+			ThrowException("%s", error.c_str());
+		});
 	}
 	catch(const WadWriteException &e)
 	{
