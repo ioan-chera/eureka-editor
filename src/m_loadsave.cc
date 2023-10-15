@@ -202,7 +202,7 @@ void Instance::CMD_ManageProject()
 				ThrowException("%s", result.message.c_str());
 		}
 	}
-	catch(const ParseException &e)
+	catch(const std::runtime_error &e)
 	{
 		DLG_ShowError(false, "Error reading configuration file: %s", e.what());
 	}
@@ -1665,9 +1665,13 @@ bool Instance::M_SaveMap()
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
 
+	tl::expected<bool, SString> exportResult = M_ExportMap();
 	if (!wad.master.edit_wad)
 	{
-		return M_ExportMap();
+		exportResult = M_ExportMap();
+		if(!exportResult)
+			ThrowException("%s", exportResult.error().c_str());
+		return *exportResult;
 	}
 
 	if (wad.master.edit_wad->IsReadOnly())
@@ -1679,7 +1683,10 @@ bool Instance::M_SaveMap()
 			return false;
 		}
 
-		return M_ExportMap();
+		exportResult = M_ExportMap();
+		if(!exportResult)
+			ThrowException("%s", exportResult.error().c_str());
+		return *exportResult;
 	}
 
 
@@ -1693,7 +1700,7 @@ bool Instance::M_SaveMap()
 }
 
 
-bool Instance::M_ExportMap()
+tl::expected<bool, SString> Instance::M_ExportMap()
 {
 	Fl_Native_File_Chooser chooser;
 
@@ -1819,7 +1826,7 @@ bool Instance::M_ExportMap()
 	// do this after the save (in case it fatal errors)
 	ReportedResult result = Main_LoadResources(loaded);
 	if(!result.success)
-		ThrowException("%s", result.message.c_str());
+		return tl::make_unexpected(result.message);
 
 	return true;
 }
@@ -1846,7 +1853,9 @@ void Instance::CMD_ExportMap()
 {
 	try
 	{
-		M_ExportMap();
+		M_ExportMap().or_else([](const SString &error) {
+			ThrowException("%s", error.c_str());
+		});
 	}
 	catch (const std::runtime_error& e)
 	{

@@ -402,7 +402,7 @@ private:
 	ReportedResult LoadThings(const Wad_file *load_wad);
 	ReportedResult LoadThings_Hexen(const Wad_file *load_wad);
 	ReportedResult LoadVertices(const Wad_file *load_wad);
-	bool M_ExportMap();
+	tl::expected<bool, SString> M_ExportMap();
 	void Navigate2D();
 	ReportedResult Project_ApplyChanges(const UI_ProjectSetup &dialog);
 	tl::optional<fs::path> Project_AskFile() const;
