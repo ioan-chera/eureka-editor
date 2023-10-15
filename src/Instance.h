@@ -420,7 +420,7 @@ private:
 	void ShowLoadProblem() const;
 
 	// M_NODES
-	build_result_e BuildAllNodes(nodebuildinfo_t *info);
+	tl::expected<build_result_e, SString> BuildAllNodes(nodebuildinfo_t *info);
 
 	// M_UDMF
 	void ValidateLevel_UDMF();

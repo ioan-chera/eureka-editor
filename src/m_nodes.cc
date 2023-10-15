@@ -305,7 +305,7 @@ static void PrepareInfo(nodebuildinfo_t *info)
 }
 
 
-build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
+tl::expected<build_result_e, SString> Instance::BuildAllNodes(nodebuildinfo_t *info)
 {
 	gLog.printf("\n");
 
@@ -328,7 +328,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 		// load level
 		ReportedResult result = LoadLevelNum(wad.master.edit_wad.get(), n);
 		if(!result.success)
-			ThrowException("%s", result.message.c_str());
+			return tl::make_unexpected(result.message);
 
 		ret = AJBSP_BuildLevel(info, n, *this);
 
@@ -467,9 +467,11 @@ void Instance::CMD_BuildAllNodes()
 
 		PrepareInfo(nb_info);
 
-		build_result_e ret = BuildAllNodes(nb_info);
+		tl::expected<build_result_e, SString> ret = BuildAllNodes(nb_info);
+		if(!ret)
+			throw std::runtime_error(ret.error().get());
 
-		if (ret == BUILD_OK)
+		if (*ret == BUILD_OK)
 		{
 			nodeialog->Finish_OK();
 			Status_Set("Built nodes OK");
