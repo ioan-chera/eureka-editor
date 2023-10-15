@@ -143,12 +143,6 @@ public:
 		y = spriteOffsetY;
 	}
 
-
-	Img_c            (const Img_c&) = delete;  // No need to implement it
-	Img_c& operator= (const Img_c&) = delete;  // No need to implement it
-	Img_c(Img_c &&) = default;
-	Img_c &operator= (Img_c &&) = default;
-
 private:
 	static Img_c createFromText(const Palette &pal, int W, int H,
 												 const char * const*text,

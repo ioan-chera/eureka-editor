@@ -63,26 +63,37 @@ void WadData::W_LoadPalette()
 void WadData::reloadResources(const LoadingData &loading, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads)
 {
 	// reset the master directory
-	if (master.edit_wad)
-		master.MasterDir_Remove(master.edit_wad);
-
-	master.MasterDir_CloseAll();
-
-	// TODO: check result
-	Main_LoadIWAD(loading);
-
-	// load all resource wads
-	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
-		master.MasterDir_Add(wad);
-
-	if (master.edit_wad)
-		master.MasterDir_Add(master.edit_wad);
-
-	// finally, load textures and stuff...
-	W_LoadPalette();
-	W_LoadColormap();
-
-	W_LoadFlats();
-	W_LoadTextures(config);
-	images.W_ClearSprites();
+	WadData newWad = *this;
+	try
+	{
+		if (newWad.master.edit_wad)
+			newWad.master.MasterDir_Remove(newWad.master.edit_wad);
+		
+		newWad.master.MasterDir_CloseAll();
+		
+		// TODO: check result
+		newWad.Main_LoadIWAD(loading);
+		
+		// load all resource wads
+		for(const std::shared_ptr<Wad_file> &wad : resourceWads)
+			newWad.master.MasterDir_Add(wad);
+		
+		if (newWad.master.edit_wad)
+			newWad.master.MasterDir_Add(newWad.master.edit_wad);
+		
+		// finally, load textures and stuff...
+		newWad.W_LoadPalette();
+		newWad.W_LoadColormap();
+		
+		newWad.W_LoadFlats();
+		newWad.W_LoadTextures(config);
+		newWad.images.W_ClearSprites();
+	}
+	catch(const std::runtime_error &e)
+	{
+		gLog.printf("Failed reloading resources: %s", e.what());
+		throw;
+	}
+	// Commit
+	*this = newWad;
 }
