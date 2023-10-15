@@ -70,10 +70,10 @@ public:
 	{
 		return const_cast<Img_c &>(IM_UnknownFlat(config));
 	}
-	Img_c *IM_UnknownSprite(const ConfigData &config);
+	Img_c &IM_UnknownSprite(const ConfigData &config);
 
-	Img_c *IM_DigitFont_11x14();
-	Img_c *IM_DigitFont_14x19();
+	Img_c &IM_DigitFont_11x14();
+	Img_c &IM_DigitFont_14x19();
 
 	void IM_UnloadDummyTextures();
 	void IM_ResetDummyTextures();
@@ -133,10 +133,10 @@ private:
 	tl::optional<Img_c> unknown_flat_image;
 
 	int unknown_sprite_color = 0;
-	std::unique_ptr<Img_c> unknown_sprite_image;
+	tl::optional<Img_c> unknown_sprite_image;
 
-	std::unique_ptr<Img_c> digit_font_11x14;
-	std::unique_ptr<Img_c> digit_font_14x19;
+	tl::optional<Img_c> digit_font_11x14;
+	tl::optional<Img_c> digit_font_14x19;
 };
 
 
@@ -185,24 +185,27 @@ struct WadData
 {
 	void W_LoadTextures(const ConfigData &config);
 
-	void W_LoadFlats();
-
 	const Img_c *getSprite(const ConfigData &config, int type, const LoadingData &loading);
 	Img_c *getMutableSprite(const ConfigData &config, int type, const LoadingData &loading)
 	{
 		return const_cast<Img_c *>(getSprite(config, type, loading));
 	}
 	
+	bool Main_LoadIWAD(const LoadingData &loading);
+	ReportedResult reloadResources(const LoadingData &loading, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads);
+
+	ImageSet images;
+	Palette palette;
+	MasterDir master;
+	
+private:
 	ReportedResult W_LoadPalette();
 
 	ReportedResult W_LoadColormap()
 	{
 		return palette.loadColormap(master.findGlobalLump("COLORMAP"));
 	}
-
-	ImageSet images;
-	Palette palette;
-	MasterDir master;
+	void W_LoadFlats();
 };
 
 #endif /* WadData_h */

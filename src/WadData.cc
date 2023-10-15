@@ -60,3 +60,37 @@ ReportedResult WadData::W_LoadPalette()
 	images.IM_ResetDummyTextures();
 	return { true };
 }
+
+ReportedResult WadData::reloadResources(const LoadingData &loading, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads)
+{
+	// reset the master directory
+	if (master.edit_wad)
+		master.MasterDir_Remove(master.edit_wad);
+
+	master.MasterDir_CloseAll();
+
+	// TODO: check result
+	Main_LoadIWAD(loading);
+
+	// load all resource wads
+	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
+		master.MasterDir_Add(wad);
+
+	if (master.edit_wad)
+		master.MasterDir_Add(master.edit_wad);
+
+	// finally, load textures and stuff...
+	ReportedResult result = W_LoadPalette();
+	if(!result.success)
+		return result;
+	
+	result = W_LoadColormap();
+	if(!result.success)
+		return result;
+
+	W_LoadFlats();
+	W_LoadTextures(config);
+	images.W_ClearSprites();
+	
+	return {true};
+}
