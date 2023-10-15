@@ -154,7 +154,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, cons
 }
 
 
-static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const byte *tex_data, int tex_length, int offset,
+static ReportedResult LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const byte *tex_data, int tex_length, int offset,
 									const byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
@@ -166,7 +166,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const 
 	gLog.debugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
-		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
+		return {false, SString::printf("W_LoadTextures: Texture '%.8s' has zero size", raw->name)};
 
 	Img_c img(width, height, false);
 	bool is_medusa = false;
@@ -175,7 +175,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const 
 	int num_patches = LE_S16(raw->patch_count);
 
 	if (! num_patches)
-		ThrowException("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
+		return {false, SString::printf("W_LoadTextures: Texture '%.8s' has no patches", raw->name)};
 
 	const raw_patchdef_t *patdef = (const raw_patchdef_t *) & raw->patches[0];
 
@@ -218,6 +218,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const 
 	namebuf[8] = 0;
 
 	wad.images.W_AddTexture(namebuf, std::move(img), is_medusa);
+	return {true};
 }
 
 
@@ -253,6 +254,7 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lum
 	// Note: we skip the first entry (e.g. AASHITTY) which is not really
     //       usable (in the DOOM engine the #0 texture means "do not draw").
 
+	ReportedResult result;
 	for (int n = skip_first ? 1 : 0 ; n < num_tex ; n++)
 	{
 		int offset = LE_S32(tex_data_s32[1 + n]);
@@ -263,7 +265,11 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lum
 		if (is_strife)
 			LoadTextureEntry_Strife(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first);
 		else
-			LoadTextureEntry_DOOM(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first);
+		{
+			result = LoadTextureEntry_DOOM(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first);
+			if(!result.success)
+				throw std::runtime_error(result.message.get());
+		}
 	}
 }
 
