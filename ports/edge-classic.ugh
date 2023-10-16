@@ -1,0 +1,483 @@
+#------------------------------------------------------------------------
+#  EDGE-Classic definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2001-2016 Andrew Apted
+#  Copyright (C) 1997-2003 André Majorel et al
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+#
+#  Based on Yadex which incorporated code from DEU 5.21 that was put
+#  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+#
+#------------------------------------------------------------------------
+
+# boom/mbf is unconditionally included
+include "mbf"
+
+map_formats DOOM UDMF
+
+supported_games doom doom2 heretic
+
+udmf_namespace EDGE-Classic
+
+feature tx_start 1
+feature img_png 1
+feature medusa_fixed 1
+feature tuttifrutti_fixed 1
+feature mix_textures_flats 1
+feature extra_floors 1
+feature slopes 1
+feature neg_patch_offsets 1
+
+
+#---- EDGE-Classic THINGS ----------
+
+thing 7000 b n  16 NVSC   "EC: Night vision"
+thing 7005 b n  16 TSTP   "EC: Stop Time"
+thing 7020 b n  16 JPCK   "EC: Jetpack"
+
+thing 7015 k nl 20 YKEY   "EC: Green keycard"
+thing 7017 k nl 20 YSKU   "EC: Green skull key"
+
+thing 7031 h nl 20 ARM3   "EC: Purple armor"
+thing 7032 h nl 20 ARM4   "EC: Yellow armor"
+thing 7033 h nl 20 ARM5   "EC: Red armor"
+
+thing 7010 d -  16 SMT2   "EC: Grey stub"
+thing 7104 d -  10 BEXP   "EC: Unstable barrel"
+
+thing 7041 - n  16 NULL   "EC: Green floor glow"
+thing 7042 - n  16 NULL   "EC: Red floor glow"
+thing 7043 - n  16 NULL   "EC: Blue floor glow"
+
+thing 7044 - n  2  NULL   "EC: White floor light"
+thing 7045 - n  2  NULL   "EC: Yellow floor light"
+thing 7046 - n  2  NULL   "EC: Red floor light"
+thing 7047 - n  2  NULL   "EC: Blue floor light"
+thing 7048 - n  2  NULL   "EC: Green floor light"
+thing 7049 - n  2  NULL   "EC: Orange floor light"
+
+thing 7054 - n  2  NULL   "EC: White ceiling light"
+thing 7055 - n  2  NULL   "EC: Yellow ceiling light"
+thing 7056 - n  2  NULL   "EC: Red ceiling light"
+thing 7057 - n  2  NULL   "EC: Blue ceiling light"
+thing 7058 - n  2  NULL   "EC: Green ceiling light"
+thing 7059 - n  2  NULL   "EC: Orange ceiling light"
+
+thing 7014 - nt 20 TFOG   "EC: Respawn dest"
+
+thing 4050 m i  64 BSPI   "EC: Stealth Arachnotron"
+thing 4051 m i  20 VILE   "EC: Stealth Archvile"
+thing 4052 m i  24 BOSS   "EC: Stealth Baron"
+thing 4053 m i  31 HEAD   "EC: Stealth Cacodemon"
+thing 4054 m i  20 CPOS   "EC: Stealth Chaingunner"
+thing 4055 m i  30 SARG   "EC: Stealth Demon"
+thing 4056 m i  24 BOS2A1C1  "EC: Stealth Hell Knight"
+thing 4057 m i  20 TROO   "EC: Stealth Imp"
+thing 4058 m i  48 FATT   "EC: Stealth Mancubus"
+thing 4059 m i  20 SKEL   "EC: Stealth Revenant"
+thing 4060 m i  20 SPOS   "EC: Stealth Sargeant"
+thing 4061 m i  20 POSS   "EC: Stealth Trooper"
+
+thing 7100 m -  20 SKELJ  "EC: Revenant mkII"
+thing 7101 m n  64 TFOGB  "EC: Imp spawner"
+thing 7102 m -  64 BSPIH  "EC: Arachnotron mkII"
+thing 7103 m -  48 FATTH  "EC: Mancubus mkII"
+
+
+#---- EDGE-Classic LINE TYPES ----------
+
+linegroup b "Hubs"
+linegroup w "Sliding Door"
+
+line 400 y "-- EC: 3D Floor"          :tag
+line 401 y "-- EC: 3D Floor /upper"   :tag
+line 402 y "-- EC: 3D Floor /lower"   :tag
+
+line 403 y "-- EC: Liquid"            :tag
+line 404 y "-- EC: Liquid 80%"        :tag
+line 405 y "-- EC: Liquid 60%"        :tag
+line 406 y "-- EC: Liquid 40%"        :tag
+line 407 y "-- EC: Liquid 20%"        :tag
+line 408 y "-- EC: Liquid  0%"        :tag
+
+line 413 y "-- EC: Thin 3D floor"     :tag
+line 414 y "-- EC: Thin 3D floor 80%" :tag
+line 415 y "-- EC: Thin 3D floor 60%" :tag
+line 416 y "-- EC: Thin 3D floor 40%" :tag
+line 417 y "-- EC: Thin 3D floor 20%" :tag
+
+line 422 a "-- EC: Scroll right"
+line 423 a "-- EC: Scroll up"
+line 424 a "-- EC: Scroll down"
+line 425 a "-- EC: Scroll left/up"
+line 426 a "-- EC: Scroll left/down"
+line 427 a "-- EC: Scroll right/up"
+line 428 a "-- EC: Scroll right/down"
+
+
+line 409 r "-- EC: Translucency 80%"  :line_id
+line 410 r "-- EC: Translucency 60%"  :line_id
+line 411 r "-- EC: Translucency 40%"  :line_id
+line 412 r "-- EC: Translucency 20%"  :line_id
+
+
+line 567 s "-- EC: Slope Floor"
+line 568 s "-- EC: Slope Ceiling"
+line 569 s "-- EC: Slope F + C"
+
+
+line 442 w "DR Sliding door LEFT /mon"
+line 443 w "DR Sliding door LEFT"
+line 444 w "DR Sliding door LEFT /fast"
+line 445 w "D1 Sliding door LEFT"
+
+line 446 w "DR Sliding door RIGHT /mon"
+line 447 w "DR Sliding door RIGHT"
+line 448 w "DR Sliding door RIGHT /fast"
+line 449 w "D1 Sliding door RIGHT"
+
+line 450 w "DR Sliding door CENTER /mon"
+line 451 w "DR Sliding door CENTER"
+line 452 w "DR Sliding door CENTER /fast"
+line 453 w "D1 Sliding door CENTER"
+
+
+line 418 n "S1 EC: Enable RTS"        :tag
+line 419 n "SR EC: Enable RTS"        :tag
+line 420 n "W1 EC: Enable RTS"        :tag
+line 421 n "WR EC: Enable RTS"        :tag
+line 440 n "G1 EC: Enable RTS"        :tag
+line 441 n "GR EC: Enable RTS"        :tag
+line 454 n "W1 EC: Enable RTS /mon"   :tag
+line 455 n "WR EC: Enable RTS /mon"   :tag
+line 456 n "GR EC: Enable RTS /mon"   :tag
+
+line 457 n "SR EC: DISABLE RTS"       :tag
+line 458 n "WR EC: DISABLE RTS"       :tag
+line 459 n "GR EC: DISABLE RTS"       :tag
+line 460 n "WR EC: DISABLE RTS /mon"  :tag
+line 461 n "GR EC: DISABLE RTS /mon"  :tag
+
+
+line 470 s "-- EC: Ladder,  48 high"  :tag
+line 471 s "-- EC: Ladder,  80 high"  :tag
+line 472 s "-- EC: Ladder, 120 high"  :tag
+line 473 s "-- EC: Ladder, 160 high"  :tag
+line 474 s "-- EC: Ladder, 192 high"  :tag
+line 475 s "-- EC: Ladder, 256 high"  :tag
+line 476 s "-- EC: Ladder, 384 high"  :tag
+line 477 s "-- EC: Ladder, 512 high"  :tag
+line 478 s "-- EC: Ladder, 768 high"  :tag
+line 479 s "-- EC: Ladder, no limit"  :tag
+
+
+line 462 r "-- EC: Mirror"
+line 463 r "-- EC: Mirror /white"
+line 464 r "-- EC: Mirror /blue"
+line 465 r "-- EC: Mirror /red"
+line 466 r "-- EC: Mirror /green"
+
+line 480 r "-- EC: Portal /dark"      :tag
+line 481 r "-- EC: Portal /light"     :tag
+line 482 r "-- EC: Portal /light2"    :tag
+line 483 r "-- EC: Portal /blue"      :tag
+line 484 r "-- EC: Portal /green"     :tag
+
+line 485 r "-- EC: Camera Portal"         :tag
+line 486 r "-- EC: Camera Portal /white"  :tag
+line 487 r "-- EC: Camera Portal /cyan"   :tag
+line 488 r "-- EC: Camera Portal /rusty"  :tag
+line 489 r "-- EC: Camera Portal /green"  :tag
+
+
+line 501 b "WR Hub Exit to MAP01 / E1M1"
+line 502 b "WR Hub Exit to MAP02 / E1M2"
+line 503 b "WR Hub Exit to MAP03 / E1M3"
+line 504 b "WR Hub Exit to MAP04 / E1M4"
+line 505 b "WR Hub Exit to MAP05 / E1M5"
+line 506 b "WR Hub Exit to MAP06 / E1M6"
+line 507 b "WR Hub Exit to MAP07 / E1M7"
+line 508 b "WR Hub Exit to MAP08 / E1M8"
+line 509 b "WR Hub Exit to MAP09 / E1M9"
+
+line 510 b "WR Hub Exit to MAP10"
+line 511 b "WR Hub Exit to MAP11 / E2M1"
+line 512 b "WR Hub Exit to MAP12 / E2M2"
+line 513 b "WR Hub Exit to MAP13 / E2M3"
+line 514 b "WR Hub Exit to MAP14 / E2M4"
+line 515 b "WR Hub Exit to MAP15 / E2M5"
+line 516 b "WR Hub Exit to MAP16 / E2M6"
+line 517 b "WR Hub Exit to MAP17 / E2M7"
+line 518 b "WR Hub Exit to MAP18 / E2M8"
+line 519 b "WR Hub Exit to MAP19 / E2M9"
+
+line 520 b "WR Hub Exit to MAP20"
+line 521 b "WR Hub Exit to MAP21 / E3M1"
+line 522 b "WR Hub Exit to MAP22 / E3M2"
+line 523 b "WR Hub Exit to MAP23 / E3M3"
+line 524 b "WR Hub Exit to MAP24 / E3M4"
+line 525 b "WR Hub Exit to MAP25 / E3M5"
+line 526 b "WR Hub Exit to MAP26 / E3M6"
+line 527 b "WR Hub Exit to MAP27 / E3M7"
+line 528 b "WR Hub Exit to MAP28 / E3M8"
+line 529 b "WR Hub Exit to MAP29 / E3M9"
+
+line 530 b "WR Hub Exit to MAP30"
+line 531 b "WR Hub Exit to MAP31 / E4M1"
+line 532 b "WR Hub Exit to MAP32 / E4M2"
+line 533 b "WR Hub Exit to MAP33 / E4M3"
+line 534 b "WR Hub Exit to MAP34 / E4M4"
+line 535 b "WR Hub Exit to MAP35 / E4M5"
+line 536 b "WR Hub Exit to MAP36 / E4M6"
+line 537 b "WR Hub Exit to MAP37 / E4M7"
+line 538 b "WR Hub Exit to MAP38 / E4M8"
+line 539 b "WR Hub Exit to MAP39 / E4M9"
+
+
+line 490 d "DR EC: Green key door"
+line 491 d "D1 EC: Green key door"
+line 492 d "SR EC: Green key door"        :tag
+line 493 d "S1 EC: Green key door"        :tag
+line 494 d "D1 EC: Green key door /fast"
+
+line 580 d "DR EC: Gold key door"
+line 581 d "D1 EC: Gold key door"
+line 582 d "SR EC: Gold key door" :tag
+line 583 d "S1 EC: Gold key door" :tag
+
+line 584 d "DR EC: Silver key door"
+line 585 d "D1 EC: Silver key door"
+line 586 d "SR EC: Silver key door"   :tag
+line 587 d "S1 EC: Silver key door"   :tag
+
+line 588 d "DR EC: Brass key door"
+line 589 d "D1 EC: Brass key door"
+line 590 d "DR EC: Copper key door"
+line 591 d "D1 EC: Copper key door"
+line 592 d "DR EC: Steel key door"
+line 593 d "D1 EC: Steel key door"
+
+line 594 d "DR EC: Wooden key door"
+line 595 d "D1 EC: Wooden key door"
+line 596 d "DR EC: Fire key door"
+line 597 d "D1 EC: Fire key door"
+line 598 d "DR EC: Water key door"
+line 599 d "D1 EC: Water key door"
+
+line 600 y "-- EC: Thick 3D floor (dummy texture) 80%" :tag
+line 601 y "-- EC: Thick 3D floor (dummy texture) 60%" :tag
+line 602 y "-- EC: Thick 3D floor (dummy texture) 40%" :tag
+line 603 y "-- EC: Thick 3D floor (dummy texture) 20%" :tag
+
+line 800 r "-- EC: Align F1"              :tag
+line 801 r "-- EC: Align F2"              :tag
+line 802 r "-- EC: Align C1"              :tag
+line 803 r "-- EC: Align C2"              :tag
+line 804 r "-- EC: Align F1 + C1"         :tag
+line 805 r "-- EC: Align F2 + C2"         :tag
+
+line 810 r "-- EC: Align, scale F1"       :tag
+line 811 r "-- EC: Align, scale F2"       :tag
+line 812 r "-- EC: Align, scale C1"       :tag
+line 813 r "-- EC: Align, scale C2"       :tag
+line 814 r "-- EC: Align, scale F1 + C1"  :tag
+line 815 r "-- EC: Align, scale C2 + C2"  :tag
+
+line 820 r "-- EC: Scale F1"              :tag
+line 821 r "-- EC: Scale F2"              :tag
+line 822 r "-- EC: Scale C1"              :tag
+line 823 r "-- EC: Scale C2"              :tag
+line 824 r "-- EC: Scale F1 + C1"         :tag
+line 825 r "-- EC: Scale F2 + C2"         :tag
+
+line 830 a "G1 EC: Breakable Glass"
+line 831 a "G1 EC: Breakable Glass, block monster sight"
+line 832 a "G1 EC: Breakable Glass, block monster sight/shots"
+
+line 835 a "G1 EC: Breakable Wall, midtex to back lower"
+line 836 a "G1 EC: Breakable Wall, midtex to back upper"
+line 837 a "G1 EC: Breakable Wall, midtex to front lower"
+line 838 a "G1 EC: Breakable Wall, midtex to front upper" 
+
+line 850 r "-- EC: Bright Wall"  :tag
+
+line 855 r "-- EC: Autoscale Tex to Line Length, stretch width"
+line 856 r "-- EC: Autoscale Tex to Line Length, stretch height"
+line 857 r "-- EC: Autoscale Tex to Line Length, stretch width and height"
+
+# MBF21; could remove once this gets added in its own UGH
+line 1024 a "-- EC: Scroll Wall by Sidedef Offsets"  :tag
+line 1025 a "-- EC: Scroll Wall by Sidedef Offsets /disp"  :tag
+line 1026 a "-- EC: Scroll Wall by Sidedef Offsets /accel"  :tag
+
+line 2001 b "SR Hub Exit to MAP01 / E1M1"
+line 2002 b "SR Hub Exit to MAP02 / E1M2"
+line 2003 b "SR Hub Exit to MAP03 / E1M3"
+line 2004 b "SR Hub Exit to MAP04 / E1M4"
+line 2005 b "SR Hub Exit to MAP05 / E1M5"
+line 2006 b "SR Hub Exit to MAP06 / E1M6"
+line 2007 b "SR Hub Exit to MAP07 / E1M7"
+line 2008 b "SR Hub Exit to MAP08 / E1M8"
+line 2009 b "SR Hub Exit to MAP09 / E1M9"
+line 2010 b "SR Hub Exit to MAP10"
+line 2011 b "SR Hub Exit to MAP11 / E2M1"
+line 2012 b "SR Hub Exit to MAP12 / E2M2"
+line 2013 b "SR Hub Exit to MAP13 / E2M3"
+line 2014 b "SR Hub Exit to MAP14 / E2M4"
+line 2015 b "SR Hub Exit to MAP15 / E2M5"
+line 2016 b "SR Hub Exit to MAP16 / E2M6"
+line 2017 b "SR Hub Exit to MAP17 / E2M7"
+line 2018 b "SR Hub Exit to MAP18 / E2M8"
+line 2019 b "SR Hub Exit to MAP19 / E2M9"
+line 2020 b "SR Hub Exit to MAP20"
+line 2021 b "SR Hub Exit to MAP21 / E3M1"
+line 2022 b "SR Hub Exit to MAP22 / E3M2"
+line 2023 b "SR Hub Exit to MAP23 / E3M3"
+line 2024 b "SR Hub Exit to MAP24 / E3M4"
+line 2025 b "SR Hub Exit to MAP25 / E3M5"
+line 2026 b "SR Hub Exit to MAP26 / E3M6"
+line 2027 b "SR Hub Exit to MAP27 / E3M7"
+line 2028 b "SR Hub Exit to MAP28 / E3M8"
+line 2029 b "SR Hub Exit to MAP29 / E3M9"
+line 2030 b "SR Hub Exit to MAP30"
+line 2031 b "SR Hub Exit to MAP31 / E4M1"
+line 2032 b "SR Hub Exit to MAP32 / E4M2"
+line 2033 b "SR Hub Exit to MAP33 / E4M3"
+line 2034 b "SR Hub Exit to MAP34 / E4M4"
+line 2035 b "SR Hub Exit to MAP35 / E4M5"
+line 2036 b "SR Hub Exit to MAP36 / E4M6"
+line 2037 b "SR Hub Exit to MAP37 / E4M7"
+line 2038 b "SR Hub Exit to MAP38 / E4M8"
+line 2039 b "SR Hub Exit to MAP39 / E4M9"
+
+#---- EDGE-Classic SECTOR TYPES ----------
+
+sector 20 "EC: Vacuum area"
+sector 25 "EC: Low Gravity area"
+sector 29 "EC: Hub entry area"
+
+sector 4466 "EC Water"
+sector 4418 "EC Water + Current N"
+sector 4419 "EC Water + Current NE"
+sector 4420 "EC Water + Current E"
+sector 4421 "EC Water + Current SE"
+sector 4422 "EC Water + Current S"
+sector 4423 "EC Water + Current SW"
+sector 4424 "EC Water + Current W"
+sector 4425 "EC Water + Current NW"
+
+sector 4467 "EC Slime (no damage)"
+sector 4468 "EC Slime"
+sector 4426 "EC Slime + Current N"
+sector 4427 "EC Slime + Current NE"
+sector 4428 "EC Slime + Current E"
+sector 4429 "EC Slime + Current SE"
+sector 4430 "EC Slime + Current S"
+sector 4431 "EC Slime + Current SW"
+sector 4432 "EC Slime + Current W"
+sector 4433 "EC Slime + Current NW"
+
+sector 4469 "EC Lava (no damage)"
+sector 4470 "EC Lava"
+sector 4434 "EC Lava + Current N"
+sector 4435 "EC Lava + Current NE"
+sector 4436 "EC Lava + Current E"
+sector 4437 "EC Lava + Current SE"
+sector 4438 "EC Lava + Current S"
+sector 4439 "EC Lava + Current SW"
+sector 4440 "EC Lava + Current W"
+sector 4441 "EC Lava + Current NW"
+
+sector 4442 "EC Push N"
+sector 4443 "EC Push NE"
+sector 4444 "EC Push E"
+sector 4445 "EC Push SE"
+sector 4446 "EC Push S"
+sector 4447 "EC Push SW"
+sector 4448 "EC Push W"
+sector 4449 "EC Push NW"
+
+sector 4450 "EC Scroll Floor N"
+sector 4451 "EC Scroll Floor NE"
+sector 4452 "EC Scroll Floor E"
+sector 4453 "EC Scroll Floor SE"
+sector 4454 "EC Scroll Floor S"
+sector 4455 "EC Scroll Floor SW"
+sector 4456 "EC Scroll Floor W"
+sector 4457 "EC Scroll Floor NW"
+
+sector 4458 "EC Scroll + Push N"
+sector 4459 "EC Scroll + Push NE"
+sector 4460 "EC Scroll + Push E"
+sector 4461 "EC Scroll + Push SE"
+sector 4462 "EC Scroll + Push S"
+sector 4463 "EC Scroll + Push SW"
+sector 4464 "EC Scroll + Push W"
+sector 4465 "EC Scroll + Push NW"
+
+sector 4471 "EC Blue Hue"
+sector 4472 "EC Green Hue"
+sector 4473 "EC Red Hue"
+sector 4474 "EC Yellow Hue"
+sector 4475 "EC Purple Hue"
+sector 4476 "EC Grey Hue"
+
+sector 4480 "EC Fog 5% White"
+sector 4481 "EC Fog 10% White"
+sector 4482 "EC Fog 15% White"
+sector 4483 "EC Fog 20% White"
+sector 4484 "EC Fog 25% White"
+sector 4485 "EC Fog 30% White"
+sector 4486 "EC Fog 35% White"
+sector 4487 "EC Fog 40% White"
+sector 4488 "EC Fog 45% White"
+sector 4489 "EC Fog 50% White"
+sector 4490 "EC Fog 5% Green"
+sector 4491 "EC Fog 10% Green"
+sector 4492 "EC Fog 15% Green"
+sector 4493 "EC Fog 20% Green"
+sector 4494 "EC Fog 25% Green"
+sector 4495 "EC Fog 30% Green"
+sector 4496 "EC Fog 35% Green"
+sector 4497 "EC Fog 40% Green"
+sector 4498 "EC Fog 45% Green"
+sector 4499 "EC Fog 50% Green"
+sector 4500 "EC Fog 5% Red"
+sector 4501 "EC Fog 10% Red"
+sector 4502 "EC Fog 15% Red"
+sector 4503 "EC Fog 20% Red"
+sector 4504 "EC Fog 25% Red"
+sector 4505 "EC Fog 30% Red"
+sector 4506 "EC Fog 35% Red"
+sector 4507 "EC Fog 40% Red"
+sector 4508 "EC Fog 45% Red"
+sector 4509 "EC Fog 50% Red"
+sector 4510 "EC Fog 5% Blue"
+sector 4511 "EC Fog 10% Blue"
+sector 4512 "EC Fog 15% Blue"
+sector 4513 "EC Fog 20% Blue"
+sector 4514 "EC Fog 25% Blue"
+sector 4515 "EC Fog 30% Blue"
+sector 4516 "EC Fog 35% Blue"
+sector 4517 "EC Fog 40% Blue"
+sector 4518 "EC Fog 45% Blue"
+sector 4519 "EC Fog 50% Blue"
+
+sector 4530 "EC Friction, slippy"
+sector 4531 "EC Friction, very slippy
+sector 4532 "EC Friction, sticky"
+sector 4533 "EC Friction, very sticky"
