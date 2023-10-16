@@ -31,7 +31,7 @@ map_formats DOOM UDMF
 
 supported_games doom doom2 heretic
 
-udmf_namespace EDGE-Classic
+udmf_namespace edge-classic
 
 feature tx_start 1
 feature img_png 1
