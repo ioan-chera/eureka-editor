@@ -79,10 +79,12 @@ public:
 	UI_SectorBox *sec_box;
 	UI_VertexBox *vert_box;
 
-	UI_DefaultProps   *props_box;
 	UI_FindAndReplace *find_box;
 
 private:
+	
+	UI_DefaultProps   *props_box;
+	
 	// active cursor
 	Fl_Cursor cursor_shape;
 
@@ -97,6 +99,12 @@ public:
 	// FLTK methods
 	int handle(int event);
 	void draw();
+	
+	void propsLoadValues()
+	{
+		assert(props_box);
+		props_box->LoadValues();
+	}
 
 public:
 	void SetTitle(const SString &wad_name, const SString &map_name, bool read_only);

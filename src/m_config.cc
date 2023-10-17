@@ -1322,7 +1322,8 @@ bool Instance::M_LoadUserState()
 
 	file.close();
 
-	Props_LoadValues(*this);
+	if(main_win)
+		main_win->propsLoadValues();
 
 	return true;
 }

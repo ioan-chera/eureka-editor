@@ -630,14 +630,11 @@ TEST_F(MConfig, InstanceMLoadUserState)
 	ASSERT_EQ(sUnitTokens["grid"][4], "grid_low");
 	ASSERT_EQ(sUnitTokens["grid"][5], "grid_key");
 	// Keep in mind the last value gets called too
-	ASSERT_EQ(sUnitTokens["props"].size(), 4);
+	ASSERT_EQ(sUnitTokens["props"].size(), 3);
 	ASSERT_EQ(sUnitTokens["props"][0], "props_props");
 	ASSERT_EQ(sUnitTokens["props"][1], "props_properties");
 	ASSERT_EQ(sUnitTokens["props"][2], "props_");
 	ASSERT_EQ(sUnitTokens.size(), 6);	// only these got stuff
-
-	ASSERT_EQ(sUnitTokens["props"].size(), 4);	// check it got called
-	ASSERT_EQ(sUnitTokens["props"][3], "LoadValues");
 
 	global::cache_dir.clear();
 	sUnitTokens.clear();
@@ -784,7 +781,7 @@ bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	return true;
 }
 
-void Props_LoadValues(const Instance &inst)
+void UI_DefaultProps::LoadValues()
 {
 	sUnitTokens["props"].push_back("LoadValues");
 }

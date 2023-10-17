@@ -957,7 +957,7 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 		main_win->browser->Populate();
 
 		// TODO: only call this when the IWAD has changed
-		Props_LoadValues(*this);
+		main_win->propsLoadValues();
 	}
 }
 

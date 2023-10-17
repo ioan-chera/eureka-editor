@@ -91,7 +91,6 @@ private:
 
 
 bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens);
-void Props_LoadValues(const Instance &inst);
 
 #endif  /* __EUREKA_UI_DEFAULT_H__ */
 
