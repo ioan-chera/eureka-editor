@@ -45,6 +45,8 @@
 
 #include "FL/Fl_Sys_Menu_Bar.H"
 
+#include <assert.h>
+
 #define WINDOW_BG  FL_DARK3
 
 #define MIN_BROWSER_W	250
