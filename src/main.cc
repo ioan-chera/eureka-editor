@@ -892,10 +892,6 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 	LoadingData newLoading = loading;
 	try
 	{
-		// FIXME: avoid doing this in case of error
-		if(edit.Selected)
-			edit.Selected->clear_all();
-
 		gLog.printf("\n");
 		gLog.printf("----- Loading Resources -----\n");
 
@@ -934,6 +930,11 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 	}
 
 	// Commit it
+	
+	// Must deselect now
+	if(edit.Selected)
+		edit.Selected->clear_all();
+	
 	conf = config;
 	loaded = newLoading;
 	
