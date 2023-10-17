@@ -76,7 +76,7 @@ public:
 	{
 		return static_cast<int>(vertices.size());
 	}
-	int numSectors() const
+	int numSectors() const noexcept
 	{
 		return static_cast<int>(sectors.size());
 	}
@@ -96,7 +96,7 @@ public:
 	{
 		return n >= 0 && n < numVertices();
 	}
-	bool isSector(int n) const
+	bool isSector(int n) const noexcept
 	{
 		return n >= 0 && n < numSectors();
 	}

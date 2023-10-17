@@ -408,7 +408,7 @@ StringID StringTable::add(const SString &text)
 //
 // Get a text (handle it robustly)
 //
-SString StringTable::get(StringID offset) const
+SString StringTable::get(StringID offset) const noexcept
 {
 	// this should never happen
 	// [ but handle it gracefully, for the sake of robustness ]
