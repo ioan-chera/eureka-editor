@@ -320,7 +320,7 @@ public:
 
 	// R_SUBDIV
 	sector_3dfloors_c *Subdiv_3DFloorsForSector(int num);
-	void Subdiv_InvalidateAll();
+	void Subdiv_InvalidateAll() noexcept;
 	bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx, double map_hy);
 	sector_subdivision_c *Subdiv_PolygonsForSector(int num);
 

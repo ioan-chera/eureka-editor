@@ -928,6 +928,10 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 		gLog.printf("Failed reloading wads: %s\n", e.what());
 		throw;
 	}
+	
+	wad.reloadResources(loaded, conf, resourceWads);
+	conf = config;
+	loaded = newLoading;
 
 	// Commit it
 	
@@ -935,11 +939,6 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 	if(edit.Selected)
 		edit.Selected->clear_all();
 	
-	conf = config;
-	loaded = newLoading;
-	
-	wad.reloadResources(loaded, conf, resourceWads);
-
 	gLog.printf("--- DONE ---\n");
 	gLog.printf("\n");
 

@@ -860,7 +860,7 @@ fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
 }
 
 
-void Instance::Subdiv_InvalidateAll()
+void Instance::Subdiv_InvalidateAll() noexcept
 {
 	// invalidate everything
 	sector_info_cache.total = -1;
