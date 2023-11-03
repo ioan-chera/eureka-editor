@@ -173,7 +173,6 @@ public:	// TODO: make private
 	// when present it is also at master_dir.back()
 	std::shared_ptr<Wad_file> edit_wad;
 	std::shared_ptr<Wad_file> game_wad;
-	fs::path Pwad_name;	// Filename of current wad
 
 private:
 	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()

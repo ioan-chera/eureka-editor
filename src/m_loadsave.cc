@@ -65,8 +65,6 @@ void MasterDir::RemoveEditWad()
 
 	MasterDir_Remove(edit_wad);
 	edit_wad.reset();
-
-	Pwad_name.clear();
 }
 
 
@@ -75,8 +73,6 @@ void MasterDir::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 	RemoveEditWad();
 
 	edit_wad = new_wad;
-
-	Pwad_name = edit_wad->PathName();
 
 	MasterDir_Add(edit_wad);
 }
@@ -279,7 +275,6 @@ void Instance::CMD_NewProject()
 		}
 
 		this->wad.master.edit_wad = wad;
-		this->wad.master.Pwad_name = this->wad.master.edit_wad->PathName();
 
 		this->wad.master.MasterDir_Add(this->wad.master.edit_wad);
 

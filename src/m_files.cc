@@ -393,8 +393,6 @@ bool Instance::M_TryOpenMostRecent()
 	else
 		loaded.levelName.clear();
 
-	this->wad.master.Pwad_name = recentMap.file;
-
 	this->wad.master.edit_wad = wad;
 
 	return true;
