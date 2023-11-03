@@ -144,12 +144,6 @@ void Instance::Editor_ScrollMap(int mode, v2int_t dpos, keycode_t mod)
 }
 
 
-void Instance::Editor_ClearNav()
-{
-	edit.nav = {};
-}
-
-
 void Instance::Navigate2D()
 {
 	float delay_ms = static_cast<float>(Nav_TimeDiff());
@@ -183,7 +177,7 @@ void Instance::Navigate2D()
 
 void Instance::Nav_Clear()
 {
-	Editor_ClearNav();
+	edit.clearNav();
 
 	memset(nav_actives, 0, sizeof(nav_actives));
 

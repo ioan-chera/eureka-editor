@@ -243,7 +243,6 @@ public:
 
 	// M_EVENTS
 	void ClearStickyMod();
-	void Editor_ClearNav();
 	void Editor_ScrollMap(int mode, v2int_t dpos = {}, keycode_t mod = 0);
 	void Editor_SetAction(EditorAction new_action);
 	void EV_EscapeKey();

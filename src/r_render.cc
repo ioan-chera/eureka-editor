@@ -1694,7 +1694,7 @@ void Instance::navigation3DMove(float *editNav, nav_release_func_t func, bool fl
 	}
 
 	if(!edit.is_navigating)
-		Editor_ClearNav();
+		edit.clearNav();
 
 	*editNav = static_cast<float>(atof(EXEC_Param[0]));
 

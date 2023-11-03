@@ -426,7 +426,7 @@ void Instance::navigationScroll(float *editNav, nav_release_func_t func)
 		return;
 
 	if(!edit.is_navigating)
-		Editor_ClearNav();
+		edit.clearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
@@ -487,7 +487,7 @@ void Instance::CMD_NAV_MouseScroll()
 	edit.panning_lax = Exec_HasFlag("/LAX");
 
 	if (! edit.is_navigating)
-		Editor_ClearNav();
+		edit.clearNav();
 
 	if (Nav_SetKey(EXEC_CurKey, &Instance::NAV_MouseScroll_release))
 	{
