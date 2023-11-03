@@ -804,20 +804,19 @@ void Main_Loop()
 }
 
 
-bool WadData::Main_LoadIWAD(const LoadingData &loading)
+bool MasterDir::loadIWAD(const fs::path &iwadName)
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(loading.iwadName,
-												   WadOpenMode::read);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(iwadName, WadOpenMode::read);
 	if (!wad)
 	{
-		gLog.printf("Failed to open game IWAD: %s\n", loading.iwadName.u8string().c_str());
+		gLog.printf("Failed to open game IWAD: %s\n", iwadName.u8string().c_str());
 		return false;
 	}
-	master.game_wad = wad;
+	game_wad = wad;
 
-	master.MasterDir_Add(master.game_wad);
+	MasterDir_Add(game_wad);
 	return true;
 }
 
@@ -1170,7 +1169,7 @@ int main(int argc, char *argv[])
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
 		// TODO: check result
-		gInstance.wad.Main_LoadIWAD(gInstance.loaded);
+		gInstance.wad.master.loadIWAD(gInstance.loaded.iwadName);
 
 
 		// load the initial level

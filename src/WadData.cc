@@ -18,6 +18,7 @@
 
 #include "WadData.h"
 #include "m_config.h"
+#include "m_loadsave.h"
 #include "w_wad.h"
 
 //
@@ -72,7 +73,7 @@ void WadData::reloadResources(const LoadingData &loading, const ConfigData &conf
 		newWad.master.MasterDir_CloseAll();
 		
 		// TODO: check result
-		newWad.Main_LoadIWAD(loading);
+		newWad.master.loadIWAD(loading.iwadName);
 		
 		// load all resource wads
 		for(const std::shared_ptr<Wad_file> &wad : resourceWads)

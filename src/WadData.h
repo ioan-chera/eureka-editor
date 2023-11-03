@@ -150,6 +150,7 @@ struct LumpNameCompare
 class MasterDir
 {
 public:
+	bool loadIWAD(const fs::path &iwadName);
 	void RemoveEditWad();
 	void ReplaceEditWad(const std::shared_ptr<Wad_file> &wad);
 	void MasterDir_Add(const std::shared_ptr<Wad_file> &wad);
@@ -191,7 +192,6 @@ struct WadData
 		return const_cast<Img_c *>(getSprite(config, type, loading));
 	}
 	
-	bool Main_LoadIWAD(const LoadingData &loading);
 	void reloadResources(const LoadingData &loading, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads);
 
 	ImageSet images;
