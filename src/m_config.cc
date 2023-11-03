@@ -1368,7 +1368,7 @@ void Instance::M_DefaultUserState()
 
 	Render3D_Setup();
 
-	Editor_DefaultState();
+	edit.defaultState();
 }
 
 

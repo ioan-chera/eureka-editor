@@ -128,7 +128,7 @@ void Instance::FreshLevel()
 
 	ZoomWholeMap();
 
-	Editor_DefaultState();
+	edit.defaultState();
 }
 
 

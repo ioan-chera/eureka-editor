@@ -204,7 +204,6 @@ public:
 	void Editor_ChangeMode(char mode_char);
 	void Editor_ChangeMode_Raw(ObjType new_mode);
 	void Editor_ClearAction();
-	void Editor_DefaultState();
 	void Editor_Init();
 	bool Editor_ParseUser(const std::vector<SString> &tokens);
 	void Editor_WriteUser(std::ostream &os) const;

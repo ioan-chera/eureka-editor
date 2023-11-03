@@ -88,6 +88,7 @@ struct Editor_State_t
 	SelectHighlight SelectionOrHighlight();
 	void Selection_AddHighlighted();
 	void Selection_Toggle(Objid &obj);
+	void defaultState();
 
 	ObjType mode;  // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 

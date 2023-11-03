@@ -1242,7 +1242,7 @@ void Instance::Editor_Init()
 
 	edit.render3d = false;
 
-	Editor_DefaultState();
+	edit.defaultState();
 
 	Nav_Clear();
 
@@ -1264,20 +1264,20 @@ void Instance::Editor_Init()
 }
 
 
-void Instance::Editor_DefaultState()
+void Editor_State_t::defaultState()
 {
-	edit.action = EditorAction::nothing;
-	edit.sticky_mod = 0;
-	edit.is_panning = false;
+	action = EditorAction::nothing;
+	sticky_mod = 0;
+	is_panning = false;
 
-	edit.dragged.clear();
-	edit.drawLine.from.clear();
+	dragged.clear();
+	drawLine.from.clear();
 
-	edit.error_mode = false;
-	edit.show_object_numbers = false;
+	error_mode = false;
+	show_object_numbers = false;
 
-	edit.sector_render_mode = config::sector_render_default;
-	edit. thing_render_mode =  config::thing_render_default;
+	sector_render_mode = config::sector_render_default;
+	 thing_render_mode =  config::thing_render_default;
 }
 
 

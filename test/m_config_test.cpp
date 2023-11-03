@@ -832,7 +832,7 @@ bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 	return true;
 }
 
-void Instance::Editor_DefaultState()
+void Editor_State_t::defaultState()
 {
 	sUnitTokens["default"].push_back("editorDefaultState");
 }
