@@ -1121,21 +1121,20 @@ int main(int argc, char *argv[])
 			M_ValidateGivenFiles();
 
 			// TODO: main instance
-			gInstance.wad.master.edit_wad = Wad_file::Open(global::Pwad_list[0], WadOpenMode::append);
-			if (!gInstance.wad.master.edit_wad)
+			std::shared_ptr<Wad_file> editWad = Wad_file::Open(global::Pwad_list[0], WadOpenMode::append);
+			if(!editWad)
+			{
 				ThrowException("Cannot load pwad: %s\n", global::Pwad_list[0].u8string().c_str());
-
+			}
+			
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.wad.master.MasterDir_Add(gInstance.wad.master.edit_wad);
+			gInstance.wad.master.ReplaceEditWad(editWad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
-			if (gInstance.M_TryOpenMostRecent())
-			{
-				gInstance.wad.master.MasterDir_Add(gInstance.wad.master.edit_wad);
-			}
+			gInstance.M_TryOpenMostRecent();
 		}
 
 

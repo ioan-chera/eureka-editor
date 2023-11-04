@@ -393,7 +393,7 @@ bool Instance::M_TryOpenMostRecent()
 	else
 		loaded.levelName.clear();
 
-	this->wad.master.edit_wad = wad;
+	this->wad.master.ReplaceEditWad(wad);
 
 	return true;
 }
