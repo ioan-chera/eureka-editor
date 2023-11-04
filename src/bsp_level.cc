@@ -391,13 +391,13 @@ static void CompressBlockmap(void)
 		block_compression = 0;
 }
 
-static Lump_c *CreateLevelLump(const Instance &inst, const char *name);
+static Lump_c &CreateLevelLump(const Instance &inst, const char *name);
 
 static void WriteBlockmap(const Instance &inst)
 {
 	int i;
 
-	Lump_c *lump = CreateLevelLump(inst, "BLOCKMAP");
+	Lump_c &lump = CreateLevelLump(inst, "BLOCKMAP");
 
 	u16_t null_block[2] = { 0x0000, 0xFFFF };
 	u16_t m_zero = 0x0000;
@@ -411,7 +411,7 @@ static void WriteBlockmap(const Instance &inst)
 	header.x_blocks = LE_U16(block_w);
 	header.y_blocks = LE_U16(block_h);
 
-	lump->Write(&header, sizeof(header));
+	lump.Write(&header, sizeof(header));
 
 	// handle pointers
 	for (i=0 ; i < block_count ; i++)
@@ -421,11 +421,11 @@ static void WriteBlockmap(const Instance &inst)
 		if (ptr == 0)
 			BugError("WriteBlockmap: offset %d not set.\n", i);
 
-		lump->Write(&ptr, sizeof(u16_t));
+		lump.Write(&ptr, sizeof(u16_t));
 	}
 
 	// add the null block which *all* empty blocks will use
-	lump->Write(null_block, sizeof(null_block));
+	lump.Write(null_block, sizeof(null_block));
 
 	// handle each block list
 	for (i=0 ; i < block_count ; i++)
@@ -439,9 +439,9 @@ static void WriteBlockmap(const Instance &inst)
 		u16_t *blk = block_lines[blk_num];
 		SYS_ASSERT(blk);
 
-		lump->Write(&m_zero, sizeof(u16_t));
-		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
-		lump->Write(&m_neg1, sizeof(u16_t));
+		lump.Write(&m_zero, sizeof(u16_t));
+		lump.Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
+		lump.Write(&m_neg1, sizeof(u16_t));
 	}
 }
 
@@ -701,9 +701,9 @@ static void Reject_ProcessSectors(const Document &doc)
 
 static void Reject_WriteLump(const Instance &inst)
 {
-	Lump_c *lump = CreateLevelLump(inst, "REJECT");
+	Lump_c &lump = CreateLevelLump(inst, "REJECT");
 
-	lump->Write(rej_matrix, rej_total_size);
+	lump.Write(rej_matrix, rej_total_size);
 }
 
 
@@ -932,7 +932,7 @@ static void PutVertices(const Instance &inst, const char *name, int do_gl)
 {
 	int count, i;
 
-	Lump_c *lump = CreateLevelLump(inst, name);
+	Lump_c &lump = CreateLevelLump(inst, name);
 
 	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
@@ -948,7 +948,7 @@ static void PutVertices(const Instance &inst, const char *name, int do_gl)
 		raw.x = LE_S16(iround(vert->x));
 		raw.y = LE_S16(iround(vert->y));
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 	}
@@ -969,12 +969,12 @@ static void PutGLVertices(const Instance &inst, int do_v5)
 {
 	int count, i;
 
-	Lump_c *lump = CreateLevelLump(inst, "GL_VERT");
+	Lump_c &lump = CreateLevelLump(inst, "GL_VERT");
 
 	if (do_v5)
-		lump->Write(lev_v5_magic, 4);
+		lump.Write(lev_v5_magic, 4);
 	else
-		lump->Write(lev_v2_magic, 4);
+		lump.Write(lev_v2_magic, 4);
 
 	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
@@ -988,7 +988,7 @@ static void PutGLVertices(const Instance &inst, int do_v5)
 		raw.x = LE_S32((int)(vert->x * 65536.0));
 		raw.y = LE_S32((int)(vert->y * 65536.0));
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 	}
@@ -1029,7 +1029,7 @@ static void PutSegs(const Instance &inst)
 {
 	int i, count;
 
-	Lump_c *lump = CreateLevelLump(inst, "SEGS");
+	Lump_c &lump = CreateLevelLump(inst, "SEGS");
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1044,7 +1044,7 @@ static void PutSegs(const Instance &inst)
 		raw.flip    = LE_U16(seg->side);
 		raw.dist    = LE_U16(VanillaSegDist(seg, inst.level));
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 
@@ -1072,7 +1072,7 @@ static void PutGLSegs(const Instance &inst)
 {
 	int i, count;
 
-	Lump_c *lump = CreateLevelLump(inst, "GL_SEGS");
+	Lump_c &lump = CreateLevelLump(inst, "GL_SEGS");
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1094,7 +1094,7 @@ static void PutGLSegs(const Instance &inst)
 		else
 			raw.partner = LE_U16(0xFFFF);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 
@@ -1118,7 +1118,7 @@ static void PutGLSegs_V5(const Instance &inst)
 {
 	int i, count;
 
-	Lump_c *lump = CreateLevelLump(inst, "GL_SEGS");
+	Lump_c &lump = CreateLevelLump(inst, "GL_SEGS");
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1141,7 +1141,7 @@ static void PutGLSegs_V5(const Instance &inst)
 		else
 			raw.partner = LE_U32(0xFFFFFFFF);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 
@@ -1162,7 +1162,7 @@ static void PutSubsecs(const Instance &inst, const char *name, int do_gl)
 {
 	int i;
 
-	Lump_c * lump = CreateLevelLump(inst, name);
+	Lump_c & lump = CreateLevelLump(inst, name);
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
@@ -1173,7 +1173,7 @@ static void PutSubsecs(const Instance &inst, const char *name, int do_gl)
 		raw.first = LE_U16(sub->seg_list->index);
 		raw.num   = LE_U16(sub->seg_count);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 #   if DEBUG_BSP
 		gLog.debugPrintf("PUT SUBSEC %04X  First %04X  Num %04X\n",
@@ -1193,7 +1193,7 @@ static void PutGLSubsecs_V5(const Instance &inst)
 {
 	int i;
 
-	Lump_c *lump = CreateLevelLump(inst, "GL_SSECT");
+	Lump_c &lump = CreateLevelLump(inst, "GL_SSECT");
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
@@ -1204,7 +1204,7 @@ static void PutGLSubsecs_V5(const Instance &inst)
 		raw.first = LE_U32(sub->seg_list->index);
 		raw.num   = LE_U32(sub->seg_count);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 #   if DEBUG_BSP
 		gLog.debugPrintf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
@@ -1323,16 +1323,16 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 
 void PutNodes(const Instance &inst, const char *name, int do_v5, node_t *root)
 {
-	Lump_c *lump = CreateLevelLump(inst, name);
+	Lump_c &lump = CreateLevelLump(inst, name);
 
 	node_cur_index = 0;
 
 	if (root)
 	{
 		if (do_v5)
-			PutOneNode_V5(root, lump);
+			PutOneNode_V5(root, &lump);
 		else
-			PutOneNode(root, lump);
+			PutOneNode(root, &lump);
 	}
 
 	if (node_cur_index != num_nodes)
@@ -1672,15 +1672,15 @@ static void SaveZDFormat(const Instance &inst, node_t *root_node)
 	CreateLevelLump(inst, "SEGS");
 	CreateLevelLump(inst, "SSECTORS");
 
-	Lump_c *lump = CreateLevelLump(inst, "NODES");
+	Lump_c &lump = CreateLevelLump(inst, "NODES");
 
 	if (cur_info->force_compress)
-		lump->Write(lev_ZNOD_magic, 4);
+		lump.Write(lev_ZNOD_magic, 4);
 	else
-		lump->Write(lev_XNOD_magic, 4);
+		lump.Write(lev_XNOD_magic, 4);
 
 	// the ZLibXXX functions do no compression for XNOD format
-	ZLibBeginLump(lump);
+	ZLibBeginLump(&lump);
 
 	PutZVertices();
 	PutZSubsecs();
@@ -1695,14 +1695,14 @@ static void SaveXGL3Format(const Instance &inst, node_t *root_node)
 {
 	// WISH : compute a max_size
 
-	Lump_c *lump = CreateLevelLump(inst, "ZNODES");
+	Lump_c &lump = CreateLevelLump(inst, "ZNODES");
 
-	lump->Write(lev_XGL3_magic, 4);
+	lump.Write(lev_XGL3_magic, 4);
 
 	// disable compression
 	cur_info->force_compress = false;
 
-	ZLibBeginLump(lump);
+	ZLibBeginLump(&lump);
 
 	PutZVertices();
 	PutZSubsecs();
@@ -2098,7 +2098,7 @@ static Lump_c * FindLevelLump(const Instance &inst, const char *name)
 }
 
 
-static Lump_c * CreateLevelLump(const Instance &inst, const char *name)
+static Lump_c & CreateLevelLump(const Instance &inst, const char *name)
 {
 	// look for existing one
 	Lump_c *lump = FindLevelLump(inst, name);
@@ -2118,7 +2118,7 @@ static Lump_c * CreateLevelLump(const Instance &inst, const char *name)
 	}
 
     lump->clearData();
-	return lump;
+	return *lump;
 }
 
 
