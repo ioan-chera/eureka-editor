@@ -108,7 +108,7 @@ public:
 		return palette[index];
 	}
 
-	bool loadPalette(Lump_c &lump, int usegamma, int panel_gamma);
+	bool loadPalette(const Lump_c &lump, int usegamma, int panel_gamma);
 	void loadColormap(Lump_c *lump);
 
 	byte findPaletteColor(int r, int g, int b) const;

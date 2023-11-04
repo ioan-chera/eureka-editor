@@ -401,21 +401,16 @@ void UI_OpenMap::Populate()
 	}
 	else if (look_where->value() >= LOOK_Resource)
 	{
-		int first = 1;
-		int last  = (int)inst.wad.master.getDir().size() - 1;
-
-		if (inst.wad.master.editWad())
-			last--;
-
 		// we simply use the last resource which contains levels
 
 		// TODO: probably should collect ones with a map, add to look_where choices
 
-		for (int r = last ; r >= first ; r--)
+		for (auto it = inst.wad.master.resourceWads().rbegin();
+			 it != inst.wad.master.resourceWads().rend(); ++it)
 		{
-			if (inst.wad.master.getDir()[r]->LevelCount() >= 0)
+			if ((*it)->LevelCount() >= 0)
 			{
-				using_wad = inst.wad.master.getDir()[r];
+				using_wad = *it;
 				PopulateButtons();
 				break;
 			}

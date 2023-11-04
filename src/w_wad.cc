@@ -1106,9 +1106,10 @@ bool Wad_file::Backup(const fs::path &new_filename)
 //
 Lump_c *MasterDir::findGlobalLump(const SString &name) const
 {
-	for (int i = (int)getDir().size()-1 ; i >= 0 ; i--)
+	std::vector<std::shared_ptr<Wad_file>> wads = getAll();
+	for (auto it = wads.rbegin(); it != wads.rend(); ++it)
 	{
-		Lump_c *L = getDir()[i]->FindLumpInNamespace(name, WadNamespace::Global);
+		Lump_c *L = (*it)->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}
@@ -1118,25 +1119,11 @@ Lump_c *MasterDir::findGlobalLump(const SString &name) const
 
 //------------------------------------------------------------------------
 
-void MasterDir::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
-{
-	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().u8string().c_str());
-
-	dir.push_back(wad);
-}
-
-void MasterDir::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
-{
-	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().u8string().c_str());
-
-	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
-	dir.erase(ENDP, dir.end());
-}
-
-
 void MasterDir::MasterDir_CloseAll()
 {
-	dir.clear();
+	resource_wads.clear();
+	edit_wad.reset();
+	game_wad.reset();
 }
 
 
@@ -1158,9 +1145,10 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 
 bool MasterDir::MasterDir_HaveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < getDir().size() ; k++)
+	std::vector<std::shared_ptr<Wad_file>> wads = getAll();
+	for (const std::shared_ptr<Wad_file> &wad : wads)
 	{
-		SString wad_path = getDir()[k]->PathName().u8string();
+		SString wad_path = wad->PathName().u8string();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;

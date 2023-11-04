@@ -36,7 +36,8 @@ Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
 {
 	SString firstName;
 	Lump_c *result = nullptr;
-	for(auto it = getDir().rbegin(); it != getDir().rend(); ++it)
+	std::vector<std::shared_ptr<Wad_file>> wads = getAll();
+	for(auto it = wads.rbegin(); it != wads.rend(); ++it)
 	{
 		Lump_c *lump = (*it)->findFirstSpriteLump(stem);
 		if(!lump)
@@ -61,24 +62,15 @@ void WadData::W_LoadPalette()
 	images.IM_ResetDummyTextures();
 }
 
-void WadData::reloadResources(const LoadingData &loading, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads)
+void WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads)
 {
 	// reset the master directory
 	WadData newWad = *this;
 	try
 	{
-		newWad.master.MasterDir_CloseAll();
-		
-		// TODO: check result
-		newWad.master.loadIWAD(loading.iwadName);
-		
-		// load all resource wads
-		for(const std::shared_ptr<Wad_file> &wad : resourceWads)
-			newWad.master.MasterDir_Add(wad);
-		
-		if (newWad.master.editWad())
-			newWad.master.MasterDir_Add(newWad.master.editWad());
-		
+		newWad.master.setGameWad(gameWad);
+		newWad.master.setResources(resourceWads);
+				
 		// finally, load textures and stuff...
 		newWad.W_LoadPalette();
 		newWad.W_LoadColormap();

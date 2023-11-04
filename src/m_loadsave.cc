@@ -60,21 +60,13 @@ static const char overwrite_message[] =
 
 void MasterDir::RemoveEditWad()
 {
-	if (!edit_wad)
-		return;
-
-	MasterDir_Remove(edit_wad);
 	edit_wad.reset();
 }
 
 
 void MasterDir::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 {
-	RemoveEditWad();
-
 	edit_wad = new_wad;
-
-	MasterDir_Add(edit_wad);
 }
 
 
@@ -203,14 +195,8 @@ void Instance::CMD_NewProject()
 {
 	try
 	{
-		if(!wad.master.gameWad())
-		{
-			gLog.printf("No game WAD!\n");
-			return;
-		}
 		if (!Main_ConfirmQuit("create a new project"))
 			return;
-
 
 		/* first, ask for the output file */
 

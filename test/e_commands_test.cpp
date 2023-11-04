@@ -707,7 +707,7 @@ void SelectNeighborMidLines::initTextures()
 	lump->Write(texHeight8, sizeof(texHeight8));
 	wad->AddLump("TX_END");
 
-	inst.wad.master.MasterDir_Add(wad);
+	inst.wad.master.setGameWad(wad);
 
 	inst.conf.features.tx_start = 1;
 	inst.wad.W_LoadTextures(inst.conf);

@@ -193,7 +193,6 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	global::app_has_focus = false;
 
 	// TODO: ALL instances. This is death.
-	gInstance.wad.master.MasterDir_CloseAll();
 	gLog.close();
 
 	exit(2);
@@ -804,23 +803,6 @@ void Main_Loop()
 }
 
 
-bool MasterDir::loadIWAD(const fs::path &iwadName)
-{
-	// Load the IWAD (read only).
-	// The filename has been checked in DetermineIWAD().
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(iwadName, WadOpenMode::read);
-	if (!wad)
-	{
-		gLog.printf("Failed to open game IWAD: %s\n", iwadName.u8string().c_str());
-		return false;
-	}
-	game_wad = wad;
-
-	MasterDir_Add(game_wad);
-	return true;
-}
-
-
 static void readGameInfo(std::unordered_map<SString, SString> &parseVars, LoadingData &loading, ConfigData &config)
 		noexcept(false)
 {
@@ -928,7 +910,13 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 		throw;
 	}
 	
-	wad.reloadResources(loaded, conf, resourceWads);
+	std::shared_ptr<Wad_file> gameWad = Wad_file::Open(newLoading.iwadName, WadOpenMode::read);
+	if(!gameWad)
+	{
+		throw std::runtime_error("Could not load IWAD file");
+	}
+	
+	wad.reloadResources(gameWad, config, resourceWads);
 	conf = config;
 	loaded = newLoading;
 
@@ -1157,7 +1145,11 @@ int main(int argc, char *argv[])
 
 		// determine which IWAD to use
 		// TODO: instance management
+		std::shared_ptr<Wad_file> gameWad;
 		if (! DetermineIWAD(gInstance))
+			goto quit;
+		gameWad = Wad_file::Open(gInstance.loaded.iwadName, WadOpenMode::read);
+		if(!gameWad)
 			goto quit;
 
 		DeterminePort(gInstance);
@@ -1165,8 +1157,7 @@ int main(int argc, char *argv[])
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
 		// TODO: check result
-		gInstance.wad.master.loadIWAD(gInstance.loaded.iwadName);
-
+		gInstance.wad.master.setGameWad(gameWad);
 
 		// load the initial level
 		// TODO: first instance
@@ -1193,7 +1184,6 @@ int main(int argc, char *argv[])
 		global::app_has_focus = false;
 
 		// TODO: all instances
-		gInstance.wad.master.MasterDir_CloseAll();
 		gLog.close();
 
 		return 0;

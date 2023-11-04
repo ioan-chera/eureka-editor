@@ -46,7 +46,7 @@ TEST(MasterDir, FindGlobalLump)
 	addValidLump(wad, "F_END");
 	addValidLump(wad, "LUMP7");
 
-	master.MasterDir_Add(wad);
+	master.setGameWad(wad);
 
 	auto wad2 = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad2);
@@ -61,8 +61,8 @@ TEST(MasterDir, FindGlobalLump)
 	addValidLump(wad2, "LUMP6");
 	addValidLump(wad2, "FF_END");	// 8
 	addValidLump(wad2, "LUMP7");
-
-	master.MasterDir_Add(wad2);
+	
+	master.ReplaceEditWad(wad2);
 
 	ASSERT_EQ(master.findGlobalLump("LUMP1"), wad->GetLump(0));
 	ASSERT_EQ(master.findGlobalLump("LUMP2"), wad2->GetLump(1));
@@ -90,7 +90,7 @@ TEST(MasterDir, FindFirstSpriteLump)
 	wad->AddLump("TROOD1").Printf("a");
 	wad->AddLump("S_END");
 
-	master.MasterDir_Add(wad);
+	master.setGameWad(wad);
 
 	auto wad2 = Wad_file::Open("dummy2.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad2);
@@ -101,7 +101,7 @@ TEST(MasterDir, FindFirstSpriteLump)
 	wad2->AddLump("TROOE1").Printf("a");
 	wad2->AddLump("S_END");
 
-	master.MasterDir_Add(wad2);
+	master.ReplaceEditWad(wad2);
 
 	ASSERT_EQ(master.findFirstSpriteLump("POSS"), &wad2possa1);
 	ASSERT_EQ(master.findFirstSpriteLump("TROO"), &wad1troob1);

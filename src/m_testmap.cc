@@ -309,11 +309,8 @@ static SString GrabWadNames(const Instance &inst, const fs::path *info)
 		AppendWadName(wad_names, inst.wad.master.gameWad()->PathName().u8string(), "-iwad");
 
 	// add any resource wads
-	for (const std::shared_ptr<Wad_file> &wad : inst.wad.master.getDir())
+	for (const std::shared_ptr<Wad_file> &wad : inst.wad.master.resourceWads())
 	{
-		if (wad == inst.wad.master.gameWad() || wad == inst.wad.master.editWad())
-			continue;
-
 		AppendWadName(wad_names, wad->PathName().u8string(),
 					  (use_merge == 1) ? "-merge" : (use_merge == 0 && !has_file) ? "-file" : NULL);
 
