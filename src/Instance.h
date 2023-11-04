@@ -277,8 +277,8 @@ public:
 
 	// M_LOADSAVE
 	Lump_c *Load_LookupAndSeek(const Wad_file *wad, const char *name) const;
-	void LoadLevel(Wad_file *wad, const SString &level);
-	void LoadLevelNum(Wad_file *wad, int lev_num);
+	void LoadLevel(const Wad_file *wad, const SString &level);
+	void LoadLevelNum(const Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	bool M_SaveMap();
 	void ValidateVertexRefs(LineDef *ld, int num);

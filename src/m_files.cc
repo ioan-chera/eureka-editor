@@ -568,14 +568,14 @@ fs::path Instance::M_PickDefaultIWAD() const
 	{
 		default_game = "doom";
 	}
-	else if (wad.master.edit_wad)
+	else if (wad.master.editWad())
 	{
-		int idx = wad.master.edit_wad->LevelFindFirst();
+		int idx = wad.master.editWad()->LevelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = wad.master.edit_wad->LevelHeader(idx);
-			const SString &name = wad.master.edit_wad->GetLump(idx)->Name();
+			idx = wad.master.editWad()->LevelHeader(idx);
+			const SString &name = wad.master.editWad()->GetLump(idx)->Name();
 
 			if (toupper(name[0]) == 'E')
 				default_game = "doom";

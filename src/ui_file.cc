@@ -257,7 +257,7 @@ UI_OpenMap::UI_OpenMap(Instance &inst) :
 		look_where->add("the PWAD above|the Game IWAD|the Resource wads");
 		look_where->callback(look_callback, this);
 
-		look_where->value(inst.wad.master.edit_wad ? LOOK_PWad : LOOK_IWad);
+		look_where->value(inst.wad.master.editWad() ? LOOK_PWad : LOOK_IWad);
 	}
 
 	{
@@ -326,8 +326,8 @@ std::shared_ptr<Wad_file> UI_OpenMap::Run(SString* map_v, bool * did_load)
 	map_v->clear();
 	*did_load = false;
 
-	if (inst.wad.master.edit_wad)
-		SetPWAD(inst.wad.master.edit_wad->PathName().u8string());
+	if (inst.wad.master.editWad())
+		SetPWAD(inst.wad.master.editWad()->PathName().u8string());
 
 	Populate();
 
@@ -396,7 +396,7 @@ void UI_OpenMap::Populate()
 
 	if (look_where->value() == LOOK_IWad)
 	{
-		using_wad = inst.wad.master.game_wad;
+		using_wad = inst.wad.master.gameWad();
 		PopulateButtons();
 	}
 	else if (look_where->value() >= LOOK_Resource)
@@ -404,7 +404,7 @@ void UI_OpenMap::Populate()
 		int first = 1;
 		int last  = (int)inst.wad.master.getDir().size() - 1;
 
-		if (inst.wad.master.edit_wad)
+		if (inst.wad.master.editWad())
 			last--;
 
 		// we simply use the last resource which contains levels
@@ -426,9 +426,9 @@ void UI_OpenMap::Populate()
 		using_wad = loaded_wad;
 		PopulateButtons();
 	}
-	else if (inst.wad.master.edit_wad)
+	else if (inst.wad.master.editWad())
 	{
-		using_wad = inst.wad.master.edit_wad;
+		using_wad = inst.wad.master.editWad();
 		PopulateButtons();
 	}
 

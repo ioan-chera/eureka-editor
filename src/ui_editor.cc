@@ -450,8 +450,13 @@ void UI_TextEditor::text_modified_callback(int, int nInserted, int nDeleted, int
 }
 
 
-bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
+bool UI_TextEditor::LoadLump(const Wad_file *wad, const SString &lump_name)
 {
+	if(!wad)
+	{
+		DLG_Notify("Cannot load lump; no WAD has been loaded.");
+		return false;
+	}
 	Lump_c * lump = wad->FindLump(lump_name);
 
 	// if the lump does not exist, we will create it
@@ -512,6 +517,10 @@ void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
 
 void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 {
+	if(!wad)
+	{
+		return;
+	}
 	gLog.printf("Writing '%s' text lump\n", lump_name.c_str());
 
 	int oldie = wad->FindLumpNum(lump_name);

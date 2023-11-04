@@ -168,13 +168,26 @@ public:
 	{
 		return dir;
 	}
-public:	// TODO: make private
+	
+	const std::shared_ptr<Wad_file> &gameWad() const
+	{
+		return game_wad;
+	}
+	const std::shared_ptr<Wad_file> &editWad() const
+	{
+		return edit_wad;
+	}
+	const std::shared_ptr<Wad_file> &activeWad() const
+	{
+		return edit_wad ? edit_wad : game_wad;
+	}
+	
+private:
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	std::shared_ptr<Wad_file> edit_wad;
 	std::shared_ptr<Wad_file> game_wad;
 
-private:
 	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
 };
 

@@ -473,7 +473,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? inst.wad.master.edit_wad.get() : inst.wad.master.game_wad.get();
+		std::shared_ptr<Wad_file> wad = (pass == 0) ? inst.wad.master.editWad() : inst.wad.master.gameWad();
 
 		if (! wad)
 			continue;
@@ -754,8 +754,8 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 //
 fs::path Instance::Main_FileOpFolder() const
 {
-	if (wad.master.edit_wad)
-		return FilenameGetPath(wad.master.edit_wad->PathName());
+	if (wad.master.editWad())
+		return FilenameGetPath(wad.master.editWad()->PathName());
 
 	return "";
 }
@@ -1145,9 +1145,9 @@ int main(int argc, char *argv[])
 		// Note: there is logic in M_ParseEurekaLump() to ensure that command
 		// line arguments can override the EUREKA_LUMP values.
 
-		if (gInstance.wad.master.edit_wad)
+		if (gInstance.wad.master.editWad())
 		{
-			if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
+			if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, gInstance.wad.master.editWad().get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.wad.master.RemoveEditWad();
@@ -1175,7 +1175,7 @@ int main(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.wad.master.edit_wad ? gInstance.wad.master.edit_wad.get() : gInstance.wad.master.game_wad.get(), gInstance.loaded.levelName);
+		gInstance.LoadLevel(gInstance.wad.master.activeWad().get(), gInstance.loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

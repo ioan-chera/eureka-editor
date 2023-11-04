@@ -76,8 +76,8 @@ void WadData::reloadResources(const LoadingData &loading, const ConfigData &conf
 		for(const std::shared_ptr<Wad_file> &wad : resourceWads)
 			newWad.master.MasterDir_Add(wad);
 		
-		if (newWad.master.edit_wad)
-			newWad.master.MasterDir_Add(newWad.master.edit_wad);
+		if (newWad.master.editWad())
+			newWad.master.MasterDir_Add(newWad.master.editWad());
 		
 		// finally, load textures and stuff...
 		newWad.W_LoadPalette();
