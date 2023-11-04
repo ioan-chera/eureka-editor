@@ -146,6 +146,20 @@ private:
 	Lump_c& operator= (const Lump_c& other);
 };
 
+class LumpInputStream
+{
+public:
+	explicit LumpInputStream(const Lump_c &lump) : lump(lump)
+	{
+	}
+	
+	bool read(void *data, int len) noexcept;
+	
+private:
+	const Lump_c &lump;
+	int pos = 0;
+};
+
 
 //------------------------------------------------------------------------
 

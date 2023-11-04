@@ -141,6 +141,7 @@ class Udmf_Parser
 {
 private:
 	Lump_c *lump;
+	LumpInputStream stream;
 
 	// reached EOF or a file read error
 	bool done = false;
@@ -161,7 +162,7 @@ private:
 	Instance &inst;
 
 public:
-	Udmf_Parser(Instance &inst, Lump_c *_lump) : lump(_lump), inst(inst)
+	Udmf_Parser(Instance &inst, Lump_c *_lump) : lump(_lump), stream(*lump), inst(inst)
 	{
 		remaining = lump->Length();
 	}
@@ -189,7 +190,7 @@ public:
 				if (want > remaining)
 					want = remaining;
 
-				if (! lump->Read(buffer + b_size, want))
+				if (! stream.read(buffer + b_size, want))
 				{
 					// TODO mark error somewhere, show dialog later
 					done = true;

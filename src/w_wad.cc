@@ -108,6 +108,19 @@ bool Lump_c::Read(void *data, int len) noexcept
 	return result;
 }
 
+bool LumpInputStream::read(void *data, int len) noexcept
+{
+	bool result = true;
+	if(pos + len > lump.Length())
+	{
+		result = false;
+		len = lump.Length() - pos;
+	}
+	memcpy(data, lump.getData().data() + pos, len);
+	pos += len;
+	return result;
+}
+
 //
 // read a line of text, returns true if OK, false on EOF
 //

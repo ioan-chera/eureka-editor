@@ -403,7 +403,7 @@ Lump_c *Instance::Load_LookupAndSeek(const Wad_file *load_wad, const char *name)
 
 void Instance::LoadVertices(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "VERTEXES");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "VERTEXES");
 	if (! lump)
 		ThrowException("No vertex lump!\n");
 
@@ -414,12 +414,13 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 # endif
 
 	level.vertices.reserve(count);
+	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_vertex_t raw;
 
-		if (! lump->Read(&raw, sizeof(raw)))
+		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading vertices.\n");
 
 		auto vert = std::make_unique<Vertex>();
@@ -434,7 +435,7 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 
 void Instance::LoadSectors(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "SECTORS");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "SECTORS");
 	if (! lump)
 		ThrowException("No sector lump!\n");
 
@@ -445,12 +446,13 @@ void Instance::LoadSectors(const Wad_file *load_wad)
 # endif
 
 	level.sectors.reserve(count);
+	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_sector_t raw;
 
-		if (! lump->Read(&raw, sizeof(raw)))
+		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading sectors.\n");
 
 		auto sec = std::make_unique<Sector>();
@@ -577,63 +579,36 @@ void Instance::ValidateSectorRef(SideDef *sd, int num)
 
 void Instance::LoadHeader(const Wad_file &load_wad)
 {
-	Lump_c *lump = load_wad.GetLump(load_wad.LevelHeader(loading_level));
-
-	int length = lump->Length();
-
-	if (length == 0)
-		return;
-
-	level.headerData.resize(length);
-
-	lump->Seek();
-
-	if (! lump->Read(&level.headerData[0], length))
-		ThrowException("Error reading header lump.\n");
+	const Lump_c *lump = load_wad.GetLump(load_wad.LevelHeader(loading_level));
+	level.headerData = lump->getData();
 }
 
 
 void Instance::LoadBehavior(const Wad_file *load_wad)
 {
 	// IOANCH 9/2015: support Hexen maps
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "BEHAVIOR");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "BEHAVIOR");
 	if (! lump)
 		ThrowException("No BEHAVIOR lump!\n");
-
-	int length = lump->Length();
-
-	level.behaviorData.resize(length);
-
-	if (length == 0)
-		return;
-
-	if (! lump->Read(&level.behaviorData[0], length))
-		ThrowException("Error reading BEHAVIOR.\n");
+	
+	level.behaviorData = lump->getData();
 }
 
 
 void Instance::LoadScripts(const Wad_file *load_wad)
 {
 	// the SCRIPTS lump is usually absent
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "SCRIPTS");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "SCRIPTS");
 	if (! lump)
 		return;
-
-	int length = lump->Length();
-
-	level.scriptsData.resize(length);
-
-	if (length == 0)
-		return;
-
-	if (! lump->Read(&level.scriptsData[0], length))
-		ThrowException("Error reading SCRIPTS.\n");
+	
+	level.scriptsData = lump->getData();
 }
 
 
 void Instance::LoadThings(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
 	if (! lump)
 		ThrowException("No things lump!\n");
 
@@ -642,12 +617,14 @@ void Instance::LoadThings(const Wad_file *load_wad)
 # if DEBUG_LOAD
 	PrintDebug("GetThings: num = %d\n", count);
 # endif
+	
+	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_thing_t raw;
 
-		if (! lump->Read(&raw, sizeof(raw)))
+		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading things.\n");
 
 		auto th = std::make_unique<Thing>();
@@ -667,7 +644,7 @@ void Instance::LoadThings(const Wad_file *load_wad)
 // IOANCH 9/2015
 void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
 	if (! lump)
 		ThrowException("No things lump!\n");
 
@@ -676,12 +653,14 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 # if DEBUG_LOAD
 	PrintDebug("GetThings: num = %d\n", count);
 # endif
+	
+	LumpInputStream stream(*lump);
 
 	for (int i = 0; i < count; ++i)
 	{
 		raw_hexen_thing_t raw;
 
-		if (! lump->Read(&raw, sizeof(raw)))
+		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading things.\n");
 
 		auto th = std::make_unique<Thing>();
@@ -709,7 +688,7 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 
 void Instance::LoadSideDefs(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "SIDEDEFS");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "SIDEDEFS");
 	if(!lump)
 		ThrowException("No sidedefs lump!\n");
 
@@ -718,12 +697,14 @@ void Instance::LoadSideDefs(const Wad_file *load_wad)
 # if DEBUG_LOAD
 	PrintDebug("GetSidedefs: num = %d\n", count);
 # endif
+	
+	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_sidedef_t raw;
 
-		if (! lump->Read(&raw, sizeof(raw)))
+		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading sidedefs.\n");
 
 		auto sd = std::make_unique<SideDef>();
@@ -750,7 +731,7 @@ void Instance::LoadSideDefs(const Wad_file *load_wad)
 
 void Instance::LoadLineDefs(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
 	if (! lump)
 		ThrowException("No linedefs lump!\n");
 
@@ -762,12 +743,14 @@ void Instance::LoadLineDefs(const Wad_file *load_wad)
 
 	if (count == 0)
 		return;
+	
+	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_linedef_t raw;
 
-		if (! lump->Read(&raw, sizeof(raw)))
+		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
 		auto ld = std::make_unique<LineDef>();
@@ -796,7 +779,7 @@ void Instance::LoadLineDefs(const Wad_file *load_wad)
 // IOANCH 9/2015
 void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
 	if (! lump)
 		ThrowException("No linedefs lump!\n");
 
@@ -808,12 +791,14 @@ void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 
 	if (count == 0)
 		return;
+	
+	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_hexen_linedef_t raw;
 
-		if (! lump->Read(&raw, sizeof(raw)))
+		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
 		auto ld = std::make_unique<LineDef>();

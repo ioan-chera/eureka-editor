@@ -100,16 +100,17 @@ bool Palette::loadPalette(const Lump_c &lump, int usegamma, int panel_gamma)
 }
 
 
-void Palette::loadColormap(Lump_c *lump)
+void Palette::loadColormap(const Lump_c *lump)
 {
 	if (! lump)
 	{
 		ThrowException("COLORMAP lump not found.\n");
 		return;
 	}
+	
+	LumpInputStream stream(*lump);
 
-	lump->Seek();
-	if (! lump->Read(raw_colormap, sizeof(raw_colormap)))
+	if (! stream.read(raw_colormap, sizeof(raw_colormap)))
 	{
 		gLog.printf("COLORMAP: read error\n");
 		return;
