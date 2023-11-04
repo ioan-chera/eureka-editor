@@ -868,7 +868,7 @@ static void readPortInfo(std::unordered_map<SString, SString> &parseVars, Loadin
 //
 void Instance::Main_LoadResources(const LoadingData &loading)
 {
-	ConfigData config = conf;
+	ConfigData config;
 	std::vector<std::shared_ptr<Wad_file>> resourceWads;
 	LoadingData newLoading = loading;
 	try
@@ -876,15 +876,13 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 		gLog.printf("\n");
 		gLog.printf("----- Loading Resources -----\n");
 
-		config.clearExceptDefaults();
-
 		// clear the parse variables, pre-set a few vars
 		std::unordered_map<SString, SString> parseVars = loading.prepareConfigVariables();
 
 		readGameInfo(parseVars, newLoading, config);
 		readPortInfo(parseVars, newLoading, config);
 
-		for(const fs::path &resource : loading.resourceList)
+		for(const fs::path &resource : newLoading.resourceList)
 		{
 			if(MatchExtensionNoCase(resource, ".ugh"))
 			{
@@ -912,9 +910,7 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 	
 	std::shared_ptr<Wad_file> gameWad = Wad_file::Open(newLoading.iwadName, WadOpenMode::read);
 	if(!gameWad)
-	{
 		throw std::runtime_error("Could not load IWAD file");
-	}
 	
 	wad.reloadResources(gameWad, config, resourceWads);
 	conf = config;
