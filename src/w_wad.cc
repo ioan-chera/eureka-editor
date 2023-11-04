@@ -84,30 +84,6 @@ void Lump_c::Rename(const char *new_name)
 		name.erase(8, std::string::npos);
 }
 
-
-void Lump_c::Seek(int offset) noexcept
-{
-	mPos = offset;
-	if(mPos < 0)
-		mPos = 0;
-	else if(mPos > (int)mData.size())
-		mPos = (int)mData.size();
-}
-
-
-bool Lump_c::Read(void *data, int len) noexcept
-{
-	bool result = true;
-	if(mPos + len > (int)mData.size())
-	{
-		result = false;
-		len = (int)mData.size() - mPos;
-	}
-	memcpy(data, mData.data() + mPos, len);
-	mPos += len;
-	return result;
-}
-
 bool LumpInputStream::read(void *data, int len) noexcept
 {
 	bool result = true;
@@ -121,21 +97,18 @@ bool LumpInputStream::read(void *data, int len) noexcept
 	return result;
 }
 
-//
-// read a line of text, returns true if OK, false on EOF
-//
-bool Lump_c::GetLine(SString &string) noexcept
+bool LumpInputStream::readLine(SString &string) noexcept
 {
-	if(mPos >= (int)mData.size())
+	if(pos >= lump.Length())
 		return false;	// EOF
 
 	string.clear();
-	for(; mPos < (int)mData.size(); ++mPos)
+	for(; pos < lump.Length(); ++pos)
 	{
-		string.push_back(static_cast<char>(mData[mPos]));
+		string.push_back(static_cast<char>(lump.getData()[pos]));
 		if(string.back() == '\n')
 		{
-			++mPos;
+			++pos;
 			break;
 		}
 	}
@@ -675,7 +648,6 @@ bool Wad_file::ReadDirectory(FILE *fp, int total_size)
 								__func__, l_length, lump->name.c_str());
 					return false;
 				}
-				lump->Seek();	// reset the insertion point
 				if(fseek(fp, curpos, SEEK_SET) < 0)
 				{
 					gLog.printf("%s: fseek back failed with error %d\n",

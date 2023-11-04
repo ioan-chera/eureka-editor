@@ -100,16 +100,6 @@ public:
 	// do not call this directly, use Wad_file::RenameLump()
 	void Rename(const char *new_name);
 
-	// attempt to seek to a position within the lump (default is
-	// the beginning).  Returns true if OK, false on error.
-	void Seek(int offset = 0) noexcept;
-
-	// read some data from the lump, returning true if OK.
-	bool Read(void *data, int len) noexcept;
-
-	// read a line of text, returns true if OK, false on EOF
-	bool GetLine(SString &string) noexcept;
-
 	// write some data to the lump.  Only the lump which had just
 	// been created with Wad_file::AddLump() or RecreateLump() can be
 	// written to.
@@ -154,6 +144,7 @@ public:
 	}
 	
 	bool read(void *data, int len) noexcept;
+	bool readLine(SString &string) noexcept;
 	
 private:
 	const Lump_c &lump;

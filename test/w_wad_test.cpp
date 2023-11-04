@@ -467,33 +467,33 @@ TEST_F(WadFileTest, LumpIO)
 	Lump_c &lump = wad->AddLump("LUMP");
 
 	lump.Printf("Hello, world!");
-	lump.Seek(7);
+	LumpInputStream stream(lump);
 	char data[20] = {};
-	ASSERT_TRUE(lump.Read(data, 5));
-	ASSERT_STREQ(data, "world");
+	ASSERT_TRUE(stream.read(data, 12));
+	ASSERT_STREQ(data, "Hello, world");
 	// Won't accept post-EOF
-	ASSERT_FALSE(lump.Read(data, 2));
+	ASSERT_FALSE(stream.read(data, 2));
 	// If we got false, we're now at EOF and must rewind
-	ASSERT_FALSE(lump.Read(data, 1));
+	ASSERT_FALSE(stream.read(data, 1));
 
-	lump.Seek();
+	LumpInputStream stream2(lump);
 	memset(data, 0, sizeof(data));
-	ASSERT_TRUE(lump.Read(data, 5));
-	ASSERT_TRUE(lump.Read(data + 5, 7));
+	ASSERT_TRUE(stream2.read(data, 5));
+	ASSERT_TRUE(stream2.read(data + 5, 7));
 	ASSERT_STREQ(data, "Hello, world");
 
 	// Now test GetLine
 	Lump_c &lump2 = wad->AddLump("LUMP2");
 	lump2.Printf("Hello\nworld\nand you!");
-	lump2.Seek();
+	LumpInputStream stream3(lump2);
 	SString line;
-	ASSERT_TRUE(lump2.GetLine(line));
+	ASSERT_TRUE(stream3.readLine(line));
 	ASSERT_EQ(line, "Hello\n");
-	ASSERT_TRUE(lump2.GetLine(line));
+	ASSERT_TRUE(stream3.readLine(line));
 	ASSERT_EQ(line, "world\n");
-	ASSERT_TRUE(lump2.GetLine(line));
+	ASSERT_TRUE(stream3.readLine(line));
 	ASSERT_EQ(line, "and you!");
-	ASSERT_FALSE(lump2.GetLine(line));
+	ASSERT_FALSE(stream3.readLine(line));
 }
 
 TEST_F(WadFileTest, LumpFromFile)

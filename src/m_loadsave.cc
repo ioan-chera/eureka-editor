@@ -395,8 +395,6 @@ Lump_c *Instance::Load_LookupAndSeek(const Wad_file *load_wad, const char *name)
 
 	Lump_c *lump = load_wad->GetLump(idx);
 
-	lump->Seek();
-
 	return lump;
 }
 

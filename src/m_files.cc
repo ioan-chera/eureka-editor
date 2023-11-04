@@ -641,7 +641,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 {
 	gLog.printf("Parsing '%s' lump\n", EUREKA_LUMP);
 
-	Lump_c * lump = wad->FindLump(EUREKA_LUMP);
+	const Lump_c * lump = wad->FindLump(EUREKA_LUMP);
 
 	if (! lump)
 	{
@@ -649,7 +649,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 		return true;
 	}
 
-	lump->Seek();
+	LumpInputStream stream(*lump);
 
 	const fs::path *new_iwad = nullptr;
 	SString new_port;
@@ -658,7 +658,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 
 	SString line;
 
-	while (lump->GetLine(line))
+	while (stream.readLine(line))
 	{
 		TokenWordParse parse(line);
 		SString key, value;

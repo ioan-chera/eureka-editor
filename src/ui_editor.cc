@@ -457,7 +457,7 @@ bool UI_TextEditor::LoadLump(const Wad_file *wad, const SString &lump_name)
 		DLG_Notify("Cannot load lump; no WAD has been loaded.");
 		return false;
 	}
-	Lump_c * lump = wad->FindLump(lump_name);
+	const Lump_c * lump = wad->FindLump(lump_name);
 
 	// if the lump does not exist, we will create it
 	if (! lump)
@@ -475,11 +475,11 @@ bool UI_TextEditor::LoadLump(const Wad_file *wad, const SString &lump_name)
 
 	gLog.printf("Reading '%s' text lump\n", lump_name.c_str());
 
-	lump->Seek();
+	LumpInputStream stream(*lump);
 
 	SString line;
 
-	while (lump->GetLine(line))
+	while (stream.readLine(line))
 	{
 		line.trimTrailingSpaces();
 
