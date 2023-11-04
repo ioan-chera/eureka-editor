@@ -473,7 +473,7 @@ void ImageSet::W_AddFlat(const SString &name, Img_c &&img)
 }
 
 
-static Img_c LoadFlatImage(const WadData &wad, const SString &name, Lump_c *lump)
+static Img_c LoadFlatImage(const WadData &wad, const SString &name, const Lump_c *lump)
 {
 	// TODO: check size == 64*64
 
@@ -483,8 +483,8 @@ static Img_c LoadFlatImage(const WadData &wad, const SString &name, Lump_c *lump
 
 	byte *raw = new byte[size];
 
-	lump->Seek();
-	if (! lump->Read(raw, size))
+	LumpInputStream stream(*lump);
+	if (! stream.read(raw, size))
 	{
 		gLog.printf("%s: flat '%s' is too small, should be at least %d.\n",
 					__func__, name.c_str(), size);
