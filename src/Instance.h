@@ -29,6 +29,7 @@
 #include "r_grid.h"
 #include "r_render.h"
 #include "r_subdiv.h"
+#include "ui_file.h"
 #include "w_texture.h"
 #include "w_wad.h"
 #include "WadData.h"
@@ -398,7 +399,7 @@ private:
 	void LoadVertices(const Wad_file *load_wad);
 	bool M_ExportMap();
 	void Navigate2D();
-	void Project_ApplyChanges(const UI_ProjectSetup &dialog);
+	void Project_ApplyChanges(const UI_ProjectSetup::Result &result);
 	tl::optional<fs::path> Project_AskFile() const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);

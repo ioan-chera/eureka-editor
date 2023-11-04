@@ -146,6 +146,14 @@ public:
 	{
 		RES_NUM = 4
 	};
+	struct Result
+	{
+		SString game;
+		SString port;
+		MapFormat mapFormat = MapFormat::invalid;
+		SString nameSpace;
+		fs::path resources[RES_NUM];
+	};
 
 private:
 	Fl_Choice *game_choice;
@@ -159,14 +167,14 @@ private:
 
 	map_format_bitset_t usable_formats;
 
-	enum
+	enum class Action
 	{
-		ACT_none = 0,
-		ACT_CANCEL,
-		ACT_ACCEPT
+		none,
+		cancel,
+		accept
 	};
 
-	int action;
+	Action action = Action::none;
 
 	static void   game_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);
@@ -187,17 +195,7 @@ private:
 	void PopulateNamespaces();
 	void PopulateResources();
 
-public:
-	/*
-	 * current state
-	 */
-	SString game;
-	SString port;
-
-	MapFormat map_format;
-	SString  name_space;
-
-	fs::path res[RES_NUM];
+	Result result;
 
 	Fl_Button* mResourceButtons[RES_NUM] = {};
 	Fl_Button* mClearButtons[RES_NUM] = {};
@@ -208,9 +206,7 @@ public:
 	UI_ProjectSetup(const Instance &inst, bool new_project = false, bool is_startup = false);
 
 	// returns true if something changed
-	bool Run();
-
-	void prepareLoadingData(LoadingData &loading) const;
+	tl::optional<Result> Run();
 };
 
 #endif  /* __EUREKA_UI_FILE_H__ */

@@ -161,11 +161,21 @@ tl::optional<fs::path> Instance::Project_AskFile() const
 }
 
 
-void Instance::Project_ApplyChanges(const UI_ProjectSetup &dialog)
+void Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result)
 {
 	// grab the new information
     LoadingData loading = loaded;
-    dialog.prepareLoadingData(loading);
+	loading.gameName = result.game;
+	loading.portName = result.port;
+	const fs::path *iwad = global::recent.queryIWAD(result.game);
+	SYS_ASSERT(iwad);
+	loading.iwadName = *iwad;
+	loading.levelFormat = result.mapFormat;
+	loading.udmfNamespace = result.nameSpace;
+	loading.resourceList.clear();
+	for(int i = 0; i < UI_ProjectSetup::RES_NUM; ++i)
+		if(!result.resources[i].empty())
+			loading.resourceList.push_back(result.resources[i]);
 	Fl::wait(0.1);
 	Main_LoadResources(loading);
 	Fl::wait(0.1);
@@ -177,11 +187,11 @@ void Instance::CMD_ManageProject()
 	try
 	{
 		UI_ProjectSetup dialog(*this, false /* new_project */, false /* is_startup */);
-		bool ok = dialog.Run();
+		tl::optional<UI_ProjectSetup::Result> result = dialog.Run();
 
-		if (ok)
+		if (result)
 		{
-			Project_ApplyChanges(dialog);
+			Project_ApplyChanges(*result);
 		}
 	}
 	catch(const ParseException &e)
@@ -210,9 +220,9 @@ void Instance::CMD_NewProject()
 		// TODO: new instance
 		UI_ProjectSetup dialog(*this, true /* new_project */, false /* is_startup */);
 
-		bool ok = dialog.Run();
+		tl::optional<UI_ProjectSetup::Result> result = dialog.Run();
 
-		if (!ok)
+		if (!result)
 		{
 			return;
 		}
@@ -241,7 +251,7 @@ void Instance::CMD_NewProject()
 		wad.master.RemoveEditWad();
 
 		// this calls Main_LoadResources which resets the master directory
-		Project_ApplyChanges(dialog);
+		Project_ApplyChanges(*result);
 
 		// determine map name (same as first level in the IWAD)
 		SString map_name = "MAP01";
@@ -285,11 +295,11 @@ bool Instance::MissingIWAD_Dialog()
 {
 	UI_ProjectSetup dialog(*this, false /* new_project */, true /* is_startup */);
 
-	bool ok = dialog.Run();
+	tl::optional<UI_ProjectSetup::Result> result = dialog.Run();
 
-	if (ok)
+	if (result)
 	{
-		loaded.gameName = dialog.game;
+		loaded.gameName = result->game;
 		SYS_ASSERT(!loaded.gameName.empty());
 
 		const fs::path *iwad = global::recent.queryIWAD(loaded.gameName);
@@ -297,7 +307,7 @@ bool Instance::MissingIWAD_Dialog()
 		loaded.iwadName = *iwad;
 	}
 
-	return ok;
+	return result.has_value();
 }
 
 
