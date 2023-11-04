@@ -492,7 +492,7 @@ MapFormat Wad_file::LevelFormat(int lev_num) const noexcept
 }
 
 
-Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) const noexcept
+const Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) const noexcept
 {
 	for(const LumpRef &lumpRef : directory)
 	{
@@ -507,10 +507,10 @@ Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) 
 //
 // Searches for the 
 //
-Lump_c *Wad_file::findFirstSpriteLump(const SString &stem) const
+const Lump_c *Wad_file::findFirstSpriteLump(const SString &stem) const
 {
 	SString firstName;
-	Lump_c *result = nullptr;
+	const Lump_c *result = nullptr;
 	for(const LumpRef &lumpRef : directory)
 	{
 		if(lumpRef.ns != WadNamespace::Sprites)
@@ -1089,12 +1089,12 @@ bool Wad_file::Backup(const fs::path &new_filename)
 // find a lump in any loaded wad (later ones tried first),
 // returning NULL if not found.
 //
-Lump_c *MasterDir::findGlobalLump(const SString &name) const
+const Lump_c *MasterDir::findGlobalLump(const SString &name) const
 {
 	std::vector<std::shared_ptr<Wad_file>> wads = getAll();
 	for (auto it = wads.rbegin(); it != wads.rend(); ++it)
 	{
-		Lump_c *L = (*it)->FindLumpInNamespace(name, WadNamespace::Global);
+		const Lump_c *L = (*it)->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}

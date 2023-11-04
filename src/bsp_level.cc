@@ -1717,7 +1717,7 @@ static void SaveXGL3Format(const Instance &inst, node_t *root_node)
 
 static void LoadLevel(const Instance &inst)
 {
-	Lump_c *LEV = inst.wad.master.editWad()->GetLump(lev_current_start);
+	const Lump_c *LEV = inst.wad.master.editWad()->GetLump(lev_current_start);
 
 	lev_current_name = LEV->Name();
 	lev_overflows = 0;

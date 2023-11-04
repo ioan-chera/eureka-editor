@@ -32,14 +32,14 @@ bool LumpNameCompare::operator()(const Lump_c &lump1, const Lump_c &lump2) const
 //
 // Locates the first four-stem sprite from the master dir
 //
-Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
+const Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
 {
 	SString firstName;
-	Lump_c *result = nullptr;
+	const Lump_c *result = nullptr;
 	std::vector<std::shared_ptr<Wad_file>> wads = getAll();
 	for(auto it = wads.rbegin(); it != wads.rend(); ++it)
 	{
-		Lump_c *lump = (*it)->findFirstSpriteLump(stem);
+		const Lump_c *lump = (*it)->findFirstSpriteLump(stem);
 		if(!lump)
 			continue;
 		if(firstName.empty() || firstName.get() > lump->Name().get())
@@ -53,7 +53,7 @@ Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
 
 void WadData::W_LoadPalette()
 {
-	Lump_c *lump = master.findGlobalLump("PLAYPAL");
+	const Lump_c *lump = master.findGlobalLump("PLAYPAL");
 	if(!lump)
 	{
 		ThrowException("PLAYPAL lump not found.\n");

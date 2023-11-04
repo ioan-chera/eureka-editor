@@ -164,8 +164,8 @@ public:
 	void MasterDir_CloseAll();
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
 
-	Lump_c *findGlobalLump(const SString &name) const;
-	Lump_c *findFirstSpriteLump(const SString &stem) const;
+	const Lump_c *findGlobalLump(const SString &name) const;
+	const Lump_c *findFirstSpriteLump(const SString &stem) const;
 
 	const std::shared_ptr<Wad_file> &gameWad() const
 	{
