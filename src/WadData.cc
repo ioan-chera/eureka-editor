@@ -67,9 +67,6 @@ void WadData::reloadResources(const LoadingData &loading, const ConfigData &conf
 	WadData newWad = *this;
 	try
 	{
-		if (newWad.master.edit_wad)
-			newWad.master.MasterDir_Remove(newWad.master.edit_wad);
-		
 		newWad.master.MasterDir_CloseAll();
 		
 		// TODO: check result
