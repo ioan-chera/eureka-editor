@@ -139,7 +139,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, cons
 		Lump_c *lump = wad.master.findGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(wad.palette, config, img, lump, picname, xofs, yofs))
+			! LoadPicture(wad.palette, config, img, *lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -206,7 +206,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const 
 		Lump_c *lump = wad.master.findGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(wad.palette, config, img, lump, picname, xofs, yofs))
+			! LoadPicture(wad.palette, config, img, *lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -221,7 +221,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const 
 }
 
 
-static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lump, const byte *pnames, int pname_size,
+static void LoadTexturesLump(WadData &wad, const ConfigData &config, const Lump_c &lump, const byte *pnames, int pname_size,
                              bool skip_first)
 {
 	// TODO : verify size word at front of PNAMES ??
@@ -232,7 +232,7 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lum
 	pname_size /= 8;
 
 	// load TEXTUREx data into memory for easier processing
-	const std::vector<byte> &tex_data = lump->getData();
+	const std::vector<byte> &tex_data = lump.getData();
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
 	s32_t *tex_data_s32 = (s32_t *)tex_data.data();
@@ -276,7 +276,7 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 			continue;
 		Lump_c *lump = lumpRef.lump.get();
 
-		ImageFormat img_fmt = W_DetectImageFormat(lump);
+		ImageFormat img_fmt = W_DetectImageFormat(*lump);
 		const SString &name = lump->Name();
 		tl::optional<Img_c> img;
 
@@ -284,22 +284,22 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 		{
 			case ImageFormat::doom: /* Doom patch */
 				img = Img_c();
-				if (! LoadPicture(wad.palette, config, *img, lump, name, 0, 0))
+				if (! LoadPicture(wad.palette, config, *img, *lump, name, 0, 0))
 				{
 					img.reset();
 				}
 				break;
 
 			case ImageFormat::png: /* PNG */
-				img = LoadImage_PNG(lump, name);
+				img = LoadImage_PNG(*lump, name);
 				break;
 
 			case ImageFormat::tga: /* TGA */
-				img = LoadImage_TGA(lump, name);
+				img = LoadImage_TGA(*lump, name);
 				break;
 
 			case ImageFormat::jpeg: /* JPEG */
-				img = LoadImage_JPEG(lump, name);
+				img = LoadImage_JPEG(*lump, name);
 				break;
 
 			case ImageFormat::unrecognized:
@@ -328,9 +328,9 @@ void WadData::W_LoadTextures(const ConfigData &config)
 	{
 		gLog.printf("Loading Textures from WAD #%d\n", i+1);
 
-		Lump_c *pnames   = master.getDir()[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
-		Lump_c *texture1 = master.getDir()[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
-		Lump_c *texture2 = master.getDir()[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
+		const Lump_c *pnames   = master.getDir()[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
+		const Lump_c *texture1 = master.getDir()[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
+		const Lump_c *texture2 = master.getDir()[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
 
 		// Note that we _require_ the PNAMES lump to exist along
 		// with the TEXTURE1/2 lump which uses it.  Probably a
@@ -344,10 +344,10 @@ void WadData::W_LoadTextures(const ConfigData &config)
 			const std::vector<byte> &pname_data = pnames->getData();
 
 			if (texture1)
-				LoadTexturesLump(*this, config, texture1, pname_data.data(), (int)pname_data.size(), true);
+				LoadTexturesLump(*this, config, *texture1, pname_data.data(), (int)pname_data.size(), true);
 
 			if (texture2)
-				LoadTexturesLump(*this, config, texture2, pname_data.data(), (int)pname_data.size(), false);
+				LoadTexturesLump(*this, config, *texture2, pname_data.data(), (int)pname_data.size(), false);
 		}
 
 		if (config.features.tx_start)
@@ -689,7 +689,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 		{
 			result = Img_c();
 
-			if (! LoadPicture(palette, config, *result, lump, info.sprite, 0, 0))
+			if (! LoadPicture(palette, config, *result, *lump, info.sprite, 0, 0))
 			{
 				result.reset();
 			}
