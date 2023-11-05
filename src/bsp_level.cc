@@ -2001,7 +2001,7 @@ void ZLibBeginLump(Lump_c *lump)
 	zout_stream.opaque = (voidpf)0;
 
 	if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-		FatalError("Trouble setting up zlib compression\n");
+		ThrowException("Trouble setting up zlib compression\n");
 
 	zout_stream.next_out  = zout_buffer;
 	zout_stream.avail_out = sizeof(zout_buffer);
