@@ -47,7 +47,7 @@ bool global::udmf_testing = false;
 //
 // Wad namespace string
 //
-const char *WadNamespaceString(WadNamespace ns)
+static const char *WadNamespaceString(WadNamespace ns) noexcept
 {
 	switch(ns)
 	{
@@ -725,7 +725,7 @@ void Wad_file::SortLevels() noexcept
 }
 
 
-static bool IsDummyMarker(const SString &name)
+static bool IsDummyMarker(const SString &name) noexcept
 {
 	// matches P1_START, F3_END etc...
 

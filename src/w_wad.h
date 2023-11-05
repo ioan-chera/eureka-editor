@@ -72,8 +72,6 @@ public:
 	}
 };
 
-const char *WadNamespaceString(WadNamespace ns);
-
 class Lump_c
 {
 friend class Wad_file;
@@ -110,11 +108,15 @@ public:
 
 	// Memory buffer actions
 	size_t writeData(FILE *f, int len);
+	void setData(std::vector<byte> &&data)
+	{
+		mData = std::move(data);
+	}
 
     //
     // Clear the lump data
     //
-    void clearData()
+    void clearData() noexcept
     {
         mData.clear();
         mPos = 0;

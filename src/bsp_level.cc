@@ -1426,7 +1426,7 @@ void SortSegs()
 class ZLibContext
 {
 public:
-	explicit ZLibContext(Lump_c &lump);
+	explicit ZLibContext(std::vector<byte> &data);
 	~ZLibContext()
 	{
 		finishLump();
@@ -1437,12 +1437,12 @@ public:
 private:
 	void finishLump();
 
-	Lump_c &out_lump;
+	std::vector<byte> &out_data;
 	z_stream out_stream{};
 	Bytef out_buffer[1024] = {};
 };
 
-ZLibContext::ZLibContext(Lump_c &lump) : out_lump(lump)
+ZLibContext::ZLibContext(std::vector<byte> &data) : out_data(data)
 {
 	if(!cur_info->force_compress)
 		return;
@@ -1459,7 +1459,8 @@ void ZLibContext::appendLump(const void *data, int length)
 {
 	if (! cur_info->force_compress)
 	{
-		out_lump.Write(data, length);
+		auto bdata = static_cast<const byte *>(data);
+		out_data.insert(out_data.end(), bdata, bdata + length);
 		return;
 	}
 
@@ -1475,7 +1476,7 @@ void ZLibContext::appendLump(const void *data, int length)
 
 		if (out_stream.avail_out == 0)
 		{
-			out_lump.Write(out_buffer, sizeof(out_buffer));
+			out_data.insert(out_data.end(), out_buffer, out_buffer + sizeof(out_buffer));
 
 			out_stream.next_out  = out_buffer;
 			out_stream.avail_out = sizeof(out_buffer);
@@ -1509,7 +1510,7 @@ void ZLibContext::finishLump()
 
 		if (out_stream.avail_out == 0)
 		{
-			out_lump.Write(out_buffer, sizeof(out_buffer));
+			out_data.insert(out_data.end(), out_buffer, out_buffer + sizeof(out_buffer));
 
 			out_stream.next_out  = out_buffer;
 			out_stream.avail_out = sizeof(out_buffer);
@@ -1519,7 +1520,9 @@ void ZLibContext::finishLump()
 	left_over = sizeof(out_buffer) - out_stream.avail_out;
 
 	if (left_over > 0)
-		out_lump.Write(out_buffer, left_over);
+	{
+		out_data.insert(out_data.end(), out_buffer, out_buffer + left_over);
+	}
 
 	deflateEnd(&out_stream);
 }
@@ -1795,6 +1798,27 @@ static void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3)
 
 static void SaveZDFormat(const Instance &inst, node_t *root_node)
 {
+
+	// the ZLibXXX functions do no compression for XNOD format
+	
+	std::vector<byte> lumpData;
+	try
+	{
+		ZLibContext zlibContext(lumpData);
+		
+		PutZVertices(zlibContext);
+		PutZSubsecs(zlibContext);
+		PutZSegs(zlibContext);
+		PutZNodes(zlibContext, root_node, false /* do_xgl3 */);
+	}
+	catch(const std::runtime_error &e)
+	{
+		gLog.printf("Error writing ZNODES: %s", e.what());
+		throw;
+	}
+	
+	// Commit
+	
 	// leave SEGS and SSECTORS empty
 	CreateLevelLump(inst, "SEGS");
 	CreateLevelLump(inst, "SSECTORS");
@@ -1805,15 +1829,7 @@ static void SaveZDFormat(const Instance &inst, node_t *root_node)
 		lump.Write(lev_ZNOD_magic, 4);
 	else
 		lump.Write(lev_XNOD_magic, 4);
-
-	// the ZLibXXX functions do no compression for XNOD format
-	
-	ZLibContext zlibContext(lump);
-
-	PutZVertices(zlibContext);
-	PutZSubsecs(zlibContext);
-	PutZSegs(zlibContext);
-	PutZNodes(zlibContext, root_node, false /* do_xgl3 */);
+	lump.setData(std::move(lumpData));
 }
 
 
@@ -1828,12 +1844,17 @@ static void SaveXGL3Format(const Instance &inst, node_t *root_node)
 	// disable compression
 	cur_info->force_compress = false;
 
-	ZLibContext zlibContext(lump);
+	std::vector<byte> lumpData;
+	{
+		ZLibContext zlibContext(lumpData);
+		
+		PutZVertices(zlibContext);
+		PutZSubsecs(zlibContext);
+		PutXGL3Segs(zlibContext);
+		PutZNodes(zlibContext, root_node, true /* do_xgl3 */);
+	}
 	
-	PutZVertices(zlibContext);
-	PutZSubsecs(zlibContext);
-	PutXGL3Segs(zlibContext);
-	PutZNodes(zlibContext, root_node, true /* do_xgl3 */);
+	lump.setData(std::move(lumpData));
 }
 
 
