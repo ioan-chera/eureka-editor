@@ -274,32 +274,32 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 	{
 		if(lumpRef.ns != WadNamespace::TextureLumps)
 			continue;
-		const Lump_c *lump = lumpRef.lump.get();
+		const Lump_c &lump = lumpRef.lump;
 
-		ImageFormat img_fmt = W_DetectImageFormat(*lump);
-		const SString &name = lump->Name();
+		ImageFormat img_fmt = W_DetectImageFormat(lump);
+		const SString &name = lump.Name();
 		tl::optional<Img_c> img;
 
 		switch (img_fmt)
 		{
 			case ImageFormat::doom: /* Doom patch */
 				img = Img_c();
-				if (! LoadPicture(wad.palette, config, *img, *lump, name, 0, 0))
+				if (! LoadPicture(wad.palette, config, *img, lump, name, 0, 0))
 				{
 					img.reset();
 				}
 				break;
 
 			case ImageFormat::png: /* PNG */
-				img = LoadImage_PNG(*lump, name);
+				img = LoadImage_PNG(lump, name);
 				break;
 
 			case ImageFormat::tga: /* TGA */
-				img = LoadImage_TGA(*lump, name);
+				img = LoadImage_TGA(lump, name);
 				break;
 
 			case ImageFormat::jpeg: /* JPEG */
-				img = LoadImage_JPEG(*lump, name);
+				img = LoadImage_JPEG(lump, name);
 				break;
 
 			case ImageFormat::unrecognized:
@@ -307,7 +307,7 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 				break;
 
 			default:
-				gLog.printf("Unsupported texture format in '%s' lump\n", lump->Name().c_str());
+				gLog.printf("Unsupported texture format in '%s' lump\n", lump.Name().c_str());
 				break;
 		}
 
@@ -526,9 +526,9 @@ void WadData::W_LoadFlats()
 		{
 			if(lumpRef.ns != WadNamespace::Flats)
 				continue;
-			const Lump_c *lump = lumpRef.lump.get();
+			const Lump_c &lump = lumpRef.lump;
 
-			images.W_AddFlat(lump->Name(), LoadFlatImage(*this, lump->Name(), lump));
+			images.W_AddFlat(lump.Name(), LoadFlatImage(*this, lump.Name(), &lump));
 		}
 	}
 }

@@ -140,7 +140,7 @@ public:
 class Udmf_Parser
 {
 private:
-	Lump_c *lump;
+	const Lump_c *lump;
 	LumpInputStream stream;
 
 	// reached EOF or a file read error
@@ -162,7 +162,7 @@ private:
 	Instance &inst;
 
 public:
-	Udmf_Parser(Instance &inst, Lump_c *_lump) : lump(_lump), stream(*lump), inst(inst)
+	Udmf_Parser(Instance &inst, const Lump_c *_lump) : lump(_lump), stream(*lump), inst(inst)
 	{
 		remaining = lump->Length();
 	}
@@ -656,7 +656,7 @@ void Instance::ValidateLevel_UDMF()
 
 void Instance::UDMF_LoadLevel(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "TEXTMAP");
+	const Lump_c *lump = Load_LookupAndSeek(load_wad, "TEXTMAP");
 	// we assume this cannot happen
 	if (! lump)
 		return;

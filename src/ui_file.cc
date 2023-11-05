@@ -467,7 +467,7 @@ void UI_OpenMap::PopulateButtons()
 
 	for (int lev = 0 ; lev < num_levels ; lev++)
 	{
-		Lump_c *lump = wad->GetLump(wad->LevelHeader(lev));
+		const Lump_c *lump = wad->GetLump(wad->LevelHeader(lev));
 
 		level_names.insert(lump->Name());
 	}
