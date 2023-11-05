@@ -1545,7 +1545,7 @@ static void PutZVertices(ZLibContext &zcontext)
 	{
 		raw_v2_vertex_t raw;
 
-		vertex_t *vert = lev_vertices[i];
+		const vertex_t *vert = lev_vertices[i];
 
 		if (! vert->is_new)
 			continue;
