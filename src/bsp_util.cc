@@ -45,7 +45,7 @@ void PrintDetail(const char *fmt, ...)
 }
 
 
-void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
+void LevelData::Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list args;
 
@@ -65,7 +65,7 @@ void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
 }
 
 
-void Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
+void LevelData::Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list args;
 
@@ -248,7 +248,7 @@ static void MarkPolyobjSector(int sector, const Document &doc)
 	}
 }
 
-static void MarkPolyobjPoint(double x, double y, const Instance &inst)
+void LevelData::MarkPolyobjPoint(double x, double y, const Instance &inst)
 {
 	int i;
 	int inside_count = 0;
@@ -381,7 +381,7 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 //
 // Based on code courtesy of Janis Legzdinsh.
 //
-void DetectPolyobjSectors(const Instance &inst)
+void LevelData::DetectPolyobjSectors(const Instance &inst)
 {
 	int i;
 

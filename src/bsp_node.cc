@@ -71,7 +71,7 @@ namespace ajbsp
 static int current_seg_index;
 
 
-typedef struct eval_info_s
+struct eval_info_t
 {
 	int cost;
 	int splits;
@@ -99,8 +99,7 @@ public:
 		else
 			mini_right++;
 	}
-}
-eval_info_t;
+};
 
 
 static intersection_t *quick_alloc_cuts = NULL;
@@ -344,7 +343,7 @@ static void AddIntersection(intersection_t ** cut_list,
 //
 // Returns true if a "bad seg" was found early.
 //
-static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
+int LevelData::EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		int best_cost, eval_info_t *info, const Document &doc)
 {
 	double qnty;
@@ -536,7 +535,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 // Returns the computed cost, or a negative value if the seg should be
 // skipped altogether.
 //
-static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Document &doc)
+int LevelData::EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Document &doc)
 {
 	eval_info_t info;
 
@@ -649,7 +648,7 @@ static void EvaluateFastWorker(quadtree_c *tree,
 }
 
 
-static seg_t *FindFastSeg(quadtree_c *tree, const Document &doc)
+seg_t *LevelData::FindFastSeg(quadtree_c *tree, const Document &doc)
 {
 	seg_t *best_H = NULL;
 	seg_t *best_V = NULL;
@@ -684,7 +683,7 @@ static seg_t *FindFastSeg(quadtree_c *tree, const Document &doc)
 
 
 /* returns false if cancelled */
-static bool PickNodeWorker(quadtree_c *part_list,
+bool LevelData::PickNodeWorker(quadtree_c *part_list,
 		quadtree_c *tree, seg_t ** best, int *best_cost, const Document &doc)
 {
 	// try each partition
@@ -733,7 +732,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 //
 // Find the best seg in the seg_list to use as a partition line.
 //
-static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
+seg_t *LevelData::PickNode(quadtree_c *tree, int depth, const Document &doc)
 {
 	seg_t *best=NULL;
 
@@ -1150,7 +1149,7 @@ void quadtree_c::VerifySide(seg_t *part, int side)
 #endif
 
 
-void node_t::SetPartition(const seg_t *part, const Instance &inst)
+void node_t::SetPartition(LevelData &lev_data, const seg_t *part, const Instance &inst)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
@@ -1186,7 +1185,7 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 		{
 			if (((int)dx | (int)dy) & 1)
 			{
-				Warning(inst, "Loss of accuracy on VERY long node: "
+				lev_data.Warning(inst, "Loss of accuracy on VERY long node: "
 						"(%f,%f) -> (%f,%f)\n", x, y, x + dx, y+ dy);
 			}
 
@@ -1753,7 +1752,7 @@ build_result_e LevelData::BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 	AddMinisegs(cut_list, part, &lefts, &rights);
 
-	node->SetPartition(part, inst);
+	node->SetPartition(*this, part, inst);
 
 # if DEBUG_BUILDER
 	gLog.debugPrintf("Build: Going LEFT\n");

@@ -97,10 +97,6 @@ namespace ajbsp
 {
 
 
-// internal storage of node building parameters
-
-extern nodebuildinfo_t * cur_info;
-
 
 
 /* ----- basic types --------------------------- */
@@ -123,8 +119,6 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 
 void PrintDetail(const char *fmt, ...);
 
-void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
-void Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
 
 // allocate and clear some memory.  guaranteed not to fail.
 void *UtilCalloc(int size);
@@ -350,7 +344,7 @@ struct node_t
 	int index;
 
 public:
-	void SetPartition(const seg_t *part, const Instance &inst);
+	void SetPartition(LevelData &lev_data, const seg_t *part, const Instance &inst);
 };
 
 
@@ -401,6 +395,7 @@ public:
 
 class ZLibContext;
 struct intersection_t;
+struct eval_info_t;
 class LevelData
 {
 	
@@ -414,6 +409,8 @@ public:
 	
 	// MAIN STUFF
 	build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
+	
+	void Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(3, 4);
 	
 private:
 	struct Block
@@ -515,8 +512,12 @@ private:
 	void LoadLevel(const Instance &inst);
 	void FreeLevel();
 	u32_t CalcGLChecksum(const Instance &inst) const;
+	inline SString CalcOptionsString() const
+	{
+		return SString::printf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
+	}
 	void UpdateGLMarker(const Instance &inst, Lump_c *marker) const;
-	void AddMissingLump(const Instance &inst, const char *name, const char *after) const;
+	void AddMissingLump(const Instance &inst, const char *name, const char *after) ;
 	build_result_e SaveLevel(node_t *root_node, const Instance &inst);
 	build_result_e SaveUDMF(const Instance &inst, node_t *root_node);
 	
@@ -570,9 +571,25 @@ private:
 	// rounded coordinates degenerate to the same point).
 	//
 	void RoundOffBspTree();
+	
+	void MarkPolyobjPoint(double x, double y, const Instance &inst);
 
 	// detection routines
 	void DetectOverlappingVertices(const Document &doc) const;
+	void DetectPolyobjSectors(const Instance &inst);
+	
+	int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
+								   int best_cost, eval_info_t *info, const Document &doc);
+	int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Document &doc);
+	seg_t *FindFastSeg(quadtree_c *tree, const Document &doc);
+	bool PickNodeWorker(quadtree_c *part_list,
+						quadtree_c *tree, seg_t ** best, int *best_cost, const Document &doc);
+	// scan all the segs in the list, and choose the best seg to use as a
+	// partition line, returning it.  If no seg can be used, returns NULL.
+	// The 'depth' parameter is the current depth in the tree, used for
+	// computing the current progress.
+	//
+	seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc);
 	
 	/* ----- vertex routines ------------------------------- */
 	void VertexAddWallTip(vertex_t *vert, double dx, double dy,
@@ -583,6 +600,8 @@ private:
 	// happens along the given seg at the given location.
 	//
 	vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc);
+	
+	void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(3, 4);
 	
 	Block block = {};
 	Reject rej = {};
@@ -602,6 +621,9 @@ private:
 	std::vector<seg_t *>     segs;
 	std::vector<node_t *>    nodes;
 	std::vector<walltip_t *> walltips;
+	
+	// internal storage of node building parameters
+	nodebuildinfo_t * cur_info = NULL;
 };
 
 
@@ -631,7 +653,6 @@ private:
 // detection routines
 
 void DetectOverlappingLines(const Document &doc);
-void DetectPolyobjSectors(const Instance &inst);
 
 // check whether a line with the given delta coordinates from this
 // vertex is open or closed.  If there exists a walltip at same
@@ -686,12 +707,6 @@ struct intersection_t
 
 /* -------- functions ---------------------------- */
 
-// scan all the segs in the list, and choose the best seg to use as a
-// partition line, returning it.  If no seg can be used, returns NULL.
-// The 'depth' parameter is the current depth in the tree, used for
-// computing the current progress.
-//
-seg_t *PickNode(quadtree_c *tree, int depth, const bbox_t *bbox);
 
 // compute the boundary of the list of segs
 void FindLimits2(seg_t *list, bbox_t *bbox);

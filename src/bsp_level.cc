@@ -1351,7 +1351,7 @@ void LevelData::SortSegs()
 class ZLibContext
 {
 public:
-	explicit ZLibContext(std::vector<byte> &data);
+	explicit ZLibContext(nodebuildinfo_t * cur_info, std::vector<byte> &data);
 	~ZLibContext()
 	{
 		finishLump();
@@ -1365,9 +1365,11 @@ private:
 	std::vector<byte> &out_data;
 	z_stream out_stream{};
 	Bytef out_buffer[1024] = {};
+	
+	nodebuildinfo_t * cur_info = NULL;
 };
 
-ZLibContext::ZLibContext(std::vector<byte> &data) : out_data(data)
+ZLibContext::ZLibContext(nodebuildinfo_t * cur_info, std::vector<byte> &data) : out_data(data), cur_info(cur_info)
 {
 	if(!cur_info->force_compress)
 		return;
@@ -1729,7 +1731,7 @@ void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 	std::vector<byte> lumpData;
 	try
 	{
-		ZLibContext zlibContext(lumpData);
+		ZLibContext zlibContext(cur_info, lumpData);
 		
 		PutZVertices(zlibContext);
 		PutZSubsecs(zlibContext);
@@ -1771,7 +1773,7 @@ void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node)
 
 	std::vector<byte> lumpData;
 	{
-		ZLibContext zlibContext(lumpData);
+		ZLibContext zlibContext(cur_info, lumpData);
 		
 		PutZVertices(zlibContext);
 		PutZSubsecs(zlibContext);
@@ -1864,12 +1866,6 @@ u32_t LevelData::CalcGLChecksum(const Instance &inst) const
 }
 
 
-inline static SString CalcOptionsString()
-{
-	return SString::printf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
-}
-
-
 void LevelData::UpdateGLMarker(const Instance &inst, Lump_c *marker) const
 {
 	// we *must* compute the checksum BEFORE (re)creating the lump
@@ -1896,7 +1892,7 @@ void LevelData::UpdateGLMarker(const Instance &inst, Lump_c *marker) const
 }
 
 
-void LevelData::AddMissingLump(const Instance &inst, const char *name, const char *after) const
+void LevelData::AddMissingLump(const Instance &inst, const char *name, const char *after)
 {
 	if (inst.wad.master.editWad()->LevelLookupLump(current_idx, name) >= 0)
 		return;
@@ -2109,9 +2105,6 @@ Lump_c & LevelData::CreateGLMarker(const Instance &inst) const
 //------------------------------------------------------------------------
 // MAIN STUFF
 //------------------------------------------------------------------------
-
-nodebuildinfo_t * cur_info = NULL;
-
 
 build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst)
 {
