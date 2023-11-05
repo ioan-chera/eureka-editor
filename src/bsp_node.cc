@@ -170,7 +170,7 @@ void seg_t::Recompute()
 //       segs (except the one we are currently splitting) must exist
 //       on a singly-linked list somewhere.
 //
-static seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc)
+seg_t * LevelData::SplitSeg(seg_t *old_seg, double x, double y, const Document &doc)
 {
 	seg_t *new_seg;
 	vertex_t *new_vert;
@@ -800,7 +800,7 @@ static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
 //       same logic when determining which segs should go left, right
 //       or be split.
 //
-static void DivideOneSeg(seg_t *seg, seg_t *part,
+void LevelData::DivideOneSeg(seg_t *seg, seg_t *part,
 		seg_t **left_list, seg_t **right_list,
 		intersection_t ** cut_list, const Document &doc)
 {
@@ -884,7 +884,7 @@ static void DivideOneSeg(seg_t *seg, seg_t *part,
 }
 
 
-static void SeparateSegs(quadtree_c *tree, seg_t *part,
+void LevelData::SeparateSegs(quadtree_c *tree, seg_t *part,
 		seg_t **left_list, seg_t **right_list,
 		intersection_t ** cut_list, const Document &doc)
 {
@@ -944,7 +944,7 @@ void FindLimits2(seg_t *list, bbox_t *bbox)
 }
 
 
-void AddMinisegs(intersection_t *cut_list, seg_t *part,
+void LevelData::AddMinisegs(intersection_t *cut_list, seg_t *part,
 		seg_t **left_list, seg_t **right_list)
 {
 	if (! cut_list)
@@ -1318,7 +1318,7 @@ void quadtree_c::ConvertToList(seg_t **_list)
 }
 
 
-static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
+seg_t *LevelData::CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 		int sidedef, int what_side /* 0 or 1 */, const Instance &inst)
 {
 	const SideDef *sd = NULL;
@@ -1356,7 +1356,7 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 // Initially create all segs, one for each linedef.
 // Must be called *after* InitBlockmap().
 //
-seg_t *CreateSegs(const Instance &inst)
+seg_t *LevelData::CreateSegs(const Instance &inst)
 {
 	seg_t *list = NULL;
 
@@ -1381,7 +1381,7 @@ seg_t *CreateSegs(const Instance &inst)
 
 		if (line->right >= 0)
 		{
-			right = CreateOneSeg(i, lev_data.vertices[line->start], lev_data.vertices[line->end], line->right, 0, inst);
+			right = CreateOneSeg(i, vertices[line->start], vertices[line->end], line->right, 0, inst);
 
 			ListAddSeg(&list, right);
 		}
@@ -1392,7 +1392,7 @@ seg_t *CreateSegs(const Instance &inst)
 
 		if (line->left >= 0)
 		{
-			left = CreateOneSeg(i, lev_data.vertices[line->end], lev_data.vertices[line->start], line->left, 1, inst);
+			left = CreateOneSeg(i, vertices[line->end], vertices[line->start], line->left, 1, inst);
 
 			ListAddSeg(&list, left);
 
@@ -1635,12 +1635,12 @@ void subsec_t::RenumberSegs()
 //
 // Create a subsector from a list of segs.
 //
-static subsec_t *CreateSubsector(quadtree_c *tree)
+subsec_t *LevelData::CreateSubsector(quadtree_c *tree)
 {
 	subsec_t *sub = NewSubsec();
 
 	// compute subsector's index
-	sub->index = num_subsecs - 1;
+	sub->index = (int)subsecs.size() - 1;
 
 	// copy segs into subsector
 	// [ assumes seg_list field is NULL ]
@@ -1687,7 +1687,7 @@ static void DebugShowSegs(seg_t *list)
 #endif
 
 
-build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
+build_result_e LevelData::BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 						  node_t ** N, subsec_t ** S, int depth, const Instance &inst)
 {
 	*N = NULL;
@@ -1779,13 +1779,13 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 }
 
 
-void ClockwiseBspTree(const Document &doc)
+void LevelData::ClockwiseBspTree(const Document &doc)
 {
 	current_seg_index = 0;
 
-	for (int i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < (int)subsecs.size() ; i++)
 	{
-		subsec_t *sub = lev_data.subsecs[i];
+		subsec_t *sub = subsecs[i];
 
 		sub->ClockwiseOrder(doc);
 		sub->RenumberSegs();
@@ -1846,15 +1846,15 @@ void subsec_t::Normalise()
 }
 
 
-void NormaliseBspTree()
+void LevelData::NormaliseBspTree() const
 {
 	// unlinks all minisegs from each subsector
 
 	current_seg_index = 0;
 
-	for (int i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < (int)subsecs.size() ; i++)
 	{
-		subsec_t *sub = lev_data.subsecs[i];
+		subsec_t *sub = subsecs[i];
 
 		sub->Normalise();
 		sub->RenumberSegs();
@@ -1862,24 +1862,24 @@ void NormaliseBspTree()
 }
 
 
-static void RoundOffVertices()
+void LevelData::RoundOffVertices()
 {
-	for (int i = 0 ; i < num_vertices ; i++)
+	for (int i = 0 ; i < (int)vertices.size() ; i++)
 	{
-		vertex_t *vert = lev_data.vertices[i];
+		vertex_t *vert = vertices[i];
 
 		if (vert->is_new)
 		{
 			vert->is_new = false;
 
-			vert->index = lev_data.num_old_vert;
-			lev_data.num_old_vert++;
+			vert->index = num_old_vert;
+			num_old_vert++;
 		}
 	}
 }
 
 
-void subsec_t::RoundOff()
+void subsec_t::RoundOff(LevelData &lev_data)
 {
 	// use head + tail to maintain same order of segs
 	seg_t *new_head = NULL;
@@ -1935,7 +1935,7 @@ void subsec_t::RoundOff()
 #   endif
 
 		// create a new vertex for this baby
-		last_real_degen->end = NewVertexDegenerate(
+		last_real_degen->end = lev_data.NewVertexDegenerate(
 				last_real_degen->start, last_real_degen->end);
 
 #   if DEBUG_SUBSEC
@@ -1988,17 +1988,17 @@ void subsec_t::RoundOff()
 }
 
 
-void RoundOffBspTree()
+void LevelData::RoundOffBspTree()
 {
 	current_seg_index = 0;
 
 	RoundOffVertices();
 
-	for (int i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < (int)subsecs.size() ; i++)
 	{
-		subsec_t *sub = lev_data.subsecs[i];
+		subsec_t *sub = subsecs[i];
 
-		sub->RoundOff();
+		sub->RoundOff(*this);
 		sub->RenumberSegs();
 	}
 }

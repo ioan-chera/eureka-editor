@@ -455,31 +455,31 @@ static FFixedPoint VertexCompare(const Document &doc, const void *p1, const void
 }
 
 
-void DetectOverlappingVertices(const Document &doc)
+void LevelData::DetectOverlappingVertices(const Document &doc) const
 {
-	SYS_ASSERT(num_vertices == doc.numVertices());
+	SYS_ASSERT((int)vertices.size() == doc.numVertices());
 
-	u16_t *array = new u16_t[num_vertices];
+	u16_t *array = new u16_t[(int)vertices.size()];
 
 	// sort array of indices
 	int i;
-	for (i=0 ; i < num_vertices ; i++)
+	for (i=0 ; i < (int)vertices.size() ; i++)
 		array[i] = static_cast<u16_t>(i);
 
-	std::sort(array, array + num_vertices, [&doc](u16_t left, u16_t right)
+	std::sort(array, array + (int)vertices.size(), [&doc](u16_t left, u16_t right)
 		{
 			return VertexCompare(doc, &left, &right).raw() < 0;
 		});
 
 	// now mark them off
-	for (i=0 ; i < num_vertices - 1 ; i++)
+	for (i=0 ; i < (int)vertices.size() - 1 ; i++)
 	{
 		if (VertexCompare(doc, array + i, array + i + 1).raw() == 0)
 		{
 			// found an overlap!
 
-			vertex_t *A = lev_data.vertices[array[i]];
-			vertex_t *B = lev_data.vertices[array[i+1]];
+			vertex_t *A = vertices[array[i]];
+			vertex_t *B = vertices[array[i+1]];
 
 			B->overlap = A->overlap ? A->overlap : A;
 		}
@@ -596,7 +596,7 @@ void DetectOverlappingLines(const Document &doc)
 // smallest degrees between two angles before being considered equal
 #define ANG_EPSILON  (1.0 / 1024.0)
 
-static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
+void LevelData::VertexAddWallTip(vertex_t *vert, double dx, double dy,
 		int open_left, int open_right)
 {
 	if (vert->overlap)
@@ -637,7 +637,7 @@ static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 }
 
 
-void CalculateWallTips(const Document &doc)
+void LevelData::CalculateWallTips(const Document &doc)
 {
 	int i;
 
@@ -656,8 +656,8 @@ void CalculateWallTips(const Document &doc)
 		bool left  = (L->left  >= 0) && doc.isSector(doc.getLeft(*L)->sector);
 		bool right = (L->right >= 0) && doc.isSector(doc.getRight(*L)->sector);
 
-		VertexAddWallTip(lev_data.vertices[L->start], x2-x1, y2-y1, left, right);
-		VertexAddWallTip(lev_data.vertices[L->end],   x1-x2, y1-y2, right, left);
+		VertexAddWallTip(vertices[L->start], x2-x1, y2-y1, left, right);
+		VertexAddWallTip(vertices[L->end],   x1-x2, y1-y2, right, left);
 	}
 
 # if DEBUG_WALLTIPS
@@ -677,7 +677,7 @@ void CalculateWallTips(const Document &doc)
 }
 
 
-vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc)
+vertex_t *LevelData::NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc)
 {
 	vertex_t *vert = NewVertex();
 
@@ -685,8 +685,8 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &
 	vert->y = y;
 	vert->is_new = true;
 
-	vert->index = lev_data.num_new_vert;
-	lev_data.num_new_vert++;
+	vert->index = num_new_vert;
+	num_new_vert++;
 
 	// compute wall-tip info
 	if (seg->linedef < 0 || doc.linedefs[seg->linedef]->TwoSided())
@@ -708,7 +708,7 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &
 }
 
 
-vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
+vertex_t *LevelData::NewVertexDegenerate(vertex_t *start, vertex_t *end)
 {
 	// this is only called when rounding off the BSP tree and
 	// all the segs are degenerate (zero length), hence we need
@@ -723,8 +723,8 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 	vert->is_new = false;
 
-	vert->index = lev_data.num_old_vert;
-	lev_data.num_old_vert++;
+	vert->index = num_old_vert;
+	num_old_vert++;
 
 	// compute new coordinates
 

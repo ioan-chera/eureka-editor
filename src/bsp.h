@@ -284,7 +284,7 @@ public:
 // it must be a very high value.
 #define SEG_IS_GARBAGE  (1 << 29)
 
-
+struct LevelData;
 struct subsec_t
 {
 	// list of segs
@@ -306,7 +306,7 @@ public:
 	void ClockwiseOrder(const Document &doc);
 	void RenumberSegs();
 
-	void RoundOff();
+	void RoundOff(LevelData &lev_data);
 	void Normalise();
 
 	void SanityCheckClosed();
@@ -399,8 +399,153 @@ public:
 
 /* ----- Level data arrays ----------------------- */
 
+class ZLibContext;
+struct intersection_t;
 struct LevelData
 {
+	
+public:
+	// return a new end vertex to compensate for a seg that would end up
+	// being zero-length (after integer rounding).  Doesn't compute the
+	// wall-tip info (thus this routine should only be used _after_ node
+	// building).
+	//
+	vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
+	
+	// MAIN STUFF
+	build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
+	
+private:
+	/* ----- create blockmap ------------------------------------ */
+	void WriteBlockmap(const Instance &inst) const;
+	void PutBlockmap(const Instance &inst) const;
+	
+	// REJECT : Generate the reject table
+	void Reject_WriteLump(const Instance &inst) const;
+	void PutReject(const Instance &inst) const;
+	
+	// allocation routines
+	vertex_t *NewVertex();
+	seg_t     *NewSeg();
+	subsec_t  *NewSubsec();
+	node_t    *NewNode();
+	walltip_t *NewWallTip();
+	
+	/* ----- free routines ---------------------------- */
+	void FreeVertices();
+	void FreeSegs();
+	void FreeSubsecs();
+	void FreeNodes();
+	void FreeWallTips();
+	
+	/* ----- reading routines ------------------------------ */
+	void GetVertices(const Document &doc);
+	
+	/* ----- writing routines ------------------------------ */
+	void MarkOverflow(int flags);
+	void PutVertices(const Instance &inst, const char *name, int do_gl);
+	void PutGLVertices(const Instance &inst, int do_v5) const;
+	inline u32_t VertexIndex_XNOD(const vertex_t *v) const noexcept
+	{
+		if (v->is_new)
+			return (u32_t) (num_old_vert + v->index);
+
+		return (u32_t) v->index;
+	}
+	void PutSegs(const Instance &inst);
+	void PutGLSegs(const Instance &inst) const;
+	void PutGLSegs_V5(const Instance &inst) const;
+	void PutSubsecs(const Instance &inst, const char *name, int do_gl);
+	void PutGLSubsecs_V5(const Instance &inst) const;
+	void PutNodes(const Instance &inst, const char *name, int do_v5, node_t *root);
+	void PutOneNode(node_t *node, Lump_c *lump);
+	void PutOneNode_V5(node_t *node, Lump_c *lump);
+	void CheckLimits(bool& force_v5, bool& force_xnod, const Instance &inst);
+	void SortSegs();
+	
+	/* ----- ZDoom format writing --------------------------- */
+	void PutZVertices(ZLibContext &zcontext) const;
+	void PutZSubsecs(ZLibContext &zcontext) const;
+	void PutZSegs(ZLibContext &zcontext) const;
+	void PutXGL3Segs(ZLibContext &zcontext) const;
+	void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3);
+	void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3);
+	void SaveZDFormat(const Instance &inst, node_t *root_node);
+	void SaveXGL3Format(const Instance &inst, node_t *root_node);
+	
+	/* ----- whole-level routines --------------------------- */
+	void LoadLevel(const Instance &inst);
+	void FreeLevel();
+	u32_t CalcGLChecksum(const Instance &inst) const;
+	void UpdateGLMarker(const Instance &inst, Lump_c *marker) const;
+	void AddMissingLump(const Instance &inst, const char *name, const char *after) const;
+	build_result_e SaveLevel(node_t *root_node, const Instance &inst);
+	build_result_e SaveUDMF(const Instance &inst, node_t *root_node);
+	
+	/* ---------------------------------------------------------------- */
+	Lump_c * FindLevelLump(const Instance &inst, const char *name) const noexcept;
+	Lump_c & CreateLevelLump(const Instance &inst, const char *name) const;
+	Lump_c & CreateGLMarker(const Instance &inst) const;
+	
+	// NODES
+	seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc);
+	void DivideOneSeg(seg_t *seg, seg_t *part,
+					  seg_t **left_list, seg_t **right_list,
+					  intersection_t ** cut_list, const Document &doc);
+	void SeparateSegs(quadtree_c *tree, seg_t *part,
+					  seg_t **left_list, seg_t **right_list,
+					  intersection_t ** cut_list, const Document &doc);
+	void AddMinisegs(intersection_t *cut_list, seg_t *part,
+					 seg_t **left_list, seg_t **right_list);
+	// takes the seg list and determines if it is convex.  When it is, the
+	// segs are converted to a subsector, and '*S' is the new subsector
+	// (and '*N' is set to NULL).  Otherwise the seg list is divided into
+	// two halves, a node is created by calling this routine recursively,
+	// and '*N' is the new node (and '*S' is set to NULL).  Normally
+	// returns BUILD_OK, or BUILD_Cancelled if user stopped it.
+	//
+	build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
+		node_t ** N, subsec_t ** S, int depth, const Instance &inst);
+	seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
+						int sidedef, int what_side /* 0 or 1 */, const Instance &inst);
+	// scan all the linedef of the level and convert each sidedef into a
+	// seg (or seg pair).  Returns the list of segs.
+	//
+	seg_t *CreateSegs(const Instance &inst);
+	subsec_t *CreateSubsector(quadtree_c *tree);
+	// put all the segs in each subsector into clockwise order, and renumber
+	// the seg indices.
+	//
+	// [ This cannot be done DURING BuildNodes() since splitting a seg with
+	//   a partner will insert another seg into that partner's list, usually
+	//   in the wrong place order-wise. ]
+	//
+	void ClockwiseBspTree(const Document &doc);
+	// traverse the BSP tree and do whatever is necessary to convert the
+	// node information from GL standard to normal standard (for example,
+	// removing minisegs).
+	//
+	void NormaliseBspTree() const;
+	void RoundOffVertices();
+	// traverse the BSP tree, doing whatever is necessary to round
+	// vertices to integer coordinates (for example, removing segs whose
+	// rounded coordinates degenerate to the same point).
+	//
+	void RoundOffBspTree();
+
+	// detection routines
+	void DetectOverlappingVertices(const Document &doc) const;
+	
+	/* ----- vertex routines ------------------------------- */
+	void VertexAddWallTip(vertex_t *vert, double dx, double dy,
+						  int open_left, int open_right);
+	// computes the wall tips for all of the vertices
+	void CalculateWallTips(const Document &doc);
+	// return a new vertex (with correct wall-tip info) for the split that
+	// happens along the given seg at the given location.
+	//
+	vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc);
+	
 	SString current_name;
 	int current_idx = 0;
 	int current_start = 0;
@@ -409,6 +554,7 @@ struct LevelData
 	int num_old_vert = 0;
 	int num_new_vert = 0;
 	int num_real_lines = 0;
+	int node_cur_index = 0;
 	
 	std::vector<vertex_t *>  vertices;
 	std::vector<subsec_t *>  subsecs;
@@ -417,23 +563,8 @@ struct LevelData
 	std::vector<walltip_t *> walltips;
 };
 
-extern LevelData lev_data;
-
-#define num_vertices  ((int)lev_data.vertices.size())
-#define num_segs      ((int)lev_data.segs.size())
-#define num_subsecs   ((int)lev_data.subsecs.size())
-#define num_nodes     ((int)lev_data.nodes.size())
-#define num_walltips  ((int)lev_data.walltips.size())
-
 
 /* ----- function prototypes ----------------------- */
-
-// allocation routines
-vertex_t  *NewVertex();
-seg_t     *NewSeg();
-subsec_t  *NewSubsec();
-node_t    *NewNode();
-walltip_t *NewWallTip();
 
 /* limit flags, to show what went wrong */
 #define LIMIT_VERTEXES     0x000001
@@ -457,24 +588,9 @@ walltip_t *NewWallTip();
 
 
 // detection routines
-void DetectOverlappingVertices(const Document &doc);
+
 void DetectOverlappingLines(const Document &doc);
 void DetectPolyobjSectors(const Instance &inst);
-
-// computes the wall tips for all of the vertices
-void CalculateWallTips(const Document &doc);
-
-// return a new vertex (with correct wall-tip info) for the split that
-// happens along the given seg at the given location.
-//
-vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc);
-
-// return a new end vertex to compensate for a seg that would end up
-// being zero-length (after integer rounding).  Doesn't compute the
-// wall-tip info (thus this routine should only be used _after_ node
-// building).
-//
-vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
 
 // check whether a line with the given delta coordinates from this
 // vertex is open or closed.  If there exists a walltip at same
@@ -575,46 +691,14 @@ void FreeQuickAllocCuts(void);
 
 
 
-// scan all the linedef of the level and convert each sidedef into a
-// seg (or seg pair).  Returns the list of segs.
-//
-seg_t *CreateSegs(const Instance &inst);
 
 quadtree_c *TreeFromSegList(seg_t *list);
 
-// takes the seg list and determines if it is convex.  When it is, the
-// segs are converted to a subsector, and '*S' is the new subsector
-// (and '*N' is set to NULL).  Otherwise the seg list is divided into
-// two halves, a node is created by calling this routine recursively,
-// and '*N' is the new node (and '*S' is set to NULL).  Normally
-// returns BUILD_OK, or BUILD_Cancelled if user stopped it.
-//
-build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
-    node_t ** N, subsec_t ** S, int depth, const Instance &inst);
 
 // compute the height of the bsp tree, starting at 'node'.
 int ComputeBspHeight(node_t *node);
 
-// put all the segs in each subsector into clockwise order, and renumber
-// the seg indices.
-//
-// [ This cannot be done DURING BuildNodes() since splitting a seg with
-//   a partner will insert another seg into that partner's list, usually
-//   in the wrong place order-wise. ]
-//
-void ClockwiseBspTree(const Document &doc);
 
-// traverse the BSP tree and do whatever is necessary to convert the
-// node information from GL standard to normal standard (for example,
-// removing minisegs).
-//
-void NormaliseBspTree();
-
-// traverse the BSP tree, doing whatever is necessary to round
-// vertices to integer coordinates (for example, removing segs whose
-// rounded coordinates degenerate to the same point).
-//
-void RoundOffBspTree();
 
 // free all the superblocks on the quick-alloc list
 void FreeQuickAllocSupers(void);
