@@ -1029,7 +1029,7 @@ Lump_c & Wad_file::AddLump(const SString &name)
 		FixLevelGroup(insert_point, 1, 0);
 
 		LumpRef lumpRef = {};
-		lumpRef.lump = std::move(lump);
+		lumpRef.lump = lump;
 		directory.insert(directory.begin() + insert_point, std::move(lumpRef));
 		result = &directory[insert_point].lump;
 
@@ -1038,7 +1038,7 @@ Lump_c & Wad_file::AddLump(const SString &name)
 	else  // add to end
 	{
 		LumpRef lumpRef = {};
-		lumpRef.lump = std::move(lump);
+		lumpRef.lump = lump;
 		directory.push_back(std::move(lumpRef));
 		result = &directory.back().lump;
 	}
