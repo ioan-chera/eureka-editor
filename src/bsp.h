@@ -423,11 +423,6 @@ subsec_t  *NewSubsec();
 node_t    *NewNode();
 walltip_t *NewWallTip();
 
-// Zlib compression support
-void ZLibBeginLump(Lump_c *lump);
-void ZLibAppendLump(const void *data, int length);
-void ZLibFinishLump(void);
-
 /* limit flags, to show what went wrong */
 #define LIMIT_VERTEXES     0x000001
 #define LIMIT_SECTORS      0x000002

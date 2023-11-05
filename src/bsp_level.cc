@@ -1422,19 +1422,121 @@ void SortSegs()
 
 /* ----- ZDoom format writing --------------------------- */
 
+
+class ZLibContext
+{
+public:
+	explicit ZLibContext(Lump_c &lump);
+	~ZLibContext()
+	{
+		finishLump();
+	}
+	
+	void appendLump(const void *data, int length);
+	
+private:
+	void finishLump();
+
+	Lump_c &out_lump;
+	z_stream out_stream{};
+	Bytef out_buffer[1024] = {};
+};
+
+ZLibContext::ZLibContext(Lump_c &lump) : out_lump(lump)
+{
+	if(!cur_info->force_compress)
+		return;
+	
+	int result = deflateInit(&out_stream, Z_DEFAULT_COMPRESSION);
+	if(result != Z_OK)
+		throw std::runtime_error("Trouble setting up zlib compression: " + std::to_string(result));
+	
+	out_stream.next_out = out_buffer;
+	out_stream.avail_out = sizeof(out_buffer);
+}
+
+void ZLibContext::appendLump(const void *data, int length)
+{
+	if (! cur_info->force_compress)
+	{
+		out_lump.Write(data, length);
+		return;
+	}
+
+	out_stream.next_in  = const_cast<Bytef*>(reinterpret_cast<const Bytef*>(data));   // const override
+	out_stream.avail_in = length;
+
+	while (out_stream.avail_in > 0)
+	{
+		int err = deflate(&out_stream, Z_NO_FLUSH);
+
+		if (err != Z_OK)
+			ThrowException("Trouble compressing %d bytes (zlib): %d", length, err);
+
+		if (out_stream.avail_out == 0)
+		{
+			out_lump.Write(out_buffer, sizeof(out_buffer));
+
+			out_stream.next_out  = out_buffer;
+			out_stream.avail_out = sizeof(out_buffer);
+		}
+	}
+}
+
+void ZLibContext::finishLump()
+{
+	if (! cur_info->force_compress)
+	{
+		return;
+	}
+
+	int left_over;
+
+	// ASSERT(zout_stream.avail_out > 0)
+
+	out_stream.next_in  = Z_NULL;
+	out_stream.avail_in = 0;
+
+	for (;;)
+	{
+		int err = deflate(&out_stream, Z_FINISH);
+
+		if (err == Z_STREAM_END)
+			break;
+
+		if (err != Z_OK)
+			ThrowException("Trouble finishing compression (zlib): %d", err);
+
+		if (out_stream.avail_out == 0)
+		{
+			out_lump.Write(out_buffer, sizeof(out_buffer));
+
+			out_stream.next_out  = out_buffer;
+			out_stream.avail_out = sizeof(out_buffer);
+		}
+	}
+
+	left_over = sizeof(out_buffer) - out_stream.avail_out;
+
+	if (left_over > 0)
+		out_lump.Write(out_buffer, left_over);
+
+	deflateEnd(&out_stream);
+}
+
 static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
 static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
 static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
 
-void PutZVertices()
+static void PutZVertices(ZLibContext &zcontext)
 {
 	int count, i;
 
 	u32_t orgverts = LE_U32(num_old_vert);
 	u32_t newverts = LE_U32(num_new_vert);
 
-	ZLibAppendLump(&orgverts, 4);
-	ZLibAppendLump(&newverts, 4);
+	zcontext.appendLump(&orgverts, 4);
+	zcontext.appendLump(&newverts, 4);
 
 	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
@@ -1448,17 +1550,20 @@ void PutZVertices()
 		raw.x = LE_S32(iround(vert->x * 65536.0));
 		raw.y = LE_S32(iround(vert->y * 65536.0));
 
-		ZLibAppendLump(&raw, sizeof(raw));
+		zcontext.appendLump(&raw, sizeof(raw));
 
 		count++;
 	}
 
 	if (count != num_new_vert)
-		BugError("PutZVertices miscounted (%d != %d)\n", count, num_new_vert);
+	{
+		throw std::logic_error(SString::printf("PutZVertices miscounted (%d != %d)\n", count,
+											   num_new_vert).get());
+	}
 }
 
 
-void PutZSubsecs()
+static void PutZSubsecs(ZLibContext &zcontext)
 {
 	int i;
 	int count;
@@ -1466,7 +1571,7 @@ void PutZSubsecs()
 
 	int cur_seg_index = 0;
 
-	ZLibAppendLump(&raw_num, 4);
+	zcontext.appendLump(&raw_num, 4);
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
@@ -1475,44 +1580,53 @@ void PutZSubsecs()
 
 		raw_num = LE_U32(sub->seg_count);
 
-		ZLibAppendLump(&raw_num, 4);
+		zcontext.appendLump(&raw_num, 4);
 
 		// sanity check the seg index values
 		count = 0;
 		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
 		{
 			if (cur_seg_index != seg->index)
-				BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n",
-						i, cur_seg_index, seg->index);
+			{
+				throw std::logic_error(SString::printf("PutZSubsecs: seg index mismatch in sub %d "
+													   "(%d != %d)\n", i, cur_seg_index,
+													   seg->index).get());
+			}
 
 			count++;
 		}
 
 		if (count != sub->seg_count)
-			BugError("PutZSubsecs: miscounted segs in sub %d (%d != %d)\n",
-					i, count, sub->seg_count);
+		{
+			throw std::logic_error(SString::printf("PutZSubsecs: miscounted segs in sub %d (%d "
+												   "!= %d)\n", i, count, sub->seg_count).get());
+		}
 	}
 
 	if (cur_seg_index != num_segs)
-		BugError("PutZSubsecs miscounted segs (%d != %d)\n",
-				cur_seg_index, num_segs);
+	{
+		throw std::logic_error(SString::printf("PutZSubsecs miscounted segs (%d != %d)\n",
+											   cur_seg_index, num_segs).get());
+	}
 }
 
 
-void PutZSegs()
+static void PutZSegs(ZLibContext &zcontext)
 {
 	int i, count;
 	u32_t raw_num = LE_U32(num_segs);
 
-	ZLibAppendLump(&raw_num, 4);
+	zcontext.appendLump(&raw_num, 4);
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		seg_t *seg = lev_segs[i];
 
 		if (count != seg->index)
-			BugError("PutZSegs: seg index mismatch (%d != %d)\n",
-					count, seg->index);
+		{
+			throw std::logic_error(SString::printf("PutZSegs: seg index mismatch (%d != %d)\n",
+												   count, seg->index).get());
+		}
 
 		{
 			u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
@@ -1521,34 +1635,39 @@ void PutZSegs()
 			u16_t line = LE_U16(seg->linedef);
 			u8_t  side = static_cast<u8_t>(seg->side);
 
-			ZLibAppendLump(&v1,   4);
-			ZLibAppendLump(&v2,   4);
-			ZLibAppendLump(&line, 2);
-			ZLibAppendLump(&side, 1);
+			zcontext.appendLump(&v1,   4);
+			zcontext.appendLump(&v2,   4);
+			zcontext.appendLump(&line, 2);
+			zcontext.appendLump(&side, 1);
 		}
 
 		count++;
 	}
 
 	if (count != num_segs)
-		BugError("PutZSegs miscounted (%d != %d)\n", count, num_segs);
+	{
+		throw std::logic_error(SString::printf("PutZSegs miscounted (%d != %d)\n", count,
+											   num_segs).get());
+	}
 }
 
 
-void PutXGL3Segs()
+static void PutXGL3Segs(ZLibContext &zcontext)
 {
 	int i, count;
 	u32_t raw_num = LE_U32(num_segs);
 
-	ZLibAppendLump(&raw_num, 4);
+	zcontext.appendLump(&raw_num, 4);
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
 		seg_t *seg = lev_segs[i];
 
 		if (count != seg->index)
-			BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n",
-					count, seg->index);
+		{
+			throw std::logic_error(SString::printf("PutXGL3Segs: seg index mismatch (%d != %d)\n",
+												   count, seg->index).get());
+		}
 
 		{
 			u32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
@@ -1560,29 +1679,32 @@ void PutXGL3Segs()
 			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
 # endif
 
-			ZLibAppendLump(&v1,      4);
-			ZLibAppendLump(&partner, 4);
-			ZLibAppendLump(&line,    4);
-			ZLibAppendLump(&side,    1);
+			zcontext.appendLump(&v1,      4);
+			zcontext.appendLump(&partner, 4);
+			zcontext.appendLump(&line,    4);
+			zcontext.appendLump(&side,    1);
 		}
 
 		count++;
 	}
 
 	if (count != num_segs)
-		BugError("PutXGL3Segs miscounted (%d != %d)\n", count, num_segs);
+	{
+		throw std::logic_error(SString::printf("PutXGL3Segs miscounted (%d != %d)\n", count,
+											   num_segs).get());
+	}
 }
 
 
-static void PutOneZNode(node_t *node, bool do_xgl3)
+static void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 {
 	raw_v5_node_t raw;
 
 	if (node->r.node)
-		PutOneZNode(node->r.node, do_xgl3);
+		PutOneZNode(zcontext, node->r.node, do_xgl3);
 
 	if (node->l.node)
-		PutOneZNode(node->l.node, do_xgl3);
+		PutOneZNode(zcontext, node->l.node, do_xgl3);
 
 	node->index = node_cur_index++;
 
@@ -1593,10 +1715,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 		u32_t dx = LE_S32(iround(node->dx * 65536.0));
 		u32_t dy = LE_S32(iround(node->dy * 65536.0));
 
-		ZLibAppendLump(&x,  4);
-		ZLibAppendLump(&y,  4);
-		ZLibAppendLump(&dx, 4);
-		ZLibAppendLump(&dy, 4);
+		zcontext.appendLump(&x,  4);
+		zcontext.appendLump(&y,  4);
+		zcontext.appendLump(&dx, 4);
+		zcontext.appendLump(&dy, 4);
 	}
 	else
 	{
@@ -1605,10 +1727,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 		raw.dx = LE_S16(iround(node->dx));
 		raw.dy = LE_S16(iround(node->dy));
 
-		ZLibAppendLump(&raw.x,  2);
-		ZLibAppendLump(&raw.y,  2);
-		ZLibAppendLump(&raw.dx, 2);
-		ZLibAppendLump(&raw.dy, 2);
+		zcontext.appendLump(&raw.x,  2);
+		zcontext.appendLump(&raw.y,  2);
+		zcontext.appendLump(&raw.dx, 2);
+		zcontext.appendLump(&raw.dy, 2);
 	}
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
@@ -1621,25 +1743,28 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
 	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
 
-	ZLibAppendLump(&raw.b1, sizeof(raw.b1));
-	ZLibAppendLump(&raw.b2, sizeof(raw.b2));
+	zcontext.appendLump(&raw.b1, sizeof(raw.b1));
+	zcontext.appendLump(&raw.b2, sizeof(raw.b2));
 
 	if (node->r.node)
 		raw.right = LE_U32(node->r.node->index);
 	else if (node->r.subsec)
 		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
-		BugError("Bad right child in V5 node %d\n", node->index);
+	{
+		throw std::logic_error(SString::printf("Bad right child in V5 node %d\n",
+											   node->index).get());
+	}
 
 	if (node->l.node)
 		raw.left = LE_U32(node->l.node->index);
 	else if (node->l.subsec)
 		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
-		BugError("Bad left child in V5 node %d\n", node->index);
+		throw std::logic_error(SString::printf("Bad left child in V5 node %d\n", node->index).get());
 
-	ZLibAppendLump(&raw.right, 4);
-	ZLibAppendLump(&raw.left,  4);
+	zcontext.appendLump(&raw.right, 4);
+	zcontext.appendLump(&raw.left,  4);
 
 # if DEBUG_BSP
 	gLog.debugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
@@ -1650,20 +1775,22 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 }
 
 
-void PutZNodes(node_t *root, bool do_xgl3)
+static void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3)
 {
 	u32_t raw_num = LE_U32(num_nodes);
 
-	ZLibAppendLump(&raw_num, 4);
+	zcontext.appendLump(&raw_num, 4);
 
 	node_cur_index = 0;
 
 	if (root)
-		PutOneZNode(root, do_xgl3);
+		PutOneZNode(zcontext, root, do_xgl3);
 
 	if (node_cur_index != num_nodes)
-		BugError("PutZNodes miscounted (%d != %d)\n",
-				node_cur_index, num_nodes);
+	{
+		throw std::logic_error(SString::printf("PutZNodes miscounted (%d != %d)\n",
+											   node_cur_index, num_nodes).get());
+	}
 }
 
 static void SaveZDFormat(const Instance &inst, node_t *root_node)
@@ -1680,14 +1807,13 @@ static void SaveZDFormat(const Instance &inst, node_t *root_node)
 		lump.Write(lev_XNOD_magic, 4);
 
 	// the ZLibXXX functions do no compression for XNOD format
-	ZLibBeginLump(&lump);
+	
+	ZLibContext zlibContext(lump);
 
-	PutZVertices();
-	PutZSubsecs();
-	PutZSegs();
-	PutZNodes(root_node, false /* do_xgl3 */);
-
-	ZLibFinishLump();
+	PutZVertices(zlibContext);
+	PutZSubsecs(zlibContext);
+	PutZSegs(zlibContext);
+	PutZNodes(zlibContext, root_node, false /* do_xgl3 */);
 }
 
 
@@ -1702,14 +1828,12 @@ static void SaveXGL3Format(const Instance &inst, node_t *root_node)
 	// disable compression
 	cur_info->force_compress = false;
 
-	ZLibBeginLump(&lump);
-
-	PutZVertices();
-	PutZSubsecs();
-	PutXGL3Segs();
-	PutZNodes(root_node, true /* do_xgl3 */);
-
-	ZLibFinishLump();
+	ZLibContext zlibContext(lump);
+	
+	PutZVertices(zlibContext);
+	PutZSubsecs(zlibContext);
+	PutXGL3Segs(zlibContext);
+	PutZNodes(zlibContext, root_node, true /* do_xgl3 */);
 }
 
 
@@ -1979,110 +2103,6 @@ static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 
 	return BUILD_OK;
 }
-
-
-//----------------------------------------------------------------------
-
-
-static Lump_c  *zout_lump;
-static z_stream zout_stream;
-static Bytef    zout_buffer[1024];
-
-
-void ZLibBeginLump(Lump_c *lump)
-{
-	zout_lump = lump;
-
-	if (! cur_info->force_compress)
-		return;
-
-	zout_stream.zalloc = (alloc_func)0;
-	zout_stream.zfree  = (free_func)0;
-	zout_stream.opaque = (voidpf)0;
-
-	if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-		ThrowException("Trouble setting up zlib compression\n");
-
-	zout_stream.next_out  = zout_buffer;
-	zout_stream.avail_out = sizeof(zout_buffer);
-}
-
-
-void ZLibAppendLump(const void *data, int length)
-{
-	// ASSERT(zout_lump)
-	// ASSERT(length > 0)
-
-	if (! cur_info->force_compress)
-	{
-		zout_lump->Write(data, length);
-		return;
-	}
-
-	zout_stream.next_in  = (Bytef*)data;   // const override
-	zout_stream.avail_in = length;
-
-	while (zout_stream.avail_in > 0)
-	{
-		int err = deflate(&zout_stream, Z_NO_FLUSH);
-
-		if (err != Z_OK)
-			FatalError("Trouble compressing %d bytes (zlib)\n", length);
-
-		if (zout_stream.avail_out == 0)
-		{
-			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
-
-			zout_stream.next_out  = zout_buffer;
-			zout_stream.avail_out = sizeof(zout_buffer);
-		}
-	}
-}
-
-
-void ZLibFinishLump(void)
-{
-	if (! cur_info->force_compress)
-	{
-		zout_lump = NULL;
-		return;
-	}
-
-	int left_over;
-
-	// ASSERT(zout_stream.avail_out > 0)
-
-	zout_stream.next_in  = Z_NULL;
-	zout_stream.avail_in = 0;
-
-	for (;;)
-	{
-		int err = deflate(&zout_stream, Z_FINISH);
-
-		if (err == Z_STREAM_END)
-			break;
-
-		if (err != Z_OK)
-			FatalError("Trouble finishing compression (zlib)\n");
-
-		if (zout_stream.avail_out == 0)
-		{
-			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
-
-			zout_stream.next_out  = zout_buffer;
-			zout_stream.avail_out = sizeof(zout_buffer);
-		}
-	}
-
-	left_over = sizeof(zout_buffer) - zout_stream.avail_out;
-
-	if (left_over > 0)
-		zout_lump->Write(zout_buffer, left_over);
-
-	deflateEnd(&zout_stream);
-	zout_lump = NULL;
-}
-
 
 /* ---------------------------------------------------------------- */
 
