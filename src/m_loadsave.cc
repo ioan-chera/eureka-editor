@@ -385,7 +385,7 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-const Lump_c *Instance::Load_LookupAndSeek(const Wad_file *load_wad, const char *name)
+Lump_c *Instance::Load_LookupAndSeek(const Wad_file *load_wad, const char *name)
 		const
 {
 	int idx = load_wad->LevelLookupLump(loading_level, name);
@@ -393,7 +393,7 @@ const Lump_c *Instance::Load_LookupAndSeek(const Wad_file *load_wad, const char 
 	if (idx < 0)
 		return NULL;
 
-	const Lump_c *lump = load_wad->GetLump(idx);
+	Lump_c *lump = load_wad->GetLump(idx);
 
 	return lump;
 }
@@ -1257,7 +1257,7 @@ void Instance::CMD_FlipMap()
 
 
 	int lump_idx = wad->LevelHeader(lev_idx);
-	const Lump_c * lump  = wad->GetLump(lump_idx);
+	Lump_c * lump  = wad->GetLump(lump_idx);
 	const SString &map_name = lump->Name();
 
 	gLog.printf("Flipping Map to : %s\n", map_name.c_str());

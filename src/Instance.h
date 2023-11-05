@@ -277,7 +277,7 @@ public:
 	bool ExecuteKey(keycode_t key, KeyContext context);
 
 	// M_LOADSAVE
-	const Lump_c *Load_LookupAndSeek(const Wad_file *wad, const char *name) const;
+	Lump_c *Load_LookupAndSeek(const Wad_file *wad, const char *name) const;
 	void LoadLevel(const Wad_file *wad, const SString &level);
 	void LoadLevelNum(const Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();

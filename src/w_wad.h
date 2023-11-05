@@ -84,11 +84,10 @@ private:
 	std::vector<byte> mData;
 	int mPos = 0;	// insertion point for reading or writing
 
-public:
-	Lump_c() = default;
-	Lump_c(const Lump_c &other) = default;
-	Lump_c &operator = (const Lump_c &other) = default;
+	// constructor is private
 	explicit Lump_c(const SString &_nam);
+
+public:
 	const SString &Name() const noexcept
 	{
 		return name;
@@ -130,6 +129,11 @@ public:
 	}
 
 	int64_t getName8() const noexcept;
+
+private:
+	// deliberately don't implement these
+	Lump_c(const Lump_c& other);
+	Lump_c& operator= (const Lump_c& other);
 };
 
 class LumpInputStream
@@ -152,7 +156,7 @@ private:
 
 struct LumpRef
 {
-	Lump_c lump;
+	std::unique_ptr<Lump_c> lump;
 	WadNamespace ns;
 };
 
@@ -219,10 +223,8 @@ public:
 	{
 		return static_cast<int>(directory.size());
 	}
-	Lump_c * GetLump(int index) noexcept;
-	const Lump_c * GetLump(int index) const noexcept;
-	Lump_c * FindLump(const SString &name) noexcept;
-	const Lump_c * FindLump(const SString &name) const noexcept;
+	Lump_c * GetLump(int index) const noexcept;
+	Lump_c * FindLump(const SString &name) const noexcept;
 	int FindLumpNum(const SString &name) const noexcept;
 
 	const Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group)
@@ -325,10 +327,10 @@ private:
 
 		inline bool operator() (const int A, const int B) const noexcept
 		{
-			const Lump_c &L1 = wad->directory[A].lump;
-			const Lump_c &L2 = wad->directory[B].lump;
+			const Lump_c *L1 = wad->directory[A].lump.get();
+			const Lump_c *L2 = wad->directory[B].lump.get();
 
-			return L1.Name() < L2.Name();
+			return L1->Name() < L2->Name();
 		}
 	};
 };
