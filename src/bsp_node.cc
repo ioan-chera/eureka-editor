@@ -1381,7 +1381,7 @@ seg_t *CreateSegs(const Instance &inst)
 
 		if (line->right >= 0)
 		{
-			right = CreateOneSeg(i, lev_vertices[line->start], lev_vertices[line->end], line->right, 0, inst);
+			right = CreateOneSeg(i, lev_data.vertices[line->start], lev_data.vertices[line->end], line->right, 0, inst);
 
 			ListAddSeg(&list, right);
 		}
@@ -1392,7 +1392,7 @@ seg_t *CreateSegs(const Instance &inst)
 
 		if (line->left >= 0)
 		{
-			left = CreateOneSeg(i, lev_vertices[line->end], lev_vertices[line->start], line->left, 1, inst);
+			left = CreateOneSeg(i, lev_data.vertices[line->end], lev_data.vertices[line->start], line->left, 1, inst);
 
 			ListAddSeg(&list, left);
 
@@ -1785,7 +1785,7 @@ void ClockwiseBspTree(const Document &doc)
 
 	for (int i=0 ; i < num_subsecs ; i++)
 	{
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = lev_data.subsecs[i];
 
 		sub->ClockwiseOrder(doc);
 		sub->RenumberSegs();
@@ -1854,7 +1854,7 @@ void NormaliseBspTree()
 
 	for (int i=0 ; i < num_subsecs ; i++)
 	{
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = lev_data.subsecs[i];
 
 		sub->Normalise();
 		sub->RenumberSegs();
@@ -1866,14 +1866,14 @@ static void RoundOffVertices()
 {
 	for (int i = 0 ; i < num_vertices ; i++)
 	{
-		vertex_t *vert = lev_vertices[i];
+		vertex_t *vert = lev_data.vertices[i];
 
 		if (vert->is_new)
 		{
 			vert->is_new = false;
 
-			vert->index = num_old_vert;
-			num_old_vert++;
+			vert->index = lev_data.num_old_vert;
+			lev_data.num_old_vert++;
 		}
 	}
 }
@@ -1996,7 +1996,7 @@ void RoundOffBspTree()
 
 	for (int i=0 ; i < num_subsecs ; i++)
 	{
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = lev_data.subsecs[i];
 
 		sub->RoundOff();
 		sub->RenumberSegs();

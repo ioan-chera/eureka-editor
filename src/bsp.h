@@ -22,6 +22,7 @@
 #define __EUREKA_BSP_H__
 
 #include "lib_util.h"
+#include "m_strings.h"
 #include "sys_type.h"
 
 #include <vector>
@@ -398,17 +399,31 @@ public:
 
 /* ----- Level data arrays ----------------------- */
 
-extern std::vector<vertex_t *>  lev_vertices;
-extern std::vector<subsec_t *>  lev_subsecs;
+struct LevelData
+{
+	SString current_name;
+	int current_idx = 0;
+	int current_start = 0;
+	int overflows = 0;
+	
+	int num_old_vert = 0;
+	int num_new_vert = 0;
+	int num_real_lines = 0;
+	
+	std::vector<vertex_t *>  vertices;
+	std::vector<subsec_t *>  subsecs;
+	std::vector<seg_t *>     segs;
+	std::vector<node_t *>    nodes;
+	std::vector<walltip_t *> walltips;
+};
 
-#define num_vertices  ((int)lev_vertices.size())
-#define num_segs      ((int)lev_segs.size())
-#define num_subsecs   ((int)lev_subsecs.size())
-#define num_nodes     ((int)lev_nodes.size())
-#define num_walltips  ((int)lev_walltips.size())
+extern LevelData lev_data;
 
-extern int num_old_vert;
-extern int num_new_vert;
+#define num_vertices  ((int)lev_data.vertices.size())
+#define num_segs      ((int)lev_data.segs.size())
+#define num_subsecs   ((int)lev_data.subsecs.size())
+#define num_nodes     ((int)lev_data.nodes.size())
+#define num_walltips  ((int)lev_data.walltips.size())
 
 
 /* ----- function prototypes ----------------------- */

@@ -750,24 +750,7 @@ static void PutReject(const Instance &inst)
 
 
 // per-level variables
-
-static SString lev_current_name;
-
-static int lev_current_idx;
-static int lev_current_start;
-
-static int lev_overflows;
-
-
-std::vector<vertex_t *>  lev_vertices;
-static std::vector<seg_t *>     lev_segs;
-std::vector<subsec_t *>  lev_subsecs;
-static std::vector<node_t *>    lev_nodes;
-static std::vector<walltip_t *> lev_walltips;
-
-int num_old_vert = 0;
-int num_new_vert = 0;
-static int num_real_lines = 0;
+LevelData lev_data;
 
 
 /* ----- allocation routines ---------------------------- */
@@ -775,35 +758,35 @@ static int num_real_lines = 0;
 vertex_t *NewVertex()
 {
 	vertex_t *V = (vertex_t *) UtilCalloc(sizeof(vertex_t));
-	lev_vertices.push_back(V);
+	lev_data.vertices.push_back(V);
 	return V;
 }
 
 seg_t *NewSeg()
 {
 	seg_t *S = (seg_t *) UtilCalloc(sizeof(seg_t));
-	lev_segs.push_back(S);
+	lev_data.segs.push_back(S);
 	return S;
 }
 
 subsec_t *NewSubsec()
 {
 	subsec_t *S = (subsec_t *) UtilCalloc(sizeof(subsec_t));
-	lev_subsecs.push_back(S);
+	lev_data.subsecs.push_back(S);
 	return S;
 }
 
 node_t *NewNode()
 {
 	node_t *N = (node_t *) UtilCalloc(sizeof(node_t));
-	lev_nodes.push_back(N);
+	lev_data.nodes.push_back(N);
 	return N;
 }
 
 walltip_t *NewWallTip()
 {
 	walltip_t *WT = (walltip_t *) UtilCalloc(sizeof(walltip_t));
-	lev_walltips.push_back(WT);
+	lev_data.walltips.push_back(WT);
 	return WT;
 }
 
@@ -812,42 +795,42 @@ walltip_t *NewWallTip()
 
 void FreeVertices()
 {
-	for (unsigned int i = 0 ; i < lev_vertices.size() ; i++)
-		UtilFree((void *) lev_vertices[i]);
+	for (unsigned int i = 0 ; i < lev_data.vertices.size() ; i++)
+		UtilFree((void *) lev_data.vertices[i]);
 
-	lev_vertices.clear();
+	lev_data.vertices.clear();
 }
 
 void FreeSegs()
 {
-	for (unsigned int i = 0 ; i < lev_segs.size() ; i++)
-		UtilFree((void *) lev_segs[i]);
+	for (unsigned int i = 0 ; i < lev_data.segs.size() ; i++)
+		UtilFree((void *) lev_data.segs[i]);
 
-	lev_segs.clear();
+	lev_data.segs.clear();
 }
 
 void FreeSubsecs()
 {
-	for (unsigned int i = 0 ; i < lev_subsecs.size() ; i++)
-		UtilFree((void *) lev_subsecs[i]);
+	for (unsigned int i = 0 ; i < lev_data.subsecs.size() ; i++)
+		UtilFree((void *) lev_data.subsecs[i]);
 
-	lev_subsecs.clear();
+	lev_data.subsecs.clear();
 }
 
 void FreeNodes()
 {
-	for (unsigned int i = 0 ; i < lev_nodes.size() ; i++)
-		UtilFree((void *) lev_nodes[i]);
+	for (unsigned int i = 0 ; i < lev_data.nodes.size() ; i++)
+		UtilFree((void *) lev_data.nodes[i]);
 
-	lev_nodes.clear();
+	lev_data.nodes.clear();
 }
 
 void FreeWallTips()
 {
-	for (unsigned int i = 0 ; i < lev_walltips.size() ; i++)
-		UtilFree((void *) lev_walltips[i]);
+	for (unsigned int i = 0 ; i < lev_data.walltips.size() ; i++)
+		UtilFree((void *) lev_data.walltips[i]);
 
-	lev_walltips.clear();
+	lev_data.walltips.clear();
 }
 
 
@@ -865,7 +848,7 @@ static void GetVertices(const Document &doc)
 		vert->index = i;
 	}
 
-	num_old_vert = num_vertices;
+	lev_data.num_old_vert = num_vertices;
 }
 
 
@@ -924,7 +907,7 @@ void MarkOverflow(int flags)
 {
 	// flags are ignored
 
-	lev_overflows++;
+	lev_data.overflows++;
 }
 
 
@@ -938,7 +921,7 @@ static void PutVertices(const Instance &inst, const char *name, int do_gl)
 	{
 		raw_vertex_t raw;
 
-		vertex_t *vert = lev_vertices[i];
+		vertex_t *vert = lev_data.vertices[i];
 
 		if ((do_gl ? 1 : 0) != (vert->is_new ? 1 : 0))
 		{
@@ -953,9 +936,9 @@ static void PutVertices(const Instance &inst, const char *name, int do_gl)
 		count++;
 	}
 
-	if (count != (do_gl ? num_new_vert : num_old_vert))
+	if (count != (do_gl ? lev_data.num_new_vert : lev_data.num_old_vert))
 		BugError("PutVertices miscounted (%d != %d)\n", count,
-				do_gl ? num_new_vert : num_old_vert);
+				do_gl ? lev_data.num_new_vert : lev_data.num_old_vert);
 
 	if (! do_gl && count > 65534)
 	{
@@ -980,7 +963,7 @@ static void PutGLVertices(const Instance &inst, int do_v5)
 	{
 		raw_v2_vertex_t raw;
 
-		vertex_t *vert = lev_vertices[i];
+		vertex_t *vert = lev_data.vertices[i];
 
 		if (! vert->is_new)
 			continue;
@@ -993,8 +976,8 @@ static void PutGLVertices(const Instance &inst, int do_v5)
 		count++;
 	}
 
-	if (count != num_new_vert)
-		BugError("PutGLVertices miscounted (%d != %d)\n", count, num_new_vert);
+	if (count != lev_data.num_new_vert)
+		BugError("PutGLVertices miscounted (%d != %d)\n", count, lev_data.num_new_vert);
 }
 
 
@@ -1019,7 +1002,7 @@ static inline u32_t VertexIndex_V5(const vertex_t *v)
 static inline u32_t VertexIndex_XNOD(const vertex_t *v)
 {
 	if (v->is_new)
-		return (u32_t) (num_old_vert + v->index);
+		return (u32_t) (lev_data.num_old_vert + v->index);
 
 	return (u32_t) v->index;
 }
@@ -1035,7 +1018,7 @@ static void PutSegs(const Instance &inst)
 	{
 		raw_seg_t raw;
 
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = lev_data.segs[i];
 
 		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
 		raw.end     = LE_U16(VertexIndex16Bit(seg->end));
@@ -1078,7 +1061,7 @@ static void PutGLSegs(const Instance &inst)
 	{
 		raw_gl_seg_t raw;
 
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = lev_data.segs[i];
 
 		raw.start = LE_U16(VertexIndex16Bit(seg->start));
 		raw.end   = LE_U16(VertexIndex16Bit(seg->end));
@@ -1124,7 +1107,7 @@ static void PutGLSegs_V5(const Instance &inst)
 	{
 		raw_v5_seg_t raw;
 
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = lev_data.segs[i];
 
 		raw.start = LE_U32(VertexIndex_V5(seg->start));
 		raw.end   = LE_U32(VertexIndex_V5(seg->end));
@@ -1168,7 +1151,7 @@ static void PutSubsecs(const Instance &inst, const char *name, int do_gl)
 	{
 		raw_subsec_t raw;
 
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = lev_data.subsecs[i];
 
 		raw.first = LE_U16(sub->seg_list->index);
 		raw.num   = LE_U16(sub->seg_count);
@@ -1199,7 +1182,7 @@ static void PutGLSubsecs_V5(const Instance &inst)
 	{
 		raw_v5_subsec_t raw;
 
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = lev_data.subsecs[i];
 
 		raw.first = LE_U32(sub->seg_list->index);
 		raw.num   = LE_U32(sub->seg_count);
@@ -1369,8 +1352,8 @@ static void CheckLimits(bool& force_v5, bool& force_xnod, const Instance &inst)
 
 	if (cur_info->gl_nodes && !cur_info->force_v5)
 	{
-		if (num_old_vert > 32767 ||
-			num_new_vert > 32767 ||
+		if (lev_data.num_old_vert > 32767 ||
+			lev_data.num_new_vert > 32767 ||
 			num_segs > 65534 ||
 			num_nodes > 32767)
 		{
@@ -1381,8 +1364,8 @@ static void CheckLimits(bool& force_v5, bool& force_xnod, const Instance &inst)
 
 	if (! cur_info->force_xnod)
 	{
-		if (num_old_vert > 32767 ||
-			num_new_vert > 32767 ||
+		if (lev_data.num_old_vert > 32767 ||
+			lev_data.num_new_vert > 32767 ||
 			num_segs > 32767 ||
 			num_nodes > 32767)
 		{
@@ -1405,17 +1388,17 @@ void SortSegs()
 {
 	// do a sanity check
 	for (int i = 0 ; i < num_segs ; i++)
-		if (lev_segs[i]->index < 0)
+		if (lev_data.segs[i]->index < 0)
 			BugError("Seg %d never reached a subsector!\n", i);
 
 	// sort segs into ascending index
-	std::sort(lev_segs.begin(), lev_segs.end(), seg_index_CMP_pred());
+	std::sort(lev_data.segs.begin(), lev_data.segs.end(), seg_index_CMP_pred());
 
 	// remove unwanted segs
-	while (lev_segs.size() > 0 && lev_segs.back()->index == SEG_IS_GARBAGE)
+	while (lev_data.segs.size() > 0 && lev_data.segs.back()->index == SEG_IS_GARBAGE)
 	{
-		UtilFree((void *) lev_segs.back());
-		lev_segs.pop_back();
+		UtilFree((void *) lev_data.segs.back());
+		lev_data.segs.pop_back();
 	}
 }
 
@@ -1535,8 +1518,8 @@ static void PutZVertices(ZLibContext &zcontext)
 {
 	int count, i;
 
-	u32_t orgverts = LE_U32(num_old_vert);
-	u32_t newverts = LE_U32(num_new_vert);
+	u32_t orgverts = LE_U32(lev_data.num_old_vert);
+	u32_t newverts = LE_U32(lev_data.num_new_vert);
 
 	zcontext.appendLump(&orgverts, 4);
 	zcontext.appendLump(&newverts, 4);
@@ -1545,7 +1528,7 @@ static void PutZVertices(ZLibContext &zcontext)
 	{
 		raw_v2_vertex_t raw;
 
-		const vertex_t *vert = lev_vertices[i];
+		const vertex_t *vert = lev_data.vertices[i];
 
 		if (! vert->is_new)
 			continue;
@@ -1558,10 +1541,10 @@ static void PutZVertices(ZLibContext &zcontext)
 		count++;
 	}
 
-	if (count != num_new_vert)
+	if (count != lev_data.num_new_vert)
 	{
 		throw std::logic_error(SString::printf("PutZVertices miscounted (%d != %d)\n", count,
-											   num_new_vert).get());
+											   lev_data.num_new_vert).get());
 	}
 }
 
@@ -1578,7 +1561,7 @@ static void PutZSubsecs(ZLibContext &zcontext)
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = lev_data.subsecs[i];
 		seg_t *seg;
 
 		raw_num = LE_U32(sub->seg_count);
@@ -1623,7 +1606,7 @@ static void PutZSegs(ZLibContext &zcontext)
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = lev_data.segs[i];
 
 		if (count != seg->index)
 		{
@@ -1664,7 +1647,7 @@ static void PutXGL3Segs(ZLibContext &zcontext)
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = lev_data.segs[i];
 
 		if (count != seg->index)
 		{
@@ -1862,22 +1845,22 @@ static void SaveXGL3Format(const Instance &inst, node_t *root_node)
 
 static void LoadLevel(const Instance &inst)
 {
-	const Lump_c *LEV = inst.wad.master.editWad()->GetLump(lev_current_start);
+	const Lump_c *LEV = inst.wad.master.editWad()->GetLump(lev_data.current_start);
 
-	lev_current_name = LEV->Name();
-	lev_overflows = 0;
+	lev_data.current_name = LEV->Name();
+	lev_data.overflows = 0;
 
-	inst.GB_PrintMsg("Building nodes on %s\n", lev_current_name.c_str());
+	inst.GB_PrintMsg("Building nodes on %s\n", lev_data.current_name.c_str());
 
-	num_new_vert = 0;
-	num_real_lines = 0;
+	lev_data.num_new_vert = 0;
+	lev_data.num_real_lines = 0;
 
 	GetVertices(inst.level);
 
 	for(auto &L : inst.level.linedefs)
 	{
 		if (L->right >= 0 || L->left >= 0)
-			num_real_lines++;
+			lev_data.num_real_lines++;
 
 		// init some fake flags
 		L->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
@@ -1954,9 +1937,9 @@ static void UpdateGLMarker(const Instance &inst, Lump_c *marker)
 	u32_t crc = CalcGLChecksum(inst);
 
 	// when original name is long, need to specify it here
-	if (lev_current_name.length() > 5)
+	if (lev_data.current_name.length() > 5)
 	{
-		marker->Printf("LEVEL=%s\n", lev_current_name.c_str());
+		marker->Printf("LEVEL=%s\n", lev_data.current_name.c_str());
 	}
 
 	marker->Printf("BUILDER=%s\n", "Eureka " EUREKA_VERSION);
@@ -1975,17 +1958,17 @@ static void UpdateGLMarker(const Instance &inst, Lump_c *marker)
 
 static void AddMissingLump(const Instance &inst, const char *name, const char *after)
 {
-	if (inst.wad.master.editWad()->LevelLookupLump(lev_current_idx, name) >= 0)
+	if (inst.wad.master.editWad()->LevelLookupLump(lev_data.current_idx, name) >= 0)
 		return;
 
-	int exist = inst.wad.master.editWad()->LevelLookupLump(lev_current_idx, after);
+	int exist = inst.wad.master.editWad()->LevelLookupLump(lev_data.current_idx, after);
 
 	// if this happens, the level structure is very broken
 	if (exist < 0)
 	{
 		Warning(inst, "Missing %s lump -- level structure is broken\n", after);
 
-		exist = inst.wad.master.editWad()->LevelLastLump(lev_current_idx);
+		exist = inst.wad.master.editWad()->LevelLastLump(lev_data.current_idx);
 	}
 
 	inst.wad.master.editWad()->InsertPoint(exist + 1);
@@ -2000,7 +1983,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 	// Note: root_node may be NULL
 
 	// remove any existing GL-Nodes
-	inst.wad.master.editWad()->RemoveGLNodes(lev_current_idx);
+	inst.wad.master.editWad()->RemoveGLNodes(lev_data.current_idx);
 
 	// ensure all necessary level lumps are present
 	AddMissingLump(inst, "SEGS",     "VERTEXES");
@@ -2022,7 +2005,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 
 	Lump_c * gl_marker = NULL;
 
-	if (cur_info->gl_nodes && num_real_lines > 0)
+	if (cur_info->gl_nodes && lev_data.num_real_lines > 0)
 	{
 		SortSegs();
 
@@ -2053,7 +2036,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 	// remove all the mini-segs from subsectors
 	NormaliseBspTree();
 
-	if (force_xnod && num_real_lines > 0)
+	if (force_xnod && lev_data.num_real_lines > 0)
 	{
 		SortSegs();
 
@@ -2088,10 +2071,10 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 
 	inst.wad.master.editWad()->writeToDisk();
 
-	if (lev_overflows > 0)
+	if (lev_data.overflows > 0)
 	{
 		cur_info->total_failed_maps++;
-		inst.GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+		inst.GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_data.overflows);
 
 		return BUILD_LumpOverflow;
 	}
@@ -2103,9 +2086,9 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 {
 	// remove any existing ZNODES lump
-	inst.wad.master.editWad()->RemoveZNodes(lev_current_idx);
+	inst.wad.master.editWad()->RemoveZNodes(lev_data.current_idx);
 
-	if (num_real_lines >= 0)
+	if (lev_data.num_real_lines >= 0)
 	{
 		SortSegs();
 
@@ -2114,10 +2097,10 @@ static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 
 	inst.wad.master.editWad()->writeToDisk();
 
-	if (lev_overflows > 0)
+	if (lev_data.overflows > 0)
 	{
 		cur_info->total_failed_maps++;
-		inst.GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+		inst.GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_data.overflows);
 
 		return BUILD_LumpOverflow;
 	}
@@ -2130,7 +2113,7 @@ static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 
 static Lump_c * FindLevelLump(const Instance &inst, const char *name) noexcept
 {
-	int idx = inst.wad.master.editWad()->LevelLookupLump(lev_current_idx, name);
+	int idx = inst.wad.master.editWad()->LevelLookupLump(lev_data.current_idx, name);
 
 	if (idx < 0)
 		return NULL;
@@ -2146,7 +2129,7 @@ static Lump_c & CreateLevelLump(const Instance &inst, const char *name)
 
 	if(!lump)
 	{
-		int last_idx = inst.wad.master.editWad()->LevelLastLump(lev_current_idx);
+		int last_idx = inst.wad.master.editWad()->LevelLastLump(lev_data.current_idx);
 
 		// in UDMF maps, insert before the ENDMAP lump, otherwise insert
 		// after the last known lump of the level.
@@ -2167,9 +2150,9 @@ static Lump_c & CreateGLMarker(const Instance &inst)
 {
 	SString name_buf;
 
-	if (lev_current_name.length() <= 5)
+	if (lev_data.current_name.length() <= 5)
 	{
-		name_buf = "GL_" + lev_current_name;
+		name_buf = "GL_" + lev_data.current_name;
 	}
 	else
 	{
@@ -2177,7 +2160,7 @@ static Lump_c & CreateGLMarker(const Instance &inst)
 		name_buf = "GL_LEVEL";
 	}
 
-	int last_idx = inst.wad.master.editWad()->LevelLastLump(lev_current_idx);
+	int last_idx = inst.wad.master.editWad()->LevelLastLump(lev_data.current_idx);
 
 	inst.wad.master.editWad()->InsertPoint(last_idx + 1);
 
@@ -2203,8 +2186,8 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 	if (cur_info->cancelled)
 		return BUILD_Cancelled;
 
-	lev_current_idx   = lev_idx;
-	lev_current_start = inst.wad.master.editWad()->LevelHeader(lev_idx);
+	lev_data.current_idx   = lev_idx;
+	lev_data.current_start = inst.wad.master.editWad()->LevelHeader(lev_idx);
 
 	LoadLevel(inst);
 
@@ -2213,7 +2196,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 
 	build_result_e ret = BUILD_OK;
 
-	if (num_real_lines > 0)
+	if (lev_data.num_real_lines > 0)
 	{
 		// create initial segs
 		seg_t *list = CreateSegs(inst);
@@ -2225,7 +2208,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 	if (ret == BUILD_OK)
 	{
 		PrintDetail("Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
-					num_nodes, num_subsecs, num_segs, num_old_vert + num_new_vert);
+					num_nodes, num_subsecs, num_segs, lev_data.num_old_vert + lev_data.num_new_vert);
 
 		if (root_node)
 		{

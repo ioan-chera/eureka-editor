@@ -478,8 +478,8 @@ void DetectOverlappingVertices(const Document &doc)
 		{
 			// found an overlap!
 
-			vertex_t *A = lev_vertices[array[i]];
-			vertex_t *B = lev_vertices[array[i+1]];
+			vertex_t *A = lev_data.vertices[array[i]];
+			vertex_t *B = lev_data.vertices[array[i+1]];
 
 			B->overlap = A->overlap ? A->overlap : A;
 		}
@@ -656,8 +656,8 @@ void CalculateWallTips(const Document &doc)
 		bool left  = (L->left  >= 0) && doc.isSector(doc.getLeft(*L)->sector);
 		bool right = (L->right >= 0) && doc.isSector(doc.getRight(*L)->sector);
 
-		VertexAddWallTip(lev_vertices[L->start], x2-x1, y2-y1, left, right);
-		VertexAddWallTip(lev_vertices[L->end],   x1-x2, y1-y2, right, left);
+		VertexAddWallTip(lev_data.vertices[L->start], x2-x1, y2-y1, left, right);
+		VertexAddWallTip(lev_data.vertices[L->end],   x1-x2, y1-y2, right, left);
 	}
 
 # if DEBUG_WALLTIPS
@@ -685,8 +685,8 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &
 	vert->y = y;
 	vert->is_new = true;
 
-	vert->index = num_new_vert;
-	num_new_vert++;
+	vert->index = lev_data.num_new_vert;
+	lev_data.num_new_vert++;
 
 	// compute wall-tip info
 	if (seg->linedef < 0 || doc.linedefs[seg->linedef]->TwoSided())
@@ -723,8 +723,8 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 
 	vert->is_new = false;
 
-	vert->index = num_old_vert;
-	num_old_vert++;
+	vert->index = lev_data.num_old_vert;
+	lev_data.num_old_vert++;
 
 	// compute new coordinates
 
