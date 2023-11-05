@@ -39,32 +39,9 @@ namespace ajbsp
 #define DEBUG_LOAD      0
 #define DEBUG_BSP       0
 
-
-static int block_x, block_y;
-static int block_w, block_h;
-static int block_count;
-
-static int block_mid_x = 0;
-static int block_mid_y = 0;
-
-static u16_t ** block_lines;
-
-static u16_t *block_ptrs;
-static u16_t *block_dups;
-
-static int block_compression;
-static int block_overflowed;
-
 #define BLOCK_LIMIT  16000
 
 #define DUMMY_DUP  0xFFFF
-
-
-void GetBlockmapBounds(int *x, int *y, int *w, int *h)
-{
-	*x = block_x; *y = block_y;
-	*w = block_w; *h = block_h;
-}
 
 
 int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
@@ -147,7 +124,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 
 #define BK_QUANTUM  32
 
-static void BlockAdd(int blk_num, int line_index)
+void LevelData::Block::Add(int blk_num, int line_index)
 {
 	u16_t *cur = block_lines[blk_num];
 
@@ -183,7 +160,7 @@ static void BlockAdd(int blk_num, int line_index)
 }
 
 
-static void BlockAddLine(int line_index, const Document &doc)
+void LevelData::Block::AddLine(int line_index, const Document &doc)
 {
 	const auto &L = doc.linedefs[line_index];
 
@@ -219,7 +196,7 @@ static void BlockAddLine(int line_index, const Document &doc)
 		for (bx=bx1 ; bx <= bx2 ; bx++)
 		{
 			int blk_num = by1 * block_w + bx;
-			BlockAdd(blk_num, line_index);
+			Add(blk_num, line_index);
 		}
 		return;
 	}
@@ -230,7 +207,7 @@ static void BlockAddLine(int line_index, const Document &doc)
 		for (by=by1 ; by <= by2 ; by++)
 		{
 			int blk_num = by * block_w + bx1;
-			BlockAdd(blk_num, line_index);
+			Add(blk_num, line_index);
 		}
 		return;
 	}
@@ -249,13 +226,13 @@ static void BlockAddLine(int line_index, const Document &doc)
 
 		if (CheckLinedefInsideBox(minx, miny, maxx, maxy, x1, y1, x2, y2))
 		{
-			BlockAdd(blk_num, line_index);
+			Add(blk_num, line_index);
 		}
 	}
 }
 
 
-static void CreateBlockmap(const Document &doc)
+void LevelData::Block::CreateMap(const Document &doc)
 {
 	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
 
@@ -265,12 +242,12 @@ static void CreateBlockmap(const Document &doc)
 		if (doc.isZeroLength(*doc.linedefs[i]))
 			continue;
 
-		BlockAddLine(i, doc);
+		AddLine(i, doc);
 	}
 }
 
 
-static int BlockCompare(const void *p1, const void *p2)
+int LevelData::Block::Compare(const void *p1, const void *p2) const
 {
 	int blk_num1 = ((const u16_t *) p1)[0];
 	int blk_num2 = ((const u16_t *) p2)[0];
@@ -298,7 +275,7 @@ static int BlockCompare(const void *p1, const void *p2)
 }
 
 
-static void CompressBlockmap(void)
+void LevelData::Block::CompressMap()
 {
 	int i;
 	int cur_offset;
@@ -316,8 +293,11 @@ static void CompressBlockmap(void)
 
 	for (i=0 ; i < block_count ; i++)
 		block_dups[i] = static_cast<u16_t>(i);
-
-	qsort(block_dups, block_count, sizeof(u16_t), BlockCompare);
+	
+	std::sort(block_dups, block_dups + block_count, [this](u16_t a, u16_t b)
+			  {
+		return Compare(&a, &b) < 0;
+	});
 
 	// scan duplicate array and build up offset array
 
@@ -334,7 +314,7 @@ static void CompressBlockmap(void)
 		// empty block ?
 		if (block_lines[blk_num] == NULL)
 		{
-			block_ptrs[blk_num] = static_cast<u16_t>(4 + block_count);
+			block_ptrs[blk_num] = static_cast<u16_t>(4 + this->block_count);
 			block_dups[i] = DUMMY_DUP;
 
 			orig_size += 2;
@@ -346,8 +326,8 @@ static void CompressBlockmap(void)
 		// duplicate ?  Only the very last one of a sequence of duplicates
 		// will update the current offset value.
 
-		if (i+1 < block_count &&
-				BlockCompare(block_dups + i, block_dups + i+1) == 0)
+		if (i+1 < this->block_count &&
+				Compare(block_dups + i, block_dups + i+1) == 0)
 		{
 			block_ptrs[blk_num] = static_cast<u16_t>(cur_offset);
 			block_dups[i] = DUMMY_DUP;
@@ -375,7 +355,7 @@ static void CompressBlockmap(void)
 
 	if (cur_offset > 65535)
 	{
-		block_overflowed = true;
+		overflowed = true;
 		return;
 	}
 
@@ -384,11 +364,11 @@ static void CompressBlockmap(void)
 			cur_offset, dup_count);
 # endif
 
-	block_compression = (orig_size - new_size) * 100 / orig_size;
+	compression = (orig_size - new_size) * 100 / orig_size;
 
 	// there's a tiny chance of new_size > orig_size
-	if (block_compression < 0)
-		block_compression = 0;
+	if (compression < 0)
+		compression = 0;
 }
 
 void LevelData::WriteBlockmap(const Instance &inst) const
@@ -404,17 +384,17 @@ void LevelData::WriteBlockmap(const Instance &inst) const
 	// fill in header
 	raw_blockmap_header_t header;
 
-	header.x_origin = LE_U16(block_x);
-	header.y_origin = LE_U16(block_y);
-	header.x_blocks = LE_U16(block_w);
-	header.y_blocks = LE_U16(block_h);
+	header.x_origin = LE_U16(block.block_x);
+	header.y_origin = LE_U16(block.block_y);
+	header.x_blocks = LE_U16(block.block_w);
+	header.y_blocks = LE_U16(block.block_h);
 
 	lump.Write(&header, sizeof(header));
 
 	// handle pointers
-	for (i=0 ; i < block_count ; i++)
+	for (i=0 ; i < block.block_count ; i++)
 	{
-		u16_t ptr = LE_U16(block_ptrs[i]);
+		u16_t ptr = LE_U16(block.block_ptrs[i]);
 
 		if (ptr == 0)
 			BugError("WriteBlockmap: offset %d not set.\n", i);
@@ -426,15 +406,15 @@ void LevelData::WriteBlockmap(const Instance &inst) const
 	lump.Write(null_block, sizeof(null_block));
 
 	// handle each block list
-	for (i=0 ; i < block_count ; i++)
+	for (i=0 ; i < block.block_count ; i++)
 	{
-		int blk_num = block_dups[i];
+		int blk_num = block.block_dups[i];
 
 		// ignore duplicate or empty blocks
 		if (blk_num == DUMMY_DUP)
 			continue;
 
-		u16_t *blk = block_lines[blk_num];
+		u16_t *blk = block.block_lines[blk_num];
 		SYS_ASSERT(blk);
 
 		lump.Write(&m_zero, sizeof(u16_t));
@@ -444,7 +424,7 @@ void LevelData::WriteBlockmap(const Instance &inst) const
 }
 
 
-static void FreeBlockmap(void)
+void LevelData::Block::FreeMap()
 {
 	for (int i=0 ; i < block_count ; i++)
 	{
@@ -458,11 +438,8 @@ static void FreeBlockmap(void)
 }
 
 
-static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
+static void FindMapLimits(bbox_t *bbox, const Document &doc)
 {
-	int mid_x = 0;
-	int mid_y = 0;
-
 	bbox->minx = bbox->miny = SHRT_MAX;
 	bbox->maxx = bbox->maxy = SHRT_MIN;
 
@@ -487,16 +464,7 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 			if (hx > bbox->maxx) bbox->maxx = hx;
 			if (hy > bbox->maxy) bbox->maxy = hy;
 
-			// compute middle of cluster (roughly, so we don't overflow)
-			mid_x += (lx + hx) / 32;
-			mid_y += (ly + hy) / 32;
 		}
-	}
-
-	if (doc.numLinedefs() > 0)
-	{
-		block_mid_x = (mid_x / doc.numLinedefs()) * 16;
-		block_mid_y = (mid_y / doc.numLinedefs()) * 16;
 	}
 
 # if DEBUG_BLOCKMAP
@@ -508,12 +476,12 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 // compute blockmap origin & size (the block_x/y/w/h variables)
 // based on the set of loaded linedefs.
 //
-static void InitBlockmap(const Document &doc)
+void LevelData::Block::InitMap(const Document &doc)
 {
 	bbox_t map_bbox;
 
 	// find limits of linedefs, and store as map limits
-	FindBlockmapLimits(&map_bbox, doc);
+	FindMapLimits(&map_bbox, doc);
 
 	PrintDetail("Map goes from (%d,%d) to (%d,%d)\n",
 			map_bbox.minx, map_bbox.miny, map_bbox.maxx, map_bbox.maxy);
@@ -530,7 +498,7 @@ static void InitBlockmap(const Document &doc)
 //
 // build the blockmap and write the data into the BLOCKMAP lump
 //
-void LevelData::PutBlockmap(const Instance &inst) const
+void LevelData::PutBlockmap(const Instance &inst)
 {
 	if (! cur_info->do_blockmap || inst.level.numLinedefs() == 0)
 	{
@@ -539,22 +507,22 @@ void LevelData::PutBlockmap(const Instance &inst) const
 		return;
 	}
 
-	block_overflowed = false;
+	block.overflowed = false;
 
 	// initial phase: create internal blockmap containing the index of
 	// all lines in each block.
 
-	CreateBlockmap(inst.level);
+	block.CreateMap(inst.level);
 
 	// -AJA- second phase: compress the blockmap.  We do this by sorting
 	//       the blocks, which is a typical way to detect duplicates in
 	//       a large list.  This also detects BLOCKMAP overflow.
 
-	CompressBlockmap();
+	block.CompressMap();
 
 	// final phase: write it out in the correct format
 
-	if (block_overflowed)
+	if (block.overflowed)
 	{
 		// leave an empty blockmap lump
 		CreateLevelLump(inst, "BLOCKMAP");
@@ -566,10 +534,10 @@ void LevelData::PutBlockmap(const Instance &inst) const
 		WriteBlockmap(inst);
 
 		PrintDetail("Completed blockmap, size %dx%d (compression: %d%%)\n",
-				block_w, block_h, block_compression);
+				block.block_w, block.block_h, block.compression);
 	}
 
-	FreeBlockmap();
+	block.FreeMap();
 }
 
 
@@ -2168,7 +2136,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 
 	LoadLevel(inst);
 
-	InitBlockmap(inst.level);
+	block.InitMap(inst.level);
 
 
 	build_result_e ret = BUILD_OK;

@@ -284,7 +284,7 @@ public:
 // it must be a very high value.
 #define SEG_IS_GARBAGE  (1 << 29)
 
-struct LevelData;
+class LevelData;
 struct subsec_t
 {
 	// list of segs
@@ -401,7 +401,7 @@ public:
 
 class ZLibContext;
 struct intersection_t;
-struct LevelData
+class LevelData
 {
 	
 public:
@@ -416,9 +416,35 @@ public:
 	build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
 	
 private:
+	struct Block
+	{
+		void CreateMap(const Document &doc);
+		void CompressMap();
+		void InitMap(const Document &doc);
+		void FreeMap();
+		
+		int block_x = 0;
+		int block_y = 0;
+		int block_w = 0;
+		int block_h = 0;
+		int block_count = 0;
+		u16_t ** block_lines = nullptr;
+		u16_t *block_ptrs = nullptr;
+		u16_t *block_dups = nullptr;
+		int compression = 0;
+		int overflowed = 0;
+		
+	private:
+		void Add(int blk_num, int line_index);
+		void AddLine(int line_index, const Document &doc);
+		int Compare(const void *p1, const void *p2) const;
+	};
+	
 	/* ----- create blockmap ------------------------------------ */
+	
 	void WriteBlockmap(const Instance &inst) const;
-	void PutBlockmap(const Instance &inst) const;
+	
+	void PutBlockmap(const Instance &inst);
 	
 	// REJECT : Generate the reject table
 	void Reject_WriteLump(const Instance &inst) const;
@@ -545,6 +571,8 @@ private:
 	// happens along the given seg at the given location.
 	//
 	vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc);
+	
+	Block block = {};
 	
 	SString current_name;
 	int current_idx = 0;
