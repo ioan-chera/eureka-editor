@@ -545,17 +545,10 @@ void LevelData::PutBlockmap(const Instance &inst)
 // REJECT : Generate the reject table
 //------------------------------------------------------------------------
 
-
-static u8_t *rej_matrix;
-static int   rej_total_size;	// in bytes
-
-static std::vector<int> rej_sector_groups;
-
-
 //
 // Allocate the matrix, init sectors into individual groups.
 //
-static void Reject_Init(const Document &doc)
+void LevelData::Reject::Init(const Document &doc)
 {
 	rej_total_size = (doc.numSectors() * doc.numSectors() + 7) / 8;
 
@@ -571,7 +564,7 @@ static void Reject_Init(const Document &doc)
 }
 
 
-static void Reject_Free()
+void LevelData::Reject::Free()
 {
 	delete[] rej_matrix;
 	rej_matrix = NULL;
@@ -585,7 +578,7 @@ static void Reject_Free()
 // Now we scan the linedef list.  For each two-sectored line,
 // merge the two sector groups into one.  That's it!
 //
-static void Reject_GroupSectors(const Document &doc)
+void LevelData::Reject::GroupSectors(const Document &doc)
 {
 	for(const auto &L : doc.linedefs)
 	{
@@ -645,7 +638,7 @@ static void Reject_DebugGroups()
 #endif
 
 
-static void Reject_ProcessSectors(const Document &doc)
+void LevelData::Reject::ProcessSectors(const Document &doc)
 {
 	for (int view=0 ; view < doc.numSectors() ; view++)
 	{
@@ -669,7 +662,7 @@ void LevelData::Reject_WriteLump(const Instance &inst) const
 {
 	Lump_c &lump = CreateLevelLump(inst, "REJECT");
 
-	lump.Write(rej_matrix, rej_total_size);
+	lump.Write(rej.rej_matrix, rej.rej_total_size);
 }
 
 
@@ -680,7 +673,7 @@ void LevelData::Reject_WriteLump(const Instance &inst) const
 // determining all isolated groups of sectors (islands that are
 // surrounded by void space).
 //
-void LevelData::PutReject(const Instance &inst) const
+void LevelData::PutReject(const Instance &inst)
 {
 	if (! cur_info->do_reject || inst.level.numSectors() == 0)
 	{
@@ -689,16 +682,16 @@ void LevelData::PutReject(const Instance &inst) const
 		return;
 	}
 
-	Reject_Init(inst.level);
-	Reject_GroupSectors(inst.level);
-	Reject_ProcessSectors(inst.level);
+	rej.Init(inst.level);
+	rej.GroupSectors(inst.level);
+	rej.ProcessSectors(inst.level);
 
 # if DEBUG_REJECT
 	Reject_DebugGroups();
 # endif
 
 	Reject_WriteLump(inst);
-	Reject_Free();
+	rej.Free();
 
 	PrintDetail("Added simple reject lump\n");
 }

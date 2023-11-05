@@ -440,6 +440,18 @@ private:
 		int Compare(const void *p1, const void *p2) const;
 	};
 	
+	struct Reject
+	{
+		void Init(const Document &doc);
+		void Free();
+		void GroupSectors(const Document &doc);
+		void ProcessSectors(const Document &doc);
+		
+		u8_t *rej_matrix = nullptr;
+		int   rej_total_size = 0;	// in bytes
+		std::vector<int> rej_sector_groups;
+	};
+	
 	/* ----- create blockmap ------------------------------------ */
 	
 	void WriteBlockmap(const Instance &inst) const;
@@ -448,7 +460,7 @@ private:
 	
 	// REJECT : Generate the reject table
 	void Reject_WriteLump(const Instance &inst) const;
-	void PutReject(const Instance &inst) const;
+	void PutReject(const Instance &inst);
 	
 	// allocation routines
 	vertex_t *NewVertex();
@@ -573,6 +585,7 @@ private:
 	vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc);
 	
 	Block block = {};
+	Reject rej = {};
 	
 	SString current_name;
 	int current_idx = 0;
