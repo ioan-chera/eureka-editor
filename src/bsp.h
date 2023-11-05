@@ -399,10 +399,7 @@ public:
 /* ----- Level data arrays ----------------------- */
 
 extern std::vector<vertex_t *>  lev_vertices;
-extern std::vector<seg_t *>     lev_segs;
 extern std::vector<subsec_t *>  lev_subsecs;
-extern std::vector<node_t *>    lev_nodes;
-extern std::vector<walltip_t *> lev_walltips;
 
 #define num_vertices  ((int)lev_vertices.size())
 #define num_segs      ((int)lev_segs.size())

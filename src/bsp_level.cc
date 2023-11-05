@@ -753,21 +753,21 @@ static void PutReject(const Instance &inst)
 
 static SString lev_current_name;
 
-int lev_current_idx;
-int lev_current_start;
+static int lev_current_idx;
+static int lev_current_start;
 
-int lev_overflows;
+static int lev_overflows;
 
 
 std::vector<vertex_t *>  lev_vertices;
-std::vector<seg_t *>     lev_segs;
+static std::vector<seg_t *>     lev_segs;
 std::vector<subsec_t *>  lev_subsecs;
-std::vector<node_t *>    lev_nodes;
-std::vector<walltip_t *> lev_walltips;
+static std::vector<node_t *>    lev_nodes;
+static std::vector<walltip_t *> lev_walltips;
 
 int num_old_vert = 0;
 int num_new_vert = 0;
-int num_real_lines = 0;
+static int num_real_lines = 0;
 
 
 /* ----- allocation routines ---------------------------- */
@@ -1890,7 +1890,7 @@ void FreeLevel(void)
 	FreeWallTips();
 }
 
-static Lump_c *FindLevelLump(const Instance &inst, const char *name);
+static Lump_c *FindLevelLump(const Instance &inst, const char *name) noexcept;
 
 static u32_t CalcGLChecksum(const Instance &inst)
 {
@@ -2107,7 +2107,7 @@ static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 /* ---------------------------------------------------------------- */
 
 
-static Lump_c * FindLevelLump(const Instance &inst, const char *name)
+static Lump_c * FindLevelLump(const Instance &inst, const char *name) noexcept
 {
 	int idx = inst.wad.master.editWad()->LevelLookupLump(lev_current_idx, name);
 

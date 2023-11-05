@@ -290,7 +290,7 @@ public:
 	// passing a negative value or invalid index will reset the
 	// insertion point -- future lumps get added at the END.
 	// RemoveLumps(), RemoveLevel() and EndWrite() also reset it.
-	void InsertPoint(int index = -1);
+	void InsertPoint(int index = -1) noexcept;
 
 	const std::vector<LumpRef> &getDir() const
 	{

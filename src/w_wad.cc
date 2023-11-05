@@ -1058,7 +1058,7 @@ Lump_c * Wad_file::AddLevel(const SString &name, int *lev_num)
 }
 
 
-void Wad_file::InsertPoint(int index)
+void Wad_file::InsertPoint(int index) noexcept
 {
 	// this is validated on usage
 	insert_point = index;

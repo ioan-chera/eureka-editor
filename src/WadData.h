@@ -171,7 +171,7 @@ public:
 	{
 		return game_wad;
 	}
-	const std::shared_ptr<Wad_file> &editWad() const
+	const std::shared_ptr<Wad_file> &editWad() const noexcept
 	{
 		return edit_wad;
 	}
