@@ -161,7 +161,7 @@ tl::optional<fs::path> Instance::Project_AskFile() const
 }
 
 
-void Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result)
+void Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false)
 {
 	// grab the new information
     LoadingData loading = loaded;
@@ -194,9 +194,9 @@ void Instance::CMD_ManageProject()
 			Project_ApplyChanges(*result);
 		}
 	}
-	catch(const ParseException &e)
+	catch(const std::runtime_error &e)
 	{
-		DLG_ShowError(false, "Error reading configuration file: %s", e.what());
+		DLG_ShowError(false, "Error managing project: %s", e.what());
 	}
 }
 

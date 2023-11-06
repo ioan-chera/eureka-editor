@@ -217,14 +217,14 @@ struct WadData
 		return const_cast<Img_c *>(getSprite(config, type, loading));
 	}
 	
-	void reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads);
+	void reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads) noexcept(false);
 
 	ImageSet images;
 	Palette palette;
 	MasterDir master;
 	
 private:
-	void W_LoadPalette();
+	void W_LoadPalette() noexcept(false);
 	void W_LoadColormap()
 	{
 		palette.loadColormap(master.findGlobalLump("COLORMAP"));

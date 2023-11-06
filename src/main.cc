@@ -866,7 +866,7 @@ static void readPortInfo(std::unordered_map<SString, SString> &parseVars, Loadin
 // open all wads in the master directory.
 // read important content from the wads (palette, textures, etc).
 //
-void Instance::Main_LoadResources(const LoadingData &loading)
+void Instance::Main_LoadResources(const LoadingData &loading) noexcept(false)
 {
 	ConfigData config;
 	std::vector<std::shared_ptr<Wad_file>> resourceWads;

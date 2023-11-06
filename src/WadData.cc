@@ -51,7 +51,7 @@ const Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
 	return result;
 }
 
-void WadData::W_LoadPalette()
+void WadData::W_LoadPalette() noexcept(false)
 {
 	const Lump_c *lump = master.findGlobalLump("PLAYPAL");
 	if(!lump)
@@ -62,7 +62,7 @@ void WadData::W_LoadPalette()
 	images.IM_ResetDummyTextures();
 }
 
-void WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads)
+void WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads) noexcept(false)
 {
 	// reset the master directory
 	WadData newWad = *this;

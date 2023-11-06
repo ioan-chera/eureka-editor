@@ -300,7 +300,7 @@ public:
 	// MAIN
 	bool Main_ConfirmQuit(const char *action) const;
 	fs::path Main_FileOpFolder() const;
-	void Main_LoadResources(const LoadingData &loading);
+	void Main_LoadResources(const LoadingData &loading) noexcept(false);
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;
@@ -399,7 +399,7 @@ private:
 	void LoadVertices(const Wad_file *load_wad);
 	bool M_ExportMap();
 	void Navigate2D();
-	void Project_ApplyChanges(const UI_ProjectSetup::Result &result);
+	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
 	tl::optional<fs::path> Project_AskFile() const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);
