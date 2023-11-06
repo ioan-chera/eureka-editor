@@ -32,7 +32,7 @@ void Fatal(const Callable &callable)
 	{
 		callable();
 	}
-	catch(const std::runtime_error &e)
+	catch(const std::exception &e)
 	{
 		std::cerr << e.what() << std::endl;
 		abort();
