@@ -974,7 +974,7 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
 // open a new wad file.
 // when 'map_name' is not NULL, try to open that map.
 //
-void OpenFileMap(const fs::path &filename, const SString &map_namem)
+void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(false)
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
@@ -1051,6 +1051,8 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem)
 	// must be after LoadLevel as we need the Level_format
 	// TODO: same here
 	gInstance.Main_LoadResources(gInstance.loaded);
+	
+	// TODO: RESTORE loaded, wad.master, LoadLevel ON FAILURE
 }
 
 
