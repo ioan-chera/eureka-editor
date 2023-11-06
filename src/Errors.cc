@@ -33,4 +33,12 @@ void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...)
 	va_end(ap);
 	throw std::runtime_error(message);
 }
-
+void ThrowLogicException(EUR_FORMAT_STRING(const char *fmt), ...)
+{
+	char message[256];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(message, sizeof(message), fmt, ap);
+	va_end(ap);
+	throw std::logic_error(message);
+}

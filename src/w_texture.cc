@@ -101,7 +101,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, cons
 	gLog.debugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
-		FatalError("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
+		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
 	Img_c img(width, height, false);
 	bool is_medusa = false;
@@ -110,7 +110,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, cons
 	int num_patches = LE_S16(raw->patch_count);
 
 	if (! num_patches)
-		FatalError("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
+		ThrowException("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
 
 	const raw_strife_patchdef_t *patdef = (const raw_strife_patchdef_t *) & raw->patches[0];
 
@@ -246,7 +246,7 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, const Lump_
 	}
 
 	if (num_tex < 0 || num_tex > (1<<20))
-		FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad count.\n");
+		ThrowException("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad count.\n");
 
 	bool is_strife = CheckTexturesAreStrife(tex_data.data(), (int)tex_data.size(), num_tex, skip_first);
 
@@ -258,7 +258,7 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, const Lump_
 		int offset = LE_S32(tex_data_s32[1 + n]);
 
 		if (offset < 4 * num_tex || offset >= (int)tex_data.size())
-			FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
+			ThrowException("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
 
 		if (is_strife)
 			LoadTextureEntry_Strife(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first);

@@ -385,7 +385,7 @@ static bool DetermineIWAD(Instance &inst)
 			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName, "wad");
 
 		if (! Wad_file::Validate(inst.loaded.iwadName))
-			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.u8string().c_str());
+			ThrowException("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.u8string().c_str());
 
 		SString game = GameNameFromIWAD(inst.loaded.iwadName);
 
@@ -910,7 +910,7 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 	
 	std::shared_ptr<Wad_file> gameWad = Wad_file::Open(newLoading.iwadName, WadOpenMode::read);
 	if(!gameWad)
-		throw std::runtime_error("Could not load IWAD file");
+		ThrowException("Could not load IWAD file");
 	
 	wad.reloadResources(gameWad, config, resourceWads);
 	conf = config;

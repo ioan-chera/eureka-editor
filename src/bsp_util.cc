@@ -101,7 +101,7 @@ void *UtilCalloc(int size)
 	void *ret = calloc(1, size);
 
 	if (!ret)
-		FatalError("Out of memory (cannot allocate %d bytes)\n", size);
+		throw std::bad_alloc();
 
 	return ret;
 }
@@ -115,7 +115,7 @@ void *UtilRealloc(void *old, int size)
 	void *ret = realloc(old, size);
 
 	if (!ret)
-		FatalError("Out of memory (cannot reallocate %d bytes)\n", size);
+		throw std::bad_alloc();
 
 	return ret;
 }

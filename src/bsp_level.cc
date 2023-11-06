@@ -1376,7 +1376,7 @@ ZLibContext::ZLibContext(nodebuildinfo_t * cur_info, std::vector<byte> &data) : 
 	
 	int result = deflateInit(&out_stream, Z_DEFAULT_COMPRESSION);
 	if(result != Z_OK)
-		throw std::runtime_error("Trouble setting up zlib compression: " + std::to_string(result));
+		ThrowException("Trouble setting up zlib compression: %d", result);
 	
 	out_stream.next_out = out_buffer;
 	out_stream.avail_out = sizeof(out_buffer);
@@ -1486,10 +1486,7 @@ void LevelData::PutZVertices(ZLibContext &zcontext) const
 	}
 
 	if (count != num_new_vert)
-	{
-		throw std::logic_error(SString::printf("PutZVertices miscounted (%d != %d)\n", count,
-											   num_new_vert).get());
-	}
+		BugError("PutZVertices miscounted (%d != %d)", count, num_new_vert);
 }
 
 
@@ -1518,26 +1515,19 @@ void LevelData::PutZSubsecs(ZLibContext &zcontext) const
 		{
 			if (cur_seg_index != seg->index)
 			{
-				throw std::logic_error(SString::printf("PutZSubsecs: seg index mismatch in sub %d "
-													   "(%d != %d)\n", i, cur_seg_index,
-													   seg->index).get());
+				BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)", i, cur_seg_index,
+						 seg->index);
 			}
 
 			count++;
 		}
 
 		if (count != sub->seg_count)
-		{
-			throw std::logic_error(SString::printf("PutZSubsecs: miscounted segs in sub %d (%d "
-												   "!= %d)\n", i, count, sub->seg_count).get());
-		}
+			BugError("PutZSubsecs: miscounted segs in sub %d (%d != %d)", i, count, sub->seg_count);
 	}
 
 	if (cur_seg_index != (int)segs.size())
-	{
-		throw std::logic_error(SString::printf("PutZSubsecs miscounted segs (%d != %d)\n",
-											   cur_seg_index, (int)segs.size()).get());
-	}
+		BugError("PutZSubsecs miscounted segs (%d != %d)", cur_seg_index, (int)segs.size());
 }
 
 
@@ -1553,10 +1543,7 @@ void LevelData::PutZSegs(ZLibContext &zcontext) const
 		seg_t *seg = segs[i];
 
 		if (count != seg->index)
-		{
-			throw std::logic_error(SString::printf("PutZSegs: seg index mismatch (%d != %d)\n",
-												   count, seg->index).get());
-		}
+			BugError("PutZSegs: seg index mismatch (%d != %d)", count, seg->index);
 
 		{
 			u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
@@ -1575,10 +1562,7 @@ void LevelData::PutZSegs(ZLibContext &zcontext) const
 	}
 
 	if (count != (int)segs.size())
-	{
-		throw std::logic_error(SString::printf("PutZSegs miscounted (%d != %d)\n", count,
-											   (int)segs.size()).get());
-	}
+		BugError("PutZSegs miscounted (%d != %d)\n", count, (int)segs.size());
 }
 
 
@@ -1595,8 +1579,7 @@ void LevelData::PutXGL3Segs(ZLibContext &zcontext) const
 
 		if (count != seg->index)
 		{
-			throw std::logic_error(SString::printf("PutXGL3Segs: seg index mismatch (%d != %d)\n",
-												   count, seg->index).get());
+			BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n", count, seg->index);
 		}
 
 		{
@@ -1620,8 +1603,7 @@ void LevelData::PutXGL3Segs(ZLibContext &zcontext) const
 
 	if (count != (int)segs.size())
 	{
-		throw std::logic_error(SString::printf("PutXGL3Segs miscounted (%d != %d)\n", count,
-											   (int)segs.size()).get());
+		BugError("PutXGL3Segs miscounted (%d != %d)\n", count, (int)segs.size());
 	}
 }
 
@@ -1682,8 +1664,7 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
 	{
-		throw std::logic_error(SString::printf("Bad right child in V5 node %d\n",
-											   node->index).get());
+		BugError("Bad right child in V5 node %d\n", node->index);
 	}
 
 	if (node->l.node)
@@ -1691,7 +1672,7 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 	else if (node->l.subsec)
 		raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
 	else
-		throw std::logic_error(SString::printf("Bad left child in V5 node %d\n", node->index).get());
+		BugError("Bad left child in V5 node %d\n", node->index);
 
 	zcontext.appendLump(&raw.right, 4);
 	zcontext.appendLump(&raw.left,  4);
@@ -1718,8 +1699,7 @@ void LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3)
 
 	if (node_cur_index != (int)nodes.size())
 	{
-		throw std::logic_error(SString::printf("PutZNodes miscounted (%d != %d)\n",
-											   node_cur_index, (int)nodes.size()).get());
+		BugError("PutZNodes miscounted (%d != %d)\n", node_cur_index, (int)nodes.size());
 	}
 }
 
