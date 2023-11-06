@@ -203,6 +203,7 @@ void Instance::CMD_ManageProject()
 
 void Instance::CMD_NewProject()
 {
+	std::shared_ptr<Wad_file> initialEditWad = wad.master.editWad();
 	try
 	{
 		if (!Main_ConfirmQuit("create a new project"))
@@ -226,27 +227,6 @@ void Instance::CMD_NewProject()
 		{
 			return;
 		}
-
-
-		/* third, delete file if it already exists
-		   [ the file chooser should have asked for confirmation ]
-		 */
-
-		if (FileExists(*filename))
-		{
-			// TODO??  M_BackupWad(wad);
-
-			if (!FileDelete(*filename))
-			{
-				DLG_Notify("Unable to delete the existing file.");
-
-				return;
-			}
-
-			Fl::wait(0.1);
-			Fl::wait(0.1);
-		}
-
 
 		wad.master.RemoveEditWad();
 
@@ -285,6 +265,8 @@ void Instance::CMD_NewProject()
 	}
 	catch (const std::runtime_error& e)
 	{
+		// Restore state before command
+		wad.master.ReplaceEditWad(initialEditWad);
 		DLG_ShowError(false, "Could not start new project: %s", e.what());
 	}
 
