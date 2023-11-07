@@ -174,134 +174,100 @@ public:
 
 };
 
-
-class fastopp_node_c
+void fastopp_node_c::Subdivide()
 {
-public:
-	int lo, hi;   // coordinate range
-	int mid;
+	if (hi - lo <= FASTOPP_DIST)
+		return;
 
-	fastopp_node_c * lo_child = nullptr;
-	fastopp_node_c * hi_child = nullptr;
+	lo_child = std::make_unique<fastopp_node_c>(lo, mid, doc);
+	hi_child = std::make_unique<fastopp_node_c>(mid, hi, doc);
+}
 
-	std::vector<int> lines;
-
-	const Document &doc;
-
-public:
-	fastopp_node_c(int _low, int _high, const Document &doc) :
-		lo(_low), hi(_high), mid((_low + _high) / 2), doc(doc)
+void fastopp_node_c::AddLine_X(int ld, int x1, int x2)
+{
+	if (lo_child && (x1 > lo_child->lo) &&
+					(x2 < lo_child->hi))
 	{
-		Subdivide();
+		lo_child->AddLine_X(ld, x1, x2);
+		return;
 	}
 
-	~fastopp_node_c()
+	if (hi_child && (x1 > hi_child->lo) &&
+					(x2 < hi_child->hi))
 	{
-		delete lo_child;
-		delete hi_child;
+		hi_child->AddLine_X(ld, x1, x2);
+		return;
 	}
 
-private:
-	void Subdivide()
-	{
-		if (hi - lo <= FASTOPP_DIST)
-			return;
+	lines.push_back(ld);
+}
 
-		lo_child = new fastopp_node_c(lo, mid, doc);
-		hi_child = new fastopp_node_c(mid, hi, doc);
+void fastopp_node_c::AddLine_X(int ld)
+{
+	const auto &L = doc.linedefs[ld];
+
+	// can ignore purely vertical lines
+	if (doc.isVertical(*L))
+		return;
+
+	double x1 = std::min(doc.getStart(*L).x(), doc.getEnd(*L).x());
+	double x2 = std::max(doc.getStart(*L).x(), doc.getEnd(*L).x());
+
+	AddLine_X(ld, (int)floor(x1), (int)ceil(x2));
+}
+
+void fastopp_node_c::AddLine_Y(int ld, int y1, int y2)
+{
+	if (lo_child && (y1 > lo_child->lo) &&
+					(y2 < lo_child->hi))
+	{
+		lo_child->AddLine_Y(ld, y1, y2);
+		return;
 	}
 
-public:
-	/* horizontal tree */
-
-	void AddLine_X(int ld, int x1, int x2)
+	if (hi_child && (y1 > hi_child->lo) &&
+					(y2 < hi_child->hi))
 	{
-		if (lo_child && (x1 > lo_child->lo) &&
-		                (x2 < lo_child->hi))
-		{
-			lo_child->AddLine_X(ld, x1, x2);
-			return;
-		}
-
-		if (hi_child && (x1 > hi_child->lo) &&
-		                (x2 < hi_child->hi))
-		{
-			hi_child->AddLine_X(ld, x1, x2);
-			return;
-		}
-
-		lines.push_back(ld);
+		hi_child->AddLine_Y(ld, y1, y2);
+		return;
 	}
 
-	void AddLine_X(int ld)
-	{
-		const auto &L = doc.linedefs[ld];
+	lines.push_back(ld);
+}
 
-		// can ignore purely vertical lines
-		if (doc.isVertical(*L))
-			return;
+void fastopp_node_c::AddLine_Y(int ld)
+{
+	const auto &L = doc.linedefs[ld];
 
-		double x1 = std::min(doc.getStart(*L).x(), doc.getEnd(*L).x());
-		double x2 = std::max(doc.getStart(*L).x(), doc.getEnd(*L).x());
+	// can ignore purely horizonal lines
+	if (doc.isHorizontal(*L))
+		return;
 
-		AddLine_X(ld, (int)floor(x1), (int)ceil(x2));
-	}
+	double y1 = std::min(doc.getStart(*L).y(), doc.getEnd(*L).y());
+	double y2 = std::max(doc.getStart(*L).y(), doc.getEnd(*L).y());
 
-	/* vertical tree */
+	AddLine_Y(ld, (int)floor(y1), (int)ceil(y2));
+}
 
-	void AddLine_Y(int ld, int y1, int y2)
-	{
-		if (lo_child && (y1 > lo_child->lo) &&
-		                (y2 < lo_child->hi))
-		{
-			lo_child->AddLine_Y(ld, y1, y2);
-			return;
-		}
+void fastopp_node_c::Process(opp_test_state_t& test, double coord) const
+{
+	for (unsigned int k = 0 ; k < lines.size() ; k++)
+		test.ProcessLine(lines[k]);
 
-		if (hi_child && (y1 > hi_child->lo) &&
-		                (y2 < hi_child->hi))
-		{
-			hi_child->AddLine_Y(ld, y1, y2);
-			return;
-		}
+	if (! lo_child)
+		return;
 
-		lines.push_back(ld);
-	}
+	// the AddLine() methods ensure that lines are not added
+	// into a child bucket unless the end points are completely
+	// inside it -- and one unit away from the extremes.
+	//
+	// hence we never need to recurse down BOTH sides here.
 
-	void AddLine_Y(int ld)
-	{
-		const auto &L = doc.linedefs[ld];
-
-		// can ignore purely horizonal lines
-		if (doc.isHorizontal(*L))
-			return;
-
-		double y1 = std::min(doc.getStart(*L).y(), doc.getEnd(*L).y());
-		double y2 = std::max(doc.getStart(*L).y(), doc.getEnd(*L).y());
-
-		AddLine_Y(ld, (int)floor(y1), (int)ceil(y2));
-	}
-
-	void Process(opp_test_state_t& test, double coord) const
-	{
-		for (unsigned int k = 0 ; k < lines.size() ; k++)
-			test.ProcessLine(lines[k]);
-
-		if (! lo_child)
-			return;
-
-		// the AddLine() methods ensure that lines are not added
-		// into a child bucket unless the end points are completely
-		// inside it -- and one unit away from the extremes.
-		//
-		// hence we never need to recurse down BOTH sides here.
-
-		if (coord < (double)mid)
-			lo_child->Process(test, coord);
-		else
-			hi_child->Process(test, coord);
-	}
-};
+	if (coord < (double)mid)
+		lo_child->Process(test, coord);
+	else
+		hi_child->Process(test, coord);
+}
 
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line
 Side PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2)
@@ -644,8 +610,8 @@ void Hover::fastOpposite_begin()
 
 	inst.CalculateLevelBounds();
 
-	m_fastopp_X_tree = new fastopp_node_c(static_cast<int>(inst.Map_bound1.x - 8), static_cast<int>(inst.Map_bound2.x + 8), doc);
-	m_fastopp_Y_tree = new fastopp_node_c(static_cast<int>(inst.Map_bound1.y - 8), static_cast<int>(inst.Map_bound2.y + 8), doc);
+	m_fastopp_X_tree.emplace(static_cast<int>(inst.Map_bound1.x - 8), static_cast<int>(inst.Map_bound2.x + 8), doc);
+	m_fastopp_Y_tree.emplace(static_cast<int>(inst.Map_bound1.y - 8), static_cast<int>(inst.Map_bound2.y + 8), doc);
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
@@ -660,10 +626,8 @@ void Hover::fastOpposite_begin()
 void Hover::fastOpposite_finish()
 {
 	SYS_ASSERT(m_fastopp_X_tree || m_fastopp_Y_tree);
-	delete m_fastopp_X_tree;
-	m_fastopp_X_tree = nullptr;
-	delete m_fastopp_Y_tree;
-	m_fastopp_Y_tree = nullptr;
+	m_fastopp_X_tree.reset();
+	m_fastopp_Y_tree.reset();
 }
 
 //
