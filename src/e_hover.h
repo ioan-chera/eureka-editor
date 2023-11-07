@@ -31,6 +31,7 @@
 #include "m_vector.h"
 #include "objid.h"
 #include "tl/optional.hpp"
+#include <memory>
 #include <vector>
 
 class bitvec_c;
