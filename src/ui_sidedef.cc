@@ -305,7 +305,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 				continue;
 
 			// determine what sector to use
-			int new_sec = box->inst.level.hover.getOppositeSector(*it, box->is_front ? Side::right : Side::left);
+			int new_sec = box->inst.level.hover.getOppositeSector(*it, box->is_front ? Side::right : Side::left, nullptr);
 
 			if (new_sec < 0)
 				new_sec = box->inst.level.numSectors() - 1;

@@ -538,7 +538,7 @@ Objid hover::findSplitLineForDangler(const Document &doc, MapFormat format,
 //
 // Get the opposite linedef
 //
-int Hover::getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const
+int Hover::getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines, FastOppositeTree *tree) const
 {
 	// ld_side is either SIDE_LEFT or SIDE_RIGHT.
 	// result_side uses the same values (never 0).
@@ -558,16 +558,16 @@ int Hover::getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bit
 	test.best_match = -1;
 	test.best_dist = 9e9;
 
-	if(m_fastopp_X_tree)
+	if(tree)
 	{
 		// fast way : use the binary tree
 
 		SYS_ASSERT(ignore_lines == NULL);
 
 		if(test.cast_horizontal)
-			m_fastopp_Y_tree->Process(test, test.y);
+			tree->m_fastopp_Y_tree->Process(test, test.y);
 		else
-			m_fastopp_X_tree->Process(test, test.x);
+			tree->m_fastopp_X_tree->Process(test, test.x);
 	}
 	else
 	{
@@ -588,11 +588,11 @@ int Hover::getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bit
 //
 // Get oppossite sector
 //
-int Hover::getOppositeSector(int ld, Side ld_side) const
+int Hover::getOppositeSector(int ld, Side ld_side, FastOppositeTree *tree) const
 {
 	Side opp_side;
 
-	int opp = getOppositeLinedef(ld, ld_side, &opp_side, nullptr);
+	int opp = getOppositeLinedef(ld, ld_side, &opp_side, nullptr, tree);
 
 	// can see the void?
 	if(opp < 0)
@@ -604,11 +604,10 @@ int Hover::getOppositeSector(int ld, Side ld_side) const
 //
 // Begin fast-opposite mode
 //
-void Hover::fastOpposite_begin()
+FastOppositeTree::FastOppositeTree(Instance &inst)
 {
-	SYS_ASSERT(!m_fastopp_X_tree && !m_fastopp_Y_tree);
-
 	inst.CalculateLevelBounds();
+	Document &doc = inst.level;
 
 	m_fastopp_X_tree.emplace(static_cast<int>(inst.Map_bound1.x - 8), static_cast<int>(inst.Map_bound2.x + 8), doc);
 	m_fastopp_Y_tree.emplace(static_cast<int>(inst.Map_bound1.y - 8), static_cast<int>(inst.Map_bound2.y + 8), doc);
@@ -618,16 +617,6 @@ void Hover::fastOpposite_begin()
 		m_fastopp_X_tree->AddLine_X(n);
 		m_fastopp_Y_tree->AddLine_Y(n);
 	}
-}
-
-//
-// End fast-opposite mode
-//
-void Hover::fastOpposite_finish()
-{
-	SYS_ASSERT(m_fastopp_X_tree || m_fastopp_Y_tree);
-	m_fastopp_X_tree.reset();
-	m_fastopp_Y_tree.reset();
 }
 
 //

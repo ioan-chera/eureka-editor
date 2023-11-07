@@ -525,7 +525,7 @@ int lineloop_c::IslandSector() const
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
 		Side opp_side;
-		int opp_ld = doc.hover.getOppositeLinedef(lines[i], sides[i], &opp_side, nullptr);
+		int opp_ld = doc.hover.getOppositeLinedef(lines[i], sides[i], &opp_side, nullptr, nullptr);
 
 		// can see "the void" ?
 		// this means the geometry around here is broken, but for
@@ -783,7 +783,7 @@ bool lineloop_c::LookForIsland()
 			Side ld_side = where ? Side::right : Side::left;
 
 			Side opp_side;
-			int opp = doc.hover.getOppositeLinedef(ld, ld_side, &opp_side, nullptr);
+			int opp = doc.hover.getOppositeLinedef(ld, ld_side, &opp_side, nullptr, nullptr);
 
 			if (opp < 0)
 				continue;
@@ -1162,7 +1162,7 @@ bool SectorModule::getLoopForSpace(const v2double_t &map, lineloop_c& loop) cons
 			int new_ld;
 			Side new_side;
 
-			new_ld = doc.hover.getOppositeLinedef(loop.lines[k], loop.sides[k], &new_side, nullptr);
+			new_ld = doc.hover.getOppositeLinedef(loop.lines[k], loop.sides[k], &new_side, nullptr, nullptr);
 
 			if (new_ld < 0)
 				continue;

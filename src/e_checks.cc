@@ -676,7 +676,7 @@ static void Sectors_ShowUnclosed(ObjType what, Instance &inst)
 }
 
 
-static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Document &doc)
+static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Instance &inst)
 {
 	//
 	// Note from RQ:
@@ -696,11 +696,13 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 
 	 secs.change_type(ObjType::sectors);
 	lines.change_type(ObjType::linedefs);
+	
+	Document &doc = inst.level;
 
 	if (doc.numLinedefs() == 0 || doc.numSectors() == 0)
 		return;
 
-	doc.hover.fastOpposite_begin();
+	FastOppositeTree tree(inst);
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
@@ -708,7 +710,7 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 
 		if (L->right >= 0)
 		{
-			int s = doc.hover.getOppositeSector(n, Side::right);
+			int s = doc.hover.getOppositeSector(n, Side::right, &tree);
 
 			if (s < 0 || doc.getRight(*L)->sector != s)
 			{
@@ -719,7 +721,7 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 
 		if (L->left >= 0)
 		{
-			int s = doc.hover.getOppositeSector(n, Side::left);
+			int s = doc.hover.getOppositeSector(n, Side::left, &tree);
 
 			if (s < 0 || doc.getLeft(*L)->sector != s)
 			{
@@ -728,8 +730,6 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 			}
 		}
 	}
-
-	doc.hover.fastOpposite_finish();
 }
 
 
@@ -741,9 +741,9 @@ static void Sectors_ShowMismatches(ObjType what, Instance &inst)
 	selection_c other;
 
 	if (what == ObjType::sectors)
-		Sectors_FindMismatches(*inst.edit.Selected, other, inst.level);
+		Sectors_FindMismatches(*inst.edit.Selected, other, inst);
 	else
-		Sectors_FindMismatches(other, *inst.edit.Selected, inst.level);
+		Sectors_FindMismatches(other, *inst.edit.Selected, inst);
 
 	inst.GoToErrors();
 }
@@ -1225,7 +1225,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 		}
 
 
-		Sectors_FindMismatches(sel, other, doc);
+		Sectors_FindMismatches(sel, other, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No mismatched sectors");
