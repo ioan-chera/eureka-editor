@@ -47,8 +47,6 @@ class ChecksModule : public DocumentModule
 {
 	friend class Instance;
 public:
-	int mLastTag = 0;
-
 	ChecksModule(Document &doc) : DocumentModule(doc)
 	{
 	}

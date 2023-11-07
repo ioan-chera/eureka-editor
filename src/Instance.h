@@ -492,6 +492,8 @@ public:	// will be private when we encapsulate everything
 	int saving_level = 0;
 	UI_NodeDialog *nodeialog = nullptr;
 	nodebuildinfo_t *nb_info = nullptr;
+	
+	int tagInMemory = 0;
 
 	WadData wad;
 

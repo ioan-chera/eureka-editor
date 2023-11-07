@@ -231,7 +231,7 @@ TEST(EChecks, TagsApplyNewValue)
 		ASSERT_EQ(line->tag, 0);
 	for(const auto &sector : inst.level.sectors)
 		ASSERT_EQ(sector->tag, 0);
-	ASSERT_EQ(inst.level.checks.mLastTag, 0);	// didn't change
+	ASSERT_EQ(inst.tagInMemory, 0);	// didn't change
 
 	// Select a couple of lines
 	inst.edit.Selected->set(1);
@@ -244,7 +244,7 @@ TEST(EChecks, TagsApplyNewValue)
 			ASSERT_EQ(line->tag, 0);
 	for(const auto &sector : inst.level.sectors)
 		ASSERT_EQ(sector->tag, 0);
-	ASSERT_EQ(inst.level.checks.mLastTag, 1);	// changed
+	ASSERT_EQ(inst.tagInMemory, 1);	// changed
 
 	// Now select a couple of sectors
 	inst.edit.mode = ObjType::sectors;
@@ -262,7 +262,7 @@ TEST(EChecks, TagsApplyNewValue)
 			ASSERT_EQ(sector->tag, 2);
 		else
 			ASSERT_EQ(sector->tag, 0);
-	ASSERT_EQ(inst.level.checks.mLastTag, 2);	// changed
+	ASSERT_EQ(inst.tagInMemory, 2);	// changed
 
 	inst.edit.Selected->clear(4);
 	inst.level.checks.tagsApplyNewValue(1);
@@ -279,5 +279,5 @@ TEST(EChecks, TagsApplyNewValue)
 		else
 			ASSERT_EQ(sector->tag, 0);
 
-	ASSERT_EQ(inst.level.checks.mLastTag, 1);	// changed again
+	ASSERT_EQ(inst.tagInMemory, 1);	// changed again
 }

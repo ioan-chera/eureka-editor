@@ -3018,7 +3018,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 		}
 	}
 	if(changed)
-		mLastTag = new_tag;
+		inst.tagInMemory = new_tag;
 }
 
 
@@ -3057,7 +3057,7 @@ void Instance::CMD_ApplyTag()
 
 	int new_tag;
 	if(do_last)
-		new_tag = level.checks.mLastTag;
+		new_tag = tagInMemory;
 	else
 		new_tag = findFreeTag(*this, edit.mode == ObjType::sectors);
 
