@@ -557,10 +557,10 @@ void Instance::ValidateSectorRef(SideDef *sd, int num)
 }
 
 
-void Instance::LoadHeader(int loading_level, const Wad_file &load_wad)
+void Document::LoadHeader(int loading_level, const Wad_file &load_wad)
 {
 	const Lump_c *lump = load_wad.GetLump(load_wad.LevelHeader(loading_level));
-	level.headerData = lump->getData();
+	headerData = lump->getData();
 }
 
 
@@ -922,7 +922,7 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
 	bad_sector_refs   = 0;
 	bad_sidedef_refs  = 0;
 
-	LoadHeader(loading_level, *wad);
+	level.LoadHeader(loading_level, *wad);
 
 	if (loaded.levelFormat == MapFormat::udmf)
 	{

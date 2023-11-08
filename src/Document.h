@@ -139,6 +139,8 @@ public:
 	bool isHorizontal(const LineDef &line) const;
 	bool isVertical(const LineDef &line) const;
 	
+	void LoadHeader(int loading_level, const Wad_file &load_wad);
+	
 	void clear();
 private:
 	friend class DocumentModule;
