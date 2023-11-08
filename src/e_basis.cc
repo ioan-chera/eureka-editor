@@ -433,31 +433,16 @@ bool Basis::redo()
 	return true;
 }
 
-//
-// clear everything (before loading a new level).
-//
-void Basis::clearAll()
+void Basis::clear()
 {
-	doc.things.clear();
-	doc.vertices.clear();
-	doc.sectors.clear();
-	doc.sidedefs.clear();
-	doc.linedefs.clear();
-
-	doc.headerData.clear();
-	doc.behaviorData.clear();
-	doc.scriptsData.clear();
-
 	while(!mUndoHistory.empty())
 		mUndoHistory.pop();
 	while(!mRedoFuture.empty())
 		mRedoFuture.pop();
-
+	
 	// Note: we don't clear the string table, since there can be
 	//       string references in the clipboard.
 
-	// TODO: other modules
-	Clipboard_ClearLocals();
 }
 
 //

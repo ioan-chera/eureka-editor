@@ -72,7 +72,7 @@ void MasterDir::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 
 void Instance::FreshLevel()
 {
-	level.basis.clearAll();
+	level.clear();
 
 	auto sec = std::make_unique<Sector>();
 
@@ -916,7 +916,7 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
 
 	loaded.levelFormat = wad->LevelFormat(loading_level);
 
-	level.basis.clearAll();
+	level.clear();
 
 	bad_linedef_count = 0;
 	bad_sector_refs   = 0;

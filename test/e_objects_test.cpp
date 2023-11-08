@@ -31,7 +31,7 @@ class EObjectsFixture : public ::testing::Test
 protected:
 	~EObjectsFixture()
 	{
-		inst.level.basis.clearAll();
+		inst.level.clear();
 	}
 
 	Instance inst;

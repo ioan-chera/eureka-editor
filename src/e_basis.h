@@ -85,7 +85,7 @@ public:
 
 	bool undo();
 	bool redo();
-	void clearAll();
+	void clear();
 
 private:
 	//

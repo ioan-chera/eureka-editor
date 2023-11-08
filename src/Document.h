@@ -138,6 +138,8 @@ public:
 	bool isSelfRef(const LineDef &line) const;
 	bool isHorizontal(const LineDef &line) const;
 	bool isVertical(const LineDef &line) const;
+	
+	void clear();
 private:
 	friend class DocumentModule;
 };

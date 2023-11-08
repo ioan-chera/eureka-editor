@@ -213,3 +213,21 @@ bool Document::isVertical(const LineDef &line) const
 {
 	return (getStart(line).raw_x == getEnd(line).raw_x);
 }
+
+void Document::clear()
+{
+	things.clear();
+	vertices.clear();
+	sectors.clear();
+	sidedefs.clear();
+	linedefs.clear();
+
+	headerData.clear();
+	behaviorData.clear();
+	scriptsData.clear();
+	
+	basis.clear();
+
+	// TODO: other modules
+	Clipboard_ClearLocals();
+}
