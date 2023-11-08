@@ -317,7 +317,7 @@ public:
 };
 
 
-static void UDMF_ParseGlobalVar(Instance &inst, Udmf_Parser& parser, Udmf_Token& name)
+static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, Udmf_Token& name)
 {
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
@@ -337,7 +337,7 @@ static void UDMF_ParseGlobalVar(Instance &inst, Udmf_Parser& parser, Udmf_Token&
 		// TODO : check if namespace is supported by current port
 		//        [ if not, show a dialog with some options ]
 
-		inst.loaded.udmfNamespace = value.DecodeString();
+		loading.udmfNamespace = value.DecodeString();
 	}
 	else if (name.Match("ee_compat"))
 	{
@@ -679,7 +679,7 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad)
 
 		if (tok2.Match("="))
 		{
-			UDMF_ParseGlobalVar(*this, parser, tok);
+			UDMF_ParseGlobalVar(loaded, parser, tok);
 			continue;
 		}
 		if (tok2.Match("{"))
