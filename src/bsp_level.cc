@@ -1351,16 +1351,21 @@ void LevelData::SortSegs()
 class ZLibContext
 {
 public:
-	explicit ZLibContext(nodebuildinfo_t * cur_info, std::vector<byte> &data);
+	ZLibContext(nodebuildinfo_t * cur_info, std::vector<byte> &data) : out_data(data), cur_info(cur_info)
+	{
+	}
+	Failable<void> init();
 	~ZLibContext()
 	{
-		finishLump();
+		auto result = finishLump();
+		if(!result)
+			gLog.printf("WARNING: %s\n", result.error().c_str());
 	}
 	
-	void appendLump(const void *data, int length);
+	Failable<void> appendLump(const void *data, int length);
 	
 private:
-	void finishLump();
+	Failable<void> finishLump();
 
 	std::vector<byte> &out_data;
 	z_stream out_stream{};
@@ -1369,26 +1374,27 @@ private:
 	nodebuildinfo_t * cur_info = NULL;
 };
 
-ZLibContext::ZLibContext(nodebuildinfo_t * cur_info, std::vector<byte> &data) : out_data(data), cur_info(cur_info)
+Failable<void> ZLibContext::init()
 {
 	if(!cur_info->force_compress)
-		return;
+		return{};
 	
 	int result = deflateInit(&out_stream, Z_DEFAULT_COMPRESSION);
 	if(result != Z_OK)
-		ThrowException("Trouble setting up zlib compression: %d", result);
+		return fail("Trouble setting up zlib compression: %d", result);
 	
 	out_stream.next_out = out_buffer;
 	out_stream.avail_out = sizeof(out_buffer);
+	return{};
 }
 
-void ZLibContext::appendLump(const void *data, int length)
+Failable<void> ZLibContext::appendLump(const void *data, int length)
 {
 	if (! cur_info->force_compress)
 	{
 		auto bdata = static_cast<const byte *>(data);
 		out_data.insert(out_data.end(), bdata, bdata + length);
-		return;
+		return{};
 	}
 
 	out_stream.next_in  = const_cast<Bytef*>(reinterpret_cast<const Bytef*>(data));   // const override
@@ -1399,7 +1405,7 @@ void ZLibContext::appendLump(const void *data, int length)
 		int err = deflate(&out_stream, Z_NO_FLUSH);
 
 		if (err != Z_OK)
-			ThrowException("Trouble compressing %d bytes (zlib): %d", length, err);
+			return fail("Trouble compressing %d bytes (zlib): %d", length, err);
 
 		if (out_stream.avail_out == 0)
 		{
@@ -1409,13 +1415,15 @@ void ZLibContext::appendLump(const void *data, int length)
 			out_stream.avail_out = sizeof(out_buffer);
 		}
 	}
+	
+	return{};
 }
 
-void ZLibContext::finishLump()
+Failable<void> ZLibContext::finishLump()
 {
 	if (! cur_info->force_compress)
 	{
-		return;
+		return{};
 	}
 
 	int left_over;
@@ -1433,7 +1441,7 @@ void ZLibContext::finishLump()
 			break;
 
 		if (err != Z_OK)
-			ThrowException("Trouble finishing compression (zlib): %d", err);
+			return fail("Trouble finishing compression (zlib): %d", err);
 
 		if (out_stream.avail_out == 0)
 		{
@@ -1452,21 +1460,29 @@ void ZLibContext::finishLump()
 	}
 
 	deflateEnd(&out_stream);
+	return{};
 }
 
 static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
 static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
 static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
 
-void LevelData::PutZVertices(ZLibContext &zcontext) const
+Failable<void> LevelData::PutZVertices(ZLibContext &zcontext) const
 {
 	int count, i;
 
 	u32_t orgverts = LE_U32(num_old_vert);
 	u32_t newverts = LE_U32(num_new_vert);
 
-	zcontext.appendLump(&orgverts, 4);
-	zcontext.appendLump(&newverts, 4);
+	try
+	{
+		attempt(zcontext.appendLump(&orgverts, 4));
+		attempt(zcontext.appendLump(&newverts, 4));
+	}
+	catch(const std::runtime_error &e)
+	{
+		return tl::make_unexpected(e.what());
+	}
 
 	for (i=0, count=0 ; i < (int)vertices.size() ; i++)
 	{
@@ -1480,17 +1496,20 @@ void LevelData::PutZVertices(ZLibContext &zcontext) const
 		raw.x = LE_S32(iround(vert->x * 65536.0));
 		raw.y = LE_S32(iround(vert->y * 65536.0));
 
-		zcontext.appendLump(&raw, sizeof(raw));
+		auto result = zcontext.appendLump(&raw, sizeof(raw));
+		if(!result)
+			return result;
 
 		count++;
 	}
 
 	if (count != num_new_vert)
 		BugError("PutZVertices miscounted (%d != %d)", count, num_new_vert);
+	return {};
 }
 
 
-void LevelData::PutZSubsecs(ZLibContext &zcontext) const
+Failable<void> LevelData::PutZSubsecs(ZLibContext &zcontext) const
 {
 	int i;
 	int count;
@@ -1498,7 +1517,9 @@ void LevelData::PutZSubsecs(ZLibContext &zcontext) const
 
 	int cur_seg_index = 0;
 
-	zcontext.appendLump(&raw_num, 4);
+	auto result = zcontext.appendLump(&raw_num, 4);
+	if(!result)
+		return result;
 
 	for (i=0 ; i < (int)subsecs.size() ; i++)
 	{
@@ -1507,7 +1528,9 @@ void LevelData::PutZSubsecs(ZLibContext &zcontext) const
 
 		raw_num = LE_U32(sub->seg_count);
 
-		zcontext.appendLump(&raw_num, 4);
+		result = zcontext.appendLump(&raw_num, 4);
+		if(!result)
+			return result;
 
 		// sanity check the seg index values
 		count = 0;
@@ -1528,15 +1551,18 @@ void LevelData::PutZSubsecs(ZLibContext &zcontext) const
 
 	if (cur_seg_index != (int)segs.size())
 		BugError("PutZSubsecs miscounted segs (%d != %d)", cur_seg_index, (int)segs.size());
+	return{};
 }
 
 
-void LevelData::PutZSegs(ZLibContext &zcontext) const
+Failable<void> LevelData::PutZSegs(ZLibContext &zcontext) const
 {
 	int i, count;
 	u32_t raw_num = LE_U32((int)segs.size());
 
-	zcontext.appendLump(&raw_num, 4);
+	auto result = zcontext.appendLump(&raw_num, 4);
+	if(!result)
+		return result;
 
 	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
@@ -1552,10 +1578,17 @@ void LevelData::PutZSegs(ZLibContext &zcontext) const
 			u16_t line = LE_U16(seg->linedef);
 			u8_t  side = static_cast<u8_t>(seg->side);
 
-			zcontext.appendLump(&v1,   4);
-			zcontext.appendLump(&v2,   4);
-			zcontext.appendLump(&line, 2);
-			zcontext.appendLump(&side, 1);
+			try
+			{
+				attempt(zcontext.appendLump(&v1,   4));
+				attempt(zcontext.appendLump(&v2,   4));
+				attempt(zcontext.appendLump(&line, 2));
+				attempt(zcontext.appendLump(&side, 1));
+			}
+			catch(const std::runtime_error &e)
+			{
+				return tl::make_unexpected(e.what());
+			}
 		}
 
 		count++;
@@ -1563,15 +1596,18 @@ void LevelData::PutZSegs(ZLibContext &zcontext) const
 
 	if (count != (int)segs.size())
 		BugError("PutZSegs miscounted (%d != %d)\n", count, (int)segs.size());
+	return{};
 }
 
 
-void LevelData::PutXGL3Segs(ZLibContext &zcontext) const
+Failable<void> LevelData::PutXGL3Segs(ZLibContext &zcontext) const
 {
 	int i, count;
 	u32_t raw_num = LE_U32((int)segs.size());
 
-	zcontext.appendLump(&raw_num, 4);
+	auto result = zcontext.appendLump(&raw_num, 4);
+	if(!result)
+		return result;
 
 	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
@@ -1591,11 +1627,17 @@ void LevelData::PutXGL3Segs(ZLibContext &zcontext) const
 # if DEBUG_BSP
 			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
 # endif
-
-			zcontext.appendLump(&v1,      4);
-			zcontext.appendLump(&partner, 4);
-			zcontext.appendLump(&line,    4);
-			zcontext.appendLump(&side,    1);
+			try
+			{
+				attempt(zcontext.appendLump(&v1,      4));
+				attempt(zcontext.appendLump(&partner, 4));
+				attempt(zcontext.appendLump(&line,    4));
+				attempt(zcontext.appendLump(&side,    1));
+			}
+			catch(const std::runtime_error &e)
+			{
+				return tl::make_unexpected(e.what());
+			}
 		}
 
 		count++;
@@ -1605,6 +1647,7 @@ void LevelData::PutXGL3Segs(ZLibContext &zcontext) const
 	{
 		BugError("PutXGL3Segs miscounted (%d != %d)\n", count, (int)segs.size());
 	}
+	return{};
 }
 
 
@@ -1627,10 +1670,17 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 		u32_t dx = LE_S32(iround(node->dx * 65536.0));
 		u32_t dy = LE_S32(iround(node->dy * 65536.0));
 
-		zcontext.appendLump(&x,  4);
-		zcontext.appendLump(&y,  4);
-		zcontext.appendLump(&dx, 4);
-		zcontext.appendLump(&dy, 4);
+		try
+		{
+			attempt(zcontext.appendLump(&x,  4));
+			attempt(zcontext.appendLump(&y,  4));
+			attempt(zcontext.appendLump(&dx, 4));
+			attempt(zcontext.appendLump(&dy, 4));
+		}
+		catch(const std::runtime_error &e)
+		{
+			throw;
+		}
 	}
 	else
 	{
@@ -1639,10 +1689,17 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 		raw.dx = LE_S16(iround(node->dx));
 		raw.dy = LE_S16(iround(node->dy));
 
-		zcontext.appendLump(&raw.x,  2);
-		zcontext.appendLump(&raw.y,  2);
-		zcontext.appendLump(&raw.dx, 2);
-		zcontext.appendLump(&raw.dy, 2);
+		try
+		{
+			attempt(zcontext.appendLump(&raw.x,  2));
+			attempt(zcontext.appendLump(&raw.y,  2));
+			attempt(zcontext.appendLump(&raw.dx, 2));
+			attempt(zcontext.appendLump(&raw.dy, 2));
+		}
+		catch(const std::runtime_error &e)
+		{
+			throw;
+		}
 	}
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
@@ -1655,8 +1712,15 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
 	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
 
-	zcontext.appendLump(&raw.b1, sizeof(raw.b1));
-	zcontext.appendLump(&raw.b2, sizeof(raw.b2));
+	try
+	{
+		attempt(zcontext.appendLump(&raw.b1, sizeof(raw.b1)));
+		attempt(zcontext.appendLump(&raw.b2, sizeof(raw.b2)));
+	}
+	catch(const std::runtime_error &e)
+	{
+		throw;
+	}
 
 	if (node->r.node)
 		raw.right = LE_U32(node->r.node->index);
@@ -1674,8 +1738,15 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 	else
 		BugError("Bad left child in V5 node %d\n", node->index);
 
-	zcontext.appendLump(&raw.right, 4);
-	zcontext.appendLump(&raw.left,  4);
+	try
+	{
+		attempt(zcontext.appendLump(&raw.right, 4));
+		attempt(zcontext.appendLump(&raw.left,  4));
+	}
+	catch(const std::runtime_error &e)
+	{
+		throw;
+	}
 
 # if DEBUG_BSP
 	gLog.debugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
@@ -1686,11 +1757,13 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 }
 
 
-void LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3)
+Failable<void> LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3)
 {
 	u32_t raw_num = LE_U32((int)nodes.size());
 
-	zcontext.appendLump(&raw_num, 4);
+	auto result = zcontext.appendLump(&raw_num, 4);
+	if(!result)
+		return result;
 
 	node_cur_index = 0;
 
@@ -1701,6 +1774,7 @@ void LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3)
 	{
 		BugError("PutZNodes miscounted (%d != %d)\n", node_cur_index, (int)nodes.size());
 	}
+	return{};
 }
 
 void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
@@ -1712,11 +1786,11 @@ void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 	try
 	{
 		ZLibContext zlibContext(cur_info, lumpData);
-		
-		PutZVertices(zlibContext);
-		PutZSubsecs(zlibContext);
-		PutZSegs(zlibContext);
-		PutZNodes(zlibContext, root_node, false /* do_xgl3 */);
+		attempt(zlibContext.init());
+		attempt(PutZVertices(zlibContext));
+		attempt(PutZSubsecs(zlibContext));
+		attempt(PutZSegs(zlibContext));
+		attempt(PutZNodes(zlibContext, root_node, false /* do_xgl3 */));
 	}
 	catch(const std::runtime_error &e)
 	{
@@ -1740,7 +1814,7 @@ void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 }
 
 
-void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node)
+Failable<void> LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node)
 {
 	// WISH : compute a max_size
 
@@ -1754,14 +1828,24 @@ void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node)
 	std::vector<byte> lumpData;
 	{
 		ZLibContext zlibContext(cur_info, lumpData);
+		try
+		{
+			attempt(zlibContext.init());
+			attempt(PutZVertices(zlibContext));
+			attempt(PutZSubsecs(zlibContext));
+			attempt(PutXGL3Segs(zlibContext));
+			attempt(PutZNodes(zlibContext, root_node, true /* do_xgl3 */));
+		}
+		catch(const std::runtime_error &e)
+		{
+			return tl::make_unexpected(e.what());
+		}
 		
-		PutZVertices(zlibContext);
-		PutZSubsecs(zlibContext);
-		PutXGL3Segs(zlibContext);
-		PutZNodes(zlibContext, root_node, true /* do_xgl3 */);
+		
 	}
 	
 	lump.setData(std::move(lumpData));
+	return{};
 }
 
 
@@ -1997,7 +2081,7 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 }
 
 
-build_result_e LevelData::SaveUDMF(const Instance &inst, node_t *root_node)
+Failable<build_result_e> LevelData::SaveUDMF(const Instance &inst, node_t *root_node)
 {
 	// remove any existing ZNODES lump
 	inst.wad.master.editWad()->RemoveZNodes(current_idx);
@@ -2006,7 +2090,9 @@ build_result_e LevelData::SaveUDMF(const Instance &inst, node_t *root_node)
 	{
 		SortSegs();
 
-		SaveXGL3Format(inst, root_node);
+		auto result = SaveXGL3Format(inst, root_node);
+		if(!result)
+			return tl::make_unexpected(result.error());
 	}
 
 	inst.wad.master.editWad()->writeToDisk();
@@ -2130,10 +2216,17 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 
 		ClockwiseBspTree(inst.level);
 
-		if (inst.loaded.levelFormat == MapFormat::udmf)
-			ret = SaveUDMF(inst, root_node);
-		else
-			ret = SaveLevel(root_node, inst);
+		try
+		{
+			if (inst.loaded.levelFormat == MapFormat::udmf)
+				ret = attempt(SaveUDMF(inst, root_node));
+			else
+				ret = SaveLevel(root_node, inst);
+		}
+		catch(const std::runtime_error &e)
+		{
+			throw;
+		}
 	}
 	else
 	{

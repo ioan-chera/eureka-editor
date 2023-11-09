@@ -75,7 +75,7 @@ unsigned int TimeGetMillies()
   do                  \
   {                 \
     if (sizeof (type) != size)            \
-      ThrowException("sizeof " #type " is %d (should be " #size ")\n",  \
+      ThrowLogicException("sizeof " #type " is %d (should be " #size ")\n",  \
   (int) sizeof (type));           \
   }                 \
   while (0)
@@ -85,7 +85,7 @@ unsigned int TimeGetMillies()
   {                 \
     type n = high;              \
     if (++n != low)             \
-      FatalError("Type " #type " wraps around to %lu (should be " #low ")\n",\
+ThrowLogicException("Type " #type " wraps around to %lu (should be " #low ")\n",\
   (unsigned long) n);           \
   }                 \
   while (0)

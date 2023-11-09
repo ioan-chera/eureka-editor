@@ -21,6 +21,7 @@
 #ifndef __EUREKA_BSP_H__
 #define __EUREKA_BSP_H__
 
+#include "Errors.h"
 #include "lib_util.h"
 #include "m_strings.h"
 #include "sys_type.h"
@@ -499,14 +500,14 @@ private:
 	void SortSegs();
 	
 	/* ----- ZDoom format writing --------------------------- */
-	void PutZVertices(ZLibContext &zcontext) const;
-	void PutZSubsecs(ZLibContext &zcontext) const;
-	void PutZSegs(ZLibContext &zcontext) const;
-	void PutXGL3Segs(ZLibContext &zcontext) const;
+	Failable<void> PutZVertices(ZLibContext &zcontext) const;
+	Failable<void> PutZSubsecs(ZLibContext &zcontext) const;
+	Failable<void> PutZSegs(ZLibContext &zcontext) const;
+	Failable<void> PutXGL3Segs(ZLibContext &zcontext) const;
 	void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3);
-	void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3);
+	Failable<void> PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3);
 	void SaveZDFormat(const Instance &inst, node_t *root_node);
-	void SaveXGL3Format(const Instance &inst, node_t *root_node);
+	Failable<void> SaveXGL3Format(const Instance &inst, node_t *root_node);
 	
 	/* ----- whole-level routines --------------------------- */
 	void LoadLevel(const Instance &inst);
@@ -519,7 +520,7 @@ private:
 	void UpdateGLMarker(const Instance &inst, Lump_c *marker) const;
 	void AddMissingLump(const Instance &inst, const char *name, const char *after) ;
 	build_result_e SaveLevel(node_t *root_node, const Instance &inst);
-	build_result_e SaveUDMF(const Instance &inst, node_t *root_node);
+	Failable<build_result_e> SaveUDMF(const Instance &inst, node_t *root_node);
 	
 	/* ---------------------------------------------------------------- */
 	Lump_c * FindLevelLump(const Instance &inst, const char *name) const noexcept;

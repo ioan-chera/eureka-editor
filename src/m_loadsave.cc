@@ -177,7 +177,9 @@ void Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexc
 		if(!result.resources[i].empty())
 			loading.resourceList.push_back(result.resources[i]);
 	Fl::wait(0.1);
-	Main_LoadResources(loading);
+	auto r = Main_LoadResources(loading);
+	if(!r)
+		ThrowException("%s", r.error().c_str());
 	Fl::wait(0.1);
 }
 

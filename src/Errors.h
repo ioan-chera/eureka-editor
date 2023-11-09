@@ -21,11 +21,15 @@
 
 #include "PrintfMacros.h"
 #include "m_strings.h"
+#include "tl/expected.hpp"
 
 #include <stdarg.h>
 #include <stdexcept>
 
 #define BugError  ThrowLogicException
+
+template<typename T>
+using Failable = tl::expected<T, SString>;
 
 //
 // Wad read exception
@@ -50,5 +54,33 @@ struct ReportedResult
 
 [[noreturn]] void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 [[noreturn]] void ThrowLogicException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
+
+template<typename T>
+inline static Failable<T> failure(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
+
+inline static tl::unexpected<typename std::decay<SString>::type> fail(EUR_FORMAT_STRING(const char *fmt), ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	auto result = tl::make_unexpected(SString::vprintf(fmt, ap));
+	va_end(ap);
+	return result;
+}
+
+template<typename T>
+inline static T attempt(Failable<T> &&operation)
+{
+	if(!operation)
+		throw std::runtime_error(operation.error().get());
+	return operation.value();
+}
+
+template<>
+inline  void attempt(Failable<void> &&operation)
+{
+	if(!operation)
+		throw std::runtime_error(operation.error().get());
+}
+
 
 #endif /* Errors_hpp */

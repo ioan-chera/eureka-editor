@@ -51,18 +51,19 @@ const Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
 	return result;
 }
 
-void WadData::W_LoadPalette() noexcept(false)
+Failable<void> WadData::W_LoadPalette() noexcept(false)
 {
 	const Lump_c *lump = master.findGlobalLump("PLAYPAL");
 	if(!lump)
 	{
-		ThrowException("PLAYPAL lump not found.\n");
+		return fail("PLAYPAL lump not found.\n");
 	}
 	palette.loadPalette(*lump, config::usegamma, config::panel_gamma);
 	images.IM_ResetDummyTextures();
+	return {};
 }
 
-void WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads) noexcept(false)
+Failable<void> WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads) noexcept(false)
 {
 	// reset the master directory
 	WadData newWad = *this;
@@ -72,7 +73,9 @@ void WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad, const Co
 		newWad.master.setResources(resourceWads);
 				
 		// finally, load textures and stuff...
-		newWad.W_LoadPalette();
+		Failable<void> result = newWad.W_LoadPalette();
+		if(!result)
+			return result;
 		newWad.W_LoadColormap();
 		
 		newWad.W_LoadFlats();
@@ -86,4 +89,5 @@ void WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad, const Co
 	}
 	// Commit
 	*this = newWad;
+	return{};
 }

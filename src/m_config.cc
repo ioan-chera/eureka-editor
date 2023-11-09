@@ -920,11 +920,11 @@ void M_ParseEnvironmentVars()
 // Common function to populate a list of strings or paths
 //
 template<typename T>
-static void readArgsForList(bool ignore, int &argc, const char *const *&argv, void *data_ptr)
+static Failable<void> readArgsForList(bool ignore, int &argc, const char *const *&argv, void *data_ptr)
 {
 	if(argc < 2)
 	{
-		ThrowException("missing argument after '%s'\n", argv[0]);
+		return fail("missing argument after '%s'\n", argv[0]);
 		/* NOT REACHED */
 	}
 	while(argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
@@ -938,6 +938,7 @@ static void readArgsForList(bool ignore, int &argc, const char *const *&argv, vo
 			list->push_back(argv[0]);
 		}
 	}
+	return{};
 }
 
 //
@@ -986,6 +987,8 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		// ignore options which are not meant for this pass
 		ignore = !!(o->flags & OptFlag_pass1) !=
 				(pass == CommandLinePass::early);
+		
+		Failable<void> result;
 
 		switch (o->opt_type)
 		{
@@ -1087,11 +1090,15 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 
 
             case OptType::stringList:
-				readArgsForList<SString>(ignore, argc, argv, o->data_ptr);
+				result = readArgsForList<SString>(ignore, argc, argv, o->data_ptr);
+				if(!result)
+					ThrowException("%s", result.error().c_str());
 				break;
 
 			case OptType::pathList:
-				readArgsForList<fs::path>(ignore, argc, argv, o->data_ptr);
+				result = readArgsForList<fs::path>(ignore, argc, argv, o->data_ptr);
+				if(!result)
+					ThrowException("%s", result.error().c_str());
 				break;
 
 			default:

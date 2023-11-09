@@ -27,6 +27,7 @@
 #ifndef __EUREKA_IM_COLOR_H__
 #define __EUREKA_IM_COLOR_H__
 
+#include "Errors.h"
 #include "sys_macro.h"
 #include "sys_type.h"
 #include "WindowsSanitization.h"	// needed for Windows
@@ -109,7 +110,7 @@ public:
 	}
 
 	bool loadPalette(const Lump_c &lump, int usegamma, int panel_gamma);
-	void loadColormap(const Lump_c *lump);
+	Failable<void> loadColormap(const Lump_c *lump);
 
 	byte findPaletteColor(int r, int g, int b) const;
 	rgb_color_t pixelToRGB(img_pixel_t p) const;
