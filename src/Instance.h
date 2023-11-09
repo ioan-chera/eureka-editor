@@ -277,7 +277,6 @@ public:
 	bool ExecuteKey(keycode_t key, KeyContext context);
 
 	// M_LOADSAVE
-	Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *wad, const char *name) const;
 	void LoadLevel(const Wad_file *wad, const SString &level);
 	void LoadLevelNum(const Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
@@ -392,11 +391,8 @@ private:
 	void LoadLineDefs(int loading_level, const Wad_file *load_wad);
 	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad);
 	void LoadScripts(int loading_level, const Wad_file *load_wad);
-	void LoadSectors(int loading_level, const Wad_file *load_wad);
 	void LoadSideDefs(int loading_level, const Wad_file *load_wad);
-	void LoadThings(int loading_level, const Wad_file *load_wad);
-	void LoadThings_Hexen(int loading_level, const Wad_file *load_wad);
-	void LoadVertices(int loading_level, const Wad_file *load_wad);
+	
 	bool M_ExportMap();
 	void Navigate2D();
 	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);

@@ -367,21 +367,20 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-Lump_c *Instance::Load_LookupAndSeek(int loading_level, const Wad_file *load_wad, const char *name)
-		const
+const Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *load_wad, const char *name)
 {
 	int idx = load_wad->LevelLookupLump(loading_level, name);
 
 	if (idx < 0)
 		return NULL;
 
-	Lump_c *lump = load_wad->GetLump(idx);
+	const Lump_c *lump = load_wad->GetLump(idx);
 
 	return lump;
 }
 
 
-void Instance::LoadVertices(int loading_level, const Wad_file *load_wad)
+void Document::LoadVertices(int loading_level, const Wad_file *load_wad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "VERTEXES");
 	if (! lump)
@@ -393,7 +392,7 @@ void Instance::LoadVertices(int loading_level, const Wad_file *load_wad)
 	PrintDebug("GetVertices: num = %d\n", count);
 # endif
 
-	level.vertices.reserve(count);
+	vertices.reserve(count);
 	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
@@ -408,12 +407,12 @@ void Instance::LoadVertices(int loading_level, const Wad_file *load_wad)
 		vert->raw_x = FFixedPoint(LE_S16(raw.x));
 		vert->raw_y = FFixedPoint(LE_S16(raw.y));
 
-		level.vertices.push_back(std::move(vert));
+		vertices.push_back(std::move(vert));
 	}
 }
 
 
-void Instance::LoadSectors(int loading_level, const Wad_file *load_wad)
+void Document::LoadSectors(int loading_level, const Wad_file *load_wad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "SECTORS");
 	if (! lump)
@@ -425,7 +424,7 @@ void Instance::LoadSectors(int loading_level, const Wad_file *load_wad)
 	PrintDebug("GetSectors: num = %d\n", count);
 # endif
 
-	level.sectors.reserve(count);
+	sectors.reserve(count);
 	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
@@ -450,7 +449,7 @@ void Instance::LoadSectors(int loading_level, const Wad_file *load_wad)
 		sec->type  = LE_U16(raw.type);
 		sec->tag   = LE_S16(raw.tag);
 
-		level.sectors.push_back(std::move(sec));
+		sectors.push_back(std::move(sec));
 	}
 }
 
@@ -586,7 +585,7 @@ void Instance::LoadScripts(int loading_level, const Wad_file *load_wad)
 }
 
 
-void Instance::LoadThings(int loading_level, const Wad_file *load_wad)
+void Document::LoadThings(int loading_level, const Wad_file *load_wad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "THINGS");
 	if (! lump)
@@ -616,13 +615,13 @@ void Instance::LoadThings(int loading_level, const Wad_file *load_wad)
 		th->type    = LE_U16(raw.type);
 		th->options = LE_U16(raw.options);
 
-		level.things.push_back(std::move(th));
+		things.push_back(std::move(th));
 	}
 }
 
 
 // IOANCH 9/2015
-void Instance::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
+void Document::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "THINGS");
 	if (! lump)
@@ -661,7 +660,7 @@ void Instance::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 		th->arg4 = raw.args[3];
 		th->arg5 = raw.args[4];
 
-		level.things.push_back(std::move(th));
+		things.push_back(std::move(th));
 	}
 }
 
@@ -931,12 +930,12 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
 	else
 	{
 		if (loaded.levelFormat == MapFormat::hexen)
-			LoadThings_Hexen(loading_level, wad);
+			level.LoadThings_Hexen(loading_level, wad);
 		else
-			LoadThings(loading_level, wad);
+			level.LoadThings(loading_level, wad);
 
-		LoadVertices(loading_level, wad);
-		LoadSectors(loading_level, wad);
+		level.LoadVertices(loading_level, wad);
+		level.LoadSectors(loading_level, wad);
 		LoadSideDefs(loading_level, wad);
 
 		if (loaded.levelFormat == MapFormat::hexen)
@@ -1053,6 +1052,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 	gInstance.Main_LoadResources(gInstance.loaded);
 	
 	// TODO: RESTORE loaded, wad.master, LoadLevel ON FAILURE
+	// LoadLevel: level.basis
 }
 
 

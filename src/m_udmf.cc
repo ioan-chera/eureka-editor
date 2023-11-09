@@ -651,7 +651,7 @@ void Instance::ValidateLevel_UDMF()
 
 void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "TEXTMAP");
+	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "TEXTMAP");
 	// we assume this cannot happen
 	if (! lump)
 		return;

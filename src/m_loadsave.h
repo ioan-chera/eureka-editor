@@ -52,6 +52,8 @@ struct LoadingData
 
 void OpenFileMap(const fs::path &filename, const SString &map_name = "") noexcept(false);
 
+const Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *load_wad, const char *name);
+
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 
 //--- editor settings ---
