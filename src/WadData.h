@@ -226,11 +226,9 @@ struct WadData
 	
 private:
 	Failable<void> W_LoadPalette() noexcept(false);
-	void W_LoadColormap()
+	Failable<void> W_LoadColormap()
 	{
-		auto result = palette.loadColormap(master.findGlobalLump("COLORMAP"));
-		if(!result)
-			ThrowException("%s", result.error().c_str());
+		return palette.loadColormap(master.findGlobalLump("COLORMAP"));
 	}
 	void W_LoadFlats();
 };

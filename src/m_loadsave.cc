@@ -161,7 +161,7 @@ tl::optional<fs::path> Instance::Project_AskFile() const
 }
 
 
-void Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false)
+Failable<void> Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false)
 {
 	// grab the new information
     LoadingData loading = loaded;
@@ -178,9 +178,8 @@ void Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexc
 			loading.resourceList.push_back(result.resources[i]);
 	Fl::wait(0.1);
 	auto r = Main_LoadResources(loading);
-	if(!r)
-		ThrowException("%s", r.error().c_str());
 	Fl::wait(0.1);
+	return r;
 }
 
 
@@ -193,7 +192,7 @@ void Instance::CMD_ManageProject()
 
 		if (result)
 		{
-			Project_ApplyChanges(*result);
+			attempt(Project_ApplyChanges(*result));
 		}
 	}
 	catch(const std::runtime_error &e)
@@ -233,7 +232,7 @@ void Instance::CMD_NewProject()
 		wad.master.RemoveEditWad();
 
 		// this calls Main_LoadResources which resets the master directory
-		Project_ApplyChanges(*result);
+		attempt(Project_ApplyChanges(*result));
 
 		// determine map name (same as first level in the IWAD)
 		SString map_name = "MAP01";
@@ -382,11 +381,11 @@ const Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *load_wad, co
 }
 
 
-void Document::LoadVertices(int loading_level, const Wad_file *load_wad)
+Failable<void> Document::LoadVertices(int loading_level, const Wad_file *load_wad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "VERTEXES");
 	if (! lump)
-		ThrowException("No vertex lump!\n");
+		return fail("No vertex lump!\n");
 
 	int count = lump->Length() / sizeof(raw_vertex_t);
 
@@ -402,7 +401,7 @@ void Document::LoadVertices(int loading_level, const Wad_file *load_wad)
 		raw_vertex_t raw;
 
 		if (! stream.read(&raw, sizeof(raw)))
-			ThrowException("Error reading vertices.\n");
+			return fail("Error reading vertices.\n");
 
 		auto vert = std::make_unique<Vertex>();
 
@@ -411,6 +410,8 @@ void Document::LoadVertices(int loading_level, const Wad_file *load_wad)
 
 		vertices.push_back(std::move(vert));
 	}
+	
+	return {};
 }
 
 
@@ -936,7 +937,7 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
 		else
 			level.LoadThings(loading_level, wad);
 
-		level.LoadVertices(loading_level, wad);
+		attempt(level.LoadVertices(loading_level, wad));
 		level.LoadSectors(loading_level, wad);
 		LoadSideDefs(loading_level, wad);
 

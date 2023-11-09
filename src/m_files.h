@@ -138,7 +138,7 @@ private:
 
 void M_OpenRecentFromMenu(void *priv_data);
 
-void M_ValidateGivenFiles();
+Failable<void> M_ValidateGivenFiles();
 int  M_FindGivenFile(const fs::path &filename);
 
 void M_BackupWad(Wad_file *wad);

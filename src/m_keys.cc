@@ -525,7 +525,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 #define MAX_TOKENS  (MAX_EXEC_PARAM + 8)
 
-static bool LoadBindingsFromPath(const SString &path, bool required)
+static Failable<bool> LoadBindingsFromPath(const SString &path, bool required)
 {
 	SString filename = path + "/bindings.cfg";
 
@@ -535,7 +535,7 @@ static bool LoadBindingsFromPath(const SString &path, bool required)
 		if (! required)
 			return false;
 
-		ThrowException("Missing key bindings file:\n\n%s\n", filename.c_str());
+		return fail("Missing key bindings file:\n\n%s\n", filename.c_str());
 	}
 
 	gLog.printf("Reading key bindings from: %s\n", filename.c_str());
@@ -610,12 +610,19 @@ void M_LoadBindings()
 {
 	global::all_bindings.clear();
 
-	LoadBindingsFromPath(global::install_dir.u8string(), true /* required */);
-
-	// keep a copy of the install_dir bindings
-	CopyInstallBindings();
-
-	LoadBindingsFromPath(global::home_dir.u8string(), false);
+	try
+	{
+		attempt(LoadBindingsFromPath(global::install_dir.u8string(), true /* required */));
+		
+		// keep a copy of the install_dir bindings
+		CopyInstallBindings();
+		
+		attempt(LoadBindingsFromPath(global::home_dir.u8string(), false));
+	}
+	catch(const std::runtime_error &e)
+	{
+		throw;
+	}
 
 	updateMenuBindings();
 }

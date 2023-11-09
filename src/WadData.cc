@@ -73,10 +73,8 @@ Failable<void> WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad
 		newWad.master.setResources(resourceWads);
 				
 		// finally, load textures and stuff...
-		Failable<void> result = newWad.W_LoadPalette();
-		if(!result)
-			return result;
-		newWad.W_LoadColormap();
+		attempt(newWad.W_LoadPalette());
+		attempt(newWad.W_LoadColormap());
 		
 		newWad.W_LoadFlats();
 		newWad.W_LoadTextures(config);
@@ -85,7 +83,7 @@ Failable<void> WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad
 	catch(const std::runtime_error &e)
 	{
 		gLog.printf("Failed reloading resources: %s", e.what());
-		throw;
+		return fail(e);
 	}
 	// Commit
 	*this = newWad;

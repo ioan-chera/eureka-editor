@@ -375,7 +375,7 @@ private:
 	int EV_RawKey(int event);
 	int EV_RawMouse(int event);
 	int EV_RawWheel(int event);
-	void M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu);
+	Failable<void> M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu);
 	bool M_ParseOperationFile();
 
 	// M_KEYS
@@ -395,7 +395,7 @@ private:
 	
 	bool M_ExportMap();
 	void Navigate2D();
-	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
+	Failable<void> Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
 	tl::optional<fs::path> Project_AskFile() const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);

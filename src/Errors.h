@@ -55,8 +55,7 @@ struct ReportedResult
 [[noreturn]] void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 [[noreturn]] void ThrowLogicException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 
-template<typename T>
-inline static Failable<T> failure(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
+inline static tl::unexpected<typename std::decay<SString>::type> fail(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 
 inline static tl::unexpected<typename std::decay<SString>::type> fail(EUR_FORMAT_STRING(const char *fmt), ...)
 {
@@ -66,6 +65,12 @@ inline static tl::unexpected<typename std::decay<SString>::type> fail(EUR_FORMAT
 	va_end(ap);
 	return result;
 }
+
+inline static tl::unexpected<typename std::decay<SString>::type> fail(const std::runtime_error &e)
+{
+	return tl::make_unexpected(SString(e.what()));
+}
+
 
 template<typename T>
 inline static T attempt(Failable<T> &&operation)

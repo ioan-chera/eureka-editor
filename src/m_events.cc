@@ -754,13 +754,13 @@ struct operation_command_t
 };
 
 
-static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Button *menu)
+static Failable<void> ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Button *menu)
 {
 	// just a divider?
 	if (tokens[0].noCaseEqual("divider"))
 	{
 		menu->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
-		return;
+		return{};
 	}
 
 	// parse the key
@@ -775,17 +775,17 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 
 	// parse the command and its parameters...
 	if (tokens.size() < 2)
-		ThrowException("operations.cfg: entry missing description.\n");
+		return fail("operations.cfg: entry missing description.\n");
 
 	if (tokens.size() < 3)
-		ThrowException("operations.cfg: entry missing command name.\n");
+		return fail("operations.cfg: entry missing command name.\n");
 
 	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
 
 	if (! cmd)
 	{
 		gLog.printf("operations.cfg: unknown function: %s\n", tokens[2].c_str());
-		return;
+		return{};
 	}
 
 	operation_command_t * info = new operation_command_t;
@@ -797,16 +797,14 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 			info->param[p] = tokens[3 + p];
 
 	menu->add(tokens[1].c_str(), shortcut, 0 /* callback */, (void *)info, 0 /* flags */);
+	return{};
 }
 
 
-void Instance::M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu)
+Failable<void> Instance::M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu)
 {
 	if (menu->size() < 2)
-	{
-		ThrowException("operations.cfg: no %s items.\n", context.c_str());
-		return;
-	}
+		return fail("operations.cfg: no %s items.\n", context.c_str());
 
 	// enable the menu
 
@@ -829,6 +827,7 @@ void Instance::M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu)
 	op_all_menus[context] = menu;
 
 	main_win->add(menu);
+	return{};
 }
 
 
@@ -884,8 +883,15 @@ bool Instance::M_ParseOperationFile()
 				continue;
 			}
 
-			if (menu != NULL)
-				M_AddOperationMenu(context, menu);
+			try
+			{
+				if (menu != NULL)
+					attempt(M_AddOperationMenu(context, menu));
+			}
+			catch(const std::runtime_error &e)
+			{
+				throw;
+			}
 
 			// create new menu
 			menu = new Fl_Menu_Button(0, 0, 99, 99, "");
@@ -896,14 +902,28 @@ bool Instance::M_ParseOperationFile()
 			continue;
 		}
 
-		if (menu != NULL)
-			ParseOperationLine(tokens, menu);
+		try
+		{
+			if (menu != NULL)
+				attempt(ParseOperationLine(tokens, menu));
+		}
+		catch(const std::runtime_error &e)
+		{
+			throw;
+		}
 	}
 
 	file.close();
 
-	if (menu != NULL)
-		M_AddOperationMenu(context, menu);
+	try
+	{
+		if (menu != NULL)
+			attempt(M_AddOperationMenu(context, menu));
+	}
+	catch(const std::runtime_error &e)
+	{
+		throw;
+	}
 
 	return true;
 }

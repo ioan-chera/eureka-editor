@@ -949,7 +949,7 @@ static Failable<void> readArgsForList(bool ignore, int &argc, const char *const 
 //
 // Otherwise, ignores all options that have the "1" flag.
 //
-void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass, std::vector<fs::path> &Pwad_list, const opt_desc_t *options)
+Failable<void> M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass, std::vector<fs::path> &Pwad_list, const opt_desc_t *options)
 {
 	const opt_desc_t *o;
 
@@ -974,7 +974,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		{
 			if (o->opt_type == OptType::end)
 			{
-				ThrowException("unknown option: '%s'\n", argv[0]);
+				return fail("unknown option: '%s'\n", argv[0]);
 				/* NOT REACHED */
 			}
 
@@ -1023,7 +1023,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
             case OptType::integer:
 				if (argc < 2)
 				{
-					ThrowException("missing argument after '%s'\n", argv[0]);
+					return fail("missing argument after '%s'\n", argv[0]);
 					/* NOT REACHED */
 				}
 
@@ -1039,7 +1039,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
             case OptType::color:
 				if (argc < 2)
 				{
-					ThrowException("missing argument after '%s'\n", argv[0]);
+					return fail("missing argument after '%s'\n", argv[0]);
 					/* NOT REACHED */
 				}
 
@@ -1055,7 +1055,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
             case OptType::string:
 				if (argc < 2)
 				{
-					ThrowException("missing argument after '%s'\n", argv[0]);
+					return fail("missing argument after '%s'\n", argv[0]);
 					/* NOT REACHED */
 				}
 				argv++;
@@ -1080,7 +1080,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 			case OptType::path:
 				if(argc < 2)
 				{
-					ThrowException("missing argument after '%s'\n", argv[0]);
+					return fail("missing argument after '%s'\n", argv[0]);
 				}
 				++argv;
 				--argc;
@@ -1092,13 +1092,13 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
             case OptType::stringList:
 				result = readArgsForList<SString>(ignore, argc, argv, o->data_ptr);
 				if(!result)
-					ThrowException("%s", result.error().c_str());
+					return result;
 				break;
 
 			case OptType::pathList:
 				result = readArgsForList<fs::path>(ignore, argc, argv, o->data_ptr);
 				if(!result)
-					ThrowException("%s", result.error().c_str());
+					return result;
 				break;
 
 			default:
@@ -1109,6 +1109,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		argv++;
 		argc--;
 	}
+	return {};
 }
 
 

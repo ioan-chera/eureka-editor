@@ -84,14 +84,15 @@ void RecentKnowledge::writeKnownIWADs(std::ostream &os) const
 }
 
 
-void M_ValidateGivenFiles()
+Failable<void> M_ValidateGivenFiles()
 {
 	for (const fs::path &pwad : global::Pwad_list)
 	{
 		if (! Wad_file::Validate(pwad))
-			ThrowException("Given pwad does not exist or is invalid: %s\n",
+			return fail("Given pwad does not exist or is invalid: %s\n",
 						   pwad.u8string().c_str());
 	}
+	return{};
 }
 
 

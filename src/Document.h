@@ -142,7 +142,7 @@ public:
 	void LoadHeader(int loading_level, const Wad_file &load_wad);
 	void LoadThings(int loading_level, const Wad_file *load_wad);
 	void LoadThings_Hexen(int loading_level, const Wad_file *load_wad);
-	void LoadVertices(int loading_level, const Wad_file *load_wad);
+	Failable<void> LoadVertices(int loading_level, const Wad_file *load_wad);
 	void LoadSectors(int loading_level, const Wad_file *load_wad);
 	
 	void clear();
