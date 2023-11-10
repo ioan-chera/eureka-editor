@@ -695,7 +695,7 @@ void SelectNeighborMidLines::SetUp()
 
 void SelectNeighborMidLines::initTextures()
 {
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad);
 	wad->AddLump("TX_START");
 	Lump_c *lump;

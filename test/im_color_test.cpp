@@ -27,7 +27,7 @@ TEST(Palette, LoadPalette)
 {
 	Palette palette;
 	// Need a wad
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad);
 	Lump_c &lump = wad->AddLump("PALETTE");
 
@@ -56,7 +56,7 @@ TEST(Palette, LoadPalette)
 TEST(Palette, FindPaletteColor)
 {
 	Palette palette;
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad);
 	Lump_c &lump = wad->AddLump("PALETTE");
 	std::vector<uint8_t> data = makeGrayscale();

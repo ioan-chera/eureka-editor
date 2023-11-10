@@ -543,7 +543,7 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 		lump.Write(&ch, 1);
 	}
 
-	wad->writeToDisk();
+	attempt(wad->writeToDisk());
 }
 
 void UI_TextEditor::SaveMemory(std::vector<byte> &buf)

@@ -492,7 +492,7 @@ void Instance::CMD_BuildAllNodes()
 
 		// reload the previous level
 		// TODO: improve this to NOT mean reloading the level
-		LoadLevel(wad.master.editWad().get(), CurLevel);
+		attempt(LoadLevel(wad.master.editWad().get(), CurLevel));
 	}
 	catch (const std::runtime_error& e)
 	{

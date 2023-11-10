@@ -109,7 +109,7 @@ char *StringNew(int length)
 	char *s = (char *) calloc(length + 1, 1);
 
 	if (! s)
-		ThrowException("Out of memory (%d bytes for string)\n", length);
+		throw std::bad_alloc();
 
 	return s;
 }
@@ -125,7 +125,7 @@ char *StringDup(const char *orig, int limit)
 		auto s = static_cast<char *>(malloc(strlen(orig) + 1));
 
 		if (! s)
-			ThrowException("Out of memory (copy string)\n");
+			throw std::bad_alloc();
 
 		strcpy(s, orig);
 
@@ -187,7 +187,7 @@ SString SString::printf(EUR_FORMAT_STRING(const char *format), ...)
 
 		buf = (char*)realloc(buf, buf_size);
 		if (!buf)
-			ThrowException("Out of memory (formatting string)\n");
+			throw std::bad_alloc();
 
 		va_start(args, format);
 		out_len = vsnprintf(buf, buf_size, format, args);

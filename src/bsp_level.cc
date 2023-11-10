@@ -1651,15 +1651,22 @@ Failable<void> LevelData::PutXGL3Segs(ZLibContext &zcontext) const
 }
 
 
-void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
+Failable<void> LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 {
 	raw_v5_node_t raw;
 
-	if (node->r.node)
-		PutOneZNode(zcontext, node->r.node, do_xgl3);
-
-	if (node->l.node)
-		PutOneZNode(zcontext, node->l.node, do_xgl3);
+	try
+	{
+		if (node->r.node)
+			attempt(PutOneZNode(zcontext, node->r.node, do_xgl3));
+		
+		if (node->l.node)
+			attempt(PutOneZNode(zcontext, node->l.node, do_xgl3));
+	}
+	catch(const std::runtime_error &e)
+	{
+		return fail(e);
+	}
 
 	node->index = node_cur_index++;
 
@@ -1679,7 +1686,7 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 		}
 		catch(const std::runtime_error &e)
 		{
-			throw;
+			return fail(e);
 		}
 	}
 	else
@@ -1698,7 +1705,7 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 		}
 		catch(const std::runtime_error &e)
 		{
-			throw;
+			return fail(e);
 		}
 	}
 
@@ -1719,7 +1726,7 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 	}
 	catch(const std::runtime_error &e)
 	{
-		throw;
+		return fail(e);
 	}
 
 	if (node->r.node)
@@ -1745,7 +1752,7 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 	}
 	catch(const std::runtime_error &e)
 	{
-		throw;
+		return fail(e);
 	}
 
 # if DEBUG_BSP
@@ -1754,6 +1761,7 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 			LE_U32(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
 # endif
+	return{};
 }
 
 
@@ -1767,8 +1775,15 @@ Failable<void> LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do
 
 	node_cur_index = 0;
 
-	if (root)
-		PutOneZNode(zcontext, root, do_xgl3);
+	try
+	{
+		if (root)
+			attempt(PutOneZNode(zcontext, root, do_xgl3));
+	}
+	catch(const std::runtime_error &e)
+	{
+		return fail(e);
+	}
 
 	if (node_cur_index != (int)nodes.size())
 	{
@@ -1777,9 +1792,9 @@ Failable<void> LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do
 	return{};
 }
 
-void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
+Failable<void> LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 {
-
+	
 	// the ZLibXXX functions do no compression for XNOD format
 	
 	std::vector<byte> lumpData;
@@ -1795,7 +1810,7 @@ void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 	catch(const std::runtime_error &e)
 	{
 		gLog.printf("Error writing ZNODES: %s", e.what());
-		throw;
+		return fail(e);
 	}
 	
 	// Commit
@@ -1803,14 +1818,15 @@ void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 	// leave SEGS and SSECTORS empty
 	CreateLevelLump(inst, "SEGS");
 	CreateLevelLump(inst, "SSECTORS");
-
+	
 	Lump_c &lump = CreateLevelLump(inst, "NODES");
-
+	
 	if (cur_info->force_compress)
 		lump.Write(lev_ZNOD_magic, 4);
 	else
 		lump.Write(lev_XNOD_magic, 4);
 	lump.setData(std::move(lumpData));
+	return{};
 }
 
 
@@ -1976,7 +1992,7 @@ void LevelData::AddMissingLump(const Instance &inst, const char *name, const cha
 	inst.wad.master.editWad()->AddLump(name);
 }
 
-build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
+Failable<build_result_e> LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 {
 	// Note: root_node may be NULL
 
@@ -2038,7 +2054,14 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 	{
 		SortSegs();
 
-		SaveZDFormat(inst, root_node);
+		try
+		{
+			attempt(SaveZDFormat(inst, root_node));
+		}
+		catch(const std::runtime_error &e)
+		{
+			return fail(e);
+		}
 	}
 	else
 	{
@@ -2067,7 +2090,7 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 		UpdateGLMarker(inst, gl_marker);
 	}
 
-	inst.wad.master.editWad()->writeToDisk();
+	attempt(inst.wad.master.editWad()->writeToDisk());
 
 	if (overflows > 0)
 	{
@@ -2095,7 +2118,7 @@ Failable<build_result_e> LevelData::SaveUDMF(const Instance &inst, node_t *root_
 			return tl::make_unexpected(result.error());
 	}
 
-	inst.wad.master.editWad()->writeToDisk();
+	attempt(inst.wad.master.editWad()->writeToDisk());
 
 	if (overflows > 0)
 	{
@@ -2221,7 +2244,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 			if (inst.loaded.levelFormat == MapFormat::udmf)
 				ret = attempt(SaveUDMF(inst, root_node));
 			else
-				ret = SaveLevel(root_node, inst);
+				ret = attempt(SaveLevel(root_node, inst));
 		}
 		catch(const std::runtime_error &e)
 		{

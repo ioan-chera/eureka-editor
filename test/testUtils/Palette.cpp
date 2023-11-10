@@ -27,7 +27,7 @@
 //
 void makeCommonPalette(Palette &palette)
 {
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	EXPECT_TRUE(wad);
 	Lump_c &lump = wad->AddLump("PALETTE");
 

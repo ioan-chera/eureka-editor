@@ -199,7 +199,7 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static std::shared_ptr<Wad_file> Open(const fs::path &filename,
+	static Failable<std::shared_ptr<Wad_file>> Open(const fs::path &filename,
 										  WadOpenMode mode
 										  = WadOpenMode::append);
 
@@ -256,7 +256,7 @@ public:
 	// returns true if successful, false on error.
 	bool Backup(const fs::path &new_filename);
 
-	void writeToDisk() noexcept(false);
+	Failable<void> writeToDisk() noexcept(false);
 
 	// change name of a lump (can be a level marker too)
 	void RenameLump(int index, const char *new_name);

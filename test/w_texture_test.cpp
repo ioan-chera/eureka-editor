@@ -37,7 +37,7 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
     type.color = 0xff000000;
     config.thing_types[3004] = type;
 
-    auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+    auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
     ASSERT_TRUE(wad);
     wad->AddLump("S_START");
     auto &spritelump = wad->AddLump("POSSA3D7");

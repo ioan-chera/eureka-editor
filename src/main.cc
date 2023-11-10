@@ -897,8 +897,8 @@ Failable<void> Instance::Main_LoadResources(const LoadingData &loading) noexcept
 			if(!Wad_file::Validate(resource))
 				throw ParseException(SString("Invalid WAD file: ") + resource.u8string());
 			
-			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
-														   WadOpenMode::read);
+			std::shared_ptr<Wad_file> wad = attempt(Wad_file::Open(resource,
+														   WadOpenMode::read));
 			if(!wad)
 				throw ParseException(SString("Cannot load resource: ") + resource.u8string());
 			
@@ -911,7 +911,7 @@ Failable<void> Instance::Main_LoadResources(const LoadingData &loading) noexcept
 		return tl::make_unexpected(e.what());
 	}
 	
-	std::shared_ptr<Wad_file> gameWad = Wad_file::Open(newLoading.iwadName, WadOpenMode::read);
+	std::shared_ptr<Wad_file> gameWad = attempt(Wad_file::Open(newLoading.iwadName, WadOpenMode::read));
 	if(!gameWad)
 		return fail("Could not load IWAD file");
 	
@@ -1113,7 +1113,7 @@ int main(int argc, char *argv[])
 			attempt(M_ValidateGivenFiles());
 
 			// TODO: main instance
-			std::shared_ptr<Wad_file> editWad = Wad_file::Open(global::Pwad_list[0], WadOpenMode::append);
+			std::shared_ptr<Wad_file> editWad = attempt(Wad_file::Open(global::Pwad_list[0], WadOpenMode::append));
 			if(!editWad)
 			{
 				ThrowException("Cannot load pwad: %s\n", global::Pwad_list[0].u8string().c_str());
@@ -1152,7 +1152,7 @@ int main(int argc, char *argv[])
 		std::shared_ptr<Wad_file> gameWad;
 		if (! attempt(DetermineIWAD(gInstance)))
 			goto quit;
-		gameWad = Wad_file::Open(gInstance.loaded.iwadName, WadOpenMode::read);
+		gameWad = attempt(Wad_file::Open(gInstance.loaded.iwadName, WadOpenMode::read));
 		if(!gameWad)
 			goto quit;
 
@@ -1170,7 +1170,7 @@ int main(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.wad.master.activeWad().get(), gInstance.loaded.levelName);
+		attempt(gInstance.LoadLevel(gInstance.wad.master.activeWad().get(), gInstance.loaded.levelName));
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

@@ -504,9 +504,9 @@ private:
 	Failable<void> PutZSubsecs(ZLibContext &zcontext) const;
 	Failable<void> PutZSegs(ZLibContext &zcontext) const;
 	Failable<void> PutXGL3Segs(ZLibContext &zcontext) const;
-	void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3);
+	Failable<void> PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3);
 	Failable<void> PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3);
-	void SaveZDFormat(const Instance &inst, node_t *root_node);
+	Failable<void> SaveZDFormat(const Instance &inst, node_t *root_node);
 	Failable<void> SaveXGL3Format(const Instance &inst, node_t *root_node);
 	
 	/* ----- whole-level routines --------------------------- */
@@ -519,7 +519,7 @@ private:
 	}
 	void UpdateGLMarker(const Instance &inst, Lump_c *marker) const;
 	void AddMissingLump(const Instance &inst, const char *name, const char *after) ;
-	build_result_e SaveLevel(node_t *root_node, const Instance &inst);
+	Failable<build_result_e> SaveLevel(node_t *root_node, const Instance &inst);
 	Failable<build_result_e> SaveUDMF(const Instance &inst, node_t *root_node);
 	
 	/* ---------------------------------------------------------------- */

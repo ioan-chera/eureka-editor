@@ -26,6 +26,7 @@
 #include "e_objects.h"
 #include "e_sector.h"
 #include "e_vertex.h"
+#include "Errors.h"
 #include "LineDef.h"
 #include "Vertex.h"
 #include <memory>
@@ -140,10 +141,10 @@ public:
 	bool isVertical(const LineDef &line) const;
 	
 	void LoadHeader(int loading_level, const Wad_file &load_wad);
-	void LoadThings(int loading_level, const Wad_file *load_wad);
-	void LoadThings_Hexen(int loading_level, const Wad_file *load_wad);
+	Failable<void> LoadThings(int loading_level, const Wad_file *load_wad);
+	Failable<void> LoadThings_Hexen(int loading_level, const Wad_file *load_wad);
 	Failable<void> LoadVertices(int loading_level, const Wad_file *load_wad);
-	void LoadSectors(int loading_level, const Wad_file *load_wad);
+	Failable<void> LoadSectors(int loading_level, const Wad_file *load_wad);
 	
 	void clear();
 private:

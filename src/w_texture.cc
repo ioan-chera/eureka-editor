@@ -89,7 +89,7 @@ static bool CheckTexturesAreStrife(const byte *tex_data, int tex_length, int num
 }
 
 
-static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, const byte *tex_data, int tex_length, int offset,
+static Failable<void> LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, const byte *tex_data, int tex_length, int offset,
 									const byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_strife_texture_t *raw = (const raw_strife_texture_t *)(tex_data + offset);
@@ -101,7 +101,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, cons
 	gLog.debugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
-		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
+		return fail("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
 	Img_c img(width, height, false);
 	bool is_medusa = false;
@@ -110,7 +110,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, cons
 	int num_patches = LE_S16(raw->patch_count);
 
 	if (! num_patches)
-		ThrowException("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
+		return fail("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
 
 	const raw_strife_patchdef_t *patdef = (const raw_strife_patchdef_t *) & raw->patches[0];
 
@@ -151,10 +151,11 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, cons
 	namebuf[8] = 0;
 
 	wad.images.W_AddTexture(namebuf, std::move(img), is_medusa);
+	return{};
 }
 
 
-static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const byte *tex_data, int tex_length, int offset,
+static Failable<void> LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const byte *tex_data, int tex_length, int offset,
 									const byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
@@ -166,7 +167,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const 
 	gLog.debugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
-		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
+		return fail("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
 	Img_c img(width, height, false);
 	bool is_medusa = false;
@@ -175,7 +176,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const 
 	int num_patches = LE_S16(raw->patch_count);
 
 	if (! num_patches)
-		ThrowException("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
+		return fail("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
 
 	const raw_patchdef_t *patdef = (const raw_patchdef_t *) & raw->patches[0];
 
@@ -218,10 +219,11 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const 
 	namebuf[8] = 0;
 
 	wad.images.W_AddTexture(namebuf, std::move(img), is_medusa);
+	return{};
 }
 
 
-static void LoadTexturesLump(WadData &wad, const ConfigData &config, const Lump_c &lump, const byte *pnames, int pname_size,
+static Failable<void> LoadTexturesLump(WadData &wad, const ConfigData &config, const Lump_c &lump, const byte *pnames, int pname_size,
                              bool skip_first)
 {
 	// TODO : verify size word at front of PNAMES ??
@@ -242,11 +244,11 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, const Lump_
 	// it seems having a count of zero is valid
 	if (num_tex == 0)
 	{
-		return;
+		return{};
 	}
 
 	if (num_tex < 0 || num_tex > (1<<20))
-		ThrowException("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad count.\n");
+		return fail("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad count.\n");
 
 	bool is_strife = CheckTexturesAreStrife(tex_data.data(), (int)tex_data.size(), num_tex, skip_first);
 
@@ -258,13 +260,14 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, const Lump_
 		int offset = LE_S32(tex_data_s32[1 + n]);
 
 		if (offset < 4 * num_tex || offset >= (int)tex_data.size())
-			ThrowException("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
+			return fail("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
 
 		if (is_strife)
-			LoadTextureEntry_Strife(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first);
+			attempt(LoadTextureEntry_Strife(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first));
 		else
-			LoadTextureEntry_DOOM(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first);
+			attempt(LoadTextureEntry_DOOM(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first));
 	}
+	return{};
 }
 
 
@@ -345,10 +348,10 @@ void WadData::W_LoadTextures(const ConfigData &config)
 			const std::vector<byte> &pname_data = pnames->getData();
 
 			if (texture1)
-				LoadTexturesLump(*this, config, *texture1, pname_data.data(), (int)pname_data.size(), true);
+				attempt(LoadTexturesLump(*this, config, *texture1, pname_data.data(), (int)pname_data.size(), true));
 
 			if (texture2)
-				LoadTexturesLump(*this, config, *texture2, pname_data.data(), (int)pname_data.size(), false);
+				attempt(LoadTexturesLump(*this, config, *texture2, pname_data.data(), (int)pname_data.size(), false));
 		}
 
 		if (config.features.tx_start)

@@ -64,17 +64,17 @@ TEST_F(WadFileTest, Open)
 	std::shared_ptr<Wad_file> wad;
 
 	// Opening a missing file for reading should fail
-	wad = Wad_file::Open(getChildPath("inexistent.wad"), WadOpenMode::read);
+	wad = attempt(Wad_file::Open(getChildPath("inexistent.wad"), WadOpenMode::read));
 	ASSERT_FALSE(wad);
 
 	// Opening for writing or appending should be fine.
-	wad = Wad_file::Open(getChildPath("newwad.wad"), WadOpenMode::write);
+	wad = attempt(Wad_file::Open(getChildPath("newwad.wad"), WadOpenMode::write));
 	ASSERT_TRUE(wad);
 	// File won't get created per se, so don't add it to the delete list.
 	// Zero lumps for the new file.
 	ASSERT_EQ(wad->NumLumps(), 0);
 
-	wad = Wad_file::Open(getChildPath("appendwad.wad"), WadOpenMode::append);
+	wad = attempt(Wad_file::Open(getChildPath("appendwad.wad"), WadOpenMode::append));
 	ASSERT_TRUE(wad);
 	// Same as with writing, no file created unless "writeToDisk". In addition,
 	// check that it's empty, just like the writing mode.
@@ -92,14 +92,14 @@ TEST_F(WadFileTest, WriteRead)
 
 	// Prepare the test path
 	fs::path path = getChildPath("newwad.wad");
-	wad = Wad_file::Open(path, WadOpenMode::write);
+	wad = attempt(Wad_file::Open(path, WadOpenMode::write));
 	ASSERT_EQ(wad->PathName(), path);
 	ASSERT_FALSE(wad->IsReadOnly());
 	ASSERT_FALSE(wad->IsIWAD());
 	ASSERT_TRUE(wad);
 
 	// Write it lumpless
-	wad->writeToDisk();
+	attempt(wad->writeToDisk());
 	mDeleteList.push(path);
 
 	// Right now add some data to it. Since writeToDisk won't be called yet,
@@ -119,18 +119,18 @@ TEST_F(WadFileTest, WriteRead)
 	assertVecString(data, "PWAD\0\0\0\0\x0c\0\0\0");
 
 	// The read wad
-	read = Wad_file::Open(path, WadOpenMode::read);
+	read = attempt(Wad_file::Open(path, WadOpenMode::read));
 	ASSERT_TRUE(read);
 	ASSERT_EQ(read->NumLumps(), 0);
 
 	// Now write it with the new lump.
-	wad->writeToDisk();
+	attempt(wad->writeToDisk());
 	readFromPath(path, data);
 	ASSERT_EQ(data.size(), 12 + 16);	// header and one dir entry
 	assertVecString(data, "PWAD\x01\0\0\0\x0c\0\0\0"
 					"\x0c\0\0\0\0\0\0\0HELLOWOR");
 	// And the wad
-	read = Wad_file::Open(path, WadOpenMode::read);
+	read = attempt(Wad_file::Open(path, WadOpenMode::read));
 	ASSERT_TRUE(read);
 	ASSERT_EQ(read->NumLumps(), 1);
 	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
@@ -138,7 +138,7 @@ TEST_F(WadFileTest, WriteRead)
 
 	// Now add some data to that lump
 	lump->Printf("Hello, world!");
-	wad->writeToDisk();	// and update the disk entry
+	attempt(wad->writeToDisk());	// and update the disk entry
 
 	// Check again
 	readFromPath(path, data);
@@ -149,7 +149,7 @@ TEST_F(WadFileTest, WriteRead)
 					"\x0c\0\0\0\x0d\0\0\0HELLOWOR");
 
 	// And the wad
-	read = Wad_file::Open(path, WadOpenMode::read);
+	read = attempt(Wad_file::Open(path, WadOpenMode::read));
 	ASSERT_TRUE(read);
 	ASSERT_EQ(read->NumLumps(), 1);
 	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
@@ -169,7 +169,7 @@ TEST_F(WadFileTest, WriteRead)
 	lump->Printf("Doom");
 
 	ASSERT_EQ(wad->TotalSize(), 12 + 13 + 4 + 2 + 48);
-	wad->writeToDisk();
+	attempt(wad->writeToDisk());
 
 	// Check
 	readFromPath(path, data);
@@ -184,7 +184,7 @@ TEST_F(WadFileTest, WriteRead)
 					"\x1d\0\0\0\x02\0\0\0LUMPLUMP");
 
 	// And check the wad
-	read = Wad_file::Open(path, WadOpenMode::read);
+	read = attempt(Wad_file::Open(path, WadOpenMode::read));
 	ASSERT_TRUE(read);
 	ASSERT_EQ(read->NumLumps(), 3);
 	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
@@ -264,7 +264,7 @@ TEST_F(WadFileTest, Validate)
 //
 TEST_F(WadFileTest, FindLumpInNamespace)
 {
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad);
 
 	// Print data for each new lump so it gets namespaced correctly
@@ -323,7 +323,7 @@ TEST_F(WadFileTest, FindLumpInNamespace)
 TEST_F(WadFileTest, LevelQuery)
 {
 	fs::path path = getChildPath("wad.wad");
-	auto wad = Wad_file::Open(path, WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open(path, WadOpenMode::write));
 	ASSERT_TRUE(wad);
 
 	// Classic Doom map. Give it a nonstandard name
@@ -356,14 +356,14 @@ TEST_F(WadFileTest, LevelQuery)
 	ASSERT_EQ(wad->LevelHeader(0), 13);
 	ASSERT_EQ(wad->LevelHeader(1), 0);
 
-	wad->writeToDisk();
+	attempt(wad->writeToDisk());
 	mDeleteList.push(path);
 
 	// For this test, let's assume UDMF is active
 	global::udmf_testing = true;
 
 	// Also check how a wad read from file behaves
-	auto read = Wad_file::Open(path, WadOpenMode::read);
+	auto read = attempt(Wad_file::Open(path, WadOpenMode::read));
 	ASSERT_TRUE(read);
 
 	// Test both wads. The second one shall autodetect
@@ -440,7 +440,7 @@ TEST_F(WadFileTest, Backup)
 {
 	fs::path path = getChildPath("wad.wad");
 	fs::path path2 = getChildPath("wad2.wad");
-	auto wad = Wad_file::Open(path, WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open(path, WadOpenMode::write));
 	ASSERT_TRUE(wad);
 
 	wad->AddLump("LUMP1");
@@ -450,7 +450,7 @@ TEST_F(WadFileTest, Backup)
 
 	ASSERT_TRUE(wad->Backup(path2));
 	mDeleteList.push(path2);
-	wad->writeToDisk();
+	attempt(wad->writeToDisk());
 	mDeleteList.push(path);
 
 	// Test it now
@@ -463,7 +463,7 @@ TEST_F(WadFileTest, Backup)
 
 TEST_F(WadFileTest, LumpIO)
 {
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	Lump_c &lump = wad->AddLump("LUMP");
 
 	lump.Printf("Hello, world!");
@@ -499,9 +499,9 @@ TEST_F(WadFileTest, LumpIO)
 TEST_F(WadFileTest, LumpFromFile)
 {
 	fs::path path = getChildPath("wad.wad");
-	auto wad = Wad_file::Open(path, WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open(path, WadOpenMode::write));
 	ASSERT_TRUE(wad);
-	wad->writeToDisk();
+	attempt(wad->writeToDisk());
 	mDeleteList.push(path);
 
 	Lump_c &lump = wad->AddLump("Test");
@@ -518,7 +518,7 @@ TEST_F(WadFileTest, LumpFromFile)
 
 TEST_F(WadFileTest, FindFirstSpriteLump)
 {
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad);
 	wad->AddLump("POSSA1");
 	wad->AddLump("S_START");

@@ -277,7 +277,7 @@ public:
 	bool ExecuteKey(keycode_t key, KeyContext context);
 
 	// M_LOADSAVE
-	void LoadLevel(const Wad_file *wad, const SString &level);
+	Failable<void> LoadLevel(const Wad_file *wad, const SString &level);
 	void LoadLevelNum(const Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	bool M_SaveMap();
@@ -386,12 +386,12 @@ private:
 	void CreateFallbackSideDef();
 	void EmptyLump(const char *name) const;
 	void FreshLevel();
-	void LoadBehavior(int loading_level, const Wad_file *load_wad);
+	Failable<void> LoadBehavior(int loading_level, const Wad_file *load_wad);
 	void LoadHeader(int loading_level, const Wad_file &load_wad);
-	void LoadLineDefs(int loading_level, const Wad_file *load_wad);
-	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad);
+	Failable<void> LoadLineDefs(int loading_level, const Wad_file *load_wad);
+	Failable<void> LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad);
 	void LoadScripts(int loading_level, const Wad_file *load_wad);
-	void LoadSideDefs(int loading_level, const Wad_file *load_wad);
+	Failable<void> LoadSideDefs(int loading_level, const Wad_file *load_wad);
 	
 	bool M_ExportMap();
 	void Navigate2D();

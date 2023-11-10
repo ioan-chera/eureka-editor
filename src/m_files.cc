@@ -371,7 +371,7 @@ bool Instance::M_TryOpenMostRecent()
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(recentMap.file, WadOpenMode::append);
+	std::shared_ptr<Wad_file> wad = attempt(Wad_file::Open(recentMap.file, WadOpenMode::append));
 
 	if (! wad)
 	{

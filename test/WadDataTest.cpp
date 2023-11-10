@@ -32,7 +32,7 @@ static void addValidLump(const std::shared_ptr<Wad_file> &wad, const char *name)
 TEST(MasterDir, FindGlobalLump)
 {
 	MasterDir master;
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad);
 	addValidLump(wad, "LUMP1");	// 0
 	addValidLump(wad, "LUMP2");
@@ -48,7 +48,7 @@ TEST(MasterDir, FindGlobalLump)
 
 	master.setGameWad(wad);
 
-	auto wad2 = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad2 = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad2);
 
 	addValidLump(wad2, "LUMP11");	// 0
@@ -79,7 +79,7 @@ TEST(MasterDir, FindFirstSpriteLump)
 {
 	MasterDir master;
 
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad);
 	wad->AddLump("S_START");
 	Lump_c &wad1possa1 = wad->AddLump("POSSA1");
@@ -92,7 +92,7 @@ TEST(MasterDir, FindFirstSpriteLump)
 
 	master.setGameWad(wad);
 
-	auto wad2 = Wad_file::Open("dummy2.wad", WadOpenMode::write);
+	auto wad2 = attempt(Wad_file::Open("dummy2.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad2);
 
 	wad2->AddLump("S_START");

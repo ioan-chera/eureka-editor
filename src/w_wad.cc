@@ -176,7 +176,7 @@ Wad_file::~Wad_file()
 }
 
 
-std::shared_ptr<Wad_file> Wad_file::Open(const fs::path &filename,
+Failable<std::shared_ptr<Wad_file>> Wad_file::Open(const fs::path &filename,
 										 WadOpenMode mode)
 {
 	SYS_ASSERT(mode == WadOpenMode::read || mode == WadOpenMode::write || mode == WadOpenMode::append);
@@ -208,7 +208,7 @@ retry:
 
 		int what = errno;
 		gLog.printf("Open failed: %s\n", GetErrorMessage(what).c_str());
-		return NULL;
+		return std::shared_ptr<Wad_file>(nullptr);
 	}
 
 	auto wraw = new Wad_file(filename, mode);
@@ -219,7 +219,7 @@ retry:
 	if (fseek(fp, 0, SEEK_END) != 0)
 	{
 		fclose(fp);
-		ThrowException("Error determining WAD size.\n");
+		return fail("Error determining WAD size.\n");
 	}
 
 	int total_size = (int)ftell(fp);
@@ -229,14 +229,14 @@ retry:
 	if (total_size < 0)
 	{
 		fclose(fp);
-		ThrowException("Error determining WAD size.\n");
+		return fail("Error determining WAD size.\n");
 	}
 
 	if (! w->ReadDirectory(fp, total_size))
 	{
 		gLog.printf("Open wad failed (reading directory)\n");
 		fclose(fp);
-		return NULL;
+		return std::shared_ptr<Wad_file>(nullptr);
 	}
 
 	w->DetectLevels();
@@ -836,11 +836,11 @@ void Wad_file::ProcessNamespaces()
 //
 // Writes the content to disk now
 //
-void Wad_file::writeToDisk() noexcept(false)
+Failable<void> Wad_file::writeToDisk() noexcept(false)
 {
 	if(IsReadOnly())
 	{
-		ThrowException("Cannot overwrite a read-only file (%s)!",
+		return fail("Cannot overwrite a read-only file (%s)!",
 					   filename.u8string().c_str());
 	}
 
@@ -849,6 +849,7 @@ void Wad_file::writeToDisk() noexcept(false)
 
 	// reset the insertion point
 	insert_point = -1;
+	return{};
 }
 
 

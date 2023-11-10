@@ -46,7 +46,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	static const char wadpathbase[] = "first/wad.wad";
 	fs::path wadpath(getChildPath(wadpathbase));
 	// Set up a nested directory WAD so we can test relative paths to resources
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(wadpath, WadOpenMode::write);
+	std::shared_ptr<Wad_file> wad = attempt(Wad_file::Open(wadpath, WadOpenMode::write));
 	ASSERT_TRUE(wad);
 
 	loaded.gameName = "Mood";	// just pick two random names
@@ -149,7 +149,7 @@ void ParseEurekaLumpFixture::SetUp()
 {
 	TempDirContext::SetUp();
 
-	wad = Wad_file::Open(getChildPath("wad.wad"), WadOpenMode::write);
+	wad = attempt(Wad_file::Open(getChildPath("wad.wad"), WadOpenMode::write));
 	ASSERT_TRUE(wad);
 }
 
@@ -479,7 +479,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	// Re-create wad to be from a subpath
 	ASSERT_TRUE(FileMakeDir(getChildPath("sub")));
 	mDeleteList.push(getChildPath("sub"));
-	wad = Wad_file::Open(getChildPath(fs::path("sub") / "wad.wad"), WadOpenMode::write);
+	wad = attempt(Wad_file::Open(getChildPath(fs::path("sub") / "wad.wad"), WadOpenMode::write));
 	ASSERT_TRUE(wad);
 
 	// Create a parent path resource

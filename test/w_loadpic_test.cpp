@@ -39,7 +39,7 @@ private:
 //
 void DetectImageFormat::SetUp()
 {
-	wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	ASSERT_TRUE(wad);
 	lump = &wad->AddLump("PIC");
 }
@@ -148,7 +148,7 @@ TEST_F(DetectImageFormat, doom)
 
 static auto prepareData(const std::vector<uint8_t> &data)
 {
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	auto wad = attempt(Wad_file::Open("dummy.wad", WadOpenMode::write));
 	EXPECT_TRUE(wad);
 	auto &lump = wad->AddLump("LUMP");
 	lump.Write(data.data(), (int)data.size());
