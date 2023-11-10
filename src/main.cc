@@ -1100,7 +1100,7 @@ int main(int argc, char *argv[])
 
 		init_progress = ProgressStatus::window;
 
-		gInstance.M_LoadOperationMenus();
+		attempt(gInstance.M_LoadOperationMenus());
 
 
 		// open a specified PWAD now

@@ -833,7 +833,7 @@ Failable<void> Instance::M_AddOperationMenu(const SString &context, Fl_Menu_Butt
 
 #define MAX_TOKENS  30
 
-bool Instance::M_ParseOperationFile()
+Failable<bool> Instance::M_ParseOperationFile()
 {
 	// open the file and build all the menus it contains.
 
@@ -890,7 +890,7 @@ bool Instance::M_ParseOperationFile()
 			}
 			catch(const std::runtime_error &e)
 			{
-				throw;
+				return fail(e);
 			}
 
 			// create new menu
@@ -909,7 +909,7 @@ bool Instance::M_ParseOperationFile()
 		}
 		catch(const std::runtime_error &e)
 		{
-			throw;
+			return fail(e);
 		}
 	}
 
@@ -922,22 +922,30 @@ bool Instance::M_ParseOperationFile()
 	}
 	catch(const std::runtime_error &e)
 	{
-		throw;
+		return fail(e);
 	}
 
 	return true;
 }
 
 
-void Instance::M_LoadOperationMenus()
+Failable<void> Instance::M_LoadOperationMenus()
 {
-	gLog.printf("Loading Operation menus...\n");
-
-	if (! M_ParseOperationFile())
+	try
 	{
-		no_operation_cfg = true;
-		DLG_Notify("Installation problem: cannot find \"operations.cfg\" file!");
+		gLog.printf("Loading Operation menus...\n");
+		
+		if (! attempt(M_ParseOperationFile()))
+		{
+			no_operation_cfg = true;
+			DLG_Notify("Installation problem: cannot find \"operations.cfg\" file!");
+		}
 	}
+	catch(const std::runtime_error &e)
+	{
+		return fail(e);
+	}
+	return{};
 }
 
 

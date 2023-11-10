@@ -248,7 +248,7 @@ public:
 	void Editor_SetAction(EditorAction new_action);
 	void EV_EscapeKey();
 	int EV_HandleEvent(int event);
-	void M_LoadOperationMenus();
+	Failable<void> M_LoadOperationMenus();
 	bool Nav_ActionKey(keycode_t key, nav_release_func_t func);
 	void Nav_Clear();
 	void Nav_Navigate();
@@ -376,7 +376,7 @@ private:
 	int EV_RawMouse(int event);
 	int EV_RawWheel(int event);
 	Failable<void> M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu);
-	bool M_ParseOperationFile();
+	Failable<bool> M_ParseOperationFile();
 
 	// M_KEYS
 	void DoExecuteCommand(const editor_command_t *cmd);

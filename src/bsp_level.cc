@@ -2090,7 +2090,14 @@ Failable<build_result_e> LevelData::SaveLevel(node_t *root_node, const Instance 
 		UpdateGLMarker(inst, gl_marker);
 	}
 
-	attempt(inst.wad.master.editWad()->writeToDisk());
+	try
+	{
+		attempt(inst.wad.master.editWad()->writeToDisk());
+	}
+	catch(const std::runtime_error &e)
+	{
+		return fail(e);
+	}
 
 	if (overflows > 0)
 	{
@@ -2118,7 +2125,14 @@ Failable<build_result_e> LevelData::SaveUDMF(const Instance &inst, node_t *root_
 			return tl::make_unexpected(result.error());
 	}
 
-	attempt(inst.wad.master.editWad()->writeToDisk());
+	try
+	{
+		attempt(inst.wad.master.editWad()->writeToDisk());
+	}
+	catch(const std::runtime_error &e)
+	{
+		return fail(e);
+	}
 
 	if (overflows > 0)
 	{
