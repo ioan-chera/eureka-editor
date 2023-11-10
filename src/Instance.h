@@ -40,6 +40,7 @@ class Fl_RGB_Image;
 class Lump_c;
 class UI_NodeDialog;
 class UI_ProjectSetup;
+struct BadCount;
 struct v2double_t;
 struct v2int_t;
 
@@ -281,9 +282,9 @@ public:
 	void LoadLevelNum(const Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	bool M_SaveMap();
-	void ValidateVertexRefs(LineDef *ld, int num);
-	void ValidateSectorRef(SideDef *sd, int num);
-	void ValidateSidedefRefs(LineDef *ld, int num);
+	void ValidateVertexRefs(LineDef *ld, int num, BadCount &bad);
+	void ValidateSectorRef(SideDef *sd, int num, BadCount &bad);
+	void ValidateSidedefRefs(LineDef *ld, int num, BadCount &bad);
 
 	// M_NODES
 	void BuildNodesAfterSave(int lev_idx);
@@ -293,7 +294,7 @@ public:
 	bool M_PortSetupDialog(const SString& port, const SString& game) const;
 
 	// M_UDMF
-	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad);
+	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, BadCount &bad);
 	void UDMF_SaveLevel() const;
 
 	// MAIN
@@ -388,10 +389,10 @@ private:
 	void FreshLevel();
 	void LoadBehavior(int loading_level, const Wad_file *load_wad);
 	void LoadHeader(int loading_level, const Wad_file &load_wad);
-	void LoadLineDefs(int loading_level, const Wad_file *load_wad);
-	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad);
+	void LoadLineDefs(int loading_level, const Wad_file *load_wad, BadCount &bad);
+	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, BadCount &bad);
 	void LoadScripts(int loading_level, const Wad_file *load_wad);
-	void LoadSideDefs(int loading_level, const Wad_file *load_wad);
+	void LoadSideDefs(int loading_level, const Wad_file *load_wad, BadCount &bad);
 	
 	bool M_ExportMap();
 	void Navigate2D();
@@ -408,13 +409,13 @@ private:
 	void SaveSectors();
 	void SaveSideDefs();
 	void SaveVertices();
-	void ShowLoadProblem() const;
+	void ShowLoadProblem(const BadCount &bad) const;
 
 	// M_NODES
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);
 
 	// M_UDMF
-	void ValidateLevel_UDMF();
+	void ValidateLevel_UDMF(BadCount &bad);
 
 	// R_GRID
 	bool Grid_ParseUser(const std::vector<SString> &tokens);
@@ -478,9 +479,6 @@ public:	// will be private when we encapsulate everything
 	Recently_used recent_flats{ *this };
 	Recently_used recent_textures{ *this };
 	Recently_used recent_things{ *this };
-	int bad_linedef_count = 0;
-	int bad_sector_refs = 0;
-	int bad_sidedef_refs = 0;
 	// this is only used to prevent a M_SaveMap which happens inside
 	// CMD_BuildAllNodes from building that saved level twice.
 	bool inhibit_node_build = false;
