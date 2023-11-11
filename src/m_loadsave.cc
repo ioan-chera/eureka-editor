@@ -454,33 +454,33 @@ void Document::LoadSectors(int loading_level, const Wad_file *load_wad)
 }
 
 
-void Instance::CreateFallbackSector()
+void Document::CreateFallbackSector(const ConfigData &config)
 {
 	gLog.printf("Creating a fallback sector.\n");
 
 	auto sec = std::make_unique<Sector>();
 
-	sec->SetDefaults(conf);
+	sec->SetDefaults(config);
 
-	level.sectors.push_back(std::move(sec));
+	sectors.push_back(std::move(sec));
 }
 
-void Instance::CreateFallbackSideDef()
+void Document::CreateFallbackSideDef(const ConfigData &config)
 {
 	// we need a valid sector too!
-	if (level.numSectors() == 0)
-		CreateFallbackSector();
+	if (numSectors() == 0)
+		CreateFallbackSector(config);
 
 	gLog.printf("Creating a fallback sidedef.\n");
 
 	auto sd = std::make_unique<SideDef>();
 
-	sd->SetDefaults(conf, false);
+	sd->SetDefaults(config, false);
 
-	level.sidedefs.push_back(std::move(sd));
+	sidedefs.push_back(std::move(sd));
 }
 
-static void CreateFallbackVertices(Document &doc)
+void Document::CreateFallbackVertices()
 {
 	gLog.printf("Creating two fallback vertices.\n");
 
@@ -493,8 +493,8 @@ static void CreateFallbackVertices(Document &doc)
 	v2->raw_x = FFixedPoint(555);
 	v2->raw_y = FFixedPoint(555);
 
-	doc.vertices.push_back(std::move(v1));
-	doc.vertices.push_back(std::move(v2));
+	vertices.push_back(std::move(v1));
+	vertices.push_back(std::move(v2));
 }
 
 struct BadCount
@@ -504,60 +504,60 @@ struct BadCount
 	int sidedef_refs;
 };
 
-void Instance::ValidateSidedefRefs(LineDef * ld, int num, BadCount &bad)
+void Document::ValidateSidedefRefs(LineDef & ld, int num, const ConfigData &config, BadCount &bad)
 {
-	if (ld->right >= level.numSidedefs() || ld->left >= level.numSidedefs())
+	if (ld.right >= numSidedefs() || ld.left >= numSidedefs())
 	{
 		gLog.printf("WARNING: linedef #%d has invalid sidedefs (%d / %d)\n",
-				  num, ld->right, ld->left);
+				  num, ld.right, ld.left);
 
 		bad.sidedef_refs++;
 
 		// ensure we have a usable sidedef
-		if (level.numSidedefs() == 0)
-			CreateFallbackSideDef();
+		if (numSidedefs() == 0)
+			CreateFallbackSideDef(config);
 
-		if (ld->right >= level.numSidedefs())
-			ld->right = 0;
+		if (ld.right >= numSidedefs())
+			ld.right = 0;
 
-		if (ld->left >= level.numSidedefs())
-			ld->left = 0;
+		if (ld.left >= numSidedefs())
+			ld.left = 0;
 	}
 }
 
-void Instance::ValidateVertexRefs(LineDef *ld, int num, BadCount &bad)
+void Document::ValidateVertexRefs(LineDef &ld, int num, BadCount &bad)
 {
-	if (ld->start >= level.numVertices() || ld->end >= level.numVertices() ||
-	    ld->start == ld->end)
+	if (ld.start >= numVertices() || ld.end >= numVertices() ||
+	    ld.start == ld.end)
 	{
 		gLog.printf("WARNING: linedef #%d has invalid vertices (%d -> %d)\n",
-		          num, ld->start, ld->end);
+		          num, ld.start, ld.end);
 
 		bad.linedef_count++;
 
 		// ensure we have a valid vertex
-		if (level.numVertices() < 2)
-			CreateFallbackVertices(level);
+		if (numVertices() < 2)
+			CreateFallbackVertices();
 
-		ld->start = 0;
-		ld->end   = level.numVertices() - 1;
+		ld.start = 0;
+		ld.end   = numVertices() - 1;
 	}
 }
 
-void Instance::ValidateSectorRef(SideDef *sd, int num, BadCount &bad)
+void Document::ValidateSectorRef(SideDef &sd, int num, const ConfigData &config, BadCount &bad)
 {
-	if (sd->sector >= level.numSectors())
+	if (sd.sector >= numSectors())
 	{
 		gLog.printf("WARNING: sidedef #%d has invalid sector (%d)\n",
-		          num, sd->sector);
+		          num, sd.sector);
 
 		bad.sector_refs++;
 
 		// ensure we have a valid sector
-		if (level.numSectors() == 0)
-			CreateFallbackSector();
+		if (numSectors() == 0)
+			CreateFallbackSector(config);
 
-		sd->sector = 0;
+		sd.sector = 0;
 	}
 }
 
@@ -671,7 +671,7 @@ void Document::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 }
 
 
-void Instance::LoadSideDefs(int loading_level, const Wad_file *load_wad, BadCount &bad)
+void Document::LoadSideDefs(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "SIDEDEFS");
 	if(!lump)
@@ -707,9 +707,9 @@ void Instance::LoadSideDefs(int loading_level, const Wad_file *load_wad, BadCoun
 
 		sd->sector = LE_U16(raw.sector);
 
-		ValidateSectorRef(sd.get(), i, bad);
+		ValidateSectorRef(*sd, i, config, bad);
 
-		level.sidedefs.push_back(std::move(sd));
+		sidedefs.push_back(std::move(sd));
 	}
 }
 
@@ -753,8 +753,8 @@ void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad, BadCoun
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld.get(), i, bad);
-		ValidateSidedefRefs(ld.get(), i, bad);
+		level.ValidateVertexRefs(*ld, i, bad);
+		level.ValidateSidedefRefs(*ld, i, conf, bad);
 
 		level.linedefs.push_back(std::move(ld));
 	}
@@ -805,8 +805,8 @@ void Instance::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, B
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld.get(), i, bad);
-		ValidateSidedefRefs(ld.get(), i, bad);
+		level.ValidateVertexRefs(*ld, i, bad);
+		level.ValidateSidedefRefs(*ld, i, conf, bad);
 
 		level.linedefs.push_back(std::move(ld));
 	}
@@ -939,7 +939,7 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
 
 		level.LoadVertices(loading_level, wad);
 		level.LoadSectors(loading_level, wad);
-		LoadSideDefs(loading_level, wad, bad);
+		level.LoadSideDefs(loading_level, wad, conf, bad);
 
 		if (loaded.levelFormat == MapFormat::hexen)
 		{

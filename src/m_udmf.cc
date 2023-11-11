@@ -632,19 +632,19 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 }
 
 
-void Instance::ValidateLevel_UDMF(BadCount &bad)
+void Document::ValidateLevel_UDMF(const ConfigData &config, BadCount &bad)
 {
-	for (int n = 0 ; n < level.numSidedefs() ; n++)
+	for (int n = 0 ; n < numSidedefs() ; n++)
 	{
-		ValidateSectorRef(level.sidedefs[n].get(), n, bad);
+		ValidateSectorRef(*sidedefs[n], n, config, bad);
 	}
 
-	for (int n = 0 ; n < level.numLinedefs(); n++)
+	for (int n = 0 ; n < numLinedefs(); n++)
 	{
-		auto &L = level.linedefs[n];
+		auto &L = linedefs[n];
 
-		ValidateVertexRefs(L.get(), n, bad);
-		ValidateSidedefRefs(L.get(), n, bad);
+		ValidateVertexRefs(*L, n, bad);
+		ValidateSidedefRefs(*L, n, config, bad);
 	}
 }
 
@@ -693,7 +693,7 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, BadCo
 		parser.SkipToEOLN();
 	}
 
-	ValidateLevel_UDMF(bad);
+	level.ValidateLevel_UDMF(conf, bad);
 }
 
 

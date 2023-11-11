@@ -282,9 +282,6 @@ public:
 	void LoadLevelNum(const Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	bool M_SaveMap();
-	void ValidateVertexRefs(LineDef *ld, int num, BadCount &bad);
-	void ValidateSectorRef(SideDef *sd, int num, BadCount &bad);
-	void ValidateSidedefRefs(LineDef *ld, int num, BadCount &bad);
 
 	// M_NODES
 	void BuildNodesAfterSave(int lev_idx);
@@ -383,8 +380,6 @@ private:
 	void DoExecuteCommand(const editor_command_t *cmd);
 
 	// M_LOADSAVE
-	void CreateFallbackSector();
-	void CreateFallbackSideDef();
 	void EmptyLump(const char *name) const;
 	void FreshLevel();
 	void LoadBehavior(int loading_level, const Wad_file *load_wad);
@@ -392,7 +387,6 @@ private:
 	void LoadLineDefs(int loading_level, const Wad_file *load_wad, BadCount &bad);
 	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, BadCount &bad);
 	void LoadScripts(int loading_level, const Wad_file *load_wad);
-	void LoadSideDefs(int loading_level, const Wad_file *load_wad, BadCount &bad);
 	
 	bool M_ExportMap();
 	void Navigate2D();
@@ -413,9 +407,6 @@ private:
 
 	// M_NODES
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);
-
-	// M_UDMF
-	void ValidateLevel_UDMF(BadCount &bad);
 
 	// R_GRID
 	bool Grid_ParseUser(const std::vector<SString> &tokens);

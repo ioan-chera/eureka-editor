@@ -32,6 +32,7 @@
 
 class crc32_c;
 class Instance;
+struct BadCount;
 
 //
 // The document associated with a file. All stuff will go here
@@ -144,6 +145,15 @@ public:
 	void LoadThings_Hexen(int loading_level, const Wad_file *load_wad);
 	void LoadVertices(int loading_level, const Wad_file *load_wad);
 	void LoadSectors(int loading_level, const Wad_file *load_wad);
+	void LoadSideDefs(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad);
+	
+	void CreateFallbackVertices();
+	void CreateFallbackSideDef(const ConfigData &config);
+	void CreateFallbackSector(const ConfigData &config);
+	void ValidateVertexRefs(LineDef &ld, int num, BadCount &bad);
+	void ValidateSidedefRefs(LineDef &ld, int num, const ConfigData &config, BadCount &bad);
+	void ValidateSectorRef(SideDef &sd, int num, const ConfigData &config, BadCount &bad);
+	void ValidateLevel_UDMF(const ConfigData &config, BadCount &bad);
 	
 	void clear();
 private:
