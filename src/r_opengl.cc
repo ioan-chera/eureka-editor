@@ -1557,7 +1557,7 @@ public:
 
 		bool saw_hl = false;
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			if (inst.edit.highlight.valid() && *it == inst.edit.highlight.num)
 			{
