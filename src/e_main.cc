@@ -107,7 +107,7 @@ void Instance::RedrawMap()
 	main_win->canvas->redraw();
 }
 
-static int Selection_FirstLine(const Document &doc, selection_c *list);
+static int Selection_FirstLine(const Document &doc, const selection_c &list);
 
 static void UpdatePanel(const Instance &inst)
 {
@@ -141,7 +141,7 @@ static void UpdatePanel(const Instance &inst)
 	{
 		// in linedef mode, we prefer showing a two-sided linedef
 		if (inst.edit.mode == ObjType::linedefs && obj_count > 1)
-			obj_idx = Selection_FirstLine(inst.level, inst.edit.Selected);
+			obj_idx = Selection_FirstLine(inst.level, *inst.edit.Selected);
 		else
 			obj_idx = inst.edit.Selected->find_first();
 	}
@@ -348,11 +348,10 @@ void Instance::Editor_ChangeMode(char mode_char)
 		main_win->NewEditMode(edit.mode);
 
 		// convert the selection
-		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode, true /* extended */);
+		selection_c prev_sel = *edit.Selected;
+		edit.Selected.emplace(edit.mode, true /* extended */);
 
-		ConvertSelection(level, *prev_sel, *edit.Selected);
-		delete prev_sel;
+		ConvertSelection(level, prev_sel, *edit.Selected);
 	}
 	else if (main_win->isSpecialPanelShown())
 	{
@@ -791,7 +790,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 //
 // NOTE: this is slow, as it may need to search the whole list.
 //
-static int Selection_FirstLine(const Document &doc, selection_c *list)
+static int Selection_FirstLine(const Document &doc, const selection_c &list)
 {
 	for (sel_iter_c it(list); ! it.done(); it.next())
 	{
@@ -802,7 +801,7 @@ static int Selection_FirstLine(const Document &doc, selection_c *list)
 	}
 
 	// return first entry (a one-sided line)
-	return list->find_first();
+	return list.find_first();
 }
 
 
@@ -918,8 +917,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 void Instance::Selection_InvalidateLast()
 {
-	delete last_Sel;
-	last_Sel = NULL;
+	last_Sel.reset();
 }
 
 
@@ -933,10 +931,8 @@ void Instance::Selection_Push()
 
 	// OK copy it
 
-	if (last_Sel)
-		delete last_Sel;
-
-	last_Sel = new selection_c(edit.Selected->what_type(), true);
+	
+	last_Sel.emplace(edit.Selected->what_type(), true);
 
 	last_Sel->merge(*edit.Selected);
 }
@@ -1042,7 +1038,7 @@ void Instance::CMD_LastSelection()
 		main_win->NewEditMode(edit.mode);
 	}
 
-	std::swap(last_Sel, edit.Selected);
+	last_Sel.swap(edit.Selected);
 
 	// ensure everything is kosher
 	Selection_Validate(*this);
@@ -1249,7 +1245,7 @@ void Instance::Editor_Init()
 	edit.pointer_in_window = false;
 	edit.map = { 0, 0, -1 };
 
-	edit.Selected = new selection_c(edit.mode, true /* extended */);
+	edit.Selected.emplace(edit.mode, true /* extended */);
 
 	edit.highlight.clear();
 	edit.split_line.clear();

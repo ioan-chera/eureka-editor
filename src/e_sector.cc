@@ -109,7 +109,7 @@ void Instance::CMD_SEC_Floor()
 		EditOperation op(level.basis);
 		op.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &S = level.sectors[*it];
 
@@ -147,7 +147,7 @@ void Instance::CMD_SEC_Ceil()
 		EditOperation op(level.basis);
 		op.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &S = level.sectors[*it];
 
@@ -196,7 +196,7 @@ void SectorModule::sectorsAdjustLight(int delta) const
 		EditOperation op(doc.basis);
 		op.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *inst.edit.Selected);
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &S = doc.sectors[*it];
 
@@ -247,7 +247,7 @@ void Instance::CMD_SEC_SwapFlats()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("swapped flats in", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &S = level.sectors[*it];
 
@@ -321,7 +321,7 @@ void Instance::commandSectorMerge()
 	// select the wrong sector afterwards (due to renumbering).
 	int new_sec = edit.Selected->max_obj();
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 	{
 		new_sec = std::min(new_sec, *it);
 	}
@@ -348,7 +348,7 @@ void Instance::commandSectorMerge()
 			op.changeSector(new_sec, Sector::F_TAG,   ref->tag);
 		}
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			int old_sec = *it;
 

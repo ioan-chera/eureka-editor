@@ -116,7 +116,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessage("edited X of"/*, inst.edit.Selected*/);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeVertex(*it, Vertex::F_X, MakeValidCoord(box->inst.loaded.levelFormat, new_x));
 		}
@@ -134,7 +134,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessage("edited Y of"/*, inst.edit.Selected*/);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(box->inst.loaded.levelFormat, new_y));
 		}
@@ -173,7 +173,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessage("adjusted"/*, inst.edit.Selected*/);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			const auto &V = box->inst.level.vertices[*it];
 

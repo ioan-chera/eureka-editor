@@ -256,7 +256,7 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			op.changeLinedef(*it, LineDef::F_TYPE, new_type);
 		}
@@ -431,7 +431,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 		EditOperation op(inst.level.basis);
 		op.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int p2 = inst.edit.Selected->get_ext(*it);
 
@@ -522,7 +522,7 @@ void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 		EditOperation op(inst.level.basis);
 		op.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &L = inst.level.linedefs[*it];
 
@@ -644,7 +644,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			const auto &L = box->inst.level.linedefs[*it];
 
@@ -672,7 +672,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeLinedef(*it, static_cast<byte>(LineDef::F_TAG + arg_idx),
                                                 new_value);

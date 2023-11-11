@@ -462,7 +462,7 @@ static void AdjustOfs_Begin(Instance &inst)
 	// find the sidedefs to adjust
 	if (! inst.edit.Selected->empty())
 	{
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int ld_num = *it;
 			byte parts = inst.edit.Selected->get_ext(ld_num);
@@ -823,7 +823,7 @@ void Render3D_DragSectors(Instance &inst)
 	}
 	else
 	{
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int parts = inst.edit.Selected->get_ext(*it);
 			parts &= ~1;
@@ -1107,7 +1107,7 @@ int Instance::GrabSelectedThing()
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &T = level.things[*it];
 			if (result >= 0 && T->type != result)
@@ -1142,7 +1142,7 @@ void Instance::StoreSelectedThing(int new_type)
 		EditOperation op(level.basis);
 		op.setMessageForSelection("pasted type of", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			op.changeThing(*it, Thing::F_TYPE, new_type);
 		}
@@ -1187,7 +1187,7 @@ StringID Instance::GrabSelectedFlat()
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &S = level.sectors[*it];
 			byte parts = edit.Selected->get_ext(*it);
@@ -1224,7 +1224,7 @@ void Instance::StoreSelectedFlat(StringID new_tex)
 		EditOperation op(level.basis);
 		op.setMessageForSelection("pasted flat to", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			byte parts = edit.Selected->get_ext(*it);
 
@@ -1259,7 +1259,7 @@ void Instance::StoreDefaultedFlats()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("defaulted flat in", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			byte parts = edit.Selected->get_ext(*it);
 
@@ -1333,7 +1333,7 @@ StringID Instance::GrabSelectedTexture()
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
@@ -1370,7 +1370,7 @@ void Instance::StoreSelectedTexture(StringID new_tex)
 		EditOperation op(level.basis);
 		op.setMessageForSelection("pasted tex to", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);

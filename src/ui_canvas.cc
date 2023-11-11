@@ -334,7 +334,7 @@ void UI_Canvas::DrawEverything()
 
 	DrawMap();
 
-	DrawSelection(inst.edit.Selected);
+	DrawSelection(&*inst.edit.Selected);
 
 	if (inst.edit.action == EditorAction::drag && !inst.edit.dragged.valid() && inst.edit.drag_lines != NULL)
 		DrawSelection(inst.edit.drag_lines);

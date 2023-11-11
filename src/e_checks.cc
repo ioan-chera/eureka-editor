@@ -3003,7 +3003,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 		EditOperation op(doc.basis);
 		op.setMessageForSelection("new tag for", *inst.edit.Selected);
 
-		for (sel_iter_c it(inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*inst.edit.Selected); !it.done(); it.next())
 		{
 			if (inst.edit.mode == ObjType::linedefs)
 			{

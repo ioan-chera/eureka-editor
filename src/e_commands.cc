@@ -141,11 +141,10 @@ void Instance::CMD_InvertSelection()
 	if (edit.Selected->what_type() != edit.mode)
 	{
 		// convert the selection
-		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode, true /* extended */);
+		selection_c prev_sel = *edit.Selected;
+		edit.Selected.emplace(edit.mode, true /* extended */);
 
-		ConvertSelection(level, *prev_sel, *edit.Selected);
-		delete prev_sel;
+		ConvertSelection(level, prev_sel, *edit.Selected);
 	}
 
 	edit.Selected->frob_range(0, total-1, BitOp::toggle);
@@ -605,7 +604,7 @@ void Instance::ACT_SelectBox_release()
 		return;
 	}
 
-	SelectObjectsInBox(level, edit.Selected, edit.mode, pos1, pos2);
+	SelectObjectsInBox(level, &*edit.Selected, edit.mode, pos1, pos2);
 	RedrawMap();
 }
 

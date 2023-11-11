@@ -278,7 +278,7 @@ public:
 
 	// M_LOADSAVE
 	void LoadLevel(const Wad_file *wad, const SString &level);
-	void LoadLevelNum(const Wad_file *wad, int lev_num);
+	void LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false);
 	bool MissingIWAD_Dialog();
 	bool M_SaveMap();
 
@@ -448,7 +448,7 @@ public:	// will be private when we encapsulate everything
 	//
 	// Selection stuff
 	//
-	selection_c *last_Sel = nullptr;
+	tl::optional<selection_c> last_Sel;
 
 	//
 	// Document stuff

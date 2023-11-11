@@ -1251,7 +1251,7 @@ void Instance::CMD_CopyProperties()
 		EditOperation op(level.basis);
 		op.setMessage("copied properties");
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			if (*it == source)
 				continue;
@@ -1321,7 +1321,7 @@ void ObjectsModule::dragCountOnGrid(int *count, int *total) const
 	// Note: the results are approximate, vertices can be counted two
 	//       or more times.
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		dragCountOnGridWorker(inst.edit.mode, *it, count, total);
 	}
@@ -1432,7 +1432,7 @@ v2double_t ObjectsModule::getDragFocus(const v2double_t &ptr) const
 		return result;
 	}
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		dragUpdateCurrentDist(inst.edit.mode, *it, &result.x, &result.y, &best_dist,
 							   ptr.x, ptr.y, only_grid);

@@ -520,7 +520,7 @@ void Instance::commandVertexDisconnect()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("disconnected", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			int v_num = *it;
 
@@ -579,7 +579,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 	doc.vertices[new_v]->SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
 	// fix all linedefs in the selection to use this new vertex
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const auto &L2 = doc.linedefs[*it];
 
@@ -616,7 +616,7 @@ void Instance::commandLineDisconnect()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("disconnected", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			level.vertmod.doDisconnectLinedef(op, *it, 0, &seen_one);
 			level.vertmod.doDisconnectLinedef(op, *it, 1, &seen_one);
@@ -990,7 +990,7 @@ void Instance::CMD_VT_ShapeLine()
 	double by = 0;
 	double b_total = 0;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 	{
 		const auto &V = level.vertices[*it];
 
@@ -1046,7 +1046,7 @@ void Instance::CMD_VT_ShapeLine()
 
 	std::vector< vert_along_t > along_list;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 	{
 		const auto &V = level.vertices[*it];
 
@@ -1234,7 +1234,7 @@ void Instance::CMD_VT_ShapeArc()
 
 	std::vector< vert_along_t > along_list;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 	{
 		const auto &V = level.vertices[*it];
 

@@ -69,7 +69,7 @@ void Instance::CMD_TH_SpinThings()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("spun", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &T = level.things[*it];
 
@@ -190,7 +190,7 @@ void CMD_TH_Merge(Instance &inst)
 	EditOperation op(inst.level.basis);
 	op.setMessageForSelection("merged", *inst.edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, mid.x));
 		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, mid.y));

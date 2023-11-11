@@ -712,7 +712,7 @@ void Instance::CMD_LIN_Align()
 
 	std::vector< Objid > group;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 	{
 		int parts = edit.Selected->get_ext(*it);
 		parts &= ~1;
@@ -861,7 +861,7 @@ void Instance::CMD_LIN_Flip()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("flipped", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			if (force_it)
 				level.linemod.flipLinedef(op, *it);
@@ -887,7 +887,7 @@ void Instance::CMD_LIN_SwapSides()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("swapped sides on", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			level.linemod.flipLine_sides(op, *it);
 		}
@@ -1013,7 +1013,7 @@ void Instance::CMD_LIN_SplitHalf()
 	{
 		EditOperation op(level.basis);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			if (level.linemod.doSplitLineDef(op, *it))
 				new_count++;

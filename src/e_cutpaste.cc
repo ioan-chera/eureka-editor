@@ -402,12 +402,12 @@ bool Instance::Clipboard_DoCopy()
 	switch (edit.mode)
 	{
 		case ObjType::things:
-			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 				clip_board->things.push_back(*level.things[*it]);
 			break;
 
 		case ObjType::vertices:
-			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 				clip_board->verts.push_back(*level.vertices[*it]);
 			break;
 

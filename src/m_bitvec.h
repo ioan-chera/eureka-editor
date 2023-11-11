@@ -58,6 +58,7 @@ public:
 	{
 		other.num_elem = 0;
 	}
+	bitvec_c &operator = (bitvec_c &&other) = default;
 
 	inline int size() const
 	{

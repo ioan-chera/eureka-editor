@@ -914,7 +914,7 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level)
 	RedrawMap();
 }
 
-void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
+void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 {
 	LoadingData backupLoaded = loaded;
 	Document backupDoc = std::move(level);

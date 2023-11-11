@@ -207,7 +207,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 			EditOperation op(box->inst.level.basis);
 			op.setMessageForSelection("edited texture on", *box->inst.edit.Selected);
 
-			for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 			{
 				const auto &L = box->inst.level.linedefs[*it];
 
@@ -293,7 +293,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			box->inst.level.sectors[new_sec]->SetDefaults(box->inst.conf);
 		}
 
-		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &L = box->inst.level.linedefs[*it];
 
@@ -347,7 +347,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 	{
 		EditOperation op(box->inst.level.basis);
 
-		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			const auto &L = box->inst.level.linedefs[*it];
 
@@ -386,7 +386,7 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 		else
 			op.setMessageForSelection("edited Y offset on", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			const auto &L = box->inst.level.linedefs[*it];
 
@@ -418,7 +418,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited sector-ref on", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			const auto &L = box->inst.level.linedefs[*it];
 
