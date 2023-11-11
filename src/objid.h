@@ -81,7 +81,7 @@ public:
 	Objid(const Objid &other) = default;
 	Objid &operator = (const Objid &other) = default;
 
-	void clear()
+	void clear() noexcept
 	{
 		num = NIL_OBJ;
 		parts = 0;

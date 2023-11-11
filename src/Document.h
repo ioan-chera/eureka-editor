@@ -97,7 +97,7 @@ public:
 	//
 	// Count map objects
 	//
-	int numThings() const
+	int numThings() const noexcept
 	{
 		return static_cast<int>(things.size());
 	}
