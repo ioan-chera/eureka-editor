@@ -569,25 +569,25 @@ void Document::LoadHeader(int loading_level, const Wad_file &load_wad)
 }
 
 
-void Instance::LoadBehavior(int loading_level, const Wad_file *load_wad)
+void Document::LoadBehavior(int loading_level, const Wad_file *load_wad)
 {
 	// IOANCH 9/2015: support Hexen maps
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "BEHAVIOR");
 	if (! lump)
 		ThrowException("No BEHAVIOR lump!\n");
 	
-	level.behaviorData = lump->getData();
+	behaviorData = lump->getData();
 }
 
 
-void Instance::LoadScripts(int loading_level, const Wad_file *load_wad)
+void Document::LoadScripts(int loading_level, const Wad_file *load_wad)
 {
 	// the SCRIPTS lump is usually absent
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "SCRIPTS");
 	if (! lump)
 		return;
 	
-	level.scriptsData = lump->getData();
+	scriptsData = lump->getData();
 }
 
 
@@ -714,7 +714,7 @@ void Document::LoadSideDefs(int loading_level, const Wad_file *load_wad, const C
 }
 
 
-void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad, BadCount &bad)
+void Document::LoadLineDefs(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "LINEDEFS");
 	if (! lump)
@@ -753,16 +753,16 @@ void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad, BadCoun
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		level.ValidateVertexRefs(*ld, i, bad);
-		level.ValidateSidedefRefs(*ld, i, conf, bad);
+		ValidateVertexRefs(*ld, i, bad);
+		ValidateSidedefRefs(*ld, i, config, bad);
 
-		level.linedefs.push_back(std::move(ld));
+		linedefs.push_back(std::move(ld));
 	}
 }
 
 
 // IOANCH 9/2015
-void Instance::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, BadCount &bad)
+void Document::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "LINEDEFS");
 	if (! lump)
@@ -805,44 +805,44 @@ void Instance::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, B
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		level.ValidateVertexRefs(*ld, i, bad);
-		level.ValidateSidedefRefs(*ld, i, conf, bad);
+		ValidateVertexRefs(*ld, i, bad);
+		ValidateSidedefRefs(*ld, i, config, bad);
 
-		level.linedefs.push_back(std::move(ld));
+		linedefs.push_back(std::move(ld));
 	}
 }
 
 
-static void RemoveUnusedVerticesAtEnd(Document &doc)
+void Document::RemoveUnusedVerticesAtEnd()
 {
-	if (doc.numVertices() == 0)
+	if (numVertices() == 0)
 		return;
 
-	bitvec_c used_verts(doc.numVertices());
+	bitvec_c used_verts(numVertices());
 
-	for (const auto &linedef : doc.linedefs)
+	for (const auto &linedef : linedefs)
 	{
 		used_verts.set(linedef->start);
 		used_verts.set(linedef->end);
 	}
 
-	int new_count = doc.numVertices();
+	int new_count = numVertices();
 
 	while (new_count > 2 && !used_verts.get(new_count-1))
 		new_count--;
 
 	// we directly modify the vertex array here (which is not
 	// normally kosher, but level loading is a special case).
-	if (new_count < doc.numVertices())
+	if (new_count < numVertices())
 	{
-		gLog.printf("Removing %d unused vertices at end\n", doc.numVertices() - new_count);
+		gLog.printf("Removing %d unused vertices at end\n", numVertices() - new_count);
 
-		doc.vertices.resize(new_count);
+		vertices.resize(new_count);
 	}
 }
 
 
-void Instance::ShowLoadProblem(const BadCount &bad) const
+static void ShowLoadProblem(const BadCount &bad)
 {
 	gLog.printf("Map load problems:\n");
 	gLog.printf("   %d linedefs with bad vertex refs\n", bad.linedef_count);
@@ -943,14 +943,14 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
 
 		if (loaded.levelFormat == MapFormat::hexen)
 		{
-			LoadLineDefs_Hexen(loading_level, wad, bad);
+			level.LoadLineDefs_Hexen(loading_level, wad, conf, bad);
 
-			LoadBehavior(loading_level, wad);
-			LoadScripts(loading_level, wad);
+			level.LoadBehavior(loading_level, wad);
+			level.LoadScripts(loading_level, wad);
 		}
 		else
 		{
-			LoadLineDefs(loading_level, wad, bad);
+			level.LoadLineDefs(loading_level, wad, conf, bad);
 		}
 	}
 
@@ -961,7 +961,7 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
 
 	// Node builders create a lot of new vertices for segs.
 	// However they just get in the way for editing, so remove them.
-	RemoveUnusedVerticesAtEnd(level);
+	level.RemoveUnusedVerticesAtEnd();
 
 	level.checks.sidedefsUnpack(true);
 

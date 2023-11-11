@@ -382,11 +382,6 @@ private:
 	// M_LOADSAVE
 	void EmptyLump(const char *name) const;
 	void FreshLevel();
-	void LoadBehavior(int loading_level, const Wad_file *load_wad);
-	void LoadHeader(int loading_level, const Wad_file &load_wad);
-	void LoadLineDefs(int loading_level, const Wad_file *load_wad, BadCount &bad);
-	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, BadCount &bad);
-	void LoadScripts(int loading_level, const Wad_file *load_wad);
 	
 	bool M_ExportMap();
 	void Navigate2D();
@@ -403,7 +398,6 @@ private:
 	void SaveSectors();
 	void SaveSideDefs();
 	void SaveVertices();
-	void ShowLoadProblem(const BadCount &bad) const;
 
 	// M_NODES
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);

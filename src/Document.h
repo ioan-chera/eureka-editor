@@ -144,8 +144,14 @@ public:
 	void LoadThings(int loading_level, const Wad_file *load_wad);
 	void LoadThings_Hexen(int loading_level, const Wad_file *load_wad);
 	void LoadVertices(int loading_level, const Wad_file *load_wad);
+	void LoadLineDefs(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad);
+	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad);
 	void LoadSectors(int loading_level, const Wad_file *load_wad);
 	void LoadSideDefs(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad);
+	void LoadBehavior(int loading_level, const Wad_file *load_wad);
+	void LoadScripts(int loading_level, const Wad_file *load_wad);
+	
+	void RemoveUnusedVerticesAtEnd();
 	
 	void CreateFallbackVertices();
 	void CreateFallbackSideDef(const ConfigData &config);
