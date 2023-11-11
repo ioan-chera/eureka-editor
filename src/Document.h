@@ -55,6 +55,8 @@ public:
 	
 	v2double_t Map_bound1 = { 32767, 32767 };	/* minimum XY value of map */
 	v2double_t Map_bound2 = { -32767, -32767 };	/* maximum XY value of map */
+	
+	bool MadeChanges = false;
 
 	Basis basis;
 	ChecksModule checks;
@@ -67,6 +69,29 @@ public:
 	explicit Document(Instance &inst) : inst(inst), basis(*this), checks(*this), hover(*this),
 	linemod(*this), vertmod(*this), secmod(*this), objects(*this)
 	{
+	}
+	
+	Document(Document &&other) : inst(other.inst), basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this)
+	{
+		*this = std::move(other);
+	}
+	
+	Document &operator = (Document &&other)
+	{
+		things = std::move(other.things);
+		vertices = std::move(other.vertices);
+		sectors = std::move(other.sectors);
+		sidedefs = std::move(other.sidedefs);
+		linedefs = std::move(other.linedefs);
+		headerData = std::move(other.headerData);
+		behaviorData = std::move(other.behaviorData);
+		scriptsData = std::move(other.scriptsData);
+		Map_bound1 = other.Map_bound1;
+		Map_bound2 = other.Map_bound2;
+		MadeChanges = other.MadeChanges;
+		// TODO: basis
+		basis = std::move(other.basis);
+		return *this;
 	}
 
 	//

@@ -906,7 +906,7 @@ void Basis::doProcessChangeStatus() const
 	if(mDidMakeChanges)
 	{
 		// TODO: the other modules
-		inst.MadeChanges = true;
+		doc.MadeChanges = true;
 		inst.RedrawMap();
 	}
 

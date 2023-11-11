@@ -332,7 +332,7 @@ void Instance::CMD_TestMap()
 {
 	try
 	{
-		if (MadeChanges)
+		if (level.MadeChanges)
 		{
 			if (DLG_Confirm({ "Cancel", "&Save" },
 				"You have unsaved changes, do you want to save them now "

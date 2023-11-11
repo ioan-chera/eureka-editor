@@ -453,7 +453,6 @@ public:	// will be private when we encapsulate everything
 	//
 	// Document stuff
 	//
-	bool MadeChanges = false;
 	int moved_vertex_count = 0;
 	int new_vertex_minimum = 0;
 	bool recalc_map_bounds = false;

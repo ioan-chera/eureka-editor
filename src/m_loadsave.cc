@@ -916,59 +916,73 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level)
 
 void Instance::LoadLevelNum(const Wad_file *wad, int lev_num)
 {
-	int loading_level = lev_num;
-
-	loaded.levelFormat = wad->LevelFormat(loading_level);
-
-	level.clear();
+	LoadingData backupLoaded = loaded;
+	Document backupDoc = std::move(level);
+	sector_info_cache_c backupCache = sector_info_cache;
 	
-	BadCount bad = {};
-
-	level.LoadHeader(loading_level, *wad);
-
-	if (loaded.levelFormat == MapFormat::udmf)
+	try
 	{
-		UDMF_LoadLevel(loading_level, wad, bad);
-	}
-	else
-	{
-		if (loaded.levelFormat == MapFormat::hexen)
-			level.LoadThings_Hexen(loading_level, wad);
-		else
-			level.LoadThings(loading_level, wad);
-
-		level.LoadVertices(loading_level, wad);
-		level.LoadSectors(loading_level, wad);
-		level.LoadSideDefs(loading_level, wad, conf, bad);
-
-		if (loaded.levelFormat == MapFormat::hexen)
+		int loading_level = lev_num;
+		
+		loaded.levelFormat = wad->LevelFormat(loading_level);
+		
+		level.clear();
+		
+		BadCount bad = {};
+		
+		level.LoadHeader(loading_level, *wad);
+		
+		if (loaded.levelFormat == MapFormat::udmf)
 		{
-			level.LoadLineDefs_Hexen(loading_level, wad, conf, bad);
-
-			level.LoadBehavior(loading_level, wad);
-			level.LoadScripts(loading_level, wad);
+			UDMF_LoadLevel(loading_level, wad, bad);
 		}
 		else
 		{
-			level.LoadLineDefs(loading_level, wad, conf, bad);
+			if (loaded.levelFormat == MapFormat::hexen)
+				level.LoadThings_Hexen(loading_level, wad);
+			else
+				level.LoadThings(loading_level, wad);
+			
+			level.LoadVertices(loading_level, wad);
+			level.LoadSectors(loading_level, wad);
+			level.LoadSideDefs(loading_level, wad, conf, bad);
+			
+			if (loaded.levelFormat == MapFormat::hexen)
+			{
+				level.LoadLineDefs_Hexen(loading_level, wad, conf, bad);
+				
+				level.LoadBehavior(loading_level, wad);
+				level.LoadScripts(loading_level, wad);
+			}
+			else
+			{
+				level.LoadLineDefs(loading_level, wad, conf, bad);
+			}
 		}
+		
+		if (bad.linedef_count || bad.sector_refs || bad.sidedef_refs)
+		{
+			ShowLoadProblem(bad);
+		}
+		
+		// Node builders create a lot of new vertices for segs.
+		// However they just get in the way for editing, so remove them.
+		level.RemoveUnusedVerticesAtEnd();
+		
+		level.checks.sidedefsUnpack(true);
+		
+		level.CalculateLevelBounds();
+		Subdiv_InvalidateAll();
+		
+		level.MadeChanges = false;
 	}
-
-	if (bad.linedef_count || bad.sector_refs || bad.sidedef_refs)
+	catch(const std::runtime_error &)
 	{
-		ShowLoadProblem(bad);
+		sector_info_cache = backupCache;
+		level = std::move(backupDoc);
+		loaded = backupLoaded;
+		throw;
 	}
-
-	// Node builders create a lot of new vertices for segs.
-	// However they just get in the way for editing, so remove them.
-	level.RemoveUnusedVerticesAtEnd();
-
-	level.checks.sidedefsUnpack(true);
-
-	level.CalculateLevelBounds();
-	Subdiv_InvalidateAll();
-
-	MadeChanges = false;
 }
 
 
@@ -1557,7 +1571,7 @@ void Instance::SaveLevel(const SString &level)
 		M_SaveUserState();
 	}
 
-	MadeChanges = false;
+	this->level.MadeChanges = false;
 }
 
 // these return false if user cancelled

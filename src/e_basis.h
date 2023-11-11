@@ -86,6 +86,15 @@ public:
 	bool undo();
 	bool redo();
 	void clear();
+	
+	Basis &operator = (Basis &&other)
+	{
+		mCurrentGroup = std::move(other.mCurrentGroup);
+		mUndoHistory = std::move(other.mUndoHistory);
+		mRedoFuture = std::move(other.mRedoFuture);
+		mDidMakeChanges = other.mDidMakeChanges;
+		return *this;
+	}
 
 private:
 	//

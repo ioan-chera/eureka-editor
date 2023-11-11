@@ -478,12 +478,12 @@ void Instance::CMD_EditLump()
 			if (lump_name == EDLUMP_HEADER)
 			{
 				editor->SaveMemory(level.headerData);
-				MadeChanges = true;
+				level.MadeChanges = true;
 			}
 			else if (lump_name == EDLUMP_SCRIPTS)
 			{
 				editor->SaveMemory(level.scriptsData);
-				MadeChanges = true;
+				level.MadeChanges = true;
 			}
 			else
 			{
@@ -558,7 +558,7 @@ void Instance::CMD_AddBehaviorLump()
 
 	level.behaviorData = std::move(data);
 
-	MadeChanges = true;
+	level.MadeChanges = true;
 }
 
 //--- editor settings ---

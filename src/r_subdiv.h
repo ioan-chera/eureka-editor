@@ -184,6 +184,13 @@ public:
 public:
 	explicit sector_info_cache_c(const Instance &inst) : inst(inst)
 	{ }
+	sector_info_cache_c(const sector_info_cache_c &other) = default;
+	sector_info_cache_c &operator = (const sector_info_cache_c &other)
+	{
+		total = other.total;
+		infos = other.infos;
+		return *this;
+	}
 
 public:
 	void Update();
