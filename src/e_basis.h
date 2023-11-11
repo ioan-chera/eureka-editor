@@ -365,7 +365,7 @@ const char *NameForObjectType(ObjType type, bool plural = false);
 StringID BA_InternaliseString(const SString &str);
 
 // get the string from the basis string table.
-SString BA_GetString(StringID offset);
+SString BA_GetString(StringID offset) noexcept;
 
 #endif  /* __EUREKA_E_BASIS_H__ */
 

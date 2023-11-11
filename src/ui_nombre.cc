@@ -46,7 +46,7 @@ UI_Nombre::UI_Nombre(int X, int Y, int W, int H, const char *what) :
 	Update();
 }
 
-void UI_Nombre::Update()
+void UI_Nombre::Update() noexcept
 {
 	char buffer[256];
 
@@ -84,7 +84,7 @@ void UI_Nombre::SetIndex(int _idx)
 	}
 }
 
-void UI_Nombre::SetTotal(int _tot)
+void UI_Nombre::SetTotal(int _tot) noexcept
 {
 	if (total != _tot)
 	{

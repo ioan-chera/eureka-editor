@@ -958,7 +958,7 @@ void UI_SectorBox::UnselectPics()
 
 
 // FIXME: make a method of Sector class
-void UI_SectorBox::UpdateTotal()
+void UI_SectorBox::UpdateTotal() noexcept
 {
 	which->SetTotal(inst.level.numSectors());
 }

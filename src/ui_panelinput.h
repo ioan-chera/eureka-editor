@@ -66,7 +66,7 @@ public:
 
 	// Call it before starting basis
 	void checkDirtyFields();
-	void setInputValue(ICallback2 *input, const char *value);
+	void setInputValue(ICallback2 *input, const char *value) noexcept;
 
 private:
 	//

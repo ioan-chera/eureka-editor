@@ -92,7 +92,7 @@ public:
 	// -1 means "all fields"
 	void UpdateField(int field = -1);
 
-	void UpdateTotal();
+	void UpdateTotal() noexcept;
 
 	void UpdateGameInfo();
 

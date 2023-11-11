@@ -93,7 +93,7 @@ public:
 	}
 
 	void W_AddFlat(const SString &name, Img_c &&img);
-	const Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
+	const Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const noexcept;
 	Img_c *getMutableFlat(const ConfigData &config, const SString &name, bool try_uppercase = false)
 	{
 		return const_cast<Img_c *>(W_GetFlat(config, name, try_uppercase));

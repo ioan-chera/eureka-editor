@@ -67,14 +67,13 @@ public:
 	selection_c(const selection_c &other) = default;
 	selection_c(selection_c &&other) = default;
 	selection_c &operator = (selection_c &&other) = default;
-	~selection_c();
 
 	ObjType what_type() const { return type; }
 
 	// this also clears the selection
 	void change_type(ObjType new_type);
 
-	void clear_all();
+	void clear_all() noexcept;
 
 	bool empty() const;
 	bool notempty() const { return ! empty(); }

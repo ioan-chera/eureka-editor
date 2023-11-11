@@ -978,7 +978,7 @@ int UI_LineBox::CalcFlags() const
 }
 
 
-void UI_LineBox::UpdateTotal()
+void UI_LineBox::UpdateTotal() noexcept
 {
 	which->SetTotal(inst.level.numLinedefs());
 }
@@ -1015,7 +1015,7 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 }
 
 
-void UI_LineBox::UpdateGameInfo()
+void UI_LineBox::UpdateGameInfo() noexcept
 {
 	choose->label("Choose");
 

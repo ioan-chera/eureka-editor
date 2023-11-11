@@ -218,7 +218,7 @@ void UI_VertexBox::UpdateField()
 }
 
 
-void UI_VertexBox::UpdateTotal()
+void UI_VertexBox::UpdateTotal() noexcept
 {
 	which->SetTotal(inst.level.numVertices());
 }

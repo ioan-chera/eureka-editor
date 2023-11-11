@@ -61,7 +61,7 @@ void PanelFieldFixUp::checkDirtyFields()
 //
 // Convenience that also sets the dirty field. Only use it for targeted fields
 //
-void PanelFieldFixUp::setInputValue(ICallback2 *input, const char *value)
+void PanelFieldFixUp::setInputValue(ICallback2 *input, const char *value) noexcept
 {
 	input->setValue(value);
 	mDirtyFields.erase(input);

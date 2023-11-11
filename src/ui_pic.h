@@ -52,13 +52,13 @@ public:
 	int handle(int event);
 
 public:
-	void Clear();
+	void Clear() noexcept;
 
-	void MarkUnknown();
+	void MarkUnknown() noexcept;
 	void MarkMissing();
 	void MarkSpecial();
 
-	void GetFlat(const SString & fname);
+	void GetFlat(const SString & fname) noexcept; 
 	void GetTex (const SString & tname);
 	void GetSprite(int type, Fl_Color back_color);
 
@@ -76,9 +76,9 @@ private:
 	void draw_highlighted();
 	void draw_selected();
 
-	void UploadRGB(std::vector<byte> &&buf, int depth);
+	void UploadRGB(std::vector<byte> &&buf, int depth) noexcept;
 
-	void TiledImg(const Img_c *img);
+	void TiledImg(const Img_c *img) noexcept;
 };
 
 

@@ -100,7 +100,7 @@ class Palette
 public:
 	bool updateGamma(int usegamma, int panel_gamma);
 	void decodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const;
-	void decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const;
+	void decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const noexcept;
 	void createBrightMap();
 
 	rgb_color_t getPaletteColor(int index) const

@@ -165,7 +165,7 @@ void UI_MainWindow::NewEditMode(ObjType mode)
 }
 
 
-void UI_MainWindow::SetCursor(Fl_Cursor shape)
+void UI_MainWindow::SetCursor(Fl_Cursor shape) noexcept
 {
 	if (shape == cursor_shape)
 		return;
@@ -265,7 +265,7 @@ void UI_MainWindow::ShowFindAndReplace()
 }
 
 
-void UI_MainWindow::UpdateTotals()
+void UI_MainWindow::UpdateTotals() noexcept
 {
 	thing_box->UpdateTotal();
 	 line_box->UpdateTotal();

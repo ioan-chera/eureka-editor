@@ -121,7 +121,7 @@ public:
 	// this is a wrapper around the FLTK cursor() method which
 	// prevents the possibly expensive call when the shape hasn't
 	// changed.
-	void SetCursor(Fl_Cursor shape);
+	void SetCursor(Fl_Cursor shape) noexcept;
 
 	// show or hide the Browser panel.
 	// kind is NUL or '-' to hide, '/' to toggle, 'T' for textures, 'F' flats,
@@ -131,7 +131,7 @@ public:
 	void ShowDefaultProps();
 	void ShowFindAndReplace();
 
-	void UpdateTotals();
+	void UpdateTotals() noexcept;
 
 	int GetPanelObjNum() const;
 

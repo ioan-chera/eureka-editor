@@ -65,7 +65,7 @@ StringID BA_InternaliseString(const SString &str)
 	return basis_strtab.add(str);
 }
 
-SString BA_GetString(StringID offset)
+SString BA_GetString(StringID offset) noexcept
 {
 	return basis_strtab.get(offset);
 }

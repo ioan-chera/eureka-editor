@@ -113,7 +113,7 @@ public:
 	{
 		return static_cast<int>(sidedefs.size());
 	}
-	int numLinedefs() const
+	int numLinedefs() const noexcept
 	{
 		return static_cast<int>(linedefs.size());
 	}

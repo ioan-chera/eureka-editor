@@ -32,14 +32,14 @@ private:
 
 	SString type_name;
 
-	void Update();
+	void Update() noexcept;
 
 public:
 	UI_Nombre(int X, int Y, int W, int H, const char *what = NULL);
 
 public:
 	void SetIndex(int _idx);  // _idx < 0 means "no index"
-	void SetTotal(int _tot);
+	void SetTotal(int _tot) noexcept;
 	void SetSelected(int _sel);
 };
 

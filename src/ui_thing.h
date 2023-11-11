@@ -101,13 +101,13 @@ public:
 	// -1 means "all fields"
 	void UpdateField(int field = -1);
 
-	void UpdateTotal();
+	void UpdateTotal() noexcept;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
-	void UpdateGameInfo();
+	void UpdateGameInfo() noexcept;
 	void UnselectPics();
 
 private:

@@ -534,7 +534,7 @@ void WadData::W_LoadFlats()
 }
 
 
-const Img_c * ImageSet::W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase) const
+const Img_c * ImageSet::W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase) const noexcept
 {
 	std::map<SString, Img_c>::const_iterator P = flats.find(name);
 

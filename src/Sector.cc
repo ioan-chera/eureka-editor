@@ -20,12 +20,12 @@
 #include "e_basis.h"
 #include "m_game.h"
 
-SString Sector::FloorTex() const
+SString Sector::FloorTex() const noexcept
 {
 	return BA_GetString(floor_tex);
 }
 
-SString Sector::CeilTex() const
+SString Sector::CeilTex() const noexcept
 {
 	return BA_GetString(ceil_tex);
 }

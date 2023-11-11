@@ -44,11 +44,6 @@ selection_c::selection_c(ObjType type, bool extended) : type(type)
 	}
 }
 
-selection_c::~selection_c()
-{
-}
-
-
 void selection_c::change_type(ObjType new_type)
 {
 	type = new_type;
@@ -176,7 +171,7 @@ void selection_c::toggle(int n)
 }
 
 
-void selection_c::clear_all()
+void selection_c::clear_all() noexcept
 {
 	count = 0;
 	maxobj = -1;

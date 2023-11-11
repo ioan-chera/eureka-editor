@@ -929,13 +929,13 @@ void UI_ThingBox::UpdateField(int field)
 }
 
 
-void UI_ThingBox::UpdateTotal()
+void UI_ThingBox::UpdateTotal() noexcept
 {
 	which->SetTotal(inst.level.numThings());
 }
 
 
-void UI_ThingBox::UpdateGameInfo()
+void UI_ThingBox::UpdateGameInfo() noexcept
 {
 	if (inst.conf.features.coop_dm_flags || inst.loaded.levelFormat != MapFormat::doom)
 	{

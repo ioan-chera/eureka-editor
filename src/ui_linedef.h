@@ -82,7 +82,7 @@ public:
 	// call this is the linedef's sides were externally modified.
 	void UpdateSides();
 
-	void UpdateTotal();
+	void UpdateTotal() noexcept;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);
@@ -90,7 +90,7 @@ public:
 
 	void UnselectPics();
 
-	void UpdateGameInfo();
+	void UpdateGameInfo() noexcept;
 
 	void checkDirtyFields()
 	{

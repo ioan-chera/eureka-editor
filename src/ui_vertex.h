@@ -58,7 +58,7 @@ public:
 	// call this if the vertex was externally changed.
 	void UpdateField();
 
-	void UpdateTotal();
+	void UpdateTotal() noexcept;
 
 private:
 	static void x_callback(Fl_Widget *, void *);

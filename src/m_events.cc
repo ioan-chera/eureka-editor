@@ -46,7 +46,7 @@ void Instance::ClearStickyMod()
 	edit.sticky_mod = 0;
 }
 
-void Instance::Editor_ClearAction()
+void Instance::Editor_ClearAction() noexcept
 {
 	switch (edit.action)
 	{

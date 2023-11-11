@@ -204,7 +204,7 @@ public:
 	// E_MAIN
 	void Editor_ChangeMode(char mode_char);
 	void Editor_ChangeMode_Raw(ObjType new_mode);
-	void Editor_ClearAction();
+	void Editor_ClearAction() noexcept;
 	void Editor_Init();
 	bool Editor_ParseUser(const std::vector<SString> &tokens);
 	void Editor_WriteUser(std::ostream &os) const;
@@ -222,7 +222,7 @@ public:
 	void RecUsed_WriteUser(std::ostream &os) const;
 	void RedrawMap();
 	void Selection_Clear(bool no_save = false);
-	void Selection_InvalidateLast();
+	void Selection_InvalidateLast() noexcept;
 	void Selection_NotifyBegin();
 	void Selection_NotifyDelete(ObjType type, int objnum);
 	void Selection_NotifyEnd();

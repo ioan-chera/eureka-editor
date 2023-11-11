@@ -915,7 +915,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 
 
-void Instance::Selection_InvalidateLast()
+void Instance::Selection_InvalidateLast() noexcept
 {
 	last_Sel.reset();
 }
