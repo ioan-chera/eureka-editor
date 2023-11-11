@@ -46,7 +46,7 @@ public:
 	Udmf_Token(const char *str, int len) : text(str, len)
 	{ }
 
-	const char *c_str()
+	const char *c_str() const
 	{
 		return text.c_str();
 	}
@@ -317,7 +317,7 @@ public:
 };
 
 
-static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, Udmf_Token& name)
+static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name)
 {
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
@@ -350,7 +350,7 @@ static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, Udmf_
 }
 
 
-static void UDMF_ParseThingField(const Document &doc, Thing *T, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token& field, const Udmf_Token& value)
 {
 	// just ignore any setting with the "false" keyword
 	if (value.Match("false"))
@@ -409,7 +409,7 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, Udmf_Token& fiel
 	}
 }
 
-static void UDMF_ParseVertexField(const Document &doc, Vertex *V, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseVertexField(const Document &doc, Vertex *V, const Udmf_Token& field, const Udmf_Token& value)
 {
 	if (field.Match("x"))
 		V->raw_x = value.DecodeCoord();
@@ -421,7 +421,7 @@ static void UDMF_ParseVertexField(const Document &doc, Vertex *V, Udmf_Token& fi
 	}
 }
 
-static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_Token& field, const Udmf_Token& value)
 {
 	// Note: vertex and sidedef numbers are validated later on
 
@@ -483,7 +483,7 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, Udmf_Token&
 	}
 }
 
-static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_Token& field, const Udmf_Token& value)
 {
 	// Note: sector numbers are validated later on
 
@@ -507,7 +507,7 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, Udmf_Token&
 	}
 }
 
-static void UDMF_ParseSectorField(const Document &doc, Sector *S, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseSectorField(const Document &doc, Sector *S, const Udmf_Token& field, const Udmf_Token& value)
 {
 	if (field.Match("heightfloor"))
 		S->floorh = value.DecodeInt();
@@ -529,7 +529,7 @@ static void UDMF_ParseSectorField(const Document &doc, Sector *S, Udmf_Token& fi
 	}
 }
 
-static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& name)
+static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Token& name)
 {
 	// create a new object of the specified type
 	Objid kind;
