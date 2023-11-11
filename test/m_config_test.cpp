@@ -875,6 +875,10 @@ DocumentModule::DocumentModule(Document &doc) : inst(doc.inst), doc(doc)
 {
 }
 
+selection_c::~selection_c()
+{
+}
+
 void Basis::EditUnit::destroy()
 {
 }

@@ -217,13 +217,9 @@ TEST(EChecks, TagsApplyNewValue)
 		inst.level.sectors.push_back(std::move(newSector));
 	}
 
-	// Prepare the selection lists
-	auto linesel = std::make_unique<selection_c>(ObjType::linedefs);
-	auto secsel = std::make_unique<selection_c>(ObjType::sectors);
-
 	// Start with linedefs
 	inst.edit.mode = ObjType::linedefs;
-	inst.edit.Selected = linesel.get();
+	inst.edit.Selected.emplace(ObjType::linedefs);
 
 	// Nothing selected: check that nothing happens
 	inst.level.checks.tagsApplyNewValue(1);
@@ -248,7 +244,7 @@ TEST(EChecks, TagsApplyNewValue)
 
 	// Now select a couple of sectors
 	inst.edit.mode = ObjType::sectors;
-	inst.edit.Selected = secsel.get();
+	inst.edit.Selected.emplace(ObjType::sectors);
 	inst.edit.Selected->set(2);
 	inst.edit.Selected->set(4);
 	inst.level.checks.tagsApplyNewValue(2);

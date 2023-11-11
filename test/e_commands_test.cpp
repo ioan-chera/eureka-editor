@@ -27,11 +27,11 @@ class SelectNeighbor : public ::testing::Test
 protected:
     SelectNeighbor()
     {
-        inst.edit.Selected = new selection_c(inst.edit.mode, true);
+        inst.edit.Selected.emplace(inst.edit.mode, true);
     }
     ~SelectNeighbor()
     {
-        delete inst.edit.Selected;
+        inst.edit.Selected.reset();
     }
 
     void addVertex(int x, int y);
