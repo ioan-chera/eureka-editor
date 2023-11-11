@@ -390,19 +390,19 @@ void UI_CanvasScroll::UpdateBounds()
 
 void UI_CanvasScroll::UpdateBounds_X()
 {
-	if (last_bounds[0] == mInstance.Map_bound1.x &&
-		last_bounds[1] == mInstance.Map_bound2.x)
+	if (last_bounds[0] == mInstance.level.Map_bound1.x &&
+		last_bounds[1] == mInstance.level.Map_bound2.x)
 	{
 		return;
 	}
 
-	last_bounds[0] = static_cast<int>(mInstance.Map_bound1.x);
-	last_bounds[1] = static_cast<int>(mInstance.Map_bound2.x);
+	last_bounds[0] = static_cast<int>(mInstance.level.Map_bound1.x);
+	last_bounds[1] = static_cast<int>(mInstance.level.Map_bound2.x);
 
-	int expand = static_cast<int>(512 + (mInstance.Map_bound2.x - mInstance.Map_bound1.x) / 8);
+	int expand = static_cast<int>(512 + (mInstance.level.Map_bound2.x - mInstance.level.Map_bound1.x) / 8);
 
-	bound_x1 = static_cast<int>(mInstance.Map_bound1.x - expand);
-	bound_x2 = static_cast<int>(mInstance.Map_bound2.x + expand);
+	bound_x1 = static_cast<int>(mInstance.level.Map_bound1.x - expand);
+	bound_x2 = static_cast<int>(mInstance.level.Map_bound2.x + expand);
 
 	Adjust_X();
 }
@@ -410,19 +410,19 @@ void UI_CanvasScroll::UpdateBounds_X()
 
 void UI_CanvasScroll::UpdateBounds_Y()
 {
-	if (last_bounds[2] == mInstance.Map_bound1.y &&
-		last_bounds[3] == mInstance.Map_bound2.y)
+	if (last_bounds[2] == mInstance.level.Map_bound1.y &&
+		last_bounds[3] == mInstance.level.Map_bound2.y)
 	{
 		return;
 	}
 
-	last_bounds[2] = static_cast<int>(mInstance.Map_bound1.y);
-	last_bounds[3] = static_cast<int>(mInstance.Map_bound2.y);
+	last_bounds[2] = static_cast<int>(mInstance.level.Map_bound1.y);
+	last_bounds[3] = static_cast<int>(mInstance.level.Map_bound2.y);
 
-	int expand = static_cast<int>(512 + (mInstance.Map_bound2.y - mInstance.Map_bound1.y) / 8);
+	int expand = static_cast<int>(512 + (mInstance.level.Map_bound2.y - mInstance.level.Map_bound1.y) / 8);
 
-	bound_y1 = static_cast<int>(mInstance.Map_bound1.y - expand);
-	bound_y2 = static_cast<int>(mInstance.Map_bound2.y + expand);
+	bound_y1 = static_cast<int>(mInstance.level.Map_bound1.y - expand);
+	bound_y2 = static_cast<int>(mInstance.level.Map_bound2.y + expand);
 
 	Adjust_Y();
 }

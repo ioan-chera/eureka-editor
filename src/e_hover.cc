@@ -606,11 +606,11 @@ int Hover::getOppositeSector(int ld, Side ld_side, FastOppositeTree *tree) const
 //
 FastOppositeTree::FastOppositeTree(Instance &inst)
 {
-	inst.CalculateLevelBounds();
+	inst.level.CalculateLevelBounds();
 	Document &doc = inst.level;
 
-	m_fastopp_X_tree.emplace(static_cast<int>(inst.Map_bound1.x - 8), static_cast<int>(inst.Map_bound2.x + 8), doc);
-	m_fastopp_Y_tree.emplace(static_cast<int>(inst.Map_bound1.y - 8), static_cast<int>(inst.Map_bound2.y + 8), doc);
+	m_fastopp_X_tree.emplace(static_cast<int>(inst.level.Map_bound1.x - 8), static_cast<int>(inst.level.Map_bound2.x + 8), doc);
+	m_fastopp_Y_tree.emplace(static_cast<int>(inst.level.Map_bound1.y - 8), static_cast<int>(inst.level.Map_bound2.y + 8), doc);
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{

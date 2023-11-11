@@ -628,11 +628,11 @@ void UI_Canvas::DrawMapBounds()
 {
 	RenderColor(FL_RED);
 
-	DrawMapLine(inst.Map_bound1.x, inst.Map_bound1.y, inst.Map_bound2.x, inst.Map_bound1.y);
-	DrawMapLine(inst.Map_bound1.x, inst.Map_bound2.y, inst.Map_bound2.x, inst.Map_bound2.y);
+	DrawMapLine(inst.level.Map_bound1.x, inst.level.Map_bound1.y, inst.level.Map_bound2.x, inst.level.Map_bound1.y);
+	DrawMapLine(inst.level.Map_bound1.x, inst.level.Map_bound2.y, inst.level.Map_bound2.x, inst.level.Map_bound2.y);
 
-	DrawMapLine(inst.Map_bound1.x, inst.Map_bound1.y, inst.Map_bound1.x, inst.Map_bound2.y);
-	DrawMapLine(inst.Map_bound2.x, inst.Map_bound1.y, inst.Map_bound2.x, inst.Map_bound2.y);
+	DrawMapLine(inst.level.Map_bound1.x, inst.level.Map_bound1.y, inst.level.Map_bound1.x, inst.level.Map_bound2.y);
+	DrawMapLine(inst.level.Map_bound2.x, inst.level.Map_bound1.y, inst.level.Map_bound2.x, inst.level.Map_bound2.y);
 }
 
 

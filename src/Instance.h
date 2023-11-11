@@ -202,7 +202,6 @@ public:
 		const Sector *front, const Sector *back) const;
 
 	// E_MAIN
-	void CalculateLevelBounds() noexcept;
 	void Editor_ChangeMode(char mode_char);
 	void Editor_ChangeMode_Raw(ObjType new_mode);
 	void Editor_ClearAction();
@@ -455,8 +454,6 @@ public:	// will be private when we encapsulate everything
 	// Document stuff
 	//
 	bool MadeChanges = false;
-	v2double_t Map_bound1 = { 32767, 32767 };	/* minimum XY value of map */
-	v2double_t Map_bound2 = { -32767, -32767 };	/* maximum XY value of map */
 	int moved_vertex_count = 0;
 	int new_vertex_minimum = 0;
 	bool recalc_map_bounds = false;

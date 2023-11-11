@@ -52,6 +52,9 @@ public:
 	std::vector<byte> headerData;
 	std::vector<byte> behaviorData;
 	std::vector<byte> scriptsData;
+	
+	v2double_t Map_bound1 = { 32767, 32767 };	/* minimum XY value of map */
+	v2double_t Map_bound2 = { -32767, -32767 };	/* maximum XY value of map */
 
 	Basis basis;
 	ChecksModule checks;
@@ -160,6 +163,9 @@ public:
 	void ValidateSidedefRefs(LineDef &ld, int num, const ConfigData &config, BadCount &bad);
 	void ValidateSectorRef(SideDef &sd, int num, const ConfigData &config, BadCount &bad);
 	void ValidateLevel_UDMF(const ConfigData &config, BadCount &bad);
+	
+	void CalculateLevelBounds() noexcept;
+	void UpdateLevelBounds(int start_vert) noexcept;
 	
 	void clear();
 private:

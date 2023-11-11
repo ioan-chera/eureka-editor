@@ -71,22 +71,22 @@ void Instance::zoom_fit()
 	v2double_t zoom = { 1, 1 };
 	v2int_t ScrMax = { main_win->canvas->w(), main_win->canvas->h() };
 
-	if (Map_bound1.x < Map_bound2.x)
-		zoom.x = ScrMax.x / (Map_bound2.x - Map_bound1.x);
+	if (level.Map_bound1.x < level.Map_bound2.x)
+		zoom.x = ScrMax.x / (level.Map_bound2.x - level.Map_bound1.x);
 
-	if (Map_bound1.y < Map_bound2.y)
-		zoom.y = ScrMax.y / (Map_bound2.y - Map_bound1.y);
+	if (level.Map_bound1.y < level.Map_bound2.y)
+		zoom.y = ScrMax.y / (level.Map_bound2.y - level.Map_bound1.y);
 
 	grid.NearestScale(std::min(zoom.x, zoom.y));
 
-	grid.MoveTo((Map_bound1 + Map_bound2) / 2);
+	grid.MoveTo((level.Map_bound1 + level.Map_bound2) / 2);
 }
 
 
 void Instance::ZoomWholeMap()
 {
 	if (MadeChanges)
-		CalculateLevelBounds();
+		level.CalculateLevelBounds();
 
 	zoom_fit();
 
@@ -373,23 +373,23 @@ void Instance::Editor_ChangeMode(char mode_char)
 //------------------------------------------------------------------------
 
 
-static void UpdateLevelBounds(Instance &inst, int start_vert) noexcept
+void Document::UpdateLevelBounds(int start_vert) noexcept
 {
-	for(int i = start_vert; i < inst.level.numVertices(); i++)
+	for(int i = start_vert; i < numVertices(); i++)
 	{
-		const auto &V = inst.level.vertices[i];
+		const auto &V = vertices[i];
 
-		if (V->x() < inst.Map_bound1.x) inst.Map_bound1.x = V->x();
-		if (V->y() < inst.Map_bound1.y) inst.Map_bound1.y = V->y();
+		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
+		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
 
-		if (V->x() > inst.Map_bound2.x) inst.Map_bound2.x = V->x();
-		if (V->y() > inst.Map_bound2.y) inst.Map_bound2.y = V->y();
+		if (V->x() > Map_bound2.x) Map_bound2.x = V->x();
+		if (V->y() > Map_bound2.y) Map_bound2.y = V->y();
 	}
 }
 
-void Instance::CalculateLevelBounds() noexcept
+void Document::CalculateLevelBounds() noexcept
 {
-	if (level.numVertices() == 0)
+	if (numVertices() == 0)
 	{
 		Map_bound1.x = Map_bound2.x = 0;
 		Map_bound1.y = Map_bound2.y = 0;
@@ -399,7 +399,7 @@ void Instance::CalculateLevelBounds() noexcept
 	Map_bound1.x = 32767; Map_bound2.x = -32767;
 	Map_bound1.y = 32767; Map_bound2.y = -32767;
 
-	UpdateLevelBounds(*this, 0);
+	UpdateLevelBounds(0);
 }
 
 
@@ -445,11 +445,11 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 
 		const auto &V = level.vertices[objnum];
 
-		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
-		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
+		if (V->x() < level.Map_bound1.x) level.Map_bound1.x = V->x();
+		if (V->y() < level.Map_bound1.y) level.Map_bound1.y = V->y();
 
-		if (V->x() > Map_bound2.x) Map_bound2.x = V->x();
-		if (V->y() > Map_bound2.y) Map_bound2.y = V->y();
+		if (V->x() > level.Map_bound2.x) level.Map_bound2.x = V->x();
+		if (V->y() > level.Map_bound2.y) level.Map_bound2.y = V->y();
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();
@@ -469,11 +469,11 @@ void Instance::MapStuff_NotifyEnd()
 {
 	if (recalc_map_bounds || moved_vertex_count > 10)  // TODO: CONFIG
 	{
-		CalculateLevelBounds();
+		level.CalculateLevelBounds();
 	}
 	else if (new_vertex_minimum >= 0)
 	{
-		UpdateLevelBounds(*this, new_vertex_minimum);
+		level.UpdateLevelBounds(new_vertex_minimum);
 	}
 }
 
