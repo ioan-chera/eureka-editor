@@ -25,17 +25,9 @@
 
 class UI_DynIntInput;
 
-class UI_VertexBox : public Fl_Group
+class UI_VertexBox : public MapItemBox
 {
-private:
-	int obj = -1;
-	int count = 0;
-
-	PanelFieldFixUp	mFixUp;
-
 public:
-	UI_Nombre *which;
-
 	UI_DynIntInput *pos_x;
 	UI_DynIntInput *pos_y;
 
@@ -44,21 +36,18 @@ public:
 	Fl_Button *move_up;
 	Fl_Button *move_down;
 
-	Instance &inst;
-
 	UI_VertexBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 
-	int handle(int event);
+	int handle(int event) override;
 	// FLTK virtual method for handling input events.
 
-	void SetObj(int _index, int _count);
-
-	int GetObj() const { return obj; }
-
 	// call this if the vertex was externally changed.
-	void UpdateField();
+	void UpdateField(int field = -1) override;
+	void UnselectPics() override
+	{
+	}
 
-	void UpdateTotal(const Document &doc) noexcept;
+	void UpdateTotal(const Document &doc) noexcept override;
 
 private:
 	static void x_callback(Fl_Widget *, void *);

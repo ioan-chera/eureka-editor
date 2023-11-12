@@ -70,8 +70,7 @@ const char *const *arrow_pixmaps[8] =
 // UI_ThingBox Constructor
 //
 UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label),
-    obj(-1), count(0), inst(inst)
+    MapItemBox(inst, X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX);
 
@@ -326,30 +325,6 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 	end();
 
 	resizable(NULL);
-}
-
-//
-// UI_ThingBox Destructor
-//
-UI_ThingBox::~UI_ThingBox()
-{
-}
-
-
-void UI_ThingBox::SetObj(int _index, int _count)
-{
-	if (obj == _index && count == _count)
-		return;
-
-	obj   = _index;
-	count = _count;
-
-	which->SetIndex(obj);
-	which->SetSelected(count);
-
-	UpdateField();
-
-	redraw();
 }
 
 

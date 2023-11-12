@@ -42,7 +42,7 @@ extern const char *const *arrow_pixmaps[8];
 // UI_VertexBox Constructor
 //
 UI_VertexBox::UI_VertexBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label), inst(inst)
+    MapItemBox(inst,X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX);
 
@@ -186,23 +186,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_VertexBox::SetObj(int _index, int _count)
-{
-	if (obj == _index && count == _count)
-		return;
-
-	obj   = _index;
-	count = _count;
-
-	which->SetIndex(obj);
-	which->SetSelected(count);
-
-	UpdateField();
-
-	redraw();
-}
-
-void UI_VertexBox::UpdateField()
+void UI_VertexBox::UpdateField(int)
 {
 	if (inst.level.isVertex(obj))
 	{

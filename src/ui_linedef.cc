@@ -48,8 +48,6 @@ enum
 	INSET_RIGHT = 6,
 	INSET_BOTTOM = 5,
 
-	NOMBRE_INSET = 6,
-	NOMBRE_HEIGHT = 28,
 	SPACING_BELOW_NOMBRE = 4,
 
 	TYPE_INPUT_X = 58,
@@ -92,7 +90,7 @@ public:
 // UI_LineBox Constructor
 //
 UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label), inst(inst)
+    MapItemBox(inst, X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
@@ -713,26 +711,6 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 
 //------------------------------------------------------------------------
-
-void UI_LineBox::SetObj(int _index, int _count)
-{
-	if (obj == _index && count == _count)
-		return;
-
-	obj   = _index;
-	count = _count;
-
-	which->SetIndex(obj);
-	which->SetSelected(count);
-
-	UpdateField();
-
-	if (obj < 0)
-		UnselectPics();
-
-	redraw();
-}
-
 
 void UI_LineBox::UpdateField(int field)
 {

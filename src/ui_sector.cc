@@ -57,7 +57,7 @@ static const int headroom_presets[UI_SectorBox::HEADROOM_BUTTONS] =
 // UI_SectorBox Constructor
 //
 UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label), inst(inst)
+    MapItemBox(inst, X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
@@ -69,7 +69,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	H -= 10;
 
 
-	which = new UI_Nombre(X+6, Y, W-12, 28, "Sector");
+	which = new UI_Nombre(X+NOMBRE_INSET, Y, W-2*NOMBRE_INSET, NOMBRE_HEIGHT, "Sector");
 
 	Y += which->h() + 4;
 
@@ -235,14 +235,6 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	end();
 
 	resizable(NULL);
-}
-
-
-//
-// UI_SectorBox Destructor
-//
-UI_SectorBox::~UI_SectorBox()
-{
 }
 
 
@@ -679,25 +671,6 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 
 //------------------------------------------------------------------------
-
-void UI_SectorBox::SetObj(int _index, int _count)
-{
-	if (obj == _index && count == _count)
-		return;
-
-	obj   = _index;
-	count = _count;
-
-	which->SetIndex(obj);
-	which->SetSelected(count);
-
-	UpdateField();
-
-	if (obj < 0)
-		UnselectPics();
-
-	redraw();
-}
 
 void UI_SectorBox::UpdateField(int field)
 {

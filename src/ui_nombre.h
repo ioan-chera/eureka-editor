@@ -21,6 +21,7 @@
 #ifndef __EUREKA_UI_NOMBRE_H__
 #define __EUREKA_UI_NOMBRE_H__
 
+#include "m_strings.h"
 #include "FL/Fl_Box.H"
 
 class UI_Nombre : public Fl_Box
