@@ -918,7 +918,6 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 {
 	LoadingData backupLoaded = loaded;
 	Document backupDoc = std::move(level);
-	sector_info_cache_c backupCache = sector_info_cache;
 	
 	try
 	{
@@ -971,18 +970,17 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 		
 		level.checks.sidedefsUnpack(true);
 		
-		level.CalculateLevelBounds();
-		Subdiv_InvalidateAll();
-		
-		level.MadeChanges = false;
 	}
 	catch(const std::runtime_error &)
 	{
-		sector_info_cache = backupCache;
 		level = std::move(backupDoc);
 		loaded = backupLoaded;
 		throw;
 	}
+	level.CalculateLevelBounds();
+	Subdiv_InvalidateAll();
+	
+	level.MadeChanges = false;
 }
 
 
