@@ -887,7 +887,7 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 	edit.Selected->clear_all();
 	edit.highlight.clear();
 
-	main_win->UpdateTotals(level);
+	main_win->UpdateTotals(this->level);
 	main_win->UpdateGameInfo();
 	main_win->InvalidatePanelObj();
 	main_win->redraw();
