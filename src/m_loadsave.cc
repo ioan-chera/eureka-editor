@@ -919,6 +919,8 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 	LoadingData backupLoaded = loaded;
 	Document backupDoc = std::move(level);
 	
+	BadCount bad = {};
+	
 	try
 	{
 		int loading_level = lev_num;
@@ -926,8 +928,6 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 		loaded.levelFormat = wad->LevelFormat(loading_level);
 		
 		level.clear();
-		
-		BadCount bad = {};
 		
 		level.LoadHeader(loading_level, *wad);
 		
@@ -958,18 +958,6 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 				level.LoadLineDefs(loading_level, wad, conf, bad);
 			}
 		}
-		
-		if (bad.linedef_count || bad.sector_refs || bad.sidedef_refs)
-		{
-			ShowLoadProblem(bad);
-		}
-		
-		// Node builders create a lot of new vertices for segs.
-		// However they just get in the way for editing, so remove them.
-		level.RemoveUnusedVerticesAtEnd();
-		
-		level.checks.sidedefsUnpack(true);
-		
 	}
 	catch(const std::runtime_error &)
 	{
@@ -977,6 +965,17 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 		loaded = backupLoaded;
 		throw;
 	}
+	if (bad.linedef_count || bad.sector_refs || bad.sidedef_refs)
+	{
+		ShowLoadProblem(bad);
+	}
+	
+	// Node builders create a lot of new vertices for segs.
+	// However they just get in the way for editing, so remove them.
+	level.RemoveUnusedVerticesAtEnd();
+
+	level.checks.sidedefsUnpack(true);
+	
 	level.CalculateLevelBounds();
 	Subdiv_InvalidateAll();
 	
