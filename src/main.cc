@@ -934,7 +934,7 @@ void Instance::Main_LoadResources(const LoadingData &loading) noexcept(false)
 		if (main_win->canvas)
 			main_win->canvas->DeleteContext();
 
-		main_win->UpdateGameInfo();
+		main_win->UpdateGameInfo(loaded, conf);
 
 		main_win->browser->Populate();
 

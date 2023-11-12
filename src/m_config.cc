@@ -1290,11 +1290,15 @@ bool Instance::M_LoadUserState()
 
 	SString line;
 
-	std::vector<SString> tokens;
-
 	while (file.readLine(line))
 	{
-		int num_tok = M_ParseLine(line, tokens, ParseOptions::haveStrings);
+		TokenWordParse parse(line);
+		SString word;
+		std::vector<SString> tokens;
+		while (parse.getNext(word))
+			tokens.push_back(word);
+
+		int num_tok = (int)tokens.size();
 
 		if (num_tok == 0)
 			continue;

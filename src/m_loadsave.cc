@@ -890,17 +890,13 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 	if (main_win)
 	{
 		main_win->UpdateTotals(this->level);
-		main_win->UpdateGameInfo();
+		main_win->UpdateGameInfo(loaded, conf);
 		main_win->InvalidatePanelObj();
 		main_win->redraw();
 
 		main_win->SetTitle(wad->PathName().u8string(), level, wad->IsReadOnly());
 
 		// load the user state associated with this map
-		crc32_c adler_crc;
-
-		this->level.getLevelChecksum(adler_crc);
-
 		if (! M_LoadUserState())
 		{
 			M_DefaultUserState();

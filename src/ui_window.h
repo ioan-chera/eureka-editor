@@ -162,7 +162,7 @@ public:
 
 	// this is called when game_info changes (in Main_LoadResources)
 	// and can enable / disable stuff in the panels.
-	void UpdateGameInfo();
+	void UpdateGameInfo(const LoadingData &loading, const ConfigData &config);
 
 private:
 	static void quit_callback(Fl_Widget *w, void *data);

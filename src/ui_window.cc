@@ -500,10 +500,10 @@ void UI_MainWindow::Delay(int steps)
 }
 
 
-void UI_MainWindow::UpdateGameInfo()
+void UI_MainWindow::UpdateGameInfo(const LoadingData &loading, const ConfigData &config)
 {
 	for(MapItemBox *box : mapItemBoxes)
-		box->UpdateGameInfo(mInstance.loaded, mInstance.conf);
+		box->UpdateGameInfo(loading, config);
 }
 
 
