@@ -993,11 +993,11 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 }
 
 
-void UI_LineBox::UpdateGameInfo()
+void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
 	choose->label("Choose");
 
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	if (loaded.levelFormat != MapFormat::doom)
 	{
 		tag->hide();
 		length->hide();
@@ -1017,17 +1017,17 @@ void UI_LineBox::UpdateGameInfo()
 		actkind->hide();
 		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 
-		if (inst.conf.features.pass_through)
+		if (config.features.pass_through)
 			f_passthru->show();
 		else
 			f_passthru->hide();
 
-		if (inst.conf.features.midtex_3d)
+		if (config.features.midtex_3d)
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
 
-		if (inst.conf.features.strife_flags)
+		if (config.features.strife_flags)
 		{
 			f_jumpover->show();
 			f_flyers->show();
@@ -1042,7 +1042,7 @@ void UI_LineBox::UpdateGameInfo()
 			f_trans2->hide();
 		}
 
-		if (inst.conf.features.gen_types)
+		if (config.features.gen_types)
 			gen->show();
 		else
 			gen->hide();
@@ -1050,7 +1050,7 @@ void UI_LineBox::UpdateGameInfo()
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		if (inst.loaded.levelFormat != MapFormat::doom)
+		if (loaded.levelFormat != MapFormat::doom)
 			args[a]->show();
 		else
 			args[a]->hide();

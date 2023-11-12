@@ -94,7 +94,7 @@ public:
 	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
-	void UpdateGameInfo() override;
+	void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) override;
 	void UnselectPics() override;
 
 private:

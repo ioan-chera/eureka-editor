@@ -503,7 +503,7 @@ void UI_MainWindow::Delay(int steps)
 void UI_MainWindow::UpdateGameInfo()
 {
 	for(MapItemBox *box : mapItemBoxes)
-		box->UpdateGameInfo();
+		box->UpdateGameInfo(mInstance.loaded, mInstance.conf);
 }
 
 

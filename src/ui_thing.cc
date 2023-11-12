@@ -910,9 +910,9 @@ void UI_ThingBox::UpdateTotal(const Document &doc) noexcept
 }
 
 
-void UI_ThingBox::UpdateGameInfo()
+void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
-	if (inst.conf.features.coop_dm_flags || inst.loaded.levelFormat != MapFormat::doom)
+	if (config.features.coop_dm_flags || loaded.levelFormat != MapFormat::doom)
 	{
 		o_sp  ->show();
 		o_coop->show();
@@ -931,13 +931,13 @@ void UI_ThingBox::UpdateGameInfo()
 		o_dm  ->hide();
 	}
 
-	if (inst.conf.features.friend_flag && !inst.conf.features.strife_flags)
+	if (config.features.friend_flag && !config.features.strife_flags)
 		o_friend->show();
 	else
 		o_friend->hide();
 
 
-	if (inst.conf.features.strife_flags)
+	if (config.features.strife_flags)
 	{
 		o_ambush->hide();
 
@@ -963,7 +963,7 @@ void UI_ThingBox::UpdateGameInfo()
 
 	thing_opt_CB_data_c *ocb;
 
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	if (loaded.levelFormat != MapFormat::doom)
 	{
 		pos_z->show();
 

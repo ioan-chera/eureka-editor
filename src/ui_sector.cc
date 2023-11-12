@@ -937,11 +937,11 @@ void UI_SectorBox::UpdateTotal(const Document &doc) noexcept
 }
 
 
-void UI_SectorBox::UpdateGameInfo()
+void UI_SectorBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
-	if (inst.conf.features.gen_sectors != GenSectorFamily::none)
+	if (config.features.gen_sectors != GenSectorFamily::none)
 	{
-		if (inst.conf.features.gen_sectors == GenSectorFamily::zdoom)
+		if (config.features.gen_sectors == GenSectorFamily::zdoom)
 			bm_title->label("ZDoom flags:");
 		else
 			bm_title->label("Boom flags:");

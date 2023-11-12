@@ -25,6 +25,7 @@
 #include "ui_panelinput.h"
 
 class UI_DynIntInput;
+struct LoadingData;
 
 class UI_LineBox : public MapItemBox
 {
@@ -78,7 +79,7 @@ public:
 
 	void UnselectPics() override;
 
-	void UpdateGameInfo() override;
+	void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) override;
 
 	void checkDirtyFields()
 	{

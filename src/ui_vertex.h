@@ -46,7 +46,7 @@ public:
 	void UnselectPics() override
 	{
 	}
-	void UpdateGameInfo() override
+	void UpdateGameInfo(const LoadingData &, const ConfigData &) override
 	{
 	}
 
