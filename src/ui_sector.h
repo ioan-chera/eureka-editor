@@ -79,7 +79,7 @@ public:
 
 	void UpdateTotal(const Document &doc) noexcept override;
 
-	void UpdateGameInfo();
+	void UpdateGameInfo() override;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);

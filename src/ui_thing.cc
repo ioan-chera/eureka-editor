@@ -910,7 +910,7 @@ void UI_ThingBox::UpdateTotal(const Document &doc) noexcept
 }
 
 
-void UI_ThingBox::UpdateGameInfo() noexcept
+void UI_ThingBox::UpdateGameInfo()
 {
 	if (inst.conf.features.coop_dm_flags || inst.loaded.levelFormat != MapFormat::doom)
 	{

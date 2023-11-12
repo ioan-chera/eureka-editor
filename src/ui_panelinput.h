@@ -120,6 +120,7 @@ public:
 	virtual void UpdateField(int field = -1) = 0;
 	virtual void UnselectPics() = 0;
 	virtual void UpdateTotal(const Document &doc) noexcept = 0;
+	virtual void UpdateGameInfo() = 0;
 	
 protected:
 	Instance &inst;

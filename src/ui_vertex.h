@@ -46,6 +46,9 @@ public:
 	void UnselectPics() override
 	{
 	}
+	void UpdateGameInfo() override
+	{
+	}
 
 	void UpdateTotal(const Document &doc) noexcept override;
 

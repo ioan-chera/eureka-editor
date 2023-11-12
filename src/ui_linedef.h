@@ -78,7 +78,7 @@ public:
 
 	void UnselectPics() override;
 
-	void UpdateGameInfo() noexcept;
+	void UpdateGameInfo() override;
 
 	void checkDirtyFields()
 	{

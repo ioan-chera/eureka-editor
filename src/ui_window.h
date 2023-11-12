@@ -93,6 +93,8 @@ private:
 	// remember window size/position after going fullscreen.
 	// the 'last_w' and 'last_h' fields are zero when not fullscreen
 	// int last_x = 0, last_y = 0, last_w = 0, last_h = 0;
+	
+	MapItemBox *mapItemBoxes[4] = {};
 
 public:
 	explicit UI_MainWindow(Instance &inst);

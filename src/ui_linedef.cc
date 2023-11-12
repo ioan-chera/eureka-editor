@@ -993,7 +993,7 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 }
 
 
-void UI_LineBox::UpdateGameInfo() noexcept
+void UI_LineBox::UpdateGameInfo()
 {
 	choose->label("Choose");
 
