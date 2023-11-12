@@ -218,9 +218,9 @@ void UI_VertexBox::UpdateField()
 }
 
 
-void UI_VertexBox::UpdateTotal() noexcept
+void UI_VertexBox::UpdateTotal(const Document &doc) noexcept
 {
-	which->SetTotal(inst.level.numVertices());
+	which->SetTotal(doc.numVertices());
 }
 
 

@@ -871,7 +871,7 @@ static void ShowLoadProblem(const BadCount &bad)
 // Read in the level data
 //
 
-void Instance::LoadLevel(const Wad_file *wad, const SString &level)
+void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(false)
 {
 	int lev_num = wad->LevelFind(level);
 
@@ -887,7 +887,7 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level)
 	edit.Selected->clear_all();
 	edit.highlight.clear();
 
-	main_win->UpdateTotals();
+	main_win->UpdateTotals(level);
 	main_win->UpdateGameInfo();
 	main_win->InvalidatePanelObj();
 	main_win->redraw();
@@ -1093,6 +1093,8 @@ void Instance::CMD_OpenMap()
 		return;
 	}
 
+	LoadingData backupLoaded = loaded;
+	WadData backupWad = this->wad;
 
 	if (did_load && wad->FindLump(EUREKA_LUMP))
 	{
@@ -1123,15 +1125,27 @@ void Instance::CMD_OpenMap()
 
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
-	// TODO: overhaul the interface to select map from the same wad
-	LoadLevel(wad.get(), map_name);
-
-	if (new_resources)
+	Document backupDoc = std::move(level);
+	try
 	{
-		// this can invalidate the 'wad' var (since it closes/reopens
-		// all wads in the master_dir), so it MUST be after LoadLevel.
-		// less importantly, we need to know the Level_format.
-		Main_LoadResources(loaded);
+		// TODO: overhaul the interface to select map from the same wad
+		LoadLevel(wad.get(), map_name);
+		
+		if (new_resources)
+		{
+			// this can invalidate the 'wad' var (since it closes/reopens
+			// all wads in the master_dir), so it MUST be after LoadLevel.
+			// less importantly, we need to know the Level_format.
+			Main_LoadResources(loaded);
+		}
+	}
+	catch(const std::runtime_error &e)
+	{
+		// TODO: restore state back to initial level if loading resources fails!
+		level = std::move(backupDoc);
+		this->wad = backupWad;
+		loaded = backupLoaded;
+		DLG_ShowError(false, "Failed opening map: %s", e.what());
 	}
 }
 

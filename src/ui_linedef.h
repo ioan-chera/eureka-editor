@@ -82,7 +82,7 @@ public:
 	// call this is the linedef's sides were externally modified.
 	void UpdateSides();
 
-	void UpdateTotal() noexcept;
+	void UpdateTotal(const Document &doc) noexcept;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);

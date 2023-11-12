@@ -277,7 +277,7 @@ public:
 	bool ExecuteKey(keycode_t key, KeyContext context);
 
 	// M_LOADSAVE
-	void LoadLevel(const Wad_file *wad, const SString &level);
+	void LoadLevel(const Wad_file *wad, const SString &level) noexcept(false);
 	void LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false);
 	bool MissingIWAD_Dialog();
 	bool M_SaveMap();

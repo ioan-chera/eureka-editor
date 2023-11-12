@@ -929,9 +929,9 @@ void UI_ThingBox::UpdateField(int field)
 }
 
 
-void UI_ThingBox::UpdateTotal() noexcept
+void UI_ThingBox::UpdateTotal(const Document &doc) noexcept
 {
-	which->SetTotal(inst.level.numThings());
+	which->SetTotal(doc.numThings());
 }
 
 

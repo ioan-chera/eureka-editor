@@ -131,7 +131,7 @@ public:
 	void ShowDefaultProps();
 	void ShowFindAndReplace();
 
-	void UpdateTotals() noexcept;
+	void UpdateTotals(const Document &doc) noexcept;
 
 	int GetPanelObjNum() const;
 

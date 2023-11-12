@@ -265,12 +265,12 @@ void UI_MainWindow::ShowFindAndReplace()
 }
 
 
-void UI_MainWindow::UpdateTotals() noexcept
+void UI_MainWindow::UpdateTotals(const Document &doc) noexcept
 {
-	thing_box->UpdateTotal();
-	 line_box->UpdateTotal();
-	  sec_box->UpdateTotal();
-	 vert_box->UpdateTotal();
+	thing_box->UpdateTotal(doc);
+	 line_box->UpdateTotal(doc);
+	  sec_box->UpdateTotal(doc);
+	 vert_box->UpdateTotal(doc);
 }
 
 

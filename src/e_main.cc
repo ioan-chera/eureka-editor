@@ -536,7 +536,7 @@ void Instance::ObjectBox_NotifyEnd() const
 	if(!main_win)
 		return;
 	if (invalidated_totals)
-		main_win->UpdateTotals();
+		main_win->UpdateTotals(level);
 
 	if (invalidated_panel_obj)
 	{

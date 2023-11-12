@@ -978,9 +978,9 @@ int UI_LineBox::CalcFlags() const
 }
 
 
-void UI_LineBox::UpdateTotal() noexcept
+void UI_LineBox::UpdateTotal(const Document &doc) noexcept
 {
-	which->SetTotal(inst.level.numLinedefs());
+	which->SetTotal(doc.numLinedefs());
 }
 
 

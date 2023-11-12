@@ -101,7 +101,7 @@ public:
 	// -1 means "all fields"
 	void UpdateField(int field = -1);
 
-	void UpdateTotal() noexcept;
+	void UpdateTotal(const Document &doc) noexcept;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);
