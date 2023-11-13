@@ -649,7 +649,7 @@ void Document::ValidateLevel_UDMF(const ConfigData &config, BadCount &bad)
 }
 
 
-void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, BadCount &bad)
+void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Document& doc, BadCount &bad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "TEXTMAP");
 	// we assume this cannot happen
@@ -684,7 +684,7 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, BadCo
 		}
 		if (tok2.Match("{"))
 		{
-			UDMF_ParseObject(level, *parser, tok);
+			UDMF_ParseObject(doc, *parser, tok);
 			continue;
 		}
 
@@ -693,7 +693,7 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, BadCo
 		parser->SkipToEOLN();
 	}
 
-	level.ValidateLevel_UDMF(conf, bad);
+	doc.ValidateLevel_UDMF(conf, bad);
 }
 
 

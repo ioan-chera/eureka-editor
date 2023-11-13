@@ -925,7 +925,7 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 	if(format == MapFormat::udmf)
 	{
 		// TODO: this shouldn't modify the "inst" structure, change it
-		inst.UDMF_LoadLevel(level, &wad, bad);
+		inst.UDMF_LoadLevel(level, &wad, doc, bad);
 		return doc;
 	}
 	
@@ -979,7 +979,7 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 		
 		if (loaded.levelFormat == MapFormat::udmf)
 		{
-			UDMF_LoadLevel(loading_level, wad, bad);
+			UDMF_LoadLevel(loading_level, wad, level, bad);
 		}
 		else
 		{
