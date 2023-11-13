@@ -910,6 +910,56 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 	RedrawMap();
 }
 
+// TODO: make this return tl::expected to pass the error message
+// TODO: use this combined with Main_LoadResources to do it all in one step
+// TODO: remove static when it's done, make it an instance method
+/*static*/ tl::optional<Document> makeFromWad(Instance &inst, const Wad_file &wad, int level, MapFormat &format)
+{
+	assert(level >= 0 && level < wad.LevelCount());
+	
+	Document doc(inst);
+	BadCount bad = {};
+	
+	format = wad.LevelFormat(level);
+	doc.LoadHeader(level, wad);
+	if(format == MapFormat::udmf)
+	{
+		// TODO: this shouldn't modify the "inst" structure, change it
+		inst.UDMF_LoadLevel(level, &wad, bad);
+		return doc;
+	}
+	
+	try
+	{
+		if(format == MapFormat::hexen)
+			doc.LoadThings_Hexen(level, &wad);
+		else
+			doc.LoadThings(level, &wad);
+		doc.LoadVertices(level, &wad);
+		doc.LoadSectors(level, &wad);
+		doc.LoadSideDefs(level, &wad, inst.conf, bad);
+		if(format == MapFormat::hexen)
+		{
+			doc.LoadLineDefs_Hexen(level, &wad, inst.conf, bad);
+			doc.LoadBehavior(level, &wad);
+			doc.LoadScripts(level, &wad);
+		}
+		else
+			doc.LoadLineDefs(level, &wad, inst.conf, bad);
+	}
+	catch(const std::runtime_error &e)
+	{
+		gLog.printf("Failed making document from wad: %s\n", e.what());
+		return {};
+	}
+	doc.RemoveUnusedVerticesAtEnd();
+	doc.checks.sidedefsUnpack(true);
+	doc.CalculateLevelBounds();
+	doc.MadeChanges = false;
+	
+	return doc;
+}
+
 void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 {
 	LoadingData backupLoaded = loaded;
