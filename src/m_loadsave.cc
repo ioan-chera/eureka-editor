@@ -499,6 +499,11 @@ void Document::CreateFallbackVertices()
 
 struct BadCount
 {
+	bool exists() const
+	{
+		return linedef_count || sector_refs || sidedef_refs;
+	}
+
 	int linedef_count;
 	int sector_refs;
 	int sidedef_refs;
@@ -917,10 +922,7 @@ struct NewDocument
 	BadCount bad;
 };
 
-// TODO: make this return tl::expected to pass the error message
-// TODO: use this combined with Main_LoadResources to do it all in one step
-// TODO: remove static when it's done, make it an instance method
-/*static*/ tl::optional<NewDocument> openDocument(Instance &inst, const Wad_file &wad, int level, MapFormat &format)
+static NewDocument openDocument(Instance &inst, const Wad_file &wad, int level)
 {
 	assert(level >= 0 && level < wad.LevelCount());
 
@@ -930,25 +932,22 @@ struct NewDocument
 	LoadingData& loading = newdoc.loading;
 	BadCount& bad = newdoc.bad;
 	
-	format = wad.LevelFormat(level);
+	loading.levelFormat = wad.LevelFormat(level);
 	doc.LoadHeader(level, wad);
-	if(format == MapFormat::udmf)
+	if(loading.levelFormat == MapFormat::udmf)
 	{
-		// TODO: this shouldn't modify the "inst" structure, change it
 		inst.UDMF_LoadLevel(level, &wad, doc, loading, bad);
-		return newdoc;
 	}
-	
-	try
+	else try
 	{
-		if(format == MapFormat::hexen)
+		if(loading.levelFormat == MapFormat::hexen)
 			doc.LoadThings_Hexen(level, &wad);
 		else
 			doc.LoadThings(level, &wad);
 		doc.LoadVertices(level, &wad);
 		doc.LoadSectors(level, &wad);
 		doc.LoadSideDefs(level, &wad, inst.conf, bad);
-		if(format == MapFormat::hexen)
+		if(loading.levelFormat == MapFormat::hexen)
 		{
 			doc.LoadLineDefs_Hexen(level, &wad, inst.conf, bad);
 			doc.LoadBehavior(level, &wad);
@@ -957,10 +956,9 @@ struct NewDocument
 		else
 			doc.LoadLineDefs(level, &wad, inst.conf, bad);
 	}
-	catch(const std::runtime_error &e)
+	catch(const std::runtime_error &)
 	{
-		gLog.printf("Failed making document from wad: %s\n", e.what());
-		return {};
+		throw;
 	}
 	doc.RemoveUnusedVerticesAtEnd();
 	doc.checks.sidedefsUnpack(true);
@@ -1131,77 +1129,137 @@ void Instance::CMD_OpenMap()
 	if (!level.Main_ConfirmQuit("open another map"))
 		return;
 
-	
 	SString map_name;
 	bool did_load = false;
-	
+
 	std::shared_ptr<Wad_file> wad = UI_OpenMap(*this).Run(&map_name, &did_load);
 
 	if (! wad)	// cancelled
 		return;
 
-
 	// this shouldn't happen -- but just in case...
-	if (wad->LevelFind(map_name) < 0)
+	int lev_num = wad->LevelFind(map_name);
+	if (lev_num < 0)
 	{
 		DLG_Notify("Hmmmm, cannot find that map !?!");
 
 		return;
 	}
 
-	LoadingData backupLoaded = loaded;
-	WadData backupWad = this->wad;
-
-	if (did_load && wad->FindLump(EUREKA_LUMP))
+	LoadingData loading = loaded;
+	if (did_load && wad->FindLump(EUREKA_LUMP) && !loading.parseEurekaLump(global::home_dir,
+		global::install_dir, global::recent, wad.get()))
 	{
-		if (! loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
-			return;
+		return;
 	}
-
 
 	// does this wad replace the currently edited wad?
 	bool new_resources = false;
+	std::shared_ptr<Wad_file> newEditWad;
+	bool removeEditWad = false;
 
 	if (did_load)
 	{
 		SYS_ASSERT(wad != this->wad.master.editWad());
 		SYS_ASSERT(wad != this->wad.master.gameWad());
 
-		this->wad.master.ReplaceEditWad(wad);
+		newEditWad = wad;
 
 		new_resources = true;
 	}
 	// ...or does it remove the edit_wad? (e.g. wad == game_wad)
 	else if (this->wad.master.editWad() && wad != this->wad.master.editWad())
 	{
-		this->wad.master.RemoveEditWad();
-
+		removeEditWad = true;
 		new_resources = true;
 	}
 
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
-	Document backupDoc = std::move(level);
+	// TODO: load level and resources safely
+	NewDocument newdoc = { Document(*this), LoadingData(), BadCount() };
 	try
 	{
-		// TODO: overhaul the interface to select map from the same wad
-		LoadLevel(wad.get(), map_name);
-		
-		if (new_resources)
-		{
-			// this can invalidate the 'wad' var (since it closes/reopens
-			// all wads in the master_dir), so it MUST be after LoadLevel.
-			// less importantly, we need to know the Level_format.
-			Main_LoadResources(loaded);
-		}
+		newdoc = openDocument(*this, *wad, lev_num);
 	}
-	catch(const std::runtime_error &e)
+	catch (const std::runtime_error& e)
 	{
-		// TODO: restore state back to initial level if loading resources fails!
-		level = std::move(backupDoc);
-		this->wad = backupWad;
-		loaded = backupLoaded;
-		DLG_ShowError(false, "Failed opening map: %s", e.what());
+		DLG_ShowError(false, "Could not open %s of %s. %s", map_name.c_str(), 
+			wad->PathName().u8string().c_str(), e.what());
+		return;
+	}
+
+	
+	if (new_resources)
+	{
+		// TODO: call a safe version of Main_LoadResources
+		NewResources newres = {};
+		try
+		{
+			newres = loadResources(newdoc.loading, this->wad);
+		}
+		catch (const std::runtime_error& e)
+		{
+			DLG_ShowError(false, "Could not reload resources: %s", e.what());
+			return;
+		}
+
+		// success loading resources
+		conf = std::move(newres.config);
+		loaded = std::move(newres.loading);
+		this->wad = std::move(newres.waddata);
+
+		gLog.printf("--- DONE ---\n");
+		gLog.printf("\n");
+	}
+
+	// on success
+
+	if (removeEditWad)
+		this->wad.master.RemoveEditWad();
+	else if (newEditWad)
+		this->wad.master.ReplaceEditWad(newEditWad);
+
+	level = std::move(newdoc.doc);
+	loaded = std::move(newdoc.loading);
+
+	if (newdoc.bad.exists())
+		ShowLoadProblem(newdoc.bad);
+
+	Subdiv_InvalidateAll();
+
+	// reset various editor state
+	Editor_ClearAction();
+	Selection_InvalidateLast();
+	edit.Selected->clear_all();
+	edit.highlight.clear();
+
+	if (main_win)
+	{
+		main_win->UpdateTotals(level);
+		main_win->UpdateGameInfo(loaded, conf);
+		main_win->InvalidatePanelObj();
+		main_win->redraw();
+		
+		main_win->SetTitle(wad->PathName().u8string(), map_name, wad->IsReadOnly());
+
+		// load the user state associated with this map
+		if (!M_LoadUserState())
+			M_DefaultUserState();
+	}
+	loaded.levelName = map_name.asUpper();
+	Status_Set("Loaded %s", loaded.levelName.c_str());
+	RedrawMap();
+
+	if (new_resources && main_win)
+	{
+		if (main_win->canvas)
+			main_win->canvas->DeleteContext();
+
+		main_win->browser->Populate();
+
+		// TODO: only call this when the IWAD has changed
+		main_win->propsLoadValues();
 	}
 }
 

@@ -860,6 +860,57 @@ static void readPortInfo(std::unordered_map<SString, SString> &parseVars, Loadin
 	}
 }
 
+NewResources loadResources(const LoadingData& loading, const WadData &waddata)
+{
+	auto newres = NewResources();
+	newres.loading = loading;
+	newres.waddata = waddata;
+
+	gLog.printf("\n");
+	gLog.printf("----- Loading Resources -----\n");
+
+	// clear the parse variables, pre-set a few vars
+	std::unordered_map<SString, SString> parseVars = loading.prepareConfigVariables();
+
+	try
+	{
+		readGameInfo(parseVars, newres.loading, newres.config);
+		readPortInfo(parseVars, newres.loading, newres.config);
+	
+
+		for (const fs::path& resource : newres.loading.resourceList)
+		{
+			if (MatchExtensionNoCase(resource, ".ugh"))
+			{
+				M_ParseDefinitionFile(parseVars, ParsePurpose::resource,
+					&newres.config, resource);
+				continue;
+			}
+			// Otherwise wad
+			if (!Wad_file::Validate(resource))
+				ThrowException("Invalid WAD file: %s", resource.u8string().c_str());
+
+			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
+				WadOpenMode::read);
+			if (!wad)
+				ThrowException("Cannot load resource: %s", resource.u8string().c_str());
+
+			newres.resourceWads.push_back(wad);
+		}
+
+		std::shared_ptr<Wad_file> gameWad = Wad_file::Open(newres.loading.iwadName, WadOpenMode::read);
+		if (!gameWad)
+			ThrowException("Could not load IWAD file");
+
+		newres.waddata.reloadResources(gameWad, newres.config, newres.resourceWads);
+	}
+	catch (const std::runtime_error& )
+	{
+		throw;
+	}
+
+	return newres;
+}
 
 //
 // load all game/port definitions (*.ugh).

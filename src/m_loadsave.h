@@ -27,7 +27,9 @@
 #ifndef __EUREKA_E_LOADSAVE_H__
 #define __EUREKA_E_LOADSAVE_H__
 
+#include "m_game.h"
 #include "w_wad.h"
+#include "WadData.h"
 #include <unordered_map>
 
 class RecentKnowledge;
@@ -49,6 +51,16 @@ struct LoadingData
 	std::vector<fs::path> resourceList;
 	MapFormat levelFormat = {};	// format of current map
 };
+
+
+struct NewResources
+{
+	ConfigData config;
+	std::vector<std::shared_ptr<Wad_file>> resourceWads;
+	LoadingData loading;
+	WadData waddata;
+};
+
 
 void OpenFileMap(const fs::path &filename, const SString &map_name = "") noexcept(false);
 
