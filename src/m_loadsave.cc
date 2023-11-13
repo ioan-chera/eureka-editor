@@ -910,23 +910,33 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 	RedrawMap();
 }
 
+struct NewDocument
+{
+	Document doc;
+	LoadingData loading;
+	BadCount bad;
+};
+
 // TODO: make this return tl::expected to pass the error message
 // TODO: use this combined with Main_LoadResources to do it all in one step
 // TODO: remove static when it's done, make it an instance method
-/*static*/ tl::optional<Document> makeFromWad(Instance &inst, const Wad_file &wad, int level, MapFormat &format)
+/*static*/ tl::optional<NewDocument> openDocument(Instance &inst, const Wad_file &wad, int level, MapFormat &format)
 {
 	assert(level >= 0 && level < wad.LevelCount());
-	
-	Document doc(inst);
-	BadCount bad = {};
+
+	NewDocument newdoc = { Document(inst), inst.loaded, BadCount() };
+
+	Document& doc = newdoc.doc;
+	LoadingData& loading = newdoc.loading;
+	BadCount& bad = newdoc.bad;
 	
 	format = wad.LevelFormat(level);
 	doc.LoadHeader(level, wad);
 	if(format == MapFormat::udmf)
 	{
 		// TODO: this shouldn't modify the "inst" structure, change it
-		inst.UDMF_LoadLevel(level, &wad, doc, bad);
-		return doc;
+		inst.UDMF_LoadLevel(level, &wad, doc, loading, bad);
+		return newdoc;
 	}
 	
 	try
@@ -957,7 +967,7 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 	doc.CalculateLevelBounds();
 	doc.MadeChanges = false;
 	
-	return doc;
+	return newdoc;
 }
 
 void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
@@ -979,7 +989,7 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 		
 		if (loaded.levelFormat == MapFormat::udmf)
 		{
-			UDMF_LoadLevel(loading_level, wad, level, bad);
+			UDMF_LoadLevel(loading_level, wad, level, loaded, bad);
 		}
 		else
 		{

@@ -649,7 +649,7 @@ void Document::ValidateLevel_UDMF(const ConfigData &config, BadCount &bad)
 }
 
 
-void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Document& doc, BadCount &bad)
+void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Document& doc, LoadingData &loading, BadCount &bad) const
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "TEXTMAP");
 	// we assume this cannot happen
@@ -679,7 +679,7 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Docum
 
 		if (tok2.Match("="))
 		{
-			UDMF_ParseGlobalVar(loaded, *parser, tok);
+			UDMF_ParseGlobalVar(loading, *parser, tok);
 			continue;
 		}
 		if (tok2.Match("{"))
