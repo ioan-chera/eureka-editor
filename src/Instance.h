@@ -294,7 +294,6 @@ public:
 	void UDMF_SaveLevel() const;
 
 	// MAIN
-	bool Main_ConfirmQuit(const char *action) const;
 	fs::path Main_FileOpFolder() const;
 	void Main_LoadResources(const LoadingData &loading) noexcept(false);
 

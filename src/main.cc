@@ -720,9 +720,9 @@ void Main_Quit()
 
 
 // used for 'New Map' / 'Open Map' functions too
-bool Instance::Main_ConfirmQuit(const char *action) const
+bool Document::Main_ConfirmQuit(const char *action) const
 {
-	if (! level.MadeChanges)
+	if (! MadeChanges)
 		return true;
 
 	SString secondButton = SString::printf("&%s", action);
@@ -784,7 +784,7 @@ void Main_Loop()
 
 		if (global::want_quit)
 		{
-			if (gInstance.Main_ConfirmQuit("quit"))
+			if (gInstance.level.Main_ConfirmQuit("quit"))
 				break;
 
 			global::want_quit = false;

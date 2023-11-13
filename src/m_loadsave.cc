@@ -206,7 +206,7 @@ void Instance::CMD_NewProject()
 	std::shared_ptr<Wad_file> initialEditWad = wad.master.editWad();
 	try
 	{
-		if (!Main_ConfirmQuit("create a new project"))
+		if (!level.Main_ConfirmQuit("create a new project"))
 			return;
 
 		/* first, ask for the output file */
@@ -309,7 +309,7 @@ void Instance::CMD_FreshMap()
 			return;
 		}
 
-		if (!Main_ConfirmQuit("create a fresh map"))
+		if (!level.Main_ConfirmQuit("create a fresh map"))
 			return;
 
 
@@ -1047,7 +1047,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
-	if (! gInstance.Main_ConfirmQuit("open another map"))
+	if (! gInstance.level.Main_ConfirmQuit("open another map"))
 		return;
 
 
@@ -1128,7 +1128,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 
 void Instance::CMD_OpenMap()
 {
-	if (! Main_ConfirmQuit("open another map"))
+	if (!level.Main_ConfirmQuit("open another map"))
 		return;
 
 	
@@ -1263,7 +1263,7 @@ void Instance::CMD_FlipMap()
 	}
 
 
-	if (! Main_ConfirmQuit("open another map"))
+	if (!level.Main_ConfirmQuit("open another map"))
 		return;
 
 

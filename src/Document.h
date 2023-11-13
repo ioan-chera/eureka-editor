@@ -193,6 +193,8 @@ public:
 	void UpdateLevelBounds(int start_vert) noexcept;
 	
 	void clear();
+
+	bool Main_ConfirmQuit(const char* action) const;
 private:
 	friend class DocumentModule;
 };
