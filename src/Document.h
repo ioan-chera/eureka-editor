@@ -71,12 +71,12 @@ public:
 	{
 	}
 	
-	Document(Document &&other) : inst(other.inst), basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this)
+	Document(Document &&other) noexcept : inst(other.inst), basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this) 
 	{
 		*this = std::move(other);
 	}
 	
-	Document &operator = (Document &&other)
+	Document &operator = (Document &&other) noexcept
 	{
 		things = std::move(other.things);
 		vertices = std::move(other.vertices);
