@@ -656,12 +656,12 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, BadCo
 	if (! lump)
 		return;
 
-	// TODO: reduce stack!!
-	Udmf_Parser parser(*lump);
+	// NOTE: this must be a pointer to heap, due to stack size.
+	auto parser = std::make_unique<Udmf_Parser>(*lump);
 
 	for (;;)
 	{
-		Udmf_Token tok = parser.Next();
+		Udmf_Token tok = parser->Next();
 		if (tok.IsEOF())
 			break;
 
@@ -669,28 +669,28 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, BadCo
 		{
 			// something has gone wrong
 			// TODO mark the error somehow, pop-up dialog later
-			parser.SkipToEOLN();
+			parser->SkipToEOLN();
 			continue;
 		}
 
-		Udmf_Token tok2 = parser.Next();
+		Udmf_Token tok2 = parser->Next();
 		if (tok2.IsEOF())
 			break;
 
 		if (tok2.Match("="))
 		{
-			UDMF_ParseGlobalVar(loaded, parser, tok);
+			UDMF_ParseGlobalVar(loaded, *parser, tok);
 			continue;
 		}
 		if (tok2.Match("{"))
 		{
-			UDMF_ParseObject(level, parser, tok);
+			UDMF_ParseObject(level, *parser, tok);
 			continue;
 		}
 
 		// unexpected symbol
 		// TODO mark the error somehow, show dialog later
-		parser.SkipToEOLN();
+		parser->SkipToEOLN();
 	}
 
 	level.ValidateLevel_UDMF(conf, bad);
