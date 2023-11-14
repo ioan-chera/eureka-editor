@@ -349,7 +349,14 @@ void M_OpenRecentFromMenu(void *priv_data)
 
 	RecentMap *data = (RecentMap *)priv_data;
 
-	OpenFileMap(data->file, data->map);
+	try
+	{
+		OpenFileMap(data->file, data->map);
+	}
+	catch (const std::runtime_error& e)
+	{
+		DLG_ShowError(false, "Could not open %s of %s: %s", data->map.c_str(), data->file.u8string().c_str(), e.what());
+	}
 }
 
 void RecentKnowledge::addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir)

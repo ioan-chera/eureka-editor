@@ -56,7 +56,6 @@ struct LoadingData
 struct NewResources
 {
 	ConfigData config;
-	std::vector<std::shared_ptr<Wad_file>> resourceWads;
 	LoadingData loading;
 	WadData waddata;
 };

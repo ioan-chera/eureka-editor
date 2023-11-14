@@ -956,8 +956,9 @@ static NewDocument openDocument(Instance &inst, const LoadingData &inLoading, co
 		else
 			doc.LoadLineDefs(level, &wad, inst.conf, bad);
 	}
-	catch(const std::runtime_error &)
+	catch(const std::runtime_error &e)
 	{
+		gLog.printf("%s\n", e.what());
 		throw;
 	}
 	doc.RemoveUnusedVerticesAtEnd();
@@ -1036,6 +1037,48 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 	level.MadeChanges = false;
 }
 
+void Instance::refreshViewAfterLoad(const BadCount& bad, const Wad_file *wad, const SString &map_name, bool new_resources)
+{
+	if (bad.exists())
+		ShowLoadProblem(bad);
+
+	Subdiv_InvalidateAll();
+
+	// reset various editor state
+	Editor_ClearAction();
+	Selection_InvalidateLast();
+	edit.Selected->clear_all();
+	edit.highlight.clear();
+
+	if (main_win)
+	{
+		main_win->UpdateTotals(level);
+		main_win->UpdateGameInfo(loaded, conf);
+		main_win->InvalidatePanelObj();
+		main_win->redraw();
+
+		main_win->SetTitle(wad->PathName().u8string(), map_name, wad->IsReadOnly());
+
+		// load the user state associated with this map
+		if (!M_LoadUserState())
+			M_DefaultUserState();
+	}
+	loaded.levelName = map_name.asUpper();
+	Status_Set("Loaded %s", loaded.levelName.c_str());
+	RedrawMap();
+
+	if (new_resources && main_win)
+	{
+		if (main_win->canvas)
+			main_win->canvas->DeleteContext();
+
+		main_win->browser->Populate();
+
+		// TODO: only call this when the IWAD has changed
+		main_win->propsLoadValues();
+	}
+}
+
 
 //
 // open a new wad file.
@@ -1086,9 +1129,11 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 		return;
 	}
 
+	LoadingData loading = gInstance.loaded;
+
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
+		if (! loading.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
 		{
 			return;
 		}
@@ -1099,28 +1144,26 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 
 
 	// this wad replaces the current PWAD
-	gInstance.wad.master.ReplaceEditWad(wad);
-
-	SYS_ASSERT(gInstance.wad.master.editWad() == wad);
-
 
 	// always grab map_name from the actual level
 	{
-		int idx = gInstance.wad.master.editWad()->LevelHeader(lev_num);
-		map_name  = gInstance.wad.master.editWad()->GetLump(idx)->Name();
+		int idx = wad->LevelHeader(lev_num);
+		map_name  = wad->GetLump(idx)->Name();
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.master.editWad()->PathName().u8string().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
-	// TODO: new instance
-	gInstance.LoadLevel(gInstance.wad.master.editWad().get(), map_name);
+	// These 2 may throw, but it's safe here
+	NewDocument newdoc = openDocument(gInstance, loading, *wad, lev_num);
+	NewResources newres = loadResources(newdoc.loading, gInstance.wad);
 
-	// must be after LoadLevel as we need the Level_format
-	// TODO: same here
-	gInstance.Main_LoadResources(gInstance.loaded);
-	
-	// TODO: RESTORE loaded, wad.master, LoadLevel ON FAILURE
-	// LoadLevel: level.basis
+	gInstance.level = std::move(newdoc.doc);
+	gInstance.conf = std::move(newres.config);
+	gInstance.loaded = std::move(newres.loading);
+	gInstance.wad = std::move(newres.waddata);
+	gInstance.wad.master.ReplaceEditWad(wad);
+
+	gInstance.refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, true);
 }
 
 
@@ -1223,44 +1266,7 @@ void Instance::CMD_OpenMap()
 	if(!new_resources)	// we already updated loaded with resources
 		loaded = std::move(newdoc.loading);
 
-	if (newdoc.bad.exists())
-		ShowLoadProblem(newdoc.bad);
-
-	Subdiv_InvalidateAll();
-
-	// reset various editor state
-	Editor_ClearAction();
-	Selection_InvalidateLast();
-	edit.Selected->clear_all();
-	edit.highlight.clear();
-
-	if (main_win)
-	{
-		main_win->UpdateTotals(level);
-		main_win->UpdateGameInfo(loaded, conf);
-		main_win->InvalidatePanelObj();
-		main_win->redraw();
-		
-		main_win->SetTitle(wad->PathName().u8string(), map_name, wad->IsReadOnly());
-
-		// load the user state associated with this map
-		if (!M_LoadUserState())
-			M_DefaultUserState();
-	}
-	loaded.levelName = map_name.asUpper();
-	Status_Set("Loaded %s", loaded.levelName.c_str());
-	RedrawMap();
-
-	if (new_resources && main_win)
-	{
-		if (main_win->canvas)
-			main_win->canvas->DeleteContext();
-
-		main_win->browser->Populate();
-
-		// TODO: only call this when the IWAD has changed
-		main_win->propsLoadValues();
-	}
+	refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, new_resources);
 }
 
 
@@ -1306,7 +1312,15 @@ void Instance::CMD_GivenFile()
 
 	// TODO: remember last map visited in this wad
 
-	OpenFileMap(global::Pwad_list[index], NULL);
+	try
+	{
+		OpenFileMap(global::Pwad_list[index], NULL);
+	}
+	catch (const std::runtime_error& e)
+	{
+		gLog.printf("%s\n", e.what());
+		DLG_ShowError(false, "Cannot load given file %s: %s", global::Pwad_list[index].u8string().c_str(), e.what());
+	}
 }
 
 

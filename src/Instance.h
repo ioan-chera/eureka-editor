@@ -281,6 +281,7 @@ public:
 	void LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false);
 	bool MissingIWAD_Dialog();
 	bool M_SaveMap();
+	void refreshViewAfterLoad(const BadCount& bad, const Wad_file* wad, const SString& map_name, bool new_resources);
 
 	// M_NODES
 	void BuildNodesAfterSave(int lev_idx);

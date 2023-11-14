@@ -90,7 +90,15 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 	if (given_idx >= 0)
 		gInstance.last_given_file = given_idx;
 
-	OpenFileMap(*filename);
+	try
+	{
+		OpenFileMap(*filename);
+	}
+	catch (const std::runtime_error& e)
+	{
+		gLog.printf("%s\n", e.what());
+		DLG_ShowError(false, "Cannot load %s: %s", filename->u8string().c_str(), e.what());
+	}
 }
 
 static void file_do_load_recent(Fl_Widget *w, void *data)

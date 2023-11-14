@@ -871,6 +871,7 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata)
 
 	// clear the parse variables, pre-set a few vars
 	std::unordered_map<SString, SString> parseVars = loading.prepareConfigVariables();
+	std::vector<std::shared_ptr<Wad_file>> resourceWads;
 
 	try
 	{
@@ -895,17 +896,18 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata)
 			if (!wad)
 				ThrowException("Cannot load resource: %s", resource.u8string().c_str());
 
-			newres.resourceWads.push_back(wad);
+			resourceWads.push_back(wad);
 		}
 
 		std::shared_ptr<Wad_file> gameWad = Wad_file::Open(newres.loading.iwadName, WadOpenMode::read);
 		if (!gameWad)
 			ThrowException("Could not load IWAD file");
 
-		newres.waddata.reloadResources(gameWad, newres.config, newres.resourceWads);
+		newres.waddata.reloadResources(gameWad, newres.config, resourceWads);
 	}
-	catch (const std::runtime_error& )
+	catch (const std::runtime_error&e )
 	{
+		gLog.printf("%s\n", e.what());
 		throw;
 	}
 
@@ -919,54 +921,12 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata)
 //
 void Instance::Main_LoadResources(const LoadingData &loading) noexcept(false)
 {
-	ConfigData config;
-	std::vector<std::shared_ptr<Wad_file>> resourceWads;
-	LoadingData newLoading = loading;
-	try
-	{
-		gLog.printf("\n");
-		gLog.printf("----- Loading Resources -----\n");
+	auto newres = loadResources(loading, wad);
 
-		// clear the parse variables, pre-set a few vars
-		std::unordered_map<SString, SString> parseVars = loading.prepareConfigVariables();
-
-		readGameInfo(parseVars, newLoading, config);
-		readPortInfo(parseVars, newLoading, config);
-
-		for(const fs::path &resource : newLoading.resourceList)
-		{
-			if(MatchExtensionNoCase(resource, ".ugh"))
-			{
-				M_ParseDefinitionFile(parseVars, ParsePurpose::resource,
-									  &config, resource);
-				continue;
-			}
-			// Otherwise wad
-			if(!Wad_file::Validate(resource))
-				throw ParseException(SString("Invalid WAD file: ") + resource.u8string());
-
-			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
-														   WadOpenMode::read);
-			if(!wad)
-				throw ParseException(SString("Cannot load resource: ") + resource.u8string());
-
-			resourceWads.push_back(wad);
-		}
-	}
-	catch(const ParseException &e)
-	{
-		gLog.printf("Failed reloading wads: %s\n", e.what());
-		throw;
-	}
+	wad = std::move(newres.waddata);
+	conf = std::move(newres.config);
+	loaded = std::move(newres.loading);
 	
-	std::shared_ptr<Wad_file> gameWad = Wad_file::Open(newLoading.iwadName, WadOpenMode::read);
-	if(!gameWad)
-		ThrowException("Could not load IWAD file");
-	
-	wad.reloadResources(gameWad, config, resourceWads);
-	conf = config;
-	loaded = newLoading;
-
 	// Commit it
 	
 	// Must deselect now
