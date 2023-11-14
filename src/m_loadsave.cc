@@ -922,11 +922,11 @@ struct NewDocument
 	BadCount bad;
 };
 
-static NewDocument openDocument(Instance &inst, const Wad_file &wad, int level)
+static NewDocument openDocument(Instance &inst, const LoadingData &inLoading, const Wad_file &wad, int level)
 {
 	assert(level >= 0 && level < wad.LevelCount());
 
-	NewDocument newdoc = { Document(inst), inst.loaded, BadCount() };
+	NewDocument newdoc = { Document(inst), inLoading, BadCount() };
 
 	Document& doc = newdoc.doc;
 	LoadingData& loading = newdoc.loading;
@@ -1176,11 +1176,10 @@ void Instance::CMD_OpenMap()
 
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
-	// TODO: load level and resources safely
 	NewDocument newdoc = { Document(*this), LoadingData(), BadCount() };
 	try
 	{
-		newdoc = openDocument(*this, *wad, lev_num);
+		newdoc = openDocument(*this, loading, *wad, lev_num);
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -1221,7 +1220,8 @@ void Instance::CMD_OpenMap()
 		this->wad.master.ReplaceEditWad(newEditWad);
 
 	level = std::move(newdoc.doc);
-	loaded = std::move(newdoc.loading);
+	if(!new_resources)	// we already updated loaded with resources
+		loaded = std::move(newdoc.loading);
 
 	if (newdoc.bad.exists())
 		ShowLoadProblem(newdoc.bad);
