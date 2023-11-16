@@ -707,9 +707,9 @@ static inline void WrFlag(Lump_c *lump, int flags, const char *name, int mask)
 	}
 }
 
-static void UDMF_WriteInfo(const Instance &inst, Lump_c *lump)
+static void UDMF_WriteInfo(const LoadingData &loading, Lump_c *lump)
 {
-	lump->Printf("namespace = \"%s\";\n\n", inst.loaded.udmfNamespace.c_str());
+	lump->Printf("namespace = \"%s\";\n\n", loading.udmfNamespace.c_str());
 }
 
 static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
@@ -886,18 +886,18 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 	}
 }
 
-void Instance::UDMF_SaveLevel() const
+void Instance::UDMF_SaveLevel(const LoadingData& loading, Wad_file& wad) const
 {
-	Lump_c &lump = wad.master.editWad()->AddLump("TEXTMAP");
+	Lump_c &lump = wad.AddLump("TEXTMAP");
 
-	UDMF_WriteInfo(*this, &lump);
+	UDMF_WriteInfo(loading, &lump);
 	UDMF_WriteThings(*this, &lump);
 	UDMF_WriteVertices(level, &lump);
 	UDMF_WriteLineDefs(*this, &lump);
 	UDMF_WriteSideDefs(level, &lump);
 	UDMF_WriteSectors(level, &lump);
 
-	wad.master.editWad()->AddLump("ENDMAP");
+	wad.AddLump("ENDMAP");
 }
 
 

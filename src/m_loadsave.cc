@@ -1410,11 +1410,11 @@ void Instance::CMD_FlipMap()
 //  SAVING CODE
 //------------------------------------------------------------------------
 
-void Instance::SaveHeader(const SString &level)
+void Instance::SaveHeader(Wad_file& wad, const SString &level) 
 {
 	int size = (int)this->level.headerData.size();
 
-	Lump_c *lump = wad.master.editWad()->AddLevel(level, &saving_level);
+	Lump_c *lump = wad.AddLevel(level, &saving_level);
 
 	if (size > 0)
 	{
@@ -1423,11 +1423,11 @@ void Instance::SaveHeader(const SString &level)
 }
 
 
-void Instance::SaveBehavior()
+void Instance::SaveBehavior(Wad_file &wad) const
 {
 	int size = (int)level.behaviorData.size();
 
-	Lump_c &lump = wad.master.editWad()->AddLump("BEHAVIOR");
+	Lump_c &lump = wad.AddLump("BEHAVIOR");
 
 	if (size > 0)
 	{
@@ -1436,22 +1436,22 @@ void Instance::SaveBehavior()
 }
 
 
-void Instance::SaveScripts()
+void Instance::SaveScripts(Wad_file& wad) const
 {
 	int size = (int)level.scriptsData.size();
 
 	if (size > 0)
 	{
-		Lump_c &lump = wad.master.editWad()->AddLump("SCRIPTS");
+		Lump_c &lump = wad.AddLump("SCRIPTS");
 
 		lump.Write(&level.scriptsData[0], size);
 	}
 }
 
 
-void Instance::SaveVertices()
+void Instance::SaveVertices(Wad_file &wad) const
 {
-	Lump_c &lump = wad.master.editWad()->AddLump("VERTEXES");
+	Lump_c &lump = wad.AddLump("VERTEXES");
 
 	for (const auto &vert : level.vertices)
 	{
@@ -1465,9 +1465,9 @@ void Instance::SaveVertices()
 }
 
 
-void Instance::SaveSectors()
+void Instance::SaveSectors(Wad_file &wad) const
 {
-	Lump_c &lump = wad.master.editWad()->AddLump("SECTORS");
+	Lump_c &lump = wad.AddLump("SECTORS");
 
 	for (const auto& sec : level.sectors)
 	{
@@ -1488,9 +1488,9 @@ void Instance::SaveSectors()
 }
 
 
-void Instance::SaveThings()
+void Instance::SaveThings(Wad_file &wad) const
 {
-	Lump_c &lump = wad.master.editWad()->AddLump("THINGS");
+	Lump_c &lump = wad.AddLump("THINGS");
 
 	for (const auto &th : level.things)
 	{
@@ -1509,9 +1509,9 @@ void Instance::SaveThings()
 
 
 // IOANCH 9/2015
-void Instance::SaveThings_Hexen()
+void Instance::SaveThings_Hexen(Wad_file& wad) const
 {
-	Lump_c &lump = wad.master.editWad()->AddLump("THINGS");
+	Lump_c &lump = wad.AddLump("THINGS");
 
 	for (const auto &th : level.things)
 	{
@@ -1539,9 +1539,9 @@ void Instance::SaveThings_Hexen()
 }
 
 
-void Instance::SaveSideDefs()
+void Instance::SaveSideDefs(Wad_file &wad) const
 {
-	Lump_c &lump = wad.master.editWad()->AddLump("SIDEDEFS");
+	Lump_c &lump = wad.AddLump("SIDEDEFS");
 
 	for (const auto &side : level.sidedefs)
 	{
@@ -1561,9 +1561,9 @@ void Instance::SaveSideDefs()
 }
 
 
-void Instance::SaveLineDefs()
+void Instance::SaveLineDefs(Wad_file &wad) const
 {
-	Lump_c &lump = wad.master.editWad()->AddLump("LINEDEFS");
+	Lump_c &lump = wad.AddLump("LINEDEFS");
 
 	for (const auto &ld : level.linedefs)
 	{
@@ -1585,9 +1585,9 @@ void Instance::SaveLineDefs()
 
 
 // IOANCH 9/2015
-void Instance::SaveLineDefs_Hexen()
+void Instance::SaveLineDefs_Hexen(Wad_file &wad) const
 {
-	Lump_c &lump = wad.master.editWad()->AddLump("LINEDEFS");
+	Lump_c &lump = wad.AddLump("LINEDEFS");
 
 	for (const auto &ld : level.linedefs)
 	{
@@ -1613,9 +1613,9 @@ void Instance::SaveLineDefs_Hexen()
 }
 
 
-void Instance::EmptyLump(const char *name) const
+void Instance::EmptyLump(Wad_file& wad, const char *name) const
 {
-	wad.master.editWad()->AddLump(name);
+	wad.AddLump(name);
 }
 
 
@@ -1641,42 +1641,42 @@ void Instance::SaveLevel(LoadingData& loading, const SString &level)
 
 	wad.master.editWad()->InsertPoint(level_lump);
 
-	SaveHeader(level);
+	SaveHeader(*wad.master.editWad(), level);
 
 	if (loading.levelFormat == MapFormat::udmf)
 	{
-		UDMF_SaveLevel();
+		UDMF_SaveLevel(loading, *wad.master.editWad());
 	}
 	else
 	{
 		// IOANCH 9/2015: save Hexen format maps
 		if (loading.levelFormat == MapFormat::hexen)
 		{
-			SaveThings_Hexen();
-			SaveLineDefs_Hexen();
+			SaveThings_Hexen(*wad.master.editWad());
+			SaveLineDefs_Hexen(*wad.master.editWad());
 		}
 		else
 		{
-			SaveThings();
-			SaveLineDefs();
+			SaveThings(*wad.master.editWad());
+			SaveLineDefs(*wad.master.editWad());
 		}
 
-		SaveSideDefs();
-		SaveVertices();
+		SaveSideDefs(*wad.master.editWad());
+		SaveVertices(*wad.master.editWad());
 
-		EmptyLump("SEGS");
-		EmptyLump("SSECTORS");
-		EmptyLump("NODES");
+		EmptyLump(*wad.master.editWad(), "SEGS");
+		EmptyLump(*wad.master.editWad(), "SSECTORS");
+		EmptyLump(*wad.master.editWad(), "NODES");
 
-		SaveSectors();
+		SaveSectors(*wad.master.editWad());
 
-		EmptyLump("REJECT");
-		EmptyLump("BLOCKMAP");
+		EmptyLump(*wad.master.editWad(), "REJECT");
+		EmptyLump(*wad.master.editWad(), "BLOCKMAP");
 
 		if (loading.levelFormat == MapFormat::hexen)
 		{
-			SaveBehavior();
-			SaveScripts();
+			SaveBehavior(*wad.master.editWad());
+			SaveScripts(*wad.master.editWad());
 		}
 	}
 

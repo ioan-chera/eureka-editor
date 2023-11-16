@@ -292,7 +292,7 @@ public:
 
 	// M_UDMF
 	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Document &doc, LoadingData &loading, BadCount &bad) const;
-	void UDMF_SaveLevel() const;
+	void UDMF_SaveLevel(const LoadingData &loading, Wad_file &wad) const;
 
 	// MAIN
 	fs::path Main_FileOpFolder() const;
@@ -379,24 +379,24 @@ private:
 	void DoExecuteCommand(const editor_command_t *cmd);
 
 	// M_LOADSAVE
-	void EmptyLump(const char *name) const;
+	void EmptyLump(Wad_file &wad, const char *name) const;
 	void FreshLevel();
 	
 	bool M_ExportMap();
 	void Navigate2D();
 	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
 	tl::optional<fs::path> Project_AskFile() const;
-	void SaveBehavior();
-	void SaveHeader(const SString &level);
+	void SaveBehavior(Wad_file& wad) const;
+	void SaveHeader(Wad_file &wad, const SString &level);
 	void SaveLevel(LoadingData& loading, const SString& level);
-	void SaveLineDefs();
-	void SaveLineDefs_Hexen();
-	void SaveThings();
-	void SaveThings_Hexen();
-	void SaveScripts();
-	void SaveSectors();
-	void SaveSideDefs();
-	void SaveVertices();
+	void SaveLineDefs(Wad_file &wad) const;
+	void SaveLineDefs_Hexen(Wad_file &wad) const;
+	void SaveThings(Wad_file &wad) const;
+	void SaveThings_Hexen(Wad_file &wad) const;
+	void SaveScripts(Wad_file& wad) const;
+	void SaveSectors(Wad_file &wad) const;
+	void SaveSideDefs(Wad_file &wad) const;
+	void SaveVertices(Wad_file &wad) const;
 
 	// M_NODES
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);

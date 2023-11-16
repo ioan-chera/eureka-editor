@@ -2015,7 +2015,7 @@ build_result_e LevelData::SaveUDMF(const Instance &inst, node_t *root_node)
 	}
 	catch (const std::runtime_error& e)
 	{
-		gLog.printf("Failed building UDMF nodes: %d\n", e.what());
+		gLog.printf("Failed building UDMF nodes: %s\n", e.what());
 		return BUILD_BadFile;
 	}
 
