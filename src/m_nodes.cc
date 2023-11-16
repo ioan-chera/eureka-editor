@@ -380,18 +380,16 @@ void Instance::BuildNodesAfterSave(int lev_idx)
 {
 	nodeialog = NULL;
 
-	nb_info = new nodebuildinfo_t;
+	nodebuildinfo_t nb_info;
 
-	PrepareInfo(nb_info);
+	PrepareInfo(&nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx, *this);
+	build_result_e ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this);
 
 	// TODO : maybe print # of serious/minor warnings
 
 	if (ret != BUILD_OK)
 		gLog.printf("NODES FAILED TO FAILED.\n");
-
-	delete nb_info;
 }
 
 

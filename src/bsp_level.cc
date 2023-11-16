@@ -1740,7 +1740,7 @@ void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 }
 
 
-void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node)
+void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node) noexcept(false)
 {
 	// WISH : compute a max_size
 
@@ -2002,14 +2002,22 @@ build_result_e LevelData::SaveUDMF(const Instance &inst, node_t *root_node)
 	// remove any existing ZNODES lump
 	inst.wad.master.editWad()->RemoveZNodes(current_idx);
 
-	if (num_real_lines >= 0)
+	try
 	{
-		SortSegs();
+		if (num_real_lines >= 0)
+		{
+			SortSegs();
 
-		SaveXGL3Format(inst, root_node);
+			SaveXGL3Format(inst, root_node);
+		}
+
+		inst.wad.master.editWad()->writeToDisk();
 	}
-
-	inst.wad.master.editWad()->writeToDisk();
+	catch (const std::runtime_error& e)
+	{
+		gLog.printf("Failed building UDMF nodes: %d\n", e.what());
+		return BUILD_BadFile;
+	}
 
 	if (overflows > 0)
 	{

@@ -388,7 +388,7 @@ private:
 	tl::optional<fs::path> Project_AskFile() const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);
-	void SaveLevel(const SString &level);
+	void SaveLevel(LoadingData& loading, const SString& level);
 	void SaveLineDefs();
 	void SaveLineDefs_Hexen();
 	void SaveThings();

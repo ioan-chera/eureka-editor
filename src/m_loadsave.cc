@@ -261,7 +261,7 @@ void Instance::CMD_NewProject()
 		FreshLevel();
 
 		// save it now : sets Level_name and window title
-		SaveLevel(map_name);
+		SaveLevel(loaded, map_name);
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -344,7 +344,7 @@ void Instance::CMD_FreshMap()
 		FreshLevel();
 
 		// save it now : sets Level_name and window title
-		SaveLevel(map_name);
+		SaveLevel(loaded, map_name);
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -1623,10 +1623,10 @@ void Instance::EmptyLump(const char *name) const
 // Write out the level data
 //
 
-void Instance::SaveLevel(const SString &level)
+void Instance::SaveLevel(LoadingData& loading, const SString &level)
 {
 	// set global level name now (for debugging code)
-	loaded.levelName = level.asUpper();
+	loading.levelName = level.asUpper();
 
 	// remove previous version of level (if it exists)
 	int lev_num = wad.master.editWad()->LevelFind(level);
@@ -1643,14 +1643,14 @@ void Instance::SaveLevel(const SString &level)
 
 	SaveHeader(level);
 
-	if (loaded.levelFormat == MapFormat::udmf)
+	if (loading.levelFormat == MapFormat::udmf)
 	{
 		UDMF_SaveLevel();
 	}
 	else
 	{
 		// IOANCH 9/2015: save Hexen format maps
-		if (loaded.levelFormat == MapFormat::hexen)
+		if (loading.levelFormat == MapFormat::hexen)
 		{
 			SaveThings_Hexen();
 			SaveLineDefs_Hexen();
@@ -1673,7 +1673,7 @@ void Instance::SaveLevel(const SString &level)
 		EmptyLump("REJECT");
 		EmptyLump("BLOCKMAP");
 
-		if (loaded.levelFormat == MapFormat::hexen)
+		if (loading.levelFormat == MapFormat::hexen)
 		{
 			SaveBehavior();
 			SaveScripts();
@@ -1695,16 +1695,16 @@ void Instance::SaveLevel(const SString &level)
 	// [ it doesn't change the on-disk wad file at all ]
 	wad.master.editWad()->SortLevels();
 
-	loaded.writeEurekaLump(*wad.master.editWad().get());
+	loading.writeEurekaLump(*wad.master.editWad().get());
 	wad.master.editWad()->writeToDisk();
 
-	global::recent.addRecent(wad.master.editWad()->PathName(), loaded.levelName, global::home_dir);
+	global::recent.addRecent(wad.master.editWad()->PathName(), loading.levelName, global::home_dir);
 
-	Status_Set("Saved %s", loaded.levelName.c_str());
+	Status_Set("Saved %s", loading.levelName.c_str());
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad.master.editWad()->PathName().u8string(), loaded.levelName, false);
+		main_win->SetTitle(wad.master.editWad()->PathName().u8string(), loading.levelName, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1741,7 +1741,7 @@ bool Instance::M_SaveMap()
 
 	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.editWad()->PathName().u8string().c_str());
 
-	SaveLevel(loaded.levelName);
+	SaveLevel(loaded, loaded.levelName);
 
 	return true;
 }
@@ -1788,53 +1788,37 @@ bool Instance::M_ExportMap()
 		return false;
 	}
 
-
-	// does the file already exist?  if not, create it...
-	bool exists = FileExists(filename);
-
-	std::shared_ptr<Wad_file> wad;
-
-	if (exists)
-	{
-		wad = Wad_file::Open(filename, WadOpenMode::append);
-
-		if (wad && wad->IsReadOnly())
-		{
-			DLG_Notify("Cannot export the map into a READ-ONLY file.");
-
-			return false;
-		}
-
-		// adopt iwad/port/resources of the target wad
-		if (wad->FindLump(EUREKA_LUMP))
-		{
-			if (! loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
-				return false;
-		}
-	}
-	else
-	{
-		wad = Wad_file::Open(filename, WadOpenMode::write);
-	}
-
-	if (! wad)
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename, WadOpenMode::append);
+	if (!wad)
 	{
 		DLG_Notify("Unable to export the map:\n\n%s",
-		           "Error creating output file");
+			"Error creating output file");
 		return false;
 	}
+	if (wad->IsReadOnly())
+	{
+		DLG_Notify("Cannot export the map into a READ-ONLY file.");
 
+		return false;
+	}
+	// adopt iwad/port/resources of the target wad
+	LoadingData loading = loaded;
+	if (wad->FindLump(EUREKA_LUMP))
+	{
+		if (!loading.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
+			return false;
+	}
 
 	// ask user for map name
 
 	SString map_name;
 	{
-		auto dialog = std::make_unique<UI_ChooseMap>(loaded.levelName.c_str());
+		UI_ChooseMap dialog(loading.levelName.c_str());
 
-		dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])),
+		dialog.PopulateButtons(static_cast<char>(toupper(loading.levelName[0])),
 								wad.get());
 
-		map_name = dialog->Run();
+		map_name = dialog.Run();
 	}
 
 	// cancelled?
@@ -1847,7 +1831,7 @@ bool Instance::M_ExportMap()
 	// we will write into the chosen wad.
 	// however if the level already exists, get confirmation first
 
-	if (exists && wad->LevelFind(map_name) >= 0)
+	if (wad->LevelFind(map_name) >= 0)
 	{
 		if (DLG_Confirm({ "Cancel", "&Overwrite" },
 		                overwrite_message, "selected") <= 0)
@@ -1857,7 +1841,7 @@ bool Instance::M_ExportMap()
 	}
 
 	// back-up an existing wad
-	if (exists)
+	if (wad->NumLumps() > 0)
 	{
 		M_BackupWad(wad.get());
 	}
@@ -1866,12 +1850,13 @@ bool Instance::M_ExportMap()
 	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// the new wad replaces the current PWAD
+	// TODO: replace edit wad after we're done
 	this->wad.master.ReplaceEditWad(wad);
 
-	SaveLevel(map_name);
+	SaveLevel(loading, map_name);
 
 	// do this after the save (in case it fatal errors)
-	Main_LoadResources(loaded);
+	Main_LoadResources(loading);
 
 	return true;
 }
@@ -1896,14 +1881,7 @@ void Instance::CMD_SaveMap()
 
 void Instance::CMD_ExportMap()
 {
-	try
-	{
-		M_ExportMap();
-	}
-	catch (const std::runtime_error& e)
-	{
-		DLG_ShowError(false, "Could not export map: %s", e.what());
-	}
+	M_ExportMap();
 }
 
 
@@ -1954,7 +1932,7 @@ void Instance::CMD_CopyMap()
 		// perform the copy (just a save)
 		gLog.printf("Copying Map : %s --> %s\n", loaded.levelName.c_str(), new_name.c_str());
 
-		SaveLevel(new_name);
+		SaveLevel(loaded, new_name);
 
 		Status_Set("Copied to %s", loaded.levelName.c_str());
 	}

@@ -506,7 +506,7 @@ private:
 	void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3) noexcept(false);
 	void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3) noexcept(false);
 	void SaveZDFormat(const Instance &inst, node_t *root_node);
-	void SaveXGL3Format(const Instance &inst, node_t *root_node);
+	void SaveXGL3Format(const Instance &inst, node_t *root_node) noexcept(false);
 	
 	/* ----- whole-level routines --------------------------- */
 	void LoadLevel(const Instance &inst);
