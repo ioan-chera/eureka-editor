@@ -317,7 +317,7 @@ inline static bool IsGLNodeLump(const SString &name) noexcept
 //
 // Wad total size
 //
-int Wad_file::TotalSize() const
+int Wad_file::TotalSize() const noexcept
 {
 	int size = 12;
 	for(const LumpRef &ref : directory)
@@ -1067,14 +1067,16 @@ void Wad_file::InsertPoint(int index) noexcept
 //
 // This one merely saves it as a new filename
 //
-bool Wad_file::Backup(const fs::path &new_filename)
+bool Wad_file::Backup(const fs::path &new_filename) const
 {
 	try
 	{
 		writeToPath(new_filename);
 	}
-	catch(const WadWriteException &)
+	catch(const std::exception &e)
 	{
+		gLog.printf("Failed backing up %s to %s: %s\n", PathName().u8string().c_str(),
+			new_filename.u8string().c_str(), e.what());
 		return false;
 	}
 	return true;

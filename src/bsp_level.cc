@@ -1357,7 +1357,7 @@ public:
 		finishLump();
 	}
 	
-	void appendLump(const void *data, int length);
+	void appendLump(const void *data, int length) noexcept(false);
 	
 private:
 	void finishLump();
@@ -1382,7 +1382,7 @@ ZLibContext::ZLibContext(nodebuildinfo_t * cur_info, std::vector<byte> &data) : 
 	out_stream.avail_out = sizeof(out_buffer);
 }
 
-void ZLibContext::appendLump(const void *data, int length)
+void ZLibContext::appendLump(const void *data, int length) noexcept(false)
 {
 	if (! cur_info->force_compress)
 	{
@@ -1458,7 +1458,7 @@ static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
 static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
 static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
 
-void LevelData::PutZVertices(ZLibContext &zcontext) const
+void LevelData::PutZVertices(ZLibContext &zcontext) const noexcept(false)
 {
 	int count, i;
 
@@ -1490,7 +1490,7 @@ void LevelData::PutZVertices(ZLibContext &zcontext) const
 }
 
 
-void LevelData::PutZSubsecs(ZLibContext &zcontext) const
+void LevelData::PutZSubsecs(ZLibContext &zcontext) const noexcept(false)
 {
 	int i;
 	int count;
@@ -1531,7 +1531,7 @@ void LevelData::PutZSubsecs(ZLibContext &zcontext) const
 }
 
 
-void LevelData::PutZSegs(ZLibContext &zcontext) const
+void LevelData::PutZSegs(ZLibContext &zcontext) const noexcept(false)
 {
 	int i, count;
 	u32_t raw_num = LE_U32((int)segs.size());
@@ -1566,7 +1566,7 @@ void LevelData::PutZSegs(ZLibContext &zcontext) const
 }
 
 
-void LevelData::PutXGL3Segs(ZLibContext &zcontext) const
+void LevelData::PutXGL3Segs(ZLibContext &zcontext) const noexcept(false)
 {
 	int i, count;
 	u32_t raw_num = LE_U32((int)segs.size());
@@ -1608,7 +1608,7 @@ void LevelData::PutXGL3Segs(ZLibContext &zcontext) const
 }
 
 
-void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
+void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3) noexcept(false)
 {
 	raw_v5_node_t raw;
 
@@ -1686,7 +1686,7 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3)
 }
 
 
-void LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3)
+void LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3) noexcept(false)
 {
 	u32_t raw_num = LE_U32((int)nodes.size());
 

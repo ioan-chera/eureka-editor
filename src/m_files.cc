@@ -883,7 +883,7 @@ static void Backup_Prune(const fs::path &dir_name, int b_low, int b_high, int wa
 }
 
 
-void M_BackupWad(Wad_file *wad)
+void M_BackupWad(const Wad_file *wad)
 {
 	// disabled ?
 	if (config::backup_max_files <= 0 || config::backup_max_space <= 0)
@@ -916,13 +916,6 @@ void M_BackupWad(Wad_file *wad)
 	int b_low  = scan_data.low;
 	int b_high = scan_data.high;
 
-	if (b_low < b_high)
-	{
-		int wad_size = wad->TotalSize();
-
-		Backup_Prune(dir_name, b_low, b_high, wad_size);
-	}
-
 	// actually back-up the file
 
 	fs::path dest_name = Backup_Name(dir_name, b_high + 1);
@@ -932,6 +925,14 @@ void M_BackupWad(Wad_file *wad)
 		// Hmmm, show a dialog ??
 		gLog.printf("WARNING: backup failed (cannot copy file)\n");
 		return;
+	}
+
+	// Now do the pruning:
+	if (b_low < b_high)
+	{
+		int wad_size = wad->TotalSize();
+
+		Backup_Prune(dir_name, b_low, b_high, wad_size);
 	}
 
 	gLog.printf("Backed up wad to: %s\n", dest_name.u8string().c_str());

@@ -141,7 +141,7 @@ void M_OpenRecentFromMenu(void *priv_data);
 void M_ValidateGivenFiles();
 int  M_FindGivenFile(const fs::path &filename);
 
-void M_BackupWad(Wad_file *wad);
+void M_BackupWad(const Wad_file *wad);
 
 namespace global
 {

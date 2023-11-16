@@ -219,7 +219,7 @@ public:
 		return kind == WadKind::IWAD;
 	}
 
-	int TotalSize() const;
+	int TotalSize() const noexcept;
 
 	int NumLumps() const noexcept
 	{
@@ -254,7 +254,7 @@ public:
 
 	// backup the current wad into the given filename.
 	// returns true if successful, false on error.
-	bool Backup(const fs::path &new_filename);
+	bool Backup(const fs::path &new_filename) const;
 
 	void writeToDisk() noexcept(false);
 

@@ -499,12 +499,12 @@ private:
 	void SortSegs();
 	
 	/* ----- ZDoom format writing --------------------------- */
-	void PutZVertices(ZLibContext &zcontext) const;
-	void PutZSubsecs(ZLibContext &zcontext) const;
-	void PutZSegs(ZLibContext &zcontext) const;
-	void PutXGL3Segs(ZLibContext &zcontext) const;
-	void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3);
-	void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3);
+	void PutZVertices(ZLibContext &zcontext) const noexcept(false);
+	void PutZSubsecs(ZLibContext &zcontext) const noexcept(false);
+	void PutZSegs(ZLibContext &zcontext) const noexcept(false);
+	void PutXGL3Segs(ZLibContext &zcontext) const noexcept(false);
+	void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3) noexcept(false);
+	void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3) noexcept(false);
 	void SaveZDFormat(const Instance &inst, node_t *root_node);
 	void SaveXGL3Format(const Instance &inst, node_t *root_node);
 	
