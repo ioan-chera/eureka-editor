@@ -24,6 +24,7 @@
 #include "lib_util.h"
 #include "m_strings.h"
 #include "sys_type.h"
+#include "Thing.h"
 
 #include <vector>
 
@@ -32,6 +33,8 @@ class Lump_c;
 struct Sector;
 enum class Side;
 struct Document;
+class Wad_file;
+struct LoadingData;
 
 // Node Build Information Structure
 //
@@ -84,7 +87,7 @@ enum build_result_e
 };
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst, const LoadingData& loading, Wad_file &wad);
 
 
 //======================================================================
@@ -400,6 +403,15 @@ class LevelData
 {
 	
 public:
+	explicit LevelData(MapFormat format, Wad_file &wad) : format(format), wad(wad)
+	{
+	}
+
+	MapFormat GetFormat() const
+	{
+		return format;
+	}
+
 	// return a new end vertex to compensate for a seg that would end up
 	// being zero-length (after integer rounding).  Doesn't compute the
 	// wall-tip info (thus this routine should only be used _after_ node
@@ -451,12 +463,12 @@ private:
 	
 	/* ----- create blockmap ------------------------------------ */
 	
-	void WriteBlockmap(const Instance &inst) const;
+	void WriteBlockmap() const;
 	
 	void PutBlockmap(const Instance &inst);
 	
 	// REJECT : Generate the reject table
-	void Reject_WriteLump(const Instance &inst) const;
+	void Reject_WriteLump() const;
 	void PutReject(const Instance &inst);
 	
 	// allocation routines
@@ -479,7 +491,7 @@ private:
 	/* ----- writing routines ------------------------------ */
 	void MarkOverflow(int flags);
 	void PutVertices(const Instance &inst, const char *name, int do_gl);
-	void PutGLVertices(const Instance &inst, int do_v5) const;
+	void PutGLVertices(int do_v5) const;
 	inline u32_t VertexIndex_XNOD(const vertex_t *v) const noexcept
 	{
 		if (v->is_new)
@@ -488,7 +500,7 @@ private:
 		return (u32_t) v->index;
 	}
 	void PutSegs(const Instance &inst);
-	void PutGLSegs(const Instance &inst) const;
+	void PutGLSegs() const;
 	void PutGLSegs_V5(const Instance &inst) const;
 	void PutSubsecs(const Instance &inst, const char *name, int do_gl);
 	void PutGLSubsecs_V5(const Instance &inst) const;
@@ -517,14 +529,14 @@ private:
 		return SString::printf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
 	}
 	void UpdateGLMarker(const Instance &inst, Lump_c *marker) const;
-	void AddMissingLump(const Instance &inst, const char *name, const char *after) ;
+	void AddMissingLump(const Instance &inst, const char *name, const char *after);
 	build_result_e SaveLevel(node_t *root_node, const Instance &inst);
 	build_result_e SaveUDMF(const Instance &inst, node_t *root_node);
 	
 	/* ---------------------------------------------------------------- */
-	Lump_c * FindLevelLump(const Instance &inst, const char *name) const noexcept;
-	Lump_c & CreateLevelLump(const Instance &inst, const char *name) const;
-	Lump_c & CreateGLMarker(const Instance &inst) const;
+	Lump_c * FindLevelLump(const char *name) const noexcept;
+	Lump_c & CreateLevelLump(const char *name) const;
+	Lump_c & CreateGLMarker() const;
 	
 	// NODES
 	seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc);
@@ -624,6 +636,9 @@ private:
 	
 	// internal storage of node building parameters
 	nodebuildinfo_t * cur_info = NULL;
+
+	const MapFormat format;
+	Wad_file& wad;
 };
 
 

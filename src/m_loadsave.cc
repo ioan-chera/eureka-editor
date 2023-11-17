@@ -261,7 +261,7 @@ void Instance::CMD_NewProject()
 		FreshLevel();
 
 		// save it now : sets Level_name and window title
-		SaveLevel(loaded, map_name);
+		SaveLevel(loaded, map_name, *this->wad.master.editWad());
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -344,7 +344,7 @@ void Instance::CMD_FreshMap()
 		FreshLevel();
 
 		// save it now : sets Level_name and window title
-		SaveLevel(loaded, map_name);
+		SaveLevel(loaded, map_name, *wad.master.editWad());
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -1410,53 +1410,53 @@ void Instance::CMD_FlipMap()
 //  SAVING CODE
 //------------------------------------------------------------------------
 
-int Instance::SaveHeader(Wad_file& wad, const SString &level) 
+int Document::SaveHeader(Wad_file& wad, const SString &level) 
 {
-	int size = (int)this->level.headerData.size();
+	int size = (int)headerData.size();
 
 	int saving_level;
 	Lump_c *lump = wad.AddLevel(level, &saving_level);
 
 	if (size > 0)
 	{
-		lump->Write(&this->level.headerData[0], size);
+		lump->Write(&headerData[0], size);
 	}
 
 	return saving_level;
 }
 
 
-void Instance::SaveBehavior(Wad_file &wad) const
+void Document::SaveBehavior(Wad_file &wad) const
 {
-	int size = (int)level.behaviorData.size();
+	int size = (int)behaviorData.size();
 
 	Lump_c &lump = wad.AddLump("BEHAVIOR");
 
 	if (size > 0)
 	{
-		lump.Write(&level.behaviorData[0], size);
+		lump.Write(&behaviorData[0], size);
 	}
 }
 
 
-void Instance::SaveScripts(Wad_file& wad) const
+void Document::SaveScripts(Wad_file& wad) const
 {
-	int size = (int)level.scriptsData.size();
+	int size = (int)scriptsData.size();
 
 	if (size > 0)
 	{
 		Lump_c &lump = wad.AddLump("SCRIPTS");
 
-		lump.Write(&level.scriptsData[0], size);
+		lump.Write(&scriptsData[0], size);
 	}
 }
 
 
-void Instance::SaveVertices(Wad_file &wad) const
+void Document::SaveVertices(Wad_file &wad) const
 {
 	Lump_c &lump = wad.AddLump("VERTEXES");
 
-	for (const auto &vert : level.vertices)
+	for (const auto &vert : vertices)
 	{
 		raw_vertex_t raw{};
 
@@ -1468,11 +1468,11 @@ void Instance::SaveVertices(Wad_file &wad) const
 }
 
 
-void Instance::SaveSectors(Wad_file &wad) const
+void Document::SaveSectors(Wad_file &wad) const
 {
 	Lump_c &lump = wad.AddLump("SECTORS");
 
-	for (const auto& sec : level.sectors)
+	for (const auto& sec : sectors)
 	{
 		raw_sector_t raw{};
 
@@ -1491,11 +1491,11 @@ void Instance::SaveSectors(Wad_file &wad) const
 }
 
 
-void Instance::SaveThings(Wad_file &wad) const
+void Document::SaveThings(Wad_file &wad) const
 {
 	Lump_c &lump = wad.AddLump("THINGS");
 
-	for (const auto &th : level.things)
+	for (const auto &th : things)
 	{
 		raw_thing_t raw{};
 
@@ -1512,11 +1512,11 @@ void Instance::SaveThings(Wad_file &wad) const
 
 
 // IOANCH 9/2015
-void Instance::SaveThings_Hexen(Wad_file& wad) const
+void Document::SaveThings_Hexen(Wad_file& wad) const
 {
 	Lump_c &lump = wad.AddLump("THINGS");
 
-	for (const auto &th : level.things)
+	for (const auto &th : things)
 	{
 		raw_hexen_thing_t raw{};
 
@@ -1542,11 +1542,11 @@ void Instance::SaveThings_Hexen(Wad_file& wad) const
 }
 
 
-void Instance::SaveSideDefs(Wad_file &wad) const
+void Document::SaveSideDefs(Wad_file &wad) const
 {
 	Lump_c &lump = wad.AddLump("SIDEDEFS");
 
-	for (const auto &side : level.sidedefs)
+	for (const auto &side : sidedefs)
 	{
 		raw_sidedef_t raw{};
 
@@ -1564,11 +1564,11 @@ void Instance::SaveSideDefs(Wad_file &wad) const
 }
 
 
-void Instance::SaveLineDefs(Wad_file &wad) const
+void Document::SaveLineDefs(Wad_file &wad) const
 {
 	Lump_c &lump = wad.AddLump("LINEDEFS");
 
-	for (const auto &ld : level.linedefs)
+	for (const auto &ld : linedefs)
 	{
 		raw_linedef_t raw{};
 
@@ -1588,11 +1588,11 @@ void Instance::SaveLineDefs(Wad_file &wad) const
 
 
 // IOANCH 9/2015
-void Instance::SaveLineDefs_Hexen(Wad_file &wad) const
+void Document::SaveLineDefs_Hexen(Wad_file &wad) const
 {
 	Lump_c &lump = wad.AddLump("LINEDEFS");
 
-	for (const auto &ld : level.linedefs)
+	for (const auto &ld : linedefs)
 	{
 		raw_hexen_linedef_t raw{};
 
@@ -1616,7 +1616,7 @@ void Instance::SaveLineDefs_Hexen(Wad_file &wad) const
 }
 
 
-void Instance::EmptyLump(Wad_file& wad, const char *name) const
+static void EmptyLump(Wad_file& wad, const char *name)
 {
 	wad.AddLump(name);
 }
@@ -1626,88 +1626,88 @@ void Instance::EmptyLump(Wad_file& wad, const char *name) const
 // Write out the level data
 //
 
-void Instance::SaveLevel(LoadingData& loading, const SString &level)
+void Instance::SaveLevel(LoadingData& loading, const SString &level, Wad_file &wad)
 {
 	// set global level name now (for debugging code)
 	loading.levelName = level.asUpper();
 
 	// remove previous version of level (if it exists)
-	int lev_num = wad.master.editWad()->LevelFind(level);
+	int lev_num = wad.LevelFind(level);
 	int level_lump = -1;
 
 	if (lev_num >= 0)
 	{
-		level_lump = wad.master.editWad()->LevelHeader(lev_num);
+		level_lump = wad.LevelHeader(lev_num);
 
-		wad.master.editWad()->RemoveLevel(lev_num);
+		wad.RemoveLevel(lev_num);
 	}
 
-	wad.master.editWad()->InsertPoint(level_lump);
+	wad.InsertPoint(level_lump);
 
-	int saving_level = SaveHeader(*wad.master.editWad(), level);
+	int saving_level = this->level.SaveHeader(wad, level);
 
 	if (loading.levelFormat == MapFormat::udmf)
 	{
-		UDMF_SaveLevel(loading, *wad.master.editWad());
+		UDMF_SaveLevel(loading, wad);
 	}
 	else
 	{
 		// IOANCH 9/2015: save Hexen format maps
 		if (loading.levelFormat == MapFormat::hexen)
 		{
-			SaveThings_Hexen(*wad.master.editWad());
-			SaveLineDefs_Hexen(*wad.master.editWad());
+			this->level.SaveThings_Hexen(wad);
+			this->level.SaveLineDefs_Hexen(wad);
 		}
 		else
 		{
-			SaveThings(*wad.master.editWad());
-			SaveLineDefs(*wad.master.editWad());
+			this->level.SaveThings(wad);
+			this->level.SaveLineDefs(wad);
 		}
 
-		SaveSideDefs(*wad.master.editWad());
-		SaveVertices(*wad.master.editWad());
+		this->level.SaveSideDefs(wad);
+		this->level.SaveVertices(wad);
 
-		EmptyLump(*wad.master.editWad(), "SEGS");
-		EmptyLump(*wad.master.editWad(), "SSECTORS");
-		EmptyLump(*wad.master.editWad(), "NODES");
+		EmptyLump(wad, "SEGS");
+		EmptyLump(wad, "SSECTORS");
+		EmptyLump(wad, "NODES");
 
-		SaveSectors(*wad.master.editWad());
+		this->level.SaveSectors(wad);
 
-		EmptyLump(*wad.master.editWad(), "REJECT");
-		EmptyLump(*wad.master.editWad(), "BLOCKMAP");
+		EmptyLump(wad, "REJECT");
+		EmptyLump(wad, "BLOCKMAP");
 
 		if (loading.levelFormat == MapFormat::hexen)
 		{
-			SaveBehavior(*wad.master.editWad());
-			SaveScripts(*wad.master.editWad());
+			this->level.SaveBehavior(wad);
+			this->level.SaveScripts(wad);
 		}
 	}
 
 	// write out the new directory
-	wad.master.editWad()->writeToDisk();
+	wad.writeToDisk();
 
 
 	// build the nodes
 	if (config::bsp_on_save && ! inhibit_node_build)
 	{
-		BuildNodesAfterSave(saving_level);
+		BuildNodesAfterSave(saving_level, loading, wad);
 	}
 
 
 	// this is mainly for Next/Prev-map commands
 	// [ it doesn't change the on-disk wad file at all ]
-	wad.master.editWad()->SortLevels();
+	wad.SortLevels();
 
-	loading.writeEurekaLump(*wad.master.editWad().get());
-	wad.master.editWad()->writeToDisk();
+	loading.writeEurekaLump(wad);
+	wad.writeToDisk();
 
-	global::recent.addRecent(wad.master.editWad()->PathName(), loading.levelName, global::home_dir);
+	global::recent.addRecent(wad.PathName(), loading.levelName, global::home_dir);
 
 	Status_Set("Saved %s", loading.levelName.c_str());
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad.master.editWad()->PathName().u8string(), loading.levelName, false);
+		main_win->SetTitle(wad.PathName().u8string(), loading.levelName, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1744,7 +1744,7 @@ bool Instance::M_SaveMap()
 
 	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.editWad()->PathName().u8string().c_str());
 
-	SaveLevel(loaded, loaded.levelName);
+	SaveLevel(loaded, loaded.levelName, *wad.master.editWad());
 
 	return true;
 }
@@ -1856,7 +1856,7 @@ bool Instance::M_ExportMap()
 	// TODO: replace edit wad after we're done
 	this->wad.master.ReplaceEditWad(wad);
 
-	SaveLevel(loading, map_name);
+	SaveLevel(loading, map_name, *wad);
 
 	// do this after the save (in case it fatal errors)
 	Main_LoadResources(loading);
@@ -1935,7 +1935,7 @@ void Instance::CMD_CopyMap()
 		// perform the copy (just a save)
 		gLog.printf("Copying Map : %s --> %s\n", loaded.levelName.c_str(), new_name.c_str());
 
-		SaveLevel(loaded, new_name);
+		SaveLevel(loaded, new_name, *wad.master.editWad());
 
 		Status_Set("Copied to %s", loaded.levelName.c_str());
 	}

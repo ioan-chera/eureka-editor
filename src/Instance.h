@@ -284,7 +284,7 @@ public:
 	void refreshViewAfterLoad(const BadCount& bad, const Wad_file* wad, const SString& map_name, bool new_resources);
 
 	// M_NODES
-	void BuildNodesAfterSave(int lev_idx);
+	void BuildNodesAfterSave(int lev_idx, const LoadingData& loading, Wad_file &wad);
 	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const EUR_PRINTF(2, 3);
 
 	// M_TESTMAP
@@ -379,24 +379,13 @@ private:
 	void DoExecuteCommand(const editor_command_t *cmd);
 
 	// M_LOADSAVE
-	void EmptyLump(Wad_file &wad, const char *name) const;
 	void FreshLevel();
 	
 	bool M_ExportMap();
 	void Navigate2D();
 	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
 	tl::optional<fs::path> Project_AskFile() const;
-	void SaveBehavior(Wad_file& wad) const;
-	int SaveHeader(Wad_file &wad, const SString &level);
-	void SaveLevel(LoadingData& loading, const SString& level);
-	void SaveLineDefs(Wad_file &wad) const;
-	void SaveLineDefs_Hexen(Wad_file &wad) const;
-	void SaveThings(Wad_file &wad) const;
-	void SaveThings_Hexen(Wad_file &wad) const;
-	void SaveScripts(Wad_file& wad) const;
-	void SaveSectors(Wad_file &wad) const;
-	void SaveSideDefs(Wad_file &wad) const;
-	void SaveVertices(Wad_file &wad) const;
+	void SaveLevel(LoadingData& loading, const SString& level, Wad_file &wad);
 
 	// M_NODES
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);

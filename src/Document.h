@@ -191,6 +191,17 @@ public:
 	
 	void CalculateLevelBounds() noexcept;
 	void UpdateLevelBounds(int start_vert) noexcept;
+
+	int SaveHeader(Wad_file& wad, const SString& level);
+	void SaveThings(Wad_file& wad) const;
+	void SaveThings_Hexen(Wad_file& wad) const;
+	void SaveLineDefs(Wad_file& wad) const;
+	void SaveLineDefs_Hexen(Wad_file& wad) const;
+	void SaveSideDefs(Wad_file& wad) const;
+	void SaveVertices(Wad_file& wad) const;
+	void SaveSectors(Wad_file& wad) const;
+	void SaveBehavior(Wad_file& wad) const;
+	void SaveScripts(Wad_file& wad) const;
 	
 	void clear();
 

@@ -328,7 +328,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 		// load level
 		LoadLevelNum(wad.master.editWad().get(), n);
 
-		ret = AJBSP_BuildLevel(info, n, *this);
+		ret = AJBSP_BuildLevel(info, n, *this, loaded, *wad.master.editWad());
 
 		// don't fail on maps with overflows
 		// [ Note that 'total_failed_maps' keeps a tally of these ]
@@ -376,7 +376,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 }
 
 
-void Instance::BuildNodesAfterSave(int lev_idx)
+void Instance::BuildNodesAfterSave(int lev_idx, const LoadingData& loading, Wad_file &wad)
 {
 	nodeialog = NULL;
 
@@ -384,7 +384,7 @@ void Instance::BuildNodesAfterSave(int lev_idx)
 
 	PrepareInfo(&nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this);
+	build_result_e ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this, loading, wad);
 
 	// TODO : maybe print # of serious/minor warnings
 

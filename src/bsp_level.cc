@@ -371,11 +371,11 @@ void LevelData::Block::CompressMap()
 		compression = 0;
 }
 
-void LevelData::WriteBlockmap(const Instance &inst) const
+void LevelData::WriteBlockmap() const
 {
 	int i;
 
-	Lump_c &lump = CreateLevelLump(inst, "BLOCKMAP");
+	Lump_c &lump = CreateLevelLump("BLOCKMAP");
 
 	u16_t null_block[2] = { 0x0000, 0xFFFF };
 	u16_t m_zero = 0x0000;
@@ -503,7 +503,7 @@ void LevelData::PutBlockmap(const Instance &inst)
 	if (! cur_info->do_blockmap || inst.level.numLinedefs() == 0)
 	{
 		// just create an empty blockmap lump
-		CreateLevelLump(inst, "BLOCKMAP");
+		CreateLevelLump("BLOCKMAP");
 		return;
 	}
 
@@ -525,13 +525,13 @@ void LevelData::PutBlockmap(const Instance &inst)
 	if (block.overflowed)
 	{
 		// leave an empty blockmap lump
-		CreateLevelLump(inst, "BLOCKMAP");
+		CreateLevelLump("BLOCKMAP");
 
 		Warning(inst, "Blockmap overflowed (lump will be empty)\n");
 	}
 	else
 	{
-		WriteBlockmap(inst);
+		WriteBlockmap();
 
 		PrintDetail("Completed blockmap, size %dx%d (compression: %d%%)\n",
 				block.block_w, block.block_h, block.compression);
@@ -658,9 +658,9 @@ void LevelData::Reject::ProcessSectors(const Document &doc)
 }
 
 
-void LevelData::Reject_WriteLump(const Instance &inst) const
+void LevelData::Reject_WriteLump() const
 {
-	Lump_c &lump = CreateLevelLump(inst, "REJECT");
+	Lump_c &lump = CreateLevelLump("REJECT");
 
 	lump.Write(rej.rej_matrix, rej.rej_total_size);
 }
@@ -678,7 +678,7 @@ void LevelData::PutReject(const Instance &inst)
 	if (! cur_info->do_reject || inst.level.numSectors() == 0)
 	{
 		// just create an empty reject lump
-		CreateLevelLump(inst, "REJECT");
+		CreateLevelLump("REJECT");
 		return;
 	}
 
@@ -690,7 +690,7 @@ void LevelData::PutReject(const Instance &inst)
 	Reject_DebugGroups();
 # endif
 
-	Reject_WriteLump(inst);
+	Reject_WriteLump();
 	rej.Free();
 
 	PrintDetail("Added simple reject lump\n");
@@ -870,7 +870,7 @@ void LevelData::PutVertices(const Instance &inst, const char *name, int do_gl)
 {
 	int count, i;
 
-	Lump_c &lump = CreateLevelLump(inst, name);
+	Lump_c &lump = CreateLevelLump(name);
 
 	for (i=0, count=0 ; i < (int)vertices.size() ; i++)
 	{
@@ -903,11 +903,11 @@ void LevelData::PutVertices(const Instance &inst, const char *name, int do_gl)
 }
 
 
-void LevelData::PutGLVertices(const Instance &inst, int do_v5) const
+void LevelData::PutGLVertices(int do_v5) const
 {
 	int count, i;
 
-	Lump_c &lump = CreateLevelLump(inst, "GL_VERT");
+	Lump_c &lump = CreateLevelLump("GL_VERT");
 
 	if (do_v5)
 		lump.Write(lev_v5_magic, 4);
@@ -957,7 +957,7 @@ void LevelData::PutSegs(const Instance &inst)
 {
 	int i, count;
 
-	Lump_c &lump = CreateLevelLump(inst, "SEGS");
+	Lump_c &lump = CreateLevelLump("SEGS");
 
 	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
@@ -996,11 +996,11 @@ void LevelData::PutSegs(const Instance &inst)
 }
 
 
-void LevelData::PutGLSegs(const Instance &inst) const
+void LevelData::PutGLSegs() const
 {
 	int i, count;
 
-	Lump_c &lump = CreateLevelLump(inst, "GL_SEGS");
+	Lump_c &lump = CreateLevelLump("GL_SEGS");
 
 	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
@@ -1046,7 +1046,7 @@ void LevelData::PutGLSegs_V5(const Instance &inst) const
 {
 	int i, count;
 
-	Lump_c &lump = CreateLevelLump(inst, "GL_SEGS");
+	Lump_c &lump = CreateLevelLump("GL_SEGS");
 
 	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
@@ -1090,7 +1090,7 @@ void LevelData::PutSubsecs(const Instance &inst, const char *name, int do_gl)
 {
 	int i;
 
-	Lump_c & lump = CreateLevelLump(inst, name);
+	Lump_c & lump = CreateLevelLump(name);
 
 	for (i=0 ; i < (int)subsecs.size() ; i++)
 	{
@@ -1121,7 +1121,7 @@ void LevelData::PutGLSubsecs_V5(const Instance &inst) const
 {
 	int i;
 
-	Lump_c &lump = CreateLevelLump(inst, "GL_SSECT");
+	Lump_c &lump = CreateLevelLump("GL_SSECT");
 
 	for (i=0 ; i < (int)subsecs.size() ; i++)
 	{
@@ -1248,7 +1248,7 @@ void LevelData::PutOneNode_V5(node_t *node, Lump_c *lump)
 
 void LevelData::PutNodes(const Instance &inst, const char *name, int do_v5, node_t *root)
 {
-	Lump_c &lump = CreateLevelLump(inst, name);
+	Lump_c &lump = CreateLevelLump(name);
 
 	node_cur_index = 0;
 
@@ -1727,10 +1727,10 @@ void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 	// Commit
 	
 	// leave SEGS and SSECTORS empty
-	CreateLevelLump(inst, "SEGS");
-	CreateLevelLump(inst, "SSECTORS");
+	CreateLevelLump("SEGS");
+	CreateLevelLump("SSECTORS");
 
-	Lump_c &lump = CreateLevelLump(inst, "NODES");
+	Lump_c &lump = CreateLevelLump("NODES");
 
 	if (cur_info->force_compress)
 		lump.Write(lev_ZNOD_magic, 4);
@@ -1744,7 +1744,7 @@ void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node) noexcept
 {
 	// WISH : compute a max_size
 
-	Lump_c &lump = CreateLevelLump(inst, "ZNODES");
+	Lump_c &lump = CreateLevelLump("ZNODES");
 
 	lump.Write(lev_XGL3_magic, 4);
 
@@ -1769,7 +1769,7 @@ void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node) noexcept
 
 void LevelData::LoadLevel(const Instance &inst)
 {
-	const Lump_c *LEV = inst.wad.master.editWad()->GetLump(current_start);
+	const Lump_c *LEV = wad.GetLump(current_start);
 
 	current_name = LEV->Name();
 	overflows = 0;
@@ -1801,7 +1801,7 @@ void LevelData::LoadLevel(const Instance &inst)
 
 	CalculateWallTips(inst.level);
 
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	if (format != MapFormat::doom)
 	{
 		// -JL- Find sectors containing polyobjs
 		DetectPolyobjSectors(inst);
@@ -1824,7 +1824,7 @@ u32_t LevelData::CalcGLChecksum(const Instance &inst) const
 
 	Adler32_Begin(&crc);
 
-	const Lump_c *lump = FindLevelLump(inst, "VERTEXES");
+	const Lump_c *lump = FindLevelLump("VERTEXES");
 
 	if (lump && lump->Length() > 0)
 	{
@@ -1832,7 +1832,7 @@ u32_t LevelData::CalcGLChecksum(const Instance &inst) const
 		Adler32_AddBlock(&crc, data, lump->Length());
 	}
 
-	lump = FindLevelLump(inst, "LINEDEFS");
+	lump = FindLevelLump("LINEDEFS");
 
 	if (lump && lump->Length() > 0)
 	{
@@ -1874,22 +1874,22 @@ void LevelData::UpdateGLMarker(const Instance &inst, Lump_c *marker) const
 
 void LevelData::AddMissingLump(const Instance &inst, const char *name, const char *after)
 {
-	if (inst.wad.master.editWad()->LevelLookupLump(current_idx, name) >= 0)
+	if (wad.LevelLookupLump(current_idx, name) >= 0)
 		return;
 
-	int exist = inst.wad.master.editWad()->LevelLookupLump(current_idx, after);
+	int exist = wad.LevelLookupLump(current_idx, after);
 
 	// if this happens, the level structure is very broken
 	if (exist < 0)
 	{
 		Warning(inst, "Missing %s lump -- level structure is broken\n", after);
 
-		exist = inst.wad.master.editWad()->LevelLastLump(current_idx);
+		exist = wad.LevelLastLump(current_idx);
 	}
 
-	inst.wad.master.editWad()->InsertPoint(exist + 1);
+	wad.InsertPoint(exist + 1);
 
-	inst.wad.master.editWad()->AddLump(name);
+	wad.AddLump(name);
 }
 
 build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
@@ -1897,7 +1897,7 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 	// Note: root_node may be NULL
 
 	// remove any existing GL-Nodes
-	inst.wad.master.editWad()->RemoveGLNodes(current_idx);
+	wad.RemoveGLNodes(current_idx);
 
 	// ensure all necessary level lumps are present
 	AddMissingLump(inst, "SEGS",     "VERTEXES");
@@ -1924,14 +1924,14 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 		SortSegs();
 
 		// create empty marker now, flesh it out later
-		gl_marker = &CreateGLMarker(inst);
+		gl_marker = &CreateGLMarker();
 
-		PutGLVertices(inst, force_v5);
+		PutGLVertices(force_v5);
 
 		if (force_v5)
 			PutGLSegs_V5(inst);
 		else
-			PutGLSegs(inst);
+			PutGLSegs();
 
 		if (force_v5)
 			PutGLSubsecs_V5(inst);
@@ -1941,7 +1941,7 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 		PutNodes(inst, "GL_NODES", force_v5, root_node);
 
 		// -JL- Add empty PVS lump
-		CreateLevelLump(inst, "GL_PVS");
+		CreateLevelLump("GL_PVS");
 	}
 
 
@@ -1983,7 +1983,7 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 		UpdateGLMarker(inst, gl_marker);
 	}
 
-	inst.wad.master.editWad()->writeToDisk();
+	wad.writeToDisk();
 
 	if (overflows > 0)
 	{
@@ -2000,7 +2000,7 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 build_result_e LevelData::SaveUDMF(const Instance &inst, node_t *root_node)
 {
 	// remove any existing ZNODES lump
-	inst.wad.master.editWad()->RemoveZNodes(current_idx);
+	wad.RemoveZNodes(current_idx);
 
 	try
 	{
@@ -2011,7 +2011,7 @@ build_result_e LevelData::SaveUDMF(const Instance &inst, node_t *root_node)
 			SaveXGL3Format(inst, root_node);
 		}
 
-		inst.wad.master.editWad()->writeToDisk();
+		wad.writeToDisk();
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -2033,34 +2033,34 @@ build_result_e LevelData::SaveUDMF(const Instance &inst, node_t *root_node)
 /* ---------------------------------------------------------------- */
 
 
-Lump_c * LevelData::FindLevelLump(const Instance &inst, const char *name) const noexcept
+Lump_c * LevelData::FindLevelLump(const char *name) const noexcept
 {
-	int idx = inst.wad.master.editWad()->LevelLookupLump(current_idx, name);
+	int idx = wad.LevelLookupLump(current_idx, name);
 
 	if (idx < 0)
 		return NULL;
 
-	return inst.wad.master.editWad()->GetLump(idx);
+	return wad.GetLump(idx);
 }
 
 
-Lump_c & LevelData::CreateLevelLump(const Instance &inst, const char *name) const
+Lump_c & LevelData::CreateLevelLump(const char *name) const
 {
 	// look for existing one
-	Lump_c *lump = FindLevelLump(inst, name);
+	Lump_c *lump = FindLevelLump(name);
 
 	if(!lump)
 	{
-		int last_idx = inst.wad.master.editWad()->LevelLastLump(current_idx);
+		int last_idx = wad.LevelLastLump(current_idx);
 
 		// in UDMF maps, insert before the ENDMAP lump, otherwise insert
 		// after the last known lump of the level.
-		if (inst.loaded.levelFormat != MapFormat::udmf)
+		if (format != MapFormat::udmf)
 			last_idx++;
 
-		inst.wad.master.editWad()->InsertPoint(last_idx);
+		wad.InsertPoint(last_idx);
 
-		lump = &inst.wad.master.editWad()->AddLump(name);
+		lump = &wad.AddLump(name);
 	}
 
     lump->clearData();
@@ -2068,7 +2068,7 @@ Lump_c & LevelData::CreateLevelLump(const Instance &inst, const char *name) cons
 }
 
 
-Lump_c & LevelData::CreateGLMarker(const Instance &inst) const
+Lump_c & LevelData::CreateGLMarker() const
 {
 	SString name_buf;
 
@@ -2082,11 +2082,11 @@ Lump_c & LevelData::CreateGLMarker(const Instance &inst) const
 		name_buf = "GL_LEVEL";
 	}
 
-	int last_idx = inst.wad.master.editWad()->LevelLastLump(current_idx);
+	int last_idx = wad.LevelLastLump(current_idx);
 
-	inst.wad.master.editWad()->InsertPoint(last_idx + 1);
+	wad.InsertPoint(last_idx + 1);
 
-	return inst.wad.master.editWad()->AddLump(name_buf);
+	return wad.AddLump(name_buf);
 }
 
 
@@ -2106,7 +2106,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 		return BUILD_Cancelled;
 
 	current_idx   = lev_idx;
-	current_start = inst.wad.master.editWad()->LevelHeader(lev_idx);
+	current_start = wad.LevelHeader(lev_idx);
 
 	LoadLevel(inst);
 
@@ -2138,7 +2138,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 
 		ClockwiseBspTree(inst.level);
 
-		if (inst.loaded.levelFormat == MapFormat::udmf)
+		if (format == MapFormat::udmf)
 			ret = SaveUDMF(inst, root_node);
 		else
 			ret = SaveLevel(root_node, inst);
@@ -2161,9 +2161,9 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 }  // namespace ajbsp
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst)
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst, const LoadingData& loading, Wad_file& wad)
 {
-	ajbsp::LevelData lev_data;
+	ajbsp::LevelData lev_data(loading.levelFormat, wad);
 	return lev_data.BuildLevel(info, lev_idx, inst);
 }
 
