@@ -1410,16 +1410,19 @@ void Instance::CMD_FlipMap()
 //  SAVING CODE
 //------------------------------------------------------------------------
 
-void Instance::SaveHeader(Wad_file& wad, const SString &level) 
+int Instance::SaveHeader(Wad_file& wad, const SString &level) 
 {
 	int size = (int)this->level.headerData.size();
 
+	int saving_level;
 	Lump_c *lump = wad.AddLevel(level, &saving_level);
 
 	if (size > 0)
 	{
 		lump->Write(&this->level.headerData[0], size);
 	}
+
+	return saving_level;
 }
 
 
@@ -1641,7 +1644,7 @@ void Instance::SaveLevel(LoadingData& loading, const SString &level)
 
 	wad.master.editWad()->InsertPoint(level_lump);
 
-	SaveHeader(*wad.master.editWad(), level);
+	int saving_level = SaveHeader(*wad.master.editWad(), level);
 
 	if (loading.levelFormat == MapFormat::udmf)
 	{

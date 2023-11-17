@@ -387,7 +387,7 @@ private:
 	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
 	tl::optional<fs::path> Project_AskFile() const;
 	void SaveBehavior(Wad_file& wad) const;
-	void SaveHeader(Wad_file &wad, const SString &level);
+	int SaveHeader(Wad_file &wad, const SString &level);
 	void SaveLevel(LoadingData& loading, const SString& level);
 	void SaveLineDefs(Wad_file &wad) const;
 	void SaveLineDefs_Hexen(Wad_file &wad) const;
@@ -464,7 +464,6 @@ public:	// will be private when we encapsulate everything
 	// CMD_BuildAllNodes from building that saved level twice.
 	bool inhibit_node_build = false;
 	int last_given_file = 0;
-	int saving_level = 0;
 	UI_NodeDialog *nodeialog = nullptr;
 	nodebuildinfo_t *nb_info = nullptr;
 	
