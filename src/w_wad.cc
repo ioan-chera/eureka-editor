@@ -247,6 +247,51 @@ retry:
 	return w;
 }
 
+std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
+{
+	gLog.printf("Opening WAD file: %s\n", filename.u8string().c_str());
+	// TODO: #55 unicode
+	FILE *fp = fopen(filename.u8string().c_str(), "rb");
+	if(!fp)
+	{
+		gLog.printf("Open failed: %s\n", GetErrorMessage(errno).c_str());
+		return nullptr;
+	}
+	auto wraw = new Wad_file(filename, WadOpenMode::append);
+	auto w = std::shared_ptr<Wad_file>(wraw);
+	
+	// determine total size (seek to end)
+	if (fseek(fp, 0, SEEK_END) != 0)
+	{
+		fclose(fp);
+		ThrowException("Error determining WAD size.\n");
+	}
+
+	int total_size = (int)ftell(fp);
+
+	gLog.debugPrintf("total_size = %d\n", total_size);
+
+	if (total_size < 0)
+	{
+		fclose(fp);
+		ThrowException("Error determining WAD size.\n");
+	}
+
+	if (! w->ReadDirectory(fp, total_size))
+	{
+		gLog.printf("Open wad failed (reading directory)\n");
+		fclose(fp);
+		return NULL;
+	}
+
+	w->DetectLevels();
+	w->ProcessNamespaces();
+
+	fclose(fp);
+
+	return w;
+}
+
 
 std::shared_ptr<Wad_file> Wad_file::Create(const fs::path &filename,
 										   WadOpenMode mode)

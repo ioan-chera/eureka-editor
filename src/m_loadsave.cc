@@ -1097,7 +1097,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 	// make sure file exists, as Open() with 'a' would create it otherwise
 	if (FileExists(filename))
 	{
-		wad = Wad_file::Open(filename, WadOpenMode::append);
+		wad = Wad_file::loadFromFile(filename);
 	}
 
 	if (! wad)

@@ -860,7 +860,7 @@ static void readPortInfo(std::unordered_map<SString, SString> &parseVars, Loadin
 	}
 }
 
-NewResources loadResources(const LoadingData& loading, const WadData &waddata)
+NewResources loadResources(const LoadingData& loading, const WadData &waddata) noexcept(false)
 {
 	auto newres = NewResources();
 	newres.loading = loading;
