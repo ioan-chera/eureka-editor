@@ -1351,69 +1351,119 @@ void LevelData::SortSegs()
 class ZLibContext
 {
 public:
-	explicit ZLibContext(nodebuildinfo_t * cur_info, std::vector<byte> &data);
-	~ZLibContext()
+	class Compression
 	{
-		finishLump();
-	}
+	public:
+		class Exception : public std::runtime_error
+		{
+		public:
+			Exception(int result, const SString& message) : std::runtime_error(message.get() + ": " + std::to_string(result))
+			{
+			}
+		};
+
+		Compression();
+		~Compression();
+		Compression(const Compression& other) = delete;
+		Compression& operator = (const Compression& other) = delete;
+
+		int deflate(int flush)
+		{
+			return ::deflate(&stream, flush);
+		}
+
+		void setNextOut(Bytef* out, uInt outSize) noexcept
+		{
+			stream.next_out = out;
+			stream.avail_out = outSize;
+		}
+
+		uInt getAvailOut() const noexcept
+		{
+			return stream.avail_out;
+		}
+
+		void setNextIn(Bytef* in, uInt inSize) noexcept
+		{
+			stream.next_in = in;
+			stream.avail_in = inSize;
+		}
+
+		uInt getAvailIn() const noexcept
+		{
+			return stream.avail_in;
+		}
+
+	private:
+		z_stream stream{};
+	};
+
+	ZLibContext(bool compress, std::vector<byte> &data);
 	
 	void appendLump(const void *data, int length) noexcept(false);
+	void finishLump() noexcept(false);
 	
 private:
-	void finishLump();
 
 	std::vector<byte> &out_data;
-	z_stream out_stream{};
+	tl::optional<Compression> compression;
 	Bytef out_buffer[1024] = {};
-	
-	nodebuildinfo_t * cur_info = NULL;
 };
 
-ZLibContext::ZLibContext(nodebuildinfo_t * cur_info, std::vector<byte> &data) : out_data(data), cur_info(cur_info)
+ZLibContext::Compression::Compression()
 {
-	if(!cur_info->force_compress)
+	int result = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+	if (result != Z_OK)
+		throw Exception(result, "Trouble setting up zlib compression");
+}
+
+ZLibContext::Compression::~Compression()
+{
+	int result = deflateEnd(&stream);
+	if (result != Z_OK)
+		gLog.printf("Error ending zlib compression: %d\n", result);
+}
+
+ZLibContext::ZLibContext(bool compress, std::vector<byte> &data) : out_data(data)
+{
+	if(!compress)
 		return;
 	
-	int result = deflateInit(&out_stream, Z_DEFAULT_COMPRESSION);
-	if(result != Z_OK)
-		ThrowException("Trouble setting up zlib compression: %d", result);
-	
-	out_stream.next_out = out_buffer;
-	out_stream.avail_out = sizeof(out_buffer);
+	compression.emplace();
+	compression->setNextOut(out_buffer, sizeof(out_buffer));
 }
 
 void ZLibContext::appendLump(const void *data, int length) noexcept(false)
 {
-	if (! cur_info->force_compress)
+	if (! compression)
 	{
 		auto bdata = static_cast<const byte *>(data);
 		out_data.insert(out_data.end(), bdata, bdata + length);
 		return;
 	}
 
-	out_stream.next_in  = const_cast<Bytef*>(reinterpret_cast<const Bytef*>(data));   // const override
-	out_stream.avail_in = length;
+	compression->setNextIn(const_cast<Bytef*>(static_cast<const Bytef*>(data)), length);
 
-	while (out_stream.avail_in > 0)
+	while (compression->getAvailIn() > 0)
 	{
-		int err = deflate(&out_stream, Z_NO_FLUSH);
-
+		int err = compression->deflate(Z_NO_FLUSH);
 		if (err != Z_OK)
-			ThrowException("Trouble compressing %d bytes (zlib): %d", length, err);
+		{
+			throw Compression::Exception(err, SString::printf("Trouble compressing %d bytes (zlib)", length));
+		}
 
-		if (out_stream.avail_out == 0)
+		if (compression->getAvailOut() == 0)
 		{
 			out_data.insert(out_data.end(), out_buffer, out_buffer + sizeof(out_buffer));
 
-			out_stream.next_out  = out_buffer;
-			out_stream.avail_out = sizeof(out_buffer);
+			compression->setNextOut(out_buffer, sizeof(out_buffer));
 		}
 	}
 }
 
-void ZLibContext::finishLump()
+void ZLibContext::finishLump() noexcept(false)
 {
-	if (! cur_info->force_compress)
+	if (! compression)
 	{
 		return;
 	}
@@ -1422,36 +1472,34 @@ void ZLibContext::finishLump()
 
 	// ASSERT(zout_stream.avail_out > 0)
 
-	out_stream.next_in  = Z_NULL;
-	out_stream.avail_in = 0;
+	compression->setNextIn(Z_NULL, 0);
 
 	for (;;)
 	{
-		int err = deflate(&out_stream, Z_FINISH);
+		int err = compression->deflate(Z_FINISH);
 
 		if (err == Z_STREAM_END)
 			break;
 
 		if (err != Z_OK)
-			ThrowException("Trouble finishing compression (zlib): %d", err);
+		{
+			throw Compression::Exception(err, "Trouble finishing compression (zlib)");
+		}
 
-		if (out_stream.avail_out == 0)
+		if (compression->getAvailOut() == 0)
 		{
 			out_data.insert(out_data.end(), out_buffer, out_buffer + sizeof(out_buffer));
 
-			out_stream.next_out  = out_buffer;
-			out_stream.avail_out = sizeof(out_buffer);
+			compression->setNextOut(out_buffer, sizeof(out_buffer));
 		}
 	}
 
-	left_over = sizeof(out_buffer) - out_stream.avail_out;
+	left_over = sizeof(out_buffer) - compression->getAvailOut();
 
 	if (left_over > 0)
 	{
 		out_data.insert(out_data.end(), out_buffer, out_buffer + left_over);
 	}
-
-	deflateEnd(&out_stream);
 }
 
 static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
@@ -1703,26 +1751,43 @@ void LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3) noe
 	}
 }
 
+void LevelData::putZItems(const Instance &inst, std::vector<byte>& lumpData, node_t* root_node, bool do_xgl3)
+{
+	auto putTheStuff = [this, root_node, do_xgl3](ZLibContext &zlibContext)
+		{
+			PutZVertices(zlibContext);
+			PutZSubsecs(zlibContext);
+			if (do_xgl3)
+				PutXGL3Segs(zlibContext);
+			else
+				PutZSegs(zlibContext);
+			PutZNodes(zlibContext, root_node, do_xgl3);
+		};
+
+	try
+	{
+		ZLibContext zlibContext(cur_info->force_compress, lumpData);
+		putTheStuff(zlibContext);
+		zlibContext.finishLump();
+	}
+	catch (const ZLibContext::Compression::Exception& e)
+	{
+		inst.GB_PrintMsg("Cannot compress nodes: %s\n", e.what());
+		lumpData.clear();
+
+		ZLibContext zlibContext(false, lumpData);
+		putTheStuff(zlibContext);
+		zlibContext.finishLump();
+	}
+}
+
 void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 {
 
 	// the ZLibXXX functions do no compression for XNOD format
 	
 	std::vector<byte> lumpData;
-	try
-	{
-		ZLibContext zlibContext(cur_info, lumpData);
-		
-		PutZVertices(zlibContext);
-		PutZSubsecs(zlibContext);
-		PutZSegs(zlibContext);
-		PutZNodes(zlibContext, root_node, false /* do_xgl3 */);
-	}
-	catch(const std::runtime_error &e)
-	{
-		gLog.printf("Error writing ZNODES: %s", e.what());
-		throw;
-	}
+	putZItems(inst, lumpData, root_node, false);
 	
 	// Commit
 	
@@ -1740,7 +1805,7 @@ void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 }
 
 
-void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node) noexcept(false)
+void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node)
 {
 	// WISH : compute a max_size
 
@@ -1752,14 +1817,7 @@ void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node) noexcept
 	cur_info->force_compress = false;
 
 	std::vector<byte> lumpData;
-	{
-		ZLibContext zlibContext(cur_info, lumpData);
-		
-		PutZVertices(zlibContext);
-		PutZSubsecs(zlibContext);
-		PutXGL3Segs(zlibContext);
-		PutZNodes(zlibContext, root_node, true /* do_xgl3 */);
-	}
+	putZItems(inst, lumpData, root_node, true);
 	
 	lump.Write(lumpData.data(), (int)lumpData.size());
 }

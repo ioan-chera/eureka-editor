@@ -511,6 +511,7 @@ private:
 	void SortSegs();
 	
 	/* ----- ZDoom format writing --------------------------- */
+	void putZItems(const Instance &inst, std::vector<byte>& lumpData, node_t* root_node, bool do_xgl3);
 	void PutZVertices(ZLibContext &zcontext) const noexcept(false);
 	void PutZSubsecs(ZLibContext &zcontext) const noexcept(false);
 	void PutZSegs(ZLibContext &zcontext) const noexcept(false);
@@ -518,7 +519,7 @@ private:
 	void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3) noexcept(false);
 	void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3) noexcept(false);
 	void SaveZDFormat(const Instance &inst, node_t *root_node);
-	void SaveXGL3Format(const Instance &inst, node_t *root_node) noexcept(false);
+	void SaveXGL3Format(const Instance &inst, node_t *root_node);
 	
 	/* ----- whole-level routines --------------------------- */
 	void LoadLevel(const Instance &inst);
