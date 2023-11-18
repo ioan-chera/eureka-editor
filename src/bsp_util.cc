@@ -45,7 +45,7 @@ void PrintDetail(const char *fmt, ...)
 }
 
 
-void LevelData::Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
+void LevelData::Failure(EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list args;
 
@@ -55,7 +55,7 @@ void LevelData::Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt)
 	va_end(args);
 
 	if (cur_info->warnings)
-		inst.GB_PrintMsg("Failure: %s", message.c_str());
+		PrintMsg("Failure: %s", message.c_str());
 
 	cur_info->total_warnings++;
 
@@ -65,7 +65,19 @@ void LevelData::Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt)
 }
 
 
-void LevelData::Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
+void LevelData::PrintMsg(EUR_FORMAT_STRING(const char *format), ...) const
+{
+	if(reportLog)
+	{
+		va_list ap;
+		va_start(ap, format);
+		reportLog(SString::vprintf(format, ap));
+		va_end(ap);
+	}
+}
+
+
+void LevelData::Warning(EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list args;
 
@@ -74,7 +86,7 @@ void LevelData::Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt)
 	va_end(args);
 
 	if (cur_info->warnings)
-		inst.GB_PrintMsg("Warning: %s", message.c_str());
+		PrintMsg("Warning: %s", message.c_str());
 
 	cur_info->total_warnings++;
 
@@ -248,7 +260,7 @@ static void MarkPolyobjSector(int sector, const Document &doc)
 	}
 }
 
-void LevelData::MarkPolyobjPoint(double x, double y, const Instance &inst)
+void LevelData::MarkPolyobjPoint(double x, double y)
 {
 	int i;
 	int inside_count = 0;
@@ -334,7 +346,7 @@ void LevelData::MarkPolyobjPoint(double x, double y, const Instance &inst)
 
 	if (best_match < 0)
 	{
-		Warning(inst, "Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
+		Warning("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
 		return;
 	}
 
@@ -370,7 +382,7 @@ void LevelData::MarkPolyobjPoint(double x, double y, const Instance &inst)
 
 	if (sector < 0)
 	{
-		Warning(inst, "Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
+		Warning("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
 		return;
 	}
 
@@ -430,7 +442,7 @@ void LevelData::DetectPolyobjSectors(const Instance &inst)
 		gLog.debugPrintf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
 #   endif
 
-		MarkPolyobjPoint(x, y, inst);
+		MarkPolyobjPoint(x, y);
 	}
 }
 

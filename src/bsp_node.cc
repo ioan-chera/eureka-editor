@@ -1149,7 +1149,7 @@ void quadtree_c::VerifySide(seg_t *part, int side)
 #endif
 
 
-void node_t::SetPartition(LevelData &lev_data, const seg_t *part, const Instance &inst)
+void node_t::SetPartition(LevelData &lev_data, const seg_t *part)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
@@ -1185,7 +1185,7 @@ void node_t::SetPartition(LevelData &lev_data, const seg_t *part, const Instance
 		{
 			if (((int)dx | (int)dy) & 1)
 			{
-				lev_data.Warning(inst, "Loss of accuracy on VERY long node: "
+				lev_data.Warning("Loss of accuracy on VERY long node: "
 						"(%f,%f) -> (%f,%f)\n", x, y, x + dx, y+ dy);
 			}
 
@@ -1318,7 +1318,7 @@ void quadtree_c::ConvertToList(seg_t **_list)
 
 
 seg_t *LevelData::CreateOneSeg(int line, vertex_t *start, vertex_t *end,
-		int sidedef, int what_side /* 0 or 1 */, const Instance &inst)
+		int sidedef, int what_side /* 0 or 1 */)
 {
 	const SideDef *sd = NULL;
 	if (sidedef >= 0)
@@ -1327,7 +1327,7 @@ seg_t *LevelData::CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 	// check for bad sidedef
 	if (sd && !doc.isSector(sd->sector))
 	{
-		Warning(inst, "Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
+		Warning("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
 	}
 
 	// handle overlapping vertices, pick a nominal one
@@ -1355,7 +1355,7 @@ seg_t *LevelData::CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 // Initially create all segs, one for each linedef.
 // Must be called *after* InitBlockmap().
 //
-seg_t *LevelData::CreateSegs(const Instance &inst)
+seg_t *LevelData::CreateSegs()
 {
 	seg_t *list = NULL;
 
@@ -1376,22 +1376,22 @@ seg_t *LevelData::CreateSegs(const Instance &inst)
 
 		// check for extremely long lines
 		if (doc.calcLength(*line) >= 30000)
-			Warning(inst, "Linedef #%d is VERY long, it may cause problems\n", i);
+			Warning("Linedef #%d is VERY long, it may cause problems\n", i);
 
 		if (line->right >= 0)
 		{
-			right = CreateOneSeg(i, vertices[line->start], vertices[line->end], line->right, 0, inst);
+			right = CreateOneSeg(i, vertices[line->start], vertices[line->end], line->right, 0);
 
 			ListAddSeg(&list, right);
 		}
 		else
 		{
-			Warning(inst, "Linedef #%d has no right sidedef!\n", i);
+			Warning("Linedef #%d has no right sidedef!\n", i);
 		}
 
 		if (line->left >= 0)
 		{
-			left = CreateOneSeg(i, vertices[line->end], vertices[line->start], line->left, 1, inst);
+			left = CreateOneSeg(i, vertices[line->end], vertices[line->start], line->left, 1);
 
 			ListAddSeg(&list, left);
 
@@ -1408,7 +1408,7 @@ seg_t *LevelData::CreateSegs(const Instance &inst)
 		else
 		{
 			if (line->flags & MLF_TwoSided)
-				Warning(inst, "Linedef #%d is 2s but has no left sidedef\n", i);
+				Warning("Linedef #%d is 2s but has no left sidedef\n", i);
 		}
 	}
 
@@ -1687,7 +1687,7 @@ static void DebugShowSegs(seg_t *list)
 
 
 build_result_e LevelData::BuildNodes(seg_t *list, bbox_t *bounds /* output */,
-						  node_t ** N, subsec_t ** S, int depth, const Instance &inst)
+						  node_t ** N, subsec_t ** S, int depth)
 {
 	*N = NULL;
 	*S = NULL;
@@ -1752,14 +1752,14 @@ build_result_e LevelData::BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 	AddMinisegs(cut_list, part, &lefts, &rights);
 
-	node->SetPartition(*this, part, inst);
+	node->SetPartition(*this, part);
 
 # if DEBUG_BUILDER
 	gLog.debugPrintf("Build: Going LEFT\n");
 # endif
 
 	build_result_e ret;
-	ret = BuildNodes(lefts, &node->l.bounds, &node->l.node, &node->l.subsec, depth+1, inst);
+	ret = BuildNodes(lefts, &node->l.bounds, &node->l.node, &node->l.subsec, depth+1);
 
 	if (ret != BUILD_OK)
 		return ret;
@@ -1768,7 +1768,7 @@ build_result_e LevelData::BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	gLog.debugPrintf("Build: Going RIGHT\n");
 # endif
 
-	ret = BuildNodes(rights, &node->r.bounds, &node->r.node, &node->r.subsec, depth+1, inst);
+	ret = BuildNodes(rights, &node->r.bounds, &node->r.node, &node->r.subsec, depth+1);
 
 # if DEBUG_BUILDER
 	gLog.debugPrintf("Build: DONE\n");

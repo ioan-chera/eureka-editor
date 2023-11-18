@@ -26,6 +26,7 @@
 #include "sys_type.h"
 #include "Thing.h"
 
+#include <functional>
 #include <vector>
 
 class Instance;
@@ -347,7 +348,7 @@ struct node_t
 	int index;
 
 public:
-	void SetPartition(LevelData &lev_data, const seg_t *part, const Instance &inst);
+	void SetPartition(LevelData &lev_data, const seg_t *part);
 };
 
 
@@ -403,7 +404,9 @@ class LevelData
 {
 	
 public:
-	explicit LevelData(MapFormat format, Wad_file &wad, const Document &doc) : format(format), wad(wad), doc(doc)
+	typedef std::function<void(const SString &)> ReportFunc;
+	
+	LevelData(MapFormat format, Wad_file &wad, const Document &doc, const ReportFunc &reportLog) : format(format), wad(wad), doc(doc), reportLog(reportLog)
 	{
 	}
 	LevelData(const LevelData& other) = delete;
@@ -429,7 +432,7 @@ public:
 	// MAIN STUFF
 	build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
 	
-	void Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(3, 4);
+	void Warning(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
 	
 private:
 	struct Block
@@ -472,7 +475,7 @@ private:
 	
 	void WriteBlockmap() const;
 	
-	void PutBlockmap(const Instance &inst);
+	void PutBlockmap();
 	
 	// REJECT : Generate the reject table
 	void Reject_WriteLump() const;
@@ -497,7 +500,7 @@ private:
 	
 	/* ----- writing routines ------------------------------ */
 	void MarkOverflow(int flags);
-	void PutVertices(const Instance &inst, const char *name, int do_gl);
+	void PutVertices(const char *name, int do_gl);
 	void PutGLVertices(int do_v5) const;
 	inline u32_t VertexIndex_XNOD(const vertex_t *v) const noexcept
 	{
@@ -506,27 +509,27 @@ private:
 
 		return (u32_t) v->index;
 	}
-	void PutSegs(const Instance &inst);
+	void PutSegs();
 	void PutGLSegs() const;
 	void PutGLSegs_V5() const;
-	void PutSubsecs(const Instance &inst, const char *name, int do_gl);
+	void PutSubsecs(const char *name, int do_gl);
 	void PutGLSubsecs_V5() const;
-	void PutNodes(const Instance &inst, const char *name, int do_v5, node_t *root);
+	void PutNodes(const char *name, int do_v5, node_t *root);
 	void PutOneNode(node_t *node, Lump_c *lump);
 	void PutOneNode_V5(node_t *node, Lump_c *lump);
-	void CheckLimits(bool& force_v5, bool& force_xnod, const Instance &inst);
+	void CheckLimits(bool& force_v5, bool& force_xnod);
 	void SortSegs();
 	
 	/* ----- ZDoom format writing --------------------------- */
-	void putZItems(const Instance &inst, std::vector<byte>& lumpData, node_t* root_node, bool do_xgl3);
+	void putZItems(std::vector<byte>& lumpData, node_t* root_node, bool do_xgl3);
 	void PutZVertices(ZLibContext &zcontext) const noexcept(false);
 	void PutZSubsecs(ZLibContext &zcontext) const noexcept(false);
 	void PutZSegs(ZLibContext &zcontext) const noexcept(false);
 	void PutXGL3Segs(ZLibContext &zcontext) const noexcept(false);
 	void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3) noexcept(false);
 	void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3) noexcept(false);
-	void SaveZDFormat(const Instance &inst, node_t *root_node);
-	void SaveXGL3Format(const Instance &inst, node_t *root_node);
+	void SaveZDFormat(node_t *root_node);
+	void SaveXGL3Format(node_t *root_node);
 	
 	/* ----- whole-level routines --------------------------- */
 	void LoadLevel(const Instance &inst);
@@ -537,9 +540,9 @@ private:
 		return SString::printf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
 	}
 	void UpdateGLMarker(Lump_c *marker) const;
-	void AddMissingLump(const Instance &inst, const char *name, const char *after);
-	build_result_e SaveLevel(node_t *root_node, const Instance &inst);
-	build_result_e SaveUDMF(const Instance &inst, node_t *root_node);
+	void AddMissingLump(const char *name, const char *after);
+	build_result_e SaveLevel(node_t *root_node);
+	build_result_e SaveUDMF(node_t *root_node);
 	
 	/* ---------------------------------------------------------------- */
 	Lump_c * FindLevelLump(const char *name) const noexcept;
@@ -564,13 +567,13 @@ private:
 	// returns BUILD_OK, or BUILD_Cancelled if user stopped it.
 	//
 	build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
-		node_t ** N, subsec_t ** S, int depth, const Instance &inst);
+		node_t ** N, subsec_t ** S, int depth);
 	seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
-						int sidedef, int what_side /* 0 or 1 */, const Instance &inst);
+						int sidedef, int what_side /* 0 or 1 */);
 	// scan all the linedef of the level and convert each sidedef into a
 	// seg (or seg pair).  Returns the list of segs.
 	//
-	seg_t *CreateSegs(const Instance &inst);
+	seg_t *CreateSegs();
 	subsec_t *CreateSubsector(quadtree_c *tree);
 	// put all the segs in each subsector into clockwise order, and renumber
 	// the seg indices.
@@ -592,7 +595,7 @@ private:
 	//
 	void RoundOffBspTree();
 	
-	void MarkPolyobjPoint(double x, double y, const Instance &inst);
+	void MarkPolyobjPoint(double x, double y);
 
 	// detection routines
 	void DetectOverlappingVertices() const;
@@ -621,7 +624,9 @@ private:
 	//
 	vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y);
 	
-	void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(3, 4);
+	void Failure(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
+	
+	void PrintMsg(EUR_FORMAT_STRING(const char *format), ...) const EUR_PRINTF(2, 3);
 	
 	Block block = {};
 	Reject rej = {};
@@ -648,6 +653,8 @@ private:
 	const MapFormat format;
 	Wad_file& wad;
 	const Document& doc;
+	
+	const ReportFunc reportLog;
 };
 
 
