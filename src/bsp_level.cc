@@ -2016,7 +2016,7 @@ build_result_e LevelData::SaveUDMF(const Instance &inst, node_t *root_node)
 	catch (const std::runtime_error& e)
 	{
 		gLog.printf("Failed building UDMF nodes: %s\n", e.what());
-		return BUILD_BadFile;
+		throw;
 	}
 
 	if (overflows > 0)
@@ -2138,10 +2138,18 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 
 		ClockwiseBspTree(inst.level);
 
-		if (format == MapFormat::udmf)
-			ret = SaveUDMF(inst, root_node);
-		else
-			ret = SaveLevel(root_node, inst);
+		try
+		{
+			if (format == MapFormat::udmf)
+				ret = SaveUDMF(inst, root_node);
+			else
+				ret = SaveLevel(root_node, inst);
+		}
+		catch(const std::exception &e)
+		{
+			inst.GB_PrintMsg("Failed saving after node-build: %s\n", e.what());
+			ret = BUILD_BadFile;
+		}
 	}
 	else
 	{
