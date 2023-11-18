@@ -1736,7 +1736,7 @@ void LevelData::SaveZDFormat(const Instance &inst, node_t *root_node)
 		lump.Write(lev_ZNOD_magic, 4);
 	else
 		lump.Write(lev_XNOD_magic, 4);
-	lump.Write(lumpData.data(), lumpData.size());
+	lump.Write(lumpData.data(), (int)lumpData.size());
 }
 
 
@@ -1761,7 +1761,7 @@ void LevelData::SaveXGL3Format(const Instance &inst, node_t *root_node) noexcept
 		PutZNodes(zlibContext, root_node, true /* do_xgl3 */);
 	}
 	
-	lump.Write(lumpData.data(), lumpData.size());
+	lump.Write(lumpData.data(), (int)lumpData.size());
 }
 
 
