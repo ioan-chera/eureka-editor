@@ -169,7 +169,7 @@ void seg_t::Recompute()
 //       segs (except the one we are currently splitting) must exist
 //       on a singly-linked list somewhere.
 //
-seg_t * LevelData::SplitSeg(seg_t *old_seg, double x, double y, const Document &doc)
+seg_t * LevelData::SplitSeg(seg_t *old_seg, double x, double y)
 {
 	seg_t *new_seg;
 	vertex_t *new_vert;
@@ -182,7 +182,7 @@ seg_t * LevelData::SplitSeg(seg_t *old_seg, double x, double y, const Document &
 		gLog.debugPrintf("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
 # endif
 
-	new_vert = NewVertexFromSplitSeg(old_seg, x, y, doc);
+	new_vert = NewVertexFromSplitSeg(old_seg, x, y);
 	new_seg  = NewSeg();
 
 	// copy seg info
@@ -344,7 +344,7 @@ static void AddIntersection(intersection_t ** cut_list,
 // Returns true if a "bad seg" was found early.
 //
 int LevelData::EvalPartitionWorker(quadtree_c *tree, seg_t *part,
-		int best_cost, eval_info_t *info, const Document &doc)
+		int best_cost, eval_info_t *info)
 {
 	double qnty;
 	double a, b, fa, fb;
@@ -518,7 +518,7 @@ int LevelData::EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 	{
 		if (tree->subs[c] && !tree->subs[c]->Empty())
 		{
-			if (EvalPartitionWorker(tree->subs[c], part, best_cost, info, doc))
+			if (EvalPartitionWorker(tree->subs[c], part, best_cost, info))
 				return true;
 		}
 	}
@@ -535,7 +535,7 @@ int LevelData::EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 // Returns the computed cost, or a negative value if the seg should be
 // skipped altogether.
 //
-int LevelData::EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Document &doc)
+int LevelData::EvalPartition(quadtree_c *tree, seg_t *part, int best_cost)
 {
 	eval_info_t info;
 
@@ -550,7 +550,7 @@ int LevelData::EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const
 	info.mini_left  = 0;
 	info.mini_right = 0;
 
-	if (EvalPartitionWorker(tree, part, best_cost, &info, doc))
+	if (EvalPartitionWorker(tree, part, best_cost, &info))
 		return -1;
 
 	/* make sure there is at least one real seg on each side */
@@ -648,7 +648,7 @@ static void EvaluateFastWorker(quadtree_c *tree,
 }
 
 
-seg_t *LevelData::FindFastSeg(quadtree_c *tree, const Document &doc)
+seg_t *LevelData::FindFastSeg(quadtree_c *tree)
 {
 	seg_t *best_H = NULL;
 	seg_t *best_V = NULL;
@@ -662,10 +662,10 @@ seg_t *LevelData::FindFastSeg(quadtree_c *tree, const Document &doc)
 	int V_cost = -1;
 
 	if (best_H)
-		H_cost = EvalPartition(tree, best_H, 99999999, doc);
+		H_cost = EvalPartition(tree, best_H, 99999999);
 
 	if (best_V)
-		V_cost = EvalPartition(tree, best_V, 99999999, doc);
+		V_cost = EvalPartition(tree, best_V, 99999999);
 
 # if DEBUG_PICKNODE
 	gLog.debugPrintf("FindFastSeg: best_H=%p (cost %d) | best_V=%p (cost %d)\n",
@@ -684,7 +684,7 @@ seg_t *LevelData::FindFastSeg(quadtree_c *tree, const Document &doc)
 
 /* returns false if cancelled */
 bool LevelData::PickNodeWorker(quadtree_c *part_list,
-		quadtree_c *tree, seg_t ** best, int *best_cost, const Document &doc)
+		quadtree_c *tree, seg_t ** best, int *best_cost)
 {
 	// try each partition
 	for (seg_t *part=part_list->list ; part ; part = part->next)
@@ -702,7 +702,7 @@ bool LevelData::PickNodeWorker(quadtree_c *part_list,
 		if (part->linedef < 0)
 			continue;
 
-		int cost = EvalPartition(tree, part, *best_cost, doc);
+		int cost = EvalPartition(tree, part, *best_cost);
 
 		/* seg unsuitable or too costly ? */
 		if (cost < 0 || cost >= *best_cost)
@@ -721,7 +721,7 @@ bool LevelData::PickNodeWorker(quadtree_c *part_list,
 	{
 		if (part_list->subs[c] && !part_list->subs[c]->Empty())
 		{
-			PickNodeWorker(part_list->subs[c], tree, best, best_cost, doc);
+			PickNodeWorker(part_list->subs[c], tree, best, best_cost);
 		}
 	}
 
@@ -732,7 +732,7 @@ bool LevelData::PickNodeWorker(quadtree_c *part_list,
 //
 // Find the best seg in the seg_list to use as a partition line.
 //
-seg_t *LevelData::PickNode(quadtree_c *tree, int depth, const Document &doc)
+seg_t *LevelData::PickNode(quadtree_c *tree, int depth)
 {
 	seg_t *best=NULL;
 
@@ -752,7 +752,7 @@ seg_t *LevelData::PickNode(quadtree_c *tree, int depth, const Document &doc)
 		gLog.debugPrintf("PickNode: Looking for Fast node...\n");
 #   endif
 
-		best = FindFastSeg(tree, doc);
+		best = FindFastSeg(tree);
 
 		if (best)
 		{
@@ -765,7 +765,7 @@ seg_t *LevelData::PickNode(quadtree_c *tree, int depth, const Document &doc)
 		}
 	}
 
-	if (! PickNodeWorker(tree, tree, &best, &best_cost, doc))
+	if (! PickNodeWorker(tree, tree, &best, &best_cost))
 	{
 		/* hack here : BuildNodes will detect the cancellation */
 		return NULL;
@@ -801,7 +801,7 @@ seg_t *LevelData::PickNode(quadtree_c *tree, int depth, const Document &doc)
 //
 void LevelData::DivideOneSeg(seg_t *seg, seg_t *part,
 		seg_t **left_list, seg_t **right_list,
-		intersection_t ** cut_list, const Document &doc)
+		intersection_t ** cut_list)
 {
 	seg_t *new_seg;
 
@@ -866,7 +866,7 @@ void LevelData::DivideOneSeg(seg_t *seg, seg_t *part,
 
 	ComputeIntersection(seg, part, a, b, &x, &y);
 
-	new_seg = SplitSeg(seg, x, y, doc);
+	new_seg = SplitSeg(seg, x, y);
 
 	AddIntersection(cut_list, seg->end, part, self_ref);
 
@@ -885,7 +885,7 @@ void LevelData::DivideOneSeg(seg_t *seg, seg_t *part,
 
 void LevelData::SeparateSegs(quadtree_c *tree, seg_t *part,
 		seg_t **left_list, seg_t **right_list,
-		intersection_t ** cut_list, const Document &doc)
+		intersection_t ** cut_list)
 {
 	while (tree->list != NULL)
 	{
@@ -894,14 +894,14 @@ void LevelData::SeparateSegs(quadtree_c *tree, seg_t *part,
 
 		seg->quad = NULL;
 
-		DivideOneSeg(seg, part, left_list, right_list, cut_list, doc);
+		DivideOneSeg(seg, part, left_list, right_list, cut_list);
 	}
 
 	// recursively handle sub-blocks
 	if (tree->subs[0])
 	{
-		SeparateSegs(tree->subs[0], part, left_list, right_list, cut_list, doc);
-		SeparateSegs(tree->subs[1], part, left_list, right_list, cut_list, doc);
+		SeparateSegs(tree->subs[0], part, left_list, right_list, cut_list);
+		SeparateSegs(tree->subs[1], part, left_list, right_list, cut_list);
 	}
 
 	// this quadtree_c is empty now
@@ -1153,21 +1153,21 @@ void node_t::SetPartition(LevelData &lev_data, const seg_t *part, const Instance
 {
 	SYS_ASSERT(part->linedef >= 0);
 
-	const auto &part_L = inst.level.linedefs[part->linedef];
+	const auto &part_L = lev_data.GetDoc().linedefs[part->linedef];
 
 	if (part->side == 0)  /* right side */
 	{
-		x  = inst.level.getStart(*part_L).x();
-		y  = inst.level.getStart(*part_L).y();
-		dx = inst.level.getEnd(*part_L).x() - x;
-		dy = inst.level.getEnd(*part_L).y() - y;
+		x  = lev_data.GetDoc().getStart(*part_L).x();
+		y  = lev_data.GetDoc().getStart(*part_L).y();
+		dx = lev_data.GetDoc().getEnd(*part_L).x() - x;
+		dy = lev_data.GetDoc().getEnd(*part_L).y() - y;
 	}
 	else  /* left side */
 	{
-		x  = inst.level.getEnd(*part_L).x();
-		y  = inst.level.getEnd(*part_L).y();
-		dx = inst.level.getStart(*part_L).x() - x;
-		dy = inst.level.getStart(*part_L).y() - y;
+		x  = lev_data.GetDoc().getEnd(*part_L).x();
+		y  = lev_data.GetDoc().getEnd(*part_L).y();
+		dx = lev_data.GetDoc().getStart(*part_L).x() - x;
+		dy = lev_data.GetDoc().getStart(*part_L).y() - y;
 	}
 
 	/* check for very long partition (overflow of dx,dy in NODES) */
@@ -1322,10 +1322,10 @@ seg_t *LevelData::CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 {
 	const SideDef *sd = NULL;
 	if (sidedef >= 0)
-		sd = inst.level.sidedefs[sidedef].get();
+		sd = doc.sidedefs[sidedef].get();
 
 	// check for bad sidedef
-	if (sd && !inst.level.isSector(sd->sector))
+	if (sd && !doc.isSector(sd->sector))
 	{
 		Warning(inst, "Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
 	}
@@ -1359,15 +1359,15 @@ seg_t *LevelData::CreateSegs(const Instance &inst)
 {
 	seg_t *list = NULL;
 
-	for (int i=0 ; i < inst.level.numLinedefs() ; i++)
+	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
-		const auto &line = inst.level.linedefs[i];
+		const auto &line = doc.linedefs[i];
 
 		seg_t *left  = NULL;
 		seg_t *right = NULL;
 
 		// ignore zero-length lines
-		if (inst.level.isZeroLength(*line))
+		if (doc.isZeroLength(*line))
 			continue;
 
 		// ignore overlapping lines
@@ -1375,7 +1375,7 @@ seg_t *LevelData::CreateSegs(const Instance &inst)
 			continue;
 
 		// check for extremely long lines
-		if (inst.level.calcLength(*line) >= 30000)
+		if (doc.calcLength(*line) >= 30000)
 			Warning(inst, "Linedef #%d is VERY long, it may cause problems\n", i);
 
 		if (line->right >= 0)
@@ -1450,7 +1450,7 @@ void subsec_t::DetermineMiddle()
 }
 
 
-void subsec_t::ClockwiseOrder(const Document &doc)
+void subsec_t::ClockwiseOrder(const Document& doc)
 {
 	seg_t *seg;
 
@@ -1707,7 +1707,7 @@ build_result_e LevelData::BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 
 	/* pick partition line  None indicates convexicity */
-	seg_t *part = PickNode(tree, depth, inst.level);
+	seg_t *part = PickNode(tree, depth);
 
 	if (part == NULL)
 	{
@@ -1738,7 +1738,7 @@ build_result_e LevelData::BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	seg_t *rights = NULL;
 	intersection_t *cut_list = NULL;
 
-	SeparateSegs(tree, part, &lefts, &rights, &cut_list, inst.level);
+	SeparateSegs(tree, part, &lefts, &rights, &cut_list);
 
 	delete tree;
 	tree = NULL;
@@ -1778,7 +1778,7 @@ build_result_e LevelData::BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 }
 
 
-void LevelData::ClockwiseBspTree(const Document &doc)
+void LevelData::ClockwiseBspTree()
 {
 	current_seg_index = 0;
 

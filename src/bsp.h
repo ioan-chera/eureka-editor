@@ -403,13 +403,20 @@ class LevelData
 {
 	
 public:
-	explicit LevelData(MapFormat format, Wad_file &wad) : format(format), wad(wad)
+	explicit LevelData(MapFormat format, Wad_file &wad, const Document &doc) : format(format), wad(wad), doc(doc)
 	{
 	}
+	LevelData(const LevelData& other) = delete;
+	LevelData& operator = (const LevelData& other) = delete;
 
 	MapFormat GetFormat() const
 	{
 		return format;
+	}
+
+	const Document& GetDoc() const
+	{
+		return doc;
 	}
 
 	// return a new end vertex to compensate for a seg that would end up
@@ -469,7 +476,7 @@ private:
 	
 	// REJECT : Generate the reject table
 	void Reject_WriteLump() const;
-	void PutReject(const Instance &inst);
+	void PutReject();
 	
 	// allocation routines
 	vertex_t *NewVertex();
@@ -486,7 +493,7 @@ private:
 	void FreeWallTips();
 	
 	/* ----- reading routines ------------------------------ */
-	void GetVertices(const Document &doc);
+	void GetVertices();
 	
 	/* ----- writing routines ------------------------------ */
 	void MarkOverflow(int flags);
@@ -501,9 +508,9 @@ private:
 	}
 	void PutSegs(const Instance &inst);
 	void PutGLSegs() const;
-	void PutGLSegs_V5(const Instance &inst) const;
+	void PutGLSegs_V5() const;
 	void PutSubsecs(const Instance &inst, const char *name, int do_gl);
-	void PutGLSubsecs_V5(const Instance &inst) const;
+	void PutGLSubsecs_V5() const;
 	void PutNodes(const Instance &inst, const char *name, int do_v5, node_t *root);
 	void PutOneNode(node_t *node, Lump_c *lump);
 	void PutOneNode_V5(node_t *node, Lump_c *lump);
@@ -524,12 +531,12 @@ private:
 	/* ----- whole-level routines --------------------------- */
 	void LoadLevel(const Instance &inst);
 	void FreeLevel();
-	u32_t CalcGLChecksum(const Instance &inst) const;
+	u32_t CalcGLChecksum() const;
 	inline SString CalcOptionsString() const
 	{
 		return SString::printf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
 	}
-	void UpdateGLMarker(const Instance &inst, Lump_c *marker) const;
+	void UpdateGLMarker(Lump_c *marker) const;
 	void AddMissingLump(const Instance &inst, const char *name, const char *after);
 	build_result_e SaveLevel(node_t *root_node, const Instance &inst);
 	build_result_e SaveUDMF(const Instance &inst, node_t *root_node);
@@ -540,13 +547,13 @@ private:
 	Lump_c & CreateGLMarker() const;
 	
 	// NODES
-	seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc);
+	seg_t * SplitSeg(seg_t *old_seg, double x, double y);
 	void DivideOneSeg(seg_t *seg, seg_t *part,
 					  seg_t **left_list, seg_t **right_list,
-					  intersection_t ** cut_list, const Document &doc);
+					  intersection_t ** cut_list);
 	void SeparateSegs(quadtree_c *tree, seg_t *part,
 					  seg_t **left_list, seg_t **right_list,
-					  intersection_t ** cut_list, const Document &doc);
+					  intersection_t ** cut_list);
 	void AddMinisegs(intersection_t *cut_list, seg_t *part,
 					 seg_t **left_list, seg_t **right_list);
 	// takes the seg list and determines if it is convex.  When it is, the
@@ -572,7 +579,7 @@ private:
 	//   a partner will insert another seg into that partner's list, usually
 	//   in the wrong place order-wise. ]
 	//
-	void ClockwiseBspTree(const Document &doc);
+	void ClockwiseBspTree();
 	// traverse the BSP tree and do whatever is necessary to convert the
 	// node information from GL standard to normal standard (for example,
 	// removing minisegs).
@@ -588,31 +595,31 @@ private:
 	void MarkPolyobjPoint(double x, double y, const Instance &inst);
 
 	// detection routines
-	void DetectOverlappingVertices(const Document &doc) const;
+	void DetectOverlappingVertices() const;
 	void DetectPolyobjSectors(const Instance &inst);
 	
 	int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
-								   int best_cost, eval_info_t *info, const Document &doc);
-	int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Document &doc);
-	seg_t *FindFastSeg(quadtree_c *tree, const Document &doc);
+								   int best_cost, eval_info_t *info);
+	int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost);
+	seg_t *FindFastSeg(quadtree_c *tree);
 	bool PickNodeWorker(quadtree_c *part_list,
-						quadtree_c *tree, seg_t ** best, int *best_cost, const Document &doc);
+						quadtree_c *tree, seg_t ** best, int *best_cost);
 	// scan all the segs in the list, and choose the best seg to use as a
 	// partition line, returning it.  If no seg can be used, returns NULL.
 	// The 'depth' parameter is the current depth in the tree, used for
 	// computing the current progress.
 	//
-	seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc);
+	seg_t *PickNode(quadtree_c *tree, int depth);
 	
 	/* ----- vertex routines ------------------------------- */
 	void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 						  int open_left, int open_right);
 	// computes the wall tips for all of the vertices
-	void CalculateWallTips(const Document &doc);
+	void CalculateWallTips();
 	// return a new vertex (with correct wall-tip info) for the split that
 	// happens along the given seg at the given location.
 	//
-	vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc);
+	vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y);
 	
 	void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(3, 4);
 	
@@ -640,6 +647,7 @@ private:
 
 	const MapFormat format;
 	Wad_file& wad;
+	const Document& doc;
 };
 
 

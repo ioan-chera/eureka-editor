@@ -271,23 +271,23 @@ void LevelData::MarkPolyobjPoint(double x, double y, const Instance &inst)
 	int bmaxx = (int) (x + POLY_BOX_SZ);
 	int bmaxy = (int) (y + POLY_BOX_SZ);
 
-	for (i = 0 ; i < inst.level.numLinedefs(); i++)
+	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		const auto &L = inst.level.linedefs[i];
+		const auto &L = doc.linedefs[i];
 
 		if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy,
-					(int) inst.level.getStart(*L).x(), (int) inst.level.getStart(*L).y(),
-					(int) inst.level.getEnd(*L).x(),   (int) inst.level.getEnd(*L).y()))
+					(int) doc.getStart(*L).x(), (int) doc.getStart(*L).y(),
+					(int) doc.getEnd(*L).x(),   (int) doc.getEnd(*L).y()))
 		{
 #     if DEBUG_POLYOBJ
 			gLog.debugPrintf("  Touching line was %d\n", L->index);
 #     endif
 
 			if (L->left >= 0)
-				MarkPolyobjSector(inst.level.getLeft(*L)->sector, inst.level);
+				MarkPolyobjSector(doc.getLeft(*L)->sector, doc);
 
 			if (L->right >= 0)
-				MarkPolyobjSector(inst.level.getRight(*L)->sector, inst.level);
+				MarkPolyobjSector(doc.getRight(*L)->sector, doc);
 
 			inside_count++;
 		}
@@ -302,16 +302,16 @@ void LevelData::MarkPolyobjPoint(double x, double y, const Instance &inst)
 	//       If the point is sitting directly on a (two-sided) line,
 	//       then we mark the sectors on both sides.
 
-	for (i = 0 ; i < inst.level.numLinedefs(); i++)
+	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		const auto &L = inst.level.linedefs[i];
+		const auto &L = doc.linedefs[i];
 
 		double x_cut;
 
-		x1 = inst.level.getStart(*L).x();
-		y1 = inst.level.getStart(*L).y();
-		x2 = inst.level.getEnd(*L).x();
-		y2 = inst.level.getEnd(*L).y();
+		x1 = doc.getStart(*L).x();
+		y1 = doc.getStart(*L).y();
+		x2 = doc.getEnd(*L).x();
+		y2 = doc.getEnd(*L).y();
 
 		/* check vertical range */
 		if (fabs(y2 - y1) < EPSILON)
@@ -338,10 +338,10 @@ void LevelData::MarkPolyobjPoint(double x, double y, const Instance &inst)
 		return;
 	}
 
-	const auto &best_ld = inst.level.linedefs[best_match];
+	const auto &best_ld = doc.linedefs[best_match];
 
-	y1 = inst.level.getStart(*best_ld).y();
-	y2 = inst.level.getEnd(*best_ld).y();
+	y1 = doc.getStart(*best_ld).y();
+	y2 = doc.getEnd(*best_ld).y();
 
 # if DEBUG_POLYOBJ
 	gLog.debugPrintf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
@@ -360,9 +360,9 @@ void LevelData::MarkPolyobjPoint(double x, double y, const Instance &inst)
 	 * actually on.
 	 */
 	if ((y1 > y2) == (best_dist > 0))
-		sector = (best_ld->right >= 0) ? inst.level.getRight(*best_ld)->sector : -1;
+		sector = (best_ld->right >= 0) ? doc.getRight(*best_ld)->sector : -1;
 	else
-		sector = (best_ld->left >= 0) ? inst.level.getLeft(*best_ld)->sector : -1;
+		sector = (best_ld->left >= 0) ? doc.getLeft(*best_ld)->sector : -1;
 
 # if DEBUG_POLYOBJ
 	gLog.debugPrintf("  Sector %d contains the polyobj.\n", sector);
@@ -374,7 +374,7 @@ void LevelData::MarkPolyobjPoint(double x, double y, const Instance &inst)
 		return;
 	}
 
-	MarkPolyobjSector(sector, inst.level);
+	MarkPolyobjSector(sector, doc);
 }
 
 
@@ -395,15 +395,15 @@ void LevelData::DetectPolyobjSectors(const Instance &inst)
 	//      used, otherwise Hexen polyobj thing types are used.
 
 	// -JL- First go through all lines to see if level contains any polyobjs
-	for (i = 0 ; i < inst.level.numLinedefs(); i++)
+	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		const auto &L = inst.level.linedefs[i];
+		const auto &L = doc.linedefs[i];
         const linetype_t *type = get(inst.conf.line_types, L->type);
         if(type && type->isPolyObjectSpecial())
 			break;
 	}
 
-	if (i == inst.level.numLinedefs())
+	if (i == doc.numLinedefs())
 	{
 		// -JL- No polyobjs in this level
 		return;
@@ -414,9 +414,9 @@ void LevelData::DetectPolyobjSectors(const Instance &inst)
 			hexen_style ? "HEXEN" : "ZDOOM");
 # endif
 
-	for (i = 0 ; i < inst.level.numThings(); i++)
+	for (i = 0 ; i < doc.numThings(); i++)
 	{
-		const auto &T = inst.level.things[i];
+		const auto &T = doc.things[i];
 
 		double x = T->x();
 		double y = T->y();
@@ -455,7 +455,7 @@ static FFixedPoint VertexCompare(const Document &doc, const void *p1, const void
 }
 
 
-void LevelData::DetectOverlappingVertices(const Document &doc) const
+void LevelData::DetectOverlappingVertices() const
 {
 	SYS_ASSERT((int)vertices.size() == doc.numVertices());
 
@@ -466,7 +466,7 @@ void LevelData::DetectOverlappingVertices(const Document &doc) const
 	for (i=0 ; i < (int)vertices.size() ; i++)
 		array[i] = static_cast<u16_t>(i);
 
-	std::sort(array, array + (int)vertices.size(), [&doc](u16_t left, u16_t right)
+	std::sort(array, array + (int)vertices.size(), [this](u16_t left, u16_t right)
 		{
 			return VertexCompare(doc, &left, &right).raw() < 0;
 		});
@@ -637,7 +637,7 @@ void LevelData::VertexAddWallTip(vertex_t *vert, double dx, double dy,
 }
 
 
-void LevelData::CalculateWallTips(const Document &doc)
+void LevelData::CalculateWallTips()
 {
 	int i;
 
@@ -677,7 +677,7 @@ void LevelData::CalculateWallTips(const Document &doc)
 }
 
 
-vertex_t *LevelData::NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc)
+vertex_t *LevelData::NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 {
 	vertex_t *vert = NewVertex();
 

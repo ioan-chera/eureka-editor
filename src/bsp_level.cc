@@ -500,7 +500,7 @@ void LevelData::Block::InitMap(const Document &doc)
 //
 void LevelData::PutBlockmap(const Instance &inst)
 {
-	if (! cur_info->do_blockmap || inst.level.numLinedefs() == 0)
+	if (! cur_info->do_blockmap || doc.numLinedefs() == 0)
 	{
 		// just create an empty blockmap lump
 		CreateLevelLump("BLOCKMAP");
@@ -512,7 +512,7 @@ void LevelData::PutBlockmap(const Instance &inst)
 	// initial phase: create internal blockmap containing the index of
 	// all lines in each block.
 
-	block.CreateMap(inst.level);
+	block.CreateMap(doc);
 
 	// -AJA- second phase: compress the blockmap.  We do this by sorting
 	//       the blocks, which is a typical way to detect duplicates in
@@ -673,18 +673,18 @@ void LevelData::Reject_WriteLump() const
 // determining all isolated groups of sectors (islands that are
 // surrounded by void space).
 //
-void LevelData::PutReject(const Instance &inst)
+void LevelData::PutReject()
 {
-	if (! cur_info->do_reject || inst.level.numSectors() == 0)
+	if (! cur_info->do_reject || doc.numSectors() == 0)
 	{
 		// just create an empty reject lump
 		CreateLevelLump("REJECT");
 		return;
 	}
 
-	rej.Init(inst.level);
-	rej.GroupSectors(inst.level);
-	rej.ProcessSectors(inst.level);
+	rej.Init(doc);
+	rej.GroupSectors(doc);
+	rej.ProcessSectors(doc);
 
 # if DEBUG_REJECT
 	Reject_DebugGroups();
@@ -791,7 +791,7 @@ void LevelData::FreeWallTips()
 
 /* ----- reading routines ------------------------------ */
 
-void LevelData::GetVertices(const Document &doc)
+void LevelData::GetVertices()
 {
 	for (int i = 0 ; i < doc.numVertices() ; i++)
 	{
@@ -970,7 +970,7 @@ void LevelData::PutSegs(const Instance &inst)
 		raw.angle   = LE_U16(VanillaSegAngle(seg));
 		raw.linedef = LE_U16(seg->linedef);
 		raw.flip    = LE_U16(seg->side);
-		raw.dist    = LE_U16(VanillaSegDist(seg, inst.level));
+		raw.dist    = LE_U16(VanillaSegDist(seg, doc));
 
 		lump.Write(&raw, sizeof(raw));
 
@@ -1042,7 +1042,7 @@ void LevelData::PutGLSegs() const
 }
 
 
-void LevelData::PutGLSegs_V5(const Instance &inst) const
+void LevelData::PutGLSegs_V5() const
 {
 	int i, count;
 
@@ -1117,7 +1117,7 @@ void LevelData::PutSubsecs(const Instance &inst, const char *name, int do_gl)
 }
 
 
-void LevelData::PutGLSubsecs_V5(const Instance &inst) const
+void LevelData::PutGLSubsecs_V5() const
 {
 	int i;
 
@@ -1274,19 +1274,19 @@ void LevelData::PutNodes(const Instance &inst, const char *name, int do_v5, node
 
 void LevelData::CheckLimits(bool& force_v5, bool& force_xnod, const Instance &inst)
 {
-	if (inst.level.numSectors() > 65534)
+	if (doc.numSectors() > 65534)
 	{
 		Failure(inst, "Map has too many sectors.\n");
 		MarkOverflow(LIMIT_SECTORS);
 	}
 
-	if (inst.level.numSidedefs() > 65534)
+	if (doc.numSidedefs() > 65534)
 	{
 		Failure(inst, "Map has too many sidedefs.\n");
 		MarkOverflow(LIMIT_SIDEDEFS);
 	}
 
-	if (inst.level.numLinedefs() > 65534)
+	if (doc.numLinedefs() > 65534)
 	{
 		Failure(inst, "Map has too many linedefs.\n");
 		MarkOverflow(LIMIT_LINEDEFS);
@@ -1837,9 +1837,9 @@ void LevelData::LoadLevel(const Instance &inst)
 	num_new_vert = 0;
 	num_real_lines = 0;
 
-	GetVertices(inst.level);
+	GetVertices();
 
-	for(auto &L : inst.level.linedefs)
+	for(auto &L : doc.linedefs)
 	{
 		if (L->right >= 0 || L->left >= 0)
 			num_real_lines++;
@@ -1852,12 +1852,12 @@ void LevelData::LoadLevel(const Instance &inst)
 	}
 
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
-			inst.level.numVertices(), inst.level.numSectors(), inst.level.numSidedefs(), inst.level.numLinedefs(), inst.level.numThings());
+			doc.numVertices(), doc.numSectors(), doc.numSidedefs(), doc.numLinedefs(), doc.numThings());
 
-	DetectOverlappingVertices(inst.level);
-	DetectOverlappingLines(inst.level);
+	DetectOverlappingVertices();
+	DetectOverlappingLines(doc);
 
-	CalculateWallTips(inst.level);
+	CalculateWallTips();
 
 	if (format != MapFormat::doom)
 	{
@@ -1876,7 +1876,7 @@ void LevelData::FreeLevel(void)
 	FreeWallTips();
 }
 
-u32_t LevelData::CalcGLChecksum(const Instance &inst) const
+u32_t LevelData::CalcGLChecksum() const
 {
 	u32_t crc;
 
@@ -1904,11 +1904,11 @@ u32_t LevelData::CalcGLChecksum(const Instance &inst) const
 }
 
 
-void LevelData::UpdateGLMarker(const Instance &inst, Lump_c *marker) const
+void LevelData::UpdateGLMarker(Lump_c *marker) const
 {
 	// we *must* compute the checksum BEFORE (re)creating the lump
 	// [ otherwise we write data into the wrong part of the file ]
-	u32_t crc = CalcGLChecksum(inst);
+	u32_t crc = CalcGLChecksum();
 
 	// when original name is long, need to specify it here
 	if (current_name.length() > 5)
@@ -1987,12 +1987,12 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 		PutGLVertices(force_v5);
 
 		if (force_v5)
-			PutGLSegs_V5(inst);
+			PutGLSegs_V5();
 		else
 			PutGLSegs();
 
 		if (force_v5)
-			PutGLSubsecs_V5(inst);
+			PutGLSubsecs_V5();
 		else
 			PutSubsecs(inst, "GL_SSECT", true);
 
@@ -2032,13 +2032,13 @@ build_result_e LevelData::SaveLevel(node_t *root_node, const Instance &inst)
 	}
 
 	PutBlockmap(inst);
-	PutReject(inst);
+	PutReject();
 
 	// keyword support (v5.0 of the specs).
 	// must be done *after* doing normal nodes (for proper checksum).
 	if (gl_marker)
 	{
-		UpdateGLMarker(inst, gl_marker);
+		UpdateGLMarker(gl_marker);
 	}
 
 	wad.writeToDisk();
@@ -2168,7 +2168,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 
 	LoadLevel(inst);
 
-	block.InitMap(inst.level);
+	block.InitMap(doc);
 
 
 	build_result_e ret = BUILD_OK;
@@ -2194,7 +2194,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 					ComputeBspHeight(root_node->l.node));
 		}
 
-		ClockwiseBspTree(inst.level);
+		ClockwiseBspTree();
 
 		try
 		{
@@ -2218,7 +2218,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 	FreeQuickAllocCuts();
 
 	// clear some fake line flags
-	for(auto &linedef : inst.level.linedefs)
+	for(auto &linedef : doc.linedefs)
 		linedef->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
 	return ret;
@@ -2229,7 +2229,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 
 build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst, const LoadingData& loading, Wad_file& wad)
 {
-	ajbsp::LevelData lev_data(loading.levelFormat, wad);
+	ajbsp::LevelData lev_data(loading.levelFormat, wad, inst.level);
 	return lev_data.BuildLevel(info, lev_idx, inst);
 }
 
