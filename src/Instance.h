@@ -42,6 +42,7 @@ class Lump_c;
 class UI_NodeDialog;
 class UI_ProjectSetup;
 struct BadCount;
+struct NewDocument;
 struct v2double_t;
 struct v2int_t;
 
@@ -278,6 +279,7 @@ public:
 	bool ExecuteKey(keycode_t key, KeyContext context);
 
 	// M_LOADSAVE
+	NewDocument openDocument(const LoadingData &inLoading, const Wad_file &wad, int level);
 	void LoadLevel(const Wad_file *wad, const SString &level) noexcept(false);
 	void LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false);
 	bool MissingIWAD_Dialog();

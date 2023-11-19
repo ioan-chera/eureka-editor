@@ -922,11 +922,11 @@ struct NewDocument
 	BadCount bad;
 };
 
-static NewDocument openDocument(Instance &inst, const LoadingData &inLoading, const Wad_file &wad, int level)
+NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file &wad, int level)
 {
 	assert(level >= 0 && level < wad.LevelCount());
 
-	NewDocument newdoc = { Document(inst), inLoading, BadCount() };
+	NewDocument newdoc = { Document(*this), inLoading, BadCount() };
 
 	Document& doc = newdoc.doc;
 	LoadingData& loading = newdoc.loading;
@@ -936,7 +936,7 @@ static NewDocument openDocument(Instance &inst, const LoadingData &inLoading, co
 	doc.LoadHeader(level, wad);
 	if(loading.levelFormat == MapFormat::udmf)
 	{
-		inst.UDMF_LoadLevel(level, &wad, doc, loading, bad);
+		UDMF_LoadLevel(level, &wad, doc, loading, bad);
 	}
 	else try
 	{
@@ -946,15 +946,15 @@ static NewDocument openDocument(Instance &inst, const LoadingData &inLoading, co
 			doc.LoadThings(level, &wad);
 		doc.LoadVertices(level, &wad);
 		doc.LoadSectors(level, &wad);
-		doc.LoadSideDefs(level, &wad, inst.conf, bad);
+		doc.LoadSideDefs(level, &wad, conf, bad);
 		if(loading.levelFormat == MapFormat::hexen)
 		{
-			doc.LoadLineDefs_Hexen(level, &wad, inst.conf, bad);
+			doc.LoadLineDefs_Hexen(level, &wad, conf, bad);
 			doc.LoadBehavior(level, &wad);
 			doc.LoadScripts(level, &wad);
 		}
 		else
-			doc.LoadLineDefs(level, &wad, inst.conf, bad);
+			doc.LoadLineDefs(level, &wad, conf, bad);
 	}
 	catch(const std::runtime_error &e)
 	{
@@ -971,70 +971,14 @@ static NewDocument openDocument(Instance &inst, const LoadingData &inLoading, co
 
 void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 {
-	LoadingData backupLoaded = loaded;
-	Document backupDoc = std::move(level);
-	
-	BadCount bad = {};
-	
-	try
+	NewDocument newdoc = openDocument(loaded, *wad, lev_num);
+	if (newdoc.bad.linedef_count || newdoc.bad.sector_refs || newdoc.bad.sidedef_refs)
 	{
-		int loading_level = lev_num;
-		
-		loaded.levelFormat = wad->LevelFormat(loading_level);
-		
-		level.clear();
-		
-		level.LoadHeader(loading_level, *wad);
-		
-		if (loaded.levelFormat == MapFormat::udmf)
-		{
-			UDMF_LoadLevel(loading_level, wad, level, loaded, bad);
-		}
-		else
-		{
-			if (loaded.levelFormat == MapFormat::hexen)
-				level.LoadThings_Hexen(loading_level, wad);
-			else
-				level.LoadThings(loading_level, wad);
-			
-			level.LoadVertices(loading_level, wad);
-			level.LoadSectors(loading_level, wad);
-			level.LoadSideDefs(loading_level, wad, conf, bad);
-			
-			if (loaded.levelFormat == MapFormat::hexen)
-			{
-				level.LoadLineDefs_Hexen(loading_level, wad, conf, bad);
-				
-				level.LoadBehavior(loading_level, wad);
-				level.LoadScripts(loading_level, wad);
-			}
-			else
-			{
-				level.LoadLineDefs(loading_level, wad, conf, bad);
-			}
-		}
+		ShowLoadProblem(newdoc.bad);
 	}
-	catch(const std::runtime_error &)
-	{
-		level = std::move(backupDoc);
-		loaded = backupLoaded;
-		throw;
-	}
-	if (bad.linedef_count || bad.sector_refs || bad.sidedef_refs)
-	{
-		ShowLoadProblem(bad);
-	}
-	
-	// Node builders create a lot of new vertices for segs.
-	// However they just get in the way for editing, so remove them.
-	level.RemoveUnusedVerticesAtEnd();
-
-	level.checks.sidedefsUnpack(true);
-	
-	level.CalculateLevelBounds();
+	loaded = newdoc.loading;
+	level = std::move(newdoc.doc);
 	Subdiv_InvalidateAll();
-	
-	level.MadeChanges = false;
 }
 
 void Instance::refreshViewAfterLoad(const BadCount& bad, const Wad_file *wad, const SString &map_name, bool new_resources)
@@ -1154,7 +1098,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// These 2 may throw, but it's safe here
-	NewDocument newdoc = openDocument(gInstance, loading, *wad, lev_num);
+	NewDocument newdoc = gInstance.openDocument(loading, *wad, lev_num);
 	NewResources newres = loadResources(newdoc.loading, gInstance.wad);
 
 	gInstance.level = std::move(newdoc.doc);
@@ -1222,7 +1166,7 @@ void Instance::CMD_OpenMap()
 	NewDocument newdoc = { Document(*this), LoadingData(), BadCount() };
 	try
 	{
-		newdoc = openDocument(*this, loading, *wad, lev_num);
+		newdoc = openDocument(loading, *wad, lev_num);
 	}
 	catch (const std::runtime_error& e)
 	{
