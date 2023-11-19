@@ -1746,7 +1746,15 @@ bool Instance::M_SaveMap(bool inhibit_node_build)
 
 	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.editWad()->PathName().u8string().c_str());
 
-	SaveLevelAndUpdateWindow(loaded, loaded.levelName, *wad.master.editWad(), inhibit_node_build);
+	try
+	{
+		SaveLevelAndUpdateWindow(loaded, loaded.levelName, *wad.master.editWad(), inhibit_node_build);
+	}
+	catch(const std::runtime_error &e)
+	{
+		DLG_ShowError(false, "Could not save map: %s", e.what());
+		return false;
+	}
 
 	return true;
 }
@@ -1886,18 +1894,7 @@ bool Instance::M_ExportMap(bool inhibit_node_build)
 
 void Instance::CMD_SaveMap()
 {
-	try
-	{
-		M_SaveMap(false);
-	}
-	catch(const WadWriteException &e)
-	{
-		DLG_ShowError(false, "%s", e.what());
-	}
-	catch (const std::runtime_error& e)
-	{
-		DLG_ShowError(false, "Could not save map: %s", e.what());
-	}
+	M_SaveMap(false);
 }
 
 

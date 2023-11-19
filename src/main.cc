@@ -889,7 +889,7 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 			}
 			// Otherwise wad
 			if (!Wad_file::Validate(resource))
-				ThrowException("Invalid WAD file: %s", resource.u8string().c_str());
+				ThrowException("Invalid resource WAD file: %s", resource.u8string().c_str());
 
 			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
 				WadOpenMode::read);
