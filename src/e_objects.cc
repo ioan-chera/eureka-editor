@@ -857,7 +857,7 @@ void ObjectsModule::move(const selection_c &list, const v3double_t &delta) const
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("moved", list);
 
-	int objectsBeforeMoving;
+	int objectsBeforeMoving = 0;
 	if(inst.edit.Selected)
 		objectsBeforeMoving = doc.numObjects(inst.edit.Selected->what_type());
 
