@@ -878,3 +878,14 @@ DocumentModule::DocumentModule(Document &doc) : inst(doc.inst), doc(doc)
 void Basis::EditUnit::destroy()
 {
 }
+
+
+// UI_NodeDialog
+UI_NodeDialog::UI_NodeDialog() : Fl_Double_Window(100, 100)
+{
+}
+
+int UI_NodeDialog::handle(int event)
+{
+	return 0;
+}
