@@ -47,50 +47,6 @@ bool config::bsp_compressed		= false;
 #define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
 
 
-class UI_NodeDialog : public Fl_Double_Window
-{
-public:
-	Fl_Browser *browser;
-
-	Fl_Progress *progress;
-
-	Fl_Button * button;
-
-	int cur_prog = -1;
-	char prog_label[64];
-
-	bool finished = false;
-
-	bool want_cancel = false;
-	bool want_close = false;
-
-public:
-	UI_NodeDialog();
-	virtual ~UI_NodeDialog()
-	{
-	}
-
-	/* FLTK method */
-	int handle(int event);
-
-public:
-	void SetProg(int perc);
-
-	void Print(const char *str);
-
-	void Finish_OK();
-	void Finish_Cancel();
-	void Finish_Error();
-
-	bool WantCancel() const { return want_cancel; }
-	bool WantClose()  const { return want_close;  }
-
-private:
-	static void  close_callback(Fl_Widget *, void *);
-	static void button_callback(Fl_Widget *, void *);
-};
-
-
 //
 //  Callbacks
 //
@@ -270,7 +226,7 @@ static const char *build_ErrorString(build_result_e ret)
 }
 
 
-void Instance::GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const
+void Instance::GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...)
 {
 	va_list args;
 
@@ -326,6 +282,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
+		
 		LoadLevelNum(wad.master.editWad().get(), n);
 
 		ret = AJBSP_BuildLevel(info, n, *this, loaded, *wad.master.editWad());
@@ -378,7 +335,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 
 void Instance::BuildNodesAfterSave(int lev_idx, const LoadingData& loading, Wad_file &wad)
 {
-	nodeialog = NULL;
+	nodeialog.reset();
 
 	nodebuildinfo_t nb_info;
 
@@ -444,7 +401,7 @@ void Instance::CMD_BuildAllNodes()
 	edit.highlight.clear();
 
 
-	nodeialog = new UI_NodeDialog();
+	nodeialog.emplace();
 
 	nodeialog->set_modal();
 	nodeialog->show();
@@ -452,18 +409,18 @@ void Instance::CMD_BuildAllNodes()
 	Fl::check();
 
 
-	nb_info = new nodebuildinfo_t;
+	nodebuildinfo_t nb_info;
 
-	PrepareInfo(nb_info);
+	PrepareInfo(&nb_info);
 
-	build_result_e ret = BuildAllNodes(nb_info);
+	build_result_e ret = BuildAllNodes(&nb_info);
 
 	if (ret == BUILD_OK)
 	{
 		nodeialog->Finish_OK();
 		Status_Set("Built nodes OK");
 	}
-	else if (nb_info->cancelled)
+	else if (nb_info.cancelled)
 	{
 		nodeialog->Finish_Cancel();
 		Status_Set("Cancelled building nodes");
@@ -479,8 +436,7 @@ void Instance::CMD_BuildAllNodes()
 		Fl::wait(0.2);
 	}
 
-	delete nb_info; nb_info = NULL;
-	delete nodeialog;  nodeialog = NULL;
+	nodeialog.reset();
 
 
 	// reload the previous level

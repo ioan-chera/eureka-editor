@@ -25,6 +25,7 @@
 #include "im_img.h"
 #include "m_game.h"
 #include "m_loadsave.h"
+#include "m_nodes.h"
 #include "main.h"
 #include "r_grid.h"
 #include "r_render.h"
@@ -285,7 +286,7 @@ public:
 
 	// M_NODES
 	void BuildNodesAfterSave(int lev_idx, const LoadingData& loading, Wad_file &wad);
-	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const EUR_PRINTF(2, 3);
+	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
 
 	// M_TESTMAP
 	bool M_PortSetupDialog(const SString& port, const SString& game) const;
@@ -452,7 +453,7 @@ public:	// will be private when we encapsulate everything
 	Recently_used recent_textures{ *this };
 	Recently_used recent_things{ *this };
 	int last_given_file = 0;
-	UI_NodeDialog *nodeialog = nullptr;
+	tl::optional<UI_NodeDialog> nodeialog;
 	nodebuildinfo_t *nb_info = nullptr;
 	
 	int tagInMemory = 0;

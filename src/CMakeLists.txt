@@ -107,6 +107,7 @@ set(source_m
     m_loadsave.cc
     m_loadsave.h
     m_nodes.cc
+    m_nodes.h
     m_parse.cc
     m_parse.h
     m_select.cc
