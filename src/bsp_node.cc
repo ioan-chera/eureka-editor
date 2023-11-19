@@ -37,13 +37,8 @@
 // Rewritten again by Andrew Apted (-AJA-), 1999-2000.
 //
 
-#include "Errors.h"
-#include "Instance.h"
-#include "LineDef.h"
-#include "SideDef.h"
-#include "Vertex.h"
 #include "bsp.h"
-
+#include "Instance.h"
 #include "w_rawdef.h"
 
 

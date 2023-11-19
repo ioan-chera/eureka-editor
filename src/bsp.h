@@ -29,6 +29,7 @@
 #include <functional>
 #include <vector>
 
+struct ConfigData;
 class Instance;
 class Lump_c;
 struct Sector;
@@ -406,7 +407,7 @@ class LevelData
 public:
 	typedef std::function<void(const SString &)> ReportFunc;
 	
-	LevelData(MapFormat format, Wad_file &wad, const Document &doc, const ReportFunc &reportLog) : format(format), wad(wad), doc(doc), reportLog(reportLog)
+	LevelData(MapFormat format, Wad_file &wad, const Document &doc, const ConfigData &config, const ReportFunc &reportLog) : format(format), wad(wad), doc(doc), config(config), reportLog(reportLog)
 	{
 	}
 	LevelData(const LevelData& other) = delete;
@@ -430,7 +431,7 @@ public:
 	vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
 	
 	// MAIN STUFF
-	build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
+	build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx);
 	
 	void Warning(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
 	
@@ -532,7 +533,7 @@ private:
 	void SaveXGL3Format(node_t *root_node);
 	
 	/* ----- whole-level routines --------------------------- */
-	void LoadLevel(const Instance &inst);
+	void LoadLevel();
 	void FreeLevel();
 	u32_t CalcGLChecksum() const;
 	inline SString CalcOptionsString() const
@@ -599,7 +600,7 @@ private:
 
 	// detection routines
 	void DetectOverlappingVertices() const;
-	void DetectPolyobjSectors(const Instance &inst);
+	void DetectPolyobjSectors();
 	
 	int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 								   int best_cost, eval_info_t *info);
@@ -653,6 +654,7 @@ private:
 	const MapFormat format;
 	Wad_file& wad;
 	const Document& doc;
+	const ConfigData &config;
 	
 	const ReportFunc reportLog;
 };

@@ -18,15 +18,9 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
-#include "Instance.h"
-#include "LineDef.h"
-#include "main.h"
 #include "bsp.h"
-#include "Vertex.h"
-
+#include "Instance.h"
 #include "w_rawdef.h"
-#include "w_wad.h"
 
 #include <zlib.h>
 
@@ -1825,7 +1819,7 @@ void LevelData::SaveXGL3Format(node_t *root_node)
 
 /* ----- whole-level routines --------------------------- */
 
-void LevelData::LoadLevel(const Instance &inst)
+void LevelData::LoadLevel()
 {
 	const Lump_c *LEV = wad.GetLump(current_start);
 
@@ -1862,7 +1856,7 @@ void LevelData::LoadLevel(const Instance &inst)
 	if (format != MapFormat::doom)
 	{
 		// -JL- Find sectors containing polyobjs
-		DetectPolyobjSectors(inst);
+		DetectPolyobjSectors();
 	}
 }
 
@@ -2152,7 +2146,7 @@ Lump_c & LevelData::CreateGLMarker() const
 // MAIN STUFF
 //------------------------------------------------------------------------
 
-build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst)
+build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx)
 {
 	cur_info = info;
 
@@ -2166,7 +2160,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 	current_idx   = lev_idx;
 	current_start = wad.LevelHeader(lev_idx);
 
-	LoadLevel(inst);
+	LoadLevel();
 
 	block.InitMap(doc);
 
@@ -2229,10 +2223,10 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx, const I
 
 build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst, const LoadingData& loading, Wad_file& wad)
 {
-	ajbsp::LevelData lev_data(loading.levelFormat, wad, inst.level, [&inst](const SString &message){
+	ajbsp::LevelData lev_data(loading.levelFormat, wad, inst.level, inst.conf, [&inst](const SString &message){
 		inst.GB_PrintMsg("%s", message.c_str());
 	});
-	return lev_data.BuildLevel(info, lev_idx, inst);
+	return lev_data.BuildLevel(info, lev_idx);
 }
 
 //--- editor settings ---

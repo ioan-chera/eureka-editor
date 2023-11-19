@@ -18,16 +18,10 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
-#include "Instance.h"
-#include "LineDef.h"
-#include "main.h"
 #include "bsp.h"
-#include "Thing.h"
-#include "Vertex.h"
+#include "Instance.h"
 
-#include "w_rawdef.h"
-
+struct ConfigData;
 
 namespace ajbsp
 {
@@ -393,7 +387,7 @@ void LevelData::MarkPolyobjPoint(double x, double y)
 //
 // Based on code courtesy of Janis Legzdinsh.
 //
-void LevelData::DetectPolyobjSectors(const Instance &inst)
+void LevelData::DetectPolyobjSectors()
 {
 	int i;
 
@@ -410,7 +404,7 @@ void LevelData::DetectPolyobjSectors(const Instance &inst)
 	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
 		const auto &L = doc.linedefs[i];
-        const linetype_t *type = get(inst.conf.line_types, L->type);
+        const linetype_t *type = get(config.line_types, L->type);
         if(type && type->isPolyObjectSpecial())
 			break;
 	}
@@ -434,7 +428,7 @@ void LevelData::DetectPolyobjSectors(const Instance &inst)
 		double y = T->y();
 
         // ignore everything except polyobj start spots
-        const thingtype_t *type = get(inst.conf.thing_types, T->type);
+        const thingtype_t *type = get(config.thing_types, T->type);
         if(!type || !(type->flags & THINGDEF_POLYSPOT))
             continue;
 
