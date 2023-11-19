@@ -385,7 +385,9 @@ private:
 	void Navigate2D();
 	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
 	tl::optional<fs::path> Project_AskFile() const;
-	void SaveLevel(LoadingData& loading, const SString& level, Wad_file &wad, bool inhibit_node_build);
+	void SaveLevel(LoadingData &loading, const SString &level, Wad_file &wad, bool inhibit_node_build);
+	void ConfirmLevelSaveSuccess(const LoadingData &loading, const Wad_file &wad);
+	void SaveLevelAndUpdateWindow(LoadingData& loading, const SString& level, Wad_file &wad, bool inhibit_node_build);
 
 	// M_NODES
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);

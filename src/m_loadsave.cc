@@ -261,7 +261,7 @@ void Instance::CMD_NewProject()
 		FreshLevel();
 
 		// save it now : sets Level_name and window title
-		SaveLevel(loaded, map_name, *this->wad.master.editWad(), false);
+		SaveLevelAndUpdateWindow(loaded, map_name, *this->wad.master.editWad(), false);
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -344,7 +344,7 @@ void Instance::CMD_FreshMap()
 		FreshLevel();
 
 		// save it now : sets Level_name and window title
-		SaveLevel(loaded, map_name, *wad.master.editWad(), false);
+		SaveLevelAndUpdateWindow(loaded, map_name, *wad.master.editWad(), false);
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -1410,7 +1410,7 @@ void Instance::CMD_FlipMap()
 //  SAVING CODE
 //------------------------------------------------------------------------
 
-int Document::SaveHeader(Wad_file& wad, const SString &level) 
+int Document::SaveHeader(Wad_file& wad, const SString &level) const
 {
 	int size = (int)headerData.size();
 
@@ -1621,11 +1621,6 @@ static void EmptyLump(Wad_file& wad, const char *name)
 	wad.AddLump(name);
 }
 
-
-//
-// Write out the level data
-//
-
 void Instance::SaveLevel(LoadingData& loading, const SString &level, Wad_file &wad, bool inhibit_node_build)
 {
 	// set global level name now (for debugging code)
@@ -1683,16 +1678,11 @@ void Instance::SaveLevel(LoadingData& loading, const SString &level, Wad_file &w
 		}
 	}
 
-	// write out the new directory
-	wad.writeToDisk();
-
-
 	// build the nodes
 	if (config::bsp_on_save && ! inhibit_node_build)
 	{
 		BuildNodesAfterSave(saving_level, loading, wad);
 	}
-
 
 	// this is mainly for Next/Prev-map commands
 	// [ it doesn't change the on-disk wad file at all ]
@@ -1700,7 +1690,10 @@ void Instance::SaveLevel(LoadingData& loading, const SString &level, Wad_file &w
 
 	loading.writeEurekaLump(wad);
 	wad.writeToDisk();
+}
 
+void Instance::ConfirmLevelSaveSuccess(const LoadingData &loading, const Wad_file &wad)
+{
 	global::recent.addRecent(wad.PathName(), loading.levelName, global::home_dir);
 
 	Status_Set("Saved %s", loading.levelName.c_str());
@@ -1714,6 +1707,15 @@ void Instance::SaveLevel(LoadingData& loading, const SString &level, Wad_file &w
 	}
 
 	this->level.MadeChanges = false;
+}
+
+//
+// Write out the level data
+//
+void Instance::SaveLevelAndUpdateWindow(LoadingData& loading, const SString &level, Wad_file &wad, bool inhibit_node_build)
+{
+	SaveLevel(loading, level, wad, inhibit_node_build);
+	ConfirmLevelSaveSuccess(loading, wad);
 }
 
 // these return false if user cancelled
@@ -1744,7 +1746,7 @@ bool Instance::M_SaveMap(bool inhibit_node_build)
 
 	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.editWad()->PathName().u8string().c_str());
 
-	SaveLevel(loaded, loaded.levelName, *wad.master.editWad(), inhibit_node_build);
+	SaveLevelAndUpdateWindow(loaded, loaded.levelName, *wad.master.editWad(), inhibit_node_build);
 
 	return true;
 }
@@ -1851,15 +1853,32 @@ bool Instance::M_ExportMap(bool inhibit_node_build)
 
 
 	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
+	
+	try
+	{
+		
+		SaveLevel(loading, map_name, *wad, inhibit_node_build);
+	}
+	catch(const std::runtime_error &e)
+	{
+		DLG_ShowError(false, "Could not export map: %s", e.what());
+		return false;
+	}
+		
+	try
+	{
+		// do this after the save (in case it fatal errors)
+		Main_LoadResources(loading);
+	}
+	catch(const std::runtime_error &e)
+	{
+		DLG_ShowError(false, "Successfully exported map, but could not load the new resources: %s", e.what());
+		return false;
+	}
 
 	// the new wad replaces the current PWAD
-	// TODO: replace edit wad after we're done
 	this->wad.master.ReplaceEditWad(wad);
-
-	SaveLevel(loading, map_name, *wad, inhibit_node_build);
-
-	// do this after the save (in case it fatal errors)
-	Main_LoadResources(loading);
+	ConfirmLevelSaveSuccess(loaded, *wad);
 
 	return true;
 }
@@ -1935,7 +1954,7 @@ void Instance::CMD_CopyMap()
 		// perform the copy (just a save)
 		gLog.printf("Copying Map : %s --> %s\n", loaded.levelName.c_str(), new_name.c_str());
 
-		SaveLevel(loaded, new_name, *wad.master.editWad(), false);
+		SaveLevelAndUpdateWindow(loaded, new_name, *wad.master.editWad(), false);
 
 		Status_Set("Copied to %s", loaded.levelName.c_str());
 	}
