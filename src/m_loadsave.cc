@@ -497,18 +497,6 @@ void Document::CreateFallbackVertices()
 	vertices.push_back(std::move(v2));
 }
 
-struct BadCount
-{
-	bool exists() const
-	{
-		return linedef_count || sector_refs || sidedef_refs;
-	}
-
-	int linedef_count;
-	int sector_refs;
-	int sidedef_refs;
-};
-
 void Document::ValidateSidedefRefs(LineDef & ld, int num, const ConfigData &config, BadCount &bad)
 {
 	if (ld.right >= numSidedefs() || ld.left >= numSidedefs())
@@ -914,13 +902,6 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 
 	RedrawMap();
 }
-
-struct NewDocument
-{
-	Document doc;
-	LoadingData loading;
-	BadCount bad;
-};
 
 NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file &wad, int level)
 {

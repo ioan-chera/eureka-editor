@@ -44,9 +44,6 @@ public:
 
 public:
 	UI_NodeDialog();
-	virtual ~UI_NodeDialog()
-	{
-	}
 
 	/* FLTK method */
 	int handle(int event);

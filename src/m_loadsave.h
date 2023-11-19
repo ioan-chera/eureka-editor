@@ -27,6 +27,7 @@
 #ifndef __EUREKA_E_LOADSAVE_H__
 #define __EUREKA_E_LOADSAVE_H__
 
+#include "Document.h"
 #include "m_game.h"
 #include "w_wad.h"
 #include "WadData.h"
@@ -60,6 +61,25 @@ struct NewResources
 	WadData waddata;
 };
 
+struct BadCount
+{
+	bool exists() const
+	{
+		return linedef_count || sector_refs || sidedef_refs;
+	}
+
+	int linedef_count;
+	int sector_refs;
+	int sidedef_refs;
+};
+
+
+struct NewDocument
+{
+	Document doc;
+	LoadingData loading;
+	BadCount bad;
+};
 
 void OpenFileMap(const fs::path &filename, const SString &map_name = "") noexcept(false);
 
