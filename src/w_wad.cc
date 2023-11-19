@@ -162,7 +162,7 @@ int64_t Lump_c::getName8() const noexcept
 		char cbuf[8];
 		int64_t cint;
 	} buffer;
-	strncpy(buffer.cbuf, Name().c_str(), 8);
+	memcpy(buffer.cbuf, Name().c_str(), std::min(Name().length(), sizeof buffer));
 	return buffer.cint;
 }
 
