@@ -417,11 +417,7 @@ void Instance::CMD_BuildAllNodes()
 			return;
 		}
 
-		inhibit_node_build = true;
-
-		bool save_result = M_SaveMap();
-
-		inhibit_node_build = false;
+		bool save_result = M_SaveMap(true);
 
 		// user cancelled the save?
 		if (!save_result)

@@ -261,7 +261,7 @@ void Instance::CMD_NewProject()
 		FreshLevel();
 
 		// save it now : sets Level_name and window title
-		SaveLevel(loaded, map_name, *this->wad.master.editWad());
+		SaveLevel(loaded, map_name, *this->wad.master.editWad(), false);
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -344,7 +344,7 @@ void Instance::CMD_FreshMap()
 		FreshLevel();
 
 		// save it now : sets Level_name and window title
-		SaveLevel(loaded, map_name, *wad.master.editWad());
+		SaveLevel(loaded, map_name, *wad.master.editWad(), false);
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -1626,7 +1626,7 @@ static void EmptyLump(Wad_file& wad, const char *name)
 // Write out the level data
 //
 
-void Instance::SaveLevel(LoadingData& loading, const SString &level, Wad_file &wad)
+void Instance::SaveLevel(LoadingData& loading, const SString &level, Wad_file &wad, bool inhibit_node_build)
 {
 	// set global level name now (for debugging code)
 	loading.levelName = level.asUpper();
@@ -1717,14 +1717,14 @@ void Instance::SaveLevel(LoadingData& loading, const SString &level, Wad_file &w
 }
 
 // these return false if user cancelled
-bool Instance::M_SaveMap()
+bool Instance::M_SaveMap(bool inhibit_node_build)
 {
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
 
 	if (!wad.master.editWad())
 	{
-		return M_ExportMap();
+		return M_ExportMap(inhibit_node_build);
 	}
 
 	if (wad.master.editWad()->IsReadOnly())
@@ -1736,7 +1736,7 @@ bool Instance::M_SaveMap()
 			return false;
 		}
 
-		return M_ExportMap();
+		return M_ExportMap(inhibit_node_build);
 	}
 
 
@@ -1744,13 +1744,13 @@ bool Instance::M_SaveMap()
 
 	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.editWad()->PathName().u8string().c_str());
 
-	SaveLevel(loaded, loaded.levelName, *wad.master.editWad());
+	SaveLevel(loaded, loaded.levelName, *wad.master.editWad(), inhibit_node_build);
 
 	return true;
 }
 
 
-bool Instance::M_ExportMap()
+bool Instance::M_ExportMap(bool inhibit_node_build)
 {
 	Fl_Native_File_Chooser chooser;
 
@@ -1856,7 +1856,7 @@ bool Instance::M_ExportMap()
 	// TODO: replace edit wad after we're done
 	this->wad.master.ReplaceEditWad(wad);
 
-	SaveLevel(loading, map_name, *wad);
+	SaveLevel(loading, map_name, *wad, inhibit_node_build);
 
 	// do this after the save (in case it fatal errors)
 	Main_LoadResources(loading);
@@ -1869,7 +1869,7 @@ void Instance::CMD_SaveMap()
 {
 	try
 	{
-		M_SaveMap();
+		M_SaveMap(false);
 	}
 	catch(const WadWriteException &e)
 	{
@@ -1884,7 +1884,7 @@ void Instance::CMD_SaveMap()
 
 void Instance::CMD_ExportMap()
 {
-	M_ExportMap();
+	M_ExportMap(false);
 }
 
 
@@ -1935,7 +1935,7 @@ void Instance::CMD_CopyMap()
 		// perform the copy (just a save)
 		gLog.printf("Copying Map : %s --> %s\n", loaded.levelName.c_str(), new_name.c_str());
 
-		SaveLevel(loaded, new_name, *wad.master.editWad());
+		SaveLevel(loaded, new_name, *wad.master.editWad(), false);
 
 		Status_Set("Copied to %s", loaded.levelName.c_str());
 	}

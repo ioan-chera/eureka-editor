@@ -280,7 +280,7 @@ public:
 	void LoadLevel(const Wad_file *wad, const SString &level) noexcept(false);
 	void LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false);
 	bool MissingIWAD_Dialog();
-	bool M_SaveMap();
+	bool M_SaveMap(bool inhibit_node_build);
 	void refreshViewAfterLoad(const BadCount& bad, const Wad_file* wad, const SString& map_name, bool new_resources);
 
 	// M_NODES
@@ -381,11 +381,11 @@ private:
 	// M_LOADSAVE
 	void FreshLevel();
 	
-	bool M_ExportMap();
+	bool M_ExportMap(bool inhibit_node_build);
 	void Navigate2D();
 	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
 	tl::optional<fs::path> Project_AskFile() const;
-	void SaveLevel(LoadingData& loading, const SString& level, Wad_file &wad);
+	void SaveLevel(LoadingData& loading, const SString& level, Wad_file &wad, bool inhibit_node_build);
 
 	// M_NODES
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);
@@ -449,9 +449,6 @@ public:	// will be private when we encapsulate everything
 	Recently_used recent_flats{ *this };
 	Recently_used recent_textures{ *this };
 	Recently_used recent_things{ *this };
-	// this is only used to prevent a M_SaveMap which happens inside
-	// CMD_BuildAllNodes from building that saved level twice.
-	bool inhibit_node_build = false;
 	int last_given_file = 0;
 	UI_NodeDialog *nodeialog = nullptr;
 	nodebuildinfo_t *nb_info = nullptr;
