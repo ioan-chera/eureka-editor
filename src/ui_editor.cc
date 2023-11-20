@@ -492,7 +492,7 @@ bool UI_TextEditor::LoadLump(const Wad_file *wad, const SString &lump_name)
 	return true;
 }
 
-void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
+void UI_TextEditor::LoadMemory(const std::vector<byte> &buf)
 {
 	// this code is slow, but simple
 
@@ -543,7 +543,14 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 		lump.Write(&ch, 1);
 	}
 
-	wad->writeToDisk();
+	try
+	{
+		wad->writeToDisk();
+	}
+	catch(const std::runtime_error &e)
+	{
+		DLG_ShowError(false, "Failed saving lump %s: %s", lump_name.c_str(), e.what());
+	}
 }
 
 void UI_TextEditor::SaveMemory(std::vector<byte> &buf)

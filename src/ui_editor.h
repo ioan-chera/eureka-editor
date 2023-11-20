@@ -66,7 +66,7 @@ public:
 	bool LoadLump(const Wad_file *wad, const SString &lump_name);
 	void SaveLump(Wad_file *wad, const SString &lump_name);
 
-	void LoadMemory(std::vector<byte> &buf);
+	void LoadMemory(const std::vector<byte> &buf);
 	void SaveMemory(std::vector<byte> &buf);
 
 	enum
