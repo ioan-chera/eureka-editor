@@ -2193,7 +2193,7 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx)
 			else
 				ret = SaveLevel(root_node);
 		}
-		catch(const std::exception &e)
+		catch(const std::runtime_error &e)
 		{
 			PrintMsg("Failed saving after node-build: %s\n", e.what());
 			ret = BUILD_BadFile;
