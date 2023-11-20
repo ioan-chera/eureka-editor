@@ -282,10 +282,17 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
-		
-		LoadLevelNum(wad.master.editWad().get(), n);
-
-		ret = AJBSP_BuildLevel(info, n, *this, loaded, *wad.master.editWad());
+		try
+		{
+			NewDocument newdoc = openDocument(loaded, *wad.master.editWad(), n);
+			
+			ret = AJBSP_BuildLevel(info, n, *this, newdoc.doc, newdoc.loading, *wad.master.editWad());
+		}
+		catch(const std::runtime_error &e)
+		{
+			GB_PrintMsg("Failed building nodes for level %d: %s\n", n, e.what());
+			continue;
+		}
 
 		// don't fail on maps with overflows
 		// [ Note that 'total_failed_maps' keeps a tally of these ]
@@ -303,6 +310,16 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 		{
 			nb_info->cancelled = true;
 		}
+	}
+	
+	try
+	{
+		wad.master.editWad()->writeToDisk();
+	}
+	catch(const std::runtime_error &e)
+	{
+		GB_PrintMsg("ERROR: could not save %s: %s\n", wad.master.editWad()->PathName().u8string().c_str(), e.what());
+		ret = BUILD_BadFile;
 	}
 
 	if (ret == BUILD_OK)
@@ -341,7 +358,7 @@ void Instance::BuildNodesAfterSave(int lev_idx, const LoadingData& loading, Wad_
 
 	PrepareInfo(&nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this, loading, wad);
+	build_result_e ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this, level, loading, wad);
 
 	// TODO : maybe print # of serious/minor warnings
 
@@ -437,12 +454,6 @@ void Instance::CMD_BuildAllNodes()
 	}
 
 	nodeialog.reset();
-
-
-	// reload the previous level
-	// TODO: improve this to NOT mean reloading the level
-	LoadLevel(wad.master.editWad().get(), CurLevel);
-
 }
 
 
