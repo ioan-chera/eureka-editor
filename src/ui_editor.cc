@@ -345,7 +345,7 @@ static const Fl_Menu_Item ted_menu_items[] =
 
 //------------------------------------------------------------------------
 
-UI_TextEditor::UI_TextEditor(Instance &inst) :
+UI_TextEditor::UI_TextEditor(const Instance &inst) :
 	Fl_Double_Window(600, 400, ""),
 	want_close(false), want_save(false),
 	is_new(true), read_only(false), has_changes(false), inst(inst)

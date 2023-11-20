@@ -148,10 +148,7 @@ private:
 	int action;
 
 public:
-	explicit UI_ChooseTextLump(Instance &inst);
-
-	virtual ~UI_ChooseTextLump()
-	{ }
+	explicit UI_ChooseTextLump(MapFormat levelFormat);
 
 	// returns lump name on success, NULL on cancel
 	SString Run();
@@ -169,7 +166,7 @@ private:
 };
 
 
-UI_ChooseTextLump::UI_ChooseTextLump(Instance &inst) :
+UI_ChooseTextLump::UI_ChooseTextLump(MapFormat levelFormat) :
 	UI_Escapable_Window(420, 385, "Choose Text Lump"),
 	action(ACT_none)
 {
@@ -204,7 +201,7 @@ UI_ChooseTextLump::UI_ChooseTextLump(Instance &inst) :
 		Fl_Button *b2 = new Fl_Button(230, mhy, 120, 25, "Map Scripts");
 		b2->callback(script_callback, this);
 
-		if (inst.loaded.levelFormat == MapFormat::hexen)
+		if (levelFormat == MapFormat::hexen)
 			b2->color(BUTTON_COL);
 		else
 			b2->deactivate();
@@ -394,11 +391,7 @@ void Instance::CMD_EditLump()
 		if (lump_name[0] == 0 || lump_name[0] == '/')
 		{
 			// ask for the lump name
-			UI_ChooseTextLump* dialog = new UI_ChooseTextLump(*this);
-
-			lump_name = dialog->Run();
-
-			delete dialog;
+			lump_name = UI_ChooseTextLump(loaded.levelFormat).Run();
 
 			if (lump_name.empty())
 				return;
@@ -438,37 +431,36 @@ void Instance::CMD_EditLump()
 		Wad_file* wad = this->wad.master.activeWad().get();
 
 		// create the editor window
-		UI_TextEditor* editor = new UI_TextEditor(*this);
+		UI_TextEditor editor(*this);
 
 		if (!this->wad.master.editWad() || this->wad.master.editWad()->IsReadOnly())
-			editor->SetReadOnly();
+			editor.SetReadOnly();
 
 		// if lump exists, load the contents
 		if (lump_name == EDLUMP_HEADER)
 		{
-			editor->LoadMemory(level.headerData);
-			editor->SetTitle(loaded.levelName);
+			editor.LoadMemory(level.headerData);
+			editor.SetTitle(loaded.levelName);
 		}
 		else if (lump_name == EDLUMP_SCRIPTS)
 		{
-			editor->LoadMemory(level.scriptsData);
-			editor->SetTitle("SCRIPTS");
+			editor.LoadMemory(level.scriptsData);
+			editor.SetTitle("SCRIPTS");
 		}
 		else
 		{
-			if (!editor->LoadLump(wad, lump_name))
+			if (!editor.LoadLump(wad, lump_name))
 			{
 				// something went wrong
-				delete editor;
 				return;
 			}
-			editor->SetTitle(lump_name);
+			editor.SetTitle(lump_name);
 		}
 
 		// run the text editor
 		for (;;)
 		{
-			int res = editor->Run();
+			int res = editor.Run();
 
 			if (res != UI_TextEditor::RUN_Save)
 				break;
@@ -477,21 +469,19 @@ void Instance::CMD_EditLump()
 
 			if (lump_name == EDLUMP_HEADER)
 			{
-				editor->SaveMemory(level.headerData);
+				editor.SaveMemory(level.headerData);
 				level.MadeChanges = true;
 			}
 			else if (lump_name == EDLUMP_SCRIPTS)
 			{
-				editor->SaveMemory(level.scriptsData);
+				editor.SaveMemory(level.scriptsData);
 				level.MadeChanges = true;
 			}
 			else
 			{
-				editor->SaveLump(wad, lump_name);
+				editor.SaveLump(wad, lump_name);
 			}
 		}
-
-		delete editor;
 	}
 	catch (const std::runtime_error& e)
 	{
