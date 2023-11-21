@@ -36,8 +36,15 @@ void BufferedOutFile::write(const void *vdata, size_t size)
 // WARNING: this throws.
 void BufferedOutFile::commit()
 {
-	std::ofstream stream;
-	stream.exceptions(std::ios::badbit);
-	stream.open(mPath, std::ios::out | std::ios::binary);
-	stream.write(reinterpret_cast<const char*>(mData.data()), mData.size());
+	try
+	{
+		std::ofstream stream;
+		stream.exceptions(std::ios::failbit);
+		stream.open(mPath, std::ios::out | std::ios::binary);
+		stream.write(reinterpret_cast<const char*>(mData.data()), mData.size());
+	}
+	catch(const std::ofstream::failure &e)
+	{
+		throw std::runtime_error(GetErrorMessage(e.code().value()).get());
+	}
 }

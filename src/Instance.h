@@ -300,6 +300,7 @@ public:
 	// MAIN
 	fs::path Main_FileOpFolder() const;
 	void Main_LoadResources(const LoadingData &loading) noexcept(false);
+	void UpdateViewOnResources();
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;

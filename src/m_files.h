@@ -124,6 +124,8 @@ public:
 	{
 		return files;
 	}
+	
+	bool hasIwadByPath(const fs::path &path) const;
 
 private:
 	void parseMiscConfig(std::istream &is);

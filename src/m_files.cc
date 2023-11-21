@@ -882,7 +882,6 @@ static void Backup_Prune(const fs::path &dir_name, int b_low, int b_high, int wa
 	}
 }
 
-
 void M_BackupWad(const Wad_file *wad)
 {
 	// disabled ?
@@ -919,8 +918,21 @@ void M_BackupWad(const Wad_file *wad)
 	// actually back-up the file
 
 	fs::path dest_name = Backup_Name(dir_name, b_high + 1);
-
-	if (! wad->Backup(dest_name))
+	
+	bool copiedReadOnly = false;
+	if(wad->IsReadOnly())
+	{
+		try
+		{
+			fs::copy(wad->PathName(), dest_name);
+			copiedReadOnly = true;
+		}
+		catch(const std::runtime_error &e)
+		{
+			gLog.printf("Failed copying directly %s to %s (%s). Trying to re-save the WAD.\n", wad->PathName().u8string().c_str(), dest_name.u8string().c_str(), e.what());
+		}
+	}
+	if (!copiedReadOnly && ! wad->Backup(dest_name))
 	{
 		// Hmmm, show a dialog ??
 		gLog.printf("WARNING: backup failed (cannot copy file)\n");
@@ -936,6 +948,14 @@ void M_BackupWad(const Wad_file *wad)
 	}
 
 	gLog.printf("Backed up wad to: %s\n", dest_name.u8string().c_str());
+}
+
+bool RecentKnowledge::hasIwadByPath(const fs::path &path) const
+{
+	for(const auto &pair : known_iwads)
+		if(SString(GetAbsolutePath(pair.second).u8string()).noCaseEqual(SString(GetAbsolutePath(path).u8string())))
+			return true;
+	return false;
 }
 
 //--- editor settings ---

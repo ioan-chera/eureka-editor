@@ -69,35 +69,32 @@ void MasterDir::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 	edit_wad = new_wad;
 }
 
-
-void Instance::FreshLevel()
+static Document makeFreshDocument(Instance &inst, const ConfigData &config, MapFormat levelFormat)
 {
-	level.clear();
-
+	Document doc(inst);
 	auto sec = std::make_unique<Sector>();
 
-
-	sec->SetDefaults(conf);
-	level.sectors.push_back(std::move(sec));
+	sec->SetDefaults(config);
+	doc.sectors.push_back(std::move(sec));
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		auto v = std::make_unique<Vertex>();
 
-		v->SetRawX(loaded.levelFormat, (i >= 2) ? 256 : -256);
-		v->SetRawY(loaded.levelFormat, (i==1 || i==2) ? 256 :-256);
-		level.vertices.push_back(std::move(v));
+		v->SetRawX(levelFormat, (i >= 2) ? 256 : -256);
+		v->SetRawY(levelFormat, (i==1 || i==2) ? 256 :-256);
+		doc.vertices.push_back(std::move(v));
 
 		auto sd = std::make_unique<SideDef>();
-		sd->SetDefaults(conf, false);
-		level.sidedefs.push_back(std::move(sd));
+		sd->SetDefaults(config, false);
+		doc.sidedefs.push_back(std::move(sd));
 
 		auto ld = std::make_unique<LineDef>();
 		ld->start = i;
 		ld->end   = (i+1) % 4;
 		ld->flags = MLF_Blocking;
 		ld->right = i;
-		level.linedefs.push_back(std::move(ld));
+		doc.linedefs.push_back(std::move(ld));
 	}
 
 	for (int pl = 1 ; pl <= 4 ; pl++)
@@ -107,12 +104,20 @@ void Instance::FreshLevel()
 		th->type  = pl;
 		th->angle = 90;
 
-		th->SetRawX(loaded.levelFormat, (pl == 1) ? 0 : (pl - 3) * 48);
-		th->SetRawY(loaded.levelFormat, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
-		level.things.push_back(std::move(th));
+		th->SetRawX(levelFormat, (pl == 1) ? 0 : (pl - 3) * 48);
+		th->SetRawY(levelFormat, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
+		doc.things.push_back(std::move(th));
 	}
 
-	level.CalculateLevelBounds();
+	doc.CalculateLevelBounds();
+	
+	return doc;
+}
+
+void Instance::FreshLevel()
+{
+	level.clear();
+	level = makeFreshDocument(*this, conf, loaded.levelFormat);
 
 	ZoomWholeMap();
 
@@ -160,11 +165,8 @@ tl::optional<fs::path> Instance::Project_AskFile() const
 	return filename;
 }
 
-
-void Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false)
+static void updateLoading(const UI_ProjectSetup::Result &result, LoadingData &loading)
 {
-	// grab the new information
-    LoadingData loading = loaded;
 	loading.gameName = result.game;
 	loading.portName = result.port;
 	const fs::path *iwad = global::recent.queryIWAD(result.game);
@@ -176,6 +178,12 @@ void Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexc
 	for(int i = 0; i < UI_ProjectSetup::RES_NUM; ++i)
 		if(!result.resources[i].empty())
 			loading.resourceList.push_back(result.resources[i]);
+}
+
+void Instance::Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false)
+{
+	LoadingData loading = loaded;
+	updateLoading(result, loading);
 	Fl::wait(0.1);
 	Main_LoadResources(loading);
 	Fl::wait(0.1);
@@ -203,73 +211,119 @@ void Instance::CMD_ManageProject()
 
 void Instance::CMD_NewProject()
 {
-	std::shared_ptr<Wad_file> initialEditWad = wad.master.editWad();
+	NewResources newres{};
+	ConfigData backupConfig = conf;
+	LoadingData backupLoading = loaded;
+	WadData backupWadData = wad;
+	tl::optional<Document> backupDoc;
 	try
 	{
 		if (!level.Main_ConfirmQuit("create a new project"))
 			return;
-
+		
 		/* first, ask for the output file */
-
+		
 		tl::optional<fs::path> filename = Project_AskFile();
-
+		
 		if (!filename)
 			return;
-
-
+		
+		if(global::recent.hasIwadByPath(*filename))
+		{
+			DLG_Notify("Cannot overwrite a game IWAD: %s", filename.value().u8string().c_str());
+			return;
+		}
+		
+		
 		/* second, query what Game, Port and Resources to use */
 		// TODO: new instance
 		UI_ProjectSetup dialog(*this, true /* new_project */, false /* is_startup */);
-
+		
 		tl::optional<UI_ProjectSetup::Result> result = dialog.Run();
-
+		
 		if (!result)
 		{
 			return;
 		}
-
-		wad.master.RemoveEditWad();
-
-		// this calls Main_LoadResources which resets the master directory
-		Project_ApplyChanges(*result);
-
-		// determine map name (same as first level in the IWAD)
-		SString map_name = "MAP01";
-
-		int idx = wad.master.gameWad()->LevelFindFirst();
-
-		if (idx >= 0)
+		
+		if(FileExists(*filename))
 		{
-			idx = wad.master.gameWad()->LevelHeader(idx);
-			map_name = wad.master.gameWad()->GetLump(idx)->Name();
+			if(!DLG_Confirm({"Cancel", "&Overwrite"}, "Are you sure you want to overwrite %s with a new project?", filename.value().u8string().c_str()))
+			{
+				return;
+			}
 		}
 
+		// Backup existing file before overwriting
+		try
+		{
+			std::shared_ptr<Wad_file> oldFile = Wad_file::Open(*filename, WadOpenMode::read);
+			if(oldFile)
+			{
+				if(oldFile->IsIWAD())
+				{
+					DLG_Notify("Overwriting game IWAD files is not allowed: %s", filename->u8string().c_str());
+					return;
+				}
+				M_BackupWad(oldFile.get());
+			}
+		}
+		catch(const std::runtime_error &e)
+		{
+			gLog.printf("Error reading old WAD %s: %s\n", filename->u8string().c_str(), e.what());
+		}
+
+		
+		LoadingData loading = loaded;
+		updateLoading(*result, loading);
+		newres = loadResources(loading, wad);
+		
+		
+		// determine map name (same as first level in the IWAD)
+		SString map_name = "MAP01";
+		
+		int idx = newres.waddata.master.gameWad()->LevelFindFirst();
+		
+		if (idx >= 0)
+		{
+			idx = newres.waddata.master.gameWad()->LevelHeader(idx);
+			map_name = newres.waddata.master.gameWad()->GetLump(idx)->Name();
+		}
+		
 		gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename->u8string().c_str());
-
-
+		
+		
 		std::shared_ptr<Wad_file> wad = Wad_file::Open(*filename, WadOpenMode::write);
-
+		
 		if (!wad)
 		{
 			DLG_Notify("Unable to create the new WAD file.");
 			return;
 		}
 
+		backupDoc = std::move(level);
+		level = makeFreshDocument(*this, newres.config, newres.loading.levelFormat);
+		conf = std::move(newres.config);
+		loaded = std::move(newres.loading);
+		this->wad = std::move(newres.waddata);
+		
+		SaveLevel(loaded, map_name, *wad, false);
 		this->wad.master.ReplaceEditWad(wad);
-
-		// TODO: new instance
-		FreshLevel();
-
-		// save it now : sets Level_name and window title
-		SaveLevelAndUpdateWindow(loaded, map_name, *this->wad.master.editWad(), false);
+		ConfirmLevelSaveSuccess(loaded, *wad);
+		UpdateViewOnResources();
+		
+		RedrawMap();
 	}
-	catch (const std::runtime_error& e)
+	catch(const std::runtime_error &e)
 	{
-		// Restore state before command
-		wad.master.ReplaceEditWad(initialEditWad);
-		DLG_ShowError(false, "Could not start new project: %s", e.what());
+		conf = std::move(backupConfig);
+		loaded = std::move(backupLoading);
+		wad = std::move(backupWadData);
+		if(backupDoc)
+			level = std::move(backupDoc.value());
+		
+		DLG_ShowError(false, "Could not create new project: %s", e.what());
 	}
-
 }
 
 

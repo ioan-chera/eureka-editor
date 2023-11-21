@@ -923,12 +923,16 @@ void Instance::Main_LoadResources(const LoadingData &loading) noexcept(false)
 {
 	auto newres = loadResources(loading, wad);
 
+	// Commit it
 	wad = std::move(newres.waddata);
 	conf = std::move(newres.config);
 	loaded = std::move(newres.loading);
 	
-	// Commit it
-	
+	UpdateViewOnResources();
+}
+
+void Instance::UpdateViewOnResources()
+{
 	// Must deselect now
 	if(edit.Selected)
 		edit.Selected->clear_all();
