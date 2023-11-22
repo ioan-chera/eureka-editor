@@ -925,7 +925,7 @@ void Wad_file::RemoveLumps(int index, int count)
 }
 
 
-void Wad_file::RemoveLevel(int lev_num)
+std::vector<Lump_c> Wad_file::RemoveLevel(int lev_num)
 {
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
@@ -934,7 +934,12 @@ void Wad_file::RemoveLevel(int lev_num)
 
 	// NOTE: FixGroup() will remove the entry in levels[]
 
+	std::vector<Lump_c> result;
+	for (int i = start; i <= finish; ++i)
+		result.push_back(std::move(*directory[i].lump));
+
 	RemoveLumps(start, finish - start + 1);
+	return result;
 }
 
 

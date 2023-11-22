@@ -2039,69 +2039,82 @@ void Instance::CMD_RenameMap()
 
 void Instance::CMD_DeleteMap()
 {
+	if (!wad.master.editWad())
+	{
+		DLG_Notify("Cannot delete a map unless editing a PWAD.");
+		return;
+	}
+
+	if (wad.master.editWad()->IsReadOnly())
+	{
+		DLG_Notify("Cannot delete map : file is read-only.");
+		return;
+	}
+
+	if (wad.master.editWad()->LevelCount() < 2)
+	{
+		// perhaps ask either to Rename map, or Delete the file (and Eureka will shut down)
+
+		DLG_Notify("Cannot delete the last map in a PWAD.");
+		return;
+	}
+
+	if (DLG_Confirm({ "Cancel", "&Delete" },
+		"Are you sure you want to delete this map? "
+		"It will be permanently removed from the current PWAD.") <= 0)
+	{
+		return;
+	}
+
+	gLog.printf("Deleting Map : %s...\n", loaded.levelName.c_str());
+
+	int lev_num = wad.master.editWad()->LevelFind(loaded.levelName);
+
+	if (lev_num < 0)
+	{
+		Beep("No such map ?!?");
+		return;
+	}
+
+	M_BackupWad(wad.master.editWad().get());
+
+	// kick it to the curb
+	int backupPoint = wad.master.editWad()->LevelHeader(lev_num);
+	std::vector<Lump_c> backupLumps = wad.master.editWad()->RemoveLevel(lev_num);
 	try
 	{
-		if (!wad.master.editWad())
-		{
-			DLG_Notify("Cannot delete a map unless editing a PWAD.");
-			return;
-		}
-
-		if (wad.master.editWad()->IsReadOnly())
-		{
-			DLG_Notify("Cannot delete map : file is read-only.");
-			return;
-		}
-
-		if (wad.master.editWad()->LevelCount() < 2)
-		{
-			// perhaps ask either to Rename map, or Delete the file (and Eureka will shut down)
-
-			DLG_Notify("Cannot delete the last map in a PWAD.");
-			return;
-		}
-
-		if (DLG_Confirm({ "Cancel", "&Delete" },
-			"Are you sure you want to delete this map? "
-			"It will be permanently removed from the current PWAD.") <= 0)
-		{
-			return;
-		}
-
-		gLog.printf("Deleting Map : %s...\n", loaded.levelName.c_str());
-
-		int lev_num = wad.master.editWad()->LevelFind(loaded.levelName);
-
-		if (lev_num < 0)
-		{
-			Beep("No such map ?!?");
-			return;
-		}
-
-
-		// kick it to the curb
-		wad.master.editWad()->RemoveLevel(lev_num);
 		wad.master.editWad()->writeToDisk();
-
-
-		// choose a new level to load
-		{
-			if (lev_num >= wad.master.editWad()->LevelCount())
-				lev_num = wad.master.editWad()->LevelCount() - 1;
-
-			int lump_idx = wad.master.editWad()->LevelHeader(lev_num);
-			Lump_c* lump = wad.master.editWad()->GetLump(lump_idx);
-			const SString& map_name = lump->Name();
-
-			gLog.printf("OK.  Loading : %s....\n", map_name.c_str());
-
-			// TODO: overhaul the interface to NOT go back to the IWAD
-			LoadLevel(wad.master.editWad().get(), map_name);
-		}
 	}
 	catch (const std::runtime_error& e)
 	{
+		// Restore deleted lumps
+		wad.master.editWad()->InsertPoint(backupPoint);
+		for (const Lump_c& backup : backupLumps)
+		{
+			if(&backup == &backupLumps[0])
+				wad.master.editWad()->AddLevel(backup.Name())->Write(backup.getData().data(), (int)backup.getData().size());
+			else
+				wad.master.editWad()->AddLump(backup.Name()).Write(backup.getData().data(), (int)backup.getData().size());
+		}
+		wad.master.editWad()->SortLevels();
 		DLG_ShowError(false, "Cannot delete map: %s", e.what());
+		return;
+	}
+
+
+	// choose a new level to load
+	{
+		if (lev_num >= wad.master.editWad()->LevelCount())
+			lev_num = wad.master.editWad()->LevelCount() - 1;
+
+		int lump_idx = wad.master.editWad()->LevelHeader(lev_num);
+		Lump_c* lump = wad.master.editWad()->GetLump(lump_idx);
+		const SString& map_name = lump->Name();
+
+		gLog.printf("OK.  Loading : %s....\n", map_name.c_str());
+
+		// TODO: overhaul the interface to NOT go back to the IWAD
+		LoadLevel(wad.master.editWad().get(), map_name);
 	}
 }
 

@@ -82,10 +82,12 @@ private:
 	std::vector<byte> mData;
 	int mPos = 0;	// insertion point for reading or writing
 
-	// constructor is private
-	explicit Lump_c(const SString &_nam);
-
 public:
+	Lump_c() = default;
+	explicit Lump_c(const SString& _nam);
+	Lump_c(Lump_c&& other) = default;
+	Lump_c& operator = (Lump_c&& other) = default;
+
 	const SString &Name() const noexcept
 	{
 		return name;
@@ -269,7 +271,7 @@ public:
 
 	// this removes the level marker PLUS all associated level lumps
 	// which follow it.
-	void RemoveLevel(int lev_num);
+	std::vector<Lump_c> RemoveLevel(int lev_num);
 
 	// removes any GL-Nodes lumps that are associated with the given
 	// level.
