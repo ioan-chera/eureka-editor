@@ -45,6 +45,8 @@ void BufferedOutFile::commit()
 	}
 	catch(const std::ofstream::failure &e)
 	{
-		throw std::runtime_error(GetErrorMessage(e.code().value()).get());
+		SString errorMessage = GetErrorMessage(e.code().value());
+		gLog.printf("Failed writing %s: %s\n", mPath.u8string().c_str(), errorMessage.c_str());
+		throw std::runtime_error(errorMessage.get());
 	}
 }

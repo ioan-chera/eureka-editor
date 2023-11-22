@@ -349,6 +349,7 @@ bool Instance::MissingIWAD_Dialog()
 
 void Instance::CMD_FreshMap()
 {
+	tl::optional<Document> backupDoc;
 	try
 	{
 		if (!wad.master.editWad())
@@ -359,21 +360,21 @@ void Instance::CMD_FreshMap()
 
 		if (wad.master.editWad()->IsReadOnly())
 		{
-			DLG_Notify("Cannot create a fresh map : file is read-only.");
+			DLG_Notify("Cannot create a fresh map: file is read-only.");
 			return;
 		}
 
 		if (!level.Main_ConfirmQuit("create a fresh map"))
 			return;
 
-
-		UI_ChooseMap* dialog = new UI_ChooseMap(loaded.levelName.c_str());
-
-		dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), wad.master.editWad().get());
-
-		SString map_name = dialog->Run();
-
-		delete dialog;
+		SString map_name;
+		{
+			UI_ChooseMap dialog(loaded.levelName.c_str());
+			
+			dialog.PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), wad.master.editWad().get());
+			
+			map_name = dialog.Run();
+		}
 
 		// cancelled?
 		if (map_name.empty())
@@ -389,12 +390,12 @@ void Instance::CMD_FreshMap()
 			}
 		}
 
-
 		M_BackupWad(wad.master.editWad().get());
 
 		gLog.printf("Created NEW map : %s\n", map_name.c_str());
 
 		// TODO: make this allow running another level
+		backupDoc = std::move(level);
 		FreshLevel();
 
 		// save it now : sets Level_name and window title
@@ -402,6 +403,8 @@ void Instance::CMD_FreshMap()
 	}
 	catch (const std::runtime_error& e)
 	{
+		if(backupDoc)
+			level = std::move(*backupDoc);
 		DLG_ShowError(false, "Could not create fresh map: %s", e.what());
 	}
 
