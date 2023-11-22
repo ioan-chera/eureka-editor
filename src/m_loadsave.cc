@@ -1902,7 +1902,7 @@ void Instance::CMD_CopyMap()
 
 		if (wad.master.editWad()->IsReadOnly())
 		{
-			DLG_Notify("Cannot copy map : file is read-only.");
+			DLG_Notify("Cannot copy map: file is read-only.");
 			return;
 		}
 
@@ -1947,6 +1947,8 @@ void Instance::CMD_CopyMap()
 
 void Instance::CMD_RenameMap()
 {
+	tl::optional<SString> backupName;
+	tl::optional<int> backupIndex;
 	try
 	{
 		if(!wad.master.gameWad())
@@ -2010,7 +2012,10 @@ void Instance::CMD_RenameMap()
 
 		if (lev_num >= 0)
 		{
+						
 			int level_lump = wad.master.editWad()->LevelHeader(lev_num);
+			backupIndex = level_lump;
+			backupName = wad.master.editWad()->GetLump(level_lump)->Name();
 
 			wad.master.editWad()->RenameLump(level_lump, new_name.c_str());
 			wad.master.editWad()->writeToDisk();
@@ -2024,6 +2029,8 @@ void Instance::CMD_RenameMap()
 	}
 	catch (const std::runtime_error& e)
 	{
+		if(backupIndex && backupName)
+			wad.master.editWad()->RenameLump(*backupIndex, backupName->c_str());
 		DLG_ShowError(false, "Could not rename map: %s", e.what());
 	}
 	
