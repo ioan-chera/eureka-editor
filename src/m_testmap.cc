@@ -29,6 +29,32 @@
 
 #include "ui_window.h"
 
+class DirChangeContext
+{
+public:
+	explicit DirChangeContext(const fs::path &path);
+	~DirChangeContext();
+private:
+	char old_dir[FL_PATH_MAX] = {};
+};
+
+DirChangeContext::DirChangeContext(const fs::path &path)
+{
+	// remember the previous working directory
+	if(!getcwd(old_dir, sizeof(old_dir)))
+		old_dir[0] = '\0';
+	old_dir[FL_PATH_MAX - 1] = '\0';	// just in case
+	gLog.printf("Changing current dir to: %s\n", path.u8string().c_str());
+	if(!FileChangeDir(path))
+		throw std::runtime_error("Failed changing directory to port location");
+}
+
+DirChangeContext::~DirChangeContext()
+{
+	// restore previous working directory
+	if(*old_dir)
+		FileChangeDir(fs::u8path(old_dir));
+}
 
 static SString QueryName(const SString &port, const SString &cgame)
 {
@@ -365,27 +391,8 @@ void Instance::CMD_TestMap()
 			return;
 		}
 
-
-		// remember the previous working directory
-		static char old_dir[FL_PATH_MAX];
-
-		if (getcwd(old_dir, sizeof(old_dir)) == NULL)
-		{
-			old_dir[0] = 0;
-		}
-
 		// change working directory to be same as the executable
-		SString folder = FilenameGetPath(*info).u8string();
-
-		gLog.printf("Changing current dir to: %s\n", folder.c_str());
-
-		if (!FileChangeDir(folder.get()))
-		{
-			// FIXME : a notify dialog
-			Beep("chdir failed!");
-			return;
-		}
-
+		DirChangeContext dirChangeContext(FilenameGetPath(*info));
 
 		// build the command string
 
@@ -413,13 +420,6 @@ void Instance::CMD_TestMap()
 			Status_Set("Result code: %d\n", status);
 
 		gLog.printf("--> result code: %d\n", status);
-
-
-		// restore previous working directory
-		if (old_dir[0])
-		{
-			FileChangeDir(old_dir);
-		}
 
 		main_win->redraw();
 		Fl::wait(0.1);
