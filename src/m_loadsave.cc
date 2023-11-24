@@ -2103,18 +2103,34 @@ void Instance::CMD_DeleteMap()
 
 
 	// choose a new level to load
+	try
 	{
 		if (lev_num >= wad.master.editWad()->LevelCount())
 			lev_num = wad.master.editWad()->LevelCount() - 1;
 
 		int lump_idx = wad.master.editWad()->LevelHeader(lev_num);
-		Lump_c* lump = wad.master.editWad()->GetLump(lump_idx);
+		const Lump_c* lump = wad.master.editWad()->GetLump(lump_idx);
 		const SString& map_name = lump->Name();
 
 		gLog.printf("OK.  Loading : %s....\n", map_name.c_str());
 
 		// TODO: overhaul the interface to NOT go back to the IWAD
 		LoadLevel(wad.master.editWad().get(), map_name);
+	}
+	catch (const std::runtime_error& e)
+	{
+		DLG_ShowError(false, "Failed changing map after deleting a level: %s\n\nThe PWAD will be closed.", e.what());
+		if (!wad.master.gameWad())
+			throw;
+		
+		int lump_idx = wad.master.gameWad()->LevelHeader(0);
+		const Lump_c* lump = wad.master.gameWad()->GetLump(lump_idx);
+		if (!lump)
+			throw;
+
+		wad.master.RemoveEditWad();
+		const SString& map_name = lump->Name();
+		LoadLevel(wad.master.gameWad().get(), map_name);
 	}
 }
 

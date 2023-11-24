@@ -324,10 +324,10 @@ private:
 	struct level_name_CMP_pred
 	{
 	private:
-		Wad_file *wad;
+		const Wad_file *wad;
 
 	public:
-		level_name_CMP_pred(Wad_file * _w) : wad(_w)
+		level_name_CMP_pred(const Wad_file * _w) : wad(_w)
 		{ }
 
 		inline bool operator() (const int A, const int B) const noexcept
