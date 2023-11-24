@@ -82,16 +82,16 @@ TEST_F(EObjectsFixture, DragWallLineToCancelSurroundingLines)
 		doc.vertices.push_back(std::move(vertex));
 	}
 
-	auto sector = std::make_unique<Sector>();
+	auto sector = std::make_shared<Sector>();
 	doc.sectors.push_back(std::move(sector));
 
 	for(int i = 0; i < 8; ++i)
 	{
-		auto side = std::make_unique<SideDef>();
+		auto side = std::make_shared<SideDef>();
 		side->sector = 0;
 		doc.sidedefs.push_back(std::move(side));
 
-		auto line = std::make_unique<LineDef>();
+		auto line = std::make_shared<LineDef>();
 		line->start = i;
 		line->end = (i + 1) % 8;
 		line->right = i;
@@ -115,7 +115,7 @@ TEST_F(EObjectsFixture, DragWallLineToCancelSurroundingLines)
 
 	// Now we must check the coordinates. We do NOT care about order
 	std::vector<Vertex *> vertices;
-	for(const std::unique_ptr<Vertex> &vertex : doc.vertices)
+	for(const std::shared_ptr<Vertex> &vertex : doc.vertices)
 		vertices.push_back(vertex.get());
 	std::sort(vertices.begin(), vertices.end(), vertexCompare);
 	ASSERT_EQ(vertices[0]->xy(), v2double_t(-64, -64));
@@ -126,7 +126,7 @@ TEST_F(EObjectsFixture, DragWallLineToCancelSurroundingLines)
 	ASSERT_EQ(vertices[5]->xy(), v2double_t(128, 0));
 
 	std::vector<const LineDef *> lines;
-	for(const std::unique_ptr<LineDef> &line : doc.linedefs)
+	for(const std::shared_ptr<LineDef> &line : doc.linedefs)
 		lines.push_back(line.get());
 	std::sort(lines.begin(), lines.end(), [&doc](const LineDef *L1, const LineDef *L2){
 		return vertexCompare(doc.vertices[L1->start].get(), doc.vertices[L2->start].get());
@@ -180,21 +180,21 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 		doc.vertices.push_back(std::move(vertex));
 	}
 
-	auto topLeftSector = std::make_unique<Sector>();
+	auto topLeftSector = std::make_shared<Sector>();
 	topLeftSector->floor_tex = BA_InternaliseString("FTOPLEFT");
-	auto topRightSector = std::make_unique<Sector>();
+	auto topRightSector = std::make_shared<Sector>();
 	topRightSector->floor_tex = BA_InternaliseString("FTOPRITE");
-	auto bottomSector = std::make_unique<Sector>();
+	auto bottomSector = std::make_shared<Sector>();
 	bottomSector->floor_tex = BA_InternaliseString("FBOTTOM");
 	doc.sectors.push_back(std::move(bottomSector));
 	doc.sectors.push_back(std::move(topLeftSector));
 	doc.sectors.push_back(std::move(topRightSector));
 
-	std::unique_ptr<SideDef> side;
+	std::shared_ptr<SideDef> side;
 	// bottom room
 	for(int i = 0; i < 6; ++i)
 	{
-		side = std::make_unique<SideDef>();
+		side = std::make_shared<SideDef>();
 		side->sector = 0;
 		if(i != 0 && i != 2)	// do not texture mid sides
 			side->mid_tex = BA_InternaliseString("BOTTOM");
@@ -205,7 +205,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	// top-left room
 	for(int i = 0; i < 4; ++i)
 	{
-		side = std::make_unique<SideDef>();
+		side = std::make_shared<SideDef>();
 		side->sector = 1;
 		if(i != 3)	// do not texture mid sides
 			side->mid_tex = BA_InternaliseString("TOPLEFT");
@@ -216,7 +216,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	// top-right room
 	for(int i = 0; i < 4; ++i)
 	{
-		side = std::make_unique<SideDef>();
+		side = std::make_shared<SideDef>();
 		side->sector = 2;
 		if(i != 3)	// do not texture mid sides
 			side->mid_tex = BA_InternaliseString("TOPRIGHT");
@@ -226,7 +226,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	}
 
 	// Too many lines to concern about, so just create them here
-	std::vector<std::unique_ptr<LineDef>> &lines = doc.linedefs;
+	std::vector<std::shared_ptr<LineDef>> &lines = doc.linedefs;
 	for(int i = 0; i < 12; ++i)
 	{
 		lines.push_back(std::make_unique<LineDef>());
@@ -283,7 +283,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	ASSERT_EQ(doc.numSectors(), 2);
 
 	std::vector<const Vertex *> vertices;
-	for(const std::unique_ptr<Vertex> &vertex : doc.vertices)
+	for(const std::shared_ptr<Vertex> &vertex : doc.vertices)
 		vertices.push_back(vertex.get());
 	std::sort(vertices.begin(), vertices.end(), vertexCompare);
 
@@ -297,7 +297,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	ASSERT_EQ(vertices[7]->xy(), v2double_t(128, 64));
 
 	std::vector<const LineDef *> vlines;
-	for(const std::unique_ptr<LineDef> &line : doc.linedefs)
+	for(const std::shared_ptr<LineDef> &line : doc.linedefs)
 		vlines.push_back(line.get());
 	std::sort(vlines.begin(), vlines.end(), [&doc](const LineDef *L1, const LineDef *L2){
 		return doc.vertices[L1->start]->xy() == doc.vertices[L2->start]->xy() ?
@@ -395,7 +395,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	// Now find the line to check
 	for(lineIndex = 0; lineIndex < doc.numLinedefs(); ++lineIndex)
 	{
-		const std::unique_ptr<LineDef> &line = doc.linedefs[lineIndex];
+		const std::shared_ptr<LineDef> &line = doc.linedefs[lineIndex];
 		if(doc.getStart(*line).xy() == v2double_t{64, 0} &&
 		   doc.getEnd(*line).xy() == v2double_t{128, 0})
 		{
@@ -428,7 +428,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 
 	// Now find the line to check
 	int checks = 0;
-	for(const std::unique_ptr<LineDef> &line : doc.linedefs)
+	for(const std::shared_ptr<LineDef> &line : doc.linedefs)
 	{
 		if(doc.getStart(*line).xy() == v2double_t{-64, -64} &&
 		   doc.getEnd(*line).xy() == v2double_t{-64, 64})
@@ -482,7 +482,7 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	ASSERT_EQ(doc.numSectors(), 1);
 
 	checks = 0;
-	for(const std::unique_ptr<LineDef> &line : doc.linedefs)
+	for(const std::shared_ptr<LineDef> &line : doc.linedefs)
 	{
 		if(doc.getStart(*line).xy() == v2double_t{0, 64} &&
 		   doc.getEnd(*line).xy() == v2double_t{64, 64})
@@ -539,93 +539,93 @@ TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 
 	for(size_t i = 0; i < 5; ++i)
 	{
-		auto vertex = std::make_unique<Vertex>();
+		auto vertex = std::make_shared<Vertex>();
 		vertex->raw_x = vertexCoordinates[i][0];
 		vertex->raw_y = vertexCoordinates[i][1];
 		doc.vertices.push_back(std::move(vertex));
 	}
 
-	std::unique_ptr<Sector> sector;
-	sector = std::make_unique<Sector>();
+	std::shared_ptr<Sector> sector;
+	sector = std::make_shared<Sector>();
 	sector->floor_tex = BA_InternaliseString("FBOTTOM");
 	doc.sectors.push_back(std::move(sector));
-	sector = std::make_unique<Sector>();
+	sector = std::make_shared<Sector>();
 	sector->floor_tex = BA_InternaliseString("FTOP");
 	doc.sectors.push_back(std::move(sector));
 
-	std::unique_ptr<SideDef> side;	// 0
-	side = std::make_unique<SideDef>();
+	std::shared_ptr<SideDef> side;	// 0
+	side = std::make_shared<SideDef>();
 	side->mid_tex = BA_InternaliseString("BOTTOM");
 	side->sector = 0;
 	doc.sidedefs.push_back(std::move(side));
 	
-	side = std::make_unique<SideDef>();	// 1
+	side = std::make_shared<SideDef>();	// 1
 	side->mid_tex = BA_InternaliseString("-");
 	side->sector = 0;
 	doc.sidedefs.push_back(std::move(side));
 	
-	side = std::make_unique<SideDef>();	// 2
+	side = std::make_shared<SideDef>();	// 2
 	side->mid_tex = BA_InternaliseString("BOTTOM");
 	side->sector = 0;
 	doc.sidedefs.push_back(std::move(side));
 
-	side = std::make_unique<SideDef>();	// 3
+	side = std::make_shared<SideDef>();	// 3
 	side->mid_tex = BA_InternaliseString("TOP");
 	side->sector = 1;
 	doc.sidedefs.push_back(std::move(side));
 
-	side = std::make_unique<SideDef>();	// 4
+	side = std::make_shared<SideDef>();	// 4
 	side->mid_tex = BA_InternaliseString("TOP");
 	side->sector = 1;
 	doc.sidedefs.push_back(std::move(side));
 
-	side = std::make_unique<SideDef>();	// 5
+	side = std::make_shared<SideDef>();	// 5
 	side->mid_tex = BA_InternaliseString("TOP");
 	side->sector = 1;
 	doc.sidedefs.push_back(std::move(side));
 
-	side = std::make_unique<SideDef>();	// 6
+	side = std::make_shared<SideDef>();	// 6
 	side->mid_tex = BA_InternaliseString("-");
 	side->sector = 1;
 	doc.sidedefs.push_back(std::move(side));
 
-	std::unique_ptr<LineDef> line;
-	line = std::make_unique<LineDef>();
+	std::shared_ptr<LineDef> line;
+	line = std::make_shared<LineDef>();
 	line->start = 0;
 	line->end = 1;
 	line->right = 3;
 	line->flags = MLF_Blocking;
 	doc.linedefs.push_back(std::move(line));
 
-	line = std::make_unique<LineDef>();
+	line = std::make_shared<LineDef>();
 	line->start = 1;
 	line->end = 2;
 	line->right = 4;
 	line->flags = MLF_Blocking;
 	doc.linedefs.push_back(std::move(line));
 
-	line = std::make_unique<LineDef>();
+	line = std::make_shared<LineDef>();
 	line->start = 2;
 	line->end = 3;
 	line->right = 5;
 	line->flags = MLF_Blocking;
 	doc.linedefs.push_back(std::move(line));
 
-	line = std::make_unique<LineDef>();
+	line = std::make_shared<LineDef>();
 	line->start = 3;
 	line->end = 4;
 	line->right = 2;
 	line->flags = MLF_Blocking;
 	doc.linedefs.push_back(std::move(line));
 
-	line = std::make_unique<LineDef>();
+	line = std::make_shared<LineDef>();
 	line->start = 4;
 	line->end = 0;
 	line->right = 0;
 	line->flags = MLF_Blocking;
 	doc.linedefs.push_back(std::move(line));
 
-	line = std::make_unique<LineDef>();
+	line = std::make_shared<LineDef>();
 	line->start = 0;
 	line->end = 3;
 	line->right = 1;
@@ -647,7 +647,7 @@ TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 	ASSERT_EQ(doc.numLinedefs(), 5);
 
 //	int checks = 0;
-	for(const std::unique_ptr<LineDef> &line : doc.linedefs)
+	for(const std::shared_ptr<LineDef> &line : doc.linedefs)
 	{
 		if(doc.getStart(*line).xy() == v2double_t{0, 0} &&
 		   doc.getEnd(*line).xy() == v2double_t{32, 0})

@@ -156,7 +156,7 @@ void LevelData::Block::Add(int blk_num, int line_index)
 
 void LevelData::Block::AddLine(int line_index, const Document &doc)
 {
-	const auto &L = doc.linedefs[line_index];
+	const auto L = doc.linedefs[line_index];
 
 	int x1 = (int) doc.getStart(*L).x();
 	int y1 = (int) doc.getStart(*L).y();
@@ -439,7 +439,7 @@ static void FindMapLimits(bbox_t *bbox, const Document &doc)
 
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto L = doc.linedefs[i];
 
 		if (!doc.isZeroLength(*L))
 		{
@@ -817,7 +817,7 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 
 static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 {
-	const auto &L = doc.linedefs[seg->linedef];
+	const auto L = doc.linedefs[seg->linedef];
 
 	double lx = seg->side ? doc.getEnd(*L).x() : doc.getStart(*L).x();
 	double ly = seg->side ? doc.getEnd(*L).y() : doc.getStart(*L).y();

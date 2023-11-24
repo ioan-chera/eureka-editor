@@ -366,8 +366,8 @@ void UI_Canvas::DrawEverything()
 		// when ratio lock is on, want to see the new line
 		if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 && inst.edit.drag_other_vert >= 0)
 		{
-			const auto &v0 = inst.level.vertices[inst.edit.drag_other_vert];
-			const auto &v1 = inst.level.vertices[inst.edit.dragged.num];
+			const auto v0 = inst.level.vertices[inst.edit.drag_other_vert];
+			const auto v1 = inst.level.vertices[inst.edit.dragged.num];
 
 			RenderColor(RED);
 			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + delta.x, v1->y() + delta.y);
@@ -395,7 +395,7 @@ void UI_Canvas::DrawEverything()
 
 		if (inst.edit.mode == ObjType::linedefs && !inst.edit.show_object_numbers)
 		{
-			const auto &L = inst.level.linedefs[inst.edit.highlight.num];
+			const auto L = inst.level.linedefs[inst.edit.highlight.num];
 			DrawLineInfo(inst.level.getStart(*L).x(), inst.level.getStart(*L).y(), inst.level.getEnd(*L).x(), inst.level.getEnd(*L).y(), false);
 		}
 
@@ -718,7 +718,7 @@ void UI_Canvas::DrawLinedefs()
 {
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const auto &L = inst.level.linedefs[n];
+		const auto L = inst.level.linedefs[n];
 
 		double x1 = inst.level.getStart(*L).x();
 		double y1 = inst.level.getStart(*L).y();
@@ -1639,7 +1639,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         {
             if(objtype == ObjType::linedefs && m == objnum)
                 continue;
-            const auto &line = inst.level.linedefs[m];
+            const auto line = inst.level.linedefs[m];
             assert(line);
             SpecialTagInfo info;
             if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, line.get(), inst.conf, info))
@@ -1658,7 +1658,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         {
             if(objtype == ObjType::things && m == objnum)
                 continue;
-            const auto &thing = inst.level.things[m];
+            const auto thing = inst.level.things[m];
             assert(thing);
             SpecialTagInfo info;
             if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing.get(), inst.conf, info))
@@ -1675,7 +1675,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 
 	if (objtype == ObjType::linedefs)
     {
-        const auto &line = inst.level.linedefs[objnum];
+        const auto line = inst.level.linedefs[objnum];
         assert(line);
         SpecialTagInfo info;
         if(getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, info))
@@ -1700,7 +1700,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     }
     else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
     {
-        const auto &thing = inst.level.things[objnum];
+        const auto thing = inst.level.things[objnum];
         assert(thing);
         SpecialTagInfo info;
         if(getSpecialTagInfo(objtype, objnum, thing->special, thing.get(), inst.conf, info))
@@ -2072,7 +2072,7 @@ void UI_Canvas::DrawCurrentLine()
 	if (inst.edit.drawLine.from.is_nil())
 		return;
 
-	const auto &V = inst.level.vertices[inst.edit.drawLine.from.num];
+	const auto V = inst.level.vertices[inst.edit.drawLine.from.num];
 
 	v2double_t newpos = inst.edit.drawLine.to;
 
@@ -2164,8 +2164,8 @@ v2double_t UI_Canvas::DragDelta()
 	if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 &&
 		inst.edit.dragged.num >= 0 && inst.edit.drag_other_vert >= 0)
 	{
-		const auto &v0 = inst.level.vertices[inst.edit.drag_other_vert];
-		const auto &v1 = inst.level.vertices[inst.edit.dragged.num];
+		const auto v0 = inst.level.vertices[inst.edit.drag_other_vert];
+		const auto v1 = inst.level.vertices[inst.edit.dragged.num];
 
 		v2double_t newpos = inst.edit.drag_cur.xy;
 

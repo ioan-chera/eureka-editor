@@ -52,7 +52,7 @@ TEST(EChecks, FindFreeTag)
 		inst.level.linedefs.clear();
 		for(LineDef &line : lines)
 		{
-			auto addedLine = std::make_unique<LineDef>();
+			auto addedLine = std::make_shared<LineDef>();
 			*addedLine = line;
 			inst.level.linedefs.push_back(std::move(addedLine));
 		}
@@ -63,7 +63,7 @@ TEST(EChecks, FindFreeTag)
 		inst.level.sectors.clear();
 		for(Sector &sector : sectors)
 		{
-			auto newSector = std::make_unique<Sector>();
+			auto newSector = std::make_shared<Sector>();
 			*newSector = sector;
 			inst.level.sectors.push_back(std::move(newSector));
 		}
@@ -206,13 +206,13 @@ TEST(EChecks, TagsApplyNewValue)
 
 	for(LineDef &line : lines)
 	{
-		auto newLine = std::make_unique<LineDef>();
+		auto newLine = std::make_shared<LineDef>();
 		*newLine = line;
 		inst.level.linedefs.push_back(std::move(newLine));
 	}
 	for(Sector &sector : sectors)
 	{
-		auto newSector = std::make_unique<Sector>();
+		auto newSector = std::make_shared<Sector>();
 		*newSector = sector;
 		inst.level.sectors.push_back(std::move(newSector));
 	}

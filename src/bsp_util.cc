@@ -244,7 +244,7 @@ static void MarkPolyobjSector(int sector, const Document &doc)
 
 	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		auto &L = doc.linedefs[i];
+		auto L = doc.linedefs[i];
 
 		if ((L->right >= 0 && doc.getRight(*L)->sector == sector) ||
 			(L->left  >= 0 && doc.getLeft(*L)->sector  == sector))
@@ -279,7 +279,7 @@ void LevelData::MarkPolyobjPoint(double x, double y)
 
 	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto L = doc.linedefs[i];
 
 		if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy,
 					(int) doc.getStart(*L).x(), (int) doc.getStart(*L).y(),
@@ -310,7 +310,7 @@ void LevelData::MarkPolyobjPoint(double x, double y)
 
 	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto L = doc.linedefs[i];
 
 		double x_cut;
 
@@ -344,7 +344,7 @@ void LevelData::MarkPolyobjPoint(double x, double y)
 		return;
 	}
 
-	const auto &best_ld = doc.linedefs[best_match];
+	const auto best_ld = doc.linedefs[best_match];
 
 	y1 = doc.getStart(*best_ld).y();
 	y2 = doc.getEnd(*best_ld).y();
@@ -403,7 +403,7 @@ void LevelData::DetectPolyobjSectors()
 	// -JL- First go through all lines to see if level contains any polyobjs
 	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto L = doc.linedefs[i];
         const linetype_t *type = get(config.line_types, L->type);
         if(type && type->isPolyObjectSpecial())
 			break;
@@ -422,7 +422,7 @@ void LevelData::DetectPolyobjSectors()
 
 	for (i = 0 ; i < doc.numThings(); i++)
 	{
-		const auto &T = doc.things[i];
+		const auto T = doc.things[i];
 
 		double x = T->x();
 		double y = T->y();
@@ -451,8 +451,8 @@ static FFixedPoint VertexCompare(const Document &doc, const void *p1, const void
 	if (vert1 == vert2)
 		return FFixedPoint{};
 
-	const auto &A = doc.vertices[vert1];
-	const auto &B = doc.vertices[vert2];
+	const auto A = doc.vertices[vert1];
+	const auto B = doc.vertices[vert2];
 
 	if (A->raw_x != B->raw_x)
 		return A->raw_x - B->raw_x;
@@ -513,8 +513,8 @@ static FFixedPoint LineStartCompare(const Document &doc, const void *p1, const v
 	if (line1 == line2)
 		return FFixedPoint();
 
-	const auto &A = doc.linedefs[line1];
-	const auto &B = doc.linedefs[line2];
+	const auto A = doc.linedefs[line1];
+	const auto B = doc.linedefs[line2];
 
 	// determine left-most vertex of each line
 	const Vertex *C = LineVertexLowest(doc, A.get()) ? &doc.getEnd(*A) : &doc.getStart(*A);
@@ -534,8 +534,8 @@ static FFixedPoint LineEndCompare(const Document &doc, const void *p1, const voi
 	if (line1 == line2)
 		return FFixedPoint{};
 
-	const auto &A = doc.linedefs[line1];
-	const auto &B = doc.linedefs[line2];
+	const auto A = doc.linedefs[line1];
+	const auto B = doc.linedefs[line2];
 
 	// determine right-most vertex of each line
 	const Vertex * C = LineVertexLowest(doc, A.get()) ? &doc.getStart(*A) : &doc.getEnd(*A);
@@ -581,7 +581,7 @@ void DetectOverlappingLines(const Document &doc)
 			{
 				// found an overlap !
 
-				auto &L = doc.linedefs[array[j]];
+				auto L = doc.linedefs[array[j]];
 				L->flags |= MLF_IS_OVERLAP;
 				count++;
 			}
@@ -649,7 +649,7 @@ void LevelData::CalculateWallTips()
 
 	for (i=0 ; i < doc.numLinedefs(); i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto L = doc.linedefs[i];
 
 		if ((L->flags & MLF_IS_OVERLAP) || doc.isZeroLength(*L))
 			continue;
@@ -702,7 +702,7 @@ vertex_t *LevelData::NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	}
 	else
 	{
-		const auto &L = doc.linedefs[seg->linedef];
+		const auto L = doc.linedefs[seg->linedef];
 
 		bool front_open = ((seg->side ? L->left : L->right) >= 0);
 

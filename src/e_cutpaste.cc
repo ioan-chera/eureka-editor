@@ -301,7 +301,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 	// determine needed sidedefs
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
-		const auto &L = doc.linedefs[*it];
+		const auto L = doc.linedefs[*it];
 
 		if (L->right >= 0) side_sel.set(L->right);
 		if (L->left  >= 0) side_sel.set(L->left);
@@ -467,7 +467,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		auto & V = op.doc.vertices[new_v];
+		auto V = op.doc.vertices[new_v];
 
 		vert_map[i] = new_v;
 
@@ -479,7 +479,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
 		int new_s = op.addNew(ObjType::sectors);
-		auto & S = op.doc.sectors[new_s];
+		auto S = op.doc.sectors[new_s];
 
 		sector_map[i] = new_s;
 
@@ -496,7 +496,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 		}
 
 		int new_sd = op.addNew(ObjType::sidedefs);
-		auto &SD = op.doc.sidedefs[new_sd];
+		auto SD = op.doc.sidedefs[new_sd];
 
 		side_map[i] = new_sd;
 
@@ -513,7 +513,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
 		int new_l = op.addNew(ObjType::linedefs);
-		auto &L = op.doc.linedefs[new_l];
+		auto L = op.doc.linedefs[new_l];
 
 		*L = clip_board->lines[i];
 
@@ -551,7 +551,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
 		int new_t = op.addNew(ObjType::things);
-		auto & T = op.doc.things[new_t];
+		auto T = op.doc.things[new_t];
 
 		*T = clip_board->things[i];
 
@@ -655,7 +655,7 @@ bool Instance::Clipboard_DoPaste()
 				for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 				{
 					int new_t = op.addNew(ObjType::things);
-					auto &T = level.things[new_t];
+					auto T = level.things[new_t];
 
 					*T = clip_board->things[i];
 
@@ -673,7 +673,7 @@ bool Instance::Clipboard_DoPaste()
 				for (i = 0 ; i < clip_board->verts.size() ; i++)
 				{
 					int new_v = op.addNew(ObjType::vertices);
-					auto & V = level.vertices[new_v];
+					auto V = level.vertices[new_v];
 
 					*V = clip_board->verts[i];
 
@@ -796,7 +796,7 @@ void UnusedVertices(const Document &doc, const selection_c &lines, selection_c &
 		if (lines.get(n))
 			continue;
 
-		const auto &L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		result.clear(L->start);
 		result.clear(L->end);
@@ -816,7 +816,7 @@ void UnusedSideDefs(const Document &doc, const selection_c &lines, const selecti
 		if (lines.get(n))
 			continue;
 
-		const auto &L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		if (doc.getRight(*L)) result.clear(L->right);
 		if (doc.getLeft(*L))  result.clear(L->left);
@@ -824,7 +824,7 @@ void UnusedSideDefs(const Document &doc, const selection_c &lines, const selecti
 
 	for (int i = 0 ; i < doc.numSidedefs(); i++)
 	{
-		const auto &SD = doc.sidedefs[i];
+		const auto SD = doc.sidedefs[i];
 
 		if (secs && secs->get(SD->sector))
 			result.set(i);
@@ -838,7 +838,7 @@ static void UnusedLineDefs(const Document &doc, const selection_c &sectors, sele
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const auto &L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		// check if touches a to-be-deleted sector
 		//    -1 : no side
@@ -866,7 +866,7 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const auto &linedef = doc.linedefs[n];
+		const auto linedef = doc.linedefs[n];
 
 		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
 		{
@@ -887,7 +887,7 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 		if(result.empty())	// stop looking if there's nothing else to remove
 			return;
 
-		const auto &linedef = doc.linedefs[n];
+		const auto linedef = doc.linedefs[n];
 
 		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
 			continue;
@@ -914,7 +914,7 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 			if (opp_ld < 0)
 				continue;
 
-			const auto &oppositeLinedef = doc.linedefs[opp_ld];
+			const auto oppositeLinedef = doc.linedefs[opp_ld];
 
 			if (doc.getSectorID(*oppositeLinedef, opp_side) == sec_num)
 				result.clear(sec_num);
@@ -927,7 +927,7 @@ static void FixupLineDefs(EditOperation &op, const Document &doc, selection_c *l
 {
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
-		const auto &L = doc.linedefs[*it];
+		const auto L = doc.linedefs[*it];
 
 		// the logic is ugly here mainly to handle flipping (in particular,
 		// not to flip the line when _both_ sides are unlinked).
@@ -967,7 +967,7 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const auto &L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 		{
@@ -1060,7 +1060,7 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const sele
 	{
 		for (int n = 0 ; n < doc.numLinedefs(); n++)
 		{
-			const auto &L = doc.linedefs[n];
+			const auto L = doc.linedefs[n];
 
 			if (list.get(L->start) || list.get(L->end))
 				line_sel.set(n);

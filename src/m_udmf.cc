@@ -558,14 +558,14 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 	else if (name.Match("linedef"))
 	{
 		kind = Objid(ObjType::linedefs, 1);
-		auto addedLine = std::make_unique<LineDef>();
+		auto addedLine = std::make_shared<LineDef>();
 		doc.linedefs.push_back(std::move(addedLine));
 		new_LD = doc.linedefs.back().get();
 	}
 	else if (name.Match("sidedef"))
 	{
 		kind = Objid(ObjType::sidedefs, 1);
-		auto addedSide = std::make_unique<SideDef>();
+		auto addedSide = std::make_shared<SideDef>();
 		addedSide->mid_tex = BA_InternaliseString("-");
 		addedSide->lower_tex = addedSide->mid_tex;
 		addedSide->upper_tex = addedSide->mid_tex;
@@ -575,7 +575,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 	else if (name.Match("sector"))
 	{
 		kind = Objid(ObjType::sectors, 1);
-		auto addedSector = std::make_unique<Sector>();
+		auto addedSector = std::make_shared<Sector>();
 		addedSector->light = 160;
 		doc.sectors.push_back(std::move(addedSector));
 		new_S = doc.sectors.back().get();
@@ -641,7 +641,7 @@ void Document::ValidateLevel_UDMF(const ConfigData &config, BadCount &bad)
 
 	for (int n = 0 ; n < numLinedefs(); n++)
 	{
-		auto &L = linedefs[n];
+		auto L = linedefs[n];
 
 		ValidateVertexRefs(*L, n, bad);
 		ValidateSidedefRefs(*L, n, config, bad);
@@ -719,7 +719,7 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		lump->Printf("thing // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &th = inst.level.things[i];
+		const auto th = inst.level.things[i];
 
 		lump->Printf("x = %1.3f;\n", th->x());
 		lump->Printf("y = %1.3f;\n", th->y());
@@ -763,7 +763,7 @@ static void UDMF_WriteVertices(const Document &doc, Lump_c *lump)
 		lump->Printf("vertex // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &vert = doc.vertices[i];
+		const auto vert = doc.vertices[i];
 
 		lump->Printf("x = %1.3f;\n", vert->x());
 		lump->Printf("y = %1.3f;\n", vert->y());
@@ -779,7 +779,7 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		lump->Printf("linedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &ld = inst.level.linedefs[i];
+		const auto ld = inst.level.linedefs[i];
 
 		lump->Printf("v1 = %d;\n", ld->start);
 		lump->Printf("v2 = %d;\n", ld->end);
@@ -837,7 +837,7 @@ static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 		lump->Printf("sidedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &side = doc.sidedefs[i];
+		const auto side = doc.sidedefs[i];
 
 		lump->Printf("sector = %d;\n", side->sector);
 
@@ -866,7 +866,7 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 		lump->Printf("sector // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &sec = doc.sectors[i];
+		const auto sec = doc.sectors[i];
 
 		lump->Printf("heightfloor = %d;\n", sec->floorh);
 		lump->Printf("heightceiling = %d;\n", sec->ceilh);

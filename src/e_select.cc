@@ -307,7 +307,7 @@ static std::vector<std::vector<int>> makeVertexLineMap(const Document &doc)
 	result.resize(doc.numVertices());
 	for(int i = 0; i < doc.numLinedefs(); ++i)
 	{
-		const auto &line = doc.linedefs[i];
+		const auto line = doc.linedefs[i];
 		for(int vertNum : {line->start, line->end})
 			if(doc.isVertex(vertNum))
 				result[vertNum].push_back(i);
@@ -326,7 +326,7 @@ static void selectNeighborLines(Instance &inst, int objnum, byte parts, WallCont
 
 	auto vertLineMap = makeVertexLineMap(doc);
 
-	const auto &source = doc.linedefs[objnum];
+	const auto source = doc.linedefs[objnum];
 	struct Entry
 	{
 		const LineDef *line;
@@ -347,7 +347,7 @@ static void selectNeighborLines(Instance &inst, int objnum, byte parts, WallCont
 		{
 			for(int neigh : vertLineMap[vertNum])
 			{
-				const auto &otherLine = doc.linedefs[neigh];
+				const auto otherLine = doc.linedefs[neigh];
 				if(otherLine.get() == entry.line)
 					continue;
 				bool flipped = otherLine->start == entry.line->start ||
@@ -378,7 +378,7 @@ static void selectNeighborLines(Instance &inst, int objnum, byte parts, WallCont
 
 void Instance::SelectNeighborSectors(int objnum, SelectNeighborCriterion option, byte parts)
 {
-	const auto &sector1 = level.sectors[objnum];
+	const auto sector1 = level.sectors[objnum];
 
 	for (const auto &line : level.linedefs)
 	{

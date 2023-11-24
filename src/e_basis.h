@@ -117,11 +117,11 @@ private:
 		ObjType objtype = ObjType::things;
 		byte field = 0;
 		int objnum = 0;
-		std::unique_ptr<Thing> thing;
-		std::unique_ptr<Vertex> vertex;
-		std::unique_ptr<Sector> sector;
-		std::unique_ptr<SideDef> sidedef;
-		std::unique_ptr<LineDef> linedef;
+		std::shared_ptr<Thing> thing;
+		std::shared_ptr<Vertex> vertex;
+		std::shared_ptr<Sector> sector;
+		std::shared_ptr<SideDef> sidedef;
+		std::shared_ptr<LineDef> linedef;
 		int value = 0;
 
 		void apply(Basis &basis);
@@ -131,11 +131,11 @@ private:
 		void rawChange(Basis &basis);
 
 		void rawDelete(Basis &basis);
-		std::unique_ptr<Thing> rawDeleteThing(Document &doc) const;
-		std::unique_ptr<Vertex> rawDeleteVertex(Document &doc) const;
-		std::unique_ptr<Sector> rawDeleteSector(Document &doc) const;
-		std::unique_ptr<SideDef> rawDeleteSidedef(Document &doc) const;
-		std::unique_ptr<LineDef> rawDeleteLinedef(Document &doc) const;
+		std::shared_ptr<Thing> rawDeleteThing(Document &doc) const;
+		std::shared_ptr<Vertex> rawDeleteVertex(Document &doc) const;
+		std::shared_ptr<Sector> rawDeleteSector(Document &doc) const;
+		std::shared_ptr<SideDef> rawDeleteSidedef(Document &doc) const;
+		std::shared_ptr<LineDef> rawDeleteLinedef(Document &doc) const;
 
 		void rawInsert(Basis &basis);
 		void rawInsertThing(Document &doc);

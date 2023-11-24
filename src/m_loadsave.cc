@@ -79,17 +79,17 @@ static Document makeFreshDocument(Instance &inst, const ConfigData &config, MapF
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
-		auto v = std::make_unique<Vertex>();
+		auto v = std::make_shared<Vertex>();
 
 		v->SetRawX(levelFormat, (i >= 2) ? 256 : -256);
 		v->SetRawY(levelFormat, (i==1 || i==2) ? 256 :-256);
 		doc.vertices.push_back(std::move(v));
 
-		auto sd = std::make_unique<SideDef>();
+		auto sd = std::make_shared<SideDef>();
 		sd->SetDefaults(config, false);
 		doc.sidedefs.push_back(std::move(sd));
 
-		auto ld = std::make_unique<LineDef>();
+		auto ld = std::make_shared<LineDef>();
 		ld->start = i;
 		ld->end   = (i+1) % 4;
 		ld->flags = MLF_Blocking;
@@ -491,7 +491,7 @@ void Document::LoadSectors(int loading_level, const Wad_file *load_wad)
 		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading sectors.\n");
 
-		auto sec = std::make_unique<Sector>();
+		auto sec = std::make_shared<Sector>();
 
 		sec->floorh = LE_S16(raw.floorh);
 		sec->ceilh  = LE_S16(raw.ceilh);
@@ -515,7 +515,7 @@ void Document::CreateFallbackSector(const ConfigData &config)
 {
 	gLog.printf("Creating a fallback sector.\n");
 
-	auto sec = std::make_unique<Sector>();
+	auto sec = std::make_shared<Sector>();
 
 	sec->SetDefaults(config);
 
@@ -530,7 +530,7 @@ void Document::CreateFallbackSideDef(const ConfigData &config)
 
 	gLog.printf("Creating a fallback sidedef.\n");
 
-	auto sd = std::make_unique<SideDef>();
+	auto sd = std::make_shared<SideDef>();
 
 	sd->SetDefaults(config, false);
 
@@ -742,7 +742,7 @@ void Document::LoadSideDefs(int loading_level, const Wad_file *load_wad, const C
 		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading sidedefs.\n");
 
-		auto sd = std::make_unique<SideDef>();
+		auto sd = std::make_shared<SideDef>();
 
 		sd->x_offset = LE_S16(raw.x_offset);
 		sd->y_offset = LE_S16(raw.y_offset);
@@ -788,7 +788,7 @@ void Document::LoadLineDefs(int loading_level, const Wad_file *load_wad, const C
 		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
-		auto ld = std::make_unique<LineDef>();
+		auto ld = std::make_shared<LineDef>();
 
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
@@ -836,7 +836,7 @@ void Document::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, c
 		if (! stream.read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
-		auto ld = std::make_unique<LineDef>();
+		auto ld = std::make_shared<LineDef>();
 
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);

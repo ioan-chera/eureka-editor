@@ -174,7 +174,7 @@ void Instance::UpdateDrawLine()
 	if (edit.action != EditorAction::drawLine || edit.drawLine.from.is_nil())
 		return;
 
-	const auto &V = level.vertices[edit.drawLine.from.num];
+	const auto V = level.vertices[edit.drawLine.from.num];
 
 	v2double_t newpos = edit.map.xy;
 
@@ -274,8 +274,8 @@ void Instance::UpdateHighlight()
 		if (grid.ratio > 0 && edit.action == EditorAction::drawLine &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
-			const auto &V = level.vertices[edit.highlight.num];
-			const auto &S = level.vertices[edit.drawLine.from.num];
+			const auto V = level.vertices[edit.highlight.num];
+			const auto S = level.vertices[edit.drawLine.from.num];
 
 			v2double_t vpos = V->xy();
 
@@ -376,7 +376,7 @@ void Document::UpdateLevelBounds(int start_vert) noexcept
 {
 	for(int i = start_vert; i < numVertices(); i++)
 	{
-		const auto &V = vertices[i];
+		const auto V = vertices[i];
 
 		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
 		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
@@ -442,7 +442,7 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const auto &V = level.vertices[objnum];
+		const auto V = level.vertices[objnum];
 
 		if (V->x() < level.Map_bound1.x) level.Map_bound1.x = V->x();
 		if (V->y() < level.Map_bound1.y) level.Map_bound1.y = V->y();
@@ -643,7 +643,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int t = 0 ; t < doc.numThings() ; t++)
 		{
-			const auto &T = doc.things[t];
+			const auto T = doc.things[t];
 
 			Objid obj = hover::getNearestSector(doc, T->xy());
 
@@ -660,7 +660,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const auto &L = doc.linedefs[l];
+			const auto L = doc.linedefs[l];
 
 			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
 				 (doc.getLeft(*L)  && src.get(doc.getLeft(*L)->sector)) )
@@ -691,7 +691,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const auto &L = doc.linedefs[*it];
+			const auto L = doc.linedefs[*it];
 
 			if (doc.getRight(*L)) dest.set(L->right);
 			if (doc.getLeft(*L))  dest.set(L->left);
@@ -703,7 +703,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int n = 0 ; n < doc.numSidedefs(); n++)
 		{
-			const auto &SD = doc.sidedefs[n];
+			const auto SD = doc.sidedefs[n];
 
 			if (src.get(SD->sector))
 				dest.set(n);
@@ -716,7 +716,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const auto &L = doc.linedefs[*it];
+			const auto L = doc.linedefs[*it];
 
 			dest.set(L->start);
 			dest.set(L->end);
@@ -730,7 +730,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		// select all linedefs that have both ends selected
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const auto &L = doc.linedefs[l];
+			const auto L = doc.linedefs[l];
 
 			if (src.get(L->start) && src.get(L->end))
 			{
@@ -754,7 +754,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	for (l = 0 ; l < doc.numLinedefs() ; l++)
 	{
-		const auto &L = doc.linedefs[l];
+		const auto L = doc.linedefs[l];
 
 		if (doc.getRight(*L)) dest.set(doc.getRight(*L)->sector);
 		if (doc.getLeft(*L))  dest.set(doc.getLeft(*L)->sector);
@@ -764,7 +764,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	for (l = 0 ; l < doc.numLinedefs(); l++)
 	{
-		const auto &L = doc.linedefs[l];
+		const auto L = doc.linedefs[l];
 
 		if (src.what_type() == ObjType::vertices)
 		{
@@ -794,7 +794,7 @@ static int Selection_FirstLine(const Document &doc, const selection_c &list)
 {
 	for (sel_iter_c it(list); ! it.done(); it.next())
 	{
-		const auto &L = doc.linedefs[*it];
+		const auto L = doc.linedefs[*it];
 
 		if (L->TwoSided())
 			return *it;
@@ -841,7 +841,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::things:
 			for (int n = 0 ; n < doc.numThings() ; n++)
 			{
-				const auto &T = doc.things[n];
+				const auto T = doc.things[n];
 
 				v2double_t tpos = T->xy();
 
@@ -853,7 +853,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::vertices:
 			for (int n = 0 ; n < doc.numVertices(); n++)
 			{
-				const auto &V = doc.vertices[n];
+				const auto V = doc.vertices[n];
 
 				v2double_t vpos = V->xy();
 
@@ -865,7 +865,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::linedefs:
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const auto &L = doc.linedefs[n];
+				const auto L = doc.linedefs[n];
 
 				/* the two ends of the line must be in the box */
 				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
@@ -883,7 +883,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const auto &L = doc.linedefs[n];
+				const auto L = doc.linedefs[n];
 
 				// Get the numbers of the sectors on both sides of the linedef
 				int s1 = doc.getRight(*L) ? doc.getRight(*L)->sector : -1;

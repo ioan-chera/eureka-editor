@@ -389,7 +389,7 @@ private:
 
 static void AdjustOfs_UpdateBBox(Instance &inst, int ld_num)
 {
-	const auto &L = inst.level.linedefs[ld_num];
+	const auto L = inst.level.linedefs[ld_num];
 
 	float lx1 = static_cast<float>(inst.level.getStart(*L).x());
 	float ly1 = static_cast<float>(inst.level.getStart(*L).y());
@@ -432,7 +432,7 @@ static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
 	if (! inst.edit.adjust_bucket)
 		return;
 
-	const auto &L = inst.level.linedefs[ld_num];
+	const auto L = inst.level.linedefs[ld_num];
 
 	// ignore invalid sides (sanity check)
 	int sd_num = (part & PART_LF_ALL) ? L->left : L->right;
@@ -899,7 +899,7 @@ static void DragThings_Update(Instance &inst)
 	}
 #endif
 
-	const auto &T = inst.level.things[inst.edit.drag_thing_num];
+	const auto T = inst.level.things[inst.edit.drag_thing_num];
 
 	float old_x = static_cast<float>(T->x());
 	float old_y = static_cast<float>(T->y());
@@ -1109,7 +1109,7 @@ int Instance::GrabSelectedThing()
 	{
 		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &T = level.things[*it];
+			const auto T = level.things[*it];
 			if (result >= 0 && T->type != result)
 			{
 				Beep("multiple thing types");
@@ -1181,7 +1181,7 @@ StringID Instance::GrabSelectedFlat()
 			return StringID(-1);
 		}
 
-		const auto &S = level.sectors[edit.highlight.num];
+		const auto S = level.sectors[edit.highlight.num];
 
 		result = SEC_GrabFlat(S.get(), edit.highlight.parts);
 	}
@@ -1189,7 +1189,7 @@ StringID Instance::GrabSelectedFlat()
 	{
 		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &S = level.sectors[*it];
+			const auto S = level.sectors[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
 			StringID tex = SEC_GrabFlat(S.get(), parts & ~1);
@@ -1327,7 +1327,7 @@ StringID Instance::GrabSelectedTexture()
 			return StringID(-1);
 		}
 
-		const auto &L = level.linedefs[edit.highlight.num];
+		const auto L = level.linedefs[edit.highlight.num];
 
 		result = LD_GrabTex(L.get(), edit.highlight.parts);
 	}
@@ -1335,7 +1335,7 @@ StringID Instance::GrabSelectedTexture()
 	{
 		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &L = level.linedefs[*it];
+			const auto L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
 			StringID tex = LD_GrabTex(L.get(), parts & ~1);
@@ -1372,7 +1372,7 @@ void Instance::StoreSelectedTexture(StringID new_tex)
 
 		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &L = level.linedefs[*it];
+			const auto L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
 			if (L->NoSided())

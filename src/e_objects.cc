@@ -100,7 +100,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		auto &V = doc.vertices[new_v];
+		auto V = doc.vertices[new_v];
 
 		V->SetRawX(inst.loaded.levelFormat, (i >= 2) ? x2 : x1);
 		V->SetRawY(inst.loaded.levelFormat, (i==1 || i==2) ? y2 : y1);
@@ -112,7 +112,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 
 		int new_ld = op.addNew(ObjType::linedefs);
 
-		auto &L = doc.linedefs[new_ld];
+		auto L = doc.linedefs[new_ld];
 
 		L->start = new_v;
 		L->end   = (i == 3) ? (new_v - 3) : new_v + 1;
@@ -139,7 +139,7 @@ void ObjectsModule::insertThing() const
 		EditOperation op(doc.basis);
 
 		new_t = op.addNew(ObjType::things);
-		auto &T = doc.things[new_t];
+		auto T = doc.things[new_t];
 
 		if(model >= 0)
 			*T = *doc.things[model];
@@ -342,7 +342,7 @@ void ObjectsModule::insertLinedef(EditOperation &op, int v1, int v2, bool no_fil
 
 	int new_ld = op.addNew(ObjType::linedefs);
 
-	auto &L = doc.linedefs[new_ld];
+	auto L = doc.linedefs[new_ld];
 
 	L->start = v1;
 	L->end   = v2;
@@ -505,7 +505,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 		{
 			new_vert = op.addNew(ObjType::vertices);
 
-			auto &V = doc.vertices[new_vert];
+			auto V = doc.vertices[new_vert];
 
 			V->SetRawXY(inst.loaded.levelFormat, newpos);
 
@@ -797,7 +797,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto &T = doc.things[*it];
+				const auto T = doc.things[*it];
 
 				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
 				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
@@ -826,7 +826,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 			// apply the Z delta first
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto & S = doc.sectors[*it];
+				const auto S = doc.sectors[*it];
 
 				op.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta.z);
 				op.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta.z);
@@ -890,7 +890,7 @@ int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 {
 	for(int i = 0; i < doc.numLinedefs(); ++i)
 	{
-		const auto &otherLine = doc.linedefs[i];
+		const auto otherLine = doc.linedefs[i];
 		if(!otherLine->TouchesVertex(vertID) || i == lineID)
 			continue;
 
@@ -917,7 +917,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 {
 	// Add a vertex there and do the split
 	int newVID = op.addNew(ObjType::vertices);
-	auto &newV = doc.vertices[newVID];
+	auto newV = doc.vertices[newVID];
 	*newV = *doc.vertices[vertID];
 
 	// Move it to the actual destination
@@ -1010,7 +1010,7 @@ void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 
 void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const
 {
-	const auto &T = doc.things[src_thing];
+	const auto T = doc.things[src_thing];
 
 	op.changeThing(dest_thing, Thing::F_TYPE,    T->type);
 	op.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
@@ -1029,7 +1029,7 @@ void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, in
 
 void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int dest_sec) const
 {
-	const auto & sector = doc.sectors[src_sec];
+	const auto sector = doc.sectors[src_sec];
 
 	op.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
 	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
@@ -1046,8 +1046,8 @@ void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int
 
 void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, int dest_line, bool do_tex) const
 {
-	const auto &L1 = doc.linedefs[src_line];
-	const auto &L2 = doc.linedefs[dest_line];
+	const auto L1 = doc.linedefs[src_line];
+	const auto L2 = doc.linedefs[dest_line];
 
 	// don't transfer certain flags
 	int flags = doc.linedefs[dest_line]->flags;
@@ -1301,7 +1301,7 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 		case ObjType::sectors:
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const auto &L = doc.linedefs[n];
+				const auto L = doc.linedefs[n];
 
 				if (! doc.touchesSector(*L, objnum))
 					continue;
@@ -1348,7 +1348,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 
 		case ObjType::linedefs:
 			{
-				const auto &L = doc.linedefs[objnum];
+				const auto L = doc.linedefs[objnum];
 
 				dragUpdateCurrentDist(ObjType::vertices, L->start, x, y, best_dist,
 									   ptr_x, ptr_y, only_grid);
@@ -1365,7 +1365,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const auto &L = doc.linedefs[n];
+				const auto L = doc.linedefs[n];
 
 				if (! doc.touchesSector(*L, objnum))
 					continue;
@@ -1565,7 +1565,7 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto &T = doc.things[*it];
+				const auto T = doc.things[*it];
 				double Tx = T->x();
 				double Ty = T->y();
 
@@ -1584,7 +1584,7 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto &V = doc.vertices[*it];
+				const auto V = doc.vertices[*it];
 				double Vx = V->x();
 				double Vy = V->y();
 
@@ -1619,7 +1619,7 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &T = doc.things[*it];
+		const auto T = doc.things[*it];
 
 		if (is_vert)
 		{
@@ -1651,7 +1651,7 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const auto &V = doc.vertices[*it];
+		const auto V = doc.vertices[*it];
 
 		if (is_vert)
 			op.changeVertex(*it, Vertex::F_Y, fix_my * 2 - V->raw_y);
@@ -1665,7 +1665,7 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
-		const auto &L = doc.linedefs[*it];
+		const auto L = doc.linedefs[*it];
 
 		int start = L->start;
 		int end   = L->end;
@@ -1736,7 +1736,7 @@ void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &T = doc.things[*it];
+		const auto T = doc.things[*it];
 
 		FFixedPoint old_x = T->raw_x;
 		FFixedPoint old_y = T->raw_y;
@@ -1806,7 +1806,7 @@ void Instance::CMD_Rotate90()
 
 			for (sel_iter_c it(verts) ; !it.done() ; it.next())
 			{
-				const auto &V = level.vertices[*it];
+				const auto V = level.vertices[*it];
 
 				FFixedPoint old_x = V->raw_x;
 				FFixedPoint old_y = V->raw_y;
@@ -1834,7 +1834,7 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &T = doc.things[*it];
+		const auto T = doc.things[*it];
 
 		double new_x = T->x();
 		double new_y = T->y();
@@ -1863,7 +1863,7 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &lis
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const auto &V = doc.vertices[*it];
+		const auto V = doc.vertices[*it];
 
 		double new_x = V->x();
 		double new_y = V->y();
@@ -1984,7 +1984,7 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto & S = doc.sectors[*it];
+		const auto S = doc.sectors[*it];
 
 		lz = std::min(lz, S->floorh);
 		hz = std::max(hz, S->ceilh);
@@ -2003,7 +2003,7 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto & S = doc.sectors[*it];
+		const auto S = doc.sectors[*it];
 
 		int new_f = mid_z + iround((S->floorh - mid_z) * scale_z);
 		int new_c = mid_z + iround((S-> ceilh - mid_z) * scale_z);
@@ -2154,7 +2154,7 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &T = doc.things[*it];
+		const auto T = doc.things[*it];
 
 		if (inst.grid.OnGrid(T->x(), T->y()))
 		{
@@ -2242,7 +2242,7 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &V = doc.vertices[*it];
+		const auto V = doc.vertices[*it];
 
 		if (inst.grid.OnGrid(V->x(), V->y()))
 		{

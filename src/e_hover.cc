@@ -79,7 +79,7 @@ public:
 		// sure the casting line is not integral (i.e. lies between two lines
 		// on the unit grid) so that we never directly hit a vertex.
 
-		const auto &L = doc.linedefs[ld];
+		const auto L = doc.linedefs[ld];
 
 		dx = doc.getEnd(*L).x() - doc.getStart(*L).x();
 		dy = doc.getEnd(*L).y() - doc.getStart(*L).y();
@@ -204,7 +204,7 @@ void fastopp_node_c::AddLine_X(int ld, int x1, int x2)
 
 void fastopp_node_c::AddLine_X(int ld)
 {
-	const auto &L = doc.linedefs[ld];
+	const auto L = doc.linedefs[ld];
 
 	// can ignore purely vertical lines
 	if (doc.isVertical(*L))
@@ -237,7 +237,7 @@ void fastopp_node_c::AddLine_Y(int ld, int y1, int y2)
 
 void fastopp_node_c::AddLine_Y(int ld)
 {
-	const auto &L = doc.linedefs[ld];
+	const auto L = doc.linedefs[ld];
 
 	// can ignore purely horizonal lines
 	if (doc.isHorizontal(*L))
@@ -457,7 +457,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 	if(!out.valid())
 		return Objid();
 
-	const auto &L = doc.linedefs[out.num];
+	const auto L = doc.linedefs[out.num];
 
 	v2double_t v1 = doc.getStart(*L).xy();
 	v2double_t v2 = doc.getEnd(*L).xy();
@@ -466,7 +466,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 
 	if(grid.ratio > 0 && edit.action == EditorAction::drawLine)
 	{
-		const auto &V = doc.vertices[edit.drawLine.from.num];
+		const auto V = doc.vertices[edit.drawLine.from.num];
 
 		// convert ratio into a vector, use it to intersect the linedef
 		v2double_t ppos1 = V->xy();
@@ -697,7 +697,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 		if(v == possible_v1 || v == possible_v2)
 			continue;
 
-		const auto &VC = doc.vertices[v];
+		const auto VC = doc.vertices[v];
 
 		// ignore vertices at same coordinates as v1 or v2
 		if(VC->Matches(FFixedPoint(p1.x), FFixedPoint(p1.y)) ||
@@ -765,7 +765,7 @@ static Objid getNearestThing(const Document &doc, const ConfigData &config,
 
 	for(int n = 0; n < doc.numThings(); n++)
 	{
-		const auto &thing = doc.things[n];
+		const auto thing = doc.things[n];
 		v2double_t tpos = thing->xy();
 
 		// filter out things that are outside the search bbox.
@@ -1006,7 +1006,7 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Gr
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
-		const auto &L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		if(L->start == ignore_vert || L->end == ignore_vert)
 			continue;
@@ -1072,7 +1072,7 @@ void Hover::findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, i
 
 	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
 	{
-		const auto &L = doc.linedefs[ld];
+		const auto L = doc.linedefs[ld];
 
 		v2double_t lpos1 = doc.getStart(*L).xy();
 		v2double_t lpos2 = doc.getEnd(*L).xy();
@@ -1188,7 +1188,7 @@ void crossing_state_c::SplitAllLines(EditOperation &op)
 		{
 			points[i].vert = op.addNew(ObjType::vertices);
 
-			auto &V = inst.level.vertices[points[i].vert];
+			auto V = inst.level.vertices[points[i].vert];
 
 			V->SetRawXY(inst.loaded.levelFormat, points[i].pos);
 

@@ -1148,7 +1148,7 @@ void node_t::SetPartition(LevelData &lev_data, const seg_t *part)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
-	const auto &part_L = lev_data.GetDoc().linedefs[part->linedef];
+	const auto part_L = lev_data.GetDoc().linedefs[part->linedef];
 
 	if (part->side == 0)  /* right side */
 	{
@@ -1356,7 +1356,7 @@ seg_t *LevelData::CreateSegs()
 
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
-		const auto &line = doc.linedefs[i];
+		const auto line = doc.linedefs[i];
 
 		seg_t *left  = NULL;
 		seg_t *right = NULL;

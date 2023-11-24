@@ -295,7 +295,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 {
 	bool opposite = (e_state & FL_SHIFT);
 
-	const auto &L = inst.level.linedefs[ld];
+	const auto L = inst.level.linedefs[ld];
 
 	// handle the selected texture boxes
 	if (parts != 0)
@@ -388,7 +388,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		const auto &S = inst.level.sidedefs[sd1];
+		const auto S = inst.level.sidedefs[sd1];
 
 		// change BOTH upper and lower when they are the same
 		// (which is great for windows).
@@ -522,7 +522,7 @@ void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 
 		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &L = inst.level.linedefs[*it];
+			const auto L = inst.level.linedefs[*it];
 
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
@@ -644,7 +644,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const auto &L = box->inst.level.linedefs[*it];
+			const auto L = box->inst.level.linedefs[*it];
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
@@ -733,7 +733,7 @@ void UI_LineBox::UpdateField(int field)
 
 		if (inst.level.isLinedef(obj))
 		{
-			const auto &L = inst.level.linedefs[obj];
+			const auto L = inst.level.linedefs[obj];
 
 			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
 
@@ -767,7 +767,7 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (inst.level.isLinedef(obj))
 		{
-			const auto &L = inst.level.linedefs[obj];
+			const auto L = inst.level.linedefs[obj];
 
 			int right_mask = SolidMask(L.get(), Side::right);
 			int  left_mask = SolidMask(L.get(), Side::left);

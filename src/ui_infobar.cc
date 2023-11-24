@@ -619,7 +619,7 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 	if (hl.valid() && hl.parts >= 2)
 	{
-		const auto &L = inst.level.linedefs[hl.num];
+		const auto L = inst.level.linedefs[hl.num];
 
 		int x_offset = 0;
 		int y_offset = 0;
@@ -651,7 +651,7 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	if (! inst.edit.drawLine.from.valid())
 		return;
 
-	const auto &V = inst.level.vertices[inst.edit.drawLine.from.num];
+	const auto V = inst.level.vertices[inst.edit.drawLine.from.num];
 
 	v2double_t dv = inst.edit.drawLine.to - V->xy();
 

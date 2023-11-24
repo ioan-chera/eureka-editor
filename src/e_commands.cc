@@ -551,7 +551,7 @@ void Instance::DoBeginDrag()
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
 			{
-				const auto &T = level.things[edit.drag_thing_num];
+				const auto T = level.things[edit.drag_thing_num];
 
 				Objid sec = hover::getNearestSector(level, T->xy());
 
@@ -719,7 +719,7 @@ void Instance::CMD_ACT_Click()
 	{
 		if (edit.highlight.type == ObjType::things)
 		{
-			const auto &T = level.things[edit.highlight.num];
+			const auto T = level.things[edit.highlight.num];
 			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->xy()));
 		}
 		else
@@ -745,7 +745,7 @@ void Instance::CMD_ACT_Click()
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
-		const auto &L = level.linedefs[split_ld];
+		const auto L = level.linedefs[split_ld];
 
 		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 		int new_vert;
@@ -755,7 +755,7 @@ void Instance::CMD_ACT_Click()
 
 			new_vert = op.addNew(ObjType::vertices);
 
-			auto &V = level.vertices[new_vert];
+			auto V = level.vertices[new_vert];
 
 			V->SetRawXY(loaded.levelFormat, edit.split);
 

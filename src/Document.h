@@ -43,11 +43,11 @@ private:
 	Instance &inst;	// make this private because we don't want to access it from Document
 public:
 
-	std::vector<std::unique_ptr<Thing>> things;
-	std::vector<std::unique_ptr<Vertex>> vertices;
-	std::vector<std::unique_ptr<Sector>> sectors;
-	std::vector<std::unique_ptr<SideDef>> sidedefs;
-	std::vector<std::unique_ptr<LineDef>> linedefs;
+	std::vector<std::shared_ptr<Thing>> things;
+	std::vector<std::shared_ptr<Vertex>> vertices;
+	std::vector<std::shared_ptr<Sector>> sectors;
+	std::vector<std::shared_ptr<SideDef>> sidedefs;
+	std::vector<std::shared_ptr<LineDef>> linedefs;
 
 	std::vector<byte> headerData;
 	std::vector<byte> behaviorData;
