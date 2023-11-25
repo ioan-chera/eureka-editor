@@ -25,6 +25,10 @@
 #include <stdarg.h>
 #include <stdexcept>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #define BugError  ThrowLogicException
 
 //
@@ -50,5 +54,10 @@ struct ReportedResult
 
 [[noreturn]] void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 [[noreturn]] void ThrowLogicException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
+
+#ifdef _WIN32
+SString GetShellExecuteErrorMessage(HINSTANCE result);
+SString GetWindowsErrorMessage(DWORD error);
+#endif
 
 #endif /* Errors_hpp */

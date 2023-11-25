@@ -298,10 +298,51 @@ static SString CalcWarpString(const Instance &inst)
 	return "";
 }
 
-
-static void AppendWadName(SString &str, const SString &name, const SString &parm = NULL)
+static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 {
-	SString abs_name = GetAbsolutePath(name.get()).u8string();
+	SYS_ASSERT(!inst.loaded.levelName.empty());
+	// FIXME : EDGE allows a full name: -warp MAP03
+	//         Eternity too.
+	//         ZDOOM too, but different syntax: +map MAP03
+
+	// most common syntax is "MAP##" or "MAP###"
+	if (inst.loaded.levelName.length() >= 4 && inst.loaded.levelName.noCaseStartsWith("MAP") && isdigit(inst.loaded.levelName[3]))
+	{
+		long number = strtol(inst.loaded.levelName.c_str() + 3, nullptr, 10);
+		args.push_back("-warp");
+		args.push_back(std::to_string(number));
+		return;
+	}
+
+	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
+	// a pair of numbers after -warp
+	if (inst.loaded.levelName.length() >= 4 && !isdigit(inst.loaded.levelName[0]) && isdigit(inst.loaded.levelName[1]) &&
+		!isdigit(inst.loaded.levelName[2]) && isdigit(inst.loaded.levelName[3]))
+	{
+		args.push_back("-warp");
+		args.push_back(SString::printf("%c", inst.loaded.levelName[1]));
+		args.push_back(inst.loaded.levelName.c_str() + 3);
+		return;
+	}
+
+	// map name is non-standard, find the first digit group and hope
+	// for the best...
+
+	size_t digitPos = inst.loaded.levelName.findDigit();
+	if (digitPos != std::string::npos)
+	{
+		args.push_back("-warp");
+		args.push_back(inst.loaded.levelName.c_str() + digitPos);
+		return;
+	}
+
+	// no digits at all, oh shit!
+}
+
+
+static void AppendWadName(SString &str, const fs::path &name, const SString &parm = NULL)
+{
+	SString abs_name = GetAbsolutePath(name).u8string();
 
 	if (parm.good())
 	{
@@ -314,7 +355,7 @@ static void AppendWadName(SString &str, const SString &name, const SString &parm
 }
 
 
-static SString GrabWadNames(const Instance &inst, const fs::path *info)
+static SString GrabWadNames(const Instance &inst)
 {
 	SString wad_names;
 
@@ -332,12 +373,12 @@ static SString GrabWadNames(const Instance &inst, const fs::path *info)
 
 	// always specify the iwad
 	if(inst.wad.master.gameWad())
-		AppendWadName(wad_names, inst.wad.master.gameWad()->PathName().u8string(), "-iwad");
+		AppendWadName(wad_names, inst.wad.master.gameWad()->PathName(), "-iwad");
 
 	// add any resource wads
 	for (const std::shared_ptr<Wad_file> &wad : inst.wad.master.resourceWads())
 	{
-		AppendWadName(wad_names, wad->PathName().u8string(),
+		AppendWadName(wad_names, wad->PathName(),
 					  (use_merge == 1) ? "-merge" : (use_merge == 0 && !has_file) ? "-file" : NULL);
 
 		if (use_merge)
@@ -348,11 +389,95 @@ static SString GrabWadNames(const Instance &inst, const fs::path *info)
 
 	// the current PWAD, if exists, must be last
 	if (inst.wad.master.editWad())
-		AppendWadName(wad_names, inst.wad.master.editWad()->PathName().u8string(), !has_file ? "-file" : NULL);
+		AppendWadName(wad_names, inst.wad.master.editWad()->PathName(), !has_file ? "-file" : NULL);
 
 	return wad_names;
 }
 
+static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
+{
+	bool has_file = false;
+	int use_merge = 0;
+
+	// see if we should use the "-merge" parameter, which is
+	// required for Chocolate-Doom and derivates like Crispy Doom.
+	// TODO : is there a better way to do this?
+	if (inst.loaded.portName.noCaseEqual("vanilla"))
+	{
+		use_merge = 1;
+	}
+
+	// always specify the iwad
+	if (inst.wad.master.gameWad())
+	{
+		args.push_back("-iwad");
+		args.push_back(inst.wad.master.gameWad()->PathName().u8string());
+	}
+
+	// add any resource wads
+	for (const std::shared_ptr<Wad_file>& wad : inst.wad.master.resourceWads())
+	{
+		if (use_merge == 1)
+			args.push_back("-merge");
+		else if (!use_merge && !has_file)
+			args.push_back("-file");
+		args.push_back(wad->PathName().u8string());
+
+		if (use_merge)
+			use_merge++;
+		else
+			has_file = true;
+	}
+
+	// the current PWAD, if exists, must be last
+	if (inst.wad.master.editWad())
+	{
+		if (!has_file)
+			args.push_back("-file");
+		args.push_back(inst.wad.master.editWad()->PathName().u8string());
+	}
+}
+
+static SString buildArgString(const std::vector<SString>& args)
+{
+	SString result;
+	for (const SString& arg : args)
+	{
+		if (!result.empty())
+			result += " ";
+		result += arg.spaceEscape();
+	}
+	return result;
+}
+
+static void logArgs(const SString& args)
+{
+	gLog.printf("Testing map using the following command:\n");
+	gLog.printf("--> %s\n", args.c_str());
+}
+
+#ifdef _WIN32
+// On Windows the process is started as if user ran it individually
+static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
+{
+	std::vector<SString> args;
+	GrabWadNamesArgs(inst, args);
+	CalcWarpString(inst, args);
+	SString argString = buildArgString(args);
+	logArgs(argString);
+	std::wstring argsWide = UTF8ToWide(argString.c_str());
+
+	HINSTANCE result = ShellExecuteW(nullptr, L"open", portPath.wstring().c_str(), argsWide.c_str(),
+		FilenameGetPath(portPath).wstring().c_str(), SW_SHOW);
+	if ((INT_PTR)result <= 32)
+	{
+		DWORD error = GetLastError();
+		ThrowException("Failed starting %s: error %s\n\n%s", portPath.u8string().c_str(),
+			GetShellExecuteErrorMessage(result).c_str(), GetWindowsErrorMessage(error).c_str());
+	}
+	inst.Status_Set("Started the game");
+}
+#endif
 
 void Instance::CMD_TestMap()
 {
@@ -391,26 +516,26 @@ void Instance::CMD_TestMap()
 			return;
 		}
 
+		Status_Set("TESTING MAP");
+		main_win->redraw();
+		Fl::wait(0.1);
+		Fl::wait(0.1);
+
+#ifdef _WIN32
+		testMapOnWindows(*this, *info);
+#else
 		// change working directory to be same as the executable
 		DirChangeContext dirChangeContext(FilenameGetPath(*info));
 
 		// build the command string
 
 		SString cmd_buffer = SString::printf("%s %s %s",
-			CalcEXEName(info).c_str(), GrabWadNames(*this, info).c_str(),
+			CalcEXEName(info).c_str(), GrabWadNames(*this).c_str(),
 			CalcWarpString(*this).c_str());
 
-		gLog.printf("Testing map using the following command:\n");
-		gLog.printf("--> %s\n", cmd_buffer.c_str());
+		logArgs(cmd_buffer);
 
-		Status_Set("TESTING MAP");
-
-		main_win->redraw();
-		Fl::wait(0.1);
-		Fl::wait(0.1);
-
-
-		/* Go baby! */
+		// Go baby!
 
 		int status = system(cmd_buffer.c_str());
 
@@ -420,13 +545,39 @@ void Instance::CMD_TestMap()
 			Status_Set("Result code: %d\n", status);
 
 		gLog.printf("--> result code: %d\n", status);
-
+#endif
+		
 		main_win->redraw();
 		Fl::wait(0.1);
 		Fl::wait(0.1);
+		
+		/*
+		// change working directory to be same as the executable
+		DirChangeContext dirChangeContext(FilenameGetPath(*info));
+
+		// build the command string
+
+		SString cmd_buffer = SString::printf("%s %s %s",
+			CalcEXEName(info).c_str(), GrabWadNames(*this).c_str(),
+			CalcWarpString(*this).c_str());
+
+		logArgs(cmd_buffer);
+
+		// Go baby!
+
+		int status = system(cmd_buffer.c_str());
+
+		if (status == 0)
+			Status_Set("Result: OK");
+		else
+			Status_Set("Result code: %d\n", status);
+
+		gLog.printf("--> result code: %d\n", status);
+		*/
 	}
 	catch(const std::runtime_error &e)
 	{
+		Status_Set("Failed testing map");
 		DLG_ShowError(false, "Could not start map for testing: %s", e.what());
 	}
 	
