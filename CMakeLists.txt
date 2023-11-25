@@ -43,6 +43,8 @@ foreach(dir ${resource_common_dirs})
 endforeach()
 
 if(WIN32)
+    configure_file(src/main.rc.in src/main.rc)
+    target_sources(eureka PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/main.rc)
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT eureka)
     list(TRANSFORM resource_common_cfgs PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 
