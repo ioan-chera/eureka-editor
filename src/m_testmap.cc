@@ -298,6 +298,7 @@ static SString CalcWarpString(const Instance &inst)
 	return "";
 }
 
+#ifdef _WIN32
 static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 {
 	SYS_ASSERT(!inst.loaded.levelName.empty());
@@ -338,7 +339,7 @@ static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 
 	// no digits at all, oh shit!
 }
-
+#endif
 
 static void AppendWadName(SString &str, const fs::path &name, const SString &parm = NULL)
 {
@@ -394,6 +395,7 @@ static SString GrabWadNames(const Instance &inst)
 	return wad_names;
 }
 
+#ifdef _WIN32
 static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 {
 	bool has_file = false;
@@ -449,6 +451,7 @@ static SString buildArgString(const std::vector<SString>& args)
 	}
 	return result;
 }
+#endif
 
 static void logArgs(const SString& args)
 {
