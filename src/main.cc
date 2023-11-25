@@ -650,6 +650,12 @@ static void Main_OpenWindow(Instance &inst)
 	    const_cast<char**>(logo_E4_32x32_xpm), &pm, &mask, NULL);
 	inst.main_win->icon((char *)pm);
 #endif
+#ifdef _WIN32
+#include "../misc/eureka.xpm"
+	Fl_Pixmap pixmap(logo_E4_32x32_xpm);
+	Fl_RGB_Image image(&pixmap);
+	inst.main_win->icon(&image);
+#endif
 
 	// show window (pass some dummy arguments)
 	{
