@@ -235,7 +235,7 @@ void RecentKnowledge::parseMiscConfig(std::istream &is)
 	while(M_ReadTextLine(line, is))
 	{
 		SString keyword;
-		TokenWordParse parse(line);
+		TokenWordParse parse(line, true);
 		if(!parse.getNext(keyword))
 			continue;	// blank line
 		if(keyword == "recent")
@@ -665,9 +665,11 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 
 	SString line;
 
+	tl::optional<SString> testingCommandLine;
+
 	while (stream.readLine(line))
 	{
-		TokenWordParse parse(line);
+		TokenWordParse parse(line, true);
 		SString key, value;
 		if(!parse.getNext(key))
 			continue;	// empty line
@@ -750,6 +752,10 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", value.c_str());
 			}
 		}
+		else if (key == "testing_command_line")
+		{
+			testingCommandLine = value;
+		}
 		else
 		{
 			gLog.printf("WARNING: unknown keyword '%s' in %s lump\n", key.c_str(), EUREKA_LUMP);
@@ -778,6 +784,9 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 			portName = new_port;
 	}
 
+	if (testingCommandLine.has_value())
+		this->testingCommandLine = *testingCommandLine;
+
 	if (! keep_cmd_line_args)
 		resourceList.clear();
 
@@ -805,6 +814,8 @@ void LoadingData::writeEurekaLump(Wad_file &wad) const
 	if (!gameName.empty())
 		lump.Printf("game %s\n", gameName.c_str());
 
+	lump.Printf("testing_command_line %s\n", testingCommandLine.spaceEscape().c_str());
+
 	if (!portName.empty())
 		lump.Printf("port %s\n", portName.c_str());
 
@@ -815,7 +826,7 @@ void LoadingData::writeEurekaLump(Wad_file &wad) const
 		fs::path absoluteResourcePath = fs::absolute(resource);
 		fs::path relative = fs::proximate(absoluteResourcePath, pwadPath);
 
-		lump.Printf("resource %s\n", relative.generic_u8string().c_str());
+		lump.Printf("resource %s\n", escape(relative).c_str());
 	}
 }
 

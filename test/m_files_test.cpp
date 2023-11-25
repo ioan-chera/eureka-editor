@@ -772,7 +772,7 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	std::map<SString, fs::path> readPortPaths;
 	while(M_ReadTextLine(line, is))
 	{
-		TokenWordParse parse(line);
+		TokenWordParse parse(line, true);
 		SString keyword;
 		if(!parse.getNext(keyword))
 			continue;

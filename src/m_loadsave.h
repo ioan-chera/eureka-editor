@@ -51,6 +51,7 @@ struct LoadingData
 	SString udmfNamespace;	// for UDMF, the current namespace
 	std::vector<fs::path> resourceList;
 	MapFormat levelFormat = {};	// format of current map
+	SString testingCommandLine;	// command-line for testing map (stored in Eureka lump due to possible port and mod-specific features)
 };
 
 

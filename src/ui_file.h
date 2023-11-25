@@ -200,10 +200,10 @@ private:
 	Fl_Button* mResourceButtons[RES_NUM] = {};
 	Fl_Button* mClearButtons[RES_NUM] = {};
 
-	const Instance &inst;
+	Instance &inst;
 
 public:
-	UI_ProjectSetup(const Instance &inst, bool new_project = false, bool is_startup = false);
+	UI_ProjectSetup(Instance &inst, bool new_project = false, bool is_startup = false);
 
 	// returns true if something changed
 	tl::optional<Result> Run();

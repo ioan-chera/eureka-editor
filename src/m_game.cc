@@ -475,7 +475,7 @@ void parser_state_c::tokenize()
 	// break the line into whitespace-separated tokens.
 	// whitespace can be enclosed in double quotes.
 	
-	TokenWordParse parse(readstring);
+	TokenWordParse parse(readstring, true);
 	SString word;
 	args.clear();
 	argc = 0;

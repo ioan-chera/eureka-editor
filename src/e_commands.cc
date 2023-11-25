@@ -1631,6 +1631,10 @@ static editor_command_t  command_table[] =
 		&Instance::CMD_TestMap
 	},
 
+	{	"ChangeTestSettings", "Tools",
+		&Instance::CMD_ChangeTestSettings
+	},
+
 	{	"RecalcSectors",  "Tools",
 		&Instance::CMD_RecalcSectors
 	},

@@ -387,6 +387,11 @@ static void tools_do_test_map(Fl_Widget *w, void * data)
 	static_cast<Instance *>(data)->ExecuteCommand("TestMap");
 }
 
+static void tools_do_change_test_settings(Fl_Widget* w, void* data)
+{
+	static_cast<Instance *>(data)->ExecuteCommand("ChangeTestSettings");
+}
+
 static void tools_do_lump_editor(Fl_Widget *w, void * data)
 {
 	static_cast<Instance *>(data)->ExecuteCommand("EditLump");
@@ -500,6 +505,7 @@ static std::unordered_map<void(*)(Fl_Widget *, void *), MenuCommand> s_menu_comm
 	{tools_do_preferences, {"PreferenceDialog"} },
 	{tools_do_build_nodes, {"BuildAllNodes"} },
 	{tools_do_test_map, {"TestMap"} },
+	{tools_do_change_test_settings, {"ChangeTestSettings"}},
 	{tools_do_lump_editor, {"EditLump"} },
 	{tools_do_add_behavior, {"AddBehavior"} },
 	{tools_do_view_logs, {"LogViewer"} },
@@ -663,6 +669,10 @@ static Fl_Menu_Item menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
+		{ "&Change Test Settings...",       0, FCAL tools_do_change_test_settings },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER | FL_MENU_INACTIVE },
+
 		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes },
 		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
 		{ "&Add BEHAVIOR Lump  ", 0, FCAL tools_do_add_behavior },

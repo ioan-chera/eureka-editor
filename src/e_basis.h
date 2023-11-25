@@ -87,7 +87,7 @@ public:
 	bool redo();
 	void clear();
 	
-	Basis &operator = (Basis &&other)
+	Basis &operator = (Basis &&other) noexcept
 	{
 		mCurrentGroup = std::move(other.mCurrentGroup);
 		mUndoHistory = std::move(other.mUndoHistory);

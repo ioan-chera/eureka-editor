@@ -154,6 +154,7 @@ public:
 	void CMD_SetVar();
 	void CMD_Shrink();
 	void CMD_TestMap();
+	void CMD_ChangeTestSettings();
 	void CMD_TH_SpinThings();
 	void CMD_ToggleVar();
 	void CMD_Undo();
@@ -291,7 +292,7 @@ public:
 	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
 
 	// M_TESTMAP
-	bool M_PortSetupDialog(const SString& port, const SString& game) const;
+	bool M_PortSetupDialog(const SString& port, const SString& game, const tl::optional<SString> &commandLine);
 
 	// M_UDMF
 	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Document &doc, LoadingData &loading, BadCount &bad) const;

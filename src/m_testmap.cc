@@ -25,6 +25,7 @@
 
 #include "m_files.h"
 #include "m_loadsave.h"
+#include "m_parse.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
@@ -77,17 +78,38 @@ static SString QueryName(const SString &port, const SString &cgame)
 class UI_PortPathDialog : public UI_Escapable_Window
 {
 public:
-	Fl_Output *exe_display;
+	static const int PADDING = 20;
+	static const int LABEL_HEIGHT = 30;
+	static const int INTER_LABEL_SPACE = 5;
+	static const int LABEL_TEXT_BOX_SPACE = 15;
+	static const int TEXT_BOX_LEFT = 118;
+	static const int TEXT_BOX_HEIGHT = 26;
+	static const int TEXT_BOX_BUTTON_SPACE = 22;
+	static const int TEXT_BOX_BUTTON_WIDTH = 60;
+	static const int PADDING_BEFORE_BOTTOM = 55;
+	static const int BOTTOM_BAR_HEIGHT = 70;
+	static const int BOTTOM_BAR_OUTSET = 10;
+	static const int BOTTOM_BUTTON_WIDTH = 95;
+	static const int BOTTOM_BUTTON_HEIGHT = 30;
+	static const int BOTTOM_PADDING = 15;
+	static const int BOTTOM_RIGHT_PADDING = 25;
+	static const int BOTTOM_BUTTON_SPACING = 45;
 
+	Fl_Output *exe_display;
+	
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;
 
 	// the chosen EXE name, or NULL if cancelled
 	fs::path exe_name;
 
-	bool want_close;
+	bool want_close = false;
 
 	const Instance& inst;
+
+private:
+	Fl_Input* other_args;
+	SString command_line;
 
 public:
 	void SetEXE(const fs::path &newbie)
@@ -101,6 +123,22 @@ public:
 			ok_but->activate();
 		else
 			ok_but->deactivate();
+	}
+
+	void SetCommandLine(const SString& command_line)
+	{
+		this->command_line = command_line;
+		other_args->value(command_line.c_str());
+	}
+
+	void HideCommandLine()
+	{
+		other_args->deactivate();
+	}
+
+	const char* getCommandLine() const
+	{
+		return other_args->value();
 	}
 
 	static void ok_callback(Fl_Widget *w, void *data)
@@ -154,38 +192,44 @@ public:
 	}
 
 public:
+
+
+
 	UI_PortPathDialog(const SString &port_name, const Instance &inst) :
-		UI_Escapable_Window(560, 250, "Port Settings"),
-		want_close(false), inst(inst)
+		UI_Escapable_Window(580, PADDING + LABEL_HEIGHT * 2 + INTER_LABEL_SPACE + 2 * (LABEL_TEXT_BOX_SPACE + TEXT_BOX_HEIGHT) + PADDING_BEFORE_BOTTOM + BOTTOM_BAR_HEIGHT, "Port Settings"),
+		inst(inst)
 	{
+
+
 		char message_buf[256];
 
 		snprintf(message_buf, sizeof(message_buf), "Setting up location of the executable (EXE) for %s.", port_name.c_str());
 
-		Fl_Box *header = new Fl_Box(FL_NO_BOX, 20, 20, w() - 40, 30, "");
+		Fl_Box *header = new Fl_Box(FL_NO_BOX, PADDING, PADDING, w() - 2 * PADDING, LABEL_HEIGHT, "");
 		header->copy_label(message_buf);
 		header->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
-		header = new Fl_Box(FL_NO_BOX, 20, 55, w() - 40, 30,
+		header = new Fl_Box(FL_NO_BOX, PADDING, header->y() + header->h() + INTER_LABEL_SPACE, w() - 2 * PADDING, LABEL_HEIGHT,
 		           "This is only needed for the Test Map command.");
 		header->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
 
-		exe_display = new Fl_Output(98, 100, w()-200, 26, "Exe path: ");
+		exe_display = new Fl_Output(TEXT_BOX_LEFT, header->y() + header->h() + LABEL_TEXT_BOX_SPACE, w() - TEXT_BOX_LEFT - PADDING - TEXT_BOX_BUTTON_WIDTH - TEXT_BOX_BUTTON_SPACE, TEXT_BOX_HEIGHT, "Exe path: ");
+		other_args = new Fl_Input(TEXT_BOX_LEFT, exe_display->y() + exe_display->h() + LABEL_TEXT_BOX_SPACE, w() - TEXT_BOX_LEFT - PADDING, TEXT_BOX_HEIGHT, "Command line: ");
 
-		Fl_Button *find_but = new Fl_Button(w()-80, 100, 60, 26, "Find");
+		Fl_Button *find_but = new Fl_Button(w()-TEXT_BOX_BUTTON_WIDTH-PADDING, exe_display->y(), TEXT_BOX_BUTTON_WIDTH, TEXT_BOX_HEIGHT, "Find");
 		find_but->callback((Fl_Callback*)find_callback, this);
 
 		/* bottom buttons */
 
-		Fl_Group * grp = new Fl_Group(0, h() - 60, w(), 70);
+		Fl_Group * grp = new Fl_Group(0, h() - BOTTOM_BAR_HEIGHT + BOTTOM_BAR_OUTSET, w(), BOTTOM_BAR_HEIGHT);
 		grp->box(FL_FLAT_BOX);
 		grp->color(WINDOW_BG, WINDOW_BG);
 		{
-			cancel_but = new Fl_Button(w() - 260, h() - 45, 95, 30, "Cancel");
+			cancel_but = new Fl_Button(w() - BOTTOM_RIGHT_PADDING - BOTTOM_BUTTON_WIDTH * 2 - BOTTOM_BUTTON_SPACING, h() - BOTTOM_BUTTON_HEIGHT - BOTTOM_PADDING, BOTTOM_BUTTON_WIDTH, BOTTOM_BUTTON_HEIGHT, "Cancel");
 			cancel_but->callback(close_callback, this);
 
-			ok_but = new Fl_Button(w() - 120, h() - 45, 95, 30, "OK");
+			ok_but = new Fl_Button(w() - BOTTOM_BUTTON_WIDTH - BOTTOM_RIGHT_PADDING, h() - BOTTOM_BUTTON_HEIGHT - BOTTOM_PADDING, BOTTOM_BUTTON_WIDTH, BOTTOM_BUTTON_HEIGHT, "OK");
 			ok_but->labelfont(FL_HELVETICA_BOLD);
 			ok_but->callback(ok_callback, this);
 			ok_but->shortcut(FL_Enter);
@@ -217,37 +261,44 @@ public:
 };
 
 
-bool Instance::M_PortSetupDialog(const SString &port, const SString &game) const
+bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const tl::optional<SString>& commandLine)
 {
 	SString name_buf;
 
 	if (port.noCaseEqual("vanilla"))
-		name_buf = "Vanilla " + game.asTitle() + '\n';
+		name_buf = "vanilla " + game.asTitle();
 	else if (port.noCaseEqual("mbf"))	// temp hack for aesthetics
 		name_buf = "MBF";
 	else
 		name_buf = port.asTitle();
 
-	UI_PortPathDialog *dialog = new UI_PortPathDialog(name_buf, *this);
+	UI_PortPathDialog dialog(name_buf, *this);
 
 	// populate the EXE name from existing info, if exists
 	const fs::path *info = global::recent.queryPortPath(QueryName(port, game));
 
 	if (info && !info->empty())
-		dialog->SetEXE(*info);
+		dialog.SetEXE(*info);
 
-	bool ok = dialog->Run();
+	if (commandLine)
+		dialog.SetCommandLine(*commandLine);
+	else
+		dialog.HideCommandLine();
+
+	bool ok = dialog.Run();
 
 	if (ok)
 	{
 		// persist the new port settings
 		global::recent.setPortPath(QueryName(port, game),
-								   GetAbsolutePath(dialog->exe_name));
+								   GetAbsolutePath(dialog.exe_name));
 
 		global::recent.save(global::home_dir);
+
+		if (commandLine)
+			loaded.testingCommandLine = dialog.getCommandLine();
 	}
 
-	delete dialog;
 	return ok;
 }
 
@@ -466,7 +517,8 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
 	CalcWarpString(inst, args);
-	SString argString = buildArgString(args);
+
+	SString argString = inst.loaded.testingCommandLine + " " + buildArgString(args);
 	logArgs(argString);
 	std::wstring argsWide = UTF8ToWide(argString.c_str());
 
@@ -481,6 +533,18 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 	inst.Status_Set("Started the game");
 }
 #endif
+
+void Instance::CMD_ChangeTestSettings()
+{
+	try
+	{
+		M_PortSetupDialog(loaded.portName, loaded.gameName, loaded.testingCommandLine);
+	}
+	catch (const std::runtime_error& e)
+	{
+		Beep("Failed: %s\n", e.what());
+	}
+}
 
 void Instance::CMD_TestMap()
 {
@@ -506,7 +570,7 @@ void Instance::CMD_TestMap()
 
 		if (!(info && M_IsPortPathValid(*info)))
 		{
-			if (!M_PortSetupDialog(loaded.portName, loaded.gameName))
+			if (!M_PortSetupDialog(loaded.portName, loaded.gameName, loaded.testingCommandLine))
 				return;
 
 			info = global::recent.queryPortPath(QueryName(loaded.portName, loaded.gameName));
@@ -532,8 +596,8 @@ void Instance::CMD_TestMap()
 
 		// build the command string
 
-		SString cmd_buffer = SString::printf("%s %s %s",
-			CalcEXEName(info).c_str(), GrabWadNames(*this).c_str(),
+		SString cmd_buffer = SString::printf("%s %s %s %s",
+			CalcEXEName(info).c_str(), loaded.testingCommandLine.c_str(), GrabWadNames(*this).c_str(),
 			CalcWarpString(*this).c_str());
 
 		logArgs(cmd_buffer);

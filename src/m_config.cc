@@ -764,7 +764,7 @@ const opt_desc_t options[] =
 static int parse_config_line_from_file(const SString &line, const fs::path &basename, int lnum,
 									   const opt_desc_t *options)
 {
-	TokenWordParse parse(line);
+	TokenWordParse parse(line, true);
 	SString key;
 	if(!parse.getNext(key))	// empty line
 		return 0;
@@ -1292,7 +1292,7 @@ bool Instance::M_LoadUserState()
 
 	while (file.readLine(line))
 	{
-		TokenWordParse parse(line);
+		TokenWordParse parse(line, true);
 		SString word;
 		std::vector<SString> tokens;
 		while (parse.getNext(word))
