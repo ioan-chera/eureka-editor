@@ -151,15 +151,6 @@ line 182 m "SR BOOM: Stop Moving Floor" :tag
 line 211 m "SR BOOM: Floor Toggle"  :tag
 line 212 m "WR BOOM: Floor Toggle"  :tag
 
-line 209 t "S1 BOOM: Teleport /keepdir" :tag
-line 174 t "S1 BOOM: Teleport"          :tag
-line 210 t "SR BOOM: Teleport /keepdir" :tag
-line 195 t "SR BOOM: Teleport"          :tag
-line 207 t "W1 BOOM: Teleport /keepdir" :tag
-line 243 t "W1 BOOM: Teleport Line" :line_id
-line 208 t "WR BOOM: Teleport /keepdir" :tag
-line 244 t "WR BOOM: Teleport Line" :line_id
-
 line 213 l "-- BOOM: Transfer floor light"  :tag
 line 261 l "-- BOOM: Transfer ceil light"   :tag
 
@@ -205,14 +196,24 @@ line 257 s "WR BOOM: Stair Raise 16"    :tag
 line 258 s "SR BOOM: Stair Raise 8" :tag
 line 259 s "SR BOOM: Stair Raise 16"    :tag
 
-line 262 t "W1 BOOM: Teleport Line /r"  :line_id
-line 263 t "WR BOOM: Teleport Line /r"  :line_id
-line 264 t "W1 BOOM: Teleport Line /mon/r"  :line_id
-line 265 t "WR BOOM: Teleport Line /mon/r"  :line_id
-line 266 t "W1 BOOM: Teleport Line /mon"    :line_id
-line 267 t "WR BOOM: Teleport Line /mon"    :line_id
-line 268 t "W1 BOOM: Teleport /mon" :tag
-line 269 t "WR BOOM: Teleport /mon" :tag
+line 174 t "S1 BOOM: Teleport"  :tag
+line 195 t "SR BOOM: Teleport"  :tag
+line 268 t "W1 BOOM: Teleport /mon /silent" :tag
+line 269 t "WR BOOM: Teleport /mon /silent" :tag
+
+line 207 t "W1 BOOM: Teleport /silent /keepdir" :tag
+line 208 t "WR BOOM: Teleport /silent /keepdir" :tag
+line 209 t "S1 BOOM: Teleport /silent /keepdir" :tag
+line 210 t "SR BOOM: Teleport /silent /keepdir" :tag
+
+line 243 t "W1 BOOM: Teleport Line /silent /keepdir" :line_id
+line 244 t "WR BOOM: Teleport Line /silent /keepdir" :line_id
+line 262 t "W1 BOOM: Teleport Line /rev /silent /keepdir"  :line_id
+line 263 t "WR BOOM: Teleport Line /rev /silent /keepdir"  :line_id
+line 264 t "W1 BOOM: Teleport Line /rev /mon /silent /keepdir"  :line_id
+line 265 t "WR BOOM: Teleport Line /rev /mon /silent /keepdir"  :line_id
+line 266 t "W1 BOOM: Teleport Line /mon /silent /keepdir"  :line_id
+line 267 t "WR BOOM: Teleport Line /mon /silent /keepdir"  :line_id
 
 
 #---- GENERALIZED LINETYPES ----------
