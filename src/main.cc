@@ -70,6 +70,10 @@
 // IOANCH: be able to call OSX specific routines (needed for ~/Library)
 #ifdef __APPLE__
 #include "OSXCalls.h"
+#elif defined(_WIN32)
+#else
+#include <sys/types.h>
+#include <sys/wait.h>
 #endif
 
 
@@ -79,6 +83,12 @@
 
 bool global::want_quit = false;
 bool global::app_has_focus = false;
+
+namespace signalling
+{
+	static bool hasChildProcessStatus;
+	static int childProcessStatus;
+}
 
 fs::path global::config_file;
 fs::path global::log_file;
@@ -766,6 +776,36 @@ fs::path Instance::Main_FileOpFolder() const
 }
 
 
+static void updateStatusByChildProcesses(const Instance &inst)
+{
+#ifdef _WIN32
+#elif defined(__APPLE__)
+#else
+	if(signalling::hasChildProcessStatus)
+	{
+		signalling::hasChildProcessStatus = false;
+		int status = signalling::childProcessStatus;
+
+		SString message;
+
+		if(WIFEXITED(status))
+		{
+			message = SString::printf("Exited with status %d", WEXITSTATUS(status));
+		}
+		else if(WIFSIGNALED(status))
+		{
+			message = SString::printf("Signalled by %d", WTERMSIG(status));
+		}
+		if(message.good())
+		{
+			inst.Status_Set("%s", message.c_str());
+			gLog.printf("--> %s\n", message.c_str());
+		}
+	}
+#endif
+}
+
+
 void Main_Loop()
 {
 	// TODO: must think this through
@@ -805,6 +845,8 @@ void Main_Loop()
 
 		if (gInstance.edit.Selected->empty())
 			gInstance.edit.error_mode = false;
+
+		updateStatusByChildProcesses(gInstance);
 	}
 }
 
@@ -1040,6 +1082,32 @@ static void prepareConfigPath()
 	}
 }
 
+static void setupSignalHandlers()
+{
+#ifdef _WIN32
+#elif defined(__APPLE__)
+#else
+	struct sigaction action = {};
+	action.sa_handler = [](int signalNumber)
+	{
+		int status;
+		pid_t pid;
+		while((pid = waitpid(-1, &status, WNOHANG)) > 0)
+		{
+			signalling::hasChildProcessStatus = true;
+			signalling::childProcessStatus = status;
+		}
+	};
+	action.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+	int r = sigaction(SIGCHLD, &action, nullptr);
+	if (r == -1)
+	{
+		ThrowException("Failed setting up process reaper signal handler: %s", 
+					   GetErrorMessage(errno).c_str());
+	}
+#endif
+}
+
 //
 //  the program starts here
 //
@@ -1047,6 +1115,16 @@ int main(int argc, char *argv[])
 {
 	try
 	{
+		try
+		{
+			setupSignalHandlers();
+		}
+		catch(const std::runtime_error &e)
+		{
+			// non-critical error, may cause issues
+			gLog.printf("WARNING: %s\n", e.what());
+		}
+
 		init_progress = ProgressStatus::nothing;
 
 

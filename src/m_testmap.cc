@@ -305,7 +305,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const
 
 //------------------------------------------------------------------------
 
-
+#ifdef __APPLE__
 static SString CalcEXEName(const fs::path *info)
 {
 	// make the executable name relative, since we chdir() to its folder
@@ -348,8 +348,8 @@ static SString CalcWarpString(const Instance &inst)
 	// no digits at all, oh shit!
 	return "";
 }
+#endif
 
-#ifdef _WIN32
 static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 {
 	SYS_ASSERT(!inst.loaded.levelName.empty());
@@ -390,8 +390,8 @@ static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 
 	// no digits at all, oh shit!
 }
-#endif
 
+#ifdef __APPLE__
 static void AppendWadName(SString &str, const fs::path &name, const SString &parm = NULL)
 {
 	SString abs_name = GetAbsolutePath(name).u8string();
@@ -445,8 +445,8 @@ static SString GrabWadNames(const Instance &inst)
 
 	return wad_names;
 }
+#endif
 
-#ifdef _WIN32
 static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 {
 	bool has_file = false;
@@ -490,7 +490,7 @@ static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 		args.push_back(inst.wad.master.editWad()->PathName().u8string());
 	}
 }
-
+#ifdef _WIN32
 static SString buildArgString(const std::vector<SString>& args)
 {
 	SString result;
@@ -531,6 +531,56 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 			GetShellExecuteErrorMessage(result).c_str(), GetWindowsErrorMessage(error).c_str());
 	}
 	inst.Status_Set("Started the game");
+}
+#elif defined(__APPLE__)
+#else
+static void testMapOnLinux(const Instance &inst, const fs::path& portPath)
+{
+	std::vector<SString> args;
+	GrabWadNamesArgs(inst, args);
+	CalcWarpString(inst, args);
+
+	SString arg;
+	TokenWordParse parse(inst.loaded.testingCommandLine, false);
+	while(parse.getNext(arg))
+		args.insert(args.begin(), arg);
+	args.insert(args.begin(), portPath.u8string());
+
+	std::vector<char *> argv;
+	argv.reserve(args.size() + 2);
+	SString portPathStorage = portPath.filename().u8string();
+	argv.push_back(portPathStorage.get().data());
+	SString argString;
+	for(SString &arg : args)
+	{
+		argString += arg + " ";
+		argv.push_back(arg.get().data());
+	}
+
+	argv.push_back(nullptr);
+
+	logArgs(argString);
+
+	pid_t pid = fork();
+	if(pid == -1)
+	{
+		// fail
+		ThrowException("Failed forking to start %s: %s", portPath.u8string().c_str(), 
+					   GetErrorMessage(errno).c_str());
+	}
+	else if(pid == 0)
+	{
+		// child process
+		DirChangeContext dirChangeContext(FilenameGetPath(portPath));
+
+		execvp(portPath.u8string().c_str(), argv.data());
+
+		// on failure
+		ThrowException("Failed executing %s: %s", portPath.u8string().c_str(), 
+					   GetErrorMessage(errno).c_str());
+	}
+
+	// Parent process. Continue work.
 }
 #endif
 
@@ -590,7 +640,7 @@ void Instance::CMD_TestMap()
 
 #ifdef _WIN32
 		testMapOnWindows(*this, *info);
-#else
+#elif defined(__APPLE__)
 		// change working directory to be same as the executable
 		DirChangeContext dirChangeContext(FilenameGetPath(*info));
 
@@ -612,35 +662,14 @@ void Instance::CMD_TestMap()
 			Status_Set("Result code: %d\n", status);
 
 		gLog.printf("--> result code: %d\n", status);
+#else
+		testMapOnLinux(*this, *info);
 #endif
 		
 		main_win->redraw();
 		Fl::wait(0.1);
 		Fl::wait(0.1);
 		
-		/*
-		// change working directory to be same as the executable
-		DirChangeContext dirChangeContext(FilenameGetPath(*info));
-
-		// build the command string
-
-		SString cmd_buffer = SString::printf("%s %s %s",
-			CalcEXEName(info).c_str(), GrabWadNames(*this).c_str(),
-			CalcWarpString(*this).c_str());
-
-		logArgs(cmd_buffer);
-
-		// Go baby!
-
-		int status = system(cmd_buffer.c_str());
-
-		if (status == 0)
-			Status_Set("Result: OK");
-		else
-			Status_Set("Result code: %d\n", status);
-
-		gLog.printf("--> result code: %d\n", status);
-		*/
 	}
 	catch(const std::runtime_error &e)
 	{
