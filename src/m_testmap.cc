@@ -305,51 +305,6 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const
 
 //------------------------------------------------------------------------
 
-#ifdef __APPLE__
-static SString CalcEXEName(const fs::path *info)
-{
-	// make the executable name relative, since we chdir() to its folder
-	SString basename = GetBaseName(*info).u8string();
-	return SString(".") + DIR_SEP_CH + basename;
-}
-
-
-static SString CalcWarpString(const Instance &inst)
-{
-	SYS_ASSERT(!inst.loaded.levelName.empty());
-	// FIXME : EDGE allows a full name: -warp MAP03
-	//         Eternity too.
-	//         ZDOOM too, but different syntax: +map MAP03
-
-	// most common syntax is "MAP##" or "MAP###"
-	if(inst.loaded.levelName.length() >= 4 && inst.loaded.levelName.noCaseStartsWith("MAP") && isdigit(inst.loaded.levelName[3]))
-	{
-		long number = strtol(inst.loaded.levelName.c_str() + 3, nullptr, 10);
-		return SString::printf("-warp %ld", number);
-	}
-
-	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
-	// a pair of numbers after -warp
-	if(inst.loaded.levelName.length() >= 4 && !isdigit(inst.loaded.levelName[0]) && isdigit(inst.loaded.levelName[1]) &&
-	   !isdigit(inst.loaded.levelName[2]) && isdigit(inst.loaded.levelName[3]))
-	{
-		return SString::printf("-warp %c %s", inst.loaded.levelName[1], inst.loaded.levelName.c_str() + 3);
-	}
-
-	// map name is non-standard, find the first digit group and hope
-	// for the best...
-
-	size_t digitPos = inst.loaded.levelName.findDigit();
-	if(digitPos != std::string::npos)
-	{
-		return SString("-warp ") + (inst.loaded.levelName.c_str() + digitPos);
-	}
-
-	// no digits at all, oh shit!
-	return "";
-}
-#else
-
 static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 {
 	SYS_ASSERT(!inst.loaded.levelName.empty());
@@ -390,62 +345,6 @@ static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 
 	// no digits at all, oh shit!
 }
-#endif
-#ifdef __APPLE__
-static void AppendWadName(SString &str, const fs::path &name, const SString &parm = NULL)
-{
-	SString abs_name = GetAbsolutePath(name).u8string();
-
-	if (parm.good())
-	{
-		str += parm;
-		str += ' ';
-	}
-
-	str += abs_name;
-	str += ' ';
-}
-
-
-static SString GrabWadNames(const Instance &inst)
-{
-	SString wad_names;
-
-	bool has_file = false;
-
-	int use_merge = 0;
-
-	// see if we should use the "-merge" parameter, which is
-	// required for Chocolate-Doom and derivates like Crispy Doom.
-	// TODO : is there a better way to do this?
-	if (inst.loaded.portName.noCaseEqual("vanilla"))
-	{
-		use_merge = 1;
-	}
-
-	// always specify the iwad
-	if(inst.wad.master.gameWad())
-		AppendWadName(wad_names, inst.wad.master.gameWad()->PathName(), "-iwad");
-
-	// add any resource wads
-	for (const std::shared_ptr<Wad_file> &wad : inst.wad.master.resourceWads())
-	{
-		AppendWadName(wad_names, wad->PathName(),
-					  (use_merge == 1) ? "-merge" : (use_merge == 0 && !has_file) ? "-file" : NULL);
-
-		if (use_merge)
-			use_merge++;
-		else
-			has_file = true;
-	}
-
-	// the current PWAD, if exists, must be last
-	if (inst.wad.master.editWad())
-		AppendWadName(wad_names, inst.wad.master.editWad()->PathName(), !has_file ? "-file" : NULL);
-
-	return wad_names;
-}
-#else
 
 static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 {
@@ -490,7 +389,7 @@ static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 		args.push_back(inst.wad.master.editWad()->PathName().u8string());
 	}
 }
-#endif
+
 #ifdef _WIN32
 static SString buildArgString(const std::vector<SString>& args)
 {
@@ -533,9 +432,8 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 	}
 	inst.Status_Set("Started the game");
 }
-#elif defined(__APPLE__)
 #else
-static void testMapOnLinux(const Instance &inst, const fs::path& portPath)
+static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
@@ -566,7 +464,7 @@ static void testMapOnLinux(const Instance &inst, const fs::path& portPath)
 	if(pid == -1)
 	{
 		// fail
-		ThrowException("Failed forking to start %s: %s", portPath.u8string().c_str(), 
+		ThrowException("Failed forking to start %s: %s", portPath.filename().u8string().c_str(), 
 					   GetErrorMessage(errno).c_str());
 	}
 	else if(pid == 0)
@@ -577,8 +475,9 @@ static void testMapOnLinux(const Instance &inst, const fs::path& portPath)
 		execvp(portPath.u8string().c_str(), argv.data());
 
 		// on failure
-		ThrowException("Failed executing %s: %s", portPath.u8string().c_str(), 
-					   GetErrorMessage(errno).c_str());
+		int err = errno;
+		gLog.printf("--> Failed starting %s: %s\n", portPath.filename().u8string().c_str(), GetErrorMessage(err).c_str());
+		_exit(err);
 	}
 
 	// Parent process. Continue work.
@@ -641,30 +540,8 @@ void Instance::CMD_TestMap()
 
 #ifdef _WIN32
 		testMapOnWindows(*this, *info);
-#elif defined(__APPLE__)
-		// change working directory to be same as the executable
-		DirChangeContext dirChangeContext(FilenameGetPath(*info));
-
-		// build the command string
-
-		SString cmd_buffer = SString::printf("%s %s %s %s",
-			CalcEXEName(info).c_str(), loaded.testingCommandLine.c_str(), GrabWadNames(*this).c_str(),
-			CalcWarpString(*this).c_str());
-
-		logArgs(cmd_buffer);
-
-		// Go baby!
-
-		int status = system(cmd_buffer.c_str());
-
-		if (status == 0)
-			Status_Set("Result: OK");
-		else
-			Status_Set("Result code: %d\n", status);
-
-		gLog.printf("--> result code: %d\n", status);
 #else
-		testMapOnLinux(*this, *info);
+		testMapOnPOSIX(*this, *info);
 #endif
 		
 		main_win->redraw();

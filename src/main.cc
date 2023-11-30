@@ -70,6 +70,7 @@
 // IOANCH: be able to call OSX specific routines (needed for ~/Library)
 #ifdef __APPLE__
 #include "OSXCalls.h"
+#include <signal.h>
 #elif defined(_WIN32)
 #else
 #include <sys/types.h>
@@ -86,11 +87,9 @@ bool global::app_has_focus = false;
 
 namespace signalling
 {
-#ifndef __APPLE__
 #ifndef _WIN32
 	static bool hasChildProcessStatus;
 	static int childProcessStatus;
-#endif
 #endif
 }
 
@@ -783,7 +782,6 @@ fs::path Instance::Main_FileOpFolder() const
 static void updateStatusByChildProcesses(const Instance &inst)
 {
 #ifdef _WIN32
-#elif defined(__APPLE__)
 #else
 	if(signalling::hasChildProcessStatus)
 	{
@@ -1089,7 +1087,6 @@ static void prepareConfigPath()
 static void setupSignalHandlers()
 {
 #ifdef _WIN32
-#elif defined(__APPLE__)
 #else
 	struct sigaction action = {};
 	action.sa_handler = [](int signalNumber)
