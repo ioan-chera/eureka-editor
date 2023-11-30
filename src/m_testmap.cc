@@ -348,7 +348,7 @@ static SString CalcWarpString(const Instance &inst)
 	// no digits at all, oh shit!
 	return "";
 }
-#endif
+#else
 
 static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 {
@@ -390,7 +390,7 @@ static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 
 	// no digits at all, oh shit!
 }
-
+#endif
 #ifdef __APPLE__
 static void AppendWadName(SString &str, const fs::path &name, const SString &parm = NULL)
 {
@@ -445,7 +445,7 @@ static SString GrabWadNames(const Instance &inst)
 
 	return wad_names;
 }
-#endif
+#else
 
 static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 {
@@ -490,6 +490,7 @@ static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 		args.push_back(inst.wad.master.editWad()->PathName().u8string());
 	}
 }
+#endif
 #ifdef _WIN32
 static SString buildArgString(const std::vector<SString>& args)
 {

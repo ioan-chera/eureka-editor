@@ -86,8 +86,12 @@ bool global::app_has_focus = false;
 
 namespace signalling
 {
+#ifndef __APPLE__
+#ifndef _WIN32
 	static bool hasChildProcessStatus;
 	static int childProcessStatus;
+#endif
+#endif
 }
 
 fs::path global::config_file;
