@@ -447,7 +447,8 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 
 	std::vector<char *> argv;
 	argv.reserve(args.size() + 2);
-	SString portPathStorage = portPath.filename().u8string();
+	fs::path portName = portPath.filename();
+	SString portPathStorage = portName.u8string();
 	argv.push_back(portPathStorage.get().data());
 	SString argString;
 	for(SString &arg : args)
@@ -464,20 +465,34 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 	if(pid == -1)
 	{
 		// fail
-		ThrowException("Failed forking to start %s: %s", portPath.filename().u8string().c_str(), 
+		ThrowException("Failed forking to start %s: %s", portName.u8string().c_str(),
 					   GetErrorMessage(errno).c_str());
 	}
 	else if(pid == 0)
 	{
 		// child process
-		DirChangeContext dirChangeContext(FilenameGetPath(portPath));
-
-		execvp(portPath.u8string().c_str(), argv.data());
-
-		// on failure
-		int err = errno;
-		gLog.printf("--> Failed starting %s: %s\n", portPath.filename().u8string().c_str(), GetErrorMessage(err).c_str());
-		_exit(err);
+		try
+		{
+			DirChangeContext dirChangeContext(FilenameGetPath(portPath));
+			
+			execvp(portPath.u8string().c_str(), argv.data());
+			
+			// on failure
+			int err = errno;
+			gLog.printf("--> Failed starting %s: %s\n", portName.u8string().c_str(), GetErrorMessage(err).c_str());
+			
+			_exit(err);
+		}
+		catch(const std::exception &e)
+		{
+			gLog.printf("--> Failed starting %s: %s\n", portName.u8string().c_str(), e.what());
+			_exit(EXIT_FAILURE);
+		}
+		catch(...)
+		{
+			// Need to guard it best here
+			_exit(EXIT_FAILURE);
+		}
 	}
 
 	// Parent process. Continue work.
