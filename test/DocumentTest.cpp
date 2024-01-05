@@ -45,17 +45,17 @@ TEST_F(DocumentFixture, CheckObjects)
 	ASSERT_FALSE(doc.numLinedefs());
 
 	// Add some objects
-	doc.things.push_back(std::make_unique<Thing>());
-	doc.things.push_back(std::make_unique<Thing>());
-	doc.things.push_back(std::make_unique<Thing>());
-	doc.vertices.push_back(std::make_unique<Vertex>());
-	doc.vertices.push_back(std::make_unique<Vertex>());
-	doc.vertices.push_back(std::make_unique<Vertex>());
-	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.things.push_back(std::make_shared<Thing>());
+	doc.things.push_back(std::make_shared<Thing>());
+	doc.things.push_back(std::make_shared<Thing>());
+	doc.vertices.push_back(std::make_shared<Vertex>());
+	doc.vertices.push_back(std::make_shared<Vertex>());
+	doc.vertices.push_back(std::make_shared<Vertex>());
+	doc.vertices.push_back(std::make_shared<Vertex>());
 	// no sectors
-	doc.sidedefs.push_back(std::make_unique<SideDef>());
-	doc.sidedefs.push_back(std::make_unique<SideDef>());
-	doc.linedefs.push_back(std::make_unique<LineDef>());
+	doc.sidedefs.push_back(std::make_shared<SideDef>());
+	doc.sidedefs.push_back(std::make_shared<SideDef>());
+	doc.linedefs.push_back(std::make_shared<LineDef>());
 
 	ASSERT_EQ(doc.numThings(), 3);
 	ASSERT_EQ(doc.numVertices(), 4);
@@ -97,17 +97,17 @@ TEST_F(DocumentFixture, CheckObjects)
 TEST_F(DocumentFixture, CRC)
 {
 	// Add some objects
-	doc.things.push_back(std::make_unique<Thing>());
-	doc.things.push_back(std::make_unique<Thing>());
-	doc.things.push_back(std::make_unique<Thing>());
-	doc.vertices.push_back(std::make_unique<Vertex>());
-	doc.vertices.push_back(std::make_unique<Vertex>());
-	doc.vertices.push_back(std::make_unique<Vertex>());
-	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.things.push_back(std::make_shared<Thing>());
+	doc.things.push_back(std::make_shared<Thing>());
+	doc.things.push_back(std::make_shared<Thing>());
+	doc.vertices.push_back(std::make_shared<Vertex>());
+	doc.vertices.push_back(std::make_shared<Vertex>());
+	doc.vertices.push_back(std::make_shared<Vertex>());
+	doc.vertices.push_back(std::make_shared<Vertex>());
 	// no sectors
-	doc.sidedefs.push_back(std::make_unique<SideDef>());
-	doc.sidedefs.push_back(std::make_unique<SideDef>());
-	doc.linedefs.push_back(std::make_unique<LineDef>());
+	doc.sidedefs.push_back(std::make_shared<SideDef>());
+	doc.sidedefs.push_back(std::make_shared<SideDef>());
+	doc.linedefs.push_back(std::make_shared<LineDef>());
 
 	crc32_c crc;
 	doc.getLevelChecksum(crc);
@@ -122,7 +122,7 @@ TEST_F(DocumentFixture, CRC)
 	ASSERT_NE(crc.extra, crc2.extra);
 
 	// Now add back one thing
-	doc.things.push_back(std::make_unique<Thing>());
+	doc.things.push_back(std::make_shared<Thing>());
 
 	crc32_c crc3;
 	doc.getLevelChecksum(crc3);

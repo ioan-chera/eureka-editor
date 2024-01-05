@@ -47,16 +47,16 @@ void DetectImageFormat::SetUp()
 TEST_F(DetectImageFormat, ShortFile)
 {
 	// Empty lump give error
-	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::unrecognized);
+	ASSERT_EQ(W_DetectImageFormat(*lump), ImageFormat::unrecognized);
 
 	// Write too little data error
 	lump->Write(header, (int)(sizeof(header) - 1));
-	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::unrecognized);
+	ASSERT_EQ(W_DetectImageFormat(*lump), ImageFormat::unrecognized);
 
 	// Blank data error
 	lump->clearData();
 	lump->Write(header, (int)sizeof(header));
-	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::unrecognized);
+	ASSERT_EQ(W_DetectImageFormat(*lump), ImageFormat::unrecognized);
 }
 
 TEST_F(DetectImageFormat, PNG)
@@ -64,7 +64,7 @@ TEST_F(DetectImageFormat, PNG)
 	header[0] = 0x89;
 	memcpy(header + 1, "PNG\r\n", 5);
 	lump->Write(header, (int)sizeof(header));
-	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::png);
+	ASSERT_EQ(W_DetectImageFormat(*lump), ImageFormat::png);
 }
 
 TEST_F(DetectImageFormat, JPEG)
@@ -81,7 +81,7 @@ TEST_F(DetectImageFormat, JPEG)
 			memcpy(header + 6, tag, 2);
 			lump->clearData();
 			lump->Write(header, (int)sizeof(header));
-			ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::jpeg);
+			ASSERT_EQ(W_DetectImageFormat(*lump), ImageFormat::jpeg);
 		}
 	}
 }
@@ -94,7 +94,7 @@ TEST_F(DetectImageFormat, GIF)
 		memcpy(header, tag, 6);
 		lump->clearData();
 		lump->Write(header, (int)sizeof(header));
-		ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::gif);
+		ASSERT_EQ(W_DetectImageFormat(*lump), ImageFormat::gif);
 	}
 }
 
@@ -103,7 +103,7 @@ TEST_F(DetectImageFormat, DDS)
 	static const char tag[] = "DDS |";
 	memcpy(header, tag, 5);
 	lump->Write(header, (int)sizeof(header));
-	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::dds);
+	ASSERT_EQ(W_DetectImageFormat(*lump), ImageFormat::dds);
 }
 
 TEST_F(DetectImageFormat, TGA)
@@ -121,7 +121,7 @@ TEST_F(DetectImageFormat, TGA)
 	int depth = 24;
 	header[16] = (byte)depth;
 	lump->Write(header, (int)sizeof(header));
-	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::tga);
+	ASSERT_EQ(W_DetectImageFormat(*lump), ImageFormat::tga);
 }
 
 TEST_F(DetectImageFormat, doom)
@@ -141,7 +141,7 @@ TEST_F(DetectImageFormat, doom)
 	std::vector<byte> padding;
 	padding.resize(4 * width);
 	lump->Write(padding.data(), (int)padding.size());
-	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::doom);
+	ASSERT_EQ(W_DetectImageFormat(*lump), ImageFormat::doom);
 }
 
 //==================================================================================================
@@ -180,7 +180,7 @@ TEST(LoadImage, PNG)
 	// Prepare data
 	auto data = prepareData(pngData);
 
-	auto image = LoadImage_PNG(data.second, "our image");
+	auto image = LoadImage_PNG(*data.second, "our image");
 	assertImageValid(image);
 }
 
@@ -193,7 +193,7 @@ TEST(LoadImage, PNGBroken)
 	// Prepare data
 	auto data = prepareData(brokenPNG);
 
-	auto image = LoadImage_PNG(data.second, "our image");
+	auto image = LoadImage_PNG(*data.second, "our image");
 	ASSERT_FALSE(image);
 }
 
@@ -235,7 +235,7 @@ static const std::vector<uint8_t> jpgData = {
 TEST(LoadImage, JPEG)
 {
 	auto data = prepareData(jpgData);
-	auto image = LoadImage_JPEG(data.second, "our jpg");
+	auto image = LoadImage_JPEG(*data.second, "our jpg");
 	assertImageValid(image);
 }
 
@@ -244,7 +244,7 @@ TEST(LoadImage, JPEGBroken)
 	auto brokenJPG = jpgData;
 	brokenJPG[brokenJPG.size() - 1] ^= 1;
 	auto data = prepareData(brokenJPG);
-	auto image = LoadImage_JPEG(data.second, "our jpg");
+	auto image = LoadImage_JPEG(*data.second, "our jpg");
 	ASSERT_FALSE(image);
 }
 
@@ -258,6 +258,6 @@ TEST(LoadImage, TGA)
 	};
 
 	auto data = prepareData(tgaData);
-	auto image = LoadImage_TGA(data.second, "our tga");
+	auto image = LoadImage_TGA(*data.second, "our tga");
 	assertImageValid(image);
 }

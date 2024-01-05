@@ -63,7 +63,7 @@ void bitvec_c::resize(int n_elements)
 }
 
 
-bool bitvec_c::get(int n) const
+bool bitvec_c::get(int n) const noexcept
 {
 	SYS_ASSERT(n >= 0);
 
@@ -87,7 +87,7 @@ void bitvec_c::set(int n)
 }
 
 
-void bitvec_c::clear(int n)
+void bitvec_c::clear(int n) noexcept
 {
 	SYS_ASSERT(n >= 0);
 

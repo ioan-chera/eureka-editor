@@ -53,7 +53,7 @@ UI_Pic::UI_Pic(Instance &inst, int X, int Y, int W, int H, const char *L) :
 	align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
 }
 
-void UI_Pic::Clear()
+void UI_Pic::Clear() noexcept
 {
 	color(FL_DARK2);
 	labelcolor(what_color);
@@ -67,7 +67,7 @@ void UI_Pic::Clear()
 }
 
 
-void UI_Pic::MarkUnknown()
+void UI_Pic::MarkUnknown() noexcept
 {
 	Clear();
 
@@ -107,7 +107,7 @@ void UI_Pic::MarkSpecial()
 }
 
 
-void UI_Pic::GetFlat(const SString & fname)
+void UI_Pic::GetFlat(const SString & fname) noexcept
 {
 	const Img_c *img = inst.wad.images.W_GetFlat(inst.conf, fname, true /* try_uppercase */);
 
@@ -221,7 +221,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 }
 
 
-void UI_Pic::TiledImg(const Img_c *img)
+void UI_Pic::TiledImg(const Img_c *img) noexcept
 {
 	color(FL_DARK2);
 
@@ -278,7 +278,7 @@ void UI_Pic::TiledImg(const Img_c *img)
 }
 
 
-void UI_Pic::UploadRGB(std::vector<byte> &&buf, int depth)
+void UI_Pic::UploadRGB(std::vector<byte> &&buf, int depth) noexcept
 {
 	rgbBuffer = std::move(buf);
 	rgb = std::make_unique<Fl_RGB_Image>(rgbBuffer.data(), w(), h(), depth, 0);

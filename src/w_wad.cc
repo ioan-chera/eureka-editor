@@ -47,7 +47,7 @@ bool global::udmf_testing = false;
 //
 // Wad namespace string
 //
-const char *WadNamespaceString(WadNamespace ns)
+static const char *WadNamespaceString(WadNamespace ns) noexcept
 {
 	switch(ns)
 	{
@@ -84,45 +84,31 @@ void Lump_c::Rename(const char *new_name)
 		name.erase(8, std::string::npos);
 }
 
-
-void Lump_c::Seek(int offset) noexcept
-{
-	mPos = offset;
-	if(mPos < 0)
-		mPos = 0;
-	else if(mPos > (int)mData.size())
-		mPos = (int)mData.size();
-}
-
-
-bool Lump_c::Read(void *data, int len) noexcept
+bool LumpInputStream::read(void *data, int len) noexcept
 {
 	bool result = true;
-	if(mPos + len > (int)mData.size())
+	if(pos + len > lump.Length())
 	{
 		result = false;
-		len = (int)mData.size() - mPos;
+		len = lump.Length() - pos;
 	}
-	memcpy(data, mData.data() + mPos, len);
-	mPos += len;
+	memcpy(data, lump.getData().data() + pos, len);
+	pos += len;
 	return result;
 }
 
-//
-// read a line of text, returns true if OK, false on EOF
-//
-bool Lump_c::GetLine(SString &string) noexcept
+bool LumpInputStream::readLine(SString &string) noexcept
 {
-	if(mPos >= (int)mData.size())
+	if(pos >= lump.Length())
 		return false;	// EOF
 
 	string.clear();
-	for(; mPos < (int)mData.size(); ++mPos)
+	for(; pos < lump.Length(); ++pos)
 	{
-		string.push_back(static_cast<char>(mData[mPos]));
+		string.push_back(static_cast<char>(lump.getData()[pos]));
 		if(string.back() == '\n')
 		{
-			++mPos;
+			++pos;
 			break;
 		}
 	}
@@ -261,6 +247,51 @@ retry:
 	return w;
 }
 
+std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
+{
+	gLog.printf("Opening WAD file: %s\n", filename.u8string().c_str());
+	// TODO: #55 unicode
+	FILE *fp = fopen(filename.u8string().c_str(), "rb");
+	if(!fp)
+	{
+		gLog.printf("Open failed: %s\n", GetErrorMessage(errno).c_str());
+		return nullptr;
+	}
+	auto wraw = new Wad_file(filename, WadOpenMode::append);
+	auto w = std::shared_ptr<Wad_file>(wraw);
+	
+	// determine total size (seek to end)
+	if (fseek(fp, 0, SEEK_END) != 0)
+	{
+		fclose(fp);
+		ThrowException("Error determining WAD size.\n");
+	}
+
+	int total_size = (int)ftell(fp);
+
+	gLog.debugPrintf("total_size = %d\n", total_size);
+
+	if (total_size < 0)
+	{
+		fclose(fp);
+		ThrowException("Error determining WAD size.\n");
+	}
+
+	if (! w->ReadDirectory(fp, total_size))
+	{
+		gLog.printf("Open wad failed (reading directory)\n");
+		fclose(fp);
+		return NULL;
+	}
+
+	w->DetectLevels();
+	w->ProcessNamespaces();
+
+	fclose(fp);
+
+	return w;
+}
+
 
 std::shared_ptr<Wad_file> Wad_file::Create(const fs::path &filename,
 										   WadOpenMode mode)
@@ -331,7 +362,7 @@ inline static bool IsGLNodeLump(const SString &name) noexcept
 //
 // Wad total size
 //
-int Wad_file::TotalSize() const
+int Wad_file::TotalSize() const noexcept
 {
 	int size = 12;
 	for(const LumpRef &ref : directory)
@@ -506,7 +537,7 @@ MapFormat Wad_file::LevelFormat(int lev_num) const noexcept
 }
 
 
-Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) const noexcept
+const Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) const noexcept
 {
 	for(const LumpRef &lumpRef : directory)
 	{
@@ -521,10 +552,10 @@ Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) 
 //
 // Searches for the 
 //
-Lump_c *Wad_file::findFirstSpriteLump(const SString &stem) const
+const Lump_c *Wad_file::findFirstSpriteLump(const SString &stem) const
 {
 	SString firstName;
-	Lump_c *result = nullptr;
+	const Lump_c *result = nullptr;
 	for(const LumpRef &lumpRef : directory)
 	{
 		if(lumpRef.ns != WadNamespace::Sprites)
@@ -662,7 +693,6 @@ bool Wad_file::ReadDirectory(FILE *fp, int total_size)
 								__func__, l_length, lump->name.c_str());
 					return false;
 				}
-				lump->Seek();	// reset the insertion point
 				if(fseek(fp, curpos, SEEK_SET) < 0)
 				{
 					gLog.printf("%s: fseek back failed with error %d\n",
@@ -740,7 +770,7 @@ void Wad_file::SortLevels() noexcept
 }
 
 
-static bool IsDummyMarker(const SString &name)
+static bool IsDummyMarker(const SString &name) noexcept
 {
 	// matches P1_START, F3_END etc...
 
@@ -895,7 +925,7 @@ void Wad_file::RemoveLumps(int index, int count)
 }
 
 
-void Wad_file::RemoveLevel(int lev_num)
+std::vector<Lump_c> Wad_file::RemoveLevel(int lev_num)
 {
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
@@ -904,7 +934,12 @@ void Wad_file::RemoveLevel(int lev_num)
 
 	// NOTE: FixGroup() will remove the entry in levels[]
 
+	std::vector<Lump_c> result;
+	for (int i = start; i <= finish; ++i)
+		result.push_back(std::move(*directory[i].lump));
+
 	RemoveLumps(start, finish - start + 1);
+	return result;
 }
 
 
@@ -1073,7 +1108,7 @@ Lump_c * Wad_file::AddLevel(const SString &name, int *lev_num)
 }
 
 
-void Wad_file::InsertPoint(int index)
+void Wad_file::InsertPoint(int index) noexcept
 {
 	// this is validated on usage
 	insert_point = index;
@@ -1082,14 +1117,16 @@ void Wad_file::InsertPoint(int index)
 //
 // This one merely saves it as a new filename
 //
-bool Wad_file::Backup(const fs::path &new_filename)
+bool Wad_file::Backup(const fs::path &new_filename) const
 {
 	try
 	{
 		writeToPath(new_filename);
 	}
-	catch(const WadWriteException &)
+	catch(const std::exception &e)
 	{
+		gLog.printf("Failed backing up %s to %s: %s\n", PathName().u8string().c_str(),
+			new_filename.u8string().c_str(), e.what());
 		return false;
 	}
 	return true;
@@ -1104,11 +1141,12 @@ bool Wad_file::Backup(const fs::path &new_filename)
 // find a lump in any loaded wad (later ones tried first),
 // returning NULL if not found.
 //
-Lump_c *MasterDir::findGlobalLump(const SString &name) const
+const Lump_c *MasterDir::findGlobalLump(const SString &name) const
 {
-	for (int i = (int)getDir().size()-1 ; i >= 0 ; i--)
+	std::vector<std::shared_ptr<Wad_file>> wads = getAll();
+	for (auto it = wads.rbegin(); it != wads.rend(); ++it)
 	{
-		Lump_c *L = getDir()[i]->FindLumpInNamespace(name, WadNamespace::Global);
+		const Lump_c *L = (*it)->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}
@@ -1118,25 +1156,11 @@ Lump_c *MasterDir::findGlobalLump(const SString &name) const
 
 //------------------------------------------------------------------------
 
-void MasterDir::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
-{
-	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().u8string().c_str());
-
-	dir.push_back(wad);
-}
-
-void MasterDir::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
-{
-	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().u8string().c_str());
-
-	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
-	dir.erase(ENDP, dir.end());
-}
-
-
 void MasterDir::MasterDir_CloseAll()
 {
-	dir.clear();
+	resource_wads.clear();
+	edit_wad.reset();
+	game_wad.reset();
 }
 
 
@@ -1158,9 +1182,10 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 
 bool MasterDir::MasterDir_HaveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < getDir().size() ; k++)
+	std::vector<std::shared_ptr<Wad_file>> wads = getAll();
+	for (const std::shared_ptr<Wad_file> &wad : wads)
 	{
-		SString wad_path = getDir()[k]->PathName().u8string();
+		SString wad_path = wad->PathName().u8string();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;

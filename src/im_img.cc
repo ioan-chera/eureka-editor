@@ -77,7 +77,7 @@ Img_c::Img_c(int width, int height, bool _dummy)
 //  return a const pointer on the buffer.
 //  if the image is null, return a NULL pointer.
 //
-const img_pixel_t *Img_c::buf() const
+const img_pixel_t *Img_c::buf() const noexcept
 {
 	return pixels.data();
 }
@@ -1095,7 +1095,7 @@ void Palette::decodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const
 
 // this applies a constant gamma.
 // for textures/flats/things in the browser and panels.
-void Palette::decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const
+void Palette::decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const noexcept
 {
 	if(p & IS_RGB_PIXEL)
 	{

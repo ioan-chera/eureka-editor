@@ -27,11 +27,11 @@ class SelectNeighbor : public ::testing::Test
 protected:
     SelectNeighbor()
     {
-        inst.edit.Selected = new selection_c(inst.edit.mode, true);
+        inst.edit.Selected.emplace(inst.edit.mode, true);
     }
     ~SelectNeighbor()
     {
-        delete inst.edit.Selected;
+        inst.edit.Selected.reset();
     }
 
     void addVertex(int x, int y);
@@ -707,7 +707,7 @@ void SelectNeighborMidLines::initTextures()
 	lump->Write(texHeight8, sizeof(texHeight8));
 	wad->AddLump("TX_END");
 
-	inst.wad.master.MasterDir_Add(wad);
+	inst.wad.master.setGameWad(wad);
 
 	inst.conf.features.tx_start = 1;
 	inst.wad.W_LoadTextures(inst.conf);

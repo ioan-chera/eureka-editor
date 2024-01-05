@@ -593,13 +593,5 @@ void Instance::Props_WriteUser(std::ostream &os) const
 	os << "default ceil_tex \"" << conf.default_ceil_tex.getTidy("\"") << "\"\n";
 }
 
-
-void Props_LoadValues(const Instance &inst)
-{
-	if (inst.main_win)
-		inst.main_win->props_box->LoadValues();
-}
-
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

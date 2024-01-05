@@ -75,15 +75,15 @@ bool Palette::updateGamma(int usegamma, int panel_gamma)
 	return true;
 }
 
-bool Palette::loadPalette(Lump_c &lump, int usegamma, int panel_gamma)
+bool Palette::loadPalette(const Lump_c &lump, int usegamma, int panel_gamma)
 {
-	lump.Seek();
-	if (! lump.Read(raw_palette, sizeof(raw_palette)))
+	if(lump.getData().size() < sizeof(raw_palette))
 	{
 		gLog.printf("PLAYPAL: read error\n");
 		return false;
 	}
-
+	memcpy(raw_palette, lump.getData().data(), sizeof(raw_palette));
+	
 	// find the colour closest to TRANS_PIXEL
 	byte tr = raw_palette[TRANS_PIXEL][0];
 	byte tg = raw_palette[TRANS_PIXEL][1];
@@ -100,16 +100,17 @@ bool Palette::loadPalette(Lump_c &lump, int usegamma, int panel_gamma)
 }
 
 
-void Palette::loadColormap(Lump_c *lump)
+void Palette::loadColormap(const Lump_c *lump)
 {
 	if (! lump)
 	{
 		ThrowException("COLORMAP lump not found.\n");
 		return;
 	}
+	
+	LumpInputStream stream(*lump);
 
-	lump->Seek();
-	if (! lump->Read(raw_colormap, sizeof(raw_colormap)))
+	if (! stream.read(raw_colormap, sizeof(raw_colormap)))
 	{
 		gLog.printf("COLORMAP: read error\n");
 		return;

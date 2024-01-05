@@ -136,7 +136,7 @@ bool TokenWordParse::getNext(SString &word)
 				mState = State::multiWord;
 				continue;
 			}
-			if(c == '#')
+			if(mHasComments && c == '#')
 			{
 				mState = State::comment;
 				return false;
@@ -159,7 +159,7 @@ bool TokenWordParse::getNext(SString &word)
 				word = std::move(item);
 				return true;
 			}
-			if(c == '#')
+			if(mHasComments && c == '#')
 			{
 				mState = State::comment;
 				word = std::move(item);
@@ -182,7 +182,7 @@ bool TokenWordParse::getNext(SString &word)
 				mState = State::multiWord;
 				continue;
 			}
-			if(c == '#')
+			if(mHasComments && c == '#')
 			{
 				mState = State::comment;
 				word = std::move(item);

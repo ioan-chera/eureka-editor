@@ -141,11 +141,10 @@ void Instance::CMD_InvertSelection()
 	if (edit.Selected->what_type() != edit.mode)
 	{
 		// convert the selection
-		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode, true /* extended */);
+		selection_c prev_sel = *edit.Selected;
+		edit.Selected.emplace(edit.mode, true /* extended */);
 
-		ConvertSelection(level, *prev_sel, *edit.Selected);
-		delete prev_sel;
+		ConvertSelection(level, prev_sel, *edit.Selected);
 	}
 
 	edit.Selected->frob_range(0, total-1, BitOp::toggle);
@@ -426,7 +425,7 @@ void Instance::navigationScroll(float *editNav, nav_release_func_t func)
 		return;
 
 	if(!edit.is_navigating)
-		Editor_ClearNav();
+		edit.clearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
@@ -487,7 +486,7 @@ void Instance::CMD_NAV_MouseScroll()
 	edit.panning_lax = Exec_HasFlag("/LAX");
 
 	if (! edit.is_navigating)
-		Editor_ClearNav();
+		edit.clearNav();
 
 	if (Nav_SetKey(EXEC_CurKey, &Instance::NAV_MouseScroll_release))
 	{
@@ -552,7 +551,7 @@ void Instance::DoBeginDrag()
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
 			{
-				const auto &T = level.things[edit.drag_thing_num];
+				const auto T = level.things[edit.drag_thing_num];
 
 				Objid sec = hover::getNearestSector(level, T->xy());
 
@@ -605,7 +604,7 @@ void Instance::ACT_SelectBox_release()
 		return;
 	}
 
-	SelectObjectsInBox(level, edit.Selected, edit.mode, pos1, pos2);
+	SelectObjectsInBox(level, &*edit.Selected, edit.mode, pos1, pos2);
 	RedrawMap();
 }
 
@@ -720,7 +719,7 @@ void Instance::CMD_ACT_Click()
 	{
 		if (edit.highlight.type == ObjType::things)
 		{
-			const auto &T = level.things[edit.highlight.num];
+			const auto T = level.things[edit.highlight.num];
 			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->xy()));
 		}
 		else
@@ -746,7 +745,7 @@ void Instance::CMD_ACT_Click()
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
-		const auto &L = level.linedefs[split_ld];
+		const auto L = level.linedefs[split_ld];
 
 		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 		int new_vert;
@@ -756,7 +755,7 @@ void Instance::CMD_ACT_Click()
 
 			new_vert = op.addNew(ObjType::vertices);
 
-			auto &V = level.vertices[new_vert];
+			auto V = level.vertices[new_vert];
 
 			V->SetRawXY(loaded.levelFormat, edit.split);
 
@@ -1630,6 +1629,10 @@ static editor_command_t  command_table[] =
 
 	{	"TestMap",  "Tools",
 		&Instance::CMD_TestMap
+	},
+
+	{	"ChangeTestSettings", "Tools",
+		&Instance::CMD_ChangeTestSettings
 	},
 
 	{	"RecalcSectors",  "Tools",

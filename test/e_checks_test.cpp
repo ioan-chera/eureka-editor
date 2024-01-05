@@ -52,7 +52,7 @@ TEST(EChecks, FindFreeTag)
 		inst.level.linedefs.clear();
 		for(LineDef &line : lines)
 		{
-			auto addedLine = std::make_unique<LineDef>();
+			auto addedLine = std::make_shared<LineDef>();
 			*addedLine = line;
 			inst.level.linedefs.push_back(std::move(addedLine));
 		}
@@ -63,7 +63,7 @@ TEST(EChecks, FindFreeTag)
 		inst.level.sectors.clear();
 		for(Sector &sector : sectors)
 		{
-			auto newSector = std::make_unique<Sector>();
+			auto newSector = std::make_shared<Sector>();
 			*newSector = sector;
 			inst.level.sectors.push_back(std::move(newSector));
 		}
@@ -206,24 +206,20 @@ TEST(EChecks, TagsApplyNewValue)
 
 	for(LineDef &line : lines)
 	{
-		auto newLine = std::make_unique<LineDef>();
+		auto newLine = std::make_shared<LineDef>();
 		*newLine = line;
 		inst.level.linedefs.push_back(std::move(newLine));
 	}
 	for(Sector &sector : sectors)
 	{
-		auto newSector = std::make_unique<Sector>();
+		auto newSector = std::make_shared<Sector>();
 		*newSector = sector;
 		inst.level.sectors.push_back(std::move(newSector));
 	}
 
-	// Prepare the selection lists
-	auto linesel = std::make_unique<selection_c>(ObjType::linedefs);
-	auto secsel = std::make_unique<selection_c>(ObjType::sectors);
-
 	// Start with linedefs
 	inst.edit.mode = ObjType::linedefs;
-	inst.edit.Selected = linesel.get();
+	inst.edit.Selected.emplace(ObjType::linedefs);
 
 	// Nothing selected: check that nothing happens
 	inst.level.checks.tagsApplyNewValue(1);
@@ -231,7 +227,7 @@ TEST(EChecks, TagsApplyNewValue)
 		ASSERT_EQ(line->tag, 0);
 	for(const auto &sector : inst.level.sectors)
 		ASSERT_EQ(sector->tag, 0);
-	ASSERT_EQ(inst.level.checks.mLastTag, 0);	// didn't change
+	ASSERT_EQ(inst.tagInMemory, 0);	// didn't change
 
 	// Select a couple of lines
 	inst.edit.Selected->set(1);
@@ -244,11 +240,11 @@ TEST(EChecks, TagsApplyNewValue)
 			ASSERT_EQ(line->tag, 0);
 	for(const auto &sector : inst.level.sectors)
 		ASSERT_EQ(sector->tag, 0);
-	ASSERT_EQ(inst.level.checks.mLastTag, 1);	// changed
+	ASSERT_EQ(inst.tagInMemory, 1);	// changed
 
 	// Now select a couple of sectors
 	inst.edit.mode = ObjType::sectors;
-	inst.edit.Selected = secsel.get();
+	inst.edit.Selected.emplace(ObjType::sectors);
 	inst.edit.Selected->set(2);
 	inst.edit.Selected->set(4);
 	inst.level.checks.tagsApplyNewValue(2);
@@ -262,7 +258,7 @@ TEST(EChecks, TagsApplyNewValue)
 			ASSERT_EQ(sector->tag, 2);
 		else
 			ASSERT_EQ(sector->tag, 0);
-	ASSERT_EQ(inst.level.checks.mLastTag, 2);	// changed
+	ASSERT_EQ(inst.tagInMemory, 2);	// changed
 
 	inst.edit.Selected->clear(4);
 	inst.level.checks.tagsApplyNewValue(1);
@@ -279,5 +275,5 @@ TEST(EChecks, TagsApplyNewValue)
 		else
 			ASSERT_EQ(sector->tag, 0);
 
-	ASSERT_EQ(inst.level.checks.mLastTag, 1);	// changed again
+	ASSERT_EQ(inst.tagInMemory, 1);	// changed again
 }

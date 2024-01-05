@@ -53,7 +53,7 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
     wad->AddLump("S_END");
 
     WadData wadData;
-    wadData.master.MasterDir_Add(wad);
+    wadData.master.setGameWad(wad);
 
     LoadingData loading;
 

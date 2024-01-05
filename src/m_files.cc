@@ -235,7 +235,7 @@ void RecentKnowledge::parseMiscConfig(std::istream &is)
 	while(M_ReadTextLine(line, is))
 	{
 		SString keyword;
-		TokenWordParse parse(line);
+		TokenWordParse parse(line, true);
 		if(!parse.getNext(keyword))
 			continue;	// blank line
 		if(keyword == "recent")
@@ -349,7 +349,14 @@ void M_OpenRecentFromMenu(void *priv_data)
 
 	RecentMap *data = (RecentMap *)priv_data;
 
-	OpenFileMap(data->file, data->map);
+	try
+	{
+		OpenFileMap(data->file, data->map);
+	}
+	catch (const std::runtime_error& e)
+	{
+		DLG_ShowError(false, "Could not open %s of %s: %s", data->map.c_str(), data->file.u8string().c_str(), e.what());
+	}
 }
 
 void RecentKnowledge::addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir)
@@ -370,7 +377,7 @@ bool Instance::M_TryOpenMostRecent()
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(recentMap.file, WadOpenMode::append);
+	std::shared_ptr<Wad_file> wad = Wad_file::loadFromFile(recentMap.file);
 
 	if (! wad)
 	{
@@ -393,9 +400,7 @@ bool Instance::M_TryOpenMostRecent()
 	else
 		loaded.levelName.clear();
 
-	this->wad.master.Pwad_name = recentMap.file;
-
-	this->wad.master.edit_wad = wad;
+	this->wad.master.ReplaceEditWad(wad);
 
 	return true;
 }
@@ -570,14 +575,14 @@ fs::path Instance::M_PickDefaultIWAD() const
 	{
 		default_game = "doom";
 	}
-	else if (wad.master.edit_wad)
+	else if (wad.master.editWad())
 	{
-		int idx = wad.master.edit_wad->LevelFindFirst();
+		int idx = wad.master.editWad()->LevelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = wad.master.edit_wad->LevelHeader(idx);
-			const SString &name = wad.master.edit_wad->GetLump(idx)->Name();
+			idx = wad.master.editWad()->LevelHeader(idx);
+			const SString &name = wad.master.editWad()->GetLump(idx)->Name();
 
 			if (toupper(name[0]) == 'E')
 				default_game = "doom";
@@ -643,7 +648,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 {
 	gLog.printf("Parsing '%s' lump\n", EUREKA_LUMP);
 
-	Lump_c * lump = wad->FindLump(EUREKA_LUMP);
+	const Lump_c * lump = wad->FindLump(EUREKA_LUMP);
 
 	if (! lump)
 	{
@@ -651,7 +656,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 		return true;
 	}
 
-	lump->Seek();
+	LumpInputStream stream(*lump);
 
 	const fs::path *new_iwad = nullptr;
 	SString new_port;
@@ -660,9 +665,11 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 
 	SString line;
 
-	while (lump->GetLine(line))
+	tl::optional<SString> testingCommandLine;
+
+	while (stream.readLine(line))
 	{
-		TokenWordParse parse(line);
+		TokenWordParse parse(line, true);
 		SString key, value;
 		if(!parse.getNext(key))
 			continue;	// empty line
@@ -745,6 +752,10 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", value.c_str());
 			}
 		}
+		else if (key == "testing_command_line")
+		{
+			testingCommandLine = value;
+		}
 		else
 		{
 			gLog.printf("WARNING: unknown keyword '%s' in %s lump\n", key.c_str(), EUREKA_LUMP);
@@ -773,6 +784,9 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 			portName = new_port;
 	}
 
+	if (testingCommandLine.has_value())
+		this->testingCommandLine = *testingCommandLine;
+
 	if (! keep_cmd_line_args)
 		resourceList.clear();
 
@@ -800,6 +814,8 @@ void LoadingData::writeEurekaLump(Wad_file &wad) const
 	if (!gameName.empty())
 		lump.Printf("game %s\n", gameName.c_str());
 
+	lump.Printf("testing_command_line %s\n", testingCommandLine.spaceEscape().c_str());
+
 	if (!portName.empty())
 		lump.Printf("port %s\n", portName.c_str());
 
@@ -810,7 +826,7 @@ void LoadingData::writeEurekaLump(Wad_file &wad) const
 		fs::path absoluteResourcePath = fs::absolute(resource);
 		fs::path relative = fs::proximate(absoluteResourcePath, pwadPath);
 
-		lump.Printf("resource %s\n", relative.generic_u8string().c_str());
+		lump.Printf("resource %s\n", escape(relative).c_str());
 	}
 }
 
@@ -877,8 +893,7 @@ static void Backup_Prune(const fs::path &dir_name, int b_low, int b_high, int wa
 	}
 }
 
-
-void M_BackupWad(Wad_file *wad)
+void M_BackupWad(const Wad_file *wad)
 {
 	// disabled ?
 	if (config::backup_max_files <= 0 || config::backup_max_space <= 0)
@@ -911,6 +926,31 @@ void M_BackupWad(Wad_file *wad)
 	int b_low  = scan_data.low;
 	int b_high = scan_data.high;
 
+	// actually back-up the file
+
+	fs::path dest_name = Backup_Name(dir_name, b_high + 1);
+	
+	bool copiedReadOnly = false;
+	if(wad->IsReadOnly())
+	{
+		try
+		{
+			fs::copy(wad->PathName(), dest_name);
+			copiedReadOnly = true;
+		}
+		catch(const std::runtime_error &e)
+		{
+			gLog.printf("Failed copying directly %s to %s (%s). Trying to re-save the WAD.\n", wad->PathName().u8string().c_str(), dest_name.u8string().c_str(), e.what());
+		}
+	}
+	if (!copiedReadOnly && ! wad->Backup(dest_name))
+	{
+		// Hmmm, show a dialog ??
+		gLog.printf("WARNING: backup failed (cannot copy file)\n");
+		return;
+	}
+
+	// Now do the pruning:
 	if (b_low < b_high)
 	{
 		int wad_size = wad->TotalSize();
@@ -918,18 +958,15 @@ void M_BackupWad(Wad_file *wad)
 		Backup_Prune(dir_name, b_low, b_high, wad_size);
 	}
 
-	// actually back-up the file
-
-	fs::path dest_name = Backup_Name(dir_name, b_high + 1);
-
-	if (! wad->Backup(dest_name))
-	{
-		// Hmmm, show a dialog ??
-		gLog.printf("WARNING: backup failed (cannot copy file)\n");
-		return;
-	}
-
 	gLog.printf("Backed up wad to: %s\n", dest_name.u8string().c_str());
+}
+
+bool RecentKnowledge::hasIwadByPath(const fs::path &path) const
+{
+	for(const auto &pair : known_iwads)
+		if(SString(GetAbsolutePath(pair.second).u8string()).noCaseEqual(SString(GetAbsolutePath(path).u8string())))
+			return true;
+	return false;
 }
 
 //--- editor settings ---

@@ -88,12 +88,12 @@ public:
 		return pixels.empty();
 	}
 
-	inline int width() const
+	inline int width() const noexcept
 	{
 		return w;
 	}
 
-	inline int height() const
+	inline int height() const noexcept
 	{
 		return h;
 	}
@@ -104,7 +104,7 @@ public:
 	}
 
 	// read access
-	const img_pixel_t *buf() const;
+	const img_pixel_t *buf() const noexcept;
 
 	// read/write access
 	img_pixel_t *wbuf();

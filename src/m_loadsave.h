@@ -27,7 +27,10 @@
 #ifndef __EUREKA_E_LOADSAVE_H__
 #define __EUREKA_E_LOADSAVE_H__
 
+#include "Document.h"
+#include "m_game.h"
 #include "w_wad.h"
+#include "WadData.h"
 #include <unordered_map>
 
 class RecentKnowledge;
@@ -48,9 +51,40 @@ struct LoadingData
 	SString udmfNamespace;	// for UDMF, the current namespace
 	std::vector<fs::path> resourceList;
 	MapFormat levelFormat = {};	// format of current map
+	SString testingCommandLine;	// command-line for testing map (stored in Eureka lump due to possible port and mod-specific features)
 };
 
-void OpenFileMap(const fs::path &filename, const SString &map_name = "");
+
+struct NewResources
+{
+	ConfigData config;
+	LoadingData loading;
+	WadData waddata;
+};
+
+struct BadCount
+{
+	bool exists() const
+	{
+		return linedef_count || sector_refs || sidedef_refs;
+	}
+
+	int linedef_count;
+	int sector_refs;
+	int sidedef_refs;
+};
+
+
+struct NewDocument
+{
+	Document doc;
+	LoadingData loading;
+	BadCount bad;
+};
+
+void OpenFileMap(const fs::path &filename, const SString &map_name = "") noexcept(false);
+
+const Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *load_wad, const char *name);
 
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 

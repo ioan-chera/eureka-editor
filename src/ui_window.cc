@@ -121,6 +121,11 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	find_box = new UI_FindAndReplace(inst, w() - panel_W, BY, panel_W, BH);
 	find_box->hide();
 	add(find_box);
+	
+	mapItemBoxes[0] = thing_box;
+	mapItemBoxes[1] = line_box;
+	mapItemBoxes[2] = sec_box;
+	mapItemBoxes[3] = vert_box;
 }
 
 
@@ -165,7 +170,7 @@ void UI_MainWindow::NewEditMode(ObjType mode)
 }
 
 
-void UI_MainWindow::SetCursor(Fl_Cursor shape)
+void UI_MainWindow::SetCursor(Fl_Cursor shape) noexcept
 {
 	if (shape == cursor_shape)
 		return;
@@ -265,12 +270,10 @@ void UI_MainWindow::ShowFindAndReplace()
 }
 
 
-void UI_MainWindow::UpdateTotals()
+void UI_MainWindow::UpdateTotals(const Document &doc) noexcept
 {
-	thing_box->UpdateTotal();
-	 line_box->UpdateTotal();
-	  sec_box->UpdateTotal();
-	 vert_box->UpdateTotal();
+	for(MapItemBox *box : mapItemBoxes)
+		box->UpdateTotal(doc);
 }
 
 
@@ -291,17 +294,9 @@ int UI_MainWindow::GetPanelObjNum() const
 
 void UI_MainWindow::InvalidatePanelObj()
 {
-	if (thing_box->visible())
-		thing_box->SetObj(-1, 0);
-
-	if (line_box->visible())
-		line_box->SetObj(-1, 0);
-
-	if (sec_box->visible())
-		sec_box->SetObj(-1, 0);
-
-	if (vert_box->visible())
-		vert_box->SetObj(-1, 0);
+	for(MapItemBox *box : mapItemBoxes)
+		if(box->visible())
+			box->SetObj(-1, 0);
 }
 
 void UI_MainWindow::UpdatePanelObj()
@@ -325,10 +320,8 @@ void UI_MainWindow::UpdatePanelObj()
 
 void UI_MainWindow::UnselectPics()
 {
-	 line_box->UnselectPics();
-	  sec_box->UnselectPics();
-	thing_box->UnselectPics();
-	props_box->UnselectPics();
+	for(MapItemBox *box : mapItemBoxes)
+		box->UnselectPics();
 }
 
 
@@ -507,11 +500,10 @@ void UI_MainWindow::Delay(int steps)
 }
 
 
-void UI_MainWindow::UpdateGameInfo()
+void UI_MainWindow::UpdateGameInfo(const LoadingData &loading, const ConfigData &config)
 {
-	thing_box->UpdateGameInfo();
-	 line_box->UpdateGameInfo();
-	  sec_box->UpdateGameInfo();
+	for(MapItemBox *box : mapItemBoxes)
+		box->UpdateGameInfo(loading, config);
 }
 
 

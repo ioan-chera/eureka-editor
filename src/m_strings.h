@@ -438,7 +438,7 @@ public:
 	explicit StringID(int num) : num(num)
 	{
 	}
-	int get() const
+	int get() const noexcept
 	{
 		return num;
 	}
@@ -458,7 +458,7 @@ public:
 	{
 		return num >= 0;
 	}
-	bool isInvalid() const
+	bool isInvalid() const noexcept
 	{
 		return num < 0;
 	}
@@ -479,7 +479,7 @@ class StringTable
 {
 public:
 	StringID add(const SString &str);
-	SString get(StringID offset) const;
+	SString get(StringID offset) const noexcept;
 private:
 	// Must start with an empty string, so get(0) gets "".
 	std::vector<SString> mStrings = { "" };	
@@ -487,6 +487,7 @@ private:
 
 #ifdef _WIN32
 SString WideToUTF8(const wchar_t *text);
+std::wstring UTF8ToWide(const char* text);
 #endif
 
 #endif  /* __EUREKA_M_STRINGS_H__ */

@@ -70,6 +70,11 @@
 // IOANCH: be able to call OSX specific routines (needed for ~/Library)
 #ifdef __APPLE__
 #include "OSXCalls.h"
+#include <signal.h>
+#elif defined(_WIN32)
+#else
+#include <sys/types.h>
+#include <sys/wait.h>
 #endif
 
 
@@ -79,6 +84,14 @@
 
 bool global::want_quit = false;
 bool global::app_has_focus = false;
+
+namespace signalling
+{
+#ifndef _WIN32
+	static bool hasChildProcessStatus;
+	static int childProcessStatus;
+#endif
+}
 
 fs::path global::config_file;
 fs::path global::log_file;
@@ -193,7 +206,6 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	global::app_has_focus = false;
 
 	// TODO: ALL instances. This is death.
-	gInstance.wad.master.MasterDir_CloseAll();
 	gLog.close();
 
 	exit(2);
@@ -386,7 +398,7 @@ static bool DetermineIWAD(Instance &inst)
 			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName, "wad");
 
 		if (! Wad_file::Validate(inst.loaded.iwadName))
-			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.u8string().c_str());
+			ThrowException("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.u8string().c_str());
 
 		SString game = GameNameFromIWAD(inst.loaded.iwadName);
 
@@ -473,7 +485,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? inst.wad.master.edit_wad.get() : inst.wad.master.game_wad.get();
+		std::shared_ptr<Wad_file> wad = (pass == 0) ? inst.wad.master.editWad() : inst.wad.master.gameWad();
 
 		if (! wad)
 			continue;
@@ -651,6 +663,12 @@ static void Main_OpenWindow(Instance &inst)
 	    const_cast<char**>(logo_E4_32x32_xpm), &pm, &mask, NULL);
 	inst.main_win->icon((char *)pm);
 #endif
+#ifdef _WIN32
+#include "../misc/eureka.xpm"
+	Fl_Pixmap pixmap(logo_E4_32x32_xpm);
+	Fl_RGB_Image image(&pixmap);
+	inst.main_win->icon(&image);
+#endif
 
 	// show window (pass some dummy arguments)
 	{
@@ -721,7 +739,7 @@ void Main_Quit()
 
 
 // used for 'New Map' / 'Open Map' functions too
-bool Instance::Main_ConfirmQuit(const char *action) const
+bool Document::Main_ConfirmQuit(const char *action) const
 {
 	if (! MadeChanges)
 		return true;
@@ -754,10 +772,39 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 //
 fs::path Instance::Main_FileOpFolder() const
 {
-	if (!wad.master.Pwad_name.empty())
-		return FilenameGetPath(wad.master.Pwad_name);
+	if (wad.master.editWad())
+		return FilenameGetPath(wad.master.editWad()->PathName());
 
 	return "";
+}
+
+
+static void updateStatusByChildProcesses(const Instance &inst)
+{
+#ifdef _WIN32
+#else
+	if(signalling::hasChildProcessStatus)
+	{
+		signalling::hasChildProcessStatus = false;
+		int status = signalling::childProcessStatus;
+
+		SString message;
+
+		if(WIFEXITED(status))
+		{
+			message = SString::printf("Exited with status %d", WEXITSTATUS(status));
+		}
+		else if(WIFSIGNALED(status))
+		{
+			message = SString::printf("Signalled by %d", WTERMSIG(status));
+		}
+		if(message.good())
+		{
+			inst.Status_Set("%s", message.c_str());
+			gLog.printf("--> %s\n", message.c_str());
+		}
+	}
+#endif
 }
 
 
@@ -785,7 +832,7 @@ void Main_Loop()
 
 		if (global::want_quit)
 		{
-			if (gInstance.Main_ConfirmQuit("quit"))
+			if (gInstance.level.Main_ConfirmQuit("quit"))
 				break;
 
 			global::want_quit = false;
@@ -794,31 +841,15 @@ void Main_Loop()
 		// TODO: handle these in a better way
 
 		// TODO: HANDLE ALL INSTANCES
-		gInstance.main_win->UpdateTitle(gInstance.MadeChanges ? '*' : 0);
+		gInstance.main_win->UpdateTitle(gInstance.level.MadeChanges ? '*' : 0);
 
 		gInstance.main_win->scroll->UpdateBounds();
 
 		if (gInstance.edit.Selected->empty())
 			gInstance.edit.error_mode = false;
+
+		updateStatusByChildProcesses(gInstance);
 	}
-}
-
-
-bool WadData::Main_LoadIWAD(const LoadingData &loading)
-{
-	// Load the IWAD (read only).
-	// The filename has been checked in DetermineIWAD().
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(loading.iwadName,
-												   WadOpenMode::read);
-	if (!wad)
-	{
-		gLog.printf("Failed to open game IWAD: %s\n", loading.iwadName.u8string().c_str());
-		return false;
-	}
-	master.game_wad = wad;
-
-	master.MasterDir_Add(master.game_wad);
-	return true;
 }
 
 
@@ -879,66 +910,83 @@ static void readPortInfo(std::unordered_map<SString, SString> &parseVars, Loadin
 	}
 }
 
+NewResources loadResources(const LoadingData& loading, const WadData &waddata) noexcept(false)
+{
+	auto newres = NewResources();
+	newres.loading = loading;
+	newres.waddata = waddata;
+
+	gLog.printf("\n");
+	gLog.printf("----- Loading Resources -----\n");
+
+	// clear the parse variables, pre-set a few vars
+	std::unordered_map<SString, SString> parseVars = loading.prepareConfigVariables();
+	std::vector<std::shared_ptr<Wad_file>> resourceWads;
+
+	try
+	{
+		readGameInfo(parseVars, newres.loading, newres.config);
+		readPortInfo(parseVars, newres.loading, newres.config);
+	
+
+		for (const fs::path& resource : newres.loading.resourceList)
+		{
+			if (MatchExtensionNoCase(resource, ".ugh"))
+			{
+				M_ParseDefinitionFile(parseVars, ParsePurpose::resource,
+					&newres.config, resource);
+				continue;
+			}
+			// Otherwise wad
+			if (!Wad_file::Validate(resource))
+				ThrowException("Invalid resource WAD file: %s", resource.u8string().c_str());
+
+			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
+				WadOpenMode::read);
+			if (!wad)
+				ThrowException("Cannot load resource: %s", resource.u8string().c_str());
+
+			resourceWads.push_back(wad);
+		}
+
+		std::shared_ptr<Wad_file> gameWad = Wad_file::Open(newres.loading.iwadName, WadOpenMode::read);
+		if (!gameWad)
+			ThrowException("Could not load IWAD file");
+
+		newres.waddata.reloadResources(gameWad, newres.config, resourceWads);
+	}
+	catch (const std::runtime_error&e )
+	{
+		gLog.printf("%s\n", e.what());
+		throw;
+	}
+
+	return newres;
+}
 
 //
 // load all game/port definitions (*.ugh).
 // open all wads in the master directory.
 // read important content from the wads (palette, textures, etc).
 //
-void Instance::Main_LoadResources(const LoadingData &loading)
+void Instance::Main_LoadResources(const LoadingData &loading) noexcept(false)
 {
-	ConfigData config = conf;
-	std::vector<std::shared_ptr<Wad_file>> resourceWads;
-	LoadingData newLoading = loading;
-	try
-	{
-		// FIXME: avoid doing this in case of error
-		if(edit.Selected)
-			edit.Selected->clear_all();
-
-		gLog.printf("\n");
-		gLog.printf("----- Loading Resources -----\n");
-
-		config.clearExceptDefaults();
-
-		// clear the parse variables, pre-set a few vars
-		std::unordered_map<SString, SString> parseVars = loading.prepareConfigVariables();
-
-		readGameInfo(parseVars, newLoading, config);
-		readPortInfo(parseVars, newLoading, config);
-
-		for(const fs::path &resource : loading.resourceList)
-		{
-			if(MatchExtensionNoCase(resource, ".ugh"))
-			{
-				M_ParseDefinitionFile(parseVars, ParsePurpose::resource,
-									  &config, resource);
-				continue;
-			}
-			// Otherwise wad
-			if(!Wad_file::Validate(resource))
-				throw ParseException(SString("Invalid WAD file: ") + resource.u8string());
-
-			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
-														   WadOpenMode::read);
-			if(!wad)
-				throw ParseException(SString("Cannot load resource: ") + resource.u8string());
-
-			resourceWads.push_back(wad);
-		}
-	}
-	catch(const ParseException &e)
-	{
-		gLog.printf("Failed reloading wads: %s\n", e.what());
-		throw;
-	}
+	auto newres = loadResources(loading, wad);
 
 	// Commit it
-	conf = config;
-	loaded = newLoading;
+	wad = std::move(newres.waddata);
+	conf = std::move(newres.config);
+	loaded = std::move(newres.loading);
 	
-	wad.reloadResources(loaded, conf, resourceWads);
+	UpdateViewOnResources();
+}
 
+void Instance::UpdateViewOnResources()
+{
+	// Must deselect now
+	if(edit.Selected)
+		edit.Selected->clear_all();
+	
 	gLog.printf("--- DONE ---\n");
 	gLog.printf("\n");
 
@@ -951,12 +999,12 @@ void Instance::Main_LoadResources(const LoadingData &loading)
 		if (main_win->canvas)
 			main_win->canvas->DeleteContext();
 
-		main_win->UpdateGameInfo();
+		main_win->UpdateGameInfo(loaded, conf);
 
 		main_win->browser->Populate();
 
 		// TODO: only call this when the IWAD has changed
-		Props_LoadValues(*this);
+		main_win->propsLoadValues();
 	}
 }
 
@@ -1036,6 +1084,31 @@ static void prepareConfigPath()
 	}
 }
 
+static void setupSignalHandlers()
+{
+#ifdef _WIN32
+#else
+	struct sigaction action = {};
+	action.sa_handler = [](int signalNumber)
+	{
+		int status;
+		pid_t pid;
+		while((pid = waitpid(-1, &status, WNOHANG)) > 0)
+		{
+			signalling::hasChildProcessStatus = true;
+			signalling::childProcessStatus = status;
+		}
+	};
+	action.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+	int r = sigaction(SIGCHLD, &action, nullptr);
+	if (r == -1)
+	{
+		ThrowException("Failed setting up process reaper signal handler: %s", 
+					   GetErrorMessage(errno).c_str());
+	}
+#endif
+}
+
 //
 //  the program starts here
 //
@@ -1043,6 +1116,16 @@ int main(int argc, char *argv[])
 {
 	try
 	{
+		try
+		{
+			setupSignalHandlers();
+		}
+		catch(const std::runtime_error &e)
+		{
+			// non-critical error, may cause issues
+			gLog.printf("WARNING: %s\n", e.what());
+		}
+
 		init_progress = ProgressStatus::nothing;
 
 
@@ -1121,25 +1204,21 @@ int main(int argc, char *argv[])
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			gInstance.wad.master.Pwad_name = global::Pwad_list[0];
-
 			// TODO: main instance
-			gInstance.wad.master.edit_wad = Wad_file::Open(gInstance.wad.master.Pwad_name,
-												WadOpenMode::append);
-			if (!gInstance.wad.master.edit_wad)
-				ThrowException("Cannot load pwad: %s\n", gInstance.wad.master.Pwad_name.u8string().c_str());
-
+			std::shared_ptr<Wad_file> editWad = Wad_file::Open(global::Pwad_list[0], WadOpenMode::append);
+			if(!editWad)
+			{
+				ThrowException("Cannot load pwad: %s\n", global::Pwad_list[0].u8string().c_str());
+			}
+			
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.wad.master.MasterDir_Add(gInstance.wad.master.edit_wad);
+			gInstance.wad.master.ReplaceEditWad(editWad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
-			if (gInstance.M_TryOpenMostRecent())
-			{
-				gInstance.wad.master.MasterDir_Add(gInstance.wad.master.edit_wad);
-			}
+			gInstance.M_TryOpenMostRecent();
 		}
 
 
@@ -1150,9 +1229,9 @@ int main(int argc, char *argv[])
 		// Note: there is logic in M_ParseEurekaLump() to ensure that command
 		// line arguments can override the EUREKA_LUMP values.
 
-		if (gInstance.wad.master.edit_wad)
+		if (gInstance.wad.master.editWad())
 		{
-			if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
+			if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, gInstance.wad.master.editWad().get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.wad.master.RemoveEditWad();
@@ -1162,7 +1241,11 @@ int main(int argc, char *argv[])
 
 		// determine which IWAD to use
 		// TODO: instance management
+		std::shared_ptr<Wad_file> gameWad;
 		if (! DetermineIWAD(gInstance))
+			goto quit;
+		gameWad = Wad_file::Open(gInstance.loaded.iwadName, WadOpenMode::read);
+		if(!gameWad)
 			goto quit;
 
 		DeterminePort(gInstance);
@@ -1170,8 +1253,7 @@ int main(int argc, char *argv[])
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
 		// TODO: check result
-		gInstance.wad.Main_LoadIWAD(gInstance.loaded);
-
+		gInstance.wad.master.setGameWad(gameWad);
 
 		// load the initial level
 		// TODO: first instance
@@ -1180,7 +1262,7 @@ int main(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.wad.master.edit_wad ? gInstance.wad.master.edit_wad.get() : gInstance.wad.master.game_wad.get(), gInstance.loaded.levelName);
+		gInstance.LoadLevel(gInstance.wad.master.activeWad().get(), gInstance.loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
@@ -1198,7 +1280,6 @@ int main(int argc, char *argv[])
 		global::app_has_focus = false;
 
 		// TODO: all instances
-		gInstance.wad.master.MasterDir_CloseAll();
 		gLog.close();
 
 		return 0;

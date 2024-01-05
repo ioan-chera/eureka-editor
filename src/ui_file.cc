@@ -257,7 +257,7 @@ UI_OpenMap::UI_OpenMap(Instance &inst) :
 		look_where->add("the PWAD above|the Game IWAD|the Resource wads");
 		look_where->callback(look_callback, this);
 
-		look_where->value(inst.wad.master.edit_wad ? LOOK_PWad : LOOK_IWad);
+		look_where->value(inst.wad.master.editWad() ? LOOK_PWad : LOOK_IWad);
 	}
 
 	{
@@ -326,8 +326,8 @@ std::shared_ptr<Wad_file> UI_OpenMap::Run(SString* map_v, bool * did_load)
 	map_v->clear();
 	*did_load = false;
 
-	if (inst.wad.master.edit_wad)
-		SetPWAD(inst.wad.master.edit_wad->PathName().u8string());
+	if (inst.wad.master.editWad())
+		SetPWAD(inst.wad.master.editWad()->PathName().u8string());
 
 	Populate();
 
@@ -396,26 +396,21 @@ void UI_OpenMap::Populate()
 
 	if (look_where->value() == LOOK_IWad)
 	{
-		using_wad = inst.wad.master.game_wad;
+		using_wad = inst.wad.master.gameWad();
 		PopulateButtons();
 	}
 	else if (look_where->value() >= LOOK_Resource)
 	{
-		int first = 1;
-		int last  = (int)inst.wad.master.getDir().size() - 1;
-
-		if (inst.wad.master.edit_wad)
-			last--;
-
 		// we simply use the last resource which contains levels
 
 		// TODO: probably should collect ones with a map, add to look_where choices
 
-		for (int r = last ; r >= first ; r--)
+		for (auto it = inst.wad.master.resourceWads().rbegin();
+			 it != inst.wad.master.resourceWads().rend(); ++it)
 		{
-			if (inst.wad.master.getDir()[r]->LevelCount() >= 0)
+			if ((*it)->LevelCount() >= 0)
 			{
-				using_wad = inst.wad.master.getDir()[r];
+				using_wad = *it;
 				PopulateButtons();
 				break;
 			}
@@ -426,9 +421,9 @@ void UI_OpenMap::Populate()
 		using_wad = loaded_wad;
 		PopulateButtons();
 	}
-	else if (inst.wad.master.edit_wad)
+	else if (inst.wad.master.editWad())
 	{
-		using_wad = inst.wad.master.edit_wad;
+		using_wad = inst.wad.master.editWad();
 		PopulateButtons();
 	}
 
@@ -656,10 +651,9 @@ void UI_OpenMap::LoadFile()
 #define STARTUP_MSG  "No IWADs could be found."
 
 
-UI_ProjectSetup::UI_ProjectSetup(const Instance &inst, bool new_project, bool is_startup) :
+UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_startup) :
 	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
-	action(ACT_none),
-	map_format(MapFormat::invalid), name_space(), inst(inst)
+	inst(inst)
 {
 	callback(close_callback, this);
 
@@ -730,7 +724,7 @@ UI_ProjectSetup::UI_ProjectSetup(const Instance &inst, bool new_project, bool is
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
-		res[r].clear();
+		result.resources[r].clear();
 
 		if (is_startup)
 			continue;
@@ -779,7 +773,7 @@ UI_ProjectSetup::UI_ProjectSetup(const Instance &inst, bool new_project, bool is
 }
 
 
-bool UI_ProjectSetup::Run()
+tl::optional<UI_ProjectSetup::Result> UI_ProjectSetup::Run()
 {
 	PopulateIWADs();
 	PopulatePort();
@@ -790,37 +784,12 @@ bool UI_ProjectSetup::Run()
 
 	show();
 
-	while (action == ACT_none)
+	while (action == Action::none)
 	{
 		Fl::wait(0.2);
 	}
 
-	return (action == ACT_ACCEPT);
-}
-
-//
-// Gets all the loading data from the dialog box
-//
-void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
-{
-	SYS_ASSERT(game.good());
-
-    loading.gameName = game;
-    loading.portName = port;
-
-	const fs::path *iwad = global::recent.queryIWAD(game);
-
-	SYS_ASSERT(!!iwad);
-	loading.iwadName = *iwad;
-
-    loading.levelFormat = map_format;
-    loading.udmfNamespace = name_space;
-
-	SYS_ASSERT(loading.levelFormat != MapFormat::invalid);
-
-	for(int i = 0; i < RES_NUM; ++i)
-		if(!res[i].empty())
-            loading.resourceList.push_back(res[i]);
+	return (action == Action::accept) ? result : tl::optional<UI_ProjectSetup::Result>{};
 }
 
 void UI_ProjectSetup::PopulateIWADs()
@@ -829,7 +798,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	// the user has found a new iwad.  For the latter case, we want
 	// to show the newly found game.
 
-	SString prev_game = game;
+	SString prev_game = result.game;
 
 	if (prev_game.empty())
 		prev_game = inst.loaded.gameName;
@@ -837,7 +806,7 @@ void UI_ProjectSetup::PopulateIWADs()
 		prev_game = "doom2";
 
 
-	game.clear();
+	result.game.clear();
 	game_choice->clear();
 
 
@@ -851,10 +820,10 @@ void UI_ProjectSetup::PopulateIWADs()
 		game_choice->add(menu_string.c_str());
 		game_choice->value(menu_value);
 
-		game = game_choice->mvalue()->text;
+		result.game = game_choice->mvalue()->text;
 	}
 
-	if (!game.empty())
+	if (!result.game.empty())
 		ok_but->activate();
 	else
 		ok_but->deactivate();
@@ -874,12 +843,12 @@ void UI_ProjectSetup::PopulatePort()
 		prev_port = "vanilla";
 
 
-	port = "vanilla";
+	result.port = "vanilla";
 
 	port_choice->clear();
 
 	// if no game, port doesn't matter
-	if (game.empty())
+	if (result.game.empty())
 		return;
 
 
@@ -903,14 +872,14 @@ void UI_ProjectSetup::PopulatePort()
 		port_choice->add  (menu_string.c_str());
 		port_choice->value(menu_value);
 
-		port = port_choice->mvalue()->text;
+		result.port = port_choice->mvalue()->text;
 	}
 }
 
 
 void UI_ProjectSetup::PopulateMapFormat()
 {
-	MapFormat prev_fmt = map_format;
+	MapFormat prev_fmt = result.mapFormat;
 
 	if (prev_fmt == MapFormat::invalid)
 		prev_fmt = inst.loaded.levelFormat;
@@ -919,10 +888,10 @@ void UI_ProjectSetup::PopulateMapFormat()
 	format_choice->clear();
 
 	// if no game, format doesn't matter
-	if (game.empty())
+	if (result.game.empty())
 	{
-		map_format = MapFormat::doom;
-		name_space = "";
+		result.mapFormat = MapFormat::doom;
+		result.nameSpace = "";
 		return;
 	}
 
@@ -977,16 +946,16 @@ void UI_ProjectSetup::PopulateMapFormat()
 
 
 	// determine the UDMF namespace
-	name_space = "";
+	result.nameSpace = "";
 
 	const PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
 	if (pinfo)
-		name_space = pinfo->udmf_namespace;
+		result.nameSpace = pinfo->udmf_namespace;
 
 	// don't leave namespace as "" when chosen format is UDMF.
 	// [ this is to handle broken config files somewhat sanely ]
-	if (name_space.empty() && map_format == MapFormat::udmf)
-		name_space = "Hexen";
+	if (result.nameSpace.empty() && result.mapFormat == MapFormat::udmf)
+		result.nameSpace = "Hexen";
 }
 
 
@@ -1052,9 +1021,9 @@ void UI_ProjectSetup::PopulateResources()
 
 		if (r < (int)inst.loaded.resourceList.size())
 		{
-			res[r] = inst.loaded.resourceList[r];
+			result.resources[r] = inst.loaded.resourceList[r];
 
-			res_name[r]->value(res[r].filename().u8string().c_str());
+			res_name[r]->value(result.resources[r].filename().u8string().c_str());
 		}
 	}
 }
@@ -1064,7 +1033,7 @@ void UI_ProjectSetup::close_callback(Fl_Widget *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	that->action = ACT_CANCEL;
+	that->action = Action::cancel;
 }
 
 
@@ -1072,7 +1041,7 @@ void UI_ProjectSetup::use_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	that->action = ACT_ACCEPT;
+	that->action = Action::accept;
 }
 
 
@@ -1084,12 +1053,12 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 
 	if (global::recent.queryIWAD(name))
 	{
-		that->game = name;
+		that->result.game = name;
 		that->ok_but->activate();
 	}
 	else
 	{
-		that->game.clear();
+		that->result.game.clear();
 		that->ok_but->deactivate();
 	}
 
@@ -1104,7 +1073,7 @@ void UI_ProjectSetup::port_callback(Fl_Choice *w, void *data)
 
 	const char * name = w->mvalue()->text;
 
-	that->port = name;
+	that->result.port = name;
 
 	that->PopulateMapFormat();
 }
@@ -1117,11 +1086,11 @@ void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
 	const char * fmt_str = w->mvalue()->text;
 
 	if (strstr(fmt_str, "UDMF"))
-		that->map_format = MapFormat::udmf;
+		that->result.mapFormat = MapFormat::udmf;
 	else if (strstr(fmt_str, "Hexen"))
-		that->map_format = MapFormat::hexen;
+		that->result.mapFormat = MapFormat::hexen;
 	else
-		that->map_format = MapFormat::doom;
+		that->result.mapFormat = MapFormat::doom;
 
 	that->PopulateNamespaces();
 }
@@ -1131,7 +1100,7 @@ void UI_ProjectSetup::namespace_callback(Fl_Choice *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	that->name_space = w->mvalue()->text;
+	that->result.nameSpace = w->mvalue()->text;
 }
 
 
@@ -1173,7 +1142,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	global::recent.addIWAD(fs::u8path(chooser.filename()));
 	global::recent.save(global::home_dir);
 
-	that->game = game;
+	that->result.game = game;
 
 	that->PopulateIWADs();
 	that->PopulatePort();
@@ -1185,13 +1154,13 @@ void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
 	// FIXME : deactivate button when this is true
-	if (that->game.empty() || that->port.empty())
+	if (that->result.game.empty() || that->result.port.empty())
 	{
 		fl_beep();
 		return;
 	}
 
-	that->inst.M_PortSetupDialog(that->port, that->game);
+	that->inst.M_PortSetupDialog(that->result.port, that->result.game, {});
 }
 
 
@@ -1226,9 +1195,9 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 			break;  // OK
 	}
 
-	that->res[r] = fs::u8path(chooser.filename());
+	that->result.resources[r] = fs::u8path(chooser.filename());
 
-	that->res_name[r]->value(that->res[r].filename().u8string().c_str());
+	that->res_name[r]->value(that->result.resources[r].filename().u8string().c_str());
 }
 
 
@@ -1243,9 +1212,9 @@ void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
 
 	SYS_ASSERT(that);
 
-	if (!that->res[r].empty())
+	if (!that->result.resources[r].empty())
 	{
-		that->res[r].clear();
+		that->result.resources[r].clear();
 
 		that->res_name[r]->value("");
 	}

@@ -1,4 +1,4 @@
-configure_file(main.rc.in main.rc)
+
 configure_file(version.h.in version.h)
 
 set(source_base
@@ -16,7 +16,6 @@ set(source_base
     LineDef.h
     main.cc
     main.h
-    main.rc
     objid.h
     SafeOutFile.cc
     SafeOutFile.h
@@ -107,6 +106,7 @@ set(source_m
     m_loadsave.cc
     m_loadsave.h
     m_nodes.cc
+    m_nodes.h
     m_parse.cc
     m_parse.h
     m_select.cc
@@ -259,7 +259,7 @@ if(APPLE OR WIN32)
         # Patch needed to prevent optimization bug
         if(APPLE)
             execute_process(
-                COMMAND patch "${LOCAL_FLTK_SOURCE}/src/Fl_JPEG_Image.cxx" 
+                COMMAND patch "${LOCAL_FLTK_SOURCE}/src/Fl_JPEG_Image.cxx"
                               "${CMAKE_CURRENT_SOURCE_DIR}/fltk-patch/Fl_JPEG_Image-fltk1.3.8-macos.diff"
             )
         endif()

@@ -100,7 +100,7 @@ class Palette
 public:
 	bool updateGamma(int usegamma, int panel_gamma);
 	void decodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const;
-	void decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const;
+	void decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const noexcept;
 	void createBrightMap();
 
 	rgb_color_t getPaletteColor(int index) const
@@ -108,8 +108,8 @@ public:
 		return palette[index];
 	}
 
-	bool loadPalette(Lump_c &lump, int usegamma, int panel_gamma);
-	void loadColormap(Lump_c *lump);
+	bool loadPalette(const Lump_c &lump, int usegamma, int panel_gamma);
+	void loadColormap(const Lump_c *lump);
 
 	byte findPaletteColor(int r, int g, int b) const;
 	rgb_color_t pixelToRGB(img_pixel_t p) const;

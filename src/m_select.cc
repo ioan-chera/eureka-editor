@@ -44,12 +44,7 @@ selection_c::selection_c(ObjType type, bool extended) : type(type)
 	}
 }
 
-selection_c::~selection_c()
-{
-}
-
-
-void selection_c::change_type(ObjType new_type)
+void selection_c::change_type(ObjType new_type) noexcept
 {
 	type = new_type;
 
@@ -57,7 +52,7 @@ void selection_c::change_type(ObjType new_type)
 }
 
 
-bool selection_c::empty() const
+bool selection_c::empty() const noexcept
 {
 	return count == 0;
 }
@@ -69,7 +64,7 @@ int selection_c::count_obj() const
 }
 
 
-bool selection_c::get(int n) const
+bool selection_c::get(int n) const noexcept
 {
 	if (extended)
 		return get_ext(n) != 0;
@@ -118,7 +113,7 @@ void selection_c::set(int n)
 }
 
 
-void selection_c::clear(int n)
+void selection_c::clear(int n) noexcept
 {
 	if (extended)
 	{
@@ -176,7 +171,7 @@ void selection_c::toggle(int n)
 }
 
 
-void selection_c::clear_all()
+void selection_c::clear_all() noexcept
 {
 	count = 0;
 	maxobj = -1;
@@ -190,7 +185,7 @@ void selection_c::clear_all()
 }
 
 
-byte selection_c::get_ext(int n) const
+byte selection_c::get_ext(int n) const noexcept
 {
 	if (! extended)
 		return get(n) ? 255 : 0;
@@ -342,7 +337,7 @@ void selection_c::ConvertToBitvec()
 }
 
 
-void selection_c::RecomputeMaxObj()
+void selection_c::RecomputeMaxObj() noexcept
 {
 	maxobj = -1;
 

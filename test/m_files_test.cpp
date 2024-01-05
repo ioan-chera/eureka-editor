@@ -79,6 +79,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	SString expected = 
 		"# Eureka project info\n"
 		"game Mood\n"
+		"testing_command_line \"\"\n"
 		"port Voom\n"
 		"resource res.png\n"
 		"resource deep/call.txt\n"
@@ -115,6 +116,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	static const char expected2[] = {
 		"# Eureka project info\n"
 		"game Mood\n"
+		"testing_command_line \"\"\n"
 	};
 	lump = wad->GetLump(2);
 	content = SString(reinterpret_cast<const char *>(lump->getData().data()), lump->Length());
@@ -772,7 +774,7 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	std::map<SString, fs::path> readPortPaths;
 	while(M_ReadTextLine(line, is))
 	{
-		TokenWordParse parse(line);
+		TokenWordParse parse(line, true);
 		SString keyword;
 		if(!parse.getNext(keyword))
 			continue;

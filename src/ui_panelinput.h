@@ -27,9 +27,22 @@
 #ifndef __EUREKA_UI_PANELINPUT_H__
 #define __EUREKA_UI_PANELINPUT_H__
 
+#include "FL/Fl_Group.H"
 #include "FL/Fl_Input.H"
 #include <unordered_map>
 #include <unordered_set>
+
+class Instance;
+class UI_Nombre;
+struct ConfigData;
+struct Document;
+struct LoadingData;
+
+enum
+{
+	NOMBRE_INSET = 6,
+	NOMBRE_HEIGHT = 28
+};
 
 //
 // Interface for providing "callback2" to controls
@@ -66,7 +79,7 @@ public:
 
 	// Call it before starting basis
 	void checkDirtyFields();
-	void setInputValue(ICallback2 *input, const char *value);
+	void setInputValue(ICallback2 *input, const char *value) noexcept;
 
 private:
 	//
@@ -93,6 +106,32 @@ private:
 	// - Remove them from list when their value() is changed externally.
 	// - Before any basis.begin() or external function which does that, call checkDirtyFields()
 	std::unordered_set<ICallback2 *> mDirtyFields;
+};
+
+
+class MapItemBox : public Fl_Group
+{
+public:
+	MapItemBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr) : Fl_Group(X, Y, W, H, label), inst(inst)
+	{
+	}
+	
+	void SetObj(int _index, int _count);
+	int GetObj() const { return obj; }
+	
+	virtual void UpdateField(int field = -1) = 0;
+	virtual void UnselectPics() = 0;
+	virtual void UpdateTotal(const Document &doc) noexcept = 0;
+	virtual void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) = 0;
+	
+protected:
+	Instance &inst;
+	int obj = -1;
+	int count = 0;
+	
+	UI_Nombre *which = nullptr;
+	
+	PanelFieldFixUp	mFixUp;
 };
 
 #endif

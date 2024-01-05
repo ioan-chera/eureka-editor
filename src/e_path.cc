@@ -56,8 +56,8 @@ select_lines_in_path_flag_e;
 
 static bool MatchingTextures(const Document &doc, int index1, int index2)
 {
-	const auto &L1 = doc.linedefs[index1];
-	const auto &L2 = doc.linedefs[index2];
+	const auto L1 = doc.linedefs[index1];
+	const auto L2 = doc.linedefs[index2];
 
 	// lines with no sidedefs only match each other
 	if (! doc.getRight(*L1) || ! doc.getRight(*L2))
@@ -259,8 +259,8 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 		if (sec1 == sec2)
 			continue;
 
-		const auto &S1 = inst.level.sectors[sec1];
-		const auto &S2 = inst.level.sectors[sec2];
+		const auto S1 = inst.level.sectors[sec1];
+		const auto S2 = inst.level.sectors[sec2];
 
 		// skip closed doors
 		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))

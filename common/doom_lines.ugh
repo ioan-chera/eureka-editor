@@ -180,11 +180,10 @@ line  89 m "WR Stop Moving Floor"   :tag
 line   7 s "S1 Stair Raise 8"   :tag
 line 100 s "W1 Stair Raise 16"  :tag
 line   8 s "W1 Stair Raise 8"   :tag
-
-line  39 t "W1 Teleport"    :tag
-line  97 t "WR Teleport"    :tag
-
-line 125 t "W1 Teleport /mon"   :tag
-line 126 t "WR Teleport /mon"   :tag
 line 127 s "S1 Stair Raise 16"  :tag
+
+line  39 t "W1 Teleport"       :tag
+line  97 t "WR Teleport"       :tag
+line 125 t "W1 Teleport /mon"  :tag
+line 126 t "WR Teleport /mon"  :tag
 

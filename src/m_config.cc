@@ -764,7 +764,7 @@ const opt_desc_t options[] =
 static int parse_config_line_from_file(const SString &line, const fs::path &basename, int lnum,
 									   const opt_desc_t *options)
 {
-	TokenWordParse parse(line);
+	TokenWordParse parse(line, true);
 	SString key;
 	if(!parse.getNext(key))	// empty line
 		return 0;
@@ -1290,11 +1290,15 @@ bool Instance::M_LoadUserState()
 
 	SString line;
 
-	std::vector<SString> tokens;
-
 	while (file.readLine(line))
 	{
-		int num_tok = M_ParseLine(line, tokens, ParseOptions::haveStrings);
+		TokenWordParse parse(line, true);
+		SString word;
+		std::vector<SString> tokens;
+		while (parse.getNext(word))
+			tokens.push_back(word);
+
+		int num_tok = (int)tokens.size();
 
 		if (num_tok == 0)
 			continue;
@@ -1322,7 +1326,8 @@ bool Instance::M_LoadUserState()
 
 	file.close();
 
-	Props_LoadValues(*this);
+	if(main_win)
+		main_win->propsLoadValues();
 
 	return true;
 }
@@ -1367,7 +1372,7 @@ void Instance::M_DefaultUserState()
 
 	Render3D_Setup();
 
-	Editor_DefaultState();
+	edit.defaultState();
 }
 
 

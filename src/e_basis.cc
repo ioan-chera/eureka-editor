@@ -65,7 +65,7 @@ StringID BA_InternaliseString(const SString &str)
 	return basis_strtab.add(str);
 }
 
-SString BA_GetString(StringID offset)
+SString BA_GetString(StringID offset) noexcept
 {
 	return basis_strtab.get(offset);
 }
@@ -197,27 +197,27 @@ int Basis::addNew(ObjType type)
 	{
 	case ObjType::things:
 		op.objnum = doc.numThings();
-		op.thing = std::make_unique<Thing>();
+		op.thing = std::make_shared<Thing>();
 		break;
 
 	case ObjType::vertices:
 		op.objnum = doc.numVertices();
-		op.vertex = std::make_unique<Vertex>();
+		op.vertex = std::make_shared<Vertex>();
 		break;
 
 	case ObjType::sidedefs:
 		op.objnum = doc.numSidedefs();
-		op.sidedef = std::make_unique<SideDef>();
+		op.sidedef = std::make_shared<SideDef>();
 		break;
 
 	case ObjType::linedefs:
 		op.objnum = doc.numLinedefs();
-		op.linedef = std::make_unique<LineDef>();
+		op.linedef = std::make_shared<LineDef>();
 		break;
 
 	case ObjType::sectors:
 		op.objnum = doc.numSectors();
-		op.sector = std::make_unique<Sector>();
+		op.sector = std::make_shared<Sector>();
 		break;
 
 	default:
@@ -252,7 +252,7 @@ void Basis::del(ObjType type, int objnum)
 		// unbind sidedef from any linedefs using it
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			const auto &L = doc.linedefs[n];
+			const auto L = doc.linedefs[n];
 
 			if(L->right == objnum)
 				changeLinedef(n, LineDef::F_RIGHT, -1);
@@ -266,7 +266,7 @@ void Basis::del(ObjType type, int objnum)
 		// delete any linedefs bound to this vertex
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			const auto &L = doc.linedefs[n];
+			const auto L = doc.linedefs[n];
 
 			if(L->start == objnum || L->end == objnum)
 				del(ObjType::linedefs, n);
@@ -433,31 +433,16 @@ bool Basis::redo()
 	return true;
 }
 
-//
-// clear everything (before loading a new level).
-//
-void Basis::clearAll()
+void Basis::clear()
 {
-	doc.things.clear();
-	doc.vertices.clear();
-	doc.sectors.clear();
-	doc.sidedefs.clear();
-	doc.linedefs.clear();
-
-	doc.headerData.clear();
-	doc.behaviorData.clear();
-	doc.scriptsData.clear();
-
 	while(!mUndoHistory.empty())
 		mUndoHistory.pop();
 	while(!mRedoFuture.empty())
 		mRedoFuture.pop();
-
+	
 	// Note: we don't clear the string table, since there can be
 	//       string references in the clipboard.
 
-	// TODO: other modules
-	Clipboard_ClearLocals();
 }
 
 //
@@ -589,7 +574,7 @@ void Basis::EditUnit::rawDelete(Basis &basis)
 //
 // Thing deletion
 //
-std::unique_ptr<Thing> Basis::EditUnit::rawDeleteThing(Document &doc) const
+std::shared_ptr<Thing> Basis::EditUnit::rawDeleteThing(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numThings());
 
@@ -602,7 +587,7 @@ std::unique_ptr<Thing> Basis::EditUnit::rawDeleteThing(Document &doc) const
 //
 // Vertex deletion (and update linedef refs)
 //
-std::unique_ptr<Vertex> Basis::EditUnit::rawDeleteVertex(Document &doc) const
+std::shared_ptr<Vertex> Basis::EditUnit::rawDeleteVertex(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numVertices());
 
@@ -615,7 +600,7 @@ std::unique_ptr<Vertex> Basis::EditUnit::rawDeleteVertex(Document &doc) const
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			auto &L = doc.linedefs[n];
+			auto L = doc.linedefs[n];
 
 			if(L->start > objnum)
 				L->start--;
@@ -631,7 +616,7 @@ std::unique_ptr<Vertex> Basis::EditUnit::rawDeleteVertex(Document &doc) const
 //
 // Raw delete sector (and update sidedef refs)
 //
-std::unique_ptr<Sector> Basis::EditUnit::rawDeleteSector(Document &doc) const
+std::shared_ptr<Sector> Basis::EditUnit::rawDeleteSector(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numSectors());
 
@@ -644,7 +629,7 @@ std::unique_ptr<Sector> Basis::EditUnit::rawDeleteSector(Document &doc) const
 	{
 		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
 		{
-			auto &S = doc.sidedefs[n];
+			auto S = doc.sidedefs[n];
 
 			if(S->sector > objnum)
 				S->sector--;
@@ -657,7 +642,7 @@ std::unique_ptr<Sector> Basis::EditUnit::rawDeleteSector(Document &doc) const
 //
 // Delete sidedef (and update linedef references)
 //
-std::unique_ptr<SideDef> Basis::EditUnit::rawDeleteSidedef(Document &doc) const
+std::shared_ptr<SideDef> Basis::EditUnit::rawDeleteSidedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numSidedefs());
 
@@ -670,7 +655,7 @@ std::unique_ptr<SideDef> Basis::EditUnit::rawDeleteSidedef(Document &doc) const
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			auto &L = doc.linedefs[n];
+			auto L = doc.linedefs[n];
 
 			if(L->right > objnum)
 				L->right--;
@@ -686,7 +671,7 @@ std::unique_ptr<SideDef> Basis::EditUnit::rawDeleteSidedef(Document &doc) const
 //
 // Raw delete linedef
 //
-std::unique_ptr<LineDef> Basis::EditUnit::rawDeleteLinedef(Document &doc) const
+std::shared_ptr<LineDef> Basis::EditUnit::rawDeleteLinedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numLinedefs());
 
@@ -765,7 +750,7 @@ void Basis::EditUnit::rawInsertVertex(Document &doc)
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			auto &L = doc.linedefs[n];
+			auto L = doc.linedefs[n];
 
 			if(L->start >= objnum)
 				L->start++;
@@ -790,7 +775,7 @@ void Basis::EditUnit::rawInsertSector(Document &doc)
 	{
 		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
 		{
-			auto &S = doc.sidedefs[n];
+			auto S = doc.sidedefs[n];
 
 			if(S->sector >= objnum)
 				S->sector++;
@@ -812,7 +797,7 @@ void Basis::EditUnit::rawInsertSidedef(Document &doc)
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			auto &L = doc.linedefs[n];
+			auto L = doc.linedefs[n];
 
 			if(L->right >= objnum)
 				L->right++;
@@ -921,7 +906,7 @@ void Basis::doProcessChangeStatus() const
 	if(mDidMakeChanges)
 	{
 		// TODO: the other modules
-		inst.MadeChanges = true;
+		doc.MadeChanges = true;
 		inst.RedrawMap();
 	}
 

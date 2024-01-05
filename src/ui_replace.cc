@@ -1460,7 +1460,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 bool UI_FindAndReplace::Match_Thing(int idx)
 {
-	const auto &T = inst.level.things[idx];
+	const auto T = inst.level.things[idx];
 
 	if (! find_numbers->get(T->type))
 		return false;
@@ -1478,7 +1478,7 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 
 bool UI_FindAndReplace::Match_LineDef(int idx)
 {
-	const auto &L = inst.level.linedefs[idx];
+	const auto L = inst.level.linedefs[idx];
 
 	if (! Filter_Tag(L->tag) || ! Filter_Sides(L.get()))
 		return false;
@@ -1521,7 +1521,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 bool UI_FindAndReplace::Match_Sector(int idx)
 {
-	const auto &sector = inst.level.sectors[idx];
+	const auto sector = inst.level.sectors[idx];
 
 	if (! Filter_Tag(sector->tag))
 		return false;
@@ -1545,7 +1545,7 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 
 bool UI_FindAndReplace::Match_LineType(int idx)
 {
-	const auto &L = inst.level.linedefs[idx];
+	const auto L = inst.level.linedefs[idx];
 
 	if (! find_numbers->get(L->type))
 		return false;
@@ -1559,7 +1559,7 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 
 bool UI_FindAndReplace::Match_SectorType(int idx)
 {
-	const auto &sector = inst.level.sectors[idx];
+	const auto sector = inst.level.sectors[idx];
 
 	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 				(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
@@ -1707,7 +1707,7 @@ void UI_FindAndReplace::Replace_Thing(EditOperation &op, int idx)
 
 void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new_tex)
 {
-	const auto &L = inst.level.linedefs[idx];
+	const auto L = inst.level.linedefs[idx];
 
 	const char *pattern = find_match->value();
 
@@ -1750,7 +1750,7 @@ void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new
 
 void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, StringID new_tex)
 {
-	const auto &sector = inst.level.sectors[idx];
+	const auto sector = inst.level.sectors[idx];
 
 	const char *pattern = find_match->value();
 

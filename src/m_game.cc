@@ -140,33 +140,6 @@ bool PortInfo_c::SupportsGame(const SString &game) const
 	return false;
 }
 
-//
-//  this is called each time the full set of definitions
-//  (game, port, resource files) are loaded.
-//
-void ConfigData::clearExceptDefaults()
-{
-	// Free all definitions
-	line_groups.clear();
-	line_types.clear();
-	sector_types.clear();
-
-	thing_groups.clear();
-	thing_types.clear();
-
-	texture_groups.clear();
-	texture_categories.clear();
-	flat_categories.clear();
-
-	miscInfo = misc_info_t();
-
-	features = {};
-
-	// reset generalized types
-	for(generalized_linetype_t &type : gen_linetypes)
-		type = {};
-	num_gen_linetypes = 0;
-}
 
 //
 // Called only from Main_LoadResources
@@ -502,7 +475,7 @@ void parser_state_c::tokenize()
 	// break the line into whitespace-separated tokens.
 	// whitespace can be enclosed in double quotes.
 	
-	TokenWordParse parse(readstring);
+	TokenWordParse parse(readstring, true);
 	SString word;
 	args.clear();
 	argc = 0;

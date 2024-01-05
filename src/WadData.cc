@@ -18,6 +18,7 @@
 
 #include "WadData.h"
 #include "m_config.h"
+#include "m_loadsave.h"
 #include "w_wad.h"
 
 //
@@ -31,13 +32,14 @@ bool LumpNameCompare::operator()(const Lump_c &lump1, const Lump_c &lump2) const
 //
 // Locates the first four-stem sprite from the master dir
 //
-Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
+const Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
 {
 	SString firstName;
-	Lump_c *result = nullptr;
-	for(auto it = getDir().rbegin(); it != getDir().rend(); ++it)
+	const Lump_c *result = nullptr;
+	std::vector<std::shared_ptr<Wad_file>> wads = getAll();
+	for(auto it = wads.rbegin(); it != wads.rend(); ++it)
 	{
-		Lump_c *lump = (*it)->findFirstSpriteLump(stem);
+		const Lump_c *lump = (*it)->findFirstSpriteLump(stem);
 		if(!lump)
 			continue;
 		if(firstName.empty() || firstName.get() > lump->Name().get())
@@ -49,9 +51,9 @@ Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
 	return result;
 }
 
-void WadData::W_LoadPalette()
+void WadData::W_LoadPalette() noexcept(false)
 {
-	Lump_c *lump = master.findGlobalLump("PLAYPAL");
+	const Lump_c *lump = master.findGlobalLump("PLAYPAL");
 	if(!lump)
 	{
 		ThrowException("PLAYPAL lump not found.\n");
@@ -60,27 +62,15 @@ void WadData::W_LoadPalette()
 	images.IM_ResetDummyTextures();
 }
 
-void WadData::reloadResources(const LoadingData &loading, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads)
+void WadData::reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads) noexcept(false)
 {
 	// reset the master directory
 	WadData newWad = *this;
 	try
 	{
-		if (newWad.master.edit_wad)
-			newWad.master.MasterDir_Remove(newWad.master.edit_wad);
-		
-		newWad.master.MasterDir_CloseAll();
-		
-		// TODO: check result
-		newWad.Main_LoadIWAD(loading);
-		
-		// load all resource wads
-		for(const std::shared_ptr<Wad_file> &wad : resourceWads)
-			newWad.master.MasterDir_Add(wad);
-		
-		if (newWad.master.edit_wad)
-			newWad.master.MasterDir_Add(newWad.master.edit_wad);
-		
+		newWad.master.setGameWad(gameWad);
+		newWad.master.setResources(resourceWads);
+				
 		// finally, load textures and stuff...
 		newWad.W_LoadPalette();
 		newWad.W_LoadColormap();

@@ -57,12 +57,12 @@ enum class ImageFormat
 	gif,
 	dds,
 };
-ImageFormat W_DetectImageFormat(Lump_c *lump);
+ImageFormat W_DetectImageFormat(const Lump_c &lump);
 
-tl::optional<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name);
-tl::optional<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name);
-tl::optional<Img_c> LoadImage_TGA(Lump_c *lump, const SString &name);
-bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr);
+tl::optional<Img_c> LoadImage_JPEG(const Lump_c &lump, const SString &name);
+tl::optional<Img_c> LoadImage_PNG(const Lump_c &lump, const SString &name);
+tl::optional<Img_c> LoadImage_TGA(const Lump_c &lump, const SString &name);
+bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c &dest, const Lump_c &lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr);
 
 #endif  /* __EUREKA_W_LOADPIC_H__ */
 

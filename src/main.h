@@ -149,6 +149,12 @@ namespace global
 }
 
 
+struct LoadingData;
+struct NewResources;
+struct WadData;
+
+NewResources loadResources(const LoadingData& loading, const WadData& waddata) noexcept(false);
+
 /*
  *  Various global functions
  */

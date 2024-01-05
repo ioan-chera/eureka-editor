@@ -39,16 +39,14 @@ private:
 	// empty means EOF
 	SString text;
 
-	Instance &inst;
-
 public:
-	Udmf_Token(Instance &inst, const char *str) : text(str), inst(inst)
+	Udmf_Token(const char *str) : text(str)
 	{ }
 
-	Udmf_Token(Instance &inst, const char *str, int len) : text(str, len), inst(inst)
+	Udmf_Token(const char *str, int len) : text(str, len)
 	{ }
 
-	const char *c_str()
+	const char *c_str() const
 	{
 		return text.c_str();
 	}
@@ -104,7 +102,7 @@ public:
 
 	FFixedPoint DecodeCoord() const
 	{
-		return MakeValidCoord(inst.loaded.levelFormat, DecodeFloat());
+		return MakeValidCoord(MapFormat::udmf, DecodeFloat());
 	}
 
 	StringID DecodeTexture() const
@@ -140,7 +138,7 @@ public:
 class Udmf_Parser
 {
 private:
-	Lump_c *lump;
+	LumpInputStream stream;
 
 	// reached EOF or a file read error
 	bool done = false;
@@ -158,12 +156,10 @@ private:
 	int b_pos = 0;
 	int b_size = 0;
 
-	Instance &inst;
-
 public:
-	Udmf_Parser(Instance &inst, Lump_c *_lump) : lump(_lump), inst(inst)
+	Udmf_Parser(const Lump_c &_lump) : stream(_lump)
 	{
-		remaining = lump->Length();
+		remaining = _lump.Length();
 	}
 
 	Udmf_Token Next()
@@ -171,7 +167,7 @@ public:
 		for (;;)
 		{
 			if (done)
-				return Udmf_Token(inst, "");
+				return Udmf_Token("");
 
 			// when position reaches half-way point, shift buffer down
 			if (b_pos >= U_BUF_SIZE/2)
@@ -189,7 +185,7 @@ public:
 				if (want > remaining)
 					want = remaining;
 
-				if (! lump->Read(buffer + b_size, want))
+				if (! stream.read(buffer + b_size, want))
 				{
 					// TODO mark error somewhere, show dialog later
 					done = true;
@@ -278,7 +274,7 @@ public:
 					b_pos++;
 				}
 
-				return Udmf_Token(inst, buffer+start, b_pos - start);
+				return Udmf_Token(buffer+start, b_pos - start);
 			}
 
 			// is it a identifier or number?
@@ -297,13 +293,13 @@ public:
 					break;
 				}
 
-				return Udmf_Token(inst, buffer+start, b_pos - start);
+				return Udmf_Token(buffer+start, b_pos - start);
 			}
 
 			// it must be a symbol, such as '{' or '}'
 			b_pos++;
 
-			return Udmf_Token(inst, buffer+start, 1);
+			return Udmf_Token(buffer+start, 1);
 		}
 	}
 
@@ -321,7 +317,7 @@ public:
 };
 
 
-static void UDMF_ParseGlobalVar(Instance &inst, Udmf_Parser& parser, Udmf_Token& name)
+static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name)
 {
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
@@ -341,7 +337,7 @@ static void UDMF_ParseGlobalVar(Instance &inst, Udmf_Parser& parser, Udmf_Token&
 		// TODO : check if namespace is supported by current port
 		//        [ if not, show a dialog with some options ]
 
-		inst.loaded.udmfNamespace = value.DecodeString();
+		loading.udmfNamespace = value.DecodeString();
 	}
 	else if (name.Match("ee_compat"))
 	{
@@ -354,7 +350,7 @@ static void UDMF_ParseGlobalVar(Instance &inst, Udmf_Parser& parser, Udmf_Token&
 }
 
 
-static void UDMF_ParseThingField(const Document &doc, Thing *T, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token& field, const Udmf_Token& value)
 {
 	// just ignore any setting with the "false" keyword
 	if (value.Match("false"))
@@ -413,7 +409,7 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, Udmf_Token& fiel
 	}
 }
 
-static void UDMF_ParseVertexField(const Document &doc, Vertex *V, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseVertexField(const Document &doc, Vertex *V, const Udmf_Token& field, const Udmf_Token& value)
 {
 	if (field.Match("x"))
 		V->raw_x = value.DecodeCoord();
@@ -425,7 +421,7 @@ static void UDMF_ParseVertexField(const Document &doc, Vertex *V, Udmf_Token& fi
 	}
 }
 
-static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_Token& field, const Udmf_Token& value)
 {
 	// Note: vertex and sidedef numbers are validated later on
 
@@ -487,7 +483,7 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, Udmf_Token&
 	}
 }
 
-static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_Token& field, const Udmf_Token& value)
 {
 	// Note: sector numbers are validated later on
 
@@ -511,7 +507,7 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, Udmf_Token&
 	}
 }
 
-static void UDMF_ParseSectorField(const Document &doc, Sector *S, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseSectorField(const Document &doc, Sector *S, const Udmf_Token& field, const Udmf_Token& value)
 {
 	if (field.Match("heightfloor"))
 		S->floorh = value.DecodeInt();
@@ -533,7 +529,7 @@ static void UDMF_ParseSectorField(const Document &doc, Sector *S, Udmf_Token& fi
 	}
 }
 
-static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& name)
+static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Token& name)
 {
 	// create a new object of the specified type
 	Objid kind;
@@ -562,14 +558,14 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	else if (name.Match("linedef"))
 	{
 		kind = Objid(ObjType::linedefs, 1);
-		auto addedLine = std::make_unique<LineDef>();
+		auto addedLine = std::make_shared<LineDef>();
 		doc.linedefs.push_back(std::move(addedLine));
 		new_LD = doc.linedefs.back().get();
 	}
 	else if (name.Match("sidedef"))
 	{
 		kind = Objid(ObjType::sidedefs, 1);
-		auto addedSide = std::make_unique<SideDef>();
+		auto addedSide = std::make_shared<SideDef>();
 		addedSide->mid_tex = BA_InternaliseString("-");
 		addedSide->lower_tex = addedSide->mid_tex;
 		addedSide->upper_tex = addedSide->mid_tex;
@@ -579,7 +575,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	else if (name.Match("sector"))
 	{
 		kind = Objid(ObjType::sectors, 1);
-		auto addedSector = std::make_unique<Sector>();
+		auto addedSector = std::make_shared<Sector>();
 		addedSector->light = 160;
 		doc.sectors.push_back(std::move(addedSector));
 		new_S = doc.sectors.back().get();
@@ -636,36 +632,36 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 }
 
 
-void Instance::ValidateLevel_UDMF()
+void Document::ValidateLevel_UDMF(const ConfigData &config, BadCount &bad)
 {
-	for (int n = 0 ; n < level.numSidedefs() ; n++)
+	for (int n = 0 ; n < numSidedefs() ; n++)
 	{
-		ValidateSectorRef(level.sidedefs[n].get(), n);
+		ValidateSectorRef(*sidedefs[n], n, config, bad);
 	}
 
-	for (int n = 0 ; n < level.numLinedefs(); n++)
+	for (int n = 0 ; n < numLinedefs(); n++)
 	{
-		auto &L = level.linedefs[n];
+		auto L = linedefs[n];
 
-		ValidateVertexRefs(L.get(), n);
-		ValidateSidedefRefs(L.get(), n);
+		ValidateVertexRefs(*L, n, bad);
+		ValidateSidedefRefs(*L, n, config, bad);
 	}
 }
 
 
-void Instance::UDMF_LoadLevel(const Wad_file *load_wad)
+void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Document& doc, LoadingData &loading, BadCount &bad) const
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "TEXTMAP");
+	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "TEXTMAP");
 	// we assume this cannot happen
 	if (! lump)
 		return;
 
-	// TODO: reduce stack!!
-	Udmf_Parser parser(*this, lump);
+	// NOTE: this must be a pointer to heap, due to stack size.
+	auto parser = std::make_unique<Udmf_Parser>(*lump);
 
 	for (;;)
 	{
-		Udmf_Token tok = parser.Next();
+		Udmf_Token tok = parser->Next();
 		if (tok.IsEOF())
 			break;
 
@@ -673,31 +669,31 @@ void Instance::UDMF_LoadLevel(const Wad_file *load_wad)
 		{
 			// something has gone wrong
 			// TODO mark the error somehow, pop-up dialog later
-			parser.SkipToEOLN();
+			parser->SkipToEOLN();
 			continue;
 		}
 
-		Udmf_Token tok2 = parser.Next();
+		Udmf_Token tok2 = parser->Next();
 		if (tok2.IsEOF())
 			break;
 
 		if (tok2.Match("="))
 		{
-			UDMF_ParseGlobalVar(*this, parser, tok);
+			UDMF_ParseGlobalVar(loading, *parser, tok);
 			continue;
 		}
 		if (tok2.Match("{"))
 		{
-			UDMF_ParseObject(level, parser, tok);
+			UDMF_ParseObject(doc, *parser, tok);
 			continue;
 		}
 
 		// unexpected symbol
 		// TODO mark the error somehow, show dialog later
-		parser.SkipToEOLN();
+		parser->SkipToEOLN();
 	}
 
-	ValidateLevel_UDMF();
+	doc.ValidateLevel_UDMF(conf, bad);
 }
 
 
@@ -711,9 +707,9 @@ static inline void WrFlag(Lump_c *lump, int flags, const char *name, int mask)
 	}
 }
 
-static void UDMF_WriteInfo(const Instance &inst, Lump_c *lump)
+static void UDMF_WriteInfo(const LoadingData &loading, Lump_c *lump)
 {
-	lump->Printf("namespace = \"%s\";\n\n", inst.loaded.udmfNamespace.c_str());
+	lump->Printf("namespace = \"%s\";\n\n", loading.udmfNamespace.c_str());
 }
 
 static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
@@ -723,7 +719,7 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		lump->Printf("thing // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &th = inst.level.things[i];
+		const auto th = inst.level.things[i];
 
 		lump->Printf("x = %1.3f;\n", th->x());
 		lump->Printf("y = %1.3f;\n", th->y());
@@ -767,7 +763,7 @@ static void UDMF_WriteVertices(const Document &doc, Lump_c *lump)
 		lump->Printf("vertex // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &vert = doc.vertices[i];
+		const auto vert = doc.vertices[i];
 
 		lump->Printf("x = %1.3f;\n", vert->x());
 		lump->Printf("y = %1.3f;\n", vert->y());
@@ -783,7 +779,7 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		lump->Printf("linedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &ld = inst.level.linedefs[i];
+		const auto ld = inst.level.linedefs[i];
 
 		lump->Printf("v1 = %d;\n", ld->start);
 		lump->Printf("v2 = %d;\n", ld->end);
@@ -841,7 +837,7 @@ static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 		lump->Printf("sidedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &side = doc.sidedefs[i];
+		const auto side = doc.sidedefs[i];
 
 		lump->Printf("sector = %d;\n", side->sector);
 
@@ -870,7 +866,7 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 		lump->Printf("sector // %d\n", i);
 		lump->Printf("{\n");
 
-		const auto &sec = doc.sectors[i];
+		const auto sec = doc.sectors[i];
 
 		lump->Printf("heightfloor = %d;\n", sec->floorh);
 		lump->Printf("heightceiling = %d;\n", sec->ceilh);
@@ -890,18 +886,18 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 	}
 }
 
-void Instance::UDMF_SaveLevel() const
+void Instance::UDMF_SaveLevel(const LoadingData& loading, Wad_file& wad) const
 {
-	Lump_c &lump = wad.master.edit_wad->AddLump("TEXTMAP");
+	Lump_c &lump = wad.AddLump("TEXTMAP");
 
-	UDMF_WriteInfo(*this, &lump);
+	UDMF_WriteInfo(loading, &lump);
 	UDMF_WriteThings(*this, &lump);
 	UDMF_WriteVertices(level, &lump);
 	UDMF_WriteLineDefs(*this, &lump);
 	UDMF_WriteSideDefs(level, &lump);
 	UDMF_WriteSectors(level, &lump);
 
-	wad.master.edit_wad->AddLump("ENDMAP");
+	wad.AddLump("ENDMAP");
 }
 
 

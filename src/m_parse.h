@@ -53,7 +53,7 @@ int M_ParseLine(const SString &cline, std::vector<SString> &tokens,
 class TokenWordParse
 {
 public:
-	explicit TokenWordParse(const SString &line) : mLine(line)
+	TokenWordParse(const SString &line, bool hasComments) : mLine(line), mHasComments(hasComments)
 	{
 	}
 
@@ -72,4 +72,5 @@ private:
 	const SString mLine;
 	int mPos = 0;
 	State mState = State::open;	// state can be left in other states
+	bool mHasComments = false;
 };

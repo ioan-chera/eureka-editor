@@ -109,9 +109,9 @@ void Instance::CMD_SEC_Floor()
 		EditOperation op(level.basis);
 		op.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &S = level.sectors[*it];
+			const auto S = level.sectors[*it];
 
 			int new_h = clamp(-32767, S->floorh + diff, S->ceilh);
 
@@ -147,9 +147,9 @@ void Instance::CMD_SEC_Ceil()
 		EditOperation op(level.basis);
 		op.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &S = level.sectors[*it];
+			const auto S = level.sectors[*it];
 
 			int new_h = clamp(S->floorh, S->ceilh + diff, 32767);
 
@@ -196,9 +196,9 @@ void SectorModule::sectorsAdjustLight(int delta) const
 		EditOperation op(doc.basis);
 		op.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *inst.edit.Selected);
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &S = doc.sectors[*it];
+			const auto S = doc.sectors[*it];
 
 			int new_lt = light_add_delta(S->light, delta);
 
@@ -247,9 +247,9 @@ void Instance::CMD_SEC_SwapFlats()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("swapped flats in", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &S = level.sectors[*it];
+			const auto S = level.sectors[*it];
 
 			StringID floor_tex = S->floor_tex;
 			StringID  ceil_tex = S->ceil_tex;
@@ -271,7 +271,7 @@ void SectorModule::linedefsBetweenSectors(selection_c *list, int sec1, int sec2)
 {
 	for (int i = 0 ; i < doc.numLinedefs() ; i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto L = doc.linedefs[i];
 
 		if (! (doc.getLeft(*L) && doc.getRight(*L)))
 			continue;
@@ -289,7 +289,7 @@ void SectorModule::replaceSectorRefs(EditOperation &op, int old_sec, int new_sec
 {
 	for (int i = 0 ; i < doc.numSidedefs() ; i++)
 	{
-		const auto &sd = doc.sidedefs[i];
+		const auto sd = doc.sidedefs[i];
 
 		if (sd->sector == old_sec)
 		{
@@ -321,7 +321,7 @@ void Instance::commandSectorMerge()
 	// select the wrong sector afterwards (due to renumbering).
 	int new_sec = edit.Selected->max_obj();
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 	{
 		new_sec = std::min(new_sec, *it);
 	}
@@ -336,7 +336,7 @@ void Instance::commandSectorMerge()
 		// keep the properties of the first selected sector
 		if (new_sec != first)
 		{
-			const auto &ref = level.sectors[first];
+			const auto ref = level.sectors[first];
 
 			op.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
 			op.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
@@ -348,7 +348,7 @@ void Instance::commandSectorMerge()
 			op.changeSector(new_sec, Sector::F_TAG,   ref->tag);
 		}
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			int old_sec = *it;
 
@@ -440,7 +440,7 @@ double lineloop_c::TotalLength() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		const auto &L = doc.linedefs[lines[k]];
+		const auto L = doc.linedefs[lines[k]];
 
 		result += doc.calcLength(*L);
 	}
@@ -492,7 +492,7 @@ int lineloop_c::NeighboringSector() const
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const auto &L = doc.linedefs[lines[i]];
+		const auto L = doc.linedefs[lines[i]];
 
 		// we assume here that SIDE_RIGHT == 0 - SIDE_LEFT
 		int sec = doc.getSectorID(*doc.linedefs[lines[i]], - sides[i]);
@@ -525,7 +525,7 @@ int lineloop_c::IslandSector() const
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
 		Side opp_side;
-		int opp_ld = doc.hover.getOppositeLinedef(lines[i], sides[i], &opp_side, nullptr);
+		int opp_ld = doc.hover.getOppositeLinedef(lines[i], sides[i], &opp_side, nullptr, nullptr);
 
 		// can see "the void" ?
 		// this means the geometry around here is broken, but for
@@ -570,7 +570,7 @@ void lineloop_c::CalcBounds(double *x1, double *y1, double *x2, double *y2) cons
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const auto &L = doc.linedefs[lines[i]];
+		const auto L = doc.linedefs[lines[i]];
 
 		*x1 = std::min(*x1, std::min(doc.getStart(*L).x(), doc.getEnd(*L).x()));
 		*y1 = std::min(*y1, std::min(doc.getStart(*L).y(), doc.getEnd(*L).y()));
@@ -660,7 +660,7 @@ bool SectorModule::traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignor
 
 		for (int n = 0 ; n < doc.numLinedefs() ; n++)
 		{
-			const auto &N = doc.linedefs[n];
+			const auto N = doc.linedefs[n];
 
 			if (! N->TouchesVertex(cur_vert))
 				continue;
@@ -765,7 +765,7 @@ bool lineloop_c::LookForIsland()
 
 	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
 	{
-		const auto &L = doc.linedefs[ld];
+		const auto L = doc.linedefs[ld];
 
 		double x1 = doc.getStart(*L).x();
 		double y1 = doc.getStart(*L).y();
@@ -783,7 +783,7 @@ bool lineloop_c::LookForIsland()
 			Side ld_side = where ? Side::right : Side::left;
 
 			Side opp_side;
-			int opp = doc.hover.getOppositeLinedef(ld, ld_side, &opp_side, nullptr);
+			int opp = doc.hover.getOppositeLinedef(ld, ld_side, &opp_side, nullptr, nullptr);
 
 			if (opp < 0)
 				continue;
@@ -868,7 +868,7 @@ void lineloop_c::Dump() const
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const auto &L = doc.linedefs[lines[i]];
+		const auto L = doc.linedefs[lines[i]];
 
 		gLog.debugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
 		            sides[i] == Side::left ? " LEFT" : "RIGHT",
@@ -881,7 +881,7 @@ void lineloop_c::Dump() const
 
 inline bool SectorModule::willBeTwoSided(int ld, Side side) const
 {
-	const auto &L = doc.linedefs[ld];
+	const auto L = doc.linedefs[ld];
 
 	if (L->WhatSideDef(side) < 0)
 	{
@@ -925,7 +925,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 			if (sd < 0)
 				continue;
 
-			const auto &SD = doc.sidedefs[sd];
+			const auto SD = doc.sidedefs[sd];
 
 			if (doc.linedefs[ld]->TwoSided())
 			{
@@ -962,7 +962,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 			continue;
 		}
 
-		const auto &SD = doc.sidedefs[sd];
+		const auto SD = doc.sidedefs[sd];
 
 		if (doc.linedefs[ld]->TwoSided())
 		{
@@ -1038,7 +1038,7 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 						   selection_c &flip) const
 {
 // gLog.debugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
-	const auto &L = doc.linedefs[ld];
+	const auto L = doc.linedefs[ld];
 
 	int sd_num   = (side == Side::right) ? L->right : L->left;
 	int other_sd = (side == Side::right) ? L->left  : L->right;
@@ -1065,7 +1065,7 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 	// create new sidedef
 	int new_sd = op.addNew(ObjType::sidedefs);
 
-	auto &SD = doc.sidedefs[new_sd];
+	auto SD = doc.sidedefs[new_sd];
 
 	if (other_sd >= 0)
 	{
@@ -1162,7 +1162,7 @@ bool SectorModule::getLoopForSpace(const v2double_t &map, lineloop_c& loop) cons
 			int new_ld;
 			Side new_side;
 
-			new_ld = doc.hover.getOppositeLinedef(loop.lines[k], loop.sides[k], &new_side, nullptr);
+			new_ld = doc.hover.getOppositeLinedef(loop.lines[k], loop.sides[k], &new_side, nullptr, nullptr);
 
 			if (new_ld < 0)
 				continue;
@@ -1230,7 +1230,7 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, const v2double_t &map,
 	// detect any sectors which have become unused, and delete them
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const auto &L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		if (doc.getSectorID(*L, Side::left) >= 0)
 			unused.clear(doc.getSectorID(*L, Side::left));

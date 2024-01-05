@@ -875,7 +875,7 @@ public:
 
 	void DrawLine(int ld_index)
 	{
-		const auto &ld = inst.level.linedefs[ld_index];
+		const auto ld = inst.level.linedefs[ld_index];
 
 		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
 			return;
@@ -1026,7 +1026,7 @@ public:
 			sector_3dfloors_c *b_ex = inst.Subdiv_3DFloorsForSector(sd_back->sector);
 			if (b_ex->heightsec >= 0)
 			{
-				const auto &dummy = inst.level.sectors[b_ex->heightsec];
+				const auto dummy = inst.level.sectors[b_ex->heightsec];
 				if (dummy->floorh < back->floorh)
 					invis_back = true;
 			}
@@ -1036,7 +1036,7 @@ public:
 			slope_plane_c dummy_fp;
 			if (f_ex->heightsec >= 0)
 			{
-				const auto &dummy = inst.level.sectors[f_ex->heightsec];
+				const auto dummy = inst.level.sectors[f_ex->heightsec];
 				if (dummy->floorh < front->floorh)
 				{
 					dummy_fp.Init(static_cast<float>(dummy->floorh));
@@ -1069,8 +1069,8 @@ public:
 				for (size_t k = 0 ; k < b_ex->floors.size() ; k++)
 				{
 					const extrafloor_c& EF = b_ex->floors[k];
-					const auto &ef_sd = inst.level.sidedefs[EF.sd];
-					const auto &dummy = inst.level.sectors[ef_sd->sector];
+					const auto ef_sd = inst.level.sidedefs[EF.sd];
+					const auto dummy = inst.level.sectors[ef_sd->sector];
 
 					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))
 						continue;
@@ -1125,7 +1125,7 @@ public:
 		if (! subdiv)
 			return;
 
-		const auto &sec = inst.level.sectors[sec_index];
+		const auto sec = inst.level.sectors[sec_index];
 
 		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sec_index);
 
@@ -1134,7 +1134,7 @@ public:
 		// support for BOOM's 242 "transfer heights" line type
 		if (exfloor->heightsec >= 0)
 		{
-			const auto &dummy = inst.level.sectors[exfloor->heightsec];
+			const auto dummy = inst.level.sectors[exfloor->heightsec];
 
 			if (dummy->floorh > sec->floorh && inst.r_view.z < dummy->floorh)
 			{
@@ -1184,7 +1184,7 @@ public:
 		for (size_t k = 0 ; k < exfloor->floors.size() ; k++)
 		{
 			const extrafloor_c& EF = exfloor->floors[k];
-			const auto &dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector];
+			const auto dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector];
 
 			// TODO: supporting translucent surfaces is non-trivial and needs
 			//       to be done in separate pass with a depth sort.
@@ -1214,7 +1214,7 @@ public:
 
 	void DrawThing(int th_index)
 	{
-		const auto &th = inst.level.things[th_index];
+		const auto th = inst.level.things[th_index];
 
 		const thingtype_t &info = inst.conf.getThingType(th->type);
 
@@ -1332,7 +1332,7 @@ public:
 
 	void HighlightLine(int ld_index, int part)
 	{
-		const auto &L = inst.level.linedefs[ld_index];
+		const auto L = inst.level.linedefs[ld_index];
 
 		Side side = (part & PART_LF_ALL) ? Side::left : Side::right;
 
@@ -1400,7 +1400,7 @@ public:
 
 	void HighlightSector(int sec_index, int part)
 	{
-		const auto &sec = inst.level.sectors[sec_index];
+		const auto sec = inst.level.sectors[sec_index];
 
 		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 
@@ -1440,7 +1440,7 @@ public:
 
 	void HighlightThing(int th_index)
 	{
-		const auto &th = inst.level.things[th_index];
+		const auto th = inst.level.things[th_index];
 		float tx = static_cast<float>(th->x());
 		float ty = static_cast<float>(th->y());
 
@@ -1557,7 +1557,7 @@ public:
 
 		bool saw_hl = false;
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			if (inst.edit.highlight.valid() && *it == inst.edit.highlight.num)
 			{

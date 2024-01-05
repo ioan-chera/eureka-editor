@@ -93,7 +93,7 @@ public:
 	}
 
 	void W_AddFlat(const SString &name, Img_c &&img);
-	const Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
+	const Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const noexcept;
 	Img_c *getMutableFlat(const ConfigData &config, const SString &name, bool try_uppercase = false)
 	{
 		return const_cast<Img_c *>(W_GetFlat(config, name, try_uppercase));
@@ -150,31 +150,58 @@ struct LumpNameCompare
 class MasterDir
 {
 public:
+	
+	void setGameWad(const std::shared_ptr<Wad_file> &gameWad)
+	{
+		game_wad = gameWad;
+	}
 	void RemoveEditWad();
-	void MasterDir_Add(const std::shared_ptr<Wad_file> &wad);
-	void MasterDir_Remove(const std::shared_ptr<Wad_file> &wad);
+	void ReplaceEditWad(const std::shared_ptr<Wad_file> &wad);
+	void setResources(const std::vector<std::shared_ptr<Wad_file>> &wads)
+	{
+		resource_wads = wads;
+	}
 	void MasterDir_CloseAll();
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
 
-	Lump_c *findGlobalLump(const SString &name) const;
-	Lump_c *findFirstSpriteLump(const SString &stem) const;
+	const Lump_c *findGlobalLump(const SString &name) const;
+	const Lump_c *findFirstSpriteLump(const SString &stem) const;
 
-	//
-	// Const getter
-	//
-	const std::vector<std::shared_ptr<Wad_file>> &getDir() const
+	const std::shared_ptr<Wad_file> &gameWad() const
 	{
-		return dir;
+		return game_wad;
 	}
-public:	// TODO: make private
+	const std::shared_ptr<Wad_file> &editWad() const noexcept
+	{
+		return edit_wad;
+	}
+	const std::shared_ptr<Wad_file> &activeWad() const
+	{
+		return edit_wad ? edit_wad : game_wad;
+	}
+	const std::vector<std::shared_ptr<Wad_file>> &resourceWads() const
+	{
+		return resource_wads;
+	}
+	
+	std::vector<std::shared_ptr<Wad_file>> getAll() const
+	{
+		std::vector<std::shared_ptr<Wad_file>> result;
+		result.reserve(resource_wads.size() + 2);
+		if(game_wad)
+			result.push_back(game_wad);
+		result.insert(result.end(), resource_wads.begin(), resource_wads.end());
+		if(edit_wad)
+			result.push_back(edit_wad);
+		return result;
+	}
+	
+private:
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	std::shared_ptr<Wad_file> edit_wad;
+	std::vector<std::shared_ptr<Wad_file>> resource_wads;
 	std::shared_ptr<Wad_file> game_wad;
-	fs::path Pwad_name;	// Filename of current wad
-
-private:
-	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
 };
 
 //
@@ -190,15 +217,14 @@ struct WadData
 		return const_cast<Img_c *>(getSprite(config, type, loading));
 	}
 	
-	bool Main_LoadIWAD(const LoadingData &loading);
-	void reloadResources(const LoadingData &loading, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads);
+	void reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads) noexcept(false);
 
 	ImageSet images;
 	Palette palette;
 	MasterDir master;
 	
 private:
-	void W_LoadPalette();
+	void W_LoadPalette() noexcept(false);
 	void W_LoadColormap()
 	{
 		palette.loadColormap(master.findGlobalLump("COLORMAP"));

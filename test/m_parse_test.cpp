@@ -135,7 +135,7 @@ TEST(MParse, MParseLine)
 
 TEST(MParse, TokenWordParse)
 {
-	TokenWordParse parse("word1 w2 ...g3+gh-\\ \"\" \"have\"\"double word\" \"\"\"\" \"Veac#caev\"#Jackson");
+	TokenWordParse parse("word1 w2 ...g3+gh-\\ \"\" \"have\"\"double word\" \"\"\"\" \"Veac#caev\"#Jackson", true);
 	std::vector<SString> words;
 	SString word;
 	while(parse.getNext(word))
@@ -153,7 +153,7 @@ TEST(MParse, TokenWordParse)
 
 TEST(MParse, TokenWordParsePath)
 {
-	TokenWordParse parse("word1 w2/w3 word3");
+	TokenWordParse parse("word1 w2/w3 word3", true);
 	SString word;
 	fs::path path;
 
@@ -167,11 +167,11 @@ TEST(MParse, TokenWordParsePath)
 
 TEST(MParse, TokenWordParseEmpty)
 {
-	TokenWordParse parse(" \t\t\r\n");
+	TokenWordParse parse(" \t\t\r\n", true);
 	SString word;
 	ASSERT_FALSE(parse.getNext(word));
 
-	TokenWordParse parse2("");
+	TokenWordParse parse2("", true);
 	ASSERT_FALSE(parse2.getNext(word));
 }
 
@@ -179,12 +179,12 @@ TEST(MParse, TokenWordParseUnendedQuote)
 {
 	SString word;
 
-	TokenWordParse parse3("\"");
+	TokenWordParse parse3("\"", true);
 	ASSERT_TRUE(parse3.getNext(word));
 	ASSERT_EQ(word, "");
 	ASSERT_FALSE(parse3.getNext(word));
 
-	TokenWordParse parse4("\"jackson");
+	TokenWordParse parse4("\"jackson", true);
 	ASSERT_TRUE(parse4.getNext(word));
 	ASSERT_EQ(word, "jackson");
 	ASSERT_FALSE(parse4.getNext(word));
@@ -194,7 +194,7 @@ TEST(MParse, TokenWordParseImmediateQuotes)
 {
 	SString word;
 
-	TokenWordParse parse("Michael\"Rogers\"Jack\"\"son\"NoEnd");
+	TokenWordParse parse("Michael\"Rogers\"Jack\"\"son\"NoEnd", true);
 
 	ASSERT_TRUE(parse.getNext(word));
 	ASSERT_EQ(word, "Michael");

@@ -25,15 +25,11 @@
 #include "ui_panelinput.h"
 
 class UI_DynIntInput;
+struct LoadingData;
 
-class UI_LineBox : public Fl_Group
+class UI_LineBox : public MapItemBox
 {
 private:
-	int obj = -1;
-	int count = 0;
-
-	UI_Nombre *which;
-
 	UI_DynInput  *type;
 	Fl_Button    *choose;
 	Fl_Button    *gen;
@@ -65,32 +61,25 @@ private:
 	Fl_Check_Button *f_sound;
 	Fl_Check_Button *f_flyers;    // Strife
 
-	Instance &inst;
-	PanelFieldFixUp mFixUp;
-
 public:
 	UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr);
 
-	void SetObj(int _index, int _count);
-
-	int GetObj() const { return obj; }
-
 	// call this if the linedef was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1);
+	void UpdateField(int field = -1) override;
 
 	// call this is the linedef's sides were externally modified.
 	void UpdateSides();
 
-	void UpdateTotal();
+	void UpdateTotal(const Document &doc) noexcept override;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
-	void UnselectPics();
+	void UnselectPics() override;
 
-	void UpdateGameInfo();
+	void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) override;
 
 	void checkDirtyFields()
 	{

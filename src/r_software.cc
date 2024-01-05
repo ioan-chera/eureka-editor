@@ -287,8 +287,8 @@ public:
 		else if (A->th >= 0 && B->th >= 0)
 		{
 			// prevent two things at same location from flickering
-			const auto &TA = inst.level.things[A->th];
-			const auto &TB = inst.level.things[B->th];
+			const auto TA = inst.level.things[A->th];
+			const auto TB = inst.level.things[B->th];
 
 			if (TA->raw_x == TB->raw_x && TA->raw_y == TB->raw_y)
 				return A->th > B->th;
@@ -388,7 +388,7 @@ public:
 		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sd->sector);
 		if (exfloor->heightsec >= 0)
 		{
-			const auto &dummy = inst.level.sectors[exfloor->heightsec];
+			const auto dummy = inst.level.sectors[exfloor->heightsec];
 			front = Boom242Sector(front, &temp_front, dummy.get());
 		}
 
@@ -397,7 +397,7 @@ public:
 			exfloor = inst.Subdiv_3DFloorsForSector(back_sd->sector);
 			if (exfloor->heightsec >= 0)
 			{
-				const auto &dummy = inst.level.sectors[exfloor->heightsec];
+				const auto dummy = inst.level.sectors[exfloor->heightsec];
 				back = Boom242Sector(back, &temp_back, dummy.get());
 			}
 		}
@@ -717,7 +717,7 @@ public:
 
 	void AddLine(int ld_index)
 	{
-		const auto &ld = inst.level.linedefs[ld_index];
+		const auto ld = inst.level.linedefs[ld_index];
 
 		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
 			return;
@@ -870,7 +870,7 @@ public:
 
 	void AddThing(int th_index)
 	{
-		const auto &th = inst.level.things[th_index];
+		const auto th = inst.level.things[th_index];
 
 		const thingtype_t &info = inst.conf.getThingType(th->type);
 
@@ -925,8 +925,8 @@ public:
 			sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(thsec);
 			if (inst.level.isSector(exfloor->heightsec))
 			{
-				const auto &real  = inst.level.sectors[thsec];
-				const auto &dummy = inst.level.sectors[exfloor->heightsec];
+				const auto real  = inst.level.sectors[thsec];
+				const auto dummy = inst.level.sectors[exfloor->heightsec];
 
 				if (dummy->floorh > real->floorh &&
 					inst.r_view.z > dummy->floorh &&
@@ -1146,7 +1146,7 @@ public:
 
 	void HighlightSectorBit(const DrawWall *dw, int sec_index, int part)
 	{
-		const auto &S = inst.level.sectors[sec_index];
+		const auto S = inst.level.sectors[sec_index];
 
 		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 
@@ -1283,7 +1283,7 @@ public:
 				float dy = static_cast<float>(inst.edit.drag_cur.y - inst.edit.drag_start.y);
 				float dz = static_cast<float>(inst.edit.drag_cur.z - inst.edit.drag_start.z);
 
-				const auto &T = inst.level.things[dw->th];
+				const auto T = inst.level.things[dw->th];
 
 				float x = static_cast<float>(T->x() + dx - inst.r_view.x);
 				float y = static_cast<float>(T->y() + dy - inst.r_view.y);

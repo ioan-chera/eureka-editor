@@ -408,7 +408,7 @@ StringID StringTable::add(const SString &text)
 //
 // Get a text (handle it robustly)
 //
-SString StringTable::get(StringID offset) const
+SString StringTable::get(StringID offset) const noexcept
 {
 	// this should never happen
 	// [ but handle it gracefully, for the sake of robustness ]
@@ -478,6 +478,44 @@ SString WideToUTF8(const wchar_t *text)
 		return FailSafeWideToUTF8(text);
 	}
 	SString result = buffer;
+	delete[] buffer;
+	return result;
+}
+
+//
+// Fail safe so we avoid failures
+//
+static std::wstring FailSafeUTF8ToWide(const char* text)
+{
+	size_t len = strlen(text);
+	std::wstring result;
+	result.reserve(len);
+	for (size_t i = 0; i < len; ++i)
+	{
+		result.push_back(static_cast<wchar_t>(text[i]));
+	}
+	return result;
+}
+
+//
+// Converts UTF8 characters to wide. Mainly for Windows
+//
+std::wstring UTF8ToWide(const char* text)
+{
+	wchar_t* buffer;
+	int n = MultiByteToWideChar(CP_UTF8, 0, text, -1, nullptr, 0);
+	if (!n)
+	{
+		return FailSafeUTF8ToWide(text);
+	}
+	buffer = new wchar_t[n];
+	n = MultiByteToWideChar(CP_UTF8, 0, text, -1, buffer, n);
+	if (!n)
+	{
+		delete[] buffer;
+		return FailSafeUTF8ToWide(text);
+	}
+	std::wstring result = buffer;
 	delete[] buffer;
 	return result;
 }

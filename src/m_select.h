@@ -63,21 +63,20 @@ private:
 	int first_obj = -1;
 
 public:
-	// since we don't use the copy constructor and the default is unsafe, let's hide it
-	selection_c(const selection_c &other) = delete;
-
 	 selection_c(ObjType type = ObjType::things, bool extended = false);
-	~selection_c();
+	selection_c(const selection_c &other) = default;
+	selection_c(selection_c &&other) = default;
+	selection_c &operator = (selection_c &&other) = default;
 
 	ObjType what_type() const { return type; }
 
 	// this also clears the selection
-	void change_type(ObjType new_type);
+	void change_type(ObjType new_type) noexcept;
 
-	void clear_all();
+	void clear_all() noexcept;
 
-	bool empty() const;
-	bool notempty() const { return ! empty(); }
+	bool empty() const noexcept;
+	bool notempty() const noexcept { return ! empty(); }
 
 	// return the number of selected objects
 	int count_obj() const;
@@ -88,17 +87,17 @@ public:
 		return maxobj;
 	}
 
-	bool get(int n) const;
+	bool get(int n) const noexcept;
 
 	void set(int n);
-	void clear(int n);
+	void clear(int n) noexcept;
 	void toggle(int n);
 
 	// in extended mode, we can read and write 8-bits per object.
 	// using set_ext() with zero value is equivalent to a clear().
 	// NOTE: using these on normal selections is not guaranteed
 	// to do anything useful.
-	byte get_ext(int n) const;
+	byte get_ext(int n) const noexcept;
 	void set_ext(int n, byte value);
 
 	void frob(int n, BitOp op);
@@ -123,7 +122,7 @@ public:
 
 private:
 	void ConvertToBitvec();
-	void RecomputeMaxObj();
+	void RecomputeMaxObj() noexcept;
 	void ResizeExtended(int new_size);
 };
 

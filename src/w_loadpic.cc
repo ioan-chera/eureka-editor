@@ -105,10 +105,10 @@ static void DrawColumn(const Palette &pal, const ConfigData &config,Img_c& img, 
 }
 
 
-tl::optional<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name)
+tl::optional<Img_c> LoadImage_PNG(const Lump_c &lump, const SString &name)
 {
 	// load the raw data
-	const std::vector<byte> &tex_data = lump->getData();
+	const std::vector<byte> &tex_data = lump.getData();
 
 	// pass it to FLTK for decoding
 	Fl_PNG_Image fltk_img(NULL, tex_data.data(), (int)tex_data.size());
@@ -126,10 +126,10 @@ tl::optional<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name)
 }
 
 
-tl::optional<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name)
+tl::optional<Img_c> LoadImage_JPEG(const Lump_c &lump, const SString &name)
 {
 	// load the raw data
-	const std::vector<byte> &tex_data = lump->getData();
+	const std::vector<byte> &tex_data = lump.getData();
 
 	// pass it to FLTK for decoding
 	Fl_JPEG_Image fltk_img(NULL, tex_data.data());
@@ -147,10 +147,10 @@ tl::optional<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name)
 }
 
 
-tl::optional<Img_c> LoadImage_TGA(Lump_c *lump, const SString &name)
+tl::optional<Img_c> LoadImage_TGA(const Lump_c &lump, const SString &name)
 {
 	// load the raw data
-	const std::vector<byte> &tex_data = lump->getData();
+	const std::vector<byte> &tex_data = lump.getData();
 
 	// decode it
 	int width;
@@ -215,7 +215,7 @@ static bool ComposePicture(Img_c& dest, const tl::optional<Img_c> &sub,
 //  Return true on success, false on failure.
 //
 bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,      // image to load picture into
-	Lump_c *lump,
+	const Lump_c &lump,
 	const SString &pic_name,   // picture name (for messages)
 	int pic_x_offset,    // coordinates of top left corner of picture
 	int pic_y_offset,    // relative to top left corner of buffer
@@ -275,7 +275,7 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 
 	/* DOOM format */
 
-	const std::vector<byte> &raw_data = lump->getData();
+	const std::vector<byte> &raw_data = lump.getData();
 
 	auto pat = reinterpret_cast<const patch_t *>(raw_data.data());
 
@@ -301,7 +301,7 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 	{
 		int offset = LE_S32(pat->columnofs[x]);
 
-		if (offset < 0 || offset >= lump->Length())
+		if (offset < 0 || offset >= lump.Length())
 		{
 			gLog.printf("WARNING: bad image offset 0x%08x in patch [%s]\n",
 			          offset, pic_name.c_str());
@@ -317,19 +317,14 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 }
 
 
-ImageFormat W_DetectImageFormat(Lump_c *lump)
+ImageFormat W_DetectImageFormat(const Lump_c &lump)
 {
-	byte header[20];
+	int length = lump.Length();
 
-	int length = lump->Length();
-
-	if (length < (int)sizeof(header))
+	if (length < 20)
 		return ImageFormat::unrecognized;
-
-	lump->Seek();
-
-	if (! lump->Read(header, (int)sizeof(header)))
-		return ImageFormat::unrecognized;
+	
+	const byte *header = lump.getData().data();
 
 	// PNG is clearly marked in the header, so check it first.
 

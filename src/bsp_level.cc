@@ -18,15 +18,9 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
-#include "Instance.h"
-#include "LineDef.h"
-#include "main.h"
 #include "bsp.h"
-#include "Vertex.h"
-
+#include "Instance.h"
 #include "w_rawdef.h"
-#include "w_wad.h"
 
 #include <zlib.h>
 
@@ -39,32 +33,9 @@ namespace ajbsp
 #define DEBUG_LOAD      0
 #define DEBUG_BSP       0
 
-
-static int block_x, block_y;
-static int block_w, block_h;
-static int block_count;
-
-static int block_mid_x = 0;
-static int block_mid_y = 0;
-
-static u16_t ** block_lines;
-
-static u16_t *block_ptrs;
-static u16_t *block_dups;
-
-static int block_compression;
-static int block_overflowed;
-
 #define BLOCK_LIMIT  16000
 
 #define DUMMY_DUP  0xFFFF
-
-
-void GetBlockmapBounds(int *x, int *y, int *w, int *h)
-{
-	*x = block_x; *y = block_y;
-	*w = block_w; *h = block_h;
-}
 
 
 int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
@@ -147,7 +118,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 
 #define BK_QUANTUM  32
 
-static void BlockAdd(int blk_num, int line_index)
+void LevelData::Block::Add(int blk_num, int line_index)
 {
 	u16_t *cur = block_lines[blk_num];
 
@@ -183,9 +154,9 @@ static void BlockAdd(int blk_num, int line_index)
 }
 
 
-static void BlockAddLine(int line_index, const Document &doc)
+void LevelData::Block::AddLine(int line_index, const Document &doc)
 {
-	const auto &L = doc.linedefs[line_index];
+	const auto L = doc.linedefs[line_index];
 
 	int x1 = (int) doc.getStart(*L).x();
 	int y1 = (int) doc.getStart(*L).y();
@@ -219,7 +190,7 @@ static void BlockAddLine(int line_index, const Document &doc)
 		for (bx=bx1 ; bx <= bx2 ; bx++)
 		{
 			int blk_num = by1 * block_w + bx;
-			BlockAdd(blk_num, line_index);
+			Add(blk_num, line_index);
 		}
 		return;
 	}
@@ -230,7 +201,7 @@ static void BlockAddLine(int line_index, const Document &doc)
 		for (by=by1 ; by <= by2 ; by++)
 		{
 			int blk_num = by * block_w + bx1;
-			BlockAdd(blk_num, line_index);
+			Add(blk_num, line_index);
 		}
 		return;
 	}
@@ -249,13 +220,13 @@ static void BlockAddLine(int line_index, const Document &doc)
 
 		if (CheckLinedefInsideBox(minx, miny, maxx, maxy, x1, y1, x2, y2))
 		{
-			BlockAdd(blk_num, line_index);
+			Add(blk_num, line_index);
 		}
 	}
 }
 
 
-static void CreateBlockmap(const Document &doc)
+void LevelData::Block::CreateMap(const Document &doc)
 {
 	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
 
@@ -265,12 +236,12 @@ static void CreateBlockmap(const Document &doc)
 		if (doc.isZeroLength(*doc.linedefs[i]))
 			continue;
 
-		BlockAddLine(i, doc);
+		AddLine(i, doc);
 	}
 }
 
 
-static int BlockCompare(const void *p1, const void *p2)
+int LevelData::Block::Compare(const void *p1, const void *p2) const
 {
 	int blk_num1 = ((const u16_t *) p1)[0];
 	int blk_num2 = ((const u16_t *) p2)[0];
@@ -298,7 +269,7 @@ static int BlockCompare(const void *p1, const void *p2)
 }
 
 
-static void CompressBlockmap(void)
+void LevelData::Block::CompressMap()
 {
 	int i;
 	int cur_offset;
@@ -316,8 +287,11 @@ static void CompressBlockmap(void)
 
 	for (i=0 ; i < block_count ; i++)
 		block_dups[i] = static_cast<u16_t>(i);
-
-	qsort(block_dups, block_count, sizeof(u16_t), BlockCompare);
+	
+	std::sort(block_dups, block_dups + block_count, [this](u16_t a, u16_t b)
+			  {
+		return Compare(&a, &b) < 0;
+	});
 
 	// scan duplicate array and build up offset array
 
@@ -334,7 +308,7 @@ static void CompressBlockmap(void)
 		// empty block ?
 		if (block_lines[blk_num] == NULL)
 		{
-			block_ptrs[blk_num] = static_cast<u16_t>(4 + block_count);
+			block_ptrs[blk_num] = static_cast<u16_t>(4 + this->block_count);
 			block_dups[i] = DUMMY_DUP;
 
 			orig_size += 2;
@@ -346,8 +320,8 @@ static void CompressBlockmap(void)
 		// duplicate ?  Only the very last one of a sequence of duplicates
 		// will update the current offset value.
 
-		if (i+1 < block_count &&
-				BlockCompare(block_dups + i, block_dups + i+1) == 0)
+		if (i+1 < this->block_count &&
+				Compare(block_dups + i, block_dups + i+1) == 0)
 		{
 			block_ptrs[blk_num] = static_cast<u16_t>(cur_offset);
 			block_dups[i] = DUMMY_DUP;
@@ -375,7 +349,7 @@ static void CompressBlockmap(void)
 
 	if (cur_offset > 65535)
 	{
-		block_overflowed = true;
+		overflowed = true;
 		return;
 	}
 
@@ -384,20 +358,18 @@ static void CompressBlockmap(void)
 			cur_offset, dup_count);
 # endif
 
-	block_compression = (orig_size - new_size) * 100 / orig_size;
+	compression = (orig_size - new_size) * 100 / orig_size;
 
 	// there's a tiny chance of new_size > orig_size
-	if (block_compression < 0)
-		block_compression = 0;
+	if (compression < 0)
+		compression = 0;
 }
 
-static Lump_c *CreateLevelLump(const Instance &inst, const char *name);
-
-static void WriteBlockmap(const Instance &inst)
+void LevelData::WriteBlockmap() const
 {
 	int i;
 
-	Lump_c *lump = CreateLevelLump(inst, "BLOCKMAP");
+	Lump_c &lump = CreateLevelLump("BLOCKMAP");
 
 	u16_t null_block[2] = { 0x0000, 0xFFFF };
 	u16_t m_zero = 0x0000;
@@ -406,47 +378,47 @@ static void WriteBlockmap(const Instance &inst)
 	// fill in header
 	raw_blockmap_header_t header;
 
-	header.x_origin = LE_U16(block_x);
-	header.y_origin = LE_U16(block_y);
-	header.x_blocks = LE_U16(block_w);
-	header.y_blocks = LE_U16(block_h);
+	header.x_origin = LE_U16(block.block_x);
+	header.y_origin = LE_U16(block.block_y);
+	header.x_blocks = LE_U16(block.block_w);
+	header.y_blocks = LE_U16(block.block_h);
 
-	lump->Write(&header, sizeof(header));
+	lump.Write(&header, sizeof(header));
 
 	// handle pointers
-	for (i=0 ; i < block_count ; i++)
+	for (i=0 ; i < block.block_count ; i++)
 	{
-		u16_t ptr = LE_U16(block_ptrs[i]);
+		u16_t ptr = LE_U16(block.block_ptrs[i]);
 
 		if (ptr == 0)
 			BugError("WriteBlockmap: offset %d not set.\n", i);
 
-		lump->Write(&ptr, sizeof(u16_t));
+		lump.Write(&ptr, sizeof(u16_t));
 	}
 
 	// add the null block which *all* empty blocks will use
-	lump->Write(null_block, sizeof(null_block));
+	lump.Write(null_block, sizeof(null_block));
 
 	// handle each block list
-	for (i=0 ; i < block_count ; i++)
+	for (i=0 ; i < block.block_count ; i++)
 	{
-		int blk_num = block_dups[i];
+		int blk_num = block.block_dups[i];
 
 		// ignore duplicate or empty blocks
 		if (blk_num == DUMMY_DUP)
 			continue;
 
-		u16_t *blk = block_lines[blk_num];
+		u16_t *blk = block.block_lines[blk_num];
 		SYS_ASSERT(blk);
 
-		lump->Write(&m_zero, sizeof(u16_t));
-		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
-		lump->Write(&m_neg1, sizeof(u16_t));
+		lump.Write(&m_zero, sizeof(u16_t));
+		lump.Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
+		lump.Write(&m_neg1, sizeof(u16_t));
 	}
 }
 
 
-static void FreeBlockmap(void)
+void LevelData::Block::FreeMap()
 {
 	for (int i=0 ; i < block_count ; i++)
 	{
@@ -460,17 +432,14 @@ static void FreeBlockmap(void)
 }
 
 
-static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
+static void FindMapLimits(bbox_t *bbox, const Document &doc)
 {
-	int mid_x = 0;
-	int mid_y = 0;
-
 	bbox->minx = bbox->miny = SHRT_MAX;
 	bbox->maxx = bbox->maxy = SHRT_MIN;
 
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto L = doc.linedefs[i];
 
 		if (!doc.isZeroLength(*L))
 		{
@@ -489,16 +458,7 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 			if (hx > bbox->maxx) bbox->maxx = hx;
 			if (hy > bbox->maxy) bbox->maxy = hy;
 
-			// compute middle of cluster (roughly, so we don't overflow)
-			mid_x += (lx + hx) / 32;
-			mid_y += (ly + hy) / 32;
 		}
-	}
-
-	if (doc.numLinedefs() > 0)
-	{
-		block_mid_x = (mid_x / doc.numLinedefs()) * 16;
-		block_mid_y = (mid_y / doc.numLinedefs()) * 16;
 	}
 
 # if DEBUG_BLOCKMAP
@@ -510,12 +470,12 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 // compute blockmap origin & size (the block_x/y/w/h variables)
 // based on the set of loaded linedefs.
 //
-static void InitBlockmap(const Document &doc)
+void LevelData::Block::InitMap(const Document &doc)
 {
 	bbox_t map_bbox;
 
 	// find limits of linedefs, and store as map limits
-	FindBlockmapLimits(&map_bbox, doc);
+	FindMapLimits(&map_bbox, doc);
 
 	PrintDetail("Map goes from (%d,%d) to (%d,%d)\n",
 			map_bbox.minx, map_bbox.miny, map_bbox.maxx, map_bbox.maxy);
@@ -532,46 +492,46 @@ static void InitBlockmap(const Document &doc)
 //
 // build the blockmap and write the data into the BLOCKMAP lump
 //
-static void PutBlockmap(const Instance &inst)
+void LevelData::PutBlockmap()
 {
-	if (! cur_info->do_blockmap || inst.level.numLinedefs() == 0)
+	if (! cur_info->do_blockmap || doc.numLinedefs() == 0)
 	{
 		// just create an empty blockmap lump
-		CreateLevelLump(inst, "BLOCKMAP");
+		CreateLevelLump("BLOCKMAP");
 		return;
 	}
 
-	block_overflowed = false;
+	block.overflowed = false;
 
 	// initial phase: create internal blockmap containing the index of
 	// all lines in each block.
 
-	CreateBlockmap(inst.level);
+	block.CreateMap(doc);
 
 	// -AJA- second phase: compress the blockmap.  We do this by sorting
 	//       the blocks, which is a typical way to detect duplicates in
 	//       a large list.  This also detects BLOCKMAP overflow.
 
-	CompressBlockmap();
+	block.CompressMap();
 
 	// final phase: write it out in the correct format
 
-	if (block_overflowed)
+	if (block.overflowed)
 	{
 		// leave an empty blockmap lump
-		CreateLevelLump(inst, "BLOCKMAP");
+		CreateLevelLump("BLOCKMAP");
 
-		Warning(inst, "Blockmap overflowed (lump will be empty)\n");
+		Warning("Blockmap overflowed (lump will be empty)\n");
 	}
 	else
 	{
-		WriteBlockmap(inst);
+		WriteBlockmap();
 
 		PrintDetail("Completed blockmap, size %dx%d (compression: %d%%)\n",
-				block_w, block_h, block_compression);
+				block.block_w, block.block_h, block.compression);
 	}
 
-	FreeBlockmap();
+	block.FreeMap();
 }
 
 
@@ -579,17 +539,10 @@ static void PutBlockmap(const Instance &inst)
 // REJECT : Generate the reject table
 //------------------------------------------------------------------------
 
-
-static u8_t *rej_matrix;
-static int   rej_total_size;	// in bytes
-
-static std::vector<int> rej_sector_groups;
-
-
 //
 // Allocate the matrix, init sectors into individual groups.
 //
-static void Reject_Init(const Document &doc)
+void LevelData::Reject::Init(const Document &doc)
 {
 	rej_total_size = (doc.numSectors() * doc.numSectors() + 7) / 8;
 
@@ -605,7 +558,7 @@ static void Reject_Init(const Document &doc)
 }
 
 
-static void Reject_Free()
+void LevelData::Reject::Free()
 {
 	delete[] rej_matrix;
 	rej_matrix = NULL;
@@ -619,7 +572,7 @@ static void Reject_Free()
 // Now we scan the linedef list.  For each two-sectored line,
 // merge the two sector groups into one.  That's it!
 //
-static void Reject_GroupSectors(const Document &doc)
+void LevelData::Reject::GroupSectors(const Document &doc)
 {
 	for(const auto &L : doc.linedefs)
 	{
@@ -679,7 +632,7 @@ static void Reject_DebugGroups()
 #endif
 
 
-static void Reject_ProcessSectors(const Document &doc)
+void LevelData::Reject::ProcessSectors(const Document &doc)
 {
 	for (int view=0 ; view < doc.numSectors() ; view++)
 	{
@@ -699,11 +652,11 @@ static void Reject_ProcessSectors(const Document &doc)
 }
 
 
-static void Reject_WriteLump(const Instance &inst)
+void LevelData::Reject_WriteLump() const
 {
-	Lump_c *lump = CreateLevelLump(inst, "REJECT");
+	Lump_c &lump = CreateLevelLump("REJECT");
 
-	lump->Write(rej_matrix, rej_total_size);
+	lump.Write(rej.rej_matrix, rej.rej_total_size);
 }
 
 
@@ -714,25 +667,25 @@ static void Reject_WriteLump(const Instance &inst)
 // determining all isolated groups of sectors (islands that are
 // surrounded by void space).
 //
-static void PutReject(const Instance &inst)
+void LevelData::PutReject()
 {
-	if (! cur_info->do_reject || inst.level.numSectors() == 0)
+	if (! cur_info->do_reject || doc.numSectors() == 0)
 	{
 		// just create an empty reject lump
-		CreateLevelLump(inst, "REJECT");
+		CreateLevelLump("REJECT");
 		return;
 	}
 
-	Reject_Init(inst.level);
-	Reject_GroupSectors(inst.level);
-	Reject_ProcessSectors(inst.level);
+	rej.Init(doc);
+	rej.GroupSectors(doc);
+	rej.ProcessSectors(doc);
 
 # if DEBUG_REJECT
 	Reject_DebugGroups();
 # endif
 
-	Reject_WriteLump(inst);
-	Reject_Free();
+	Reject_WriteLump();
+	rej.Free();
 
 	PrintDetail("Added simple reject lump\n");
 }
@@ -749,111 +702,90 @@ static void PutReject(const Instance &inst)
 #define ALLOC_BLKNUM  1024
 
 
-// per-level variables
-
-static SString lev_current_name;
-
-int lev_current_idx;
-int lev_current_start;
-
-int lev_overflows;
-
-
-std::vector<vertex_t *>  lev_vertices;
-std::vector<seg_t *>     lev_segs;
-std::vector<subsec_t *>  lev_subsecs;
-std::vector<node_t *>    lev_nodes;
-std::vector<walltip_t *> lev_walltips;
-
-int num_old_vert = 0;
-int num_new_vert = 0;
-int num_real_lines = 0;
-
-
 /* ----- allocation routines ---------------------------- */
 
-vertex_t *NewVertex()
+vertex_t *LevelData::NewVertex()
 {
 	vertex_t *V = (vertex_t *) UtilCalloc(sizeof(vertex_t));
-	lev_vertices.push_back(V);
+	vertices.push_back(V);
 	return V;
 }
 
-seg_t *NewSeg()
+seg_t *LevelData::NewSeg()
 {
 	seg_t *S = (seg_t *) UtilCalloc(sizeof(seg_t));
-	lev_segs.push_back(S);
+	segs.push_back(S);
 	return S;
 }
 
-subsec_t *NewSubsec()
+subsec_t *LevelData::NewSubsec()
 {
 	subsec_t *S = (subsec_t *) UtilCalloc(sizeof(subsec_t));
-	lev_subsecs.push_back(S);
+	subsecs.push_back(S);
 	return S;
 }
 
-node_t *NewNode()
+node_t *LevelData::NewNode()
 {
 	node_t *N = (node_t *) UtilCalloc(sizeof(node_t));
-	lev_nodes.push_back(N);
+	nodes.push_back(N);
 	return N;
 }
 
-walltip_t *NewWallTip()
+walltip_t *LevelData::NewWallTip()
 {
 	walltip_t *WT = (walltip_t *) UtilCalloc(sizeof(walltip_t));
-	lev_walltips.push_back(WT);
+	walltips.push_back(WT);
 	return WT;
 }
 
 
 /* ----- free routines ---------------------------- */
 
-void FreeVertices()
+void LevelData::FreeVertices()
 {
-	for (unsigned int i = 0 ; i < lev_vertices.size() ; i++)
-		UtilFree((void *) lev_vertices[i]);
+	for (unsigned int i = 0 ; i < vertices.size() ; i++)
+		UtilFree((void *) vertices[i]);
 
-	lev_vertices.clear();
+	vertices.clear();
 }
 
-void FreeSegs()
+void LevelData::FreeSegs()
 {
-	for (unsigned int i = 0 ; i < lev_segs.size() ; i++)
-		UtilFree((void *) lev_segs[i]);
+	for (unsigned int i = 0 ; i < segs.size() ; i++)
+		UtilFree((void *) segs[i]);
 
-	lev_segs.clear();
+	segs.clear();
 }
 
-void FreeSubsecs()
+void LevelData::FreeSubsecs()
 {
-	for (unsigned int i = 0 ; i < lev_subsecs.size() ; i++)
-		UtilFree((void *) lev_subsecs[i]);
+	for (unsigned int i = 0 ; i < subsecs.size() ; i++)
+		UtilFree((void *) subsecs[i]);
 
-	lev_subsecs.clear();
+	subsecs.clear();
 }
 
-void FreeNodes()
+void LevelData::FreeNodes()
 {
-	for (unsigned int i = 0 ; i < lev_nodes.size() ; i++)
-		UtilFree((void *) lev_nodes[i]);
+	for (unsigned int i = 0 ; i < nodes.size() ; i++)
+		UtilFree((void *) nodes[i]);
 
-	lev_nodes.clear();
+	nodes.clear();
 }
 
-void FreeWallTips()
+void LevelData::FreeWallTips()
 {
-	for (unsigned int i = 0 ; i < lev_walltips.size() ; i++)
-		UtilFree((void *) lev_walltips[i]);
+	for (unsigned int i = 0 ; i < walltips.size() ; i++)
+		UtilFree((void *) walltips[i]);
 
-	lev_walltips.clear();
+	walltips.clear();
 }
 
 
 /* ----- reading routines ------------------------------ */
 
-static void GetVertices(const Document &doc)
+void LevelData::GetVertices()
 {
 	for (int i = 0 ; i < doc.numVertices() ; i++)
 	{
@@ -865,7 +797,7 @@ static void GetVertices(const Document &doc)
 		vert->index = i;
 	}
 
-	num_old_vert = num_vertices;
+	num_old_vert = (int)vertices.size();
 }
 
 
@@ -885,7 +817,7 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 
 static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 {
-	const auto &L = doc.linedefs[seg->linedef];
+	const auto L = doc.linedefs[seg->linedef];
 
 	double lx = seg->side ? doc.getEnd(*L).x() : doc.getStart(*L).x();
 	double ly = seg->side ? doc.getEnd(*L).y() : doc.getStart(*L).y();
@@ -920,25 +852,25 @@ static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
 static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
 
 
-void MarkOverflow(int flags)
+void LevelData::MarkOverflow(int flags)
 {
 	// flags are ignored
 
-	lev_overflows++;
+	overflows++;
 }
 
 
-static void PutVertices(const Instance &inst, const char *name, int do_gl)
+void LevelData::PutVertices(const char *name, int do_gl)
 {
 	int count, i;
 
-	Lump_c *lump = CreateLevelLump(inst, name);
+	Lump_c &lump = CreateLevelLump(name);
 
-	for (i=0, count=0 ; i < num_vertices ; i++)
+	for (i=0, count=0 ; i < (int)vertices.size() ; i++)
 	{
 		raw_vertex_t raw;
 
-		vertex_t *vert = lev_vertices[i];
+		vertex_t *vert = vertices[i];
 
 		if ((do_gl ? 1 : 0) != (vert->is_new ? 1 : 0))
 		{
@@ -948,7 +880,7 @@ static void PutVertices(const Instance &inst, const char *name, int do_gl)
 		raw.x = LE_S16(iround(vert->x));
 		raw.y = LE_S16(iround(vert->y));
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 	}
@@ -959,28 +891,28 @@ static void PutVertices(const Instance &inst, const char *name, int do_gl)
 
 	if (! do_gl && count > 65534)
 	{
-		Failure(inst, "Number of vertices has overflowed.\n");
+		Failure("Number of vertices has overflowed.\n");
 		MarkOverflow(LIMIT_VERTEXES);
 	}
 }
 
 
-static void PutGLVertices(const Instance &inst, int do_v5)
+void LevelData::PutGLVertices(int do_v5) const
 {
 	int count, i;
 
-	Lump_c *lump = CreateLevelLump(inst, "GL_VERT");
+	Lump_c &lump = CreateLevelLump("GL_VERT");
 
 	if (do_v5)
-		lump->Write(lev_v5_magic, 4);
+		lump.Write(lev_v5_magic, 4);
 	else
-		lump->Write(lev_v2_magic, 4);
+		lump.Write(lev_v2_magic, 4);
 
-	for (i=0, count=0 ; i < num_vertices ; i++)
+	for (i=0, count=0 ; i < (int)vertices.size() ; i++)
 	{
 		raw_v2_vertex_t raw;
 
-		vertex_t *vert = lev_vertices[i];
+		vertex_t *vert = vertices[i];
 
 		if (! vert->is_new)
 			continue;
@@ -988,7 +920,7 @@ static void PutGLVertices(const Instance &inst, int do_v5)
 		raw.x = LE_S32((int)(vert->x * 65536.0));
 		raw.y = LE_S32((int)(vert->y * 65536.0));
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 	}
@@ -1015,36 +947,26 @@ static inline u32_t VertexIndex_V5(const vertex_t *v)
 	return (u32_t) v->index;
 }
 
-
-static inline u32_t VertexIndex_XNOD(const vertex_t *v)
-{
-	if (v->is_new)
-		return (u32_t) (num_old_vert + v->index);
-
-	return (u32_t) v->index;
-}
-
-
-static void PutSegs(const Instance &inst)
+void LevelData::PutSegs()
 {
 	int i, count;
 
-	Lump_c *lump = CreateLevelLump(inst, "SEGS");
+	Lump_c &lump = CreateLevelLump("SEGS");
 
-	for (i=0, count=0 ; i < num_segs ; i++)
+	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
 		raw_seg_t raw;
 
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = segs[i];
 
 		raw.start   = LE_U16(VertexIndex16Bit(seg->start));
 		raw.end     = LE_U16(VertexIndex16Bit(seg->end));
 		raw.angle   = LE_U16(VanillaSegAngle(seg));
 		raw.linedef = LE_U16(seg->linedef);
 		raw.flip    = LE_U16(seg->side);
-		raw.dist    = LE_U16(VanillaSegDist(seg, inst.level));
+		raw.dist    = LE_U16(VanillaSegDist(seg, doc));
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 
@@ -1057,28 +979,28 @@ static void PutSegs(const Instance &inst)
 #   endif
 	}
 
-	if (count != num_segs)
-		BugError("PutSegs miscounted (%d != %d)\n", count, num_segs);
+	if (count != (int)segs.size())
+		BugError("PutSegs miscounted (%d != %d)\n", count, (int)segs.size());
 
 	if (count > 65534)
 	{
-		Failure(inst, "Number of segs has overflowed.\n");
+		Failure("Number of segs has overflowed.\n");
 		MarkOverflow(LIMIT_SEGS);
 	}
 }
 
 
-static void PutGLSegs(const Instance &inst)
+void LevelData::PutGLSegs() const
 {
 	int i, count;
 
-	Lump_c *lump = CreateLevelLump(inst, "GL_SEGS");
+	Lump_c &lump = CreateLevelLump("GL_SEGS");
 
-	for (i=0, count=0 ; i < num_segs ; i++)
+	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
 		raw_gl_seg_t raw;
 
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = segs[i];
 
 		raw.start = LE_U16(VertexIndex16Bit(seg->start));
 		raw.end   = LE_U16(VertexIndex16Bit(seg->end));
@@ -1094,7 +1016,7 @@ static void PutGLSegs(const Instance &inst)
 		else
 			raw.partner = LE_U16(0xFFFF);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 
@@ -1106,25 +1028,25 @@ static void PutGLSegs(const Instance &inst)
 #   endif
 	}
 
-	if (count != num_segs)
-		BugError("PutGLSegs miscounted (%d != %d)\n", count, num_segs);
+	if (count != (int)segs.size())
+		BugError("PutGLSegs miscounted (%d != %d)\n", count, (int)segs.size());
 
 	if (count > 65534)
 		BugError("PutGLSegs with %d (> 65534) segs\n", count);
 }
 
 
-static void PutGLSegs_V5(const Instance &inst)
+void LevelData::PutGLSegs_V5() const
 {
 	int i, count;
 
-	Lump_c *lump = CreateLevelLump(inst, "GL_SEGS");
+	Lump_c &lump = CreateLevelLump("GL_SEGS");
 
-	for (i=0, count=0 ; i < num_segs ; i++)
+	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
 		raw_v5_seg_t raw;
 
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = segs[i];
 
 		raw.start = LE_U32(VertexIndex_V5(seg->start));
 		raw.end   = LE_U32(VertexIndex_V5(seg->end));
@@ -1141,7 +1063,7 @@ static void PutGLSegs_V5(const Instance &inst)
 		else
 			raw.partner = LE_U32(0xFFFFFFFF);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 		count++;
 
@@ -1153,27 +1075,27 @@ static void PutGLSegs_V5(const Instance &inst)
 #   endif
 	}
 
-	if (count != num_segs)
-		BugError("PutGLSegs miscounted (%d != %d)\n", count, num_segs);
+	if (count != (int)segs.size())
+		BugError("PutGLSegs miscounted (%d != %d)\n", count, (int)segs.size());
 }
 
 
-static void PutSubsecs(const Instance &inst, const char *name, int do_gl)
+void LevelData::PutSubsecs(const char *name, int do_gl)
 {
 	int i;
 
-	Lump_c * lump = CreateLevelLump(inst, name);
+	Lump_c & lump = CreateLevelLump(name);
 
-	for (i=0 ; i < num_subsecs ; i++)
+	for (i=0 ; i < (int)subsecs.size() ; i++)
 	{
 		raw_subsec_t raw;
 
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = subsecs[i];
 
 		raw.first = LE_U16(sub->seg_list->index);
 		raw.num   = LE_U16(sub->seg_count);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 #   if DEBUG_BSP
 		gLog.debugPrintf("PUT SUBSEC %04X  First %04X  Num %04X\n",
@@ -1181,30 +1103,30 @@ static void PutSubsecs(const Instance &inst, const char *name, int do_gl)
 #   endif
 	}
 
-	if (num_subsecs > 32767)
+	if ((int)segs.size() > 32767)
 	{
-		Failure(inst, "Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
+		Failure("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
 		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
 	}
 }
 
 
-static void PutGLSubsecs_V5(const Instance &inst)
+void LevelData::PutGLSubsecs_V5() const
 {
 	int i;
 
-	Lump_c *lump = CreateLevelLump(inst, "GL_SSECT");
+	Lump_c &lump = CreateLevelLump("GL_SSECT");
 
-	for (i=0 ; i < num_subsecs ; i++)
+	for (i=0 ; i < (int)subsecs.size() ; i++)
 	{
 		raw_v5_subsec_t raw;
 
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = subsecs[i];
 
 		raw.first = LE_U32(sub->seg_list->index);
 		raw.num   = LE_U32(sub->seg_count);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.Write(&raw, sizeof(raw));
 
 #   if DEBUG_BSP
 		gLog.debugPrintf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
@@ -1213,10 +1135,7 @@ static void PutGLSubsecs_V5(const Instance &inst)
 	}
 }
 
-
-static int node_cur_index;
-
-static void PutOneNode(node_t *node, Lump_c *lump)
+void LevelData::PutOneNode(node_t *node, Lump_c *lump)
 {
 	raw_node_t raw;
 
@@ -1269,7 +1188,7 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 }
 
 
-static void PutOneNode_V5(node_t *node, Lump_c *lump)
+void LevelData::PutOneNode_V5(node_t *node, Lump_c *lump)
 {
 	raw_v5_node_t raw;
 
@@ -1321,49 +1240,49 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 }
 
 
-void PutNodes(const Instance &inst, const char *name, int do_v5, node_t *root)
+void LevelData::PutNodes(const char *name, int do_v5, node_t *root)
 {
-	Lump_c *lump = CreateLevelLump(inst, name);
+	Lump_c &lump = CreateLevelLump(name);
 
 	node_cur_index = 0;
 
 	if (root)
 	{
 		if (do_v5)
-			PutOneNode_V5(root, lump);
+			PutOneNode_V5(root, &lump);
 		else
-			PutOneNode(root, lump);
+			PutOneNode(root, &lump);
 	}
 
-	if (node_cur_index != num_nodes)
+	if (node_cur_index != (int)nodes.size())
 		BugError("PutNodes miscounted (%d != %d)\n",
-				node_cur_index, num_nodes);
+				node_cur_index, (int)nodes.size());
 
 	if (!do_v5 && node_cur_index > 32767)
 	{
-		Failure(inst, "Number of nodes has overflowed.\n");
+		Failure("Number of nodes has overflowed.\n");
 		MarkOverflow(LIMIT_NODES);
 	}
 }
 
 
-static void CheckLimits(bool& force_v5, bool& force_xnod, const Instance &inst)
+void LevelData::CheckLimits(bool& force_v5, bool& force_xnod)
 {
-	if (inst.level.numSectors() > 65534)
+	if (doc.numSectors() > 65534)
 	{
-		Failure(inst, "Map has too many sectors.\n");
+		Failure("Map has too many sectors.\n");
 		MarkOverflow(LIMIT_SECTORS);
 	}
 
-	if (inst.level.numSidedefs() > 65534)
+	if (doc.numSidedefs() > 65534)
 	{
-		Failure(inst, "Map has too many sidedefs.\n");
+		Failure("Map has too many sidedefs.\n");
 		MarkOverflow(LIMIT_SIDEDEFS);
 	}
 
-	if (inst.level.numLinedefs() > 65534)
+	if (doc.numLinedefs() > 65534)
 	{
-		Failure(inst, "Map has too many linedefs.\n");
+		Failure("Map has too many linedefs.\n");
 		MarkOverflow(LIMIT_LINEDEFS);
 	}
 
@@ -1371,10 +1290,10 @@ static void CheckLimits(bool& force_v5, bool& force_xnod, const Instance &inst)
 	{
 		if (num_old_vert > 32767 ||
 			num_new_vert > 32767 ||
-			num_segs > 65534 ||
-			num_nodes > 32767)
+			(int)segs.size() > 65534 ||
+			(int)nodes.size() > 32767)
 		{
-			Warning(inst, "Forcing V5 of GL-Nodes due to overflows.\n");
+			Warning("Forcing V5 of GL-Nodes due to overflows.\n");
 			force_v5 = true;
 		}
 	}
@@ -1383,10 +1302,10 @@ static void CheckLimits(bool& force_v5, bool& force_xnod, const Instance &inst)
 	{
 		if (num_old_vert > 32767 ||
 			num_new_vert > 32767 ||
-			num_segs > 32767 ||
-			num_nodes > 32767)
+			(int)segs.size() > 32767 ||
+			(int)nodes.size() > 32767)
 		{
-			Warning(inst, "Forcing XNOD format nodes due to overflows.\n");
+			Warning("Forcing XNOD format nodes due to overflows.\n");
 			force_xnod = true;
 		}
 	}
@@ -1401,46 +1320,201 @@ struct seg_index_CMP_pred
 	}
 };
 
-void SortSegs()
+void LevelData::SortSegs()
 {
 	// do a sanity check
-	for (int i = 0 ; i < num_segs ; i++)
-		if (lev_segs[i]->index < 0)
+	for (int i = 0 ; i < (int)segs.size() ; i++)
+		if (segs[i]->index < 0)
 			BugError("Seg %d never reached a subsector!\n", i);
 
 	// sort segs into ascending index
-	std::sort(lev_segs.begin(), lev_segs.end(), seg_index_CMP_pred());
+	std::sort(segs.begin(), segs.end(), seg_index_CMP_pred());
 
 	// remove unwanted segs
-	while (lev_segs.size() > 0 && lev_segs.back()->index == SEG_IS_GARBAGE)
+	while (segs.size() > 0 && segs.back()->index == SEG_IS_GARBAGE)
 	{
-		UtilFree((void *) lev_segs.back());
-		lev_segs.pop_back();
+		UtilFree((void *) segs.back());
+		segs.pop_back();
 	}
 }
 
 
 /* ----- ZDoom format writing --------------------------- */
 
+
+class ZLibContext
+{
+public:
+	class Compression
+	{
+	public:
+		class Exception : public std::runtime_error
+		{
+		public:
+			Exception(int result, const SString& message) : std::runtime_error(message.get() + ": " + std::to_string(result))
+			{
+			}
+		};
+
+		Compression();
+		~Compression();
+		Compression(const Compression& other) = delete;
+		Compression& operator = (const Compression& other) = delete;
+
+		int deflate(int flush)
+		{
+			return ::deflate(&stream, flush);
+		}
+
+		void setNextOut(Bytef* out, uInt outSize) noexcept
+		{
+			stream.next_out = out;
+			stream.avail_out = outSize;
+		}
+
+		uInt getAvailOut() const noexcept
+		{
+			return stream.avail_out;
+		}
+
+		void setNextIn(Bytef* in, uInt inSize) noexcept
+		{
+			stream.next_in = in;
+			stream.avail_in = inSize;
+		}
+
+		uInt getAvailIn() const noexcept
+		{
+			return stream.avail_in;
+		}
+
+	private:
+		z_stream stream{};
+	};
+
+	ZLibContext(bool compress, std::vector<byte> &data);
+	
+	void appendLump(const void *data, int length) noexcept(false);
+	void finishLump() noexcept(false);
+	
+private:
+
+	std::vector<byte> &out_data;
+	tl::optional<Compression> compression;
+	Bytef out_buffer[1024] = {};
+};
+
+ZLibContext::Compression::Compression()
+{
+	int result = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+	if (result != Z_OK)
+		throw Exception(result, "Trouble setting up zlib compression");
+}
+
+ZLibContext::Compression::~Compression()
+{
+	int result = deflateEnd(&stream);
+	if (result != Z_OK)
+		gLog.printf("Error ending zlib compression: %d\n", result);
+}
+
+ZLibContext::ZLibContext(bool compress, std::vector<byte> &data) : out_data(data)
+{
+	if(!compress)
+		return;
+	
+	compression.emplace();
+	compression->setNextOut(out_buffer, sizeof(out_buffer));
+}
+
+void ZLibContext::appendLump(const void *data, int length) noexcept(false)
+{
+	if (! compression)
+	{
+		auto bdata = static_cast<const byte *>(data);
+		out_data.insert(out_data.end(), bdata, bdata + length);
+		return;
+	}
+
+	compression->setNextIn(const_cast<Bytef*>(static_cast<const Bytef*>(data)), length);
+
+	while (compression->getAvailIn() > 0)
+	{
+		int err = compression->deflate(Z_NO_FLUSH);
+		if (err != Z_OK)
+		{
+			throw Compression::Exception(err, SString::printf("Trouble compressing %d bytes (zlib)", length));
+		}
+
+		if (compression->getAvailOut() == 0)
+		{
+			out_data.insert(out_data.end(), out_buffer, out_buffer + sizeof(out_buffer));
+
+			compression->setNextOut(out_buffer, sizeof(out_buffer));
+		}
+	}
+}
+
+void ZLibContext::finishLump() noexcept(false)
+{
+	if (! compression)
+	{
+		return;
+	}
+
+	int left_over;
+
+	// ASSERT(zout_stream.avail_out > 0)
+
+	compression->setNextIn(Z_NULL, 0);
+
+	for (;;)
+	{
+		int err = compression->deflate(Z_FINISH);
+
+		if (err == Z_STREAM_END)
+			break;
+
+		if (err != Z_OK)
+		{
+			throw Compression::Exception(err, "Trouble finishing compression (zlib)");
+		}
+
+		if (compression->getAvailOut() == 0)
+		{
+			out_data.insert(out_data.end(), out_buffer, out_buffer + sizeof(out_buffer));
+
+			compression->setNextOut(out_buffer, sizeof(out_buffer));
+		}
+	}
+
+	left_over = sizeof(out_buffer) - compression->getAvailOut();
+
+	if (left_over > 0)
+	{
+		out_data.insert(out_data.end(), out_buffer, out_buffer + left_over);
+	}
+}
+
 static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
 static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
 static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
 
-void PutZVertices()
+void LevelData::PutZVertices(ZLibContext &zcontext) const noexcept(false)
 {
 	int count, i;
 
 	u32_t orgverts = LE_U32(num_old_vert);
 	u32_t newverts = LE_U32(num_new_vert);
 
-	ZLibAppendLump(&orgverts, 4);
-	ZLibAppendLump(&newverts, 4);
+	zcontext.appendLump(&orgverts, 4);
+	zcontext.appendLump(&newverts, 4);
 
-	for (i=0, count=0 ; i < num_vertices ; i++)
+	for (i=0, count=0 ; i < (int)vertices.size() ; i++)
 	{
 		raw_v2_vertex_t raw;
 
-		vertex_t *vert = lev_vertices[i];
+		const vertex_t *vert = vertices[i];
 
 		if (! vert->is_new)
 			continue;
@@ -1448,71 +1522,70 @@ void PutZVertices()
 		raw.x = LE_S32(iround(vert->x * 65536.0));
 		raw.y = LE_S32(iround(vert->y * 65536.0));
 
-		ZLibAppendLump(&raw, sizeof(raw));
+		zcontext.appendLump(&raw, sizeof(raw));
 
 		count++;
 	}
 
 	if (count != num_new_vert)
-		BugError("PutZVertices miscounted (%d != %d)\n", count, num_new_vert);
+		BugError("PutZVertices miscounted (%d != %d)", count, num_new_vert);
 }
 
 
-void PutZSubsecs()
+void LevelData::PutZSubsecs(ZLibContext &zcontext) const noexcept(false)
 {
 	int i;
 	int count;
-	u32_t raw_num = LE_U32(num_subsecs);
+	u32_t raw_num = LE_U32((int)subsecs.size());
 
 	int cur_seg_index = 0;
 
-	ZLibAppendLump(&raw_num, 4);
+	zcontext.appendLump(&raw_num, 4);
 
-	for (i=0 ; i < num_subsecs ; i++)
+	for (i=0 ; i < (int)subsecs.size() ; i++)
 	{
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = subsecs[i];
 		seg_t *seg;
 
 		raw_num = LE_U32(sub->seg_count);
 
-		ZLibAppendLump(&raw_num, 4);
+		zcontext.appendLump(&raw_num, 4);
 
 		// sanity check the seg index values
 		count = 0;
 		for (seg = sub->seg_list ; seg ; seg = seg->next, cur_seg_index++)
 		{
 			if (cur_seg_index != seg->index)
-				BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n",
-						i, cur_seg_index, seg->index);
+			{
+				BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)", i, cur_seg_index,
+						 seg->index);
+			}
 
 			count++;
 		}
 
 		if (count != sub->seg_count)
-			BugError("PutZSubsecs: miscounted segs in sub %d (%d != %d)\n",
-					i, count, sub->seg_count);
+			BugError("PutZSubsecs: miscounted segs in sub %d (%d != %d)", i, count, sub->seg_count);
 	}
 
-	if (cur_seg_index != num_segs)
-		BugError("PutZSubsecs miscounted segs (%d != %d)\n",
-				cur_seg_index, num_segs);
+	if (cur_seg_index != (int)segs.size())
+		BugError("PutZSubsecs miscounted segs (%d != %d)", cur_seg_index, (int)segs.size());
 }
 
 
-void PutZSegs()
+void LevelData::PutZSegs(ZLibContext &zcontext) const noexcept(false)
 {
 	int i, count;
-	u32_t raw_num = LE_U32(num_segs);
+	u32_t raw_num = LE_U32((int)segs.size());
 
-	ZLibAppendLump(&raw_num, 4);
+	zcontext.appendLump(&raw_num, 4);
 
-	for (i=0, count=0 ; i < num_segs ; i++)
+	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = segs[i];
 
 		if (count != seg->index)
-			BugError("PutZSegs: seg index mismatch (%d != %d)\n",
-					count, seg->index);
+			BugError("PutZSegs: seg index mismatch (%d != %d)", count, seg->index);
 
 		{
 			u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
@@ -1521,34 +1594,35 @@ void PutZSegs()
 			u16_t line = LE_U16(seg->linedef);
 			u8_t  side = static_cast<u8_t>(seg->side);
 
-			ZLibAppendLump(&v1,   4);
-			ZLibAppendLump(&v2,   4);
-			ZLibAppendLump(&line, 2);
-			ZLibAppendLump(&side, 1);
+			zcontext.appendLump(&v1,   4);
+			zcontext.appendLump(&v2,   4);
+			zcontext.appendLump(&line, 2);
+			zcontext.appendLump(&side, 1);
 		}
 
 		count++;
 	}
 
-	if (count != num_segs)
-		BugError("PutZSegs miscounted (%d != %d)\n", count, num_segs);
+	if (count != (int)segs.size())
+		BugError("PutZSegs miscounted (%d != %d)\n", count, (int)segs.size());
 }
 
 
-void PutXGL3Segs()
+void LevelData::PutXGL3Segs(ZLibContext &zcontext) const noexcept(false)
 {
 	int i, count;
-	u32_t raw_num = LE_U32(num_segs);
+	u32_t raw_num = LE_U32((int)segs.size());
 
-	ZLibAppendLump(&raw_num, 4);
+	zcontext.appendLump(&raw_num, 4);
 
-	for (i=0, count=0 ; i < num_segs ; i++)
+	for (i=0, count=0 ; i < (int)segs.size() ; i++)
 	{
-		seg_t *seg = lev_segs[i];
+		seg_t *seg = segs[i];
 
 		if (count != seg->index)
-			BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n",
-					count, seg->index);
+		{
+			BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n", count, seg->index);
+		}
 
 		{
 			u32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
@@ -1560,29 +1634,31 @@ void PutXGL3Segs()
 			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
 # endif
 
-			ZLibAppendLump(&v1,      4);
-			ZLibAppendLump(&partner, 4);
-			ZLibAppendLump(&line,    4);
-			ZLibAppendLump(&side,    1);
+			zcontext.appendLump(&v1,      4);
+			zcontext.appendLump(&partner, 4);
+			zcontext.appendLump(&line,    4);
+			zcontext.appendLump(&side,    1);
 		}
 
 		count++;
 	}
 
-	if (count != num_segs)
-		BugError("PutXGL3Segs miscounted (%d != %d)\n", count, num_segs);
+	if (count != (int)segs.size())
+	{
+		BugError("PutXGL3Segs miscounted (%d != %d)\n", count, (int)segs.size());
+	}
 }
 
 
-static void PutOneZNode(node_t *node, bool do_xgl3)
+void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3) noexcept(false)
 {
 	raw_v5_node_t raw;
 
 	if (node->r.node)
-		PutOneZNode(node->r.node, do_xgl3);
+		PutOneZNode(zcontext, node->r.node, do_xgl3);
 
 	if (node->l.node)
-		PutOneZNode(node->l.node, do_xgl3);
+		PutOneZNode(zcontext, node->l.node, do_xgl3);
 
 	node->index = node_cur_index++;
 
@@ -1593,10 +1669,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 		u32_t dx = LE_S32(iround(node->dx * 65536.0));
 		u32_t dy = LE_S32(iround(node->dy * 65536.0));
 
-		ZLibAppendLump(&x,  4);
-		ZLibAppendLump(&y,  4);
-		ZLibAppendLump(&dx, 4);
-		ZLibAppendLump(&dy, 4);
+		zcontext.appendLump(&x,  4);
+		zcontext.appendLump(&y,  4);
+		zcontext.appendLump(&dx, 4);
+		zcontext.appendLump(&dy, 4);
 	}
 	else
 	{
@@ -1605,10 +1681,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 		raw.dx = LE_S16(iround(node->dx));
 		raw.dy = LE_S16(iround(node->dy));
 
-		ZLibAppendLump(&raw.x,  2);
-		ZLibAppendLump(&raw.y,  2);
-		ZLibAppendLump(&raw.dx, 2);
-		ZLibAppendLump(&raw.dy, 2);
+		zcontext.appendLump(&raw.x,  2);
+		zcontext.appendLump(&raw.y,  2);
+		zcontext.appendLump(&raw.dx, 2);
+		zcontext.appendLump(&raw.dy, 2);
 	}
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
@@ -1621,15 +1697,17 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 	raw.b2.maxx = LE_S16(node->l.bounds.maxx);
 	raw.b2.maxy = LE_S16(node->l.bounds.maxy);
 
-	ZLibAppendLump(&raw.b1, sizeof(raw.b1));
-	ZLibAppendLump(&raw.b2, sizeof(raw.b2));
+	zcontext.appendLump(&raw.b1, sizeof(raw.b1));
+	zcontext.appendLump(&raw.b2, sizeof(raw.b2));
 
 	if (node->r.node)
 		raw.right = LE_U32(node->r.node->index);
 	else if (node->r.subsec)
 		raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
 	else
+	{
 		BugError("Bad right child in V5 node %d\n", node->index);
+	}
 
 	if (node->l.node)
 		raw.left = LE_U32(node->l.node->index);
@@ -1638,8 +1716,8 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 	else
 		BugError("Bad left child in V5 node %d\n", node->index);
 
-	ZLibAppendLump(&raw.right, 4);
-	ZLibAppendLump(&raw.left,  4);
+	zcontext.appendLump(&raw.right, 4);
+	zcontext.appendLump(&raw.left,  4);
 
 # if DEBUG_BSP
 	gLog.debugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
@@ -1650,86 +1728,112 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 }
 
 
-void PutZNodes(node_t *root, bool do_xgl3)
+void LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3) noexcept(false)
 {
-	u32_t raw_num = LE_U32(num_nodes);
+	u32_t raw_num = LE_U32((int)nodes.size());
 
-	ZLibAppendLump(&raw_num, 4);
+	zcontext.appendLump(&raw_num, 4);
 
 	node_cur_index = 0;
 
 	if (root)
-		PutOneZNode(root, do_xgl3);
+		PutOneZNode(zcontext, root, do_xgl3);
 
-	if (node_cur_index != num_nodes)
-		BugError("PutZNodes miscounted (%d != %d)\n",
-				node_cur_index, num_nodes);
+	if (node_cur_index != (int)nodes.size())
+	{
+		BugError("PutZNodes miscounted (%d != %d)\n", node_cur_index, (int)nodes.size());
+	}
 }
 
-static void SaveZDFormat(const Instance &inst, node_t *root_node)
+void LevelData::putZItems(std::vector<byte>& lumpData, node_t* root_node, bool do_xgl3)
 {
-	// leave SEGS and SSECTORS empty
-	CreateLevelLump(inst, "SEGS");
-	CreateLevelLump(inst, "SSECTORS");
+	auto putTheStuff = [this, root_node, do_xgl3](ZLibContext &zlibContext)
+		{
+			PutZVertices(zlibContext);
+			PutZSubsecs(zlibContext);
+			if (do_xgl3)
+				PutXGL3Segs(zlibContext);
+			else
+				PutZSegs(zlibContext);
+			PutZNodes(zlibContext, root_node, do_xgl3);
+		};
 
-	Lump_c *lump = CreateLevelLump(inst, "NODES");
+	try
+	{
+		ZLibContext zlibContext(cur_info->force_compress, lumpData);
+		putTheStuff(zlibContext);
+		zlibContext.finishLump();
+	}
+	catch (const ZLibContext::Compression::Exception& e)
+	{
+		PrintMsg("Cannot compress nodes: %s\n", e.what());
+		lumpData.clear();
 
-	if (cur_info->force_compress)
-		lump->Write(lev_ZNOD_magic, 4);
-	else
-		lump->Write(lev_XNOD_magic, 4);
+		ZLibContext zlibContext(false, lumpData);
+		putTheStuff(zlibContext);
+		zlibContext.finishLump();
+	}
+}
+
+void LevelData::SaveZDFormat(node_t *root_node)
+{
 
 	// the ZLibXXX functions do no compression for XNOD format
-	ZLibBeginLump(lump);
+	
+	std::vector<byte> lumpData;
+	putZItems(lumpData, root_node, false);
+	
+	// Commit
+	
+	// leave SEGS and SSECTORS empty
+	CreateLevelLump("SEGS");
+	CreateLevelLump("SSECTORS");
 
-	PutZVertices();
-	PutZSubsecs();
-	PutZSegs();
-	PutZNodes(root_node, false /* do_xgl3 */);
+	Lump_c &lump = CreateLevelLump("NODES");
 
-	ZLibFinishLump();
+	if (cur_info->force_compress)
+		lump.Write(lev_ZNOD_magic, 4);
+	else
+		lump.Write(lev_XNOD_magic, 4);
+	lump.Write(lumpData.data(), (int)lumpData.size());
 }
 
 
-static void SaveXGL3Format(const Instance &inst, node_t *root_node)
+void LevelData::SaveXGL3Format(node_t *root_node)
 {
 	// WISH : compute a max_size
 
-	Lump_c *lump = CreateLevelLump(inst, "ZNODES");
+	Lump_c &lump = CreateLevelLump("ZNODES");
 
-	lump->Write(lev_XGL3_magic, 4);
+	lump.Write(lev_XGL3_magic, 4);
 
 	// disable compression
 	cur_info->force_compress = false;
 
-	ZLibBeginLump(lump);
-
-	PutZVertices();
-	PutZSubsecs();
-	PutXGL3Segs();
-	PutZNodes(root_node, true /* do_xgl3 */);
-
-	ZLibFinishLump();
+	std::vector<byte> lumpData;
+	putZItems(lumpData, root_node, true);
+	
+	lump.Write(lumpData.data(), (int)lumpData.size());
 }
 
 
 /* ----- whole-level routines --------------------------- */
 
-static void LoadLevel(const Instance &inst)
+void LevelData::LoadLevel()
 {
-	Lump_c *LEV = inst.wad.master.edit_wad->GetLump(lev_current_start);
+	const Lump_c *LEV = wad.GetLump(current_start);
 
-	lev_current_name = LEV->Name();
-	lev_overflows = 0;
+	current_name = LEV->Name();
+	overflows = 0;
 
-	inst.GB_PrintMsg("Building nodes on %s\n", lev_current_name.c_str());
+	PrintMsg("Building nodes on %s\n", current_name.c_str());
 
 	num_new_vert = 0;
 	num_real_lines = 0;
 
-	GetVertices(inst.level);
+	GetVertices();
 
-	for(auto &L : inst.level.linedefs)
+	for(auto &L : doc.linedefs)
 	{
 		if (L->right >= 0 || L->left >= 0)
 			num_real_lines++;
@@ -1742,22 +1846,22 @@ static void LoadLevel(const Instance &inst)
 	}
 
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
-			inst.level.numVertices(), inst.level.numSectors(), inst.level.numSidedefs(), inst.level.numLinedefs(), inst.level.numThings());
+			doc.numVertices(), doc.numSectors(), doc.numSidedefs(), doc.numLinedefs(), doc.numThings());
 
-	DetectOverlappingVertices(inst.level);
-	DetectOverlappingLines(inst.level);
+	DetectOverlappingVertices();
+	DetectOverlappingLines(doc);
 
-	CalculateWallTips(inst.level);
+	CalculateWallTips();
 
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	if (format != MapFormat::doom)
 	{
 		// -JL- Find sectors containing polyobjs
-		DetectPolyobjSectors(inst);
+		DetectPolyobjSectors();
 	}
 }
 
 
-void FreeLevel(void)
+void LevelData::FreeLevel(void)
 {
 	FreeVertices();
 	FreeSegs();
@@ -1766,39 +1870,26 @@ void FreeLevel(void)
 	FreeWallTips();
 }
 
-static Lump_c *FindLevelLump(const Instance &inst, const char *name);
-
-static u32_t CalcGLChecksum(const Instance &inst)
+u32_t LevelData::CalcGLChecksum() const
 {
 	u32_t crc;
 
 	Adler32_Begin(&crc);
 
-	Lump_c *lump = FindLevelLump(inst, "VERTEXES");
+	const Lump_c *lump = FindLevelLump("VERTEXES");
 
 	if (lump && lump->Length() > 0)
 	{
-		u8_t *data = new u8_t[lump->Length()];
-
-		lump->Seek();
-		if (! lump->Read(data, lump->Length()))
-			FatalError("Error reading vertices (for checksum).\n");
-
+		const u8_t *data = lump->getData().data();
 		Adler32_AddBlock(&crc, data, lump->Length());
-		delete[] data;
 	}
 
-	lump = FindLevelLump(inst, "LINEDEFS");
+	lump = FindLevelLump("LINEDEFS");
 
 	if (lump && lump->Length() > 0)
 	{
-		u8_t *data = new u8_t[lump->Length()];
-		lump->Seek();
-		if (! lump->Read(data, lump->Length()))
-			FatalError("Error reading linedefs (for checksum).\n");
-
+		const u8_t *data = lump->getData().data();
 		Adler32_AddBlock(&crc, data, lump->Length());
-		delete[] data;
 	}
 
 	Adler32_Finish(&crc);
@@ -1807,22 +1898,16 @@ static u32_t CalcGLChecksum(const Instance &inst)
 }
 
 
-inline static SString CalcOptionsString()
-{
-	return SString::printf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
-}
-
-
-static void UpdateGLMarker(const Instance &inst, Lump_c *marker)
+void LevelData::UpdateGLMarker(Lump_c *marker) const
 {
 	// we *must* compute the checksum BEFORE (re)creating the lump
 	// [ otherwise we write data into the wrong part of the file ]
-	u32_t crc = CalcGLChecksum(inst);
+	u32_t crc = CalcGLChecksum();
 
 	// when original name is long, need to specify it here
-	if (lev_current_name.length() > 5)
+	if (current_name.length() > 5)
 	{
-		marker->Printf("LEVEL=%s\n", lev_current_name.c_str());
+		marker->Printf("LEVEL=%s\n", current_name.c_str());
 	}
 
 	marker->Printf("BUILDER=%s\n", "Eureka " EUREKA_VERSION);
@@ -1839,41 +1924,39 @@ static void UpdateGLMarker(const Instance &inst, Lump_c *marker)
 }
 
 
-static void AddMissingLump(const Instance &inst, const char *name, const char *after)
+void LevelData::AddMissingLump(const char *name, const char *after)
 {
-	if (inst.wad.master.edit_wad->LevelLookupLump(lev_current_idx, name) >= 0)
+	if (wad.LevelLookupLump(current_idx, name) >= 0)
 		return;
 
-	int exist = inst.wad.master.edit_wad->LevelLookupLump(lev_current_idx, after);
+	int exist = wad.LevelLookupLump(current_idx, after);
 
 	// if this happens, the level structure is very broken
 	if (exist < 0)
 	{
-		Warning(inst, "Missing %s lump -- level structure is broken\n", after);
+		Warning("Missing %s lump -- level structure is broken\n", after);
 
-		exist = inst.wad.master.edit_wad->LevelLastLump(lev_current_idx);
+		exist = wad.LevelLastLump(current_idx);
 	}
 
-	inst.wad.master.edit_wad->InsertPoint(exist + 1);
+	wad.InsertPoint(exist + 1);
 
-	inst.wad.master.edit_wad->AddLump(name);
+	wad.AddLump(name);
 }
 
-static Lump_c &CreateGLMarker(const Instance &inst);
-
-static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
+build_result_e LevelData::SaveLevel(node_t *root_node)
 {
 	// Note: root_node may be NULL
 
 	// remove any existing GL-Nodes
-	inst.wad.master.edit_wad->RemoveGLNodes(lev_current_idx);
+	wad.RemoveGLNodes(current_idx);
 
 	// ensure all necessary level lumps are present
-	AddMissingLump(inst, "SEGS",     "VERTEXES");
-	AddMissingLump(inst, "SSECTORS", "SEGS");
-	AddMissingLump(inst, "NODES",    "SSECTORS");
-	AddMissingLump(inst, "REJECT",   "SECTORS");
-	AddMissingLump(inst, "BLOCKMAP", "REJECT");
+	AddMissingLump("SEGS",     "VERTEXES");
+	AddMissingLump("SSECTORS", "SEGS");
+	AddMissingLump("NODES",    "SSECTORS");
+	AddMissingLump("REJECT",   "SECTORS");
+	AddMissingLump("BLOCKMAP", "REJECT");
 
 	// user preferences
 	bool force_v5   = cur_info->force_v5;
@@ -1881,7 +1964,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 
 	// check for overflows...
 	// this sets the force_xxx vars if certain limits are breached
-	CheckLimits(force_v5, force_xnod, inst);
+	CheckLimits(force_v5, force_xnod);
 
 
 	/* --- GL Nodes --- */
@@ -1893,24 +1976,24 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 		SortSegs();
 
 		// create empty marker now, flesh it out later
-		gl_marker = &CreateGLMarker(inst);
+		gl_marker = &CreateGLMarker();
 
-		PutGLVertices(inst, force_v5);
-
-		if (force_v5)
-			PutGLSegs_V5(inst);
-		else
-			PutGLSegs(inst);
+		PutGLVertices(force_v5);
 
 		if (force_v5)
-			PutGLSubsecs_V5(inst);
+			PutGLSegs_V5();
 		else
-			PutSubsecs(inst, "GL_SSECT", true);
+			PutGLSegs();
 
-		PutNodes(inst, "GL_NODES", force_v5, root_node);
+		if (force_v5)
+			PutGLSubsecs_V5();
+		else
+			PutSubsecs("GL_SSECT", true);
+
+		PutNodes("GL_NODES", force_v5, root_node);
 
 		// -JL- Add empty PVS lump
-		CreateLevelLump(inst, "GL_PVS");
+		CreateLevelLump("GL_PVS");
 	}
 
 
@@ -1923,7 +2006,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 	{
 		SortSegs();
 
-		SaveZDFormat(inst, root_node);
+		SaveZDFormat(root_node);
 	}
 	else
 	{
@@ -1935,29 +2018,27 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 		// this also removes minisegs and degenerate segs
 		SortSegs();
 
-		PutVertices(inst, "VERTEXES", false);
+		PutVertices("VERTEXES", false);
 
-		PutSegs(inst);
-		PutSubsecs(inst, "SSECTORS", false);
-		PutNodes(inst, "NODES", false, root_node);
+		PutSegs();
+		PutSubsecs("SSECTORS", false);
+		PutNodes("NODES", false, root_node);
 	}
 
-	PutBlockmap(inst);
-	PutReject(inst);
+	PutBlockmap();
+	PutReject();
 
 	// keyword support (v5.0 of the specs).
 	// must be done *after* doing normal nodes (for proper checksum).
 	if (gl_marker)
 	{
-		UpdateGLMarker(inst, gl_marker);
+		UpdateGLMarker(gl_marker);
 	}
 
-	inst.wad.master.edit_wad->writeToDisk();
-
-	if (lev_overflows > 0)
+	if (overflows > 0)
 	{
 		cur_info->total_failed_maps++;
-		inst.GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+		PrintMsg("FAILED with %d overflowed lumps\n", overflows);
 
 		return BUILD_LumpOverflow;
 	}
@@ -1966,180 +2047,82 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 }
 
 
-static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
+build_result_e LevelData::SaveUDMF(node_t *root_node)
 {
 	// remove any existing ZNODES lump
-	inst.wad.master.edit_wad->RemoveZNodes(lev_current_idx);
+	wad.RemoveZNodes(current_idx);
 
-	if (num_real_lines >= 0)
+	try
 	{
-		SortSegs();
+		if (num_real_lines >= 0)
+		{
+			SortSegs();
 
-		SaveXGL3Format(inst, root_node);
+			SaveXGL3Format(root_node);
+		}
+	}
+	catch (const std::runtime_error& e)
+	{
+		gLog.printf("Failed building UDMF nodes: %s\n", e.what());
+		throw;
 	}
 
-	inst.wad.master.edit_wad->writeToDisk();
-
-	if (lev_overflows > 0)
+	if (overflows > 0)
 	{
 		cur_info->total_failed_maps++;
-		inst.GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+		PrintMsg("FAILED with %d overflowed lumps\n", overflows);
 
 		return BUILD_LumpOverflow;
 	}
 
 	return BUILD_OK;
 }
-
-
-//----------------------------------------------------------------------
-
-
-static Lump_c  *zout_lump;
-static z_stream zout_stream;
-static Bytef    zout_buffer[1024];
-
-
-void ZLibBeginLump(Lump_c *lump)
-{
-	zout_lump = lump;
-
-	if (! cur_info->force_compress)
-		return;
-
-	zout_stream.zalloc = (alloc_func)0;
-	zout_stream.zfree  = (free_func)0;
-	zout_stream.opaque = (voidpf)0;
-
-	if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-		FatalError("Trouble setting up zlib compression\n");
-
-	zout_stream.next_out  = zout_buffer;
-	zout_stream.avail_out = sizeof(zout_buffer);
-}
-
-
-void ZLibAppendLump(const void *data, int length)
-{
-	// ASSERT(zout_lump)
-	// ASSERT(length > 0)
-
-	if (! cur_info->force_compress)
-	{
-		zout_lump->Write(data, length);
-		return;
-	}
-
-	zout_stream.next_in  = (Bytef*)data;   // const override
-	zout_stream.avail_in = length;
-
-	while (zout_stream.avail_in > 0)
-	{
-		int err = deflate(&zout_stream, Z_NO_FLUSH);
-
-		if (err != Z_OK)
-			FatalError("Trouble compressing %d bytes (zlib)\n", length);
-
-		if (zout_stream.avail_out == 0)
-		{
-			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
-
-			zout_stream.next_out  = zout_buffer;
-			zout_stream.avail_out = sizeof(zout_buffer);
-		}
-	}
-}
-
-
-void ZLibFinishLump(void)
-{
-	if (! cur_info->force_compress)
-	{
-		zout_lump = NULL;
-		return;
-	}
-
-	int left_over;
-
-	// ASSERT(zout_stream.avail_out > 0)
-
-	zout_stream.next_in  = Z_NULL;
-	zout_stream.avail_in = 0;
-
-	for (;;)
-	{
-		int err = deflate(&zout_stream, Z_FINISH);
-
-		if (err == Z_STREAM_END)
-			break;
-
-		if (err != Z_OK)
-			FatalError("Trouble finishing compression (zlib)\n");
-
-		if (zout_stream.avail_out == 0)
-		{
-			zout_lump->Write(zout_buffer, sizeof(zout_buffer));
-
-			zout_stream.next_out  = zout_buffer;
-			zout_stream.avail_out = sizeof(zout_buffer);
-		}
-	}
-
-	left_over = sizeof(zout_buffer) - zout_stream.avail_out;
-
-	if (left_over > 0)
-		zout_lump->Write(zout_buffer, left_over);
-
-	deflateEnd(&zout_stream);
-	zout_lump = NULL;
-}
-
 
 /* ---------------------------------------------------------------- */
 
 
-static Lump_c * FindLevelLump(const Instance &inst, const char *name)
+Lump_c * LevelData::FindLevelLump(const char *name) const noexcept
 {
-	int idx = inst.wad.master.edit_wad->LevelLookupLump(lev_current_idx, name);
+	int idx = wad.LevelLookupLump(current_idx, name);
 
 	if (idx < 0)
 		return NULL;
 
-	return inst.wad.master.edit_wad->GetLump(idx);
+	return wad.GetLump(idx);
 }
 
 
-static Lump_c * CreateLevelLump(const Instance &inst, const char *name)
+Lump_c & LevelData::CreateLevelLump(const char *name) const
 {
 	// look for existing one
-	Lump_c *lump = FindLevelLump(inst, name);
+	Lump_c *lump = FindLevelLump(name);
 
 	if(!lump)
 	{
-		int last_idx = inst.wad.master.edit_wad->LevelLastLump(lev_current_idx);
+		int last_idx = wad.LevelLastLump(current_idx);
 
 		// in UDMF maps, insert before the ENDMAP lump, otherwise insert
 		// after the last known lump of the level.
-		if (inst.loaded.levelFormat != MapFormat::udmf)
+		if (format != MapFormat::udmf)
 			last_idx++;
 
-		inst.wad.master.edit_wad->InsertPoint(last_idx);
+		wad.InsertPoint(last_idx);
 
-		lump = &inst.wad.master.edit_wad->AddLump(name);
+		lump = &wad.AddLump(name);
 	}
 
     lump->clearData();
-	return lump;
+	return *lump;
 }
 
 
-static Lump_c & CreateGLMarker(const Instance &inst)
+Lump_c & LevelData::CreateGLMarker() const
 {
 	SString name_buf;
 
-	if (lev_current_name.length() <= 5)
+	if (current_name.length() <= 5)
 	{
-		name_buf = "GL_" + lev_current_name;
+		name_buf = "GL_" + current_name;
 	}
 	else
 	{
@@ -2147,11 +2130,11 @@ static Lump_c & CreateGLMarker(const Instance &inst)
 		name_buf = "GL_LEVEL";
 	}
 
-	int last_idx = inst.wad.master.edit_wad->LevelLastLump(lev_current_idx);
+	int last_idx = wad.LevelLastLump(current_idx);
 
-	inst.wad.master.edit_wad->InsertPoint(last_idx + 1);
+	wad.InsertPoint(last_idx + 1);
 
-	return inst.wad.master.edit_wad->AddLump(name_buf);
+	return wad.AddLump(name_buf);
 }
 
 
@@ -2159,10 +2142,7 @@ static Lump_c & CreateGLMarker(const Instance &inst)
 // MAIN STUFF
 //------------------------------------------------------------------------
 
-nodebuildinfo_t * cur_info = NULL;
-
-
-static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst)
+build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx)
 {
 	cur_info = info;
 
@@ -2173,12 +2153,12 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 	if (cur_info->cancelled)
 		return BUILD_Cancelled;
 
-	lev_current_idx   = lev_idx;
-	lev_current_start = inst.wad.master.edit_wad->LevelHeader(lev_idx);
+	current_idx   = lev_idx;
+	current_start = wad.LevelHeader(lev_idx);
 
-	LoadLevel(inst);
+	LoadLevel();
 
-	InitBlockmap(inst.level);
+	block.InitMap(doc);
 
 
 	build_result_e ret = BUILD_OK;
@@ -2186,16 +2166,16 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 	if (num_real_lines > 0)
 	{
 		// create initial segs
-		seg_t *list = CreateSegs(inst);
+		seg_t *list = CreateSegs();
 
 		// recursively create nodes
-		ret = BuildNodes(list, &root_bbox, &root_node, &root_sub, 0, inst);
+		ret = BuildNodes(list, &root_bbox, &root_node, &root_sub, 0);
 	}
 
 	if (ret == BUILD_OK)
 	{
 		PrintDetail("Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
-					num_nodes, num_subsecs, num_segs, num_old_vert + num_new_vert);
+					(int)nodes.size(), (int)subsecs.size(), (int)segs.size(), num_old_vert + num_new_vert);
 
 		if (root_node)
 		{
@@ -2204,12 +2184,20 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 					ComputeBspHeight(root_node->l.node));
 		}
 
-		ClockwiseBspTree(inst.level);
+		ClockwiseBspTree();
 
-		if (inst.loaded.levelFormat == MapFormat::udmf)
-			ret = SaveUDMF(inst, root_node);
-		else
-			ret = SaveLevel(root_node, inst);
+		try
+		{
+			if (format == MapFormat::udmf)
+				ret = SaveUDMF(root_node);
+			else
+				ret = SaveLevel(root_node);
+		}
+		catch(const std::runtime_error &e)
+		{
+			PrintMsg("Failed saving after node-build: %s\n", e.what());
+			ret = BUILD_BadFile;
+		}
 	}
 	else
 	{
@@ -2220,7 +2208,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 	FreeQuickAllocCuts();
 
 	// clear some fake line flags
-	for(auto &linedef : inst.level.linedefs)
+	for(auto &linedef : doc.linedefs)
 		linedef->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
 	return ret;
@@ -2229,9 +2217,12 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 }  // namespace ajbsp
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst)
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &inst, const Document &doc, const LoadingData& loading, Wad_file& wad)
 {
-	return ajbsp::BuildLevel(info, lev_idx, inst);
+	ajbsp::LevelData lev_data(loading.levelFormat, wad, doc, inst.conf, [&inst](const SString &message){
+		inst.GB_PrintMsg("%s", message.c_str());
+	});
+	return lev_data.BuildLevel(info, lev_idx);
 }
 
 //--- editor settings ---

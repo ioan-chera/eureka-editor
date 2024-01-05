@@ -50,10 +50,10 @@ private:
 	// use SetFindString() to set this
 	SString find_string;
 
-	Instance& inst;
+	const Instance& inst;
 
 public:
-	UI_TextEditor(Instance &inst);
+	UI_TextEditor(const Instance &inst);
 	virtual ~UI_TextEditor();
 
 	void SetReadOnly()
@@ -63,10 +63,10 @@ public:
 
 	void SetTitle(const SString &lump_name);
 
-	bool LoadLump(Wad_file *wad, const SString &lump_name);
+	bool LoadLump(const Wad_file *wad, const SString &lump_name);
 	void SaveLump(Wad_file *wad, const SString &lump_name);
 
-	void LoadMemory(std::vector<byte> &buf);
+	void LoadMemory(const std::vector<byte> &buf);
 	void SaveMemory(std::vector<byte> &buf);
 
 	enum

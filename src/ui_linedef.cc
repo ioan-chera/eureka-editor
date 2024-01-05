@@ -48,8 +48,6 @@ enum
 	INSET_RIGHT = 6,
 	INSET_BOTTOM = 5,
 
-	NOMBRE_INSET = 6,
-	NOMBRE_HEIGHT = 28,
 	SPACING_BELOW_NOMBRE = 4,
 
 	TYPE_INPUT_X = 58,
@@ -92,7 +90,7 @@ public:
 // UI_LineBox Constructor
 //
 UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label), inst(inst)
+    MapItemBox(inst, X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
@@ -256,7 +254,7 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			op.changeLinedef(*it, LineDef::F_TYPE, new_type);
 		}
@@ -297,7 +295,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 {
 	bool opposite = (e_state & FL_SHIFT);
 
-	const auto &L = inst.level.linedefs[ld];
+	const auto L = inst.level.linedefs[ld];
 
 	// handle the selected texture boxes
 	if (parts != 0)
@@ -390,7 +388,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		const auto &S = inst.level.sidedefs[sd1];
+		const auto S = inst.level.sidedefs[sd1];
 
 		// change BOTH upper and lower when they are the same
 		// (which is great for windows).
@@ -431,7 +429,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 		EditOperation op(inst.level.basis);
 		op.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int p2 = inst.edit.Selected->get_ext(*it);
 
@@ -522,9 +520,9 @@ void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 		EditOperation op(inst.level.basis);
 		op.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &L = inst.level.linedefs[*it];
+			const auto L = inst.level.linedefs[*it];
 
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
@@ -644,9 +642,9 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const auto &L = box->inst.level.linedefs[*it];
+			const auto L = box->inst.level.linedefs[*it];
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
@@ -672,7 +670,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeLinedef(*it, static_cast<byte>(LineDef::F_TAG + arg_idx),
                                                 new_value);
@@ -714,26 +712,6 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_LineBox::SetObj(int _index, int _count)
-{
-	if (obj == _index && count == _count)
-		return;
-
-	obj   = _index;
-	count = _count;
-
-	which->SetIndex(obj);
-	which->SetSelected(count);
-
-	UpdateField();
-
-	if (obj < 0)
-		UnselectPics();
-
-	redraw();
-}
-
-
 void UI_LineBox::UpdateField(int field)
 {
 	if (field < 0 || field == LineDef::F_START || field == LineDef::F_END)
@@ -755,7 +733,7 @@ void UI_LineBox::UpdateField(int field)
 
 		if (inst.level.isLinedef(obj))
 		{
-			const auto &L = inst.level.linedefs[obj];
+			const auto L = inst.level.linedefs[obj];
 
 			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
 
@@ -789,7 +767,7 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (inst.level.isLinedef(obj))
 		{
-			const auto &L = inst.level.linedefs[obj];
+			const auto L = inst.level.linedefs[obj];
 
 			int right_mask = SolidMask(L.get(), Side::right);
 			int  left_mask = SolidMask(L.get(), Side::left);
@@ -978,9 +956,9 @@ int UI_LineBox::CalcFlags() const
 }
 
 
-void UI_LineBox::UpdateTotal()
+void UI_LineBox::UpdateTotal(const Document &doc) noexcept
 {
-	which->SetTotal(inst.level.numLinedefs());
+	which->SetTotal(doc.numLinedefs());
 }
 
 
@@ -1015,11 +993,11 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 }
 
 
-void UI_LineBox::UpdateGameInfo()
+void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
 	choose->label("Choose");
 
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	if (loaded.levelFormat != MapFormat::doom)
 	{
 		tag->hide();
 		length->hide();
@@ -1039,17 +1017,17 @@ void UI_LineBox::UpdateGameInfo()
 		actkind->hide();
 		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 
-		if (inst.conf.features.pass_through)
+		if (config.features.pass_through)
 			f_passthru->show();
 		else
 			f_passthru->hide();
 
-		if (inst.conf.features.midtex_3d)
+		if (config.features.midtex_3d)
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
 
-		if (inst.conf.features.strife_flags)
+		if (config.features.strife_flags)
 		{
 			f_jumpover->show();
 			f_flyers->show();
@@ -1064,7 +1042,7 @@ void UI_LineBox::UpdateGameInfo()
 			f_trans2->hide();
 		}
 
-		if (inst.conf.features.gen_types)
+		if (config.features.gen_types)
 			gen->show();
 		else
 			gen->hide();
@@ -1072,7 +1050,7 @@ void UI_LineBox::UpdateGameInfo()
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		if (inst.loaded.levelFormat != MapFormat::doom)
+		if (loaded.levelFormat != MapFormat::doom)
 			args[a]->show();
 		else
 			args[a]->hide();

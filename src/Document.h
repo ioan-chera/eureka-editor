@@ -32,6 +32,7 @@
 
 class crc32_c;
 class Instance;
+struct BadCount;
 
 //
 // The document associated with a file. All stuff will go here
@@ -42,15 +43,20 @@ private:
 	Instance &inst;	// make this private because we don't want to access it from Document
 public:
 
-	std::vector<std::unique_ptr<Thing>> things;
-	std::vector<std::unique_ptr<Vertex>> vertices;
-	std::vector<std::unique_ptr<Sector>> sectors;
-	std::vector<std::unique_ptr<SideDef>> sidedefs;
-	std::vector<std::unique_ptr<LineDef>> linedefs;
+	std::vector<std::shared_ptr<Thing>> things;
+	std::vector<std::shared_ptr<Vertex>> vertices;
+	std::vector<std::shared_ptr<Sector>> sectors;
+	std::vector<std::shared_ptr<SideDef>> sidedefs;
+	std::vector<std::shared_ptr<LineDef>> linedefs;
 
 	std::vector<byte> headerData;
 	std::vector<byte> behaviorData;
 	std::vector<byte> scriptsData;
+	
+	v2double_t Map_bound1 = { 32767, 32767 };	/* minimum XY value of map */
+	v2double_t Map_bound2 = { -32767, -32767 };	/* maximum XY value of map */
+	
+	bool MadeChanges = false;
 
 	Basis basis;
 	ChecksModule checks;
@@ -64,11 +70,34 @@ public:
 	linemod(*this), vertmod(*this), secmod(*this), objects(*this)
 	{
 	}
+	
+	Document(Document &&other) noexcept : inst(other.inst), basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this) 
+	{
+		*this = std::move(other);
+	}
+	
+	Document &operator = (Document &&other) noexcept
+	{
+		things = std::move(other.things);
+		vertices = std::move(other.vertices);
+		sectors = std::move(other.sectors);
+		sidedefs = std::move(other.sidedefs);
+		linedefs = std::move(other.linedefs);
+		headerData = std::move(other.headerData);
+		behaviorData = std::move(other.behaviorData);
+		scriptsData = std::move(other.scriptsData);
+		Map_bound1 = other.Map_bound1;
+		Map_bound2 = other.Map_bound2;
+		MadeChanges = other.MadeChanges;
+		// TODO: basis
+		basis = std::move(other.basis);
+		return *this;
+	}
 
 	//
 	// Count map objects
 	//
-	int numThings() const
+	int numThings() const noexcept
 	{
 		return static_cast<int>(things.size());
 	}
@@ -76,7 +105,7 @@ public:
 	{
 		return static_cast<int>(vertices.size());
 	}
-	int numSectors() const
+	int numSectors() const noexcept
 	{
 		return static_cast<int>(sectors.size());
 	}
@@ -84,7 +113,7 @@ public:
 	{
 		return static_cast<int>(sidedefs.size());
 	}
-	int numLinedefs() const
+	int numLinedefs() const noexcept
 	{
 		return static_cast<int>(linedefs.size());
 	}
@@ -96,7 +125,7 @@ public:
 	{
 		return n >= 0 && n < numVertices();
 	}
-	bool isSector(int n) const
+	bool isSector(int n) const noexcept
 	{
 		return n >= 0 && n < numSectors();
 	}
@@ -138,6 +167,45 @@ public:
 	bool isSelfRef(const LineDef &line) const;
 	bool isHorizontal(const LineDef &line) const;
 	bool isVertical(const LineDef &line) const;
+	
+	void LoadHeader(int loading_level, const Wad_file &load_wad);
+	void LoadThings(int loading_level, const Wad_file *load_wad);
+	void LoadThings_Hexen(int loading_level, const Wad_file *load_wad);
+	void LoadVertices(int loading_level, const Wad_file *load_wad);
+	void LoadLineDefs(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad);
+	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad);
+	void LoadSectors(int loading_level, const Wad_file *load_wad);
+	void LoadSideDefs(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad);
+	void LoadBehavior(int loading_level, const Wad_file *load_wad);
+	void LoadScripts(int loading_level, const Wad_file *load_wad);
+	
+	void RemoveUnusedVerticesAtEnd();
+	
+	void CreateFallbackVertices();
+	void CreateFallbackSideDef(const ConfigData &config);
+	void CreateFallbackSector(const ConfigData &config);
+	void ValidateVertexRefs(LineDef &ld, int num, BadCount &bad);
+	void ValidateSidedefRefs(LineDef &ld, int num, const ConfigData &config, BadCount &bad);
+	void ValidateSectorRef(SideDef &sd, int num, const ConfigData &config, BadCount &bad);
+	void ValidateLevel_UDMF(const ConfigData &config, BadCount &bad);
+	
+	void CalculateLevelBounds() noexcept;
+	void UpdateLevelBounds(int start_vert) noexcept;
+
+	int SaveHeader(Wad_file& wad, const SString& level) const;
+	void SaveThings(Wad_file& wad) const;
+	void SaveThings_Hexen(Wad_file& wad) const;
+	void SaveLineDefs(Wad_file& wad) const;
+	void SaveLineDefs_Hexen(Wad_file& wad) const;
+	void SaveSideDefs(Wad_file& wad) const;
+	void SaveVertices(Wad_file& wad) const;
+	void SaveSectors(Wad_file& wad) const;
+	void SaveBehavior(Wad_file& wad) const;
+	void SaveScripts(Wad_file& wad) const;
+	
+	void clear();
+
+	bool Main_ConfirmQuit(const char* action) const;
 private:
 	friend class DocumentModule;
 };

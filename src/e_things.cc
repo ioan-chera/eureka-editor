@@ -69,9 +69,9 @@ void Instance::CMD_TH_SpinThings()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("spun", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &T = level.things[*it];
+			const auto T = level.things[*it];
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
 		}
@@ -86,8 +86,8 @@ void Instance::CMD_TH_SpinThings()
 
 static bool ThingsAtSameLoc(const Document &doc, int th1, int th2)
 {
-	const auto &T1 = doc.things[th1];
-	const auto &T2 = doc.things[th2];
+	const auto T1 = doc.things[th1];
+	const auto T2 = doc.things[th2];
 
 	double dx = fabs(T1->x() - T2->x());
 	double dy = fabs(T1->y() - T2->y());
@@ -120,7 +120,7 @@ static void MoveOverlapThing(EditOperation &op, Instance &inst, int th, int mid_
 	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, static_cast<double>(vec_x) * dist);
 	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, static_cast<double>(vec_y) * dist);
 
-	const auto &T = inst.level.things[th];
+	const auto T = inst.level.things[th];
 
 	op.changeThing(th, Thing::F_X, T->raw_x + fdx);
 	op.changeThing(th, Thing::F_Y, T->raw_y + fdy);
@@ -190,7 +190,7 @@ void CMD_TH_Merge(Instance &inst)
 	EditOperation op(inst.level.basis);
 	op.setMessageForSelection("merged", *inst.edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, mid.x));
 		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, mid.y));

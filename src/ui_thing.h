@@ -28,14 +28,9 @@
 class Sticker;
 class UI_DynIntInput;
 
-class UI_ThingBox : public Fl_Group
+class UI_ThingBox : public MapItemBox
 {
 private:
-	int obj;
-	int count;
-
-	UI_Nombre *which;
-
 	UI_DynInput  *type;
 	Fl_Output    *desc;
 	Fl_Button    *choose;
@@ -85,30 +80,22 @@ private:
 	Fl_Output    *spec_desc;
 	UI_DynIntInput *args[5];
 
-	Instance &inst;
-	PanelFieldFixUp mFixUp;
-
 public:
 	UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
-	virtual ~UI_ThingBox();
 
 public:
-	void SetObj(int _index, int _count);
-
-	int GetObj() const { return obj; }
-
 	// call this if the thing was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1);
+	void UpdateField(int field = -1) override;
 
-	void UpdateTotal();
+	void UpdateTotal(const Document &doc) noexcept override;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
-	void UpdateGameInfo();
-	void UnselectPics();
+	void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) override;
+	void UnselectPics() override;
 
 private:
 	void SetThingType(int new_type);

@@ -57,7 +57,7 @@ static const int headroom_presets[UI_SectorBox::HEADROOM_BUTTONS] =
 // UI_SectorBox Constructor
 //
 UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label), inst(inst)
+    MapItemBox(inst, X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
@@ -69,7 +69,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	H -= 10;
 
 
-	which = new UI_Nombre(X+6, Y, W-12, 28, "Sector");
+	which = new UI_Nombre(X+NOMBRE_INSET, Y, W-2*NOMBRE_INSET, NOMBRE_HEIGHT, "Sector");
 
 	Y += which->h() + 4;
 
@@ -238,14 +238,6 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 }
 
 
-//
-// UI_SectorBox Destructor
-//
-UI_SectorBox::~UI_SectorBox()
-{
-}
-
-
 //------------------------------------------------------------------------
 
 void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
@@ -268,7 +260,7 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 			else
 				op.setMessageForSelection("edited ceiling of", *box->inst.edit.Selected);
 
-			for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+			for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			{
 				if (w == box->floor_h)
 					op.changeSector(*it, Sector::F_FLOORH, f_h);
@@ -306,7 +298,7 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 			EditOperation op(box->inst.level.basis);
 			op.setMessageForSelection("edited headroom of", *box->inst.edit.Selected);
 
-			for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+			for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			{
 				int new_h = box->inst.level.sectors[*it]->floorh + room;
 
@@ -376,7 +368,7 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 		EditOperation op(inst.level.basis);
 		op.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int parts = inst.edit.Selected->get_ext(*it);
 			if (parts == 1)
@@ -498,7 +490,7 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 		EditOperation op(inst.level.basis);
 		op.setMessageForSelection("edited type of", *inst.edit.Selected);
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int old_type = inst.level.sectors[*it]->type;
 
@@ -570,7 +562,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited light of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeSector(*it, Sector::F_LIGHT, new_lt);
 		}
@@ -679,25 +671,6 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 
 //------------------------------------------------------------------------
-
-void UI_SectorBox::SetObj(int _index, int _count)
-{
-	if (obj == _index && count == _count)
-		return;
-
-	obj   = _index;
-	count = _count;
-
-	which->SetIndex(obj);
-	which->SetSelected(count);
-
-	UpdateField();
-
-	if (obj < 0)
-		UnselectPics();
-
-	redraw();
-}
 
 void UI_SectorBox::UpdateField(int field)
 {
@@ -842,7 +815,7 @@ void UI_SectorBox::CB_Paste(int parts, StringID new_tex)
 		EditOperation op(inst.level.basis);
 		op.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
 			if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_tex);
@@ -866,7 +839,7 @@ void UI_SectorBox::CB_Cut(int parts)
 			EditOperation op(inst.level.basis);
 			op.setMessageForSelection("cut texture on", *inst.edit.Selected);
 
-			for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 			{
 				if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_floor);
 				if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_ceil);
@@ -958,17 +931,17 @@ void UI_SectorBox::UnselectPics()
 
 
 // FIXME: make a method of Sector class
-void UI_SectorBox::UpdateTotal()
+void UI_SectorBox::UpdateTotal(const Document &doc) noexcept
 {
-	which->SetTotal(inst.level.numSectors());
+	which->SetTotal(doc.numSectors());
 }
 
 
-void UI_SectorBox::UpdateGameInfo()
+void UI_SectorBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
-	if (inst.conf.features.gen_sectors != GenSectorFamily::none)
+	if (config.features.gen_sectors != GenSectorFamily::none)
 	{
-		if (inst.conf.features.gen_sectors == GenSectorFamily::zdoom)
+		if (config.features.gen_sectors == GenSectorFamily::zdoom)
 			bm_title->label("ZDoom flags:");
 		else
 			bm_title->label("Boom flags:");
