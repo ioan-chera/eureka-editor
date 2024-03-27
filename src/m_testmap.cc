@@ -305,17 +305,17 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const
 
 //------------------------------------------------------------------------
 
-static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
+static void CalcWarpString(const SString& levelName, std::vector<SString> &args)
 {
-	SYS_ASSERT(!inst.loaded.levelName.empty());
+	SYS_ASSERT(!levelName.empty());
 	// FIXME : EDGE allows a full name: -warp MAP03
 	//         Eternity too.
 	//         ZDOOM too, but different syntax: +map MAP03
 
 	// most common syntax is "MAP##" or "MAP###"
-	if (inst.loaded.levelName.length() >= 4 && inst.loaded.levelName.noCaseStartsWith("MAP") && isdigit(inst.loaded.levelName[3]))
+	if (levelName.length() >= 4 && levelName.noCaseStartsWith("MAP") && isdigit(levelName[3]))
 	{
-		long number = strtol(inst.loaded.levelName.c_str() + 3, nullptr, 10);
+		long number = strtol(levelName.c_str() + 3, nullptr, 10);
 		args.push_back("-warp");
 		args.push_back(std::to_string(number));
 		return;
@@ -323,23 +323,23 @@ static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 
 	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
 	// a pair of numbers after -warp
-	if (inst.loaded.levelName.length() >= 4 && !isdigit(inst.loaded.levelName[0]) && isdigit(inst.loaded.levelName[1]) &&
-		!isdigit(inst.loaded.levelName[2]) && isdigit(inst.loaded.levelName[3]))
+	if (levelName.length() >= 4 && !isdigit(levelName[0]) && isdigit(levelName[1]) &&
+		!isdigit(levelName[2]) && isdigit(levelName[3]))
 	{
 		args.push_back("-warp");
-		args.push_back(SString::printf("%c", inst.loaded.levelName[1]));
-		args.push_back(inst.loaded.levelName.c_str() + 3);
+		args.push_back(SString::printf("%c", levelName[1]));
+		args.push_back(levelName.c_str() + 3);
 		return;
 	}
 
 	// map name is non-standard, find the first digit group and hope
 	// for the best...
 
-	size_t digitPos = inst.loaded.levelName.findDigit();
+	size_t digitPos = levelName.findDigit();
 	if (digitPos != std::string::npos)
 	{
 		args.push_back("-warp");
-		args.push_back(inst.loaded.levelName.c_str() + digitPos);
+		args.push_back(levelName.c_str() + digitPos);
 		return;
 	}
 
@@ -416,7 +416,7 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
-	CalcWarpString(inst, args);
+	CalcWarpString(inst.loaded.levelName, args);
 
 	SString argString = inst.loaded.testingCommandLine + " " + buildArgString(args);
 	logArgs(argString);
@@ -437,7 +437,7 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
-	CalcWarpString(inst, args);
+	CalcWarpString(inst.loaded.levelName, args);
 
 	SString arg;
 	TokenWordParse parse(inst.loaded.testingCommandLine, false);
