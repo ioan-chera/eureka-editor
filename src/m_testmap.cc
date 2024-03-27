@@ -442,7 +442,7 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 	SString arg;
 	TokenWordParse parse(inst.loaded.testingCommandLine, false);
 	while(parse.getNext(arg))
-		args.insert(args.begin(), arg);
+		args.push_back(arg);
 	args.insert(args.begin(), portPath.u8string());
 
 	std::vector<char *> argv;
