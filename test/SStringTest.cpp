@@ -317,6 +317,7 @@ TEST(SString, Escape)
 	ASSERT_EQ(SString("OneWord").spaceEscape(), "OneWord");
 	ASSERT_EQ(SString("One Word").spaceEscape(), "\"One Word\"");
 	ASSERT_EQ(SString("One\"Word").spaceEscape(), "\"One\"\"Word\"");
+	ASSERT_EQ(SString("One\"Word").spaceEscape(true), "\"One\\\"Word\"");
 	ASSERT_EQ(SString("One \"Ripper\" Word").spaceEscape(), "\"One \"\"Ripper\"\" Word\"");
 	ASSERT_EQ(SString("").spaceEscape(), "\"\"");
 

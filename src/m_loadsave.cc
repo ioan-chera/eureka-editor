@@ -57,18 +57,6 @@ static const char overwrite_message[] =
 	"\n\n"
 	"Are you sure you want to continue?";
 
-
-void MasterDir::RemoveEditWad()
-{
-	edit_wad.reset();
-}
-
-
-void MasterDir::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
-{
-	edit_wad = new_wad;
-}
-
 static Document makeFreshDocument(Instance &inst, const ConfigData &config, MapFormat levelFormat)
 {
 	Document doc(inst);

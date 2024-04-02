@@ -549,7 +549,8 @@ void Instance::CMD_TestMap()
 		}
 
 		Status_Set("TESTING MAP");
-		main_win->redraw();
+		if(main_win)
+			main_win->redraw();
 		Fl::wait(0.1);
 		Fl::wait(0.1);
 
@@ -558,8 +559,8 @@ void Instance::CMD_TestMap()
 #else
 		testMapOnPOSIX(*this, *info);
 #endif
-		
-		main_win->redraw();
+		if(main_win)
+			main_win->redraw();
 		Fl::wait(0.1);
 		Fl::wait(0.1);
 		

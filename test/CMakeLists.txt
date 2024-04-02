@@ -124,6 +124,7 @@ unit_test(general
     m_files_test.cpp
     m_game_test.cpp
     m_parse_test.cpp
+    m_testmap_test.cpp
     main_test.cpp
 	SafeOutFileTest.cpp
     SectorTest.cpp

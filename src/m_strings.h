@@ -363,7 +363,7 @@ public:
 	size_t findSpace() const;
 	size_t findDigit() const;
 
-	SString spaceEscape() const;
+	SString spaceEscape(bool backslash = false) const;
 
 private:
 	std::string data;
