@@ -32,39 +32,45 @@
 
 #include <fstream>
 
-class TestMapFixture : public TempDirContext
-{
-};
-
 #ifdef _WIN32
 #else
-TEST_F(TestMapFixture, TestMapOnPOSIX)
+class TestMapFixturePOSIX : public TempDirContext
 {
+protected:
+	void SetUp() override;
+	
 	Instance inst;
-	
-	static const fs::path execname = "port.sh";
-	
-	fs::path outputFile = getChildPath("output.list");
+	fs::path outputPath;
+	fs::path portPath;
+};
+
+void TestMapFixturePOSIX::SetUp()
+{
+	TempDirContext::SetUp();
+	outputPath = getChildPath("output.list");
 	
 	// Setup the program
-	fs::path path = getChildPath(execname);
-	std::ofstream stream(path);
+	portPath = getChildPath("port.sh");
+	std::ofstream stream(portPath);
 	ASSERT_TRUE(stream.is_open());
-	mDeleteList.push(path);
+	mDeleteList.push(portPath);
 	stream << "#!/bin/bash" << std::endl;
 	stream << "echo running script" << std::endl;
-	stream << "echo \"$0\" > " << SString(path.u8string()).spaceEscape(true) << std::endl;
+	stream << "echo \"$0\" > " << SString(portPath.u8string()).spaceEscape(true) << std::endl;
 	stream << "for var in \"$@\"" << std::endl;
 	stream << "do" << std::endl;
-	stream << "echo \"$var\" >> " << SString(outputFile).spaceEscape(true) <<
+	stream << "echo \"$var\" >> " << SString(outputPath).spaceEscape(true) <<
 	std::endl;
 	stream << "done" << std::endl;
 	stream.close();
-	int r = chmod(path.u8string().c_str(), S_IRWXU);
+	int r = chmod(portPath.u8string().c_str(), S_IRWXU);
 	ASSERT_FALSE(r);
-	
+}
+
+TEST_F(TestMapFixturePOSIX, TestMap)
+{
 	// Prepare the conditions
-	global::recent.setPortPath("vanilla_doom2", path);
+	global::recent.setPortPath("vanilla_doom2", portPath);
 	
 	// Populate for GrabWadNamesArgs
 	inst.loaded.portName = "vanilla";
@@ -91,13 +97,13 @@ TEST_F(TestMapFixture, TestMapOnPOSIX)
 	// Now run
 	inst.CMD_TestMap();
 	
-	mDeleteList.push(outputFile);
+	mDeleteList.push(outputPath);
 
 	// Try until it's open
 	std::ifstream input;
 	for(int i = 0; i < 20; ++i)
 	{
-		input.open(outputFile);
+		input.open(outputPath);
 		if(input.is_open())
 			break;
 		usleep(100000);	// retry
@@ -105,7 +111,7 @@ TEST_F(TestMapFixture, TestMapOnPOSIX)
 	ASSERT_TRUE(input.is_open());
 	
 	int index = 0;
-	std::vector<std::string> expected = {path.u8string(), "-iwad", gameWadPath.u8string(), "-merge", 
+	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-merge",
 		res1Path.u8string(), res2Path.u8string(), "-file", editWadPath.u8string(), "-warp", "14"};
 	while(!input.eof())
 	{
