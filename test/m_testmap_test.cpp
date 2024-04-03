@@ -143,12 +143,10 @@ TEST_F(TestMapFixturePOSIX, TestMapVanillaWithResources)
 	addIWAD();
 	
 	addResources();
-	// TODO: also no resources
 	
 	addPWAD();
 	
 	inst.loaded.levelName = "MAP14";
-	// TODO: also ExMy, also nonstandard, also something else
 	
 	// Now run
 	inst.CMD_TestMap();
@@ -167,12 +165,10 @@ TEST_F(TestMapFixturePOSIX, TestMapPortWithResources)
 	addIWAD();
 	
 	addResources();
-	// TODO: also no resources
 	
 	addPWAD();
 	
 	inst.loaded.levelName = "MAP14";
-	// TODO: also ExMy, also nonstandard, also something else
 	
 	// Now run
 	inst.CMD_TestMap();
@@ -181,6 +177,82 @@ TEST_F(TestMapFixturePOSIX, TestMapPortWithResources)
 	std::vector<std::string> lines = getResultLines();
 	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file",
 		res1Path.u8string(), res2Path.u8string(), editWadPath.u8string(), "-warp", "14"};
+	ASSERT_EQ(lines, expected);
+}
+
+TEST_F(TestMapFixturePOSIX, TestMapPortWithoutResources)
+{
+	setPortName("boom");
+	
+	addIWAD();
+		
+	addPWAD();
+	
+	inst.loaded.levelName = "MAP14";
+	
+	// Now run
+	inst.CMD_TestMap();
+	mDeleteList.push(outputPath);
+	
+	std::vector<std::string> lines = getResultLines();
+	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string(), "-warp", "14"};
+	ASSERT_EQ(lines, expected);
+}
+
+TEST_F(TestMapFixturePOSIX, TestMapPortWithoutResourcesDoom1Map)
+{
+	setPortName("boom");
+	
+	addIWAD();
+		
+	addPWAD();
+	
+	inst.loaded.levelName = "E6M9";
+	
+	// Now run
+	inst.CMD_TestMap();
+	mDeleteList.push(outputPath);
+	
+	std::vector<std::string> lines = getResultLines();
+	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string(), "-warp", "6", "9"};
+	ASSERT_EQ(lines, expected);
+}
+
+TEST_F(TestMapFixturePOSIX, TestMapPortWithoutResourcesNonstandardMap)
+{
+	setPortName("boom");
+	
+	addIWAD();
+		
+	addPWAD();
+	
+	inst.loaded.levelName = "ZOMFG65";
+	
+	// Now run
+	inst.CMD_TestMap();
+	mDeleteList.push(outputPath);
+	
+	std::vector<std::string> lines = getResultLines();
+	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string(), "-warp", "65"};
+	ASSERT_EQ(lines, expected);
+}
+
+TEST_F(TestMapFixturePOSIX, TestMapPortWithoutResourcesBadMap)
+{
+	setPortName("boom");
+	
+	addIWAD();
+		
+	addPWAD();
+	
+	inst.loaded.levelName = "NOTHING";
+	
+	// Now run
+	inst.CMD_TestMap();
+	mDeleteList.push(outputPath);
+	
+	std::vector<std::string> lines = getResultLines();
+	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string()};
 	ASSERT_EQ(lines, expected);
 }
 
