@@ -30,6 +30,10 @@
 
 #include "ui_window.h"
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 class DirChangeContext
 {
 public:
@@ -74,6 +78,42 @@ static SString QueryName(const SString &port, const SString &cgame)
 	return port;
 }
 
+static bool isMacOSAppBundle(const fs::path &path)
+{
+#ifdef __APPLE__
+	CFStringRef pathString = CFStringCreateWithCString(kCFAllocatorDefault, path.u8string().c_str(), kCFStringEncodingUTF8);
+	if(!pathString)
+	{
+		gLog.printf("ERROR: Failed allocating macOS app bundle path CF string: %s\n", path.u8string().c_str());
+		return false;
+	}
+	CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, pathString, kCFURLPOSIXPathStyle, true);
+	
+	CFRelease(pathString);
+	if(!url)
+	{
+		gLog.printf("ERROR: Failed allocating macOS app bundle CF URL: %s\n", path.u8string().c_str());
+		
+		return false;
+	}
+	
+	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, url);
+	CFRelease(url);
+	if(!bundle)
+	{
+		gLog.printf("Could not load, or invalid macOS app CF bundle: %s\n", path.u8string().c_str());
+		
+		return false;
+	}
+	
+	CFDictionaryRef infoDict = CFBundleGetInfoDictionary(bundle);
+	CFRelease(bundle);
+	
+	return !!infoDict;
+#else
+	return false;
+#endif
+}
 
 class UI_PortPathDialog : public UI_Escapable_Window
 {
@@ -119,7 +159,7 @@ public:
 		// NULL is ok here
 		exe_display->value(exe_name.u8string().c_str());
 
-		if (!exe_name.empty() && FileExists(exe_name))
+		if (!exe_name.empty() && (FileExists(exe_name) || isMacOSAppBundle(exe_name)))
 			ok_but->activate();
 		else
 			ok_but->deactivate();
@@ -446,10 +486,29 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 	args.insert(args.begin(), portPath.u8string());
 
 	std::vector<char *> argv;
-	argv.reserve(args.size() + 2);
+	bool isMacApp = isMacOSAppBundle(portPath);
+	if(isMacApp)
+		argv.reserve(args.size() + 5);
+	else
+		argv.reserve(args.size() + 2);
 	fs::path portName = portPath.filename();
 	SString portPathStorage = portName.u8string();
-	argv.push_back(portPathStorage.get().data());
+	
+	char premadeargvdata[3][80];
+	
+	// TODO: move this to simple "system" actually
+	if(isMacApp)
+	{
+		strcpy(premadeargvdata[0], "/usr/bin/open");
+		strcpy(premadeargvdata[1], "-a");
+		strcpy(premadeargvdata[2], "--args");
+		argv.push_back(premadeargvdata[0]);
+		argv.push_back(premadeargvdata[1]);
+		argv.push_back(portPathStorage.get().data());
+		argv.push_back(premadeargvdata[2]);
+	}
+	else
+		argv.push_back(portPathStorage.get().data());
 	SString argString;
 	for(SString &arg : args)
 	{
@@ -474,8 +533,10 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 		try
 		{
 			DirChangeContext dirChangeContext(FilenameGetPath(portPath));
-			
-			execvp(portPath.u8string().c_str(), argv.data());
+			if(isMacApp)
+				execvp("/usr/bin/open", argv.data());
+			else
+				execvp(portPath.u8string().c_str(), argv.data());
 			
 			// on failure
 			int err = errno;
@@ -509,6 +570,17 @@ void Instance::CMD_ChangeTestSettings()
 	{
 		Beep("Failed: %s\n", e.what());
 	}
+}
+
+static bool M_IsPortPathValid(const fs::path &path)
+{
+	if(path.u8string().length() < 2)
+		return false;
+
+	if (! FileExists(path) && !isMacOSAppBundle(path))
+		return false;
+
+	return true;
 }
 
 void Instance::CMD_TestMap()

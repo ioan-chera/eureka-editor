@@ -109,16 +109,7 @@ int M_FindGivenFile(const fs::path &filename)
 //  PORT PATH HANDLING
 //------------------------------------------------------------------------
 
-bool M_IsPortPathValid(const fs::path &path)
-{
-	if(path.u8string().length() < 2)
-		return false;
 
-	if (! FileExists(path))
-		return false;
-
-	return true;
-}
 
 //
 // Parse port path
