@@ -430,19 +430,17 @@ static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 	}
 }
 
-#ifdef _WIN32
-static SString buildArgString(const std::vector<SString>& args)
+static SString buildArgString(const std::vector<SString>& args, bool backslash)
 {
 	SString result;
 	for (const SString& arg : args)
 	{
 		if (!result.empty())
 			result += " ";
-		result += arg.spaceEscape();
+		result += arg.spaceEscape(backslash);
 	}
 	return result;
 }
-#endif
 
 static void logArgs(const SString& args)
 {
@@ -458,7 +456,7 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 	GrabWadNamesArgs(inst, args);
 	CalcWarpString(inst.loaded.levelName, args);
 
-	SString argString = inst.loaded.testingCommandLine + " " + buildArgString(args);
+	SString argString = inst.loaded.testingCommandLine + " " + buildArgString(args, false);
 	logArgs(argString);
 	std::wstring argsWide = UTF8ToWide(argString.c_str());
 
@@ -473,6 +471,19 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 	inst.Status_Set("Started the game");
 }
 #else
+
+static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
+{
+	std::vector<SString> args;
+	GrabWadNamesArgs(inst, args);
+	CalcWarpString(inst.loaded.levelName, args);
+	
+	SString argString = SString("/usr/bin/open -a ") + SString(portPath.u8string()).spaceEscape(true) + " --args " + inst.loaded.testingCommandLine + " " + buildArgString(args, true);
+	logArgs(argString);
+	
+	system(argString.c_str());
+}
+
 static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
@@ -484,31 +495,13 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 	while(parse.getNext(arg))
 		args.push_back(arg);
 	args.insert(args.begin(), portPath.u8string());
-
+	
 	std::vector<char *> argv;
-	bool isMacApp = isMacOSAppBundle(portPath);
-	if(isMacApp)
-		argv.reserve(args.size() + 5);
-	else
-		argv.reserve(args.size() + 2);
+	argv.reserve(args.size() + 2);
 	fs::path portName = portPath.filename();
 	SString portPathStorage = portName.u8string();
 	
-	char premadeargvdata[3][80];
-	
-	// TODO: move this to simple "system" actually
-	if(isMacApp)
-	{
-		strcpy(premadeargvdata[0], "/usr/bin/open");
-		strcpy(premadeargvdata[1], "-a");
-		strcpy(premadeargvdata[2], "--args");
-		argv.push_back(premadeargvdata[0]);
-		argv.push_back(premadeargvdata[1]);
-		argv.push_back(portPathStorage.get().data());
-		argv.push_back(premadeargvdata[2]);
-	}
-	else
-		argv.push_back(portPathStorage.get().data());
+	argv.push_back(portPathStorage.get().data());
 	SString argString;
 	for(SString &arg : args)
 	{
@@ -533,10 +526,7 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 		try
 		{
 			DirChangeContext dirChangeContext(FilenameGetPath(portPath));
-			if(isMacApp)
-				execvp("/usr/bin/open", argv.data());
-			else
-				execvp(portPath.u8string().c_str(), argv.data());
+			execvp(portPath.u8string().c_str(), argv.data());
 			
 			// on failure
 			int err = errno;
@@ -629,7 +619,10 @@ void Instance::CMD_TestMap()
 #ifdef _WIN32
 		testMapOnWindows(*this, *info);
 #else
-		testMapOnPOSIX(*this, *info);
+		if(isMacOSAppBundle(*info))
+			testMapOnMacBundle(*this, *info);
+		else
+			testMapOnPOSIX(*this, *info);
 #endif
 		if(main_win)
 			main_win->redraw();
