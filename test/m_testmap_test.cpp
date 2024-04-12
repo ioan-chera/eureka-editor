@@ -51,7 +51,37 @@ protected:
 	fs::path res1Path;
 	fs::path res2Path;
 	fs::path editWadPath;
+	
+#ifdef __APPLE__
+	fs::path macPath;
+#endif
+	
+private:
+#ifndef _WIN32
+	void writeShellScript(const fs::path &path);
+#endif
 };
+
+#ifndef _WIN32
+void TestMapFixture::writeShellScript(const fs::path &path)
+{
+	std::ofstream stream(path);
+	ASSERT_TRUE(stream.is_open());
+	mDeleteList.push(path);
+	stream << "#!/bin/bash" << std::endl;
+	stream << "echo running script" << std::endl;
+	// TODO: fix this!?
+	stream << "echo \"$0\" > " << SString(path.u8string()).spaceEscape(true) << std::endl;
+	stream << "for var in \"$@\"" << std::endl;
+	stream << "do" << std::endl;
+	stream << "echo \"$var\" >> " << SString(outputPath).spaceEscape(true) <<
+		std::endl;
+	stream << "done" << std::endl;
+	stream.close();
+	int r = chmod(path.u8string().c_str(), S_IRWXU);
+	ASSERT_FALSE(r);
+}
+#endif
 
 void TestMapFixture::SetUp()
 {
@@ -73,21 +103,40 @@ void TestMapFixture::SetUp()
 	stream.close();
 #else
 	portPath = getChildPath("port.sh");
-	std::ofstream stream(portPath);
-	ASSERT_TRUE(stream.is_open());
-	mDeleteList.push(portPath);
-	stream << "#!/bin/bash" << std::endl;
-	stream << "echo running script" << std::endl;
-	// TODO: fix this!?
-	stream << "echo \"$0\" > " << SString(portPath.u8string()).spaceEscape(true) << std::endl;
-	stream << "for var in \"$@\"" << std::endl;
-	stream << "do" << std::endl;
-	stream << "echo \"$var\" >> " << SString(outputPath).spaceEscape(true) <<
-		std::endl;
-	stream << "done" << std::endl;
-	stream.close();
-	int r = chmod(portPath.u8string().c_str(), S_IRWXU);
-	ASSERT_FALSE(r);
+	writeShellScript(portPath);
+#endif
+#ifdef __APPLE__
+	macPath = getChildPath("port.app");
+	bool result;
+	result = FileMakeDir(macPath);
+	ASSERT_TRUE(result);
+	mDeleteList.push(macPath);
+	fs::path contdir = macPath / "Contents";
+	result = FileMakeDir(contdir);
+	ASSERT_TRUE(result);
+	mDeleteList.push(contdir);
+	fs::path macosdir = contdir / "MacOS";
+	result = FileMakeDir(macosdir);
+	ASSERT_TRUE(result);
+	mDeleteList.push(macosdir);
+	fs::path execpath = macosdir / "portentry";
+	writeShellScript(execpath);
+	// Now the info plist file
+	fs::path infopath = contdir / "Info.plist";
+	std::ofstream infostream(infopath);
+	ASSERT_TRUE(infostream.is_open());
+	mDeleteList.push(infopath);
+	infostream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+	infostream << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << std::endl;
+	infostream << "<plist version=\"1.0\">" << std::endl;
+	infostream << "<dict>" << std::endl;
+	infostream << "<key>CFBundleExecutable</key>" << std::endl;
+	infostream << "<string>" << execpath.filename().u8string() << "</string>" << std::endl;
+	infostream << "<key>CFBundleIdentifier</key>" << std::endl;
+	infostream << "<string>com.eureka.testmaptest</string>" << std::endl;
+	infostream << "</dict>" << std::endl;
+	infostream << "</plist>" << std::endl;
+	infostream.close();
 #endif
 }
 
@@ -281,3 +330,5 @@ TEST_F(TestMapFixture, TestMapPortWithoutResourcesBadMap)
 	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string()};
 	ASSERT_EQ(lines, expected);
 }
+
+// TODO: add mac app bundle test
