@@ -32,8 +32,7 @@
 // UI_Nombre Constructor
 //
 UI_Nombre::UI_Nombre(int X, int Y, int W, int H, const char *what) :
-    Fl_Box(FL_FLAT_BOX, X, Y, W, H, ""),
-    index(-1), total(0), selected(0)
+    Fl_Box(FL_FLAT_BOX, X, Y, W, H, "")
 {
 	type_name = what;
 

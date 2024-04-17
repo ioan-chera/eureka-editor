@@ -36,13 +36,12 @@ private:
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;
 
-	bool want_close;
+	bool want_close = false;
 
 	Instance &inst;
 
 public:
 	UI_MoveDialog(Instance &inst, bool want_dz);
-	virtual ~UI_MoveDialog();
 
 	void Run();
 
@@ -68,13 +67,12 @@ private:
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;
 
-	bool want_close;
+	bool want_close = false;
 
 	Instance &inst;
 
 public:
 	explicit UI_ScaleDialog(Instance &inst);
-	virtual ~UI_ScaleDialog();
 
 	void Run();
 
