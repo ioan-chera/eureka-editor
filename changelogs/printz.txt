@@ -4,6 +4,12 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+20.04.2024
+* Testing map now opens the game without blocking Eureka, just like user would start another app.
+  Also, for macOS you can now use the app bundle.
+* Deleted Makefile.xming.
+
+----------
 07.10.2023
 * Now dragging lines or sectors can also split other lines. Currently still no support for the 
   dragged lines getting split by existing vertices.
