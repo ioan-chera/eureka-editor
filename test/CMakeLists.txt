@@ -131,6 +131,7 @@ unit_test(general
     SStringTest.cpp
     ThingTest.cpp
     VertexTest.cpp
+    w_dehacked_test.cpp
     w_loadpic_test.cpp
     w_texture_test.cpp
     w_wad_test.cpp
