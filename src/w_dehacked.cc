@@ -346,8 +346,6 @@ static void read(std::istream &is, ConfigData &config)
 				morelines = M_ReadTextLine(dehline, is);
 			}
 		}
-
-		morelines = M_ReadTextLine(dehline, is);
 	}
 
 	//Apply DEHACKED things to editor config
