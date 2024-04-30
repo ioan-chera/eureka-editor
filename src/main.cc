@@ -44,6 +44,7 @@
 #include "r_render.h"
 #include "r_subdiv.h"
 
+#include "w_dehacked.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "w_wad.h"
@@ -937,6 +938,12 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 					&newres.config, resource);
 				continue;
 			}
+			if(MatchExtensionNoCase(resource, ".deh") || MatchExtensionNoCase(resource, ".bex"))
+			{
+				if(!dehacked::loadFile(resource, newres.config))
+					gLog.printf("Error loading Dehacked file %s\n", resource.u8string().c_str());
+				continue;
+			}
 			// Otherwise wad
 			if (!Wad_file::Validate(resource))
 				ThrowException("Invalid resource WAD file: %s", resource.u8string().c_str());
@@ -954,6 +961,7 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 			ThrowException("Could not load IWAD file");
 
 		newres.waddata.reloadResources(gameWad, newres.config, resourceWads);
+		dehacked::loadLumps(newres.waddata.master, newres.config);
 	}
 	catch (const std::runtime_error&e )
 	{

@@ -215,6 +215,7 @@ private:
 //
 struct WadData
 {
+	void loadDehacked(ConfigData &config);
 	void W_LoadTextures(const ConfigData &config);
 
 	const Img_c *getSprite(const ConfigData &config, int type, const LoadingData &loading);
