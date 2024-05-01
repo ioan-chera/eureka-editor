@@ -100,9 +100,6 @@ static void readThing(std::istream &is, const ConfigData &config, thing_t &newth
 	if(configThing)
 		thing = *configThing;
 	
-	thing.group = '-';
-	thing.scale = 1.0;
-
 	SString dehline;
 	bool morelines = M_ReadTextLine(dehline, is);
 
@@ -279,6 +276,7 @@ static void read(std::istream &is, ConfigData &config)
 			if(dehnum < (int)lengthof(THING_NUM_TO_SPRITE))
 				newthing.spawnframenum = THING_NUM_TO_SPRITE[dehnum];
 
+			int oldthingid = newthingid;
 			readThing(is, config, newthing, newthingid);
 			newthing.thing.desc = thingName(tokens);
 
@@ -286,7 +284,11 @@ static void read(std::istream &is, ConfigData &config)
 			if (newthingid == -1)
 				config.thing_types.erase(newthingid);
 			else
+			{
+				if(newthingid != oldthingid)
+					config.thing_types.erase(oldthingid);
 				deh_things[newthingid] = newthing;
+			}
 		}
 
 		//Get Dehacked Frame

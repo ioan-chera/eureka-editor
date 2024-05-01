@@ -191,7 +191,7 @@ std::vector<std::string> TestMapFixture::getResultLines() const
 	EXPECT_TRUE(input.is_open());
 
 	std::vector<std::string> result;
-	while (!input.eof())
+	while (input && !input.eof())
 	{
 		std::string line;
 		std::getline(input, line);
