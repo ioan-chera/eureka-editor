@@ -24,6 +24,9 @@
 //
 //------------------------------------------------------------------------
 
+// THANKS TO Isaac Colón (https://github.com/iccolon818) for this contribution. I added reformatting
+// and some input checking.
+
 #ifndef __EUREKA_W_DEHACKED_H__
 #define __EUREKA_W_DEHACKED_H__
 

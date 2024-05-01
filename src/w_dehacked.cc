@@ -24,6 +24,9 @@
 //
 //------------------------------------------------------------------------
 
+// THANKS TO Isaac Colón (https://github.com/iccolon818) for this contribution. I added reformatting
+// and some input checking.
+
 #include "w_dehacked.h"
 
 #include "dehconsts.h"

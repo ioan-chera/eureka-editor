@@ -4,6 +4,10 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+01.05.2024
+* Added Dehacked resource support, by contribution of Isaac Colón (https://github.com/iccolon818).
+
+----------
 20.04.2024
 * Testing map now opens the game without blocking Eureka, just like user would start another app.
   Also, for macOS you can now use the app bundle.

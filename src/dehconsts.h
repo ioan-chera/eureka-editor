@@ -24,6 +24,9 @@
 //
 //------------------------------------------------------------------------
 
+// THANKS TO Isaac Colón (https://github.com/iccolon818) for this contribution, and compiling all
+// these data lists, as based on the data from the DOOM executable. I did reformatting.
+
 #ifndef __EUREKA_DEHCONSTS_H__
 #define __EUREKA_DEHCONSTS_H__
 
