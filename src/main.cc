@@ -37,6 +37,7 @@
 #include "m_game.h"
 #include "m_files.h"
 #include "m_loadsave.h"
+#include "m_testmap.h"
 
 #include "e_main.h"
 #include "m_events.h"
@@ -646,7 +647,7 @@ static void Main_OpenWindow(Instance &inst)
 	inst.main_win = new UI_MainWindow(inst);
 
 	// Set menu bindings now that we have them.
-	menu::updateBindings();
+	menu::updateBindings(inst.main_win->menu_bar);
 
 	inst.main_win->label("Eureka v" EUREKA_VERSION);
 
@@ -985,6 +986,8 @@ void Instance::Main_LoadResources(const LoadingData &loading) noexcept(false)
 	wad = std::move(newres.waddata);
 	conf = std::move(newres.config);
 	loaded = std::move(newres.loading);
+	if(main_win)
+		testmap::updateMenuName(main_win->menu_bar, loaded);
 	
 	UpdateViewOnResources();
 }

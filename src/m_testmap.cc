@@ -26,8 +26,10 @@
 #include "m_files.h"
 #include "m_loadsave.h"
 #include "m_parse.h"
+#include "m_testmap.h"
 #include "w_wad.h"
 
+#include "ui_menu.h"
 #include "ui_window.h"
 
 #ifdef __APPLE__
@@ -332,6 +334,8 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const
 		// persist the new port settings
 		global::recent.setPortPath(QueryName(port, game),
 								   GetAbsolutePath(dialog.exe_name));
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
 
 		global::recent.save(global::home_dir);
 
@@ -636,6 +640,21 @@ void Instance::CMD_TestMap()
 		DLG_ShowError(false, "Could not start map for testing: %s", e.what());
 	}
 	
+}
+
+namespace testmap
+{
+void updateMenuName(Fl_Sys_Menu_Bar *bar, const LoadingData &loading)
+{
+	if(loading.portName.empty() || loading.gameName.empty())
+		return;	// premature
+	const fs::path* info = global::recent.queryPortPath(QueryName(loading.portName,
+		loading.gameName));
+	if(!info || !M_IsPortPathValid(*info))
+		menu::setTestMapDetail(bar, "");
+	else
+		menu::setTestMapDetail(bar, SString(info->filename().replace_extension()));
+}
 }
 
 

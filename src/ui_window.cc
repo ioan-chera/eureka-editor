@@ -23,6 +23,7 @@
 
 #include "e_main.h"
 #include "m_config.h"
+#include "m_testmap.h"
 #include "r_render.h"
 #include "ui_window.h"
 #include "w_wad.h"
@@ -64,6 +65,7 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	{
 		menu_bar = menu::create(0, 0, w()-3 - panel_W, 31, &mInstance);
 		add(menu_bar);
+		testmap::updateMenuName(menu_bar, inst.loaded);
 
 #ifndef __APPLE__
 		cy += menu_bar->h();

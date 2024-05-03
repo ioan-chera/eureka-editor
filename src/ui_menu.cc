@@ -896,6 +896,36 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 namespace menu
 {
+static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> testMapDetailStorage;
+
+void setTestMapDetail(Fl_Sys_Menu_Bar *bar, const SString &text)
+{
+	if(!bar)
+		return;
+	int menuSize = bar->size();
+	const Fl_Menu_Item *items = bar->menu();
+	
+	int index = -1;
+	for(int i = 0; i < menuSize; ++i)
+	{
+		const Fl_Menu_Item &item = items[i];
+		if(item.callback() == tools_do_test_map)
+		{
+			index = i;
+			break;
+		}
+	}
+
+	if(index < 0)
+		return;
+	if(text.good())
+		testMapDetailStorage[bar] = SString::printf("&Test in Game (%s)", text.c_str());
+	else
+		testMapDetailStorage[bar] = "&Test in Game";
+	
+	bar->replace(index, testMapDetailStorage[bar].c_str());
+}
+
 Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
@@ -941,13 +971,11 @@ Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData)
 //
 // Update all the menu shortcut displays after all_bindings got updated
 //
-void updateBindings()
+void updateBindings(Fl_Sys_Menu_Bar *bar)
 {
 	// If window not made yet, it will call this itself
-	if(!gInstance.main_win || !gInstance.main_win->menu_bar)
+	if(!bar)
 		return;
-	
-	Fl_Sys_Menu_Bar *bar = gInstance.main_win->menu_bar;
 	int menuSize = bar->size();
 	const Fl_Menu_Item *items = bar->menu();
 	

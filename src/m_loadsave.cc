@@ -38,6 +38,7 @@
 #include "m_config.h"
 #include "m_files.h"
 #include "m_loadsave.h"
+#include "m_testmap.h"
 #include "r_subdiv.h"
 #include "Sector.h"
 #include "SideDef.h"
@@ -293,6 +294,9 @@ void Instance::CMD_NewProject()
 		level = makeFreshDocument(*this, newres.config, newres.loading.levelFormat);
 		conf = std::move(newres.config);
 		loaded = std::move(newres.loading);
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
+		
 		this->wad = std::move(newres.waddata);
 		
 		SaveLevel(loaded, map_name, *wad, false);
@@ -1132,6 +1136,9 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 	gInstance.loaded = std::move(newres.loading);
 	gInstance.wad = std::move(newres.waddata);
 	gInstance.wad.master.ReplaceEditWad(wad);
+	
+	if(gInstance.main_win)
+		testmap::updateMenuName(gInstance.main_win->menu_bar, gInstance.loaded);
 
 	gInstance.refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, true);
 }
@@ -1220,6 +1227,9 @@ void Instance::CMD_OpenMap()
 		conf = std::move(newres.config);
 		loaded = std::move(newres.loading);
 		this->wad = std::move(newres.waddata);
+		
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
 
 		gLog.printf("--- DONE ---\n");
 		gLog.printf("\n");

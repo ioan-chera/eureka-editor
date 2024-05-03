@@ -117,6 +117,7 @@ set(source_m
     m_strings.cc
     m_strings.h
     m_testmap.cc
+    m_testmap.h
     m_udmf.cc
     m_vector.cc
     m_vector.h
