@@ -646,7 +646,7 @@ static void Main_OpenWindow(Instance &inst)
 	inst.main_win = new UI_MainWindow(inst);
 
 	// Set menu bindings now that we have them.
-	updateMenuBindings();
+	menu::updateBindings();
 
 	inst.main_win->label("Eureka v" EUREKA_VERSION);
 

@@ -62,7 +62,7 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 
 	/* ---- Menu bar ---- */
 	{
-		menu_bar = mInstance.Menu_Create(0, 0, w()-3 - panel_W, 31);
+		menu_bar = menu::create(0, 0, w()-3 - panel_W, 31, &mInstance);
 		add(menu_bar);
 
 #ifndef __APPLE__

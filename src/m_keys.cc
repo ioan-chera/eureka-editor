@@ -617,7 +617,7 @@ void M_LoadBindings()
 
 	LoadBindingsFromPath(global::home_dir.u8string(), false);
 
-	updateMenuBindings();
+	menu::updateBindings();
 }
 
 
@@ -711,7 +711,7 @@ void M_ApplyBindings()
 {
     global::all_bindings = global::pref_binds;
 
-	updateMenuBindings();
+	menu::updateBindings();
 }
 
 

@@ -21,7 +21,13 @@
 #ifndef __EUREKA_UI_MENU_H__
 #define __EUREKA_UI_MENU_H__
 
-void updateMenuBindings();
+class Fl_Sys_Menu_Bar;
+
+namespace menu
+{
+Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData);
+void updateBindings();
+}
 
 #endif  /* __EUREKA_UI_MENU_H__ */
 
