@@ -144,8 +144,8 @@ namespace global
 
 namespace global
 {
-	extern int   show_help;		// Print usage message and exit.
-	extern int   show_version;	// Print version info and exit.
+	extern bool   show_help;		// Print usage message and exit.
+	extern bool   show_version;	// Print version info and exit.
 }
 
 

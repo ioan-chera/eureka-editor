@@ -135,8 +135,8 @@ enum class ProgressStatus
 };
 static ProgressStatus init_progress;
 
-int global::show_help     = 0;
-int global::show_version  = 0;
+bool global::show_help;
+bool global::show_version;
 
 
 static void RemoveSingleNewlines(SString &buffer)

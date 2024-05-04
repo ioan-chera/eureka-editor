@@ -36,44 +36,6 @@ namespace fs = ghc::filesystem;
 
 /* ==== CONFIG VARIABLES ==================== */
 
-
-//
-//  Structures for command line arguments and config settings
-//
-enum class OptType
-{
-	// End of the options description
-	end,
-
-	// Boolean (toggle)
-	// Receptacle is of type: bool
-	boolean,
-
-	// Integer number,
-	// Receptacle is of type: int
-	integer,
-
-	// A color value
-	// Receptacle is of type: rgb_color_t
-	color,
-
-	// String (not leaking)
-	// Receptacle is of type: SString
-	string,
-
-	// Path (similar to string)
-	// Receptacle is of type: fs::path
-	path,
-
-	// List of strings (not leaking)
-	// Receptacle is of type: std::vector<SString>
-	stringList,
-
-	// List of paths
-	// Receptacle if of type: std::vector<fs::path>
-	pathList,
-};
-
 enum
 {
 	OptFlag_pass1 = 1 << 0,
@@ -91,7 +53,6 @@ struct opt_desc_t
 	const char *long_name;  // Command line arg. or keyword
 	const char *short_name; // Abbreviated command line argument
 
-	OptType opt_type;    // Type of this option
 	unsigned flags;    // Flags for this option :
 	// '1' : process only on pass 1 of parse_command_line_options()
 	// '<' : print extra newline after this option (when dumping)

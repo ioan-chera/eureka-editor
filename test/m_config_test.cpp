@@ -32,21 +32,23 @@ namespace fs = ghc::filesystem;
 //
 static const opt_desc_t kEnd =
 {
-	nullptr, nullptr, OptType::end, 0, nullptr, nullptr, nullptr
+	nullptr, nullptr, 0, nullptr, nullptr, nullptr
 };
 
 //
 // Returns an opt_desc_t using only the fields we need for config file
 //
-static opt_desc_t configOption(const char *long_name, OptType opt_type, unsigned flags,
-							   void *data_ptr)
+template<typename T>
+static opt_desc_t configOption(const char *long_name, unsigned flags,
+							   T *data_ptr)
 {
-	return {long_name, nullptr, opt_type, flags, nullptr, nullptr, data_ptr};
+	return {long_name, nullptr, flags, nullptr, nullptr, data_ptr};
 }
-static opt_desc_t configOption(const char *long_name, const char *shortname, OptType opt_type, unsigned flags,
-							   void *data_ptr)
+template<typename T>
+static opt_desc_t configOption(const char *long_name, const char *shortname, unsigned flags,
+							   T *data_ptr)
 {
-	return {long_name, shortname, opt_type, flags, nullptr, nullptr, data_ptr};
+	return {long_name, shortname, flags, nullptr, nullptr, data_ptr};
 }
 
 //
@@ -111,36 +113,36 @@ void MConfig::SetUp()
 {
 	TempDirContext::SetUp();
 
-	add(configOption("auto_load_recent", OptType::boolean, OptFlag_preference,
+	add(configOption("auto_load_recent", OptFlag_preference,
 					 &config.auto_load_recent));
-	add(configOption("backup_max_files", OptType::integer, OptFlag_preference,
+	add(configOption("backup_max_files", OptFlag_preference,
 					 &config.backup_max_files));
-	add(configOption("begin_maximized", OptType::boolean, OptFlag_preference,
+	add(configOption("begin_maximized", OptFlag_preference,
 					 &config.begin_maximized));
-	add(configOption("bsp_gl_nodes", OptType::boolean, OptFlag_preference, &config.bsp_gl_nodes));
-	add(configOption("bsp_on_save", OptType::boolean, OptFlag_preference, &config.bsp_on_save));
-	add(configOption("config", OptType::path, OptFlag_pass1 | OptFlag_helpNewline,
+	add(configOption("bsp_gl_nodes", OptFlag_preference, &config.bsp_gl_nodes));
+	add(configOption("bsp_on_save", OptFlag_preference, &config.bsp_on_save));
+	add(configOption("config", OptFlag_pass1 | OptFlag_helpNewline,
 					 &config.config_file));
-	add(configOption("default_gamma", OptType::integer, OptFlag_preference, &config.usegamma));
-	add(configOption("default_port", OptType::string, OptFlag_preference, &config.default_port));
-	add(configOption("dotty_axis_col", OptType::color, OptFlag_preference, &config.dotty_axis_col));
-	add(configOption("file", "f", OptType::pathList, 0, &config.Pwad_list));
-	add(configOption("grid_snap_indicator", OptType::boolean, OptFlag_preference,
+	add(configOption("default_gamma", OptFlag_preference, &config.usegamma));
+	add(configOption("default_port", OptFlag_preference, &config.default_port));
+	add(configOption("dotty_axis_col", OptFlag_preference, &config.dotty_axis_col));
+	add(configOption("file", "f", 0, &config.Pwad_list));
+	add(configOption("grid_snap_indicator", OptFlag_preference,
 					 &config.grid_snap_indicator));
-	add(configOption("help", OptType::boolean, OptFlag_pass1, &config.show_help));
-	add(configOption("home", OptType::string, OptFlag_pass1, &config.home_dir));
-	add(configOption("iwad", OptType::string, 0, &config.loadedIwadName));
-	add(configOption("leave_offsets_alone", OptType::boolean, OptFlag_preference,
+	add(configOption("help", OptFlag_pass1, &config.show_help));
+	add(configOption("home", OptFlag_pass1, &config.home_dir));
+	add(configOption("iwad", 0, &config.loadedIwadName));
+	add(configOption("leave_offsets_alone", OptFlag_preference,
 					 &config.leave_offsets_alone));
-	add(configOption("merge", "m", OptType::stringList, 0, &config.loadedResourceList));
-	add(configOption("quiet", "q", OptType::boolean, OptFlag_pass1, &config.Quiet));
-	add(configOption("udmftest", OptType::boolean, OptFlag_hide, &config.udmf_testing));
-	add(configOption("version", "v", OptType::boolean, OptFlag_pass1, &config.show_version));
-	add(configOption("warp", OptType::string, OptFlag_warp | OptFlag_helpNewline,
+	add(configOption("merge", "m", 0, &config.loadedResourceList));
+	add(configOption("quiet", "q", OptFlag_pass1, &config.Quiet));
+	add(configOption("udmftest", OptFlag_hide, &config.udmf_testing));
+	add(configOption("version", "v", OptFlag_pass1, &config.show_version));
+	add(configOption("warp", OptFlag_warp | OptFlag_helpNewline,
 					 &config.loadedLevelName));
 	// Path type
-	add(configOption("path", OptType::pathList, OptFlag_preference, &config.paths));
-	add(configOption("onepath", OptType::path, OptFlag_preference, &config.onepath));
+	add(configOption("path", OptFlag_preference, &config.paths));
+	add(configOption("onepath", OptFlag_preference, &config.onepath));
 }
 
 //
@@ -749,12 +751,12 @@ bool config::same_mode_clears_selection = false;
 bool config::bsp_fast        = false;
 fs::path global::config_file;
 fs::path global::install_dir;
-int global::show_version  = 0;
+bool global::show_version;
 fs::path global::home_dir;
 fs::path global::log_file;
 std::vector<fs::path> global::Pwad_list;
 fs::path global::cache_dir;
-int global::show_help     = 0;
+bool global::show_help;
 
 Instance gInstance;
 
