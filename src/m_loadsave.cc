@@ -313,6 +313,8 @@ void Instance::CMD_NewProject()
 		wad = std::move(backupWadData);
 		if(backupDoc)
 			level = std::move(backupDoc.value());
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
 		
 		DLG_ShowError(false, "Could not create new project: %s", e.what());
 	}
@@ -333,6 +335,9 @@ bool Instance::MissingIWAD_Dialog()
 		const fs::path *iwad = global::recent.queryIWAD(loaded.gameName);
 		SYS_ASSERT(!!iwad);
 		loaded.iwadName = *iwad;
+		
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
 	}
 
 	return result.has_value();
@@ -1008,6 +1013,8 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 	}
 	loaded = newdoc.loading;
 	level = std::move(newdoc.doc);
+	if(main_win)
+		testmap::updateMenuName(main_win->menu_bar, loaded);
 	Subdiv_InvalidateAll();
 }
 
@@ -1245,6 +1252,8 @@ void Instance::CMD_OpenMap()
 	level = std::move(newdoc.doc);
 	if(!new_resources)	// we already updated loaded with resources
 		loaded = std::move(newdoc.loading);
+	if(main_win)
+		testmap::updateMenuName(main_win->menu_bar, loaded);
 
 	refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, new_resources);
 }

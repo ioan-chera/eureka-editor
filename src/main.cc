@@ -464,6 +464,8 @@ static void DeterminePort(Instance &inst)
 	}
 
 	inst.loaded.portName = config::default_port;
+	if(inst.main_win)
+		testmap::updateMenuName(inst.main_win->menu_bar, inst.loaded);
 }
 
 
