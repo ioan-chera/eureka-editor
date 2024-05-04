@@ -150,6 +150,8 @@ extern bool bsp_gl_nodes;
 extern bool bsp_force_v5;
 extern bool bsp_force_zdoom;
 extern bool bsp_compressed;
+
+extern LoadingData preloading;
 }
 
 extern const opt_desc_t options[];

@@ -34,6 +34,11 @@
 #include "filesystem.hpp"
 namespace fs = ghc::filesystem;
 
+namespace config
+{
+LoadingData preloading;
+}
+
 //------------------------------------------------------------------------
 
 const opt_desc_t options[] =
@@ -123,7 +128,7 @@ const opt_desc_t options[] =
 		0,
 		"Resource file(s) to load",
 		"<file>...",
-		&gInstance.loaded.resourceList
+		&config::preloading.resourceList
 	},
 
 	{	"iwad",
@@ -131,7 +136,7 @@ const opt_desc_t options[] =
 		0,
 		"The name of the IWAD (game data)",
 		"<file>",
-		&gInstance.loaded.iwadName	// TODO: same deal
+		&config::preloading.iwadName	// TODO: same deal
 	},
 
 	{	"port",
@@ -139,7 +144,7 @@ const opt_desc_t options[] =
 		0,
 		"Port (engine) name",
 		"<name>",
-		&gInstance.loaded.portName	// TODO: same deal
+		&config::preloading.portName	// TODO: same deal
 	},
 
 	{	"warp",
@@ -147,7 +152,7 @@ const opt_desc_t options[] =
 		OptFlag_warp | OptFlag_helpNewline,
 		"Select level to edit",
 		"<map>",
-		&gInstance.loaded.levelName	// TODO: this will need to work only for first instance
+		&config::preloading.levelName	// TODO: this will need to work only for first instance
 	},
 
 	{	"udmftest",

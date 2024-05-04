@@ -1177,6 +1177,7 @@ int main(int argc, char *argv[])
 
 
 		// load all the config settings
+		config::preloading = gInstance.loaded;
 		prepareConfigPath();
 		M_ParseConfigFile(global::config_file, options);
 
@@ -1185,6 +1186,8 @@ int main(int argc, char *argv[])
 
 		// and command line arguments will override both
 		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal, global::Pwad_list, options);
+		
+		gInstance.loaded = config::preloading;	// update state now
 
 		// TODO: create a new instance
 		gInstance.Editor_Init();
