@@ -28,6 +28,7 @@
 #define __EUREKA_M_CONFIG_H__
 
 #include "im_color.h"
+#include <variant>
 #include <vector>
 
 #include "filesystem.hpp"
@@ -82,6 +83,9 @@ enum
 	OptFlag_hide = 1 << 4,
 };
 
+typedef std::variant<bool *, int *, rgb_color_t *, SString *, fs::path *, std::vector<SString> *, 
+					 std::vector<fs::path> *, std::nullptr_t> ArgData;
+
 struct opt_desc_t
 {
 	const char *long_name;  // Command line arg. or keyword
@@ -98,7 +102,8 @@ struct opt_desc_t
 	const char *desc;   // Description of the option
 	const char *arg_desc;  // Description of the argument (NULL --> none or default)
 
-	void *data_ptr;   // Pointer to the data
+	// Pointer to the data
+	ArgData data_ptr;
 };
 
 

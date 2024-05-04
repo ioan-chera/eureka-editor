@@ -751,7 +751,7 @@ const opt_desc_t options[] =
 		0,
 		0,
 		0,
-		0
+		nullptr
 	}
 };
 
@@ -808,34 +808,34 @@ static int parse_config_line_from_file(const SString &line, const fs::path &base
 			if(value.noCaseEqual("no") || value.noCaseEqual("false") ||
 			   value.noCaseEqual("off") || value.noCaseEqual("0"))
 			{
-				*((bool *) (opt->data_ptr)) = false;
+				*std::get<bool *>(opt->data_ptr) = false;
 			}
 			else  // anything else is TRUE
 			{
-				*((bool *) (opt->data_ptr)) = true;
+				*std::get<bool *>(opt->data_ptr) = true;
 			}
 			break;
 
 		case OptType::integer:
-			*((int *) opt->data_ptr) = atoi(value);
+			*std::get<int *>(opt->data_ptr) = atoi(value);
 			break;
 
 		case OptType::color:
-			*((rgb_color_t *) opt->data_ptr) = ParseColor(value);
+			*std::get<rgb_color_t *>(opt->data_ptr) = ParseColor(value);
 			break;
 
 		case OptType::string:
-			*static_cast<SString *>(opt->data_ptr) = value;
+			*std::get<SString *>(opt->data_ptr) = value;
 			break;
 
 		case OptType::path:
-			*static_cast<fs::path *>(opt->data_ptr) = fs::u8path(value.get());
+			*std::get<fs::path *>(opt->data_ptr) = fs::u8path(value.get());
 			break;
 
 		case OptType::stringList:
 			if(value != "{}")
 			{
-				auto list = static_cast<std::vector<SString> *>(opt->data_ptr);
+				auto list = std::get<std::vector<SString> *>(opt->data_ptr);
 				do
 					list->push_back(value);
 				while(parse.getNext(value));
@@ -844,7 +844,7 @@ static int parse_config_line_from_file(const SString &line, const fs::path &base
 		case OptType::pathList:
 			if(value != "{}")
 			{
-				auto list = static_cast<std::vector<fs::path> *>(opt->data_ptr);
+				auto list = std::get<std::vector<fs::path> *>(opt->data_ptr);
 				fs::path pathvalue = fs::u8path(value.get());
 				do
 					list->push_back(pathvalue);
@@ -920,7 +920,7 @@ void M_ParseEnvironmentVars()
 // Common function to populate a list of strings or paths
 //
 template<typename T>
-static void readArgsForList(bool ignore, int &argc, const char *const *&argv, void *data_ptr)
+static void readArgsForList(bool ignore, int &argc, const char *const *&argv, const ArgData &data_ptr)
 {
 	if(argc < 2)
 	{
@@ -934,7 +934,7 @@ static void readArgsForList(bool ignore, int &argc, const char *const *&argv, vo
 
 		if (! ignore)
 		{
-			auto list = static_cast<std::vector<T> *>(data_ptr);
+			auto list = std::get<std::vector<T> *>(data_ptr);
 			list->push_back(argv[0]);
 		}
 	}
@@ -1004,16 +1004,16 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 						y_stricmp(argv[0], "off")   == 0 ||
 						y_stricmp(argv[0], "0")     == 0)
 					{
-						*((bool *) (o->data_ptr)) = false;
+						*std::get<bool *>(o->data_ptr) = false;
 					}
 					else  // anything else is TRUE
 					{
-						*((bool *) (o->data_ptr)) = true;
+						*std::get<bool *>(o->data_ptr) = true;
 					}
 				}
 				else if (! ignore)
 				{
-					*((bool *) o->data_ptr) = true;
+					*std::get<bool *>(o->data_ptr) = true;
 				}
 				break;
 
@@ -1029,7 +1029,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 
 				if (! ignore)
 				{
-					*((int *) o->data_ptr) = atoi(argv[0]);
+					*std::get<int *>(o->data_ptr) = atoi(argv[0]);
 				}
 				break;
 
@@ -1045,7 +1045,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 
 				if (! ignore)
 				{
-					*((rgb_color_t *) o->data_ptr) = ParseColor(argv[0]);
+					*std::get<rgb_color_t *>(o->data_ptr) = ParseColor(argv[0]);
 				}
 				break;
 
@@ -1058,14 +1058,14 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 				argv++;
 				argc--;
 				if(!ignore)
-					*static_cast<SString *>(o->data_ptr) = argv[0];
+					*std::get<SString *>(o->data_ptr) = argv[0];
 				// support two numeric values after -warp
 				if (o->flags & OptFlag_warp && isdigit(argv[0][0]) &&
 					argc > 1 && isdigit(argv[1][0]))
 				{
 					if (! ignore)
 					{
-						*static_cast<SString *>(o->data_ptr) = SString(argv[0]) + argv[1];
+						*std::get<SString *>(o->data_ptr) = SString(argv[0]) + argv[1];
 					}
 
 					argv++;
@@ -1082,7 +1082,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 				++argv;
 				--argc;
 				if(!ignore)
-					*static_cast<fs::path *>(o->data_ptr) = fs::u8path(argv[0]);
+					*std::get<fs::path *>(o->data_ptr) = fs::u8path(argv[0]);
 				break;
 
 
@@ -1218,35 +1218,35 @@ int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
 		switch (o->opt_type)
 		{
             case OptType::boolean:
-				os << (*((bool *)o->data_ptr) ? "1" : "0");
+				os << (*std::get<bool *>(o->data_ptr) ? "1" : "0");
 				break;
 
             case OptType::string:
 			{
-				const SString *str = static_cast<SString *>(o->data_ptr);
+				const SString *str = std::get<SString *>(o->data_ptr);
 				os << str->spaceEscape();
 				break;
 			}
 			case OptType::path:
 			{
-				const fs::path *path = static_cast<fs::path *>(o->data_ptr);
+				const fs::path *path = std::get<fs::path *>(o->data_ptr);
 				os << escape(*path);
 				break;
 			}
             case OptType::integer:
-				os << *((int *)o->data_ptr);
+				os << *(std::get<int *>(o->data_ptr));
 				break;
 
             case OptType::color:
-				os << SString::printf("%06x", *((rgb_color_t *)o->data_ptr) >> 8);
+				os << SString::printf("%06x", *(std::get<rgb_color_t *>(o->data_ptr)) >> 8);
 				break;
 
             case OptType::stringList:
-				writeListToConfig(*static_cast<std::vector<SString> *>(o->data_ptr), os);
+				writeListToConfig(*std::get<std::vector<SString> *>(o->data_ptr), os);
 				break;
 
 			case OptType::pathList:
-				writeListToConfig(*static_cast<std::vector<fs::path> *>(o->data_ptr), os);
+				writeListToConfig(*std::get<std::vector<fs::path> *>(o->data_ptr), os);
 				break;
 
 			default:
