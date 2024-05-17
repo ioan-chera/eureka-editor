@@ -729,6 +729,7 @@ static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
 // make for nicer looking menus in Windows/Linux, but are not
 // needed for the MacOS system menu bar.
 //
+#ifdef __APPLE__
 static void Menu_PackForMac(Fl_Menu_Item *src)
 {
 	int depth = 0;
@@ -766,7 +767,7 @@ static void Menu_PackForMac(Fl_Menu_Item *src)
 		*dest++ = *src++;
 	}
 }
-
+#endif
 
 static int Menu_FindItem(const Fl_Menu_Item *items, const char *text)
 {
