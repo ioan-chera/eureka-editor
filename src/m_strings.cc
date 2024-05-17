@@ -420,7 +420,7 @@ SString StringTable::get(StringID offset) const noexcept
 //
 // If string has spaces, surrounds it in double quotes. If there are any quotes, it doubles them (MS-DOS convention)
 //
-SString SString::spaceEscape() const
+SString SString::spaceEscape(bool backslash) const
 {
 	if(empty())
 		return "\"\"";
@@ -437,7 +437,7 @@ SString SString::spaceEscape() const
 	{
 		size_t pos = std::string::npos;
 		while((pos = result.data.find('"', pos == std::string::npos ? 0 : pos + 2)) != std::string::npos)
-			result.data.insert(result.data.begin() + pos, '"');
+			result.data.insert(result.data.begin() + pos, backslash ? '\\' : '"');
 		return "\"" + result + "\"";
 	}
 	return result;

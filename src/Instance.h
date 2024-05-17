@@ -333,9 +333,6 @@ public:
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 	void Status_Clear() const;
 
-	// UI_MENU
-	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
-
 private:
 	// New private methods
 	void navigationScroll(float *editNav, nav_release_func_t func);

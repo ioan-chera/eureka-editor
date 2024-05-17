@@ -155,8 +155,14 @@ public:
 	{
 		game_wad = gameWad;
 	}
-	void RemoveEditWad();
-	void ReplaceEditWad(const std::shared_ptr<Wad_file> &wad);
+	void RemoveEditWad()
+	{
+		edit_wad.reset();
+	}
+	void ReplaceEditWad(const std::shared_ptr<Wad_file> &wad)
+	{
+		edit_wad = wad;
+	}
 	void setResources(const std::vector<std::shared_ptr<Wad_file>> &wads)
 	{
 		resource_wads = wads;
@@ -209,6 +215,7 @@ private:
 //
 struct WadData
 {
+	void loadDehacked(ConfigData &config);
 	void W_LoadTextures(const ConfigData &config);
 
 	const Img_c *getSprite(const ConfigData &config, int type, const LoadingData &loading);

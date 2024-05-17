@@ -38,6 +38,7 @@
 #include "m_config.h"
 #include "m_files.h"
 #include "m_loadsave.h"
+#include "m_testmap.h"
 #include "r_subdiv.h"
 #include "Sector.h"
 #include "SideDef.h"
@@ -56,18 +57,6 @@ static const char overwrite_message[] =
 	"This operation will destroy that map (overwrite it)."
 	"\n\n"
 	"Are you sure you want to continue?";
-
-
-void MasterDir::RemoveEditWad()
-{
-	edit_wad.reset();
-}
-
-
-void MasterDir::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
-{
-	edit_wad = new_wad;
-}
 
 static Document makeFreshDocument(Instance &inst, const ConfigData &config, MapFormat levelFormat)
 {
@@ -305,6 +294,9 @@ void Instance::CMD_NewProject()
 		level = makeFreshDocument(*this, newres.config, newres.loading.levelFormat);
 		conf = std::move(newres.config);
 		loaded = std::move(newres.loading);
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
+		
 		this->wad = std::move(newres.waddata);
 		
 		SaveLevel(loaded, map_name, *wad, false);
@@ -321,6 +313,8 @@ void Instance::CMD_NewProject()
 		wad = std::move(backupWadData);
 		if(backupDoc)
 			level = std::move(backupDoc.value());
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
 		
 		DLG_ShowError(false, "Could not create new project: %s", e.what());
 	}
@@ -341,6 +335,9 @@ bool Instance::MissingIWAD_Dialog()
 		const fs::path *iwad = global::recent.queryIWAD(loaded.gameName);
 		SYS_ASSERT(!!iwad);
 		loaded.iwadName = *iwad;
+		
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
 	}
 
 	return result.has_value();
@@ -1016,6 +1013,8 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 	}
 	loaded = newdoc.loading;
 	level = std::move(newdoc.doc);
+	if(main_win)
+		testmap::updateMenuName(main_win->menu_bar, loaded);
 	Subdiv_InvalidateAll();
 }
 
@@ -1144,6 +1143,9 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 	gInstance.loaded = std::move(newres.loading);
 	gInstance.wad = std::move(newres.waddata);
 	gInstance.wad.master.ReplaceEditWad(wad);
+	
+	if(gInstance.main_win)
+		testmap::updateMenuName(gInstance.main_win->menu_bar, gInstance.loaded);
 
 	gInstance.refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, true);
 }
@@ -1232,6 +1234,9 @@ void Instance::CMD_OpenMap()
 		conf = std::move(newres.config);
 		loaded = std::move(newres.loading);
 		this->wad = std::move(newres.waddata);
+		
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
 
 		gLog.printf("--- DONE ---\n");
 		gLog.printf("\n");
@@ -1247,6 +1252,8 @@ void Instance::CMD_OpenMap()
 	level = std::move(newdoc.doc);
 	if(!new_resources)	// we already updated loaded with resources
 		loaded = std::move(newdoc.loading);
+	if(main_win)
+		testmap::updateMenuName(main_win->menu_bar, loaded);
 
 	refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, new_resources);
 }

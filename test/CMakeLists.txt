@@ -124,12 +124,14 @@ unit_test(general
     m_files_test.cpp
     m_game_test.cpp
     m_parse_test.cpp
+    m_testmap_test.cpp
     main_test.cpp
 	SafeOutFileTest.cpp
     SectorTest.cpp
     SStringTest.cpp
     ThingTest.cpp
     VertexTest.cpp
+    w_dehacked_test.cpp
     w_loadpic_test.cpp
     w_texture_test.cpp
     w_wad_test.cpp
@@ -208,6 +210,7 @@ unit_test(general
         ui_vertex.cc
         ui_window.cc
         Vertex.cc
+        w_dehacked.cc
         w_loadpic.cc
         w_texture.cc
         w_wad.cc

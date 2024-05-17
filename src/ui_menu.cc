@@ -729,7 +729,8 @@ static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
 // make for nicer looking menus in Windows/Linux, but are not
 // needed for the MacOS system menu bar.
 //
-void Menu_PackForMac(Fl_Menu_Item *src)
+#ifdef __APPLE__
+static void Menu_PackForMac(Fl_Menu_Item *src)
 {
 	int depth = 0;
 
@@ -766,7 +767,7 @@ void Menu_PackForMac(Fl_Menu_Item *src)
 		*dest++ = *src++;
 	}
 }
-
+#endif
 
 static int Menu_FindItem(const Fl_Menu_Item *items, const char *text)
 {
@@ -894,8 +895,39 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 	return new_array;
 }
 
+namespace menu
+{
+static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> testMapDetailStorage;
 
-Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
+void setTestMapDetail(Fl_Sys_Menu_Bar *bar, const SString &text)
+{
+	if(!bar)
+		return;
+	int menuSize = bar->size();
+	const Fl_Menu_Item *items = bar->menu();
+	
+	int index = -1;
+	for(int i = 0; i < menuSize; ++i)
+	{
+		const Fl_Menu_Item &item = items[i];
+		if(item.callback() == tools_do_test_map)
+		{
+			index = i;
+			break;
+		}
+	}
+
+	if(index < 0)
+		return;
+	if(text.good())
+		testMapDetailStorage[bar] = SString::printf("&Test in Game (%s)", text.c_str());
+	else
+		testMapDetailStorage[bar] = "&Test in Game";
+	
+	bar->replace(index, testMapDetailStorage[bar].c_str());
+}
+
+Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
 
@@ -919,7 +951,7 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 	int total = items[0].size();
 	for(int i = 0; i < total; ++i)
 		if(items[i].text && items[i].callback_ && !items[i].user_data_)
-			items[i].user_data_ = this;
+			items[i].user_data_ = userData;
 
 	bar->menu(items);
 
@@ -940,16 +972,14 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 //
 // Update all the menu shortcut displays after all_bindings got updated
 //
-void updateMenuBindings()
+void updateBindings(Fl_Sys_Menu_Bar *bar)
 {
 	// If window not made yet, it will call this itself
-	if(!gInstance.main_win || !gInstance.main_win->menu_bar)
+	if(!bar)
 		return;
-
-	Fl_Sys_Menu_Bar *bar = gInstance.main_win->menu_bar;
 	int menuSize = bar->size();
 	const Fl_Menu_Item *items = bar->menu();
-
+	
 	for(int i = 0; i < menuSize; ++i)
 	{
 		auto it = s_menu_command_map.find(items[i].callback());
@@ -959,7 +989,7 @@ void updateMenuBindings()
 		keycode_t code;
 		if(!findKeyCodeForCommandName(command.command, command.param, &code))
 			continue;
-
+		
 		// Convert Eureka code to FLTK code
 		if(code & EMOD_COMMAND)
 			code = (code & ~EMOD_COMMAND) | FL_COMMAND;
@@ -967,11 +997,11 @@ void updateMenuBindings()
 			code = (code & ~EMOD_META) | FL_META;
 		if(code & EMOD_ALT)
 			code = (code & ~EMOD_ALT) | FL_ALT;
-
+		
 		bar->shortcut(i, code);
 	}
 }
-
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

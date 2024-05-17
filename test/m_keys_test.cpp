@@ -35,9 +35,12 @@ void DLG_ShowError(bool fatal, EUR_FORMAT_STRING(const char* msg), ...)
 }
 
 static int sUpdates;
-void updateMenuBindings()
+namespace menu
 {
-    ++sUpdates;
+void updateBindings(Fl_Sys_Menu_Bar *)
+{
+	++sUpdates;
+}
 }
 
 void Instance::Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const

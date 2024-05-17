@@ -26,9 +26,15 @@
 #include "m_files.h"
 #include "m_loadsave.h"
 #include "m_parse.h"
+#include "m_testmap.h"
 #include "w_wad.h"
 
+#include "ui_menu.h"
 #include "ui_window.h"
+
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
 
 class DirChangeContext
 {
@@ -74,6 +80,42 @@ static SString QueryName(const SString &port, const SString &cgame)
 	return port;
 }
 
+static bool isMacOSAppBundle(const fs::path &path)
+{
+#ifdef __APPLE__
+	CFStringRef pathString = CFStringCreateWithCString(kCFAllocatorDefault, path.u8string().c_str(), kCFStringEncodingUTF8);
+	if(!pathString)
+	{
+		gLog.printf("ERROR: Failed allocating macOS app bundle path CF string: %s\n", path.u8string().c_str());
+		return false;
+	}
+	CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, pathString, kCFURLPOSIXPathStyle, true);
+	
+	CFRelease(pathString);
+	if(!url)
+	{
+		gLog.printf("ERROR: Failed allocating macOS app bundle CF URL: %s\n", path.u8string().c_str());
+		
+		return false;
+	}
+	
+	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, url);
+	CFRelease(url);
+	if(!bundle)
+	{
+		gLog.printf("Could not load, or invalid macOS app CF bundle: %s\n", path.u8string().c_str());
+		
+		return false;
+	}
+	
+	CFDictionaryRef infoDict = CFBundleGetInfoDictionary(bundle);
+	CFRelease(bundle);
+	
+	return !!infoDict;
+#else
+	return false;
+#endif
+}
 
 class UI_PortPathDialog : public UI_Escapable_Window
 {
@@ -119,7 +161,7 @@ public:
 		// NULL is ok here
 		exe_display->value(exe_name.u8string().c_str());
 
-		if (!exe_name.empty() && FileExists(exe_name))
+		if (!exe_name.empty() && (FileExists(exe_name) || isMacOSAppBundle(exe_name)))
 			ok_but->activate();
 		else
 			ok_but->deactivate();
@@ -292,6 +334,8 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const
 		// persist the new port settings
 		global::recent.setPortPath(QueryName(port, game),
 								   GetAbsolutePath(dialog.exe_name));
+		if(main_win)
+			testmap::updateMenuName(main_win->menu_bar, loaded);
 
 		global::recent.save(global::home_dir);
 
@@ -305,17 +349,17 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const
 
 //------------------------------------------------------------------------
 
-static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
+static void CalcWarpString(const SString& levelName, std::vector<SString> &args)
 {
-	SYS_ASSERT(!inst.loaded.levelName.empty());
+	SYS_ASSERT(!levelName.empty());
 	// FIXME : EDGE allows a full name: -warp MAP03
 	//         Eternity too.
 	//         ZDOOM too, but different syntax: +map MAP03
 
 	// most common syntax is "MAP##" or "MAP###"
-	if (inst.loaded.levelName.length() >= 4 && inst.loaded.levelName.noCaseStartsWith("MAP") && isdigit(inst.loaded.levelName[3]))
+	if (levelName.length() >= 4 && levelName.noCaseStartsWith("MAP") && isdigit(levelName[3]))
 	{
-		long number = strtol(inst.loaded.levelName.c_str() + 3, nullptr, 10);
+		long number = strtol(levelName.c_str() + 3, nullptr, 10);
 		args.push_back("-warp");
 		args.push_back(std::to_string(number));
 		return;
@@ -323,23 +367,23 @@ static void CalcWarpString(const Instance& inst, std::vector<SString> &args)
 
 	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
 	// a pair of numbers after -warp
-	if (inst.loaded.levelName.length() >= 4 && !isdigit(inst.loaded.levelName[0]) && isdigit(inst.loaded.levelName[1]) &&
-		!isdigit(inst.loaded.levelName[2]) && isdigit(inst.loaded.levelName[3]))
+	if (levelName.length() >= 4 && !isdigit(levelName[0]) && isdigit(levelName[1]) &&
+		!isdigit(levelName[2]) && isdigit(levelName[3]))
 	{
 		args.push_back("-warp");
-		args.push_back(SString::printf("%c", inst.loaded.levelName[1]));
-		args.push_back(inst.loaded.levelName.c_str() + 3);
+		args.push_back(SString::printf("%c", levelName[1]));
+		args.push_back(levelName.c_str() + 3);
 		return;
 	}
 
 	// map name is non-standard, find the first digit group and hope
 	// for the best...
 
-	size_t digitPos = inst.loaded.levelName.findDigit();
+	size_t digitPos = levelName.findDigit();
 	if (digitPos != std::string::npos)
 	{
 		args.push_back("-warp");
-		args.push_back(inst.loaded.levelName.c_str() + digitPos);
+		args.push_back(levelName.c_str() + digitPos);
 		return;
 	}
 
@@ -390,19 +434,17 @@ static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 	}
 }
 
-#ifdef _WIN32
-static SString buildArgString(const std::vector<SString>& args)
+static SString buildArgString(const std::vector<SString>& args, bool backslash)
 {
 	SString result;
 	for (const SString& arg : args)
 	{
 		if (!result.empty())
 			result += " ";
-		result += arg.spaceEscape();
+		result += arg.spaceEscape(backslash);
 	}
 	return result;
 }
-#endif
 
 static void logArgs(const SString& args)
 {
@@ -416,9 +458,9 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
-	CalcWarpString(inst, args);
+	CalcWarpString(inst.loaded.levelName, args);
 
-	SString argString = inst.loaded.testingCommandLine + " " + buildArgString(args);
+	SString argString = inst.loaded.testingCommandLine + " " + buildArgString(args, false);
 	logArgs(argString);
 	std::wstring argsWide = UTF8ToWide(argString.c_str());
 
@@ -433,22 +475,36 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 	inst.Status_Set("Started the game");
 }
 #else
+
+static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
+{
+	std::vector<SString> args;
+	GrabWadNamesArgs(inst, args);
+	CalcWarpString(inst.loaded.levelName, args);
+	
+	SString argString = SString("/usr/bin/open -a ") + SString(portPath.u8string()).spaceEscape(true) + " --args " + inst.loaded.testingCommandLine + " " + buildArgString(args, true);
+	logArgs(argString);
+	
+	system(argString.c_str());
+}
+
 static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
-	CalcWarpString(inst, args);
+	CalcWarpString(inst.loaded.levelName, args);
 
 	SString arg;
 	TokenWordParse parse(inst.loaded.testingCommandLine, false);
 	while(parse.getNext(arg))
-		args.insert(args.begin(), arg);
+		args.push_back(arg);
 	args.insert(args.begin(), portPath.u8string());
-
+	
 	std::vector<char *> argv;
 	argv.reserve(args.size() + 2);
 	fs::path portName = portPath.filename();
 	SString portPathStorage = portName.u8string();
+	
 	argv.push_back(portPathStorage.get().data());
 	SString argString;
 	for(SString &arg : args)
@@ -474,7 +530,6 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 		try
 		{
 			DirChangeContext dirChangeContext(FilenameGetPath(portPath));
-			
 			execvp(portPath.u8string().c_str(), argv.data());
 			
 			// on failure
@@ -511,6 +566,17 @@ void Instance::CMD_ChangeTestSettings()
 	}
 }
 
+static bool M_IsPortPathValid(const fs::path &path)
+{
+	if(path.u8string().length() < 2)
+		return false;
+
+	if (! FileExists(path) && !isMacOSAppBundle(path))
+		return false;
+
+	return true;
+}
+
 void Instance::CMD_TestMap()
 {
 	try
@@ -533,7 +599,7 @@ void Instance::CMD_TestMap()
 		const fs::path* info = global::recent.queryPortPath(QueryName(loaded.portName,
 			loaded.gameName));
 
-		if (!(info && M_IsPortPathValid(*info)))
+		if (!info || !M_IsPortPathValid(*info))
 		{
 			if (!M_PortSetupDialog(loaded.portName, loaded.gameName, loaded.testingCommandLine))
 				return;
@@ -542,24 +608,28 @@ void Instance::CMD_TestMap()
 		}
 
 		// this generally can't happen, but we check anyway...
-		if (!(info && M_IsPortPathValid(*info)))
+		if (!info || !M_IsPortPathValid(*info))
 		{
 			Beep("invalid path to executable");
 			return;
 		}
 
 		Status_Set("TESTING MAP");
-		main_win->redraw();
+		if(main_win)
+			main_win->redraw();
 		Fl::wait(0.1);
 		Fl::wait(0.1);
 
 #ifdef _WIN32
 		testMapOnWindows(*this, *info);
 #else
-		testMapOnPOSIX(*this, *info);
+		if(isMacOSAppBundle(*info))
+			testMapOnMacBundle(*this, *info);
+		else
+			testMapOnPOSIX(*this, *info);
 #endif
-		
-		main_win->redraw();
+		if(main_win)
+			main_win->redraw();
 		Fl::wait(0.1);
 		Fl::wait(0.1);
 		
@@ -570,6 +640,21 @@ void Instance::CMD_TestMap()
 		DLG_ShowError(false, "Could not start map for testing: %s", e.what());
 	}
 	
+}
+
+namespace testmap
+{
+void updateMenuName(Fl_Sys_Menu_Bar *bar, const LoadingData &loading)
+{
+	if(loading.portName.empty() || loading.gameName.empty())
+		return;	// premature
+	const fs::path* info = global::recent.queryPortPath(QueryName(loading.portName,
+		loading.gameName));
+	if(!info || !M_IsPortPathValid(*info))
+		menu::setTestMapDetail(bar, "");
+	else
+		menu::setTestMapDetail(bar, SString(info->filename().replace_extension()));
+}
 }
 
 

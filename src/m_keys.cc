@@ -617,7 +617,8 @@ void M_LoadBindings()
 
 	LoadBindingsFromPath(global::home_dir.u8string(), false);
 
-	updateMenuBindings();
+	if(gInstance.main_win)
+		menu::updateBindings(gInstance.main_win->menu_bar);
 }
 
 
@@ -711,7 +712,8 @@ void M_ApplyBindings()
 {
     global::all_bindings = global::pref_binds;
 
-	updateMenuBindings();
+	if(gInstance.main_win)
+		menu::updateBindings(gInstance.main_win->menu_bar);
 }
 
 

@@ -2,6 +2,7 @@
 configure_file(version.h.in version.h)
 
 set(source_base
+    dehconsts.h
     Document.cc
     Document.h
     DocumentModule.cc
@@ -116,6 +117,7 @@ set(source_m
     m_strings.cc
     m_strings.h
     m_testmap.cc
+    m_testmap.h
     m_udmf.cc
     m_vector.cc
     m_vector.h
@@ -191,6 +193,8 @@ set(source_ui
 )
 
 set(source_w
+    w_dehacked.cc
+    w_dehacked.h
     w_loadpic.cc
     w_loadpic.h
     w_rawdef.h

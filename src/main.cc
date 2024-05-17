@@ -37,6 +37,7 @@
 #include "m_game.h"
 #include "m_files.h"
 #include "m_loadsave.h"
+#include "m_testmap.h"
 
 #include "e_main.h"
 #include "m_events.h"
@@ -44,6 +45,7 @@
 #include "r_render.h"
 #include "r_subdiv.h"
 
+#include "w_dehacked.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "w_wad.h"
@@ -133,8 +135,8 @@ enum class ProgressStatus
 };
 static ProgressStatus init_progress;
 
-int global::show_help     = 0;
-int global::show_version  = 0;
+bool global::show_help;
+bool global::show_version;
 
 
 static void RemoveSingleNewlines(SString &buffer)
@@ -462,6 +464,8 @@ static void DeterminePort(Instance &inst)
 	}
 
 	inst.loaded.portName = config::default_port;
+	if(inst.main_win)
+		testmap::updateMenuName(inst.main_win->menu_bar, inst.loaded);
 }
 
 
@@ -645,7 +649,7 @@ static void Main_OpenWindow(Instance &inst)
 	inst.main_win = new UI_MainWindow(inst);
 
 	// Set menu bindings now that we have them.
-	updateMenuBindings();
+	menu::updateBindings(inst.main_win->menu_bar);
 
 	inst.main_win->label("Eureka v" EUREKA_VERSION);
 
@@ -937,6 +941,12 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 					&newres.config, resource);
 				continue;
 			}
+			if(MatchExtensionNoCase(resource, ".deh") || MatchExtensionNoCase(resource, ".bex"))
+			{
+				if(!dehacked::loadFile(resource, newres.config))
+					gLog.printf("Error loading Dehacked file %s\n", resource.u8string().c_str());
+				continue;
+			}
 			// Otherwise wad
 			if (!Wad_file::Validate(resource))
 				ThrowException("Invalid resource WAD file: %s", resource.u8string().c_str());
@@ -954,6 +964,7 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 			ThrowException("Could not load IWAD file");
 
 		newres.waddata.reloadResources(gameWad, newres.config, resourceWads);
+		dehacked::loadLumps(newres.waddata.master, newres.config);
 	}
 	catch (const std::runtime_error&e )
 	{
@@ -977,6 +988,8 @@ void Instance::Main_LoadResources(const LoadingData &loading) noexcept(false)
 	wad = std::move(newres.waddata);
 	conf = std::move(newres.config);
 	loaded = std::move(newres.loading);
+	if(main_win)
+		testmap::updateMenuName(main_win->menu_bar, loaded);
 	
 	UpdateViewOnResources();
 }
@@ -1166,6 +1179,7 @@ int main(int argc, char *argv[])
 
 
 		// load all the config settings
+		config::preloading = gInstance.loaded;
 		prepareConfigPath();
 		M_ParseConfigFile(global::config_file, options);
 
@@ -1174,6 +1188,8 @@ int main(int argc, char *argv[])
 
 		// and command line arguments will override both
 		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal, global::Pwad_list, options);
+		
+		gInstance.loaded = config::preloading;	// update state now
 
 		// TODO: create a new instance
 		gInstance.Editor_Init();

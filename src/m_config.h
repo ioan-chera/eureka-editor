@@ -28,50 +28,15 @@
 #define __EUREKA_M_CONFIG_H__
 
 #include "im_color.h"
+#include <variant>
 #include <vector>
 
 #include "filesystem.hpp"
 namespace fs = ghc::filesystem;
 
+struct LoadingData;
+
 /* ==== CONFIG VARIABLES ==================== */
-
-
-//
-//  Structures for command line arguments and config settings
-//
-enum class OptType
-{
-	// End of the options description
-	end,
-
-	// Boolean (toggle)
-	// Receptacle is of type: bool
-	boolean,
-
-	// Integer number,
-	// Receptacle is of type: int
-	integer,
-
-	// A color value
-	// Receptacle is of type: rgb_color_t
-	color,
-
-	// String (not leaking)
-	// Receptacle is of type: SString
-	string,
-
-	// Path (similar to string)
-	// Receptacle is of type: fs::path
-	path,
-
-	// List of strings (not leaking)
-	// Receptacle is of type: std::vector<SString>
-	stringList,
-
-	// List of paths
-	// Receptacle if of type: std::vector<fs::path>
-	pathList,
-};
 
 enum
 {
@@ -82,12 +47,14 @@ enum
 	OptFlag_hide = 1 << 4,
 };
 
+typedef std::variant<bool *, int *, rgb_color_t *, SString *, fs::path *, std::vector<SString> *, 
+					 std::vector<fs::path> *, std::nullptr_t> ArgData;
+
 struct opt_desc_t
 {
 	const char *long_name;  // Command line arg. or keyword
 	const char *short_name; // Abbreviated command line argument
 
-	OptType opt_type;    // Type of this option
 	unsigned flags;    // Flags for this option :
 	// '1' : process only on pass 1 of parse_command_line_options()
 	// '<' : print extra newline after this option (when dumping)
@@ -98,7 +65,8 @@ struct opt_desc_t
 	const char *desc;   // Description of the option
 	const char *arg_desc;  // Description of the argument (NULL --> none or default)
 
-	void *data_ptr;   // Pointer to the data
+	// Pointer to the data
+	ArgData data_ptr;
 };
 
 
@@ -184,6 +152,8 @@ extern bool bsp_gl_nodes;
 extern bool bsp_force_v5;
 extern bool bsp_force_zdoom;
 extern bool bsp_compressed;
+
+extern LoadingData preloading;
 }
 
 extern const opt_desc_t options[];

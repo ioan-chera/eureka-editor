@@ -27,9 +27,9 @@
 class UI_Nombre : public Fl_Box
 {
 private:
-	int index;
-	int total;
-	int selected;
+	int index = -1;
+	int total = 0;
+	int selected = 0;
 
 	SString type_name;
 

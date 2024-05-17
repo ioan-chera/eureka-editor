@@ -27,6 +27,7 @@
 #include "m_loadsave.h"
 #include "m_parse.h"
 #include "m_streams.h"
+#include "m_testmap.h"
 #include "w_wad.h"
 
 #include "ui_window.h"
@@ -109,16 +110,7 @@ int M_FindGivenFile(const fs::path &filename)
 //  PORT PATH HANDLING
 //------------------------------------------------------------------------
 
-bool M_IsPortPathValid(const fs::path &path)
-{
-	if(path.u8string().length() < 2)
-		return false;
 
-	if (! FileExists(path))
-		return false;
-
-	return true;
-}
 
 //
 // Parse port path
@@ -138,6 +130,8 @@ void RecentKnowledge::parsePortPath(const SString &name, const SString &cpath)
 	path.erase(0, pos + 1);
 
 	setPortPath(name, fs::u8path(path.get()));
+	if(gInstance.main_win)
+		testmap::updateMenuName(gInstance.main_win->menu_bar, gInstance.loaded);
 
 	// parse any other arguments
 	// [ none needed atm.... ]

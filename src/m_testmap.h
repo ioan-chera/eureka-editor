@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------
-//  MENUS
+//  TEST (PLAY) THE MAP
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2009 Andrew Apted
+//  Copyright (C) 2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -18,22 +18,16 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EUREKA_UI_MENU_H__
-#define __EUREKA_UI_MENU_H__
+#ifndef M_TESTMAP_H_
+#define M_TESTMAP_H_
 
 #include "FL/Fl_Sys_Menu_Bar.H"
 
-class Fl_Menu_Bar;
-class SString;
+struct LoadingData;
 
-namespace menu
+namespace testmap
 {
-Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData);
-void updateBindings(Fl_Sys_Menu_Bar *bar);
-void setTestMapDetail(Fl_Sys_Menu_Bar *bar, const SString &text);
+void updateMenuName(Fl_Sys_Menu_Bar *bar, const LoadingData &loading);
 }
 
-#endif  /* __EUREKA_UI_MENU_H__ */
-
-//--- editor settings ---
-// vi:ts=4:sw=4:noexpandtab
+#endif
