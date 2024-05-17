@@ -21,7 +21,8 @@
 #ifndef M_TESTMAP_H_
 #define M_TESTMAP_H_
 
-class Fl_Sys_Menu_Bar;
+#include "FL/Fl_Sys_Menu_Bar.H"
+
 struct LoadingData;
 
 namespace testmap

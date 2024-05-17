@@ -21,7 +21,8 @@
 #ifndef __EUREKA_UI_MENU_H__
 #define __EUREKA_UI_MENU_H__
 
-class Fl_Sys_Menu_Bar;
+#include "FL/Fl_Sys_Menu_Bar.H"
+
 class Fl_Menu_Bar;
 class SString;
 
