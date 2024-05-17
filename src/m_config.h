@@ -34,6 +34,8 @@
 #include "filesystem.hpp"
 namespace fs = ghc::filesystem;
 
+struct LoadingData;
+
 /* ==== CONFIG VARIABLES ==================== */
 
 enum

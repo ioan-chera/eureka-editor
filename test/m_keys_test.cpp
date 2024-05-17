@@ -37,7 +37,7 @@ void DLG_ShowError(bool fatal, EUR_FORMAT_STRING(const char* msg), ...)
 static int sUpdates;
 namespace menu
 {
-void updateBindings()
+void updateBindings(Fl_Sys_Menu_Bar *)
 {
 	++sUpdates;
 }
