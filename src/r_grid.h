@@ -25,6 +25,18 @@
 
 class Instance;
 
+class GridListener
+{
+public:
+	virtual void gridRedrawMap() = 0;
+	virtual void gridSetGrid(int grid) = 0;
+	virtual void gridUpdateSnap() = 0;
+	virtual void gridAdjustPos() = 0;
+	virtual void gridPointerPos() = 0;
+	virtual void gridSetScale(double scale) = 0;
+	virtual void gridBeep(const char *message) = 0;
+};
+
 class Grid_State_c final
 {
 friend class Instance;
@@ -50,7 +62,7 @@ public:
 	double Scale = 1.0;
 
 public:
-	explicit Grid_State_c(Instance &inst) : inst(inst)
+	explicit Grid_State_c(GridListener &listener) : listener(listener)
 	{
 	}
 
@@ -133,12 +145,11 @@ private:
 	void RawSetScale(int i);
 	void RawSetShown(bool new_shown);
 
-private:
 	static const double scale_values[];
 	static const int digit_scales[];
 	static const int grid_values[];
 
-	Instance &inst;
+	GridListener &listener;
 };
 
 #endif  /* __EUREKA_R_GRID_H__ */

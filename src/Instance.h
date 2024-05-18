@@ -59,7 +59,7 @@ enum SelectNeighborCriterion
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
 //
-class Instance
+class Instance : public GridListener
 {
 public:
 	// E_COMMANDS
@@ -332,6 +332,47 @@ public:
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 	void Status_Clear() const;
+	
+	// GridListener
+	void gridRedrawMap() override
+	{
+		RedrawMap();
+	}
+	
+	void gridSetGrid(int grid) override
+	{
+		if (main_win)
+			main_win->info_bar->SetGrid(-1);
+	}
+	
+	void gridUpdateSnap() override
+	{
+		if (main_win)
+			main_win->info_bar->UpdateSnap();
+	}
+	
+	void gridAdjustPos() override
+	{
+		if (main_win)
+			main_win->scroll->AdjustPos();
+	}
+	
+	void gridPointerPos() override
+	{
+		if (main_win)
+			main_win->canvas->PointerPos();
+	}
+	
+	void gridSetScale(double scale) override
+	{
+		if (main_win)
+			main_win->info_bar->SetScale(scale);
+	}
+	
+	void gridBeep(const char *message) override
+	{
+		Beep("%s", message);
+	}
 
 private:
 	// New private methods

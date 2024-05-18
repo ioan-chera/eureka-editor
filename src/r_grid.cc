@@ -64,8 +64,7 @@ void Grid_State_c::Init()
 	{
 		shown = false;
 
-		if (inst.main_win)
-			inst.main_win->info_bar->SetGrid(-1);
+		listener.gridSetGrid(-1);
 	}
 	else
 	{
@@ -73,9 +72,7 @@ void Grid_State_c::Init()
 	}
 
 	snap = config::grid_default_snap;
-
-	if (inst.main_win)
-		inst.main_win->info_bar->UpdateSnap();
+	listener.gridUpdateSnap();
 }
 
 
@@ -89,13 +86,9 @@ void Grid_State_c::MoveTo(const v2double_t &pos)
 	orig.x = pos.x;
 	orig.y = pos.y;
 
-	if (inst.main_win)
-	{
-		inst.main_win->scroll->AdjustPos();
-		inst.main_win->canvas->PointerPos();
-
-		inst.RedrawMap();
-	}
+	listener.gridAdjustPos();
+	listener.gridPointerPos();
+	listener.gridRedrawMap();
 }
 
 
@@ -396,11 +389,8 @@ void Grid_State_c::RefocusZoom(const v2double_t &map, float before_Scale)
 	orig.x += (map.x - orig.x) * dist_factor;
 	orig.y += (map.y - orig.y) * dist_factor;
 
-	if (inst.main_win)
-	{
-		inst.main_win->canvas->PointerPos();
-		inst.RedrawMap();
-	}
+	listener.gridPointerPos();
+	listener.gridRedrawMap();
 }
 
 
@@ -436,14 +426,11 @@ void Grid_State_c::RawSetScale(int i)
 
 	Scale = scale_values[i];
 
-	if (!inst.main_win)
-		return;
+	listener.gridAdjustPos();
+	listener.gridPointerPos();
+	listener.gridSetScale(Scale);
 
-	inst.main_win->scroll->AdjustPos();
-	inst.main_win->canvas->PointerPos();
-	inst.main_win->info_bar->SetScale(Scale);
-
-	inst.RedrawMap();
+	listener.gridRedrawMap();
 }
 
 
@@ -454,23 +441,19 @@ void Grid_State_c::RawSetStep(int i)
 	if (i == NUM_GRID_VALUES-1)  /* OFF */
 	{
 		shown = false;
-
-		if (inst.main_win)
-			inst.main_win->info_bar->SetGrid(-1);
+		listener.gridSetGrid(-1);
 	}
 	else
 	{
 		shown = true;
 		step  = grid_values[i];
-
-		if (inst.main_win)
-			inst.main_win->info_bar->SetGrid(step);
+		listener.gridSetGrid(step);
 	}
 
 	if (config::grid_hide_in_free_mode)
 		SetSnap(shown);
 
-	inst.RedrawMap();
+	listener.gridRedrawMap();
 }
 
 
@@ -479,13 +462,12 @@ void Grid_State_c::ForceStep(int new_step)
 	step  = new_step;
 	shown = true;
 
-	if (inst.main_win)
-		inst.main_win->info_bar->SetGrid(step);
+	listener.gridSetGrid(step);
 
 	if (config::grid_hide_in_free_mode)
 		SetSnap(shown);
 
-	inst.RedrawMap();
+	listener.gridRedrawMap();
 }
 
 
@@ -508,7 +490,7 @@ void Grid_State_c::StepFromScale()
 
 	step = grid_values[result];
 
-	inst.RedrawMap();
+	listener.gridRedrawMap();
 }
 
 
@@ -516,7 +498,7 @@ void Grid_State_c::AdjustStep(int delta)
 {
 	if (! shown)
 	{
-		inst.Beep("Grid is off (cannot change step)");
+		listener.gridBeep("Grid is off (cannot change step)");
 		return;
 	}
 
@@ -591,21 +573,8 @@ void Grid_State_c::AdjustScale(int delta)
 void Grid_State_c::RawSetShown(bool new_value)
 {
 	shown = new_value;
-
-	if (!inst.main_win)
-		return;
-
-	if (! shown)
-	{
-		inst.main_win->info_bar->SetGrid(-1);
-		inst.RedrawMap();
-		return;
-	}
-
-	// update the info-bar
-	inst.main_win->info_bar->SetGrid(step);
-
-	inst.RedrawMap();
+	listener.gridSetGrid(shown ? step : -1);
+	listener.gridRedrawMap();
 }
 
 
@@ -633,10 +602,8 @@ void Grid_State_c::SetSnap(bool enable)
 	if (config::grid_hide_in_free_mode && snap != shown)
 		SetShown(snap);
 
-	if (inst.main_win)
-		inst.main_win->info_bar->UpdateSnap();
-
-	inst.RedrawMap();
+	listener.gridUpdateSnap();
+	listener.gridRedrawMap();
 }
 
 void Grid_State_c::ToggleSnap()
