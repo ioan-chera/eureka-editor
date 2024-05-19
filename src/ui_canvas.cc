@@ -199,7 +199,7 @@ void UI_Canvas::draw()
 	RenderThickness(1);
 
 	// default font (for showing object numbers)
-	int font_size = (inst.grid.Scale < 0.9) ? 14 : 19;
+	int font_size = (inst.grid.getScale() < 0.9) ? 14 : 19;
 	RenderFontSize(font_size);
 
 	DrawEverything();
@@ -249,20 +249,20 @@ int UI_Canvas::NORMALY(int len, double dx, double dy)
 
 #ifdef NO_OPENGL
 // convert screen coordinates to map coordinates
-inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig.x + (sx - w() / 2 - x()) / inst.grid.Scale; }
-inline double UI_Canvas::MAPY(int sy) const { return inst.grid.orig.y + (h() / 2 - sy + y()) / inst.grid.Scale; }
+inline double UI_Canvas::MAPX(int sx) const { return inst.grid.getOrig().x + (sx - w() / 2 - x()) / inst.grid.getScale(); }
+inline double UI_Canvas::MAPY(int sy) const { return inst.grid.getOrig().y + (h() / 2 - sy + y()) / inst.grid.getScale(); }
 
 // convert map coordinates to screen coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + iround((mx - inst.grid.orig.x) * inst.grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + iround((inst.grid.orig.y - my) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + iround((mx - inst.grid.getOrig().x) * inst.grid.getScale())); }
+inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + iround((inst.grid.getOrig().y - my) * inst.grid.getScale())); }
 #else
 // convert GL coordinates to map coordinates
-inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig.x + (sx - w() / 2) / inst.grid.Scale; }
-inline double UI_Canvas::MAPY(int sy) const { return inst.grid.orig.y + (sy - h() / 2) / inst.grid.Scale; }
+inline double UI_Canvas::MAPX(int sx) const { return inst.grid.getOrig().x + (sx - w() / 2) / inst.grid.getScale(); }
+inline double UI_Canvas::MAPY(int sy) const { return inst.grid.getOrig().y + (sy - h() / 2) / inst.grid.getScale(); }
 
 // convert map coordinates to GL coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + iround((mx - inst.grid.orig.x) * inst.grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + iround((my - inst.grid.orig.y) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + iround((mx - inst.grid.getOrig().x) * inst.grid.getScale())); }
+inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + iround((my - inst.grid.getOrig().y) * inst.grid.getScale())); }
 #endif
 
 void UI_Canvas::PointerPos(bool in_event)
@@ -425,7 +425,7 @@ void UI_Canvas::DrawMap()
 	}
 
 	// draw the grid first since it's in the background
-	if (inst.grid.shown)
+	if (inst.grid.isShown())
 	{
 		if (config::grid_style == 0)
 			DrawGrid_Normal();
@@ -470,7 +470,7 @@ void UI_Canvas::DrawMap()
 //
 void UI_Canvas::DrawGrid_Normal()
 {
-	float pixels_1 = static_cast<float>(inst.grid.getStep() * inst.grid.Scale);
+	float pixels_1 = static_cast<float>(inst.grid.getStep() * inst.grid.getScale());
 
 	if (pixels_1 < 1.6)
 	{
@@ -484,7 +484,7 @@ void UI_Canvas::DrawGrid_Normal()
 
 	int flat_step = 64;
 
-	float pixels_2 = static_cast<float>(flat_step * inst.grid.Scale);
+	float pixels_2 = static_cast<float>(flat_step * inst.grid.getScale());
 
 	Fl_Color flat_col = (inst.grid.getStep() < 64) ? config::normal_main_col : config::normal_flat_col;
 
@@ -513,7 +513,7 @@ void UI_Canvas::DrawGrid_Normal()
 
 	Fl_Color main_col = (inst.grid.getStep() < 64) ? config::normal_small_col : config::normal_main_col;
 
-	float pixels_3 = static_cast<float>(inst.grid.getStep() * inst.grid.Scale);
+	float pixels_3 = static_cast<float>(inst.grid.getStep() * inst.grid.getScale());
 
 	if (pixels_3 < 4.2)
 		main_col = DarkerColor(main_col);
@@ -545,7 +545,7 @@ void UI_Canvas::DrawGrid_Dotty()
 	int grid_step_2 = 8 * grid_step_1;  // Map units between dim lines
 	int grid_step_3 = 8 * grid_step_2;  // Map units between bright lines
 
-	float pixels_1 = static_cast<float>(inst.grid.getStep() * inst.grid.Scale);
+	float pixels_1 = static_cast<float>(inst.grid.getStep() * inst.grid.getScale());
 
 
 	if (pixels_1 < 1.6)
@@ -677,7 +677,7 @@ void UI_Canvas::DrawVertex(double map_x, double map_y, int r)
 
 void UI_Canvas::DrawVertices()
 {
-	const int r = vertex_radius(inst.grid.Scale);
+	const int r = vertex_radius(inst.grid.getScale());
 
 	RenderColor(FL_GREEN);
 
@@ -1032,7 +1032,7 @@ void UI_Canvas::DrawThingSprites()
 		int sx = SCREENX(x);
 		int sy = SCREENY(y);
 
-		RenderSprite(sx, sy, static_cast<float>(scale * inst.grid.Scale), sprite);
+		RenderSprite(sx, sy, static_cast<float>(scale * inst.grid.getScale()), sprite);
 	}
 
 #ifndef NO_OPENGL
@@ -1160,12 +1160,12 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, Side side, in
 	int sy = (y1 + y2) / 2;
 
 	// normally draw line numbers on back of line
-	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.Scale, 1.0));
+	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.getScale(), 1.0));
 
 	// for sectors, draw closer and on sector side
 	if (side != Side::neither)
 	{
-		want_len = static_cast<int>(2 + 12 * clamp(0.25, inst.grid.Scale, 1.0));
+		want_len = static_cast<int>(2 + 12 * clamp(0.25, inst.grid.getScale(), 1.0));
 
 		if (side == Side::left)
 			want_len = -want_len;
@@ -1222,7 +1222,7 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 	}
 
 	// back of line is best place, no knob getting in the way
-	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.Scale, 1.0));
+	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.getScale(), 1.0));
 
 	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
 	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
@@ -1391,7 +1391,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 			double x = dx + inst.level.vertices[objnum]->x();
 			double y = dy + inst.level.vertices[objnum]->y();
 
-			int vert_r = vertex_radius(inst.grid.Scale);
+			int vert_r = vertex_radius(inst.grid.getScale());
 
 			if (! Vis(x, y, vert_r))
 				break;
@@ -1486,7 +1486,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 			double x = inst.level.vertices[objnum]->x();
 			double y = inst.level.vertices[objnum]->y();
 
-			int vert_r = vertex_radius(inst.grid.Scale);
+			int vert_r = vertex_radius(inst.grid.getScale());
 
 			inst.edit.trans_param.Apply(&x, &y);
 
@@ -1873,7 +1873,7 @@ void UI_Canvas::DrawSplitPoint(const v2double_t &map_pos)
 	int sx = SCREENX(map_pos.x);
 	int sy = SCREENY(map_pos.y);
 
-	int size = (inst.grid.Scale >= 5.0) ? 9 : (inst.grid.Scale >= 1.0) ? 7 : 5;
+	int size = (inst.grid.getScale() >= 5.0) ? 9 : (inst.grid.getScale() >= 1.0) ? 7 : 5;
 
 	// color set by caller
 
@@ -2003,7 +2003,7 @@ void UI_Canvas::DrawCamera()
 	float mx = static_cast<float>(map_pos.x);
 	float my = static_cast<float>(map_pos.y);
 
-	float r = static_cast<float>(40.0 / sqrt(inst.grid.Scale));
+	float r = static_cast<float>(40.0 / sqrt(inst.grid.getScale()));
 
 	float dx = static_cast<float>(r * cos(angle * M_PI / 180.0));
 	float dy = static_cast<float>(r * sin(angle * M_PI / 180.0));
@@ -2080,7 +2080,7 @@ void UI_Canvas::DrawCurrentLine()
 	if (! (inst.edit.highlight.valid() || inst.edit.split_line.valid()))
 	{
 		RenderColor(FL_GREEN);
-		DrawVertex(newpos.x, newpos.y, vertex_radius(inst.grid.Scale));
+		DrawVertex(newpos.x, newpos.y, vertex_radius(inst.grid.getScale()));
 	}
 
 	RenderColor(RED);
@@ -2151,7 +2151,7 @@ v2double_t UI_Canvas::DragDelta()
 {
 	v2double_t result = inst.edit.drag_cur.xy - inst.edit.drag_start.xy;
 
-	v2double_t pixel_dpos = result * inst.grid.Scale;
+	v2double_t pixel_dpos = result * inst.grid.getScale();
 
 	// check that we have moved far enough from the start position,
 	// giving the user the option to select the original place.

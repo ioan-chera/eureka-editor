@@ -93,7 +93,7 @@ void Instance::Editor_SetAction(EditorAction  new_action)
 
 void Instance::Editor_Zoom(int delta, v2int_t mid)
 {
-    float S1 = static_cast<float>(grid.Scale);
+    float S1 = static_cast<float>(grid.getScale());
 
     grid.AdjustScale(delta);
 
@@ -132,7 +132,7 @@ void Instance::Editor_ScrollMap(int mode, v2int_t dpos, keycode_t mod)
 	}
 	else
 	{
-		float speed = static_cast<float>(edit.panning_speed / grid.Scale);
+		float speed = static_cast<float>(edit.panning_speed / grid.getScale());
 
 		v2double_t delta = {
 			((double) -dpos.x * speed),

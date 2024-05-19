@@ -50,7 +50,6 @@ private:
 	// if non-zero, new lines will be forced to have a certain ratio
 	int ratio = 0;
 
-public:
 	// whether the grid is being displayed or not.
 	bool shown = true;
 
@@ -153,6 +152,14 @@ public:
 	int getRatio() const
 	{
 		return ratio;
+	}
+	const v2double_t &getOrig() const
+	{
+		return orig;
+	}
+	double getScale() const
+	{
+		return Scale;
 	}
 
 private:

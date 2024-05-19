@@ -634,7 +634,7 @@ bool Instance::Clipboard_DoPaste()
 
 	if (! edit.pointer_in_window)
 	{
-		pos = grid.orig;
+		pos = grid.getOrig();
 	}
 
 	// honor the grid snapping setting

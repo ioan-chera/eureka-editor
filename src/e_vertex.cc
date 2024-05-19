@@ -784,7 +784,7 @@ void VertexModule::DETSEC_CalcMoveVector(const selection_c & detach_verts, doubl
 	if (fabs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
 	if (fabs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
 
-	double mul = 1.0 / clamp(0.25, inst.grid.Scale, 1.0);
+	double mul = 1.0 / clamp(0.25, inst.grid.getScale(), 1.0);
 
 	*dx = (*dx) * mul;
 	*dy = (*dy) * mul;

@@ -686,9 +686,9 @@ bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
 
 void Instance::Grid_WriteUser(std::ostream &os) const
 {
-	os << "map_pos " << SString::printf("%1.0f %1.0f %1.6f", grid.orig.x, grid.orig.y, grid.Scale) <<
+	os << "map_pos " << SString::printf("%1.0f %1.0f %1.6f", grid.getOrig().x, grid.getOrig().y, grid.getScale()) <<
 		'\n';
-	os << "grid " << (grid.shown ? 1 : 0) << ' ' << (config::grid_style ? 0 : 1) << ' ' << 
+	os << "grid " << (grid.isShown() ? 1 : 0) << ' ' << (config::grid_style ? 0 : 1) << ' ' << 
 		grid.getStep() << '\n';
 	os << "snap " << (grid.snaps() ? 1 : 0) << '\n';
 }

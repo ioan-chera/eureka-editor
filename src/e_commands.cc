@@ -393,7 +393,7 @@ void Instance::CMD_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	delta *= base_size / 100.0 / grid.Scale;
+	delta *= base_size / 100.0 / grid.getScale();
 
 	grid.Scroll(delta);
 }
@@ -417,7 +417,7 @@ void Instance::navigationScroll(float *editNav, nav_release_func_t func)
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	*editNav = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	*editNav = static_cast<float>(perc * base_size / 100.0 / grid.getScale());
 
 	Nav_SetKey(EXEC_CurKey, func);
 }
@@ -989,7 +989,7 @@ void Instance::CMD_WHEEL_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
+	speed = static_cast<float>(speed * base_size / 100.0 / grid.getScale());
 
 	grid.Scroll(delta * speed);
 }
@@ -1062,7 +1062,7 @@ void Instance::CMD_Zoom()
 	auto mid = v2int_t(edit.map.xy);
 
 	if (Exec_HasFlag("/center"))
-		mid = grid.orig.iround();
+		mid = grid.getOrig().iround();
 
 	Editor_Zoom(delta, mid);
 }
@@ -1235,7 +1235,7 @@ void Instance::CMD_GRID_Zoom()
 	if (scale < 0)
 		scale = -1.0 / scale;
 
-	float S1 = static_cast<float>(grid.Scale);
+	float S1 = static_cast<float>(grid.getScale());
 
 	grid.NearestScale(scale);
 

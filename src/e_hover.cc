@@ -675,7 +675,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 	cross.end = p2;
 
 	// when zooming out, make it easier to hit a vertex
-	double close_dist = 4 * sqrt(1.0 / inst.grid.Scale);
+	double close_dist = 4 * sqrt(1.0 / inst.grid.getScale());
 
 	close_dist = clamp(1.0, close_dist, 12.0);
 
@@ -753,7 +753,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 static Objid getNearestThing(const Document &doc, const ConfigData &config,
 							 const Grid_State_c &grid, const v2double_t &pos)
 {
-	double mapslack = 1 + 16.0f / grid.Scale;
+	double mapslack = 1 + 16.0f / grid.getScale();
 
 	double max_radius = MAX_RADIUS + ceil(mapslack);
 
@@ -806,13 +806,13 @@ static Objid getNearestThing(const Document &doc, const ConfigData &config,
 //
 static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, const v2double_t &pos)
 {
-	const int screen_pix = vertex_radius(grid.Scale);
+	const int screen_pix = vertex_radius(grid.getScale());
 
-	double mapslack = 1 + (4 + screen_pix) / grid.Scale;
+	double mapslack = 1 + (4 + screen_pix) / grid.getScale();
 
 	// workaround for overly zealous highlighting when zoomed in far
-	if(grid.Scale >= 15.0) mapslack *= 0.7;
-	if(grid.Scale >= 31.0) mapslack *= 0.5;
+	if(grid.getScale() >= 15.0) mapslack *= 0.7;
+	if(grid.getScale() >= 31.0) mapslack *= 0.5;
 
 	v2double_t lpos = pos - v2double_t(mapslack + 0.5);
 	v2double_t hpos = pos + v2double_t(mapslack + 0.5);
@@ -857,7 +857,7 @@ static double getApproximateDistanceToLinedef(const Document &doc, const LineDef
 static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, const v2double_t &pos)
 {
 	// slack in map units
-	double mapslack = 2.5 + 16.0f / grid.Scale;
+	double mapslack = 2.5 + 16.0f / grid.getScale();
 
 	v2double_t lpos = pos - v2double_t(mapslack);
 	v2double_t hpos = pos + v2double_t(mapslack);
@@ -994,7 +994,7 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Gr
 								 const v2double_t &pos, int ignore_vert)
 {
 	// slack in map units
-	double mapslack = 1.5 + ceil(8.0f / grid.Scale);
+	double mapslack = 1.5 + ceil(8.0f / grid.getScale());
 
 	v2double_t lpos = pos - v2double_t(mapslack);
 	v2double_t hpos = pos + v2double_t(mapslack);
