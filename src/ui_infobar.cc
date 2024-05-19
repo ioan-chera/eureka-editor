@@ -125,7 +125,7 @@ UI_InfoBar::UI_InfoBar(Instance &inst, int X, int Y, int W, int H, const char *l
 
 
 	grid_snap = new Fl_Toggle_Button(X+4, Y, 72, H);
-	grid_snap->value(inst.grid.snap ? 1 : 0);
+	grid_snap->value(inst.grid.snaps() ? 1 : 0);
 	grid_snap->color(FREE_COLOR);
 	grid_snap->selection_color(SNAP_COLOR);
 	grid_snap->callback(snap_callback, this);
@@ -341,7 +341,7 @@ void UI_InfoBar::SetGrid(int new_step)
 
 void UI_InfoBar::UpdateSnap()
 {
-   grid_snap->value(inst.grid.snap ? 1 : 0);
+   grid_snap->value(inst.grid.snaps() ? 1 : 0);
 
    UpdateSnapText();
 }

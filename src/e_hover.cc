@@ -491,7 +491,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 
 		out_pos = v1 + (v2 - v1) * c;
 	}
-	else if(grid.snap)
+	else if(grid.snaps())
 	{
 		// don't highlight the line if the new vertex would snap onto
 		// the same coordinate as the start or end of the linedef.

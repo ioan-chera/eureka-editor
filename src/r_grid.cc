@@ -381,6 +381,18 @@ bool Grid_State_c::OnGrid(double map_x, double map_y) const
 	return OnGridX(map_x) && OnGridY(map_y);
 }
 
+void Grid_State_c::configureGrid(int step, bool shown)
+{
+	this->step = step;
+	RawSetShown(shown);
+	listener.gridRedrawMap();
+}
+
+void Grid_State_c::configureSnap(bool snap)
+{
+	this->snap = snap;
+	listener.gridUpdateSnap();
+}
 
 void Grid_State_c::RefocusZoom(const v2double_t &map, float before_Scale)
 {
@@ -649,23 +661,14 @@ bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
 	{
 		bool t_shown = atoi(tokens[1]) ? true : false;
 
-		grid.step = atoi(tokens[3]);
-
+		grid.configureGrid(atoi(tokens[3]), t_shown);
 		// tokens[2] was grid.mode, currently unused
-
-		grid.RawSetShown(t_shown);
-
-		RedrawMap();
-
 		return true;
 	}
 
 	if (tokens[0] == "snap" && tokens.size() >= 2)
 	{
-		grid.snap = atoi(tokens[1]) ? true : false;
-
-		if (main_win)
-			main_win->info_bar->UpdateSnap();
+		grid.configureSnap(!!atoi(tokens[1]));
 
 		return true;
 	}
@@ -678,8 +681,8 @@ void Instance::Grid_WriteUser(std::ostream &os) const
 	os << "map_pos " << SString::printf("%1.0f %1.0f %1.6f", grid.orig.x, grid.orig.y, grid.Scale) <<
 		'\n';
 	os << "grid " << (grid.shown ? 1 : 0) << ' ' << (config::grid_style ? 0 : 1) << ' ' << 
-		grid.step << '\n';
-	os << "snap " << (grid.snap ? 1 : 0) << '\n';
+		grid.getStep() << '\n';
+	os << "snap " << (grid.snaps() ? 1 : 0) << '\n';
 }
 
 

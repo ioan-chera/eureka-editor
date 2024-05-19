@@ -39,15 +39,14 @@ public:
 
 class Grid_State_c final
 {
-friend class Instance;
-
-public:
+private:
 	// the actual grid step (64, 128, etc)
 	int step = 64;
 
 	// if true, new and moved objects are forced to be on the grid
 	bool snap = true;
 
+public:
 	// if non-zero, new lines will be forced to have a certain ratio
 	int ratio = 0;
 
@@ -137,6 +136,18 @@ public:
 	bool OnGridY(double map_y) const;
 
 	bool OnGrid(double map_x, double map_y) const;
+	
+	void configureGrid(int step, bool shown);
+	void configureSnap(bool snap);
+	
+	int getStep() const
+	{
+		return step;
+	}
+	bool snaps() const
+	{
+		return snap;
+	}
 
 private:
 	void DoSetScale(double new_scale);

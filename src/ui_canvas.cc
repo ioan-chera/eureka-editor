@@ -441,7 +441,7 @@ void UI_Canvas::DrawMap()
 	if (inst.edit.mode != ObjType::things)
 		DrawThings();
 
-	if (inst.grid.snap && config::grid_snap_indicator)
+	if (inst.grid.snaps() && config::grid_snap_indicator)
 		DrawSnapPoint();
 
 	DrawLinedefs();
@@ -470,7 +470,7 @@ void UI_Canvas::DrawMap()
 //
 void UI_Canvas::DrawGrid_Normal()
 {
-	float pixels_1 = static_cast<float>(inst.grid.step * inst.grid.Scale);
+	float pixels_1 = static_cast<float>(inst.grid.getStep() * inst.grid.Scale);
 
 	if (pixels_1 < 1.6)
 	{
@@ -486,7 +486,7 @@ void UI_Canvas::DrawGrid_Normal()
 
 	float pixels_2 = static_cast<float>(flat_step * inst.grid.Scale);
 
-	Fl_Color flat_col = (inst.grid.step < 64) ? config::normal_main_col : config::normal_flat_col;
+	Fl_Color flat_col = (inst.grid.getStep() < 64) ? config::normal_main_col : config::normal_flat_col;
 
 	if (pixels_2 < 2.2)
 		flat_col = DarkerColor(flat_col);
@@ -511,9 +511,9 @@ void UI_Canvas::DrawGrid_Normal()
 	}
 
 
-	Fl_Color main_col = (inst.grid.step < 64) ? config::normal_small_col : config::normal_main_col;
+	Fl_Color main_col = (inst.grid.getStep() < 64) ? config::normal_small_col : config::normal_main_col;
 
-	float pixels_3 = static_cast<float>(inst.grid.step * inst.grid.Scale);
+	float pixels_3 = static_cast<float>(inst.grid.getStep() * inst.grid.Scale);
 
 	if (pixels_3 < 4.2)
 		main_col = DarkerColor(main_col);
@@ -521,16 +521,16 @@ void UI_Canvas::DrawGrid_Normal()
 	RenderColor(main_col);
 
 	{
-		int gx = static_cast<int>(floor(map_lx / inst.grid.step) * inst.grid.step);
+		int gx = static_cast<int>(floor(map_lx / inst.grid.getStep()) * inst.grid.getStep());
 
-		for (; gx <= map_hx; gx += inst.grid.step)
-			if ((inst.grid.step >= 64 || (gx & 63) != 0) && (gx != 0))
+		for (; gx <= map_hx; gx += inst.grid.getStep())
+			if ((inst.grid.getStep() >= 64 || (gx & 63) != 0) && (gx != 0))
 				DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = static_cast<int>(floor(map_ly / inst.grid.step) * inst.grid.step);
+		int gy = static_cast<int>(floor(map_ly / inst.grid.getStep()) * inst.grid.getStep());
 
-		for (; gy <= map_hy; gy += inst.grid.step)
-			if ((inst.grid.step >= 64 || (gy & 63) != 0) && (gy != 0))
+		for (; gy <= map_hy; gy += inst.grid.getStep())
+			if ((inst.grid.getStep() >= 64 || (gy & 63) != 0) && (gy != 0))
 				DrawMapLine(map_lx, gy, map_hx, gy);
 	}
 
@@ -541,11 +541,11 @@ void UI_Canvas::DrawGrid_Normal()
 
 void UI_Canvas::DrawGrid_Dotty()
 {
-	int grid_step_1 = 1 * inst.grid.step;    // Map units between dots
+	int grid_step_1 = 1 * inst.grid.getStep();    // Map units between dots
 	int grid_step_2 = 8 * grid_step_1;  // Map units between dim lines
 	int grid_step_3 = 8 * grid_step_2;  // Map units between bright lines
 
-	float pixels_1 = static_cast<float>(inst.grid.step * inst.grid.Scale);
+	float pixels_1 = static_cast<float>(inst.grid.getStep() * inst.grid.Scale);
 
 
 	if (pixels_1 < 1.6)
@@ -1298,7 +1298,7 @@ void UI_Canvas::DrawNumber(int x, int y, int num)
 
 void UI_Canvas::CheckGridSnap()
 {
-	if (!inst.grid.snap || !config::grid_snap_indicator)
+	if (!inst.grid.snaps() || !config::grid_snap_indicator)
 		return;
 
 	double new_snap_x = inst.grid.SnapX(inst.edit.map.x);
@@ -2183,7 +2183,7 @@ v2double_t UI_Canvas::DragDelta()
 		return newpos - inst.edit.drag_start.xy;
 	}
 
-	if (inst.grid.snap)
+	if (inst.grid.snaps())
 	{
 		v2double_t focus = inst.edit.drag_focus.xy + result;
 

@@ -546,7 +546,7 @@ void Instance::DoBeginDrag()
 		{
 			edit.drag_thing_num = edit.clicked.num;
 			edit.drag_thing_floorh = static_cast<float>(edit.drag_start.z);
-			edit.drag_thing_up_down = (loaded.levelFormat != MapFormat::doom && !grid.snap);
+			edit.drag_thing_up_down = (loaded.levelFormat != MapFormat::doom && !grid.snaps());
 
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)

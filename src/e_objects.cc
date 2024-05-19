@@ -439,7 +439,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			new_vert = inst.edit.highlight.num;
 
 		// if no highlight, look for a vertex at snapped coord
-		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == EditorAction::drawLine))
+		if (new_vert < 0 && inst.grid.snaps() && ! (inst.edit.action == EditorAction::drawLine))
 			new_vert = doc.vertmod.findExact(FFixedPoint(newpos.x), FFixedPoint(newpos.y));
 
 		//
@@ -1413,7 +1413,7 @@ v2double_t ObjectsModule::getDragFocus(const v2double_t &ptr) const
 	int count = 0;
 	int total = 0;
 
-	if (inst.grid.snap)
+	if (inst.grid.snaps())
 	{
 		dragCountOnGrid(&count, &total);
 
