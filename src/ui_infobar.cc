@@ -279,8 +279,7 @@ void UI_InfoBar::ratio_callback(Fl_Widget *w, void *data)
 	Fl_Menu_Button *ratio_lock = (Fl_Menu_Button *)w;
 	auto bar = static_cast<const UI_InfoBar *>(data);
 
-	bar->inst.grid.ratio = ratio_lock->value();
-	bar->inst.main_win->info_bar->UpdateRatio();
+	bar->inst.grid.configureRatio(ratio_lock->value(), false);
 }
 
 
@@ -370,12 +369,12 @@ void UI_InfoBar::UpdateSecRend()
 
 void UI_InfoBar::UpdateRatio()
 {
-	if (inst.grid.ratio == 0)
+	if (inst.grid.getRatio() == 0)
 		ratio_lock->color(FL_BACKGROUND_COLOR);
 	else
 		ratio_lock->color(RATIO_COLOR);
 
-	if (inst.grid.ratio == 7)
+	if (inst.grid.getRatio() == 7)
 	{
 		char buffer[256];
 		snprintf(buffer, sizeof(buffer), "Usr %d:%d", config::grid_ratio_high, config::grid_ratio_low);
@@ -388,7 +387,7 @@ void UI_InfoBar::UpdateRatio()
 	}
 	else
 	{
-		ratio_lock->copy_label(ratio_lock->text(inst.grid.ratio));
+		ratio_lock->copy_label(ratio_lock->text(inst.grid.getRatio()));
 	}
 }
 

@@ -35,6 +35,7 @@ public:
 	virtual void gridPointerPos() = 0;
 	virtual void gridSetScale(double scale) = 0;
 	virtual void gridBeep(const char *message) = 0;
+	virtual void gridUpdateRatio() = 0;
 };
 
 class Grid_State_c final
@@ -46,10 +47,10 @@ private:
 	// if true, new and moved objects are forced to be on the grid
 	bool snap = true;
 
-public:
 	// if non-zero, new lines will be forced to have a certain ratio
 	int ratio = 0;
 
+public:
 	// whether the grid is being displayed or not.
 	bool shown = true;
 
@@ -139,6 +140,7 @@ public:
 	
 	void configureGrid(int step, bool shown);
 	void configureSnap(bool snap);
+	void configureRatio(int ratio, bool redraw);
 	
 	int getStep() const
 	{
@@ -147,6 +149,10 @@ public:
 	bool snaps() const
 	{
 		return snap;
+	}
+	int getRatio() const
+	{
+		return ratio;
 	}
 
 private:

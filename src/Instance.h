@@ -374,6 +374,12 @@ public:
 		Beep("%s", message);
 	}
 
+	void gridUpdateRatio() override
+	{
+		if(main_win)
+			main_win->info_bar->UpdateRatio();
+	}
+
 private:
 	// New private methods
 	void navigationScroll(float *editNav, nav_release_func_t func);

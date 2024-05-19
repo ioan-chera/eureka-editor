@@ -464,7 +464,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 
 	double len = (v2 - v1).hypot();
 
-	if(grid.ratio > 0 && edit.action == EditorAction::drawLine)
+	if(grid.getRatio() > 0 && edit.action == EditorAction::drawLine)
 	{
 		const auto V = doc.vertices[edit.drawLine.from.num];
 

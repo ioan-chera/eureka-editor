@@ -394,6 +394,14 @@ void Grid_State_c::configureSnap(bool snap)
 	listener.gridUpdateSnap();
 }
 
+void Grid_State_c::configureRatio(int ratio, bool redraw)
+{
+	this->ratio = ratio;
+	listener.gridUpdateRatio();
+	if(redraw)
+		listener.gridRedrawMap();
+}
+
 void Grid_State_c::RefocusZoom(const v2double_t &map, float before_Scale)
 {
 	double dist_factor = (1.0 - before_Scale / Scale);

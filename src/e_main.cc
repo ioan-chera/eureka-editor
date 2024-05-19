@@ -178,7 +178,7 @@ void Instance::UpdateDrawLine()
 
 	v2double_t newpos = edit.map.xy;
 
-	if (grid.ratio > 0)
+	if (grid.getRatio() > 0)
 	{
 		grid.RatioSnapXY(newpos, V->xy());
 	}
@@ -271,7 +271,7 @@ void Instance::UpdateHighlight()
 
 		// if drawing a line and ratio lock is ON, only highlight a
 		// vertex if it is *exactly* the right ratio.
-		if (grid.ratio > 0 && edit.action == EditorAction::drawLine &&
+		if (grid.getRatio() > 0 && edit.action == EditorAction::drawLine &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
 			const auto V = level.vertices[edit.highlight.num];

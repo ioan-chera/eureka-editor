@@ -364,7 +364,7 @@ void UI_Canvas::DrawEverything()
 		RenderThickness(1);
 
 		// when ratio lock is on, want to see the new line
-		if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 && inst.edit.drag_other_vert >= 0)
+		if (inst.edit.mode == ObjType::vertices && inst.grid.getRatio() > 0 && inst.edit.drag_other_vert >= 0)
 		{
 			const auto v0 = inst.level.vertices[inst.edit.drag_other_vert];
 			const auto v1 = inst.level.vertices[inst.edit.dragged.num];
@@ -2086,7 +2086,7 @@ void UI_Canvas::DrawCurrentLine()
 	RenderColor(RED);
 	DrawKnobbyLine(V->x(), V->y(), newpos.x, newpos.y);
 
-	DrawLineInfo(V->x(), V->y(), newpos.x, newpos.y, inst.grid.ratio > 0);
+	DrawLineInfo(V->x(), V->y(), newpos.x, newpos.y, inst.grid.getRatio() > 0);
 
 	// draw all the crossing points
 	crossing_state_c cross(inst);
@@ -2161,7 +2161,7 @@ v2double_t UI_Canvas::DragDelta()
 	}
 
 	// handle ratio-lock of a single dragged vertex
-	if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 &&
+	if (inst.edit.mode == ObjType::vertices && inst.grid.getRatio() > 0 &&
 		inst.edit.dragged.num >= 0 && inst.edit.drag_other_vert >= 0)
 	{
 		const auto v0 = inst.level.vertices[inst.edit.drag_other_vert];
@@ -2174,7 +2174,7 @@ v2double_t UI_Canvas::DragDelta()
 		return newpos - v1->xy();
 	}
 
-	if (inst.grid.ratio > 0)
+	if (inst.grid.getRatio() > 0)
 	{
 		v2double_t newpos = inst.edit.drag_cur.xy;
 

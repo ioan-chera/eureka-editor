@@ -259,11 +259,7 @@ void Instance::CMD_SetVar()
 		SetGamma(*this, int_val);
 	}
 	else if (var_name.noCaseEqual("ratio"))
-	{
-		grid.ratio = clamp(0, int_val, 7);
-		main_win->info_bar->UpdateRatio();
-		RedrawMap();
-	}
+		grid.configureRatio(clamp(0, int_val, 7), true);
 	else if (var_name.noCaseEqual("sec_render"))
 	{
 		int_val = clamp(0, int_val, (int)SREND_SoundProp);
@@ -332,15 +328,7 @@ void Instance::CMD_ToggleVar()
 		SetGamma(*this, (config::usegamma >= 4) ? 0 : config::usegamma + 1);
 	}
 	else if (var_name.noCaseEqual("ratio"))
-	{
-		if (grid.ratio >= 7)
-			grid.ratio = 0;
-		else
-			grid.ratio++;
-
-		main_win->info_bar->UpdateRatio();
-		RedrawMap();
-	}
+		grid.configureRatio(grid.getRatio() >= 7 ? 0 : grid.getRatio() + 1, true);
 	else if (var_name.noCaseEqual("sec_render"))
 	{
 		if (edit.sector_render_mode >= SREND_SoundProp)
