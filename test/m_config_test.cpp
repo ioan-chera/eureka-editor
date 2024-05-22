@@ -891,3 +891,31 @@ int UI_NodeDialog::handle(int event)
 {
 	return 0;
 }
+
+void UI_Canvas::PointerPos(bool in_event)
+{
+}
+
+void UI_InfoBar::SetScale(double new_scale)
+{
+}
+
+void UI_InfoBar::SetGrid(int new_step)
+{
+}
+
+void UI_InfoBar::UpdateSnap()
+{
+}
+
+void UI_InfoBar::UpdateRatio()
+{
+}
+
+void UI_CanvasScroll::AdjustPos()
+{
+}
+
+void Instance::RedrawMap()
+{
+}

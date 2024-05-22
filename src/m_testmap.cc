@@ -653,7 +653,7 @@ void updateMenuName(Fl_Sys_Menu_Bar *bar, const LoadingData &loading)
 	if(!info || !M_IsPortPathValid(*info))
 		menu::setTestMapDetail(bar, "");
 	else
-		menu::setTestMapDetail(bar, SString(info->filename().replace_extension()));
+		menu::setTestMapDetail(bar, SString(info->filename().replace_extension().u8string()));
 }
 }
 
