@@ -163,8 +163,6 @@ public:
 	}
 
 private:
-	void DoSetScale(double new_scale);
-
 	void RawSetStep(int i);
 	void RawSetScale(int i);
 	void RawSetShown(bool new_shown);

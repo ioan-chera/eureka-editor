@@ -421,7 +421,7 @@ void loadLumps(const MasterDir &master, ConfigData &config)
 		if (!dehlump)
 			continue;
 
-		std::istringstream iss(reinterpret_cast<const char *>(dehlump->getData().data()));
+		std::istringstream iss(std::string(reinterpret_cast<const char *>(dehlump->getData().data()), dehlump->Length()));
 		read(iss, config);
 	}
 }

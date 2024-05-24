@@ -126,6 +126,7 @@ unit_test(general
     m_parse_test.cpp
     m_testmap_test.cpp
     main_test.cpp
+    r_grid_test.cpp
 	SafeOutFileTest.cpp
     SectorTest.cpp
     SStringTest.cpp
