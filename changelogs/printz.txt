@@ -4,6 +4,11 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+25.05.2024
+* Fixed the initial grid being set one step higher than intended in preferences.
+* Removed the non-existent "dotty" option from grid's default mode documentation.
+
+----------
 01.05.2024
 * Added Dehacked resource support, by contribution of Isaac Colón (https://github.com/iccolon818).
 

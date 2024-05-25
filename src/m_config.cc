@@ -360,7 +360,7 @@ const opt_desc_t options[] =
 	{	"grid_default_mode",
 		0,
 		OptFlag_preference,
-		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
+		"Default grid mode: 0 = OFF, 1 = normal",
 		NULL,
 		&config::grid_default_mode
 	},

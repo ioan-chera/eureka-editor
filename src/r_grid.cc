@@ -37,7 +37,7 @@
 // config items
 int  config::grid_default_size = 64;
 bool config::grid_default_snap = false;
-int  config::grid_default_mode = 0;  // off
+bool config::grid_default_mode = false;
 
 int  config::grid_style;  // 0 = squares, 1 = dotty
 bool config::grid_hide_in_free_mode = false;
@@ -58,9 +58,9 @@ void Grid_State_c::Init()
 
 	shown = true;  // prevent a beep in AdjustStep
 
-	AdjustStep(+1);
+	AdjustStep(0);	// correct step to power of two
 
-	if (config::grid_default_mode == 0)
+	if (!config::grid_default_mode)
 	{
 		shown = false;
 
@@ -529,6 +529,17 @@ void Grid_State_c::AdjustStep(int delta)
 		for (int i = NUM_GRID_VALUES-2 ; i >= 0 ; i--)
 		{
 			if (grid_values[i] > step)
+			{
+				result = i;
+				break;
+			}
+		}
+	}
+	else if(!delta)	// this is for snapping to the closest grid
+	{
+		for (int i = NUM_GRID_VALUES-2 ; i >= 0 ; i--)
+		{
+			if (grid_values[i] >= step)
 			{
 				result = i;
 				break;

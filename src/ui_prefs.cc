@@ -1479,11 +1479,8 @@ void UI_Preferences::LoadValues()
 	if (config::grid_style < 0 || config::grid_style > 1)
 		config::grid_style = 1;
 
-	if (config::grid_default_mode < 0 || config::grid_default_mode > 1)
-		config::grid_default_mode = 1;
-
 	grid_cur_style->value(config::grid_style);
-	grid_enabled->value(config::grid_default_mode);
+	grid_enabled->value(config::grid_default_mode ? 1 : 0);
 	grid_snap->value(config::grid_default_snap ? 1 : 0);
 	grid_size->value(GridSizeToChoice(config::grid_default_size));
 	grid_hide_free ->value(config::grid_hide_in_free_mode ? 1 : 0);
@@ -1644,7 +1641,7 @@ void UI_Preferences::SaveValues()
 	/* Grid Tab */
 
 	config::grid_style        = grid_cur_style->value();
-	config::grid_default_mode = grid_enabled->value();
+	config::grid_default_mode = !!grid_enabled->value();
 	config::grid_default_snap = grid_snap->value() ? true : false;
 	config::grid_default_size = atoi(grid_size->mvalue()->text);
 	config::grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
