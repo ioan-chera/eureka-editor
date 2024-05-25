@@ -342,7 +342,7 @@ public:
 	void gridSetGrid(int grid) override
 	{
 		if (main_win)
-			main_win->info_bar->SetGrid(-1);
+			main_win->info_bar->SetGrid(grid);
 	}
 	
 	void gridUpdateSnap() override
