@@ -232,3 +232,21 @@ TEST_F(GridStateFixture, InitWithoutSnappingAndInvisible)
 	
 	ASSERT_GE(redrawMapCounts, 1);
 }
+
+/*
+TEST_F(GridStateFixture, ChangeShownStatus)
+{
+	Grid_State_c grid(*this);
+	
+	config::grid_default_mode = true;
+	grid.Init();
+	ASSERT_TRUE(grid.isShown());
+	
+	grid.SetShown(true);
+	ASSERT_FALSE(grid.isShown());
+	grid.Toggle();
+	ASSERT_TRUE(grid.isShown());
+	
+	ASSERT_GE(redrawMapCounts, 3);
+}
+*/
