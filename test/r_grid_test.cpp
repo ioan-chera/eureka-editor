@@ -297,3 +297,55 @@ TEST_F(GridStateFixture, SetSnapSameValueChangesNothing)
 		ASSERT_EQ(redrawMapCounts, mapRedrawsBefore);
 	}
 }
+
+TEST_F(GridStateFixture, ToggleSnappingWithoutHidingInFreeMode)
+{
+	Grid_State_c grid(*this);
+	
+	config::grid_default_snap = false;
+	config::grid_default_mode = false;
+	grid.Init();
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+	int snapUpdatesBefore = snapUpdates;
+	int mapRedrawsBefore = redrawMapCounts;
+	grid.SetSnap(true);
+	ASSERT_TRUE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+	ASSERT_EQ(snapUpdates, snapUpdatesBefore + 1);
+	ASSERT_EQ(redrawMapCounts, mapRedrawsBefore + 1);
+	grid.SetSnap(false);
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+	ASSERT_EQ(snapUpdates, snapUpdatesBefore + 2);
+	ASSERT_EQ(redrawMapCounts, mapRedrawsBefore + 2);
+}
+
+TEST_F(GridStateFixture, ToggleSnappingWithHidingInFreeMode)
+{
+	Grid_State_c grid(*this);
+
+	config::grid_default_snap = false;
+	config::grid_default_mode = false;
+	config::grid_hide_in_free_mode = true;
+	grid.Init();
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+	int snapUpdatesBefore = snapUpdates;
+	int mapRedrawsBefore = redrawMapCounts;
+	grid.SetSnap(true);
+	ASSERT_TRUE(grid.snaps());
+	ASSERT_TRUE(grid.isShown());
+	ASSERT_EQ(snapUpdates, snapUpdatesBefore + 1);
+	ASSERT_GE(redrawMapCounts, mapRedrawsBefore + 1);
+	ASSERT_FALSE(gridSettings.empty());
+	ASSERT_GE(gridSettings.back(), 2);
+	mapRedrawsBefore = redrawMapCounts;	// refresh it because the increment is unknown, it's just >= 1
+	grid.SetSnap(false);
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+	ASSERT_EQ(snapUpdates, snapUpdatesBefore + 2);
+	ASSERT_GE(redrawMapCounts, mapRedrawsBefore + 1);
+	ASSERT_FALSE(gridSettings.empty());
+	ASSERT_GE(gridSettings.back(), -1);
+}
