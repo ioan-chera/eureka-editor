@@ -349,3 +349,51 @@ TEST_F(GridStateFixture, ToggleSnappingWithHidingInFreeMode)
 	ASSERT_FALSE(gridSettings.empty());
 	ASSERT_GE(gridSettings.back(), -1);
 }
+
+TEST_F(GridStateFixture, ToggleControlsWithoutLinking)
+{
+	Grid_State_c grid(*this);
+
+	config::grid_default_snap = false;
+	config::grid_default_mode = false;
+	config::grid_hide_in_free_mode = false;
+	grid.Init();
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+	grid.ToggleShown();
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_TRUE(grid.isShown());
+	grid.ToggleShown();
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+	grid.ToggleSnap();
+	ASSERT_TRUE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+	grid.ToggleSnap();
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+}
+
+TEST_F(GridStateFixture, ToggleControlsWithLinking)
+{
+	Grid_State_c grid(*this);
+
+	config::grid_default_snap = false;
+	config::grid_default_mode = false;
+	config::grid_hide_in_free_mode = true;
+	grid.Init();
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_FALSE(grid.isShown());
+	grid.ToggleShown();
+	ASSERT_TRUE(grid.isShown());
+	ASSERT_TRUE(grid.snaps());
+	grid.ToggleShown();
+	ASSERT_FALSE(grid.isShown());
+	ASSERT_FALSE(grid.snaps());
+	grid.ToggleSnap();
+	ASSERT_TRUE(grid.isShown());
+	ASSERT_TRUE(grid.snaps());
+	grid.ToggleSnap();
+	ASSERT_FALSE(grid.isShown());
+	ASSERT_FALSE(grid.snaps());
+}
