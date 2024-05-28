@@ -273,3 +273,27 @@ TEST_F(GridStateFixture, ChangeShownStatus)
 	ASSERT_TRUE(grid.snaps());
 	ASSERT_EQ(snapUpdates, befsnaps + 1);
 }
+
+TEST_F(GridStateFixture, SetSnapSameValueChangesNothing)
+{
+	{
+		Grid_State_c grid(*this);
+		config::grid_default_snap = false;
+		grid.Init();
+		int snapUpdatesBefore = snapUpdates;
+		int mapRedrawsBefore = redrawMapCounts;
+		grid.SetSnap(false);
+		ASSERT_EQ(snapUpdates, snapUpdatesBefore);
+		ASSERT_EQ(redrawMapCounts, mapRedrawsBefore);
+	}
+	{
+		Grid_State_c grid(*this);
+		config::grid_default_snap = true;
+		grid.Init();
+		int snapUpdatesBefore = snapUpdates;
+		int mapRedrawsBefore = redrawMapCounts;
+		grid.SetSnap(true);
+		ASSERT_EQ(snapUpdates, snapUpdatesBefore);
+		ASSERT_EQ(redrawMapCounts, mapRedrawsBefore);
+	}
+}
