@@ -61,6 +61,7 @@ protected:
 		config::grid_default_size = initialGridDefaultSize;
 		config::grid_default_mode = initialGridDefaultMode;
 		config::grid_default_snap = initialGridDefaultSnap;
+		config::grid_hide_in_free_mode = initialGridHideInFreeMode;
 	}
 	
 	int redrawMapCounts = 0;
@@ -76,6 +77,7 @@ private:
 	int initialGridDefaultSize = config::grid_default_size;
 	bool initialGridDefaultMode = config::grid_default_mode;
 	bool initialGridDefaultSnap = config::grid_default_snap;
+	bool initialGridHideInFreeMode = config::grid_hide_in_free_mode;
 };
 
 TEST_F(GridStateFixture, InitNormalGrid)
@@ -233,20 +235,41 @@ TEST_F(GridStateFixture, InitWithoutSnappingAndInvisible)
 	ASSERT_GE(redrawMapCounts, 1);
 }
 
-/*
 TEST_F(GridStateFixture, ChangeShownStatus)
 {
 	Grid_State_c grid(*this);
 	
 	config::grid_default_mode = true;
+	config::grid_default_size = 16;
+	config::grid_default_snap = true;
 	grid.Init();
 	ASSERT_TRUE(grid.isShown());
 	
-	grid.SetShown(true);
+	grid.SetShown(false);
 	ASSERT_FALSE(grid.isShown());
-	grid.Toggle();
-	ASSERT_TRUE(grid.isShown());
+	ASSERT_FALSE(gridSettings.empty());
+	ASSERT_EQ(gridSettings.back(), -1);
 	
-	ASSERT_GE(redrawMapCounts, 3);
+	grid.SetShown(true);
+	ASSERT_TRUE(grid.isShown());
+	ASSERT_FALSE(gridSettings.empty());
+	ASSERT_EQ(gridSettings.back(), 16);
+	
+	// Now also with snapping
+	config::grid_hide_in_free_mode = true;
+	int befsnaps = snapUpdates;
+	grid.SetShown(false);
+	ASSERT_FALSE(grid.isShown());
+	ASSERT_FALSE(gridSettings.empty());
+	ASSERT_EQ(gridSettings.back(), -1);
+	ASSERT_FALSE(grid.snaps());
+	ASSERT_EQ(snapUpdates, befsnaps + 1);
+	
+	befsnaps = snapUpdates;
+	grid.SetShown(true);
+	ASSERT_TRUE(grid.isShown());
+	ASSERT_FALSE(gridSettings.empty());
+	ASSERT_EQ(gridSettings.back(), 16);
+	ASSERT_TRUE(grid.snaps());
+	ASSERT_EQ(snapUpdates, befsnaps + 1);
 }
-*/
