@@ -445,3 +445,59 @@ TEST_F(GridStateFixture, MoveToAndScroll)
 	ASSERT_EQ(pointerPositionUpdates, 3);
 	ASSERT_EQ(redrawMapCounts, 3);
 }
+
+TEST_F(GridStateFixture, RefocusZoom)
+{
+	Grid_State_c grid(*this);
+
+	grid.Init();
+	ASSERT_EQ(grid.getScale(), 1.0);
+	grid.MoveTo({ 100, 100 });
+
+	int redrawMapCountsBefore = redrawMapCounts;
+	int pointerPositionUpdatesBefore = pointerPositionUpdates;
+	grid.RefocusZoom({ 200, 300 }, 0.75);
+	ASSERT_EQ(grid.getOrig().x, 125);
+	ASSERT_EQ(grid.getOrig().y, 150);
+
+	ASSERT_EQ(redrawMapCounts, redrawMapCountsBefore + 1);
+	ASSERT_EQ(pointerPositionUpdates, pointerPositionUpdatesBefore + 1);
+}
+
+TEST_F(GridStateFixture, NearestScaleValid)
+{
+	Grid_State_c grid(*this);
+
+	grid.Init();
+	int posAdjustBefore = positionUpdates;
+	int pointerPosBefore = pointerPositionUpdates;
+	int redrawMapBefore = redrawMapCounts;
+	size_t scaleSettingsBefore = scaleSettings.size();
+	grid.NearestScale(12);
+
+	ASSERT_EQ(grid.getScale(), 8);
+	ASSERT_EQ(positionUpdates, posAdjustBefore + 1);
+	ASSERT_EQ(pointerPositionUpdates, pointerPosBefore + 1);
+	ASSERT_EQ(redrawMapCounts, redrawMapBefore + 1);
+	ASSERT_EQ(scaleSettings.size(), scaleSettingsBefore + 1);
+	ASSERT_EQ(scaleSettings.back(), 8);
+}
+
+TEST_F(GridStateFixture, NearestScaleTiny)	// check we don't overflow
+{
+	Grid_State_c grid(*this);
+
+	grid.Init();
+	int posAdjustBefore = positionUpdates;
+	int pointerPosBefore = pointerPositionUpdates;
+	int redrawMapBefore = redrawMapCounts;
+	size_t scaleSettingsBefore = scaleSettings.size();
+	grid.NearestScale(0.0001);
+
+	ASSERT_EQ(grid.getScale(), 1.0 / 64.0);
+	ASSERT_EQ(positionUpdates, posAdjustBefore + 1);
+	ASSERT_EQ(pointerPositionUpdates, pointerPosBefore + 1);
+	ASSERT_EQ(redrawMapCounts, redrawMapBefore + 1);
+	ASSERT_EQ(scaleSettings.size(), scaleSettingsBefore + 1);
+	ASSERT_EQ(scaleSettings.back(), 1.0 / 64.0);
+}
