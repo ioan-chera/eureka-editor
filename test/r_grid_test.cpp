@@ -397,3 +397,51 @@ TEST_F(GridStateFixture, ToggleControlsWithLinking)
 	ASSERT_FALSE(grid.isShown());
 	ASSERT_FALSE(grid.snaps());
 }
+
+TEST_F(GridStateFixture, MoveToAndScroll)
+{
+	Grid_State_c grid(*this);
+
+	grid.Init();
+
+	redrawMapCounts = 0;	// reset
+
+	grid.MoveTo({ 100, 200 });
+	ASSERT_EQ(grid.getOrig().x, 100);
+	ASSERT_EQ(grid.getOrig().y, 200);
+	ASSERT_EQ(positionUpdates, 1);
+	ASSERT_EQ(pointerPositionUpdates, 1);
+	ASSERT_EQ(redrawMapCounts, 1);
+
+	// Same position here
+	grid.MoveTo({ 100.001, 200.001 });
+	ASSERT_EQ(grid.getOrig().x, 100);
+	ASSERT_EQ(grid.getOrig().y, 200);
+	ASSERT_EQ(positionUpdates, 1);
+	ASSERT_EQ(pointerPositionUpdates, 1);
+	ASSERT_EQ(redrawMapCounts, 1);
+
+	// Move more
+	grid.MoveTo({ 100, 202 });
+	ASSERT_EQ(grid.getOrig().x, 100);
+	ASSERT_EQ(grid.getOrig().y, 202);
+	ASSERT_EQ(positionUpdates, 2);
+	ASSERT_EQ(pointerPositionUpdates, 2);
+	ASSERT_EQ(redrawMapCounts, 2);
+
+	// Zero scroll
+	grid.Scroll({ 0, 0 });
+	ASSERT_EQ(grid.getOrig().x, 100);
+	ASSERT_EQ(grid.getOrig().y, 202);
+	ASSERT_EQ(positionUpdates, 2);
+	ASSERT_EQ(pointerPositionUpdates, 2);
+	ASSERT_EQ(redrawMapCounts, 2);
+
+	// Existing scroll
+	grid.Scroll({ +1, -1 });
+	ASSERT_EQ(grid.getOrig().x, 101);
+	ASSERT_EQ(grid.getOrig().y, 201);
+	ASSERT_EQ(positionUpdates, 3);
+	ASSERT_EQ(pointerPositionUpdates, 3);
+	ASSERT_EQ(redrawMapCounts, 3);
+}
