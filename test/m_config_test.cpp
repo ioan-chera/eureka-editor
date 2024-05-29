@@ -769,7 +769,7 @@ bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	return true;
 }
 
-void Grid_State_c::Init()
+void grid::State::Init()
 {
 	sUnitTokens["default"].push_back("gridInit");
 }

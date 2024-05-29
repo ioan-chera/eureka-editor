@@ -59,7 +59,7 @@ enum SelectNeighborCriterion
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
 //
-class Instance : public GridListener
+class Instance : public grid::Listener
 {
 public:
 	// E_COMMANDS
@@ -540,7 +540,7 @@ public:	// will be private when we encapsulate everything
 	//
 	// Rendering
 	//
-	Grid_State_c grid{ *this };
+	grid::State grid{ *this };
 	Render_View_t r_view{ *this };
 	sector_info_cache_c sector_info_cache{ *this };
 };

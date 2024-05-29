@@ -46,7 +46,7 @@ bool config::grid_snap_indicator = true;
 int  config::grid_ratio_high = 3;  // custom ratio (high must be >= low)
 int  config::grid_ratio_low  = 1;  // (low must be > 0)
 
-void Grid_State_c::Init()
+void grid::State::Init()
 {
 	step = config::grid_default_size;
 
@@ -76,7 +76,7 @@ void Grid_State_c::Init()
 }
 
 
-void Grid_State_c::MoveTo(const v2double_t &pos)
+void grid::State::MoveTo(const v2double_t &pos)
 {
 	// no change?
 	if (fabs(pos.x - orig.x) < 0.01 &&
@@ -92,24 +92,24 @@ void Grid_State_c::MoveTo(const v2double_t &pos)
 }
 
 
-void Grid_State_c::Scroll(const v2double_t &delta)
+void grid::State::Scroll(const v2double_t &delta)
 {
 	MoveTo(orig + delta);
 }
 
 
-int Grid_State_c::ForceSnapX(double map_x) const
+int grid::State::ForceSnapX(double map_x) const
 {
 	return static_cast<int>(step * round(map_x / (double)step));
 }
 
-int Grid_State_c::ForceSnapY(double map_y) const
+int grid::State::ForceSnapY(double map_y) const
 {
 	return static_cast<int>(step * round(map_y / (double)step));
 }
 
 
-double Grid_State_c::SnapX(double map_x) const
+double grid::State::SnapX(double map_x) const
 {
 	if (! snap || step == 0)
 		return map_x;
@@ -117,7 +117,7 @@ double Grid_State_c::SnapX(double map_x) const
 	return ForceSnapX(map_x);
 }
 
-double Grid_State_c::SnapY(double map_y) const
+double grid::State::SnapY(double map_y) const
 {
 	if (! snap || step == 0)
 		return map_y;
@@ -126,7 +126,7 @@ double Grid_State_c::SnapY(double map_y) const
 }
 
 
-void Grid_State_c::RatioSnapXY(v2double_t& var, const v2double_t &start) const
+void grid::State::RatioSnapXY(v2double_t& var, const v2double_t &start) const
 {
 	// snap first, otherwise we lose the ratio
 	var = Snap(var);
@@ -297,7 +297,7 @@ void Grid_State_c::RatioSnapXY(v2double_t& var, const v2double_t &start) const
 }
 
 
-int Grid_State_c::QuantSnapX(double map_x, bool want_furthest, int *dir) const
+int grid::State::QuantSnapX(double map_x, bool want_furthest, int *dir) const
 {
 	if (OnGridX(map_x))
 	{
@@ -325,7 +325,7 @@ int Grid_State_c::QuantSnapX(double map_x, bool want_furthest, int *dir) const
 		return ForceSnapX(map_x - (step - 1));
 }
 
-int Grid_State_c::QuantSnapY(double map_y, bool want_furthest, int *dir) const
+int grid::State::QuantSnapY(double map_y, bool want_furthest, int *dir) const
 {
 	// this is sufficient since the grid is always square
 
@@ -333,7 +333,7 @@ int Grid_State_c::QuantSnapY(double map_y, bool want_furthest, int *dir) const
 }
 
 
-void Grid_State_c::NaturalSnapXY(double& var_x, double& var_y) const
+void grid::State::NaturalSnapXY(double& var_x, double& var_y) const
 {
 	// this is only used by UI_Canvas::PointerPos()
 
@@ -350,7 +350,7 @@ void Grid_State_c::NaturalSnapXY(double& var_x, double& var_y) const
 }
 
 
-bool Grid_State_c::OnGridX(double map_x) const
+bool grid::State::OnGridX(double map_x) const
 {
 	if (map_x < 0)
 		map_x = -map_x;
@@ -363,7 +363,7 @@ bool Grid_State_c::OnGridX(double map_x) const
 	return (map_x2 % step) == 0;
 }
 
-bool Grid_State_c::OnGridY(double map_y) const
+bool grid::State::OnGridY(double map_y) const
 {
 	if (map_y < 0)
 		map_y = -map_y;
@@ -376,25 +376,25 @@ bool Grid_State_c::OnGridY(double map_y) const
 	return (map_y2 % step) == 0;
 }
 
-bool Grid_State_c::OnGrid(double map_x, double map_y) const
+bool grid::State::OnGrid(double map_x, double map_y) const
 {
 	return OnGridX(map_x) && OnGridY(map_y);
 }
 
-void Grid_State_c::configureGrid(int step, bool shown)
+void grid::State::configureGrid(int step, bool shown)
 {
 	this->step = step;
 	RawSetShown(shown);
 	listener.gridRedrawMap();
 }
 
-void Grid_State_c::configureSnap(bool snap)
+void grid::State::configureSnap(bool snap)
 {
 	this->snap = snap;
 	listener.gridUpdateSnap();
 }
 
-void Grid_State_c::configureRatio(int ratio, bool redraw)
+void grid::State::configureRatio(int ratio, bool redraw)
 {
 	this->ratio = ratio;
 	listener.gridUpdateRatio();
@@ -402,7 +402,7 @@ void Grid_State_c::configureRatio(int ratio, bool redraw)
 		listener.gridRedrawMap();
 }
 
-void Grid_State_c::RefocusZoom(const v2double_t &map, float before_Scale)
+void grid::State::RefocusZoom(const v2double_t &map, float before_Scale)
 {
 	double dist_factor = (1.0 - before_Scale / Scale);
 
@@ -414,7 +414,7 @@ void Grid_State_c::RefocusZoom(const v2double_t &map, float before_Scale)
 }
 
 
-const double Grid_State_c::scale_values[] =
+const double grid::State::scale_values[] =
 {
 	32.0, 16.0, 8.0, 6.0, 4.0,  3.0, 2.0, 1.5, 1.0,
 
@@ -424,12 +424,12 @@ const double Grid_State_c::scale_values[] =
 };
 
 
-const int Grid_State_c::digit_scales[] =
+const int grid::State::digit_scales[] =
 {
 	1, 3, 5, 7, 9, 11, 13, 14, 15  /* index into scale_values[] */
 };
 
-const int Grid_State_c::grid_values[] =
+const int grid::State::grid_values[] =
 {
 	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2,
 
@@ -440,7 +440,7 @@ const int Grid_State_c::grid_values[] =
 #define NUM_GRID_VALUES   12
 
 
-void Grid_State_c::RawSetScale(int i)
+void grid::State::RawSetScale(int i)
 {
 	SYS_ASSERT(0 <= i && i < NUM_SCALE_VALUES);
 
@@ -454,7 +454,7 @@ void Grid_State_c::RawSetScale(int i)
 }
 
 
-void Grid_State_c::RawSetStep(int i)
+void grid::State::RawSetStep(int i)
 {
 	SYS_ASSERT(0 <= i && i < NUM_GRID_VALUES);
 
@@ -477,7 +477,7 @@ void Grid_State_c::RawSetStep(int i)
 }
 
 
-void Grid_State_c::ForceStep(int new_step)
+void grid::State::ForceStep(int new_step)
 {
 	step  = new_step;
 	shown = true;
@@ -491,7 +491,7 @@ void Grid_State_c::ForceStep(int new_step)
 }
 
 
-void Grid_State_c::StepFromScale()
+void grid::State::StepFromScale()
 {
 	int pixels_min = 16;
 
@@ -514,7 +514,7 @@ void Grid_State_c::StepFromScale()
 }
 
 
-void Grid_State_c::AdjustStep(int delta)
+void grid::State::AdjustStep(int delta)
 {
 	if (! shown)
 	{
@@ -566,7 +566,7 @@ void Grid_State_c::AdjustStep(int delta)
 }
 
 
-void Grid_State_c::AdjustScale(int delta)
+void grid::State::AdjustScale(int delta)
 {
 	int result = -1;
 
@@ -601,7 +601,7 @@ void Grid_State_c::AdjustScale(int delta)
 }
 
 
-void Grid_State_c::RawSetShown(bool new_value)
+void grid::State::RawSetShown(bool new_value)
 {
 	shown = new_value;
 	listener.gridSetGrid(shown ? step : -1);
@@ -609,7 +609,7 @@ void Grid_State_c::RawSetShown(bool new_value)
 }
 
 
-void Grid_State_c::SetShown(bool enable)
+void grid::State::SetShown(bool enable)
 {
 	RawSetShown(enable);
 
@@ -617,13 +617,13 @@ void Grid_State_c::SetShown(bool enable)
 		SetSnap(enable);
 }
 
-void Grid_State_c::ToggleShown()
+void grid::State::ToggleShown()
 {
 	SetShown(!shown);
 }
 
 
-void Grid_State_c::SetSnap(bool enable)
+void grid::State::SetSnap(bool enable)
 {
 	if (snap == enable)
 		return;
@@ -637,13 +637,13 @@ void Grid_State_c::SetSnap(bool enable)
 	listener.gridRedrawMap();
 }
 
-void Grid_State_c::ToggleSnap()
+void grid::State::ToggleSnap()
 {
 	SetSnap(! snap);
 }
 
 
-void Grid_State_c::NearestScale(double want_scale)
+void grid::State::NearestScale(double want_scale)
 {
 	int best = 0;
 

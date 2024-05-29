@@ -20,7 +20,7 @@
 #include "m_config.h"
 #include "gtest/gtest.h"
 
-class GridStateFixture : public ::testing::Test, public GridListener
+class GridStateFixture : public ::testing::Test, public grid::Listener
 {
 public:
 	virtual void gridRedrawMap() override
@@ -63,7 +63,7 @@ protected:
 		config::grid_default_snap = initialGridDefaultSnap;
 		config::grid_hide_in_free_mode = initialGridHideInFreeMode;
 	}
-	
+
 	int redrawMapCounts = 0;
 	std::vector<int> gridSettings;
 	int snapUpdates = 0;
@@ -82,7 +82,7 @@ private:
 
 TEST_F(GridStateFixture, InitNormalGrid)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	config::grid_default_size = 16;
 	config::grid_default_mode = true;
@@ -98,7 +98,7 @@ TEST_F(GridStateFixture, InitNormalGrid)
 
 TEST_F(GridStateFixture, InitNonPowerOf2Grid)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	config::grid_default_size = 12;
 	config::grid_default_mode = true;
@@ -115,7 +115,7 @@ TEST_F(GridStateFixture, InitNonPowerOf2Grid)
 TEST_F(GridStateFixture, InitUnderflowGridCapsAt2)
 {
 	{
-		Grid_State_c grid(*this);
+		grid::State grid(*this);
 		
 		config::grid_default_size = 1;
 		config::grid_default_mode = true;
@@ -129,7 +129,7 @@ TEST_F(GridStateFixture, InitUnderflowGridCapsAt2)
 		ASSERT_GE(redrawMapCounts, 1);
 	}
 	{
-		Grid_State_c grid(*this);
+		grid::State grid(*this);
 		
 		config::grid_default_size = -8;
 		config::grid_default_mode = true;
@@ -147,7 +147,7 @@ TEST_F(GridStateFixture, InitUnderflowGridCapsAt2)
 TEST_F(GridStateFixture, InitOverflowGridCapsAt1024)
 {
 	{
-		Grid_State_c grid(*this);
+		grid::State grid(*this);
 		
 		config::grid_default_size = 1025;
 		config::grid_default_mode = true;
@@ -161,7 +161,7 @@ TEST_F(GridStateFixture, InitOverflowGridCapsAt1024)
 		ASSERT_GE(redrawMapCounts, 1);
 	}
 	{
-		Grid_State_c grid(*this);
+		grid::State grid(*this);
 		
 		config::grid_default_size = 2048;
 		config::grid_default_mode = true;
@@ -178,7 +178,7 @@ TEST_F(GridStateFixture, InitOverflowGridCapsAt1024)
 
 TEST_F(GridStateFixture, SnapCalled)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	grid.Init();
 	ASSERT_EQ(snapUpdates, 1);
@@ -188,7 +188,7 @@ TEST_F(GridStateFixture, SnapCalled)
 
 TEST_F(GridStateFixture, GridDisabledWhenNotConfigured)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	config::grid_default_mode = false;
 	grid.Init();
@@ -201,7 +201,7 @@ TEST_F(GridStateFixture, GridDisabledWhenNotConfigured)
 
 TEST_F(GridStateFixture, InitWithoutSnappingButVisible)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 	
 	config::grid_default_mode = true;
 	config::grid_default_snap = false;
@@ -219,7 +219,7 @@ TEST_F(GridStateFixture, InitWithoutSnappingButVisible)
 
 TEST_F(GridStateFixture, InitWithoutSnappingAndInvisible)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 	
 	config::grid_default_mode = false;
 	config::grid_default_snap = false;
@@ -237,7 +237,7 @@ TEST_F(GridStateFixture, InitWithoutSnappingAndInvisible)
 
 TEST_F(GridStateFixture, ChangeShownStatus)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 	
 	config::grid_default_mode = true;
 	config::grid_default_size = 16;
@@ -277,7 +277,7 @@ TEST_F(GridStateFixture, ChangeShownStatus)
 TEST_F(GridStateFixture, SetSnapSameValueChangesNothing)
 {
 	{
-		Grid_State_c grid(*this);
+		grid::State grid(*this);
 		config::grid_default_snap = false;
 		grid.Init();
 		int snapUpdatesBefore = snapUpdates;
@@ -287,7 +287,7 @@ TEST_F(GridStateFixture, SetSnapSameValueChangesNothing)
 		ASSERT_EQ(redrawMapCounts, mapRedrawsBefore);
 	}
 	{
-		Grid_State_c grid(*this);
+		grid::State grid(*this);
 		config::grid_default_snap = true;
 		grid.Init();
 		int snapUpdatesBefore = snapUpdates;
@@ -300,7 +300,7 @@ TEST_F(GridStateFixture, SetSnapSameValueChangesNothing)
 
 TEST_F(GridStateFixture, ToggleSnappingWithoutHidingInFreeMode)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 	
 	config::grid_default_snap = false;
 	config::grid_default_mode = false;
@@ -323,7 +323,7 @@ TEST_F(GridStateFixture, ToggleSnappingWithoutHidingInFreeMode)
 
 TEST_F(GridStateFixture, ToggleSnappingWithHidingInFreeMode)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	config::grid_default_snap = false;
 	config::grid_default_mode = false;
@@ -352,7 +352,7 @@ TEST_F(GridStateFixture, ToggleSnappingWithHidingInFreeMode)
 
 TEST_F(GridStateFixture, ToggleControlsWithoutLinking)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	config::grid_default_snap = false;
 	config::grid_default_mode = false;
@@ -376,7 +376,7 @@ TEST_F(GridStateFixture, ToggleControlsWithoutLinking)
 
 TEST_F(GridStateFixture, ToggleControlsWithLinking)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	config::grid_default_snap = false;
 	config::grid_default_mode = false;
@@ -400,7 +400,7 @@ TEST_F(GridStateFixture, ToggleControlsWithLinking)
 
 TEST_F(GridStateFixture, MoveToAndScroll)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	grid.Init();
 
@@ -448,7 +448,7 @@ TEST_F(GridStateFixture, MoveToAndScroll)
 
 TEST_F(GridStateFixture, RefocusZoom)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	grid.Init();
 	ASSERT_EQ(grid.getScale(), 1.0);
@@ -466,7 +466,7 @@ TEST_F(GridStateFixture, RefocusZoom)
 
 TEST_F(GridStateFixture, NearestScaleValid)
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	grid.Init();
 	int posAdjustBefore = positionUpdates;
@@ -485,7 +485,7 @@ TEST_F(GridStateFixture, NearestScaleValid)
 
 TEST_F(GridStateFixture, NearestScaleTiny)	// check we don't overflow
 {
-	Grid_State_c grid(*this);
+	grid::State grid(*this);
 
 	grid.Init();
 	int posAdjustBefore = positionUpdates;
@@ -500,4 +500,9 @@ TEST_F(GridStateFixture, NearestScaleTiny)	// check we don't overflow
 	ASSERT_EQ(redrawMapCounts, redrawMapBefore + 1);
 	ASSERT_EQ(scaleSettings.size(), scaleSettingsBefore + 1);
 	ASSERT_EQ(scaleSettings.back(), 1.0 / 64.0);
+}
+
+TEST_F(GridStateFixture, ForceStep)
+{
+
 }

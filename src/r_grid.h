@@ -25,7 +25,9 @@
 
 class Instance;
 
-class GridListener
+namespace grid
+{
+class Listener
 {
 public:
 	virtual void gridRedrawMap() = 0;
@@ -38,7 +40,7 @@ public:
 	virtual void gridUpdateRatio() = 0;
 };
 
-class Grid_State_c final
+class State final
 {
 private:
 	// the actual grid step (64, 128, etc)
@@ -61,7 +63,7 @@ private:
 	double Scale = 1.0;
 
 public:
-	explicit Grid_State_c(GridListener &listener) : listener(listener)
+	explicit State(Listener& listener) : listener(listener)
 	{
 	}
 
@@ -136,11 +138,11 @@ public:
 	bool OnGridY(double map_y) const;
 
 	bool OnGrid(double map_x, double map_y) const;
-	
+
 	void configureGrid(int step, bool shown);
 	void configureSnap(bool snap);
 	void configureRatio(int ratio, bool redraw);
-	
+
 	int getStep() const
 	{
 		return step;
@@ -171,8 +173,9 @@ private:
 	static const int digit_scales[];
 	static const int grid_values[];
 
-	GridListener &listener;
+	Listener& listener;
 };
+} // namespace grid
 
 #endif  /* __EUREKA_R_GRID_H__ */
 

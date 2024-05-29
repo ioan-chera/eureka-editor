@@ -87,14 +87,14 @@ static ConfigData baseConfig()
 	thingtype_t *type = &config.thing_types[3004];
 	type->group = 'm';
 	type->flags = 0;
-	type->radius = 20.0f;
+	type->radius = 20;
 	type->desc = "Trooper";
 	type->sprite = "POSS";
 	
 	type = &config.thing_types[9];
 	type->group = 'm';
 	type->flags = 0;
-	type->radius = 20.0f;
+	type->radius = 20;
 	type->desc = "Sergeant";
 	type->sprite = "SPOS";
 
