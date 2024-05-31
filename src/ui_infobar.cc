@@ -48,9 +48,6 @@ const double UI_InfoBar::scale_amounts[9] =
 	0.0625, 0.125, 0.25, 0.33333, 0.5, 1.0, 2.0, 4.0, 8.0
 };
 
-const char *UI_InfoBar::grid_options_str =
-	"1024|512|256|192|128| 64| 32| 16|  8|  4|  2|OFF";
-
 //
 // UI_InfoBar Constructor
 //

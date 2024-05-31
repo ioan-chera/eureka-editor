@@ -61,8 +61,6 @@ private:
 	static const char  *scale_options_str;
 	static const double scale_amounts[9];
 
-	static const char *grid_options_str;
-
 	void UpdateModeColor();
 	void UpdateSnapText();
 
