@@ -53,8 +53,8 @@ void grid::State::Init()
 	if (step < 1)
 		step = 1;
 
-	if (step > grid_values[0])
-		step = grid_values[0];
+	if (step > values[0])
+		step = values[0];
 
 	shown = true;  // prevent a beep in AdjustStep
 
@@ -429,12 +429,6 @@ const int grid::State::digit_scales[] =
 	1, 3, 5, 7, 9, 11, 13, 14, 15  /* index into scale_values[] */
 };
 
-const int grid::State::grid_values[] =
-{
-	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2,
-
-	-1 /* OFF */,
-};
 
 #define NUM_SCALE_VALUES  18
 #define NUM_GRID_VALUES   12
@@ -466,7 +460,7 @@ void grid::State::RawSetStep(int i)
 	else
 	{
 		shown = true;
-		step  = grid_values[i];
+		step  = values[i];
 		listener.gridSetGrid(step);
 	}
 
@@ -501,14 +495,14 @@ void grid::State::StepFromScale()
 	{
 		result = i;
 
-		if (grid_values[i] * Scale / 2 < pixels_min)
+		if (values[i] * Scale / 2 < pixels_min)
 			break;
 	}
 
-	if (step == grid_values[result])
+	if (step == values[result])
 		return; // no change
 
-	step = grid_values[result];
+	step = values[result];
 
 	listener.gridRedrawMap();
 }
@@ -528,7 +522,7 @@ void grid::State::AdjustStep(int delta)
 	{
 		for (int i = NUM_GRID_VALUES-2 ; i >= 0 ; i--)
 		{
-			if (grid_values[i] > step)
+			if (values[i] > step)
 			{
 				result = i;
 				break;
@@ -539,7 +533,7 @@ void grid::State::AdjustStep(int delta)
 	{
 		for (int i = NUM_GRID_VALUES-2 ; i >= 0 ; i--)
 		{
-			if (grid_values[i] >= step)
+			if (values[i] >= step)
 			{
 				result = i;
 				break;
@@ -550,7 +544,7 @@ void grid::State::AdjustStep(int delta)
 	{
 		for (int i = 0 ; i < NUM_GRID_VALUES-1 ; i++)
 		{
-			if (grid_values[i] < step)
+			if (values[i] < step)
 			{
 				result = i;
 				break;
@@ -608,6 +602,22 @@ void grid::State::RawSetShown(bool new_value)
 	listener.gridRedrawMap();
 }
 
+std::string grid::getValuesFLTKMenuString()
+{
+	std::string result;
+	result.reserve(5 * lengthof(values));
+	for(size_t i = 0; i < lengthof(values); ++i)
+	{
+		int value = values[i];
+		if(value >= 0)
+			result += SString::printf("%d", value).get();
+		else
+			result += "OFF";
+		if(i < lengthof(values) - 1)
+            result += '|';
+	}
+	return result;
+}
 
 void grid::State::SetShown(bool enable)
 {

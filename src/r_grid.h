@@ -27,6 +27,12 @@ class Instance;
 
 namespace grid
 {
+static const int values[] = 
+{
+	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2,
+	-1	// off
+};
+
 class Listener
 {
 public:
@@ -171,10 +177,12 @@ private:
 
 	static const double scale_values[];
 	static const int digit_scales[];
-	static const int grid_values[];
 
 	Listener& listener;
 };
+
+std::string getValuesFLTKMenuString();
+
 } // namespace grid
 
 #endif  /* __EUREKA_R_GRID_H__ */

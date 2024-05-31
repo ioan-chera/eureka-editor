@@ -51,13 +51,6 @@ const double UI_InfoBar::scale_amounts[9] =
 const char *UI_InfoBar::grid_options_str =
 	"1024|512|256|192|128| 64| 32| 16|  8|  4|  2|OFF";
 
-const int UI_InfoBar::grid_amounts[12] =
-{
-	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2,
-	-1 /* OFF */
-};
-
-
 //
 // UI_InfoBar Constructor
 //
@@ -117,7 +110,7 @@ UI_InfoBar::UI_InfoBar(Instance &inst, int X, int Y, int W, int H, const char *l
 	grid_size = new Fl_Menu_Button(X+44, Y, 72, H, "OFF");
 
 	grid_size->align(FL_ALIGN_INSIDE);
-	grid_size->add(grid_options_str);
+	grid_size->add(grid::getValuesFLTKMenuString().c_str());
 	grid_size->callback(grid_callback, this);
 	grid_size->labelsize(16);
 
@@ -255,7 +248,7 @@ void UI_InfoBar::grid_callback(Fl_Widget *w, void *data)
 	auto bar = static_cast<UI_InfoBar *>(data);
 	Fl_Menu_Button *gsize = (Fl_Menu_Button *)w;
 
-	int new_step = grid_amounts[gsize->value()];
+	int new_step = grid::values[gsize->value()];
 
 	if (new_step < 0)
 		bar->inst.grid.SetShown(false);
