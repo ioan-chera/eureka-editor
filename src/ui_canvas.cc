@@ -2336,8 +2336,8 @@ void UI_Canvas::RenderSector(int num)
 			int x = sx1;
 			int span_w = sx2 - sx1 + 1;
 
-			u8_t *dest = rgb_buf + ((x - rgb_x) + (y - rgb_y) * rgb_w) * 3;
-			u8_t *dest_end = dest + span_w * 3;
+			uint8_t *dest = rgb_buf + ((x - rgb_x) + (y - rgb_y) * rgb_w) * 3;
+			uint8_t *dest_end = dest + span_w * 3;
 
 			// the logic here for non-64x64 textures matches the software
 			// 3D renderer, but is different than ZDoom (which scales them).
@@ -2357,9 +2357,9 @@ void UI_Canvas::RenderSector(int num)
 
 					inst.wad.palette.decodePixel(pix, dest[0], dest[1], dest[2]);
 
-					dest[0] = (u8_t)(((int)dest[0] * r) >> 16);
-					dest[1] = (u8_t)(((int)dest[1] * g) >> 16);
-					dest[2] = (u8_t)(((int)dest[2] * b) >> 16);
+					dest[0] = (uint8_t)(((int)dest[0] * r) >> 16);
+					dest[1] = (uint8_t)(((int)dest[1] * g) >> 16);
+					dest[2] = (uint8_t)(((int)dest[2] * b) >> 16);
 				}
 			}
 			else  // fullbright version

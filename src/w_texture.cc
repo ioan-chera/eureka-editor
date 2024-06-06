@@ -66,7 +66,7 @@ static bool CheckTexturesAreStrife(const byte *tex_data, int tex_length, int num
 	// assuming DOOM format, and if any have a patch_count of zero or
 	// the last two bytes of columndir are non-zero then assume Strife.
 
-	const s32_t *tex_data_s32 = (const s32_t *)tex_data;
+	const int32_t *tex_data_s32 = (const int32_t *)tex_data;
 
 	for (int n = skip_first ? 1 : 0 ; n < num_tex ; n++)
 	{
@@ -235,7 +235,7 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, const Lump_
 	const std::vector<byte> &tex_data = lump.getData();
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
-	s32_t *tex_data_s32 = (s32_t *)tex_data.data();
+	int32_t *tex_data_s32 = (int32_t *)tex_data.data();
 
 	int num_tex = LE_S32(tex_data_s32[0]);
 

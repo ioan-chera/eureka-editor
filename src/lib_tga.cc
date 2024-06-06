@@ -31,18 +31,18 @@
 
 struct targa_header_t
 {
-	u8_t	id_length;
-	u8_t	colormap_type;
-	u8_t	image_type;
-	u16_t	colormap_start;
-	u16_t	colormap_length;
-	u8_t	colormap_bits;
-	u16_t	x_origin;
-	u16_t	y_origin;
-	u16_t	width;
-	u16_t	height;
-	u8_t	pixel_bits;
-	u8_t	attributes;
+	uint8_t	id_length;
+	uint8_t	colormap_type;
+	uint8_t	image_type;
+	uint16_t	colormap_start;
+	uint16_t	colormap_length;
+	uint8_t	colormap_bits;
+	uint16_t	x_origin;
+	uint16_t	y_origin;
+	uint16_t	width;
+	uint16_t	height;
+	uint8_t	pixel_bits;
+	uint8_t	attributes;
 };
 
 
@@ -74,18 +74,18 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 	targa_header.colormap_type = *buf_p++;
 	targa_header.image_type = *buf_p++;
 
-	targa_header.colormap_start = static_cast<u16_t>((buf_p[0]) | (buf_p[1] << 8));
+	targa_header.colormap_start = static_cast<uint16_t>((buf_p[0]) | (buf_p[1] << 8));
     buf_p += 2;
-	targa_header.colormap_length = static_cast<u16_t>((buf_p[0]) | (buf_p[1] << 8));
+	targa_header.colormap_length = static_cast<uint16_t>((buf_p[0]) | (buf_p[1] << 8));
     buf_p += 2;
 	targa_header.colormap_bits = *buf_p++;
-	targa_header.x_origin = static_cast<u16_t>((buf_p[0]) | (buf_p[1] << 8));
+	targa_header.x_origin = static_cast<uint16_t>((buf_p[0]) | (buf_p[1] << 8));
     buf_p += 2;
-	targa_header.y_origin = static_cast<u16_t>((buf_p[0]) | (buf_p[1] << 8));
+	targa_header.y_origin = static_cast<uint16_t>((buf_p[0]) | (buf_p[1] << 8));
     buf_p += 2;
-	targa_header.width = static_cast<u16_t>((buf_p[0]) | (buf_p[1] << 8));
+	targa_header.width = static_cast<uint16_t>((buf_p[0]) | (buf_p[1] << 8));
     buf_p += 2;
-	targa_header.height = static_cast<u16_t>((buf_p[0]) | (buf_p[1] << 8));
+	targa_header.height = static_cast<uint16_t>((buf_p[0]) | (buf_p[1] << 8));
     buf_p += 2;
 	targa_header.pixel_bits = *buf_p++;
 	targa_header.attributes = *buf_p++;

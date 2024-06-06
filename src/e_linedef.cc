@@ -1559,8 +1559,8 @@ static int SidedefCompare(const void *p1, const void *p2)
 {
 	int comp;
 
-	int side1 = ((const u16_t *) p1)[0];
-	int side2 = ((const u16_t *) p2)[0];
+	int side1 = ((const uint16_t *) p1)[0];
+	int side2 = ((const uint16_t *) p2)[0];
 
 	sidedef_t *A = lev_sidedefs[side1];
 	sidedef_t *B = lev_sidedefs[side2];
@@ -1604,7 +1604,7 @@ static int SidedefCompare(const void *p1, const void *p2)
 void DetectDuplicateSidedefs(void)
 {
 	int i;
-	u16_t *array = (u16_t *)UtilCalloc(num_sidedefs * sizeof(u16_t));
+	uint16_t *array = (uint16_t *)UtilCalloc(num_sidedefs * sizeof(uint16_t));
 
 	GB_DisplayTicker();
 
@@ -1612,7 +1612,7 @@ void DetectDuplicateSidedefs(void)
 	for (i=0; i < num_sidedefs; i++)
 		array[i] = i;
 
-	qsort(array, num_sidedefs, sizeof(u16_t), SidedefCompare);
+	qsort(array, num_sidedefs, sizeof(uint16_t), SidedefCompare);
 
 	// now mark them off
 	for (i=0; i < num_sidedefs - 1; i++)

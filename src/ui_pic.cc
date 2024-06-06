@@ -156,7 +156,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 	}
 
 
-	u32_t back = Fl::get_color(back_color);
+	uint32_t back = Fl::get_color(back_color);
 
 	int iw = img->width();
 	int ih = img->height();
@@ -246,7 +246,7 @@ void UI_Pic::TiledImg(const Img_c *img) noexcept
 		scale = scale * 2;
 
 
-	const u32_t back = config::transparent_col;
+	const uint32_t back = config::transparent_col;
 
 
 	std::vector<uchar> buf;

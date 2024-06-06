@@ -93,12 +93,12 @@ unsigned int TimeGetMillies()
 
 void CheckTypeSizes()
 {
-	assert_size(u8_t,  1);
-	assert_size(s8_t,  1);
-	assert_size(u16_t, 2);
-	assert_size(s16_t, 2);
-	assert_size(u32_t, 4);
-	assert_size(s32_t, 4);
+	assert_size(uint8_t,  1);
+	assert_size(int8_t,  1);
+	assert_size(uint16_t, 2);
+	assert_size(int16_t, 2);
+	assert_size(uint32_t, 4);
+	assert_size(int32_t, 4);
 
 	assert_size(raw_linedef_t, 14);
 	assert_size(raw_sector_s,  26);

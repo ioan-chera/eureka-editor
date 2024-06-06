@@ -120,7 +120,7 @@ int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
 
 void LevelData::Block::Add(int blk_num, int line_index)
 {
-	u16_t *cur = block_lines[blk_num];
+	uint16_t *cur = block_lines[blk_num];
 
 # if DEBUG_BLOCKMAP
 	gLog.debugPrintf("Block %d has line %d\n", blk_num, line_index);
@@ -132,7 +132,7 @@ void LevelData::Block::Add(int blk_num, int line_index)
 	if (! cur)
 	{
 		// create empty block
-		block_lines[blk_num] = cur = (u16_t *)UtilCalloc(BK_QUANTUM * sizeof(u16_t));
+		block_lines[blk_num] = cur = (uint16_t *)UtilCalloc(BK_QUANTUM * sizeof(uint16_t));
 		cur[BK_NUM] = 0;
 		cur[BK_MAX] = BK_QUANTUM;
 		cur[BK_XOR] = 0x1234;
@@ -143,11 +143,11 @@ void LevelData::Block::Add(int blk_num, int line_index)
 		// no more room, so allocate some more...
 		cur[BK_MAX] += BK_QUANTUM;
 
-		block_lines[blk_num] = cur = (u16_t *)UtilRealloc(cur, cur[BK_MAX] * sizeof(u16_t));
+		block_lines[blk_num] = cur = (uint16_t *)UtilRealloc(cur, cur[BK_MAX] * sizeof(uint16_t));
 	}
 
 	// compute new checksum
-	cur[BK_XOR] = static_cast<u16_t>(((cur[BK_XOR] << 4) | (cur[BK_XOR] >> 12)) ^ line_index);
+	cur[BK_XOR] = static_cast<uint16_t>(((cur[BK_XOR] << 4) | (cur[BK_XOR] >> 12)) ^ line_index);
 
 	cur[BK_FIRST + cur[BK_NUM]] = LE_U16(line_index);
 	cur[BK_NUM]++;
@@ -228,7 +228,7 @@ void LevelData::Block::AddLine(int line_index, const Document &doc)
 
 void LevelData::Block::CreateMap(const Document &doc)
 {
-	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
+	block_lines = (uint16_t **) UtilCalloc(block_count * sizeof(uint16_t *));
 
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
@@ -243,11 +243,11 @@ void LevelData::Block::CreateMap(const Document &doc)
 
 int LevelData::Block::Compare(const void *p1, const void *p2) const
 {
-	int blk_num1 = ((const u16_t *) p1)[0];
-	int blk_num2 = ((const u16_t *) p2)[0];
+	int blk_num1 = ((const uint16_t *) p1)[0];
+	int blk_num2 = ((const uint16_t *) p2)[0];
 
-	const u16_t *A = block_lines[blk_num1];
-	const u16_t *B = block_lines[blk_num2];
+	const uint16_t *A = block_lines[blk_num1];
+	const uint16_t *B = block_lines[blk_num2];
 
 	if (A == B)
 		return 0;
@@ -265,7 +265,7 @@ int LevelData::Block::Compare(const void *p1, const void *p2) const
 		return A[BK_XOR] - B[BK_XOR];
 	}
 
-	return memcmp(A+BK_FIRST, B+BK_FIRST, A[BK_NUM] * sizeof(u16_t));
+	return memcmp(A+BK_FIRST, B+BK_FIRST, A[BK_NUM] * sizeof(uint16_t));
 }
 
 
@@ -278,17 +278,17 @@ void LevelData::Block::CompressMap()
 
 	int orig_size, new_size;
 
-	block_ptrs = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
-	block_dups = (u16_t *)UtilCalloc(block_count * sizeof(u16_t));
+	block_ptrs = (uint16_t *)UtilCalloc(block_count * sizeof(uint16_t));
+	block_dups = (uint16_t *)UtilCalloc(block_count * sizeof(uint16_t));
 
 	// sort duplicate-detecting array.  After the sort, all duplicates
 	// will be next to each other.  The duplicate array gives the order
 	// of the blocklists in the BLOCKMAP lump.
 
 	for (i=0 ; i < block_count ; i++)
-		block_dups[i] = static_cast<u16_t>(i);
+		block_dups[i] = static_cast<uint16_t>(i);
 	
-	std::sort(block_dups, block_dups + block_count, [this](u16_t a, u16_t b)
+	std::sort(block_dups, block_dups + block_count, [this](uint16_t a, uint16_t b)
 			  {
 		return Compare(&a, &b) < 0;
 	});
@@ -308,7 +308,7 @@ void LevelData::Block::CompressMap()
 		// empty block ?
 		if (block_lines[blk_num] == NULL)
 		{
-			block_ptrs[blk_num] = static_cast<u16_t>(4 + this->block_count);
+			block_ptrs[blk_num] = static_cast<uint16_t>(4 + this->block_count);
 			block_dups[i] = DUMMY_DUP;
 
 			orig_size += 2;
@@ -323,7 +323,7 @@ void LevelData::Block::CompressMap()
 		if (i+1 < this->block_count &&
 				Compare(block_dups + i, block_dups + i+1) == 0)
 		{
-			block_ptrs[blk_num] = static_cast<u16_t>(cur_offset);
+			block_ptrs[blk_num] = static_cast<uint16_t>(cur_offset);
 			block_dups[i] = DUMMY_DUP;
 
 			// free the memory of the duplicated block
@@ -339,7 +339,7 @@ void LevelData::Block::CompressMap()
 		// OK, this block is either the last of a series of duplicates, or
 		// just a singleton.
 
-		block_ptrs[blk_num] = static_cast<u16_t>(cur_offset);
+		block_ptrs[blk_num] = static_cast<uint16_t>(cur_offset);
 
 		cur_offset += count;
 
@@ -371,9 +371,9 @@ void LevelData::WriteBlockmap() const
 
 	Lump_c &lump = CreateLevelLump("BLOCKMAP");
 
-	u16_t null_block[2] = { 0x0000, 0xFFFF };
-	u16_t m_zero = 0x0000;
-	u16_t m_neg1 = 0xFFFF;
+	uint16_t null_block[2] = { 0x0000, 0xFFFF };
+	uint16_t m_zero = 0x0000;
+	uint16_t m_neg1 = 0xFFFF;
 
 	// fill in header
 	raw_blockmap_header_t header;
@@ -388,12 +388,12 @@ void LevelData::WriteBlockmap() const
 	// handle pointers
 	for (i=0 ; i < block.block_count ; i++)
 	{
-		u16_t ptr = LE_U16(block.block_ptrs[i]);
+		uint16_t ptr = LE_U16(block.block_ptrs[i]);
 
 		if (ptr == 0)
 			BugError("WriteBlockmap: offset %d not set.\n", i);
 
-		lump.Write(&ptr, sizeof(u16_t));
+		lump.Write(&ptr, sizeof(uint16_t));
 	}
 
 	// add the null block which *all* empty blocks will use
@@ -408,12 +408,12 @@ void LevelData::WriteBlockmap() const
 		if (blk_num == DUMMY_DUP)
 			continue;
 
-		u16_t *blk = block.block_lines[blk_num];
+		uint16_t *blk = block.block_lines[blk_num];
 		SYS_ASSERT(blk);
 
-		lump.Write(&m_zero, sizeof(u16_t));
-		lump.Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
-		lump.Write(&m_neg1, sizeof(u16_t));
+		lump.Write(&m_zero, sizeof(uint16_t));
+		lump.Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(uint16_t));
+		lump.Write(&m_neg1, sizeof(uint16_t));
 	}
 }
 
@@ -546,7 +546,7 @@ void LevelData::Reject::Init(const Document &doc)
 {
 	rej_total_size = (doc.numSectors() * doc.numSectors() + 7) / 8;
 
-	rej_matrix = new u8_t[rej_total_size];
+	rej_matrix = new uint8_t[rej_total_size];
 	memset(rej_matrix, 0, rej_total_size);
 
 	rej_sector_groups.resize(doc.numSectors());
@@ -802,12 +802,12 @@ void LevelData::GetVertices()
 
 
 #if 0
-static inline SideDef *SafeLookupSidedef(u16_t num)
+static inline SideDef *SafeLookupSidedef(uint16_t num)
 {
 	if (num == 0xFFFF)
 		return NULL;
 
-	if ((int)num >= doc.numSidedefs() && (s16_t)(num) < 0)
+	if ((int)num >= doc.numSidedefs() && (int16_t)(num) < 0)
 		return NULL;
 
 	return SideDefs[num];
@@ -848,8 +848,8 @@ static inline int VanillaSegAngle(const seg_t *seg)
 
 /* ----- writing routines ------------------------------ */
 
-static const u8_t *lev_v2_magic = (u8_t *) "gNd2";
-static const u8_t *lev_v5_magic = (u8_t *) "gNd5";
+static const uint8_t *lev_v2_magic = (uint8_t *) "gNd2";
+static const uint8_t *lev_v5_magic = (uint8_t *) "gNd5";
 
 
 void LevelData::MarkOverflow(int flags)
@@ -930,21 +930,21 @@ void LevelData::PutGLVertices(int do_v5) const
 }
 
 
-static inline u16_t VertexIndex16Bit(const vertex_t *v)
+static inline uint16_t VertexIndex16Bit(const vertex_t *v)
 {
 	if (v->is_new)
-		return (u16_t) (v->index | 0x8000U);
+		return (uint16_t) (v->index | 0x8000U);
 
-	return (u16_t) v->index;
+	return (uint16_t) v->index;
 }
 
 
-static inline u32_t VertexIndex_V5(const vertex_t *v)
+static inline uint32_t VertexIndex_V5(const vertex_t *v)
 {
 	if (v->is_new)
-		return (u32_t) (v->index | 0x80000000U);
+		return (uint32_t) (v->index | 0x80000000U);
 
-	return (u32_t) v->index;
+	return (uint32_t) v->index;
 }
 
 void LevelData::PutSegs()
@@ -1496,16 +1496,16 @@ void ZLibContext::finishLump() noexcept(false)
 	}
 }
 
-static const u8_t *lev_XNOD_magic = (u8_t *) "XNOD";
-static const u8_t *lev_XGL3_magic = (u8_t *) "XGL3";
-static const u8_t *lev_ZNOD_magic = (u8_t *) "ZNOD";
+static const uint8_t *lev_XNOD_magic = (uint8_t *) "XNOD";
+static const uint8_t *lev_XGL3_magic = (uint8_t *) "XGL3";
+static const uint8_t *lev_ZNOD_magic = (uint8_t *) "ZNOD";
 
 void LevelData::PutZVertices(ZLibContext &zcontext) const noexcept(false)
 {
 	int count, i;
 
-	u32_t orgverts = LE_U32(num_old_vert);
-	u32_t newverts = LE_U32(num_new_vert);
+	uint32_t orgverts = LE_U32(num_old_vert);
+	uint32_t newverts = LE_U32(num_new_vert);
 
 	zcontext.appendLump(&orgverts, 4);
 	zcontext.appendLump(&newverts, 4);
@@ -1536,7 +1536,7 @@ void LevelData::PutZSubsecs(ZLibContext &zcontext) const noexcept(false)
 {
 	int i;
 	int count;
-	u32_t raw_num = LE_U32((int)subsecs.size());
+	uint32_t raw_num = LE_U32((int)subsecs.size());
 
 	int cur_seg_index = 0;
 
@@ -1576,7 +1576,7 @@ void LevelData::PutZSubsecs(ZLibContext &zcontext) const noexcept(false)
 void LevelData::PutZSegs(ZLibContext &zcontext) const noexcept(false)
 {
 	int i, count;
-	u32_t raw_num = LE_U32((int)segs.size());
+	uint32_t raw_num = LE_U32((int)segs.size());
 
 	zcontext.appendLump(&raw_num, 4);
 
@@ -1588,11 +1588,11 @@ void LevelData::PutZSegs(ZLibContext &zcontext) const noexcept(false)
 			BugError("PutZSegs: seg index mismatch (%d != %d)", count, seg->index);
 
 		{
-			u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
-			u32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
+			uint32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
+			uint32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
 
-			u16_t line = LE_U16(seg->linedef);
-			u8_t  side = static_cast<u8_t>(seg->side);
+			uint16_t line = LE_U16(seg->linedef);
+			uint8_t  side = static_cast<uint8_t>(seg->side);
 
 			zcontext.appendLump(&v1,   4);
 			zcontext.appendLump(&v2,   4);
@@ -1611,7 +1611,7 @@ void LevelData::PutZSegs(ZLibContext &zcontext) const noexcept(false)
 void LevelData::PutXGL3Segs(ZLibContext &zcontext) const noexcept(false)
 {
 	int i, count;
-	u32_t raw_num = LE_U32((int)segs.size());
+	uint32_t raw_num = LE_U32((int)segs.size());
 
 	zcontext.appendLump(&raw_num, 4);
 
@@ -1625,10 +1625,10 @@ void LevelData::PutXGL3Segs(ZLibContext &zcontext) const noexcept(false)
 		}
 
 		{
-			u32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
-			u32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
-			u32_t line = LE_U32(seg->linedef);
-			u8_t  side = static_cast<u8_t>(seg->side);
+			uint32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
+			uint32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
+			uint32_t line = LE_U32(seg->linedef);
+			uint8_t  side = static_cast<uint8_t>(seg->side);
 
 # if DEBUG_BSP
 			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
@@ -1664,10 +1664,10 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3) n
 
 	if (do_xgl3)
 	{
-		u32_t x  = LE_S32(iround(node->x  * 65536.0));
-		u32_t y  = LE_S32(iround(node->y  * 65536.0));
-		u32_t dx = LE_S32(iround(node->dx * 65536.0));
-		u32_t dy = LE_S32(iround(node->dy * 65536.0));
+		uint32_t x  = LE_S32(iround(node->x  * 65536.0));
+		uint32_t y  = LE_S32(iround(node->y  * 65536.0));
+		uint32_t dx = LE_S32(iround(node->dx * 65536.0));
+		uint32_t dy = LE_S32(iround(node->dy * 65536.0));
 
 		zcontext.appendLump(&x,  4);
 		zcontext.appendLump(&y,  4);
@@ -1730,7 +1730,7 @@ void LevelData::PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3) n
 
 void LevelData::PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3) noexcept(false)
 {
-	u32_t raw_num = LE_U32((int)nodes.size());
+	uint32_t raw_num = LE_U32((int)nodes.size());
 
 	zcontext.appendLump(&raw_num, 4);
 
@@ -1870,9 +1870,9 @@ void LevelData::FreeLevel(void)
 	FreeWallTips();
 }
 
-u32_t LevelData::CalcGLChecksum() const
+uint32_t LevelData::CalcGLChecksum() const
 {
-	u32_t crc;
+	uint32_t crc;
 
 	Adler32_Begin(&crc);
 
@@ -1880,7 +1880,7 @@ u32_t LevelData::CalcGLChecksum() const
 
 	if (lump && lump->Length() > 0)
 	{
-		const u8_t *data = lump->getData().data();
+		const uint8_t *data = lump->getData().data();
 		Adler32_AddBlock(&crc, data, lump->Length());
 	}
 
@@ -1888,7 +1888,7 @@ u32_t LevelData::CalcGLChecksum() const
 
 	if (lump && lump->Length() > 0)
 	{
-		const u8_t *data = lump->getData().data();
+		const uint8_t *data = lump->getData().data();
 		Adler32_AddBlock(&crc, data, lump->Length());
 	}
 
@@ -1902,7 +1902,7 @@ void LevelData::UpdateGLMarker(Lump_c *marker) const
 {
 	// we *must* compute the checksum BEFORE (re)creating the lump
 	// [ otherwise we write data into the wrong part of the file ]
-	u32_t crc = CalcGLChecksum();
+	uint32_t crc = CalcGLChecksum();
 
 	// when original name is long, need to specify it here
 	if (current_name.length() > 5)

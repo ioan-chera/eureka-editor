@@ -142,9 +142,9 @@ SString UtilTimeString(void);
 angle_g UtilComputeAngle(double dx, double dy);
 
 // checksum functions
-void Adler32_Begin(u32_t *crc);
-void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length);
-void Adler32_Finish(u32_t *crc);
+void Adler32_Begin(uint32_t *crc);
+void Adler32_AddBlock(uint32_t *crc, const uint8_t *data, int length);
+void Adler32_Finish(uint32_t *crc);
 
 
 //------------------------------------------------------------------------
@@ -448,9 +448,9 @@ private:
 		int block_w = 0;
 		int block_h = 0;
 		int block_count = 0;
-		u16_t ** block_lines = nullptr;
-		u16_t *block_ptrs = nullptr;
-		u16_t *block_dups = nullptr;
+		uint16_t ** block_lines = nullptr;
+		uint16_t *block_ptrs = nullptr;
+		uint16_t *block_dups = nullptr;
 		int compression = 0;
 		int overflowed = 0;
 		
@@ -467,7 +467,7 @@ private:
 		void GroupSectors(const Document &doc);
 		void ProcessSectors(const Document &doc);
 		
-		u8_t *rej_matrix = nullptr;
+		uint8_t *rej_matrix = nullptr;
 		int   rej_total_size = 0;	// in bytes
 		std::vector<int> rej_sector_groups;
 	};
@@ -503,12 +503,12 @@ private:
 	void MarkOverflow(int flags);
 	void PutVertices(const char *name, int do_gl);
 	void PutGLVertices(int do_v5) const;
-	inline u32_t VertexIndex_XNOD(const vertex_t *v) const noexcept
+	inline uint32_t VertexIndex_XNOD(const vertex_t *v) const noexcept
 	{
 		if (v->is_new)
-			return (u32_t) (num_old_vert + v->index);
+			return (uint32_t) (num_old_vert + v->index);
 
-		return (u32_t) v->index;
+		return (uint32_t) v->index;
 	}
 	void PutSegs();
 	void PutGLSegs() const;
@@ -535,7 +535,7 @@ private:
 	/* ----- whole-level routines --------------------------- */
 	void LoadLevel();
 	void FreeLevel();
-	u32_t CalcGLChecksum() const;
+	uint32_t CalcGLChecksum() const;
 	inline SString CalcOptionsString() const
 	{
 		return SString::printf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");

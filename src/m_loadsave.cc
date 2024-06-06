@@ -1519,12 +1519,12 @@ void Document::SaveThings_Hexen(Wad_file& wad) const
 		raw.type    = LE_U16(th->type);
 		raw.options = LE_U16(th->options);
 
-		raw.special = static_cast<u8_t>(th->special);
-		raw.args[0] = static_cast<u8_t>(th->arg1);
-		raw.args[1] = static_cast<u8_t>(th->arg2);
-		raw.args[2] = static_cast<u8_t>(th->arg3);
-		raw.args[3] = static_cast<u8_t>(th->arg4);
-		raw.args[4] = static_cast<u8_t>(th->arg5);
+		raw.special = static_cast<uint8_t>(th->special);
+		raw.args[0] = static_cast<uint8_t>(th->arg1);
+		raw.args[1] = static_cast<uint8_t>(th->arg2);
+		raw.args[2] = static_cast<uint8_t>(th->arg3);
+		raw.args[3] = static_cast<uint8_t>(th->arg4);
+		raw.args[4] = static_cast<uint8_t>(th->arg5);
 
 		lump.Write(&raw, sizeof(raw));
 	}
@@ -1589,13 +1589,13 @@ void Document::SaveLineDefs_Hexen(Wad_file &wad) const
 		raw.end   = LE_U16(ld->end);
 
 		raw.flags = LE_U16(ld->flags);
-		raw.type  = static_cast<u8_t>(ld->type);
+		raw.type  = static_cast<uint8_t>(ld->type);
 
-		raw.args[0] = static_cast<u8_t>(ld->tag);
-		raw.args[1] = static_cast<u8_t>(ld->arg2);
-		raw.args[2] = static_cast<u8_t>(ld->arg3);
-		raw.args[3] = static_cast<u8_t>(ld->arg4);
-		raw.args[4] = static_cast<u8_t>(ld->arg5);
+		raw.args[0] = static_cast<uint8_t>(ld->tag);
+		raw.args[1] = static_cast<uint8_t>(ld->arg2);
+		raw.args[2] = static_cast<uint8_t>(ld->arg3);
+		raw.args[3] = static_cast<uint8_t>(ld->arg4);
+		raw.args[4] = static_cast<uint8_t>(ld->arg5);
 
 		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
 		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
