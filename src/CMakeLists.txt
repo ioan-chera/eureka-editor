@@ -111,8 +111,6 @@ set(source_m
     m_select.h
     m_streams.cc
     m_streams.h
-    m_strings.cc
-    m_strings.h
     m_testmap.cc
     m_testmap.h
     m_udmf.cc
@@ -132,8 +130,6 @@ set(source_r
 )
 
 set(source_sys
-    sys_debug.cc
-    sys_debug.h
     sys_endian.h
     sys_type.h
 )
@@ -219,9 +215,15 @@ add_library(
     eurekacore STATIC
     Errors.cc
     Errors.h
+    filesystem.hpp
     FixedPoint.h
+    m_strings.cc
+    m_strings.h
     PrintfMacros.h
+    sys_debug.cc
+    sys_debug.h
     sys_macro.h
+    WindowsSanitization.h
 )
 
 target_link_libraries(eurekasrc PRIVATE eurekacore)
