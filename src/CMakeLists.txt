@@ -7,9 +7,6 @@ set(source_base
     Document.h
     DocumentModule.cc
     DocumentModule.h
-    Errors.cc
-    Errors.h
-    FixedPoint.h
     hdr_fltk.h
     Instance.cc
     Instance.h
@@ -138,7 +135,6 @@ set(source_sys
     sys_debug.cc
     sys_debug.h
     sys_endian.h
-    sys_macro.h
     sys_type.h
 )
 
@@ -219,8 +215,19 @@ add_library(
     ${source_w}
 )
 
+add_library(
+    eurekacore STATIC
+    Errors.cc
+    Errors.h
+    FixedPoint.h
+    PrintfMacros.h
+    sys_macro.h
+)
+
+target_link_libraries(eurekasrc PRIVATE eurekacore)
+
 # Needed for macOS release archiving!
-set_target_properties(eurekasrc PROPERTIES ARCHIVE_OUTPUT_DIRECTORY
+set_target_properties(eurekasrc eurekacore PROPERTIES ARCHIVE_OUTPUT_DIRECTORY
                       ${PROJECT_BINARY_DIR}/out/library)
 
 option(ENABLE_OPENGL "Use OpenGL instead of software rendering" ON)
