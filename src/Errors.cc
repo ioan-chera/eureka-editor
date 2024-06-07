@@ -18,7 +18,6 @@
 
 #include "Errors.h"
 
-#include <stdarg.h>
 #include <stdio.h>
 
 #ifdef _WIN32

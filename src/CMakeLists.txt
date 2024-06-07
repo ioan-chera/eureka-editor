@@ -225,9 +225,6 @@ set_target_properties(eurekasrc PROPERTIES ARCHIVE_OUTPUT_DIRECTORY
 
 option(ENABLE_OPENGL "Use OpenGL instead of software rendering" ON)
 
-# TODO: remove this when everything is moved to CMake
-target_compile_definitions(eurekasrc PUBLIC BUILT_VIA_CMAKE)
-
 if(ENABLE_OPENGL)
     find_package(OpenGL REQUIRED)
 else()
