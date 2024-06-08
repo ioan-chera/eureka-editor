@@ -19,7 +19,8 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
-#include "main.h"
+#include "lib_file.h"
+#include "sys_debug.h"
 
 #ifdef WIN32
 #include <io.h>

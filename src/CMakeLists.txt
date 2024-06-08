@@ -15,8 +15,6 @@ set(source_base
     main.cc
     main.h
     objid.h
-    SafeOutFile.cc
-    SafeOutFile.h
     Sector.cc
     Sector.h
     Side.h
@@ -77,14 +75,8 @@ set(source_im
 )
 
 set(source_lib
-    lib_adler.cc
-    lib_adler.h
-    lib_file.cc
-    lib_file.h
     lib_tga.cc
     lib_tga.h
-    lib_util.cc
-    lib_util.h
 )
 
 set(source_m
@@ -114,8 +106,6 @@ set(source_m
     m_testmap.cc
     m_testmap.h
     m_udmf.cc
-    m_vector.cc
-    m_vector.h
 )
 
 set(source_r
@@ -127,11 +117,6 @@ set(source_r
     r_software.cc
     r_subdiv.cc
     r_subdiv.h
-)
-
-set(source_sys
-    sys_endian.h
-    sys_type.h
 )
 
 set(source_ui
@@ -205,7 +190,6 @@ add_library(
     ${source_lib}
     ${source_m}
     ${source_r}
-    ${source_sys}
     ${source_thirdparty}
     ${source_ui}
     ${source_w}
@@ -217,12 +201,24 @@ add_library(
     Errors.h
     filesystem.hpp
     FixedPoint.h
+    lib_adler.cc
+    lib_adler.h
+    lib_file.cc
+    lib_file.h
+    lib_util.cc
+    lib_util.h
     m_strings.cc
     m_strings.h
+    m_vector.cc
+    m_vector.h
     PrintfMacros.h
+    SafeOutFile.cc
+    SafeOutFile.h
     sys_debug.cc
     sys_debug.h
+    sys_endian.h
     sys_macro.h
+    sys_type.h
     WindowsSanitization.h
 )
 
@@ -378,7 +374,6 @@ source_group("im_ source" FILES ${source_im})
 source_group("lib_ source" FILES ${source_lib})
 source_group("m_ source" FILES ${source_m})
 source_group("r_ source" FILES ${source_r})
-source_group("sys_ source" FILES ${source_sys})
 source_group("ui_ source" FILES ${source_ui})
 source_group("w_ source" FILES ${source_w})
 source_group("third-party" FILES ${source_thirdparty})

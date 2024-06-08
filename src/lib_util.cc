@@ -25,7 +25,9 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
-#include "main.h"
+#include "m_vector.h"
+#include "sys_debug.h"
+#include "sys_macro.h"
 
 #ifndef _MSC_VER
 #include <sys/time.h>
