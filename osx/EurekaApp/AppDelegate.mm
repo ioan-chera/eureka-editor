@@ -42,7 +42,7 @@ static BOOL gFinderLaunch;
 static BOOL   gCalledAppMainline = FALSE;
 
 // Prototype to cross-platform main entry function
-int main_ORIGINAL(int argc, char *argv[]);
+int EurekaMain(int argc, char *argv[]);
 
 @implementation AppDelegate
 
@@ -73,7 +73,7 @@ int main_ORIGINAL(int argc, char *argv[]);
 //
 - (void)launchMainLine
 {
-    int exitcode = main_ORIGINAL(gArgc, gArgv);
+    int exitcode = EurekaMain(gArgc, gArgv);
     
     exit(exitcode);
 }
@@ -147,11 +147,6 @@ static void CustomApplicationMain (int argc, char **argv)
     [delegate release];
     [pool release];
 }
-
-// Undefine main from main_ORIGINAL. This will be the real entry point.
-#ifdef main
-#undef main
-#endif
 
 //
 // main

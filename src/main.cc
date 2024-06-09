@@ -1123,9 +1123,9 @@ static void setupSignalHandlers()
 }
 
 //
-//  the program starts here
+//  Common entry point, called by main or other handlers depending on system
 //
-int main(int argc, char *argv[])
+int EurekaMain(int argc, char *argv[])
 {
 	try
 	{

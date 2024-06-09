@@ -69,6 +69,10 @@ if(WIN32)
     )
 endif()
 
+if(NOT APPLE)
+    target_sources(eureka PRIVATE mainroot.cc)
+endif()
+
 if(APPLE)
     set(exe_display_name "Eureka Doom Editor")
     set_target_properties(eureka PROPERTIES OUTPUT_NAME "${exe_display_name}")
