@@ -25,14 +25,10 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
-#include "Instance.h"
-
-#include "main.h"
 
 #include "r_grid.h"
-#include "e_main.h"
 #include "m_config.h"
-#include "ui_window.h"
+#include "sys_debug.h"
 
 // config items
 int  config::grid_default_size = 64;
@@ -669,20 +665,20 @@ void grid::State::NearestScale(double want_scale)
 }
 
 
-bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
+bool grid::State::parseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "map_pos" && tokens.size() >= 4)
 	{
 		double x = atof(tokens[1]);
 		double y = atof(tokens[2]);
 
-		grid.MoveTo({ x, y });
+		MoveTo({ x, y });
 
 		double new_scale = atof(tokens[3]);
 
-		grid.NearestScale(new_scale);
+		NearestScale(new_scale);
 
-		RedrawMap();
+		listener.gridRedrawMap();
 		return true;
 	}
 
@@ -690,14 +686,14 @@ bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
 	{
 		bool t_shown = atoi(tokens[1]) ? true : false;
 
-		grid.configureGrid(atoi(tokens[3]), t_shown);
+		configureGrid(atoi(tokens[3]), t_shown);
 		// tokens[2] was grid.mode, currently unused
 		return true;
 	}
 
 	if (tokens[0] == "snap" && tokens.size() >= 2)
 	{
-		grid.configureSnap(!!atoi(tokens[1]));
+		configureSnap(!!atoi(tokens[1]));
 
 		return true;
 	}
@@ -705,13 +701,13 @@ bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
 	return false;
 }
 
-void Instance::Grid_WriteUser(std::ostream &os) const
+void grid::State::writeUser(std::ostream &os) const
 {
-	os << "map_pos " << SString::printf("%1.0f %1.0f %1.6f", grid.getOrig().x, grid.getOrig().y, grid.getScale()) <<
+	os << "map_pos " << SString::printf("%1.0f %1.0f %1.6f", getOrig().x, getOrig().y, getScale()) <<
 		'\n';
-	os << "grid " << (grid.isShown() ? 1 : 0) << ' ' << (config::grid_style ? 0 : 1) << ' ' << 
-		grid.getStep() << '\n';
-	os << "snap " << (grid.snaps() ? 1 : 0) << '\n';
+	os << "grid " << (isShown() ? 1 : 0) << ' ' << (config::grid_style ? 0 : 1) << ' ' <<
+		getStep() << '\n';
+	os << "snap " << (snaps() ? 1 : 0) << '\n';
 }
 
 

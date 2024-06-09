@@ -793,7 +793,7 @@ void Instance::ZoomWholeMap()
 	sUnitTokens["default"].push_back("zoomWholeMap");
 }
 
-bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
+bool grid::State::parseUser(const std::vector<SString> &tokens)
 {
 	if(tokens.empty() || tokens[0] != "grid")
 		return false;
@@ -843,7 +843,7 @@ void Document::getLevelChecksum(crc32_c &crc) const
 {
 }
 
-void Instance::Grid_WriteUser(std::ostream &os) const
+void grid::State::writeUser(std::ostream &os) const
 {
 	sUnitTokens["WriteUser"].push_back("grid");
 }

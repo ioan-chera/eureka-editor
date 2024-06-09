@@ -145,8 +145,6 @@ public:
 
 	bool OnGrid(double map_x, double map_y) const;
 
-	void configureGrid(int step, bool shown);
-	void configureSnap(bool snap);
 	void configureRatio(int ratio, bool redraw);
 
 	int getStep() const
@@ -169,11 +167,17 @@ public:
 	{
 		return Scale;
 	}
+	
+	bool parseUser(const std::vector<SString> &tokens);
+	void writeUser(std::ostream &os) const;
 
 private:
 	void RawSetStep(int i);
 	void RawSetScale(int i);
 	void RawSetShown(bool new_shown);
+	
+	void configureGrid(int step, bool shown);
+	void configureSnap(bool snap);
 
 	static const double scale_values[];
 	static const int digit_scales[];

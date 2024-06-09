@@ -1192,7 +1192,7 @@ bool Instance::M_LoadUserState()
 		}
 
 		if (  Editor_ParseUser(tokens) ||
-		        Grid_ParseUser(tokens) ||
+		        grid.parseUser(tokens) ||
 		    Render3D_ParseUser(tokens) ||
 		     Browser_ParseUser(*this, tokens) ||
 		       Props_ParseUser(*this, tokens) ||
@@ -1236,7 +1236,7 @@ bool Instance::M_SaveUserState() const
 	}
 
 	Editor_WriteUser(os);
-	Grid_WriteUser(os);
+	grid.writeUser(os);
 	Render3D_WriteUser(os);
 	Browser_WriteUser(os);
 	Props_WriteUser(os);

@@ -442,8 +442,6 @@ private:
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);
 
 	// R_GRID
-	bool Grid_ParseUser(const std::vector<SString> &tokens);
-	void Grid_WriteUser(std::ostream &os) const;
 
 	// R_RENDER
 	StringID GrabSelectedFlat();
