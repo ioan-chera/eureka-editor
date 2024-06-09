@@ -32,13 +32,15 @@
 #include "m_strings.h"
 #include <stdint.h>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 class crc32_c
 {
-public:
+private:
 	uint32_t raw;
 	uint32_t extra;
 
-private:
 	static const uint32_t INIT_VALUE = 1;
 
 public:
@@ -47,11 +49,6 @@ public:
 	~crc32_c() { }
 
 	void Reset(void) { raw = INIT_VALUE; extra = 0; }
-
-	crc32_c& operator= (const crc32_c &rhs)
-  {
-    raw = rhs.raw; extra = rhs.extra; return *this;
-  }
 
 	crc32_c& operator+= (uint8_t value);
 	crc32_c& operator+= (int8_t value);
@@ -72,6 +69,11 @@ public:
 
 	crc32_c& AddBlock(const uint8_t *data, int len);
 	crc32_c& AddCStr(const char *str);
+	
+	fs::path getPath() const
+	{
+		return SString::printf("%08X%08X.dat", extra, raw).get();
+	}
 
   // TODO: operator==  and  operator!=
 };

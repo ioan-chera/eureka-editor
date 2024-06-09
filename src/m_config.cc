@@ -1148,8 +1148,7 @@ int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
 
 static fs::path PersistFilename(const crc32_c& crc)
 {
-	fs::path filename = fs::u8path(SString::printf("%08X%08X.dat", crc.extra, crc.raw).get());
-	return global::cache_dir / "cache" / filename;
+	return global::cache_dir / "cache" / crc.getPath();
 }
 
 
