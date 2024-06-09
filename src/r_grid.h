@@ -22,6 +22,7 @@
 #define __EUREKA_R_GRID_H__
 
 #include "m_vector.h"
+#include "m_strings.h"
 
 class Instance;
 
