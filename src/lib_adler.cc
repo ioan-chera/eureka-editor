@@ -28,6 +28,7 @@
 
 
 #include "lib_adler.h"
+#include <math.h>
 
 // ---- Primitive routines ----
 
