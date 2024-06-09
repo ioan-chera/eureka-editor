@@ -80,8 +80,6 @@ set(source_lib
 )
 
 set(source_m
-    m_bitvec.cc
-    m_bitvec.h
     m_config.cc
     m_config.h
     m_editlump.cc
@@ -97,12 +95,8 @@ set(source_m
     m_loadsave.h
     m_nodes.cc
     m_nodes.h
-    m_parse.cc
-    m_parse.h
     m_select.cc
     m_select.h
-    m_streams.cc
-    m_streams.h
     m_testmap.cc
     m_testmap.h
     m_udmf.cc
@@ -207,8 +201,14 @@ add_library(
     lib_file.h
     lib_util.cc
     lib_util.h
+    m_bitvec.cc
+    m_bitvec.h
     m_strings.cc
     m_strings.h
+    m_parse.cc
+    m_parse.h
+    m_streams.cc
+    m_streams.h
     m_vector.cc
     m_vector.h
     PrintfMacros.h

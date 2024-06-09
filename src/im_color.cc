@@ -24,14 +24,10 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
 #include "Instance.h"
-#include "main.h"
 
 #include "im_color.h"
-#include "im_img.h"  // TRANS_PIXEL
 #include "m_config.h"
-#include "w_wad.h"
 
 
 // config item
