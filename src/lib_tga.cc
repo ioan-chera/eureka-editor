@@ -63,12 +63,16 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 							   int& width, int& height)
 {
 	const byte * buf_p   = buffer;
-///	const byte * buf_end = buffer + length;
+
+	const byte * buf_end = buffer + length;
 
 
 // decode the TGA header
 
-	targa_header_t	targa_header;
+	targa_header_t	targa_header = {};
+
+	if(length < 18)
+		return nullptr;
 
 	targa_header.id_length = *buf_p++;
 	targa_header.colormap_type = *buf_p++;
@@ -89,6 +93,9 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
     buf_p += 2;
 	targa_header.pixel_bits = *buf_p++;
 	targa_header.attributes = *buf_p++;
+
+	if(buf_p + targa_header.id_length > buf_end)
+		return nullptr;
 
 	if (targa_header.id_length != 0)
 		buf_p += targa_header.id_length;  // skip TARGA image comment
@@ -148,13 +155,19 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 
 		for (int n = cm_start ; n < cm_end ; n++)
 		{
+			if(buf_p + 3 > buf_end)
+				return nullptr;
 			byte b = *buf_p++;
 			byte g = *buf_p++;
 			byte r = *buf_p++;
 			byte a = 255;
 
 			if (targa_header.colormap_bits == 32)
+			{
+				if(buf_p >= buf_end)
+					return nullptr;
 				a = *buf_p++;
+			}
 
 			palette[n] = RGBA_MAKE(r, g, b, a);
 		}
@@ -183,13 +196,25 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 
 			for (int x = 0 ; x < width ; x++)
 			{
+				if(buf_p + 3 > buf_end)
+				{
+					delete[] pixels;
+					return nullptr;
+				}
 				byte b = *buf_p++;
 				byte g = *buf_p++;
 				byte r = *buf_p++;
 				byte a = 255;
 
 				if (targa_header.pixel_bits == 32)
+				{
+					if(buf_p >= buf_end)
+					{
+						delete[] pixels;
+						return nullptr;
+					}
 					a = *buf_p++;
+				}
 
 				*p++ = RGBA_MAKE(r, g, b, a);
 
@@ -219,18 +244,35 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 
 			for (int x = 0 ; x < width ; )
 			{
+				if(buf_p >= buf_end)
+				{
+					delete[] pixels;
+					return nullptr;
+				}
 				packet_header = *buf_p++;
 				packet_size = 1 + (packet_header & 0x7f);
 
 				if (packet_header & 0x80)    // run-length packet
 				{
+					if(buf_p + 3 > buf_end)
+					{
+						delete[] pixels;
+						return nullptr;
+					}
 					b = *buf_p++;
 					g = *buf_p++;
 					r = *buf_p++;
 					a = 255;
 
 					if (targa_header.pixel_bits == 32)
+					{
+						if(buf_p >= buf_end)
+						{
+							delete[] pixels;
+							return nullptr;
+						}
 						a = *buf_p++;
+					}
 
 					if (a == 0)
 						is_masked = true;
@@ -259,13 +301,25 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 				{
 					for (int j = 0 ; j < packet_size; j++)
 					{
+						if(buf_p + 3 > buf_end)
+						{
+							delete[] pixels;
+							return nullptr;
+						}
 						b = *buf_p++;
 						g = *buf_p++;
 						r = *buf_p++;
 						a = 255;
 
 						if (targa_header.pixel_bits == 32)
+						{
+							if(buf_p >= buf_end)
+							{
+								delete[] pixels;
+								return nullptr;
+							}
 							a = *buf_p++;
+						}
 
 						*p++ = RGBA_MAKE(r, g, b, a);
 
@@ -300,6 +354,11 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 
 			for (int x = 0 ; x < width ; x++)
 			{
+				if(buf_p >= buf_end)
+				{
+					delete[] pixels;
+					return nullptr;
+				}
 				rgba_color_t col = palette[*buf_p++];
 
 				*p++ = col;
@@ -323,11 +382,21 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 
 			for (int x = 0 ; x < width ; )
 			{
+				if(buf_p >= buf_end)
+				{
+					delete[] pixels;
+					return nullptr;
+				}
 				packet_header = *buf_p++;
 				packet_size = 1 + (packet_header & 0x7f);
 
 				if (packet_header & 0x80)    // run-length packet
 				{
+					if(buf_p >= buf_end)
+					{
+						delete[] pixels;
+						return nullptr;
+					}
 					rgba_color_t col = palette[*buf_p++];
 
 					byte a = RGBA_ALPHA(col);
@@ -359,6 +428,11 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 				{
 					for (int j = 0 ; j < packet_size; j++)
 					{
+						if(buf_p >= buf_end)
+						{
+							delete[] pixels;
+							return nullptr;
+						}
 						rgba_color_t col = palette[*buf_p++];
 
 						*p++ = col;

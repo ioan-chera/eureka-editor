@@ -55,3 +55,15 @@ TEST(TGA, DecodeImageBroken)
 
     ASSERT_FALSE(rgba);
 }
+
+TEST(TGA, DecodeImageMalformed)
+{
+    static const uint8_t image[] = {
+        23,
+    };
+
+    int width;
+    int height;
+    rgba_color_t *rgba = TGA_DecodeImage(image, sizeof(image), width, height);
+    ASSERT_FALSE(rgba);
+}
