@@ -700,68 +700,73 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 
 	// player color remapping
 	// [ FIXME : put colors into game definition file ]
-	if (result && info.group == 'p')
+	if (result)
 	{
-		tl::optional<Img_c> new_img;
-
-		int src1, src2;
-		int targ1[4], targ2[4];
-		if (M_GetBaseGame(loading.gameName) == "heretic")
+		if(info.flags & THINGDEF_INVIS)
+			result = result->spectrify(config);
+		else if(info.group == 'p')
 		{
-			src1 = 225;
-			src2 = 240;
-			targ1[0] = 114;
-			targ2[0] = 129;
-			targ1[1] = 145;
-			targ2[1] = 160;
-			targ1[2] = targ1[3] = 190;
-			targ2[2] = targ2[3] = 205;
+			tl::optional<Img_c> new_img;
 			
-		}
-		else
-		{
-			src1 = 0x70;
-			src2 = 0x7f;
-			targ1[0] = 0x60;
-			targ2[0] = 0x6f;
-			targ1[1] = 0x40;
-			targ2[1] = 0x4f;
-			targ1[2] = 0x20;
-			targ2[2] = 0x2f;
-			targ1[3] = 0xc4;
-			targ2[3] = 0xcf;
-		}
-
-		switch (type)
-		{
-			case 1:
-				// no change
-				break;
-
-			case 2:
-				new_img = result->color_remap(src1, src2, targ1[0], targ2[0]);
-				break;
-
-			case 3:
-				new_img = result->color_remap(src1, src2, targ1[1], targ2[1]);
-				break;
-
-			case 4:
-				new_img = result->color_remap(src1, src2, targ1[2], targ2[2]);
-				break;
-
-			// blue for the extra coop starts
-			case 4001:
-			case 4002:
-			case 4003:
-			case 4004:
-				new_img = result->color_remap(src1, src2, targ1[3], targ2[3]);
-				break;
-		}
-
-		if (new_img)
-		{
-			result = std::move(new_img);
+			int src1, src2;
+			int targ1[4], targ2[4];
+			if (M_GetBaseGame(loading.gameName) == "heretic")
+			{
+				src1 = 225;
+				src2 = 240;
+				targ1[0] = 114;
+				targ2[0] = 129;
+				targ1[1] = 145;
+				targ2[1] = 160;
+				targ1[2] = targ1[3] = 190;
+				targ2[2] = targ2[3] = 205;
+				
+			}
+			else
+			{
+				src1 = 0x70;
+				src2 = 0x7f;
+				targ1[0] = 0x60;
+				targ2[0] = 0x6f;
+				targ1[1] = 0x40;
+				targ2[1] = 0x4f;
+				targ1[2] = 0x20;
+				targ2[2] = 0x2f;
+				targ1[3] = 0xc4;
+				targ2[3] = 0xcf;
+			}
+			
+			switch (type)
+			{
+				case 1:
+					// no change
+					break;
+					
+				case 2:
+					new_img = result->color_remap(src1, src2, targ1[0], targ2[0]);
+					break;
+					
+				case 3:
+					new_img = result->color_remap(src1, src2, targ1[1], targ2[1]);
+					break;
+					
+				case 4:
+					new_img = result->color_remap(src1, src2, targ1[2], targ2[2]);
+					break;
+					
+					// blue for the extra coop starts
+				case 4001:
+				case 4002:
+				case 4003:
+				case 4004:
+					new_img = result->color_remap(src1, src2, targ1[3], targ2[3]);
+					break;
+			}
+			
+			if (new_img)
+			{
+				result = std::move(new_img);
+			}
 		}
 	}
 

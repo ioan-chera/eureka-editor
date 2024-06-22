@@ -149,11 +149,6 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 
 	const thingtype_t &info = inst.conf.getThingType(type);
 
-	if (info.flags & THINGDEF_INVIS)
-	{
-		new_img = img->spectrify(inst.conf);
-		img = &new_img.value();
-	}
 
 
 	uint32_t back = Fl::get_color(back_color);
