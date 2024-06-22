@@ -205,6 +205,7 @@ public:
 										  WadOpenMode mode
 										  = WadOpenMode::append);
 	static std::shared_ptr<Wad_file> loadFromFile(const fs::path &filename);
+	static std::shared_ptr<Wad_file> readFromDir(const fs::path &path);
 
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const fs::path &filename);

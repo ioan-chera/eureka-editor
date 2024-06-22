@@ -227,6 +227,96 @@ std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
 	return createAndReadDirectory(filename, WadOpenMode::append, fp);
 }
 
+std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
+{
+	gLog.printf("Opening WAD folder: %s\n", path.u8string().c_str());
+	
+	// Reading from folder follows this rule (which should be a cross-port standard):
+	// https://eternity.youfailit.net/wiki/ZIP
+	
+	// Currently no editing is allowed in folder paths, which are only for resources anyway
+	auto wraw = new Wad_file(path, WadOpenMode::read);
+	auto w = std::shared_ptr<Wad_file>(wraw);
+	
+	fs::directory_iterator iterator;
+	try
+	{
+		iterator = fs::directory_iterator(path);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Open failed: %s\n", e.what());
+		return nullptr;
+	}
+	
+	auto tryAddNewLump = [](std::shared_ptr<Wad_file> &w, const fs::path &path, WadNamespace nameSpace)
+	{
+		SString lumpname = SString(path.filename().replace_extension().u8string()).asUpper().substr(0, 8);
+		
+		Lump_c *lump = new Lump_c(lumpname);
+		std::vector<uint8_t> data;
+		if(!FileLoad(path, data))
+		{
+			gLog.printf("Failed reading %s\n", path.u8string().c_str());
+			delete lump;
+			return;
+		}
+		
+		lump->setData(std::move(data));
+		
+		LumpRef ref = {};
+		ref.lump.reset(lump);
+		ref.ns = nameSpace;
+		w->directory.push_back(std::move(ref));
+	};
+	
+	for(const auto &entry : iterator)
+	{
+		if(fs::is_regular_file(entry.path()))
+		{
+			// Promptly add the lump now
+			tryAddNewLump(w, entry.path(), WadNamespace::Global);
+		}
+		else if(fs::is_directory(entry.path()))
+		{
+			fs::directory_iterator subiterator;
+			try
+			{
+				subiterator = fs::directory_iterator(entry.path());
+			}
+			catch(const fs::filesystem_error &e)
+			{
+				gLog.printf("Error opening subfolder %s: %s\n", entry.path().u8string().c_str(), e.what());
+			}
+			for(const auto &subentry : subiterator)
+			{
+				if(!fs::is_regular_file(subentry.path()))
+					continue;	// only allow one sub level
+				// Check namespaces by the way
+				SString folderName = entry.path().filename().u8string();
+				WadNamespace nameSpace;
+				if(folderName.noCaseEqual("flats"))
+					nameSpace = WadNamespace::Flats;
+				else if(folderName.noCaseEqual("sprites"))
+					nameSpace = WadNamespace::Sprites;
+				else if(folderName.noCaseEqual("textures"))
+					nameSpace = WadNamespace::TextureLumps;
+				else
+					nameSpace = WadNamespace::Global;
+				
+				tryAddNewLump(w, subentry.path(), nameSpace);
+			}
+		}
+		else
+		{
+			gLog.printf("Ignoring irregular file path %s\n", entry.path().u8string().c_str());
+		}
+	}
+	
+	// No DetectLevels allowed either.
+	
+	return w;
+}
 
 std::shared_ptr<Wad_file> Wad_file::Create(const fs::path &filename,
 										   WadOpenMode mode)
