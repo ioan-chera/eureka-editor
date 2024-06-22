@@ -935,6 +935,17 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 
 		for (const fs::path& resource : newres.loading.resourceList)
 		{
+			if(fs::is_directory(resource))
+			{
+				std::shared_ptr<Wad_file> wad = Wad_file::readFromDir(resource);
+				if(!wad)
+					gLog.printf("Failed opening directory: %s\n", resource.u8string().c_str());
+				else
+				{
+					resourceWads.push_back(wad);
+				}
+				continue;
+			}
 			if (MatchExtensionNoCase(resource, ".ugh"))
 			{
 				M_ParseDefinitionFile(parseVars, ParsePurpose::resource,

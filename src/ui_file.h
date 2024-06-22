@@ -197,7 +197,8 @@ private:
 
 	Result result;
 
-	Fl_Button* mResourceButtons[RES_NUM] = {};
+	Fl_Button* mResourceFileButtons[RES_NUM] = {};
+	Fl_Button* mResourceDirButtons[RES_NUM] = {};
 	Fl_Button* mClearButtons[RES_NUM] = {};
 
 	Instance &inst;
