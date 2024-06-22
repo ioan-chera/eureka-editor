@@ -253,6 +253,10 @@ std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 	{
 		SString lumpname = SString(path.filename().replace_extension().u8string()).asUpper().substr(0, 8);
 		
+		for(char &c : lumpname)
+			if(c == '^')
+				c = '\\';	// de-escape backslashes, due to vile precedent
+		
 		Lump_c *lump = new Lump_c(lumpname);
 		std::vector<uint8_t> data;
 		if(!FileLoad(path, data))

@@ -545,3 +545,99 @@ TEST_F(WadFileTest, FindFirstSpriteLump)
 	ASSERT_EQ(wad->findFirstSpriteLump("TROO"), &troob1);
 	ASSERT_EQ(wad->findFirstSpriteLump("POSSD4"), nullptr);
 }
+
+TEST_F(WadFileTest, ReadFromInvalidDir)
+{
+	auto wad = Wad_file::readFromDir(getChildPath("jackson"));
+	ASSERT_FALSE(wad);
+	
+	fs::path normalFile = getChildPath("file.txt");
+	std::ofstream ofs(normalFile);
+	ASSERT_TRUE(ofs);
+	mDeleteList.push(normalFile);
+	ofs.close();
+	
+	wad = Wad_file::readFromDir(normalFile);
+	ASSERT_FALSE(wad);
+}
+
+TEST_F(WadFileTest, ReadDirectory)
+{
+	fs::path dir = getChildPath("dir");
+	fs::create_directory(dir);
+	mDeleteList.push(dir);
+	auto addFile = [this](const fs::path &dir, const fs::path &name, const char *content)
+	{
+		fs::path path = dir / name;
+		std::ofstream stream(path);
+		ASSERT_TRUE(stream);
+		mDeleteList.push(path);
+		stream << content;	// also write something
+	};
+	
+	addFile(dir, "file1", "File one");
+	addFile(dir, "File2.txt", "File two");
+	addFile(dir, ".file3", "File three");
+	addFile(dir, ".File4.txt", "File four");
+	addFile(dir, "FileMoreLength.txt", "File five");
+	
+	fs::path subdir = dir / "flats";
+	fs::create_directory(subdir);
+	mDeleteList.push(subdir);
+	
+	addFile(subdir, "flat1.lmp", "Flat one");
+	addFile(subdir, "longtexname", "Flat two");
+	
+	subdir = dir / "sprites";
+	fs::create_directory(subdir);
+	mDeleteList.push(subdir);
+	
+	addFile(subdir, "POSSA1.png", "sprite one");
+	addFile(subdir, "POSSA1^1.png", "sprite two");
+	
+	subdir = dir / "textures";
+	fs::create_directory(subdir);
+	mDeleteList.push(subdir);
+	
+	addFile(subdir, "TEX1.png", "texture one");
+	
+	subdir = dir / "sounds";	// no namespace here
+	fs::create_directory(subdir);
+	mDeleteList.push(subdir);
+	
+	addFile(subdir, "sound1.wav", "sound one");
+	
+	auto wad = Wad_file::readFromDir(dir);
+	ASSERT_TRUE(wad);
+	
+	// Now inspect the wad
+	// Order can be random, so make a map
+	std::unordered_map<SString, std::pair<SString, WadNamespace>> expected =
+	{
+		{"FILE1", {"File one", WadNamespace::Global}},
+		{"FILE2", {"File two", WadNamespace::Global}},
+		{".FILE3", {"File three", WadNamespace::Global}},
+		{".FILE4", {"File four", WadNamespace::Global}},
+		{"FILEMORE", {"File five", WadNamespace::Global}},
+		{"FLAT1", {"Flat one", WadNamespace::Flats}},
+		{"LONGTEXN", {"Flat two", WadNamespace::Flats}},
+		{"POSSA1", {"sprite one", WadNamespace::Sprites}},
+		{"POSSA1\\1", {"sprite two", WadNamespace::Sprites}},
+		{"TEX1", {"texture one", WadNamespace::TextureLumps}},
+		{"SOUND1", {"sound one", WadNamespace::Global}},
+	};
+	
+	int numlumps = wad->NumLumps();
+	for(int i = 0; i < numlumps; ++i)
+	{
+		const Lump_c *lump = wad->GetLump(i);
+		ASSERT_TRUE(lump);
+		auto it = expected.find(lump->Name());
+		ASSERT_NE(it, expected.end());
+		ASSERT_EQ(lump->Length(), (int)it->second.first.length());
+		ASSERT_FALSE(memcmp(lump->getData().data(), it->second.first.c_str(), it->second.first.length()));
+		ASSERT_EQ(wad->FindLumpInNamespace(lump->Name(), it->second.second), lump);
+		
+		expected.erase(it);	// erase it so we don't find stuff twice
+	}
+}
