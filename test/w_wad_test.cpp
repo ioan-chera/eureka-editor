@@ -607,6 +607,12 @@ TEST_F(WadFileTest, ReadDirectory)
 	
 	addFile(subdir, "sound1.wav", "sound one");
 	
+	fs::path subsubdir = dir / "sounds" / "extra";
+	fs::create_directory(subsubdir);
+	mDeleteList.push(subsubdir);
+	
+	addFile(subsubdir, "SUBLUMP.txt", "Sub");	// this will NOT be loaded
+	
 	auto wad = Wad_file::readFromDir(dir);
 	ASSERT_TRUE(wad);
 	
@@ -640,4 +646,6 @@ TEST_F(WadFileTest, ReadDirectory)
 		
 		expected.erase(it);	// erase it so we don't find stuff twice
 	}
+	
+	ASSERT_TRUE(expected.empty());	// consumed
 }

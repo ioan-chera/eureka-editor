@@ -4,6 +4,10 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+22.06.2024
+* Now resources can be loaded as PK3/PKE arranged folders.
+
+----------
 25.05.2024
 * Fixed the initial grid being set one step higher than intended in preferences.
 * Removed the non-existent "dotty" option from grid's default mode documentation.

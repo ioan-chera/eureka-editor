@@ -742,6 +742,12 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 		kill->labelsize(20);
 		kill->callback((Fl_Callback*)kill_callback, this);
 
+		// NOTE: on Apple, when selecting a folder picker, we can already pick files too, so unify the buttons
+#ifdef __APPLE__
+		Fl_Button *load = new Fl_Button(315, cy, 75 + 10 + 90, 25, "Load File or Folder");
+		mResourceFileButtons[r] = load;
+		load->callback((Fl_Callback*)load_callback, this);
+#else
 		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load File");
 		mResourceFileButtons[r] = load;
 		load->callback((Fl_Callback*)load_callback, this);
@@ -749,6 +755,7 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 		load = new Fl_Button(load->x() + load->w() + 10, cy, 90, 25, "Load Folder");
 		mResourceDirButtons[r] = load;
 		load->callback((Fl_Callback*)load_callback, this);
+#endif
 	}
 
 	// bottom buttons
@@ -1182,13 +1189,22 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
 	SYS_ASSERT(that);
+	
+	const char *title = isdir ? "Pick folder to open" : "Pick file to open";
+#ifdef __APPLE__
+	title = "Pick file or folder to open";
+	isdir = true;
+#endif
 
 	Fl_Native_File_Chooser chooser;
 
-	chooser.title("Pick file to open");
+	chooser.title(title);
 	if(isdir)
 	{
 		chooser.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
+#ifdef __APPLE__
+		chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh\nDehacked files\t*.deh\nBEX files\t*.bex");
+#endif
 	}
 	else
 	{
