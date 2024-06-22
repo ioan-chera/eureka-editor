@@ -305,6 +305,8 @@ public:
 private:
 	static std::shared_ptr<Wad_file> Create(const fs::path &filename,
 											WadOpenMode mode);
+	static std::shared_ptr<Wad_file> createAndReadDirectory(const fs::path &filename,
+															WadOpenMode mode, FILE *fp);
 
 	// read the existing directory.
 	bool ReadDirectory(FILE *fp, int totalSize);
