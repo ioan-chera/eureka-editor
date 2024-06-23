@@ -1018,6 +1018,10 @@ void UI_ProjectSetup::PopulateNamespaces()
 #endif
 }
 
+inline static fs::path fileOrDirName(const fs::path &path)
+{
+	return path.has_filename() ? path.filename() : path.parent_path().filename();
+}
 
 void UI_ProjectSetup::PopulateResources()
 {
@@ -1034,7 +1038,7 @@ void UI_ProjectSetup::PopulateResources()
 		{
 			result.resources[r] = inst.loaded.resourceList[r];
 
-			res_name[r]->value(result.resources[r].filename().u8string().c_str());
+			res_name[r]->value(fileOrDirName(result.resources[r]).u8string().c_str());
 		}
 	}
 }
@@ -1228,7 +1232,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 
 	that->result.resources[r] = fs::u8path(chooser.filename());
 
-	that->res_name[r]->value(that->result.resources[r].filename().u8string().c_str());
+	that->res_name[r]->value(fileOrDirName(that->result.resources[r]).u8string().c_str());
 }
 
 
