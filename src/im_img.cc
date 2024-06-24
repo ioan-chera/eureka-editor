@@ -164,6 +164,12 @@ void Img_c::compose(const Img_c &other, int x, int y)
 	}
 }
 
+void Img_c::flipHorizontally()
+{
+	for(int y = 0; y < h; ++y)
+		for(int x = 0; x < w / 2; ++x)
+			std::swap(pixels[y * w + x], pixels[y * w + w - x - 1]);
+}
 
 //
 // make a game image look vaguely like a spectre

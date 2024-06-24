@@ -1000,6 +1000,37 @@ void UI_Canvas::DrawThingBodies()
 	}
 }
 
+static int calcThingRotation(int angle)
+{
+	// 1: south,     247.5:292.5
+	// 2: southwest, 202.5:247.5
+	// 3: west,      157.5:202.5
+	// 4: northwest, 112.5:157.5
+	// 5: north,      67.5:112.5
+	// 6: northeast,  22.5: 67.5
+	// 7: east,      -22.5: 22.5
+	// 8: southeast, -67.5:-22.5 or rather 292.5 : 337.5
+	while(angle < 0)
+		angle += 360;
+	while(angle > 360)
+		angle -= 360;
+	if(angle >= 338 || angle < 23)
+		return 7;
+	if(angle < 68)
+		return 6;
+	if(angle < 113)
+		return 5;
+	if(angle < 158)
+		return 4;
+	if(angle < 203)
+		return 3;
+	if(angle < 248)
+		return 2;
+	if(angle < 293)
+		return 1;
+	// if(angle < 338)
+		return 8;
+}
 
 void UI_Canvas::DrawThingSprites()
 {
@@ -1021,7 +1052,7 @@ void UI_Canvas::DrawThingSprites()
 		const thingtype_t &info = inst.conf.getThingType(thing->type);
 		float scale = info.scale;
 
-		Img_c *sprite = inst.wad.getMutableSprite(inst.conf, thing->type, inst.loaded);
+		Img_c *sprite = inst.wad.getMutableSprite(inst.conf, thing->type, inst.loaded, calcThingRotation(thing->angle));
 
 		if (! sprite)
 		{

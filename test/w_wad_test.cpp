@@ -535,15 +535,92 @@ TEST_F(WadFileTest, FindFirstSpriteLump)
 	Lump_c &trood1 = wad->AddLump("TROOD1");
 	trood1.Printf("a");
 	wad->AddLump("S_END");
-
-	ASSERT_EQ(wad->findFirstSpriteLump("POSS"), &possa1);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSSA"), &possa1);
-	ASSERT_EQ(wad->findFirstSpriteLump("TROOC"), &trooc1);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSSD"), &possa2d3);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSSD2"), &possa3d2);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSSA3"), &possa3d2);
-	ASSERT_EQ(wad->findFirstSpriteLump("TROO"), &troob1);
-	ASSERT_EQ(wad->findFirstSpriteLump("POSSD4"), nullptr);
+	
+	std::vector<SpriteLumpRef> expected = {
+		{&possa1, false},
+		{&possa2d3, false},
+		{&possa3d2, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+	};
+	std::vector<SpriteLumpRef> tested = wad->findFirstSpriteLump("POSS");
+	for(int i = 0; i < 8; ++i)
+	{
+		ASSERT_EQ(tested.at(i).lump, expected[i].lump);
+		ASSERT_EQ(tested.at(i).flipped, expected[i].flipped);
+	}
+	
+	tested = wad->findFirstSpriteLump("POSSA");
+	for(int i = 0; i < 8; ++i)
+	{
+		ASSERT_EQ(tested.at(i).lump, expected[i].lump);
+		ASSERT_EQ(tested.at(i).flipped, expected[i].flipped);
+	}
+	
+	expected = {
+		{&trooc1, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+	};
+	
+	tested = wad->findFirstSpriteLump("TROOC");
+	for(int i = 0; i < 8; ++i)
+	{
+		ASSERT_EQ(tested.at(i).lump, expected[i].lump);
+		ASSERT_EQ(tested.at(i).flipped, expected[i].flipped);
+	}
+	
+	tested = wad->findFirstSpriteLump("POSSD");
+	ASSERT_TRUE(tested.empty());
+	
+	tested = wad->findFirstSpriteLump("POSSD2");
+	ASSERT_TRUE(tested.empty());
+	
+	expected = {
+		{&possa1, false},
+		{&possa2d3, false},
+		{&possa3d2, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+	};
+	
+	tested = wad->findFirstSpriteLump("POSSA3");
+	for(int i = 0; i < 8; ++i)
+	{
+		ASSERT_EQ(tested.at(i).lump, expected[i].lump);
+		ASSERT_EQ(tested.at(i).flipped, expected[i].flipped);
+	}
+	
+	expected = {
+		{&troob1, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+	};
+	tested = wad->findFirstSpriteLump("TROO");
+	for(int i = 0; i < 8; ++i)
+	{
+		ASSERT_EQ(tested.at(i).lump, expected[i].lump);
+		ASSERT_EQ(tested.at(i).flipped, expected[i].flipped);
+	}
+	
+	tested = wad->findFirstSpriteLump("POSSD4");
+	ASSERT_TRUE(tested.empty());
 }
 
 TEST_F(WadFileTest, ReadFromInvalidDir)

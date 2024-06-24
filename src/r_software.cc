@@ -888,7 +888,7 @@ public:
 
 		float scale = info.scale;
 
-		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type, inst.loaded);
+		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type, inst.loaded, Render3D_CalcRotation(inst.r_view.angle, th->angle));
 		if (! sprite)
 		{
 			sprite = &inst.wad.images.IM_UnknownSprite(inst.conf);

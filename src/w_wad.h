@@ -164,6 +164,11 @@ struct LumpRef
 	WadNamespace ns;
 };
 
+struct SpriteLumpRef
+{
+	const Lump_c *lump;
+	bool flipped;
+};
 
 class Wad_file
 {
@@ -235,7 +240,7 @@ public:
 
 	const Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group)
 			const noexcept;
-	const Lump_c *findFirstSpriteLump(const SString &stem) const;
+	std::vector<SpriteLumpRef> findFirstSpriteLump(const SString &stem) const;
 
 	int LevelCount() const noexcept
 	{

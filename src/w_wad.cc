@@ -618,60 +618,76 @@ const Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace g
 //
 // Searches for the 
 //
-const Lump_c *Wad_file::findFirstSpriteLump(const SString &stem) const
+std::vector<SpriteLumpRef> Wad_file::findFirstSpriteLump(const SString &stem) const
 {
-	SString firstName;
-	const Lump_c *result = nullptr;
-	for(const LumpRef &lumpRef : directory)
+	auto isSprite = [](const LumpRef &ref)
 	{
-		if(lumpRef.ns != WadNamespace::Sprites)
-			continue;
-		const SString &name = lumpRef.lump->name;
+		if(ref.ns != WadNamespace::Sprites)
+			return false;
+		const SString &name = ref.lump->name;
 		if(name.length() != 6 && name.length() != 8)
+			return false;
+		if(name[5] < '0' || name[5] > '8')
+			return false;
+		if(name.length() == 8 && (name[7] < '0' || name[7] > '8'))
+			return false;
+		return true;
+	};
+	
+	std::vector<SpriteLumpRef> result;
+	SString substem = stem.length() > 4 ? stem.substr(0, 4) : stem;
+	std::vector<const Lump_c *> candidates;
+	
+	SString foundName;
+	const Lump_c *foundLump = nullptr;
+	// 1. Find the first ordered stem
+	// 2. Find the first ordered frame
+	for(const LumpRef &ref : directory)
+	{
+		if(!isSprite(ref))
 			continue;
-		if(stem.length() <= 4)
+		const SString &name = ref.lump->name;
+		if(name.startsWith(substem.c_str()))
 		{
-			if(!name.startsWith(stem.c_str()))
-				continue;
+			candidates.push_back(ref.lump.get());
 		}
-		else
+		if(!name.startsWith(stem.c_str()))
+			continue;
+		if(foundName.empty() || foundName.get() > name.get())
 		{
-			if(!name.startsWith(stem.substr(0, 4).c_str()))
-				continue;
-			if(stem.length() == 5)
-			{
-				char letter = stem[4];
-				if(name[4] != letter && (name.length() != 8 || name[6] != letter))
-					continue;
-			}
-			else if(stem.length() == 6)
-			{
-				const char *pair = stem.c_str() + 4;
-				if((name[4] != pair[0] || name[5] != pair[1]) &&
-				   (name.length() != 8 || name[6] != pair[0] || name[7] != pair[1]))
-				{
-					continue;
-				}
-			}
-			else if(stem.length() == 7)
-			{
-				if(name.startsWith(stem.c_str()))
-				{
-					return lumpRef.lump.get();
-				}
-			}
-			else if(stem.length() == 8)
-			{
-				if(name == stem)
-					return lumpRef.lump.get();
-			}
-		}
-		if(firstName.empty() || firstName.get() > name.get())
-		{
-			firstName = name;
-			result = lumpRef.lump.get();
+			foundName = name;
+			foundLump = ref.lump.get();
 		}
 	}
+	if(foundName.empty())
+		return {};
+	
+	char letter = 0;
+	char rot = 0;
+	
+	// 3. Find all the other rotations with that frame
+	letter = foundName[4];
+	rot = foundName[5];
+	if(rot == '0')
+		return {{foundLump, false}};	// got one see-all-around sprite already
+	// we got some rotation
+	result.resize(8);
+	// Now look for all rotations
+	for(const Lump_c *lump : candidates)
+	{
+		const SString &name = lump->Name();
+		if(stem.length() < 4 && name.substr(0, 4) != foundName.substr(0, 4))
+			continue;
+		if(name[4] == letter)
+			result[name[5] - '1'] = {lump, false};
+		if(name.length() == 8 && name[6] == letter)
+		{
+			if(name[7] == '0')
+				return {{lump, true}};
+			result[name[7] - '1'] = {lump, true};
+		}
+	}
+	
 	return result;
 }
 

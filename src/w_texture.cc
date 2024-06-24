@@ -594,7 +594,7 @@ void ImageSet::W_ClearSprites()
 
 
 // find sprite by prefix
-static const Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &config, const SString &name)
+static std::vector<SpriteLumpRef> Sprite_loc_by_root (const MasterDir &master, const ConfigData &config, const SString &name)
 {
 	// first look for one in the sprite namespace (S_START..S_END),
 	// only if that fails do we check the whole wad.
@@ -602,13 +602,13 @@ static const Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigD
 	SString buffer;
 	buffer.reserve(16);
 	buffer = name;
-	const Lump_c *lump = nullptr;
-	lump = master.findFirstSpriteLump(buffer);
+	std::vector<SpriteLumpRef> spriteset = master.findFirstSpriteLump(buffer);
 
-	if (lump)
-		return lump;
+	if (!spriteset.empty())
+		return spriteset;
 
 	// check outside of the sprite namespace...
+	const Lump_c *lump = nullptr;
 
 	if (config.features.lax_sprites)
 	{
@@ -641,21 +641,26 @@ static const Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigD
 		lump = master.findGlobalLump(name);
 	}
 
-	return lump;
+	return {{lump, false}};
 }
 
 
-const Img_c *WadData::getSprite(const ConfigData &config, int type, const LoadingData &loading)
+const Img_c *WadData::getSprite(const ConfigData &config, int type, const LoadingData &loading, int rotation)
 {
-	const tl::optional<Img_c> *existing = get(images.sprites, type);
+	assert(rotation >= 1 && rotation <= 8);
+	const std::vector<Img_c> *existing = get(images.sprites, type);
 	if(existing)
-		return *existing ? &existing->value() : nullptr;
+	{
+		assert(existing->size() <= 1 || existing->size() == 8);
+		return existing->empty() ? nullptr :
+				existing->size() == 1 ? &(*existing)[0] : &(*existing)[rotation - 1];
+	}
 
 	// sprite not in the list yet.  Add it.
 
 	const thingtype_t &info = config.getThingType(type);
 
-	tl::optional<Img_c> result;
+	std::vector<Img_c> result;
 
 	if (info.desc.startsWith("UNKNOWN"))
 	{
@@ -663,47 +668,84 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 	}
 	else if (info.sprite.noCaseEqual("_LYT"))
 	{
-		result = Img_c::createLightSprite(palette);
+		result = {Img_c::createLightSprite(palette)};
 	}
 	else if (info.sprite.noCaseEqual("_MSP"))
 	{
-		result = Img_c::createMapSpotSprite(palette, 0, 255, 0);
+		result = {Img_c::createMapSpotSprite(palette, 0, 255, 0)};
 	}
 	else if (info.sprite.noCaseEqual("NULL"))
 	{
-		result = Img_c::createMapSpotSprite(palette, 70, 70, 255);
+		result = {Img_c::createMapSpotSprite(palette, 70, 70, 255)};
 	}
 	else
 	{
-		const Lump_c *lump = Sprite_loc_by_root(master, config, info.sprite);
-		if (! lump)
+		std::vector<SpriteLumpRef> spriteset = Sprite_loc_by_root(master, config, info.sprite);
+		if (spriteset.empty())
 		{
 			// for the MBF dog, create our own sprite for it, since
 			// it is defined in the Boom definition file and the
 			// missing sprite looks ugly in the thing browser.
 
 			if (info.sprite.noCaseEqual("DOGS"))
-				result = Img_c::createDogSprite(palette);
+				result = {Img_c::createDogSprite(palette)};
 			else
 				gLog.printf("Sprite not found: '%s'\n", info.sprite.c_str());
 		}
 		else
 		{
-			result = Img_c();
-
-			if (! LoadPicture(palette, config, *result, *lump, info.sprite, 0, 0))
+			if(spriteset.size() == 1)
 			{
-				result.reset();
+				result.resize(1);
+				result[0] = Img_c();
+				if (! LoadPicture(palette, config, result[0], *spriteset[0].lump, info.sprite, 0, 0))
+				{
+					result.clear();
+				}
+				else if(spriteset[0].flipped)
+					result[0].flipHorizontally();
+			}
+			else if(spriteset.size() == 8)
+			{
+				result.resize(8);
+				int firstRot = -1;
+				for(int i = 0; i < 8; ++i)
+				{
+					if(!spriteset[i].lump)
+						continue;
+					
+					if (! LoadPicture(palette, config, result[i], *spriteset[i].lump, info.sprite, 0, 0))
+					{
+						gLog.printf("Failed loading %s rotation %d\n", info.sprite.c_str(), i + 1);
+					}
+					else
+					{
+						firstRot = i;
+						if(spriteset[i].flipped)
+						{
+							result[i].flipHorizontally();
+						}
+					}
+				}
+				// Now sweep them for missing images
+				if(firstRot == -1)	// nothing found
+					result.clear();
+				else for(Img_c &img : result)
+					if(!img.width())
+						img = result[firstRot];
 			}
 		}
 	}
 
 	// player color remapping
 	// [ FIXME : put colors into game definition file ]
-	if (result)
+	if (!result.empty())
 	{
 		if(info.flags & THINGDEF_INVIS)
-			result = result->spectrify(config);
+		{
+			for(Img_c &img : result)
+				img = img.spectrify(config);
+		}
 		else if(info.group == 'p')
 		{
 			tl::optional<Img_c> new_img;
@@ -736,45 +778,50 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 				targ2[3] = 0xcf;
 			}
 			
-			switch (type)
+			for(Img_c &img : result)
 			{
-				case 1:
-					// no change
-					break;
-					
-				case 2:
-					new_img = result->color_remap(src1, src2, targ1[0], targ2[0]);
-					break;
-					
-				case 3:
-					new_img = result->color_remap(src1, src2, targ1[1], targ2[1]);
-					break;
-					
-				case 4:
-					new_img = result->color_remap(src1, src2, targ1[2], targ2[2]);
-					break;
-					
-					// blue for the extra coop starts
-				case 4001:
-				case 4002:
-				case 4003:
-				case 4004:
-					new_img = result->color_remap(src1, src2, targ1[3], targ2[3]);
-					break;
-			}
-			
-			if (new_img)
-			{
-				result = std::move(new_img);
+				switch (type)
+				{
+					case 1:
+						// no change
+						break;
+						
+					case 2:
+						new_img = img.color_remap(src1, src2, targ1[0], targ2[0]);
+						break;
+						
+					case 3:
+						new_img = img.color_remap(src1, src2, targ1[1], targ2[1]);
+						break;
+						
+					case 4:
+						new_img = img.color_remap(src1, src2, targ1[2], targ2[2]);
+						break;
+						
+						// blue for the extra coop starts
+					case 4001:
+					case 4002:
+					case 4003:
+					case 4004:
+						new_img = img.color_remap(src1, src2, targ1[3], targ2[3]);
+						break;
+				}
+				
+				if (new_img)
+				{
+					img = std::move(*new_img);
+				}
 			}
 		}
 	}
 
 	// note that a NULL image is OK.  Our renderer will just ignore the
 	// missing sprite.
-
-	images.sprites[type] = std::move(result);
-	return images.sprites[type] ? &*images.sprites[type] : nullptr;
+	
+	images.sprites[type] = result;
+	std::vector<Img_c> &sprites = images.sprites[type];
+	
+	return sprites.empty() ? nullptr : sprites.size() == 8 ? &sprites[rotation - 1] : &sprites[0];
 }
 
 
@@ -792,8 +839,8 @@ static void UnloadFlat(std::map<SString, Img_c>::value_type& P)
 
 static void UnloadSprite(sprite_map_t::value_type& P)
 {
-	if (P.second)
-		P.second->unload_gl(false);
+	for(Img_c &img : P.second)
+		img.unload_gl(false);
 }
 
 void ImageSet::W_UnloadAllTextures()
