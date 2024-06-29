@@ -265,7 +265,6 @@ public:
 	// M_GAME
 	bool is_sky(const SString &flat) const;
 	char M_GetFlatType(const SString &name) const;
-	const linetype_t &M_GetLineType(int type) const;
 	const sectortype_t &M_GetSectorType(int type) const;
 	char M_GetTextureType(const SString &name) const;
 	SString M_LineCategoryString(SString &letters) const;

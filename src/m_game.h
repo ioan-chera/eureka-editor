@@ -366,6 +366,7 @@ struct ConfigData
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
 
 	const thingtype_t &getThingType(int type) const;
+	const linetype_t &getLineType(int type) const;
 };
 
 //
