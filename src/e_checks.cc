@@ -3121,7 +3121,7 @@ static void Tags_FindUnmatchedSectors(selection_c& secs, const Instance &inst)
 }
 
 
-static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc)
+static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc, const ConfigData &config)
 {
 	lines.change_type(ObjType::linedefs);
 
@@ -3132,13 +3132,33 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc)
 		if (L->tag <= 0)
 			continue;
 
-		// TODO: handle special BOOM types (e.g. line-to-line teleporter)
-
 		if (L->type <= 0)
 			continue;
 
-		if (! SEC_tag_exists(L->tag, doc))
-			lines.set(n);
+		SpecialTagInfo info = {};
+		bool hasinfo = getSpecialTagInfo(ObjType::linedefs, n, L->type, L.get(), config, info);
+		
+		if(!hasinfo)
+			continue;
+		
+		for(int i = 0; i < info.numtags; ++i)
+		{
+			if(!SEC_tag_exists(info.tags[i], doc))
+			{
+				lines.set(n);
+				goto nextline;
+			}
+		}
+		for(int i = 0; i < info.numlineids; ++i)
+		{
+			if(!LD_tag_exists(info.lineids[i], doc))
+			{
+				lines.set(n);
+				goto nextline;
+			}
+		}
+	nextline:
+		;
 	}
 }
 
@@ -3159,7 +3179,7 @@ static void Tags_ShowUnmatchedLineDefs(Instance &inst)
 	if (inst.edit.mode != ObjType::linedefs)
 		inst.Editor_ChangeMode('l');
 
-	Tags_FindUnmatchedLineDefs(*inst.edit.Selected, inst.level);
+	Tags_FindUnmatchedLineDefs(*inst.edit.Selected, inst.level, inst.conf);
 
 	inst.GoToErrors();
 }
@@ -3185,6 +3205,12 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 		// TODO: boom generalized manual doors (etc??)
 		const linetype_t &info = inst.conf.getLineType(L->type);
 
+		if(info.desc.empty())
+		{
+			gLog.printf("WARNING: invalid empty description for line type %d\n", L->type);
+			continue;
+		}
+		
 		char first = info.desc[0];
 
 		if (first == 'D' || first == '-' || ('a' <= first && first <= 'z'))
@@ -3352,7 +3378,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		}
 
 
-		Tags_FindUnmatchedLineDefs(sel, doc);
+		Tags_FindUnmatchedLineDefs(sel, doc, inst.conf);
 
 		if (sel.empty())
 			dialog.AddLine("No tagged linedefs w/o a matching sector");
