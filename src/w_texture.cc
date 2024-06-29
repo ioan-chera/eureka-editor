@@ -641,7 +641,7 @@ static std::vector<SpriteLumpRef> Sprite_loc_by_root (const MasterDir &master, c
 		lump = master.findGlobalLump(name);
 	}
 
-	return {{lump, false}};
+	return lump ? std::vector<SpriteLumpRef>{{lump, false}} : std::vector<SpriteLumpRef>{};
 }
 
 
@@ -698,6 +698,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 			{
 				result.resize(1);
 				result[0] = Img_c();
+				assert(spriteset[0].lump);
 				if (! LoadPicture(palette, config, result[0], *spriteset[0].lump, info.sprite, 0, 0))
 				{
 					result.clear();
