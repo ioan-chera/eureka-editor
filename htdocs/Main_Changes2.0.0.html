@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-  <title>Eureka DOOM Editor | History </title>
+  <title>Eureka DOOM Editor | Changes 2.0.0 </title>
   <meta http-equiv='Content-Style-Type' content='text/css' />
   <link rel='stylesheet' href='eureka.css' type='text/css' />
 
@@ -63,7 +63,7 @@ a.varlink { text-decoration:none; }
 </li></ul><p class='vspace sidehead'> SourceForge
 </p>
 <div class='vspace'></div><ul><li><a class='urllink' href='https://sourceforge.net/projects/eureka-editor' rel='nofollow'>Project</a>
-</li><li><a class='urllink' href='https://sourceforge.net/projects/eureka-editor/files/Eureka/1.27' rel='nofollow'>Downloads</a>
+(TODO GITHUB) </li><li><a class='urllink' href='https://sourceforge.net/projects/eureka-editor/files/Eureka/1.27' rel='nofollow'>Downloads</a>
 </li><li><a class='urllink' href='https://sourceforge.net/p/eureka-editor/discussion/' rel='nofollow'>Forum</a>
 </li><li><a class='urllink' href='https://sourceforge.net/p/eureka-editor/tickets/' rel='nofollow'>Bugs</a>
 </li></ul><p class='vspace sidehead'> Links
@@ -85,32 +85,50 @@ a.varlink { text-decoration:none; }
       <!--PageActionFmt-->
 
       <div id='wikititle'>
-      <!-- [h1 class='pagetitle']History [/h1] -->
+      <!-- [h1 class='pagetitle']Changes127 [/h1] -->
       </div>
 
 <!--PageText-->
 <div id='wikitext'>
-<h1>Version History</h1>
-<h2>Public Releases</h2>
-<ul><li>Version 2.0.0 : 30-Jun-2024 : <a class='wikilink' href='Main_Changes2.0.0.html'>Changes 2.0.0</a>
-</li><li>Version 1.27 : 06-Feb-2020 : <a class='wikilink' href='Main_Changes127.html'>Changes127</a>
-</li><li>Version 1.24 : 05-Aug-2018 : <a class='wikilink' href='Main_Changes124.html'>Changes124</a>
-</li><li>Version 1.21 : 12-Jan-2017 : <a class='wikilink' href='Main_Changes121.html'>Changes121</a>
-</li><li>Version 1.11 : 26-Jan-2016 : <a class='wikilink' href='Main_Changes111.html'>Changes111</a>
-</li><li>Version 1.07 : 18-Feb-2015 : <a class='wikilink' href='Main_Changes107.html'>Changes107</a>
-</li><li>Version 1.00 : 25-Aug-2013 : <a class='wikilink' href='Main_Changes100.html'>Changes100</a>
-</li><li>Version 0.95 : 24-Feb-2013 : <a class='wikilink' href='Main_Changes095.html'>Changes095</a>
-</li><li>Version 0.88 : 27-Dec-2012 : <a class='wikilink' href='Main_Changes088.html'>Changes088</a>
-</li><li>Version 0.84 : 27-Nov-2012 : <a class='wikilink' href='Main_Changes084.html'>Changes084</a>
-</li><li>Version 0.81 : 16-Nov-2012 : <a class='wikilink' href='Main_Changes081.html'>Changes081</a>
-</li></ul><div class='vspace'></div><h2>Pre-release Versions </h2>
-<ul><li>Version 0.74 : 17-Feb-2012 : <a class='wikilink' href='Main_Changes074.html'>Changes074</a>
-</li><li>Version 0.72 : 01-Feb-2012 : <a class='wikilink' href='Main_Changes072.html'>Changes072</a>
-</li><li>Version 0.64 : 27-Nov-2011 : no changelog
-</li></ul><div class='vspace'></div><h2>Commit History</h2>
-<p>For all the gory details, head over to the <a class='wikilink' href='Main_SVN_Logs.html'>SVN_Logs</a> page.
+<div class='vspace'></div><h1>CHANGES IN Eureka 2.0.0</h1>
+<p><em>(Since version 1.27b)</em>
 </p>
-<div class='vspace'></div>
+<p class='vspace'>
+<br/>- The tags check is now aware of the linedef special so it doesn't look for tagged sector if the special doesn't deal with sectors.
+<br/>- Now sprites are displayed with rotations both in 2D and 3D views.
+<br/>- Now resources can be loaded as PK3/PKE arranged folders.
+<br/>- Spectral sprite view also shows up as such in the editor views, not just the sprite browser.
+<br/>- Fixed the initial grid being set one step higher than intended in preferences.
+<br/>- Removed the non-existent "dotty" option from grid's default mode documentation.
+<br/>- Added Dehacked resource support, by contribution of Isaac Colón (https://github.com/iccolon818).
+<br/>- Testing map now opens the game without blocking Eureka, just like user would start another app. Also, for macOS you can now use the app bundle.
+<br/>- Deleted Makefile.xming.
+<br/>- Now dragging lines or sectors can also split other lines. Currently still no support for the dragged lines getting split by existing vertices.
+<br/>- Added tutti-frutti texture check
+<br/>- Fixed Heretic torches looking wrong in the 3D mode
+<br/>- Fixed Heretic multiplayer sprite color translation
+<br/>- Thing definition sprite lookup is now smarter and doesn't need full names for certain frames (e.g. BOSA1C1). In consequence, mods which change the rotation distributions won't be affected.
+<br/>- Fixed the EUREKA lump to store relative paths so that the user settings are portable between computers.
+<br/>- Removed the Hexen format support from Eternity. This format is only meant for vanilla Hexen wads and should not be used for new maps when UDMF is available.
+<br/>- Now the tagged items (regardless of type) get highlighted properly, depending on the triggering special.
+<br/>- Fixed an access violation happening when starting a new ZDoom project.
+<br/>- Now the menu commands show their actual shortcuts as set in user preferences.
+<br/>- Now the Jump to Objects dialog allows you to choose multiple items.
+<br/>- Fixed missing 'm' texture category from heretic.ugh. Added it and named it "magic".
+<br/>- Fixed so clicking a button while editing a panel field won't reset the field.
+<br/>- Fixed a bug where dragging a vertex into a neighbouring linedef to split it resulted in two overlapping lines.
+<br/>- Fixed a crash happening when starting a new project while a linedef is selected.
+<br/>- Fixed a crash happening when using R to change sidedef offset in 3D mode on a selected (but not highlighted) linedef.
+<br/>- Do not throw a fatal error when loading invalid project resource files (other than broken UGH files).
+<br/>- Fixed a fatal error happening when deleting the last vertex.
+<br/>- Fixed an illegal operation being run when rendering 3D mode.
+<br/>- Fixed wrong labelling of sidedef texture boxes.
+<br/>- Fixed failure to compile on SmartOS.
+<br/>- Fixed failure to locate a patch if an equally named flat exists.
+<br/>- Fixed the Strife klaxon things to hang from ceiling.
+<br/>- Fixed the Strife Sigil sprite not displaying correctly.
+</p>
+
 </div>
 
 &nbsp;
