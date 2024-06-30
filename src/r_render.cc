@@ -50,7 +50,6 @@
 #include "ui_window.h"
 #include "Vertex.h"
 
-
 // config items
 rgb_color_t config::transparent_col = rgbMake(0, 255, 255);
 
@@ -286,7 +285,7 @@ int Render3D_CalcRotation(double viewAngle_rad, int thingAngle_deg)
 	while(angleDelta_rad < -157.5 * M_PI / 180.0)
 		angleDelta_rad += 2 * M_PI;
 	
-	return clamp((int)floor((202.5 * M_PI / 180.0 - angleDelta_rad) / M_PI_4 + 1.0), 1, 8);
+	return clamp((int)floor((202.5 * M_PI / 180.0 - angleDelta_rad) / (M_PI / 4.0) + 1.0), 1, 8);
 }
 
 //------------------------------------------------------------------------
