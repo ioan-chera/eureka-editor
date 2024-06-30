@@ -2,7 +2,12 @@
 EUREKA AUTHORS
 ==============
 
-CREATOR:
+CREATORS:
+
+Ioan Chera
+
+Current developer of Eureka.
+
 
 Andrew Apted  <ajapted@users.sf.net>
 

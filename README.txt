@@ -1,12 +1,12 @@
 
-Eureka 1.27 README
-==================
+Eureka 2.0.0 README
+===================
 
 
 INTRODUCTION
 
 Eureka is a map editor for the classic DOOM games, and a few related
-games such as Heretic and Hexen.  The supported operating systems are
+games such as Heretic, Hexen and Strife.  The supported operating systems are
 Linux (and other Unix-likes), Windows and macOS.
 
 
@@ -52,8 +52,11 @@ See the INSTALL.txt document (in source code)
 
 RUNNING
 
+
+Command line:
+
 You can run Eureka from the command line, or it can be run from
-the desktop menu (if your OS handles .desktop files as per the
+the desktop menu (on Linux: if your OS handles .desktop files as per the
 XDG specs).  Eureka will need to be able to find an IWAD to run,
 if it cannot find any then the "Manage Wads" dialog will open up,
 allowing you to "Find" one (which is remembered for next time).
@@ -287,3 +290,49 @@ COPYRIGHT and LICENSE
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
+
+
+Updates in v2.0.0
+-----------------
+
+* Thing sprites are displayed with rotations both in 2D and 3D views.
+* Now resources can be loaded as PK3/PKE extracted folders.
+* Fixed the initial grid being set one step higher than intended in preferences.
+* Removed the non-existent "dotty" option from grid's default mode documentation.
+* Added Dehacked resource support, by contribution of Isaac Colón (https://github.com/iccolon818).
+* Testing map now opens the game without blocking Eureka, just like user would start another app.
+  Also, for macOS you can now use the app bundle.
+* Deleted Makefile.xming.
+* Now dragging lines or sectors can also split other lines. Currently still no support for the
+  dragged lines getting split by existing vertices.
+* Added tutti-frutti texture check
+* Fixed Heretic torches looking wrong in the 3D mode
+* Fixed Heretic multiplayer sprite color translation
+* Thing definition sprite lookup is now smarter and doesn't need full names for certain frames (e.g.
+  BOSA1C1). In consequence, mods which change the rotation distributions won't be affected.
+* Fixed the EUREKA lump to store relative paths so that the user settings are portable between
+  computers.
+* Removed the Hexen format support from Eternity. This format is only meant for vanilla Hexen wads
+  and should not be used for new maps when UDMF is available.
+* Now the tagged items (regardless of type) get highlighted properly, depending on the triggering
+  special.
+* Fixed an access violation happening when starting a new ZDoom project.
+* Now the menu commands show their actual shortcuts as set in user preferences.
+* Now the Jump to Objects dialog allows you to choose multiple items.
+* Fixed missing 'm' texture category from heretic.ugh. Added it and named it "magic".
+* Fixed so clicking a button while editing a panel field won't reset the field.
+* Fixed a bug where dragging a vertex into a neighbouring linedef to split it resulted in two
+  overlapping lines.
+* Fixed a crash happening when starting a new project while a linedef is selected.
+* Fixed a crash happening when using R to change sidedef offset in 3D mode on a selected (but not
+  highlighted) linedef.
+* Do not throw a fatal error when loading invalid project resource files (other than broken UGH
+  files).
+* Fixed a fatal error happening when deleting the last vertex.
+* Fixed an illegal operation being run when rendering 3D mode.
+* Fixed wrong labelling of sidedef texture boxes.
+* Fixed failure to compile on SmartOS.
+* Fixed failure to locate a patch if an equally named flat exists.
+* Fixed the Strife klaxon things to hang from ceiling.
+* Fixed the Strife Sigil sprite not displaying correctly.
+* WADs are now fully loaded in memory.

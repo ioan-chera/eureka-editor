@@ -2,6 +2,8 @@
 Eureka TODO / WISHLIST
 ======================
 
+See also github.com/ioan-chera/eureka-editor list of issues.
+
 
 Slightly Possible
 -----------------
@@ -73,8 +75,6 @@ Slightly Possible
 -  feature "tile_nonpow2"  [ emulate tutti frutti when absent ]
 
 -  draw the sky texture in 3D view
-
--  rotated sprites in 3D view
 
 -  when browser opened by a click, jump to the texture/etc clicked on
 
@@ -212,4 +212,3 @@ NO:  conversion from Boom --> vanilla DOOM
 NO:  for DOOM have "Switch", "Grating", "Door" categories
 
 NO:  add MBF things: 2016 "BETA Sceptre", 2017 "BETA Bible"
-
