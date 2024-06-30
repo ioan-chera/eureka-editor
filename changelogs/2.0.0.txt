@@ -1,11 +1,21 @@
-Changes for 2.0
-===============
+Changes for 2.0.0
+=================
 
 dd.mm.yyyy
 
 ----------
+29.06.2024
+* The tags check is now aware of the linedef special so it doesn't look for tagged sector if the
+  special doesn't deal with sectors.
+
+----------
+24.06.2024
+* Now sprites are displayed with rotations both in 2D and 3D views.
+
+----------
 22.06.2024
 * Now resources can be loaded as PK3/PKE arranged folders.
+* Spectral sprite view also shows up as such in the editor views, not just the sprite browser.
 
 ----------
 25.05.2024
@@ -24,7 +34,7 @@ dd.mm.yyyy
 
 ----------
 07.10.2023
-* Now dragging lines or sectors can also split other lines. Currently still no support for the 
+* Now dragging lines or sectors can also split other lines. Currently still no support for the
   dragged lines getting split by existing vertices.
 
 ----------
