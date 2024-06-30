@@ -275,6 +275,7 @@ if(APPLE OR WIN32)
         message(STATUS "Building ${LOCAL_FLTK_SOURCE}")
 
         set(LOCAL_FLTK_DEFS -D CMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
+                            -D CMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}
                             -D CMAKE_BUILD_TYPE=Release
                             -D OPTION_USE_SYSTEM_LIBJPEG=OFF -D OPTION_USE_SYSTEM_LIBPNG=OFF
                             -D OPTION_USE_SYSTEM_ZLIB=OFF
