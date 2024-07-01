@@ -545,13 +545,13 @@ int Main_key_handler(int event)
 int x11_check_focus_change(void *xevent, void *data)
 {
 	// TODO: get multiple windows
-	if (gInstance.main_win != NULL)
+	if (gInstance->main_win != NULL)
 	{
 		const XEvent *xev = (const XEvent *)xevent;
 
 		Window xid = xev->xany.window;
 
-		if (fl_find(xid) == gInstance.main_win)
+		if (fl_find(xid) == gInstance->main_win)
 		{
 			switch (xev->type)
 			{
