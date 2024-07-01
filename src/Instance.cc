@@ -18,4 +18,4 @@
 
 #include "Instance.h"
 
-Instance gInstance;
+Instance *gInstance;

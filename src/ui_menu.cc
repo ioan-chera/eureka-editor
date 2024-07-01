@@ -88,7 +88,7 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 
 	// TODO: think up the right instance to get this
 	if (given_idx >= 0)
-		gInstance.last_given_file = given_idx;
+		gInstance->last_given_file = given_idx;
 
 	try
 	{
@@ -374,7 +374,7 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 static void tools_do_preferences(Fl_Widget *w, void * data)
 {
 	// FIXME: this uses the global instance because it's also used globally on Mac
-	gInstance.ExecuteCommand("PreferenceDialog");
+	gInstance->ExecuteCommand("PreferenceDialog");
 }
 
 static void tools_do_build_nodes(Fl_Widget *w, void * data)

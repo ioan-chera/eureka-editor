@@ -1578,7 +1578,7 @@ void UI_Preferences::SaveValues()
 		Fl::foreground(0, 0, 0);
 
 		// TODO: update for ALL windows
-		gInstance.main_win->redraw();
+		gInstance->main_win->redraw();
 	}
 	else if (config::gui_color_set == 2)
 	{
@@ -1590,7 +1590,7 @@ void UI_Preferences::SaveValues()
 						RGB_BLUE(config::gui_custom_fg));
 
 		// TODO: update for ALL windows
-		gInstance.main_win->redraw();
+		gInstance->main_win->redraw();
 	}
 
 	/* General Tab */
@@ -1623,7 +1623,7 @@ void UI_Preferences::SaveValues()
 		config::browser_combine_tex = new_combo;
 
 		// TODO: update for ALL windows
-		gInstance.main_win->browser->Populate();
+		gInstance->main_win->browser->Populate();
 	}
 
 	// decode the user ratio
@@ -1636,7 +1636,7 @@ void UI_Preferences::SaveValues()
 		std::swap(config::grid_ratio_low, config::grid_ratio_high);
 
 	// TODO: update for ALL windows
-	gInstance.main_win->info_bar->UpdateRatio();
+	gInstance->main_win->info_bar->UpdateRatio();
 
 	/* Grid Tab */
 

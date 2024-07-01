@@ -130,8 +130,8 @@ void RecentKnowledge::parsePortPath(const SString &name, const SString &cpath)
 	path.erase(0, pos + 1);
 
 	setPortPath(name, fs::u8path(path.get()));
-	if(gInstance.main_win)
-		testmap::updateMenuName(gInstance.main_win->menu_bar, gInstance.loaded);
+	if(gInstance->main_win)
+		testmap::updateMenuName(gInstance->main_win->menu_bar, gInstance->loaded);
 
 	// parse any other arguments
 	// [ none needed atm.... ]
