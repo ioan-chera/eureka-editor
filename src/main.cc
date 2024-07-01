@@ -1281,6 +1281,7 @@ int EurekaMain(int argc, char *argv[])
 		// it will get loaded again in Main_LoadResources().
 		// TODO: check result
 		gInstance.wad.master.setGameWad(gameWad);
+		gameWad.reset();
 
 		// load the initial level
 		// TODO: first instance
