@@ -505,7 +505,6 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 	fs::path portName = portPath.filename();
 	SString portPathStorage = portName.u8string();
 	
-	argv.push_back(portPathStorage.get().data());
 	SString argString;
 	for(SString &arg : args)
 	{
