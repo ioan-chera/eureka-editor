@@ -43,14 +43,14 @@ static_extra = (
 template = 'template.html'
 
 with open(os.path.join(cur_path, template)) as f:
-    template_data = f.read()
+    template_data = f.read().replace('&nbsp;', ' ')
 
 template_soup = BeautifulSoup(template_data, 'html.parser')
 
 for item in legacy_content:
     path = os.path.join(cur_path, item)
     with open(os.path.join(cur_path, path)) as f:
-        item_data = f.read()
+        item_data = f.read().replace('&nbsp;', ' ')
     item_soup = BeautifulSoup(item_data, 'html.parser')
 
     template_soup.find(id='wikitext').replaceWith(item_soup)
@@ -61,7 +61,7 @@ for item in legacy_content:
         title = 'MainPage'  # index.html only one
 
     with open(os.path.join(out_path, item), 'w') as f:
-        f.write(template_soup.prettify(formatter='minimal').replace('$(TITLE)', title))
+        f.write(str(template_soup).replace('$(TITLE)', title))
 
 
 def copyanything(src, dst):
