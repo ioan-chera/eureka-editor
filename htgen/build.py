@@ -3,6 +3,7 @@ import sys
 from bs4 import BeautifulSoup
 import shutil
 import errno
+import markdown
 
 cur_path = os.path.dirname(os.path.realpath(__file__))
 out_path = os.path.join(cur_path, '..', 'htdocs-OUTPUT')
@@ -52,6 +53,15 @@ for item in legacy_content:
     with open(os.path.join(cur_path, path)) as f:
         item_data = f.read().replace('&nbsp;', ' ')
     item_soup = BeautifulSoup(item_data, 'html.parser')
+
+    if item == 'Main_TODO.html':
+        with open(os.path.join(cur_path, '..', 'TODO.txt')) as f:
+            todo_content = f.read()
+        item_soup.pre.string = todo_content
+    elif item == 'Main_Credits.html':
+        with open(os.path.join(cur_path, '..', 'AUTHORS.md')) as f:
+            authors_content = f.read()
+        item_soup.div.append(BeautifulSoup(markdown.markdown(authors_content, extensions=['fenced_code']), 'html.parser'))
 
     template_soup.find(id='wikitext').replaceWith(item_soup)
 
