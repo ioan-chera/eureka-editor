@@ -37,7 +37,7 @@ legacy_content = (
 )
 
 static_extra = (
-    'shots', 'user', 'custom_logo.png', 'eureka.css', 'grid.png'
+    'shots', 'custom_logo.png', 'eureka.css', 'grid.png'
 )
 
 template = 'template.html'
