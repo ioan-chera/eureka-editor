@@ -82,7 +82,7 @@ for item in legacy_content:
         title = 'MainPage'  # index.html only one
 
     with open(os.path.join(out_path, item), 'w') as f:
-        f.write(template_soup.prettify().replace('$(TITLE)', title))
+        f.write(template_soup.prettify(formatter='minimal').replace('$(TITLE)', title))
 
 
 def copyanything(src, dst):
