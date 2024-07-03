@@ -736,7 +736,7 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 // Move a single vertex, without depending on the user interface highlighting
 //
 static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID,
-						 const v2double_t &delta, int &deletedVertexID)
+						 const v2double_t &delta, int &deletedVertexID, const selection_c &movingGroup)
 {
 	const Vertex &vertex = *inst.level.vertices[vertexID];
 	deletedVertexID = -1;
@@ -744,7 +744,7 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID,
 	v2double_t dest = vertex.xy() + delta;
 
 	Objid obj = hover::getNearbyObject(ObjType::vertices, inst.level, inst.conf, inst.grid, dest);
-	if(obj.valid() && obj.num != vertexID)
+	if(obj.valid() && obj.num != vertexID && !movingGroup.get(obj.num))
 	{
 		// Vertex merging
 		// TODO: messaging
@@ -765,17 +765,22 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID,
 							   splitPoint, dest, vertexID);
 	if(obj.valid())
 	{
-		splitLine = obj.num;
-		if(inst.level.objects.findLineBetweenLineAndVertex(splitLine, vertexID) >= 0)
+		const auto& L = inst.level.linedefs[obj.num];
+		assert(L);
+		if (!movingGroup.get(L->start) && !movingGroup.get(L->end))
 		{
-			// TODO: messaging
-			selection_c del_list;
-			inst.level.objects.splitLinedefAndMergeSandwich(op, splitLine, vertexID, delta,
-															&del_list);
-			deletedVertexID = del_list.find_first();
-			return;
+			splitLine = obj.num;
+			if (inst.level.objects.findLineBetweenLineAndVertex(splitLine, vertexID) >= 0)
+			{
+				// TODO: messaging
+				selection_c del_list;
+				inst.level.objects.splitLinedefAndMergeSandwich(op, splitLine, vertexID, delta,
+					&del_list);
+				deletedVertexID = del_list.find_first();
+				return;
+			}
+			inst.level.linemod.splitLinedefAtVertex(op, splitLine, vertexID);
 		}
-		inst.level.linemod.splitLinedefAtVertex(op, splitLine, vertexID);
 	}
 
 	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + MakeValidCoord(inst.loaded.levelFormat,
@@ -810,15 +815,21 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 		{
 			// We need the selection list as an array so we can easily modify it during iteration
 			std::vector<int> sel = list.asArray();
+			selection_c movingGroup = list;
 			
 			for(auto it = sel.begin(); it != sel.end(); ++it)
 			{
 				int deletedVertex = -1;
-				doMoveVertex(op, inst, *it, delta.xy, deletedVertex);
-				if(deletedVertex >= 0 && deletedVertex < list.max_obj())
-					for(auto jt = it + 1; jt != sel.end(); ++jt)
-						if(*jt > deletedVertex)
-							-- *jt;
+				doMoveVertex(op, inst, *it, delta.xy, deletedVertex, movingGroup);
+				if (deletedVertex >= 0 && deletedVertex < list.max_obj())
+					for (auto jt = it + 1; jt != sel.end(); ++jt)
+						if (*jt > deletedVertex)
+						{
+							movingGroup.clear(*jt);
+							--*jt;
+							movingGroup.set(*jt);
+						}
+				movingGroup.clear(*it);
 			}
 			break;
 		}

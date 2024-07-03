@@ -1069,7 +1069,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
-	if (! gInstance.level.Main_ConfirmQuit("open another map"))
+	if (! gInstance->level.Main_ConfirmQuit("open another map"))
 		return;
 
 
@@ -1110,7 +1110,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 		return;
 	}
 
-	LoadingData loading = gInstance.loaded;
+	LoadingData loading = gInstance->loaded;
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
@@ -1135,19 +1135,19 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// These 2 may throw, but it's safe here
-	NewDocument newdoc = gInstance.openDocument(loading, *wad, lev_num);
-	NewResources newres = loadResources(newdoc.loading, gInstance.wad);
+	NewDocument newdoc = gInstance->openDocument(loading, *wad, lev_num);
+	NewResources newres = loadResources(newdoc.loading, gInstance->wad);
 
-	gInstance.level = std::move(newdoc.doc);
-	gInstance.conf = std::move(newres.config);
-	gInstance.loaded = std::move(newres.loading);
-	gInstance.wad = std::move(newres.waddata);
-	gInstance.wad.master.ReplaceEditWad(wad);
+	gInstance->level = std::move(newdoc.doc);
+	gInstance->conf = std::move(newres.config);
+	gInstance->loaded = std::move(newres.loading);
+	gInstance->wad = std::move(newres.waddata);
+	gInstance->wad.master.ReplaceEditWad(wad);
 	
-	if(gInstance.main_win)
-		testmap::updateMenuName(gInstance.main_win->menu_bar, gInstance.loaded);
+	if(gInstance->main_win)
+		testmap::updateMenuName(gInstance->main_win->menu_bar, gInstance->loaded);
 
-	gInstance.refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, true);
+	gInstance->refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, true);
 }
 
 

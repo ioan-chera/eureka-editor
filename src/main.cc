@@ -532,7 +532,7 @@ int Main_key_handler(int event)
 	if (Fl::event_key() == FL_Escape)
 	{
 		// TODO: use the currently active instance instead
-		gInstance.EV_EscapeKey();
+		gInstance->EV_EscapeKey();
 		return 1;
 	}
 
@@ -545,13 +545,13 @@ int Main_key_handler(int event)
 int x11_check_focus_change(void *xevent, void *data)
 {
 	// TODO: get multiple windows
-	if (gInstance.main_win != NULL)
+	if (gInstance->main_win != NULL)
 	{
 		const XEvent *xev = (const XEvent *)xevent;
 
 		Window xid = xev->xany.window;
 
-		if (fl_find(xid) == gInstance.main_win)
+		if (fl_find(xid) == gInstance->main_win)
 		{
 			switch (xev->type)
 			{
@@ -716,7 +716,7 @@ static void Main_OpenWindow(Instance &inst)
 	if (config::begin_maximized)
 		inst.main_win->Maximize();
 
-	log_viewer = new UI_LogViewer(gInstance);
+	log_viewer = new UI_LogViewer(*gInstance);
 
 	gLog.openWindow([](const SString &text, void *userData)
                     {
@@ -815,14 +815,14 @@ static void updateStatusByChildProcesses(const Instance &inst)
 void Main_Loop()
 {
 	// TODO: must think this through
-	gInstance.RedrawMap();
+	gInstance->RedrawMap();
 
 	for (;;)
 	{
 		// TODO: determine the active instance
-		if (gInstance.edit.is_navigating)
+		if (gInstance->edit.is_navigating)
 		{
-			gInstance.Nav_Navigate();
+			gInstance->Nav_Navigate();
 
 			Fl::wait(0);
 
@@ -836,7 +836,7 @@ void Main_Loop()
 
 		if (global::want_quit)
 		{
-			if (gInstance.level.Main_ConfirmQuit("quit"))
+			if (gInstance->level.Main_ConfirmQuit("quit"))
 				break;
 
 			global::want_quit = false;
@@ -845,14 +845,14 @@ void Main_Loop()
 		// TODO: handle these in a better way
 
 		// TODO: HANDLE ALL INSTANCES
-		gInstance.main_win->UpdateTitle(gInstance.level.MadeChanges ? '*' : 0);
+		gInstance->main_win->UpdateTitle(gInstance->level.MadeChanges ? '*' : 0);
 
-		gInstance.main_win->scroll->UpdateBounds();
+		gInstance->main_win->scroll->UpdateBounds();
 
-		if (gInstance.edit.Selected->empty())
-			gInstance.edit.error_mode = false;
+		if (gInstance->edit.Selected->empty())
+			gInstance->edit.error_mode = false;
 
-		updateStatusByChildProcesses(gInstance);
+		updateStatusByChildProcesses(*gInstance);
 	}
 }
 
@@ -1151,6 +1151,9 @@ int EurekaMain(int argc, char *argv[])
 		}
 
 		init_progress = ProgressStatus::nothing;
+		
+		Instance instance;
+		gInstance = &instance;
 
 
 		// a quick pass through the command line arguments
@@ -1190,7 +1193,7 @@ int EurekaMain(int argc, char *argv[])
 
 
 		// load all the config settings
-		config::preloading = gInstance.loaded;
+		config::preloading = gInstance->loaded;
 		prepareConfigPath();
 		M_ParseConfigFile(global::config_file, options);
 
@@ -1200,10 +1203,10 @@ int EurekaMain(int argc, char *argv[])
 		// and command line arguments will override both
 		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal, global::Pwad_list, options);
 		
-		gInstance.loaded = config::preloading;	// update state now
+		gInstance->loaded = config::preloading;	// update state now
 
 		// TODO: create a new instance
-		gInstance.Editor_Init();
+		gInstance->Editor_Init();
 
 		Main_SetupFLTK();
 
@@ -1215,11 +1218,11 @@ int EurekaMain(int argc, char *argv[])
 
 		global::recent.lookForIWADs(global::install_dir, global::home_dir);
 
-		Main_OpenWindow(gInstance);
+		Main_OpenWindow(*gInstance);
 
 		init_progress = ProgressStatus::window;
 
-		gInstance.M_LoadOperationMenus();
+		gInstance->M_LoadOperationMenus();
 
 
 		// open a specified PWAD now
@@ -1240,12 +1243,12 @@ int EurekaMain(int argc, char *argv[])
 			
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.wad.master.ReplaceEditWad(editWad);
+			gInstance->wad.master.ReplaceEditWad(editWad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
-		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
+		else if (config::auto_load_recent && ! (!gInstance->loaded.iwadName.empty() || !gInstance->loaded.levelName.empty()))
 		{
-			gInstance.M_TryOpenMostRecent();
+			gInstance->M_TryOpenMostRecent();
 		}
 
 
@@ -1256,12 +1259,12 @@ int EurekaMain(int argc, char *argv[])
 		// Note: there is logic in M_ParseEurekaLump() to ensure that command
 		// line arguments can override the EUREKA_LUMP values.
 
-		if (gInstance.wad.master.editWad())
+		if (gInstance->wad.master.editWad())
 		{
-			if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, gInstance.wad.master.editWad().get(), true /* keep_cmd_line_args */))
+			if (! gInstance->loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, gInstance->wad.master.editWad().get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
-				gInstance.wad.master.RemoveEditWad();
+				gInstance->wad.master.RemoveEditWad();
 			}
 		}
 
@@ -1269,31 +1272,32 @@ int EurekaMain(int argc, char *argv[])
 		// determine which IWAD to use
 		// TODO: instance management
 		std::shared_ptr<Wad_file> gameWad;
-		if (! DetermineIWAD(gInstance))
+		if (! DetermineIWAD(*gInstance))
 			goto quit;
-		gameWad = Wad_file::Open(gInstance.loaded.iwadName, WadOpenMode::read);
+		gameWad = Wad_file::Open(gInstance->loaded.iwadName, WadOpenMode::read);
 		if(!gameWad)
 			goto quit;
 
-		DeterminePort(gInstance);
+		DeterminePort(*gInstance);
 
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
 		// TODO: check result
-		gInstance.wad.master.setGameWad(gameWad);
+		gInstance->wad.master.setGameWad(gameWad);
+		gameWad.reset();
 
 		// load the initial level
 		// TODO: first instance
-		gInstance.loaded.levelName = DetermineLevel(gInstance);
+		gInstance->loaded.levelName = DetermineLevel(*gInstance);
 
-		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
+		gLog.printf("Loading initial map : %s\n", gInstance->loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.wad.master.activeWad().get(), gInstance.loaded.levelName);
+		gInstance->LoadLevel(gInstance->wad.master.activeWad().get(), gInstance->loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
-		gInstance.Main_LoadResources(gInstance.loaded);	// TODO: instance management
+		gInstance->Main_LoadResources(gInstance->loaded);	// TODO: instance management
 
 
 		Main_Loop();

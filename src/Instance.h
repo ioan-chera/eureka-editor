@@ -542,6 +542,6 @@ public:	// will be private when we encapsulate everything
 	sector_info_cache_c sector_info_cache{ *this };
 };
 
-extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
+extern Instance *gInstance;	// for now we run with one instance, will have more for the MDI.
 
 #endif

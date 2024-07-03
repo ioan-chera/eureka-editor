@@ -73,14 +73,13 @@ void TestMapFixture::writeShellScript(const fs::path &path)
 	mDeleteList.push(path);
 	stream << "#!/bin/bash" << std::endl;
 	stream << "echo running script" << std::endl;
-	// TODO: fix this!?
-	stream << "echo \"$0\" > " << SString(path.u8string()).spaceEscape(true) << std::endl;
+	stream << "echo \"$0\" > " << SString(outputPath.u8string()).spaceEscape(true) << std::endl;
 	stream << "for var in \"$@\"" << std::endl;
 	stream << "do" << std::endl;
-	stream << "echo \"$var\" >> " << SString(outputPath).spaceEscape(true) <<
+	stream << "echo \"$var\" >> " << SString(outputPath.u8string()).spaceEscape(true) <<
 		std::endl;
 	stream << "done" << std::endl;
-	stream << "echo done > " << SString(finishMarkPath).spaceEscape(true) << std::endl;
+	stream << "echo done > " << SString(finishMarkPath.u8string()).spaceEscape(true) << std::endl;
 	stream.close();
 	int r = chmod(path.u8string().c_str(), S_IRWXU);
 	ASSERT_FALSE(r);

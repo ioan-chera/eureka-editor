@@ -126,27 +126,27 @@ int EurekaMain(int argc, char *argv[]);
 //
 // Replacement for NSApplicationMain. Also borrowed from SDLMain.m
 //
-static void CustomApplicationMain (int argc, char **argv)
-{
-    NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
-    AppDelegate				*delegate;
-	
-    // Ensure the application object is initialised
-    [NSApplication sharedApplication];
-	
-    // Set up the menubar
-    [NSApp setMainMenu:[[NSMenu alloc] init]];
-	
-    // Create SDLMain and make it the app delegate
-    delegate = [[AppDelegate alloc] init];
-    [[NSApplication sharedApplication] setDelegate:delegate];
-	
-    // Start the main event loop
-    [NSApp run];
-	
-    [delegate release];
-    [pool release];
-}
+//static void CustomApplicationMain (int argc, char **argv)
+//{
+//    NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
+//    AppDelegate				*delegate;
+//	
+//    // Ensure the application object is initialised
+//    [NSApplication sharedApplication];
+//	
+//    // Set up the menubar
+//    [NSApp setMainMenu:[[NSMenu alloc] init]];
+//	
+//    // Create SDLMain and make it the app delegate
+//    delegate = [[AppDelegate alloc] init];
+//    [[NSApplication sharedApplication] setDelegate:delegate];
+//	
+//    // Start the main event loop
+//    [NSApp run];
+//	
+//    [delegate release];
+//    [pool release];
+//}
 
 //
 // main
@@ -173,5 +173,12 @@ int main(int argc, char *argv[])
 		gFinderLaunch = NO;
 	}
 	
-	CustomApplicationMain(gArgc, gArgv);
+	// Set install_dir from here (it's dependent on project build settings)
+	// Current value (might change): .app package root directory
+	global::install_dir = [[[NSBundle mainBundle] resourcePath]
+				   cStringUsingEncoding:NSUTF8StringEncoding];
+
+	return EurekaMain(gArgc, gArgv);
+	
+//	CustomApplicationMain(gArgc, gArgv);
 }
