@@ -1,0 +1,32 @@
+<div id='wikitext'>
+<p><span style='font-size:83%'><a class='wikilink' href='User_Index.html'>back to the Index</a></span> &nbsp; | &nbsp; <span style='font-size:83%'><a class='wikilink' href='Cookbook_Doors.html'>go to next page</a></span>
+</p>
+<div class='vspace'></div><h1>Teleporters</h1>
+<div><img src='user/teleport-01.png' alt='' title='' /></div>
+<p>A teleport is triggered by walking over a linedef with the teleport special. The tag of the linedef points to the sector where the teleport lands.
+</p>
+<div class='vspace'></div><h2>Teleport Platform</h2>
+<ul><li>Create a 64x64 sector for the teleport platform
+</li><li>Set the floor texture as GATE1, the ceiling as TLITE6_5
+</li></ul><div class='vspace'></div><div><img src='user/teleport-02.png' alt='' title='' /></div>
+<ul><li>Enter linedef edit mode (<span class='key'>l</span>)
+</li><li>Press <span class='key'>;</span> then <span class='key'>f</span> to apply a fresh tag to all four linedefs. This will point to the teleport landing sector.
+</li></ul><div class='vspace'></div><div><img src='user/teleport-03.png' alt='' title='' /></div>
+<ul><li>Choose the linedef <strong>Type</strong> as 97 WR Teleport
+</li></ul><div class='vspace'></div>
+<table id='noticebox' ><tr><td  valign='top'>
+<p><strong>Note:</strong>
+</p>
+<p class='vspace'>A teleport is only triggered when walking from the <strong>Front</strong> to the <strong>Back</strong> of a linedef. This is intentional as it allows the player to walk off the landing platform without triggering another unintended teleport.
+</p></td></tr></table>
+<h2>Landing Site</h2>
+<ul><li>Tag the landing sector the same as the teleporter linedefs. Press <span class='key'>;</span> then <span class='key'>l</span> to apply the last used tag to the landing sector.
+</li><li>Enter Thing edit mode (<span class='key'>t</span>), position the mouse cursor inside the landing sector and press <span class='key'>INS</span>. Choose the <strong>Type</strong> as 14 Teleport Exit (labelled as TFOG in the thing browser)
+</li></ul><div class='vspace'></div><div><img src='user/teleport-04.png' alt='' title='' /></div>
+<ul><li>Click the directional arrows to set the angle of the TFOG thing. This is the angle faced after teleporting.
+</li></ul><div class='vspace'></div><h2>Downloads</h2>
+<p><a class='urllink' href='http://sourceforge.net/projects/eureka-editor/files/Misc/Samples/teleporters.wad/download' rel='nofollow'>teleporters.wad</a>
+</p>
+<p class='vspace'><span style='font-size:83%'><a class='wikilink' href='User_Index.html'>back to the Index</a></span> &nbsp; | &nbsp; <span style='font-size:83%'><a class='wikilink' href='Cookbook_Doors.html'>go to next page</a></span>
+</p>
+</div>

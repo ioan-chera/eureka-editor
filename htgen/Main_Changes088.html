@@ -1,0 +1,52 @@
+<div id='wikitext'>
+<h1>CHANGES IN Eureka 0.88c (r605)</h1>
+<p><em>(Changes are since the 0.84 version, r304)</em>
+</p>
+<p class='vspace'>+  large overhaul of file handling:
+</p><div class='indent'>+  'Manage Wads' dialog allows setting the IWAD, port and resource wads
+<br  />+  'Open Map' dialog, with buttons for easy map selection
+<br  />+  'Recent Files' dialog (CTRL-R or File menu)
+<br  />+  the iwad/port/resource settings are saved in the PWAD
+<br  />+  better 'Export Map' dialog
+<br  />+  IWADs found by the user are remembered
+</div><p class='vspace'>+  new Default Properties panel (shown in vertex mode)
+<br  />+  implemented picture mode for Thing browser
+<br  />+  new Move/Scale/Rotate dialogs (via Edit menu)
+</p>
+<p class='vspace'>+  support for Doom Legacy, courtesy Wesley Johnson
+<br  />+  support for HACX (not quite finished, but usable)
+<br  />+  3D view: fixed the slime trails
+</p>
+<p class='vspace'>-  added 'd' disconnect command for sectors
+<br  />-  added 'm' merge command for vertices
+<br  />-  added 'm' merge command for two linedefs
+</p>
+<p class='vspace'><span  style='color: red;'>!</span>  the -iwad parameter can no longer be a directory name
+</p>
+<p class='vspace'>-  shortcut key for 'File/Export Map' is now CTRL-E
+<br  />-  swapped sector height keys: '.' ',' &lt;---&gt; '[' ']'
+<br  />-  grid-snap button is easier to use (a toggle button now)
+<br  />-  can disable multi-select ('multi_select_modifier' config var)
+<br  />-  sectors created outside of map now have fixed size
+<br  />-  show a '*' in window title when map has unsaved changes
+</p>
+<p class='vspace'>-  got 'View/Jump to Object' command working ('j' key)
+<br  />-  got 'View/Show Object Numbers' working (also on 'J' key)
+<br  />-  new 'View/Whole Selection' command
+<br  />-  new 'View/Toggle Grid Type' command
+</p>
+<p class='vspace'>-  fixed rotating a group of things to update their angles too
+<br  />-  fixed wrong color of a tagged linedef or sector
+<br  />-  fixed zooming out on File/Open when map has persistent state
+<br  />-  fixed middle texture when pasting and linedef lost a side
+</p>
+<p class='vspace'>-  config: default grid size is now 64 (was: 128)
+<br  />-  config: added var: <code>default_grid_size</code>
+<br  />-  config: added var: <code>default_grid_snap</code>
+<br  />-  config: added var: <code>digits_set_zoom</code>
+</p>
+<p class='vspace'>-  config: added var: <code>new_sector_size</code>
+<br  />-  config: added vars: <code>gui_scheme</code> and <code>gui_color_set</code>
+<br  />-  config: added some glBSP-related vars
+</p>
+</div>

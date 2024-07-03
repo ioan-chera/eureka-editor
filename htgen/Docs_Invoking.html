@@ -1,0 +1,66 @@
+<div id='wikitext'>
+<h1>Running Eureka</h1>
+<p>You can run Eureka a number of ways: from double clicking its binary after downloading and unpacking (the Windows package), from the desktop menu (when installed e.g. from the Debian repository), or from the command line in a terminal emulator.
+</p>
+<p class='vspace'>Note that Eureka needs a game IWAD in order to run.  When it cannot find one, then the "Manage Wads" dialog will open up and you can use the "Find" button to locate one. If you do not own any of the games which Eureka supports, there is always the project "FreeDoom" which is completely free.
+</p>
+<p class='vspace'>The rest of this page describes running Eureka from the command line.
+</p>
+<div class='vspace'></div><hr />
+<div class='vspace'></div><h2>Option Syntax</h2>
+<p>Option names begin with either one or two dashes.  Short options consist of a single letter after a single dash, like <code>-f</code> and <code>-w</code>, whereas long options are a whole word following one or two dashes, such as <code>--file</code> and <code>--warp</code>. &nbsp;Long options are shown on this page with two dashes, but a single dash is supported too, because that syntax was accepted by the original DOOM engine and various source ports.
+</p>
+<p class='vspace'>Some options accept a parameter after them.  There <em>must</em> be a space between the option name and the parameter, even for short options, and equal signs <em>cannot</em> be used.  A few of the options accept multiple parameters, and each parameter must be separated by spaces too.
+</p>
+<p class='vspace'>When the first thing on the command line is not an option, Eureka treats it as the filename of a pwad to edit.  Multiple files can be specified this way.
+</p>
+<p class='vspace'>Examples of valid options:
+</p><div class='indent'><span  style='color: blue;'><code>-w 1</code></span>
+</div><div class='indent'><span  style='color: blue;'><code>-warp 2</code></span>
+</div><div class='indent'><span  style='color: blue;'><code>--warp 3</code></span>
+</div><p class='vspace'>Examples of <strong>invalid</strong> options:
+</p><div class='indent'><span  style='color: red;'><code>-w</code></span> &nbsp; <em>missing the parameter</em>
+</div><div class='indent'><span  style='color: red;'><code>-w2</code></span> &nbsp; <em>no space between option and parameter</em>
+</div><div class='indent'><span  style='color: red;'><code>-w=3</code></span> &nbsp; <em>equal signs cannot be used</em>
+</div><div class='vspace'></div><hr />
+<div class='vspace'></div><h2>General Options</h2>
+<p><strong>-f &nbsp;--file &lt;filename&gt;....</strong>
+</p><div class='indent'>The wad file(s) to edit.  When more than one filename is given, the first one is opened for editing, and the others can be accessed from the "Given Files" sub-menu(in the File menu.
+</div><p class='vspace'><strong>-w &nbsp;--warp &lt;map&gt;</strong>
+</p><div class='indent'>Which level to edit.  This can be the full map name, such as "MAP12" or "E3M4", but can also be a single number like "12" or "34", and for Ultimate DOOM and Heretic a pair of numbers (episode + map) is supported too.
+</div><p class='vspace'><strong>-i &nbsp;--iwad &lt;filename&gt;</strong>
+</p><div class='indent'>The name of the game IWAD file.  This specifies what game you are editing for, e.g. "doom.wad" will mean the map is for Ultimate DOOM, whereas "heretic.wad" means we are editing for the game Heretic.
+</div><p class='vspace'><strong>-m &nbsp;--merge &lt;filename&gt;....</strong>
+</p><div class='indent'>Resource file(s) to load.  These can be wad files containing textures, flats, sprites (etc), but can also be Eureka definitions files (with the <code>.ugh</code> extension).
+</div><p class='vspace'><strong>-p &nbsp;--port &lt;name&gt;</strong>
+</p><div class='indent'>Name of the port (engine) being used.  The default port is "vanilla", which refers to the original DOOM EXE (or to Chocolate-Doom), but some other supported ports are "boom", "mbf", "edge", "odamex", "legacy" and "zdoom".
+</div><p class='vspace'><strong>-h &nbsp;--help</strong>
+</p><div class='indent'>Show a usage summary.
+</div><p class='vspace'><strong>-v &nbsp;--version</strong>
+</p><div class='indent'>Show the version string.
+</div><p class='vspace'><strong>-q &nbsp;--quiet</strong>
+</p><div class='indent'>Inhibits messages to the terminal.  NOTE: has no effect on beeping!
+</div><p class='vspace'><strong>-d &nbsp;--debug</strong>
+</p><div class='indent'>Enable extra debugging messages.
+</div><div class='vspace'></div><hr />
+<div class='vspace'></div><h2>Configuration Options</h2>
+<p>The following options control how Eureka finds some important files and directories.   They are not particular useful <em>per se</em>, but may be needed for special circumstances.
+</p>
+<p class='vspace'><strong>--install &lt;dir&gt;</strong>
+</p><div class='indent'>The installation directory where game definition files, default key bindings, and a few other important files are located.  Specifying "." for the install directory is useful when compiling and testing Eureka.
+</div><p class='vspace'><strong>--home &lt;dir&gt;</strong>
+</p><div class='indent'>The home directory where user settings, wad backups, and a few other files are stored.  Under Linux and other Unixes, this will be the <code>.eureka</code> folder in the user's <code>$HOME</code> directory.
+</div><p class='vspace'><strong>--log &lt;file&gt;</strong>
+</p><div class='indent'>The file where all log messages are written.  Defaults to <code>logs.txt</code> in the home directory.
+</div><p class='vspace'><strong>--config &lt;file&gt;</strong>
+</p><div class='indent'>The config file which stores all the user's preferences (except for key bindings).  This file is loaded when Eureka starts up, and is saved whenever the user uses the Preferences dialog.  Defaults to <code>config.cfg</code> in the home directory.
+</div><div class='vspace'></div><hr />
+<div class='vspace'></div><h2>Environment Variables</h2>
+<p>The following environment vars are recognized by Eureka:
+</p>
+<p class='vspace'><strong>DOOMWADDIR</strong>
+</p><div class='indent'>If set, contains a single directory name where Eureka  will look for IWADs.
+</div><p class='vspace'><strong>DOOMWADPATH</strong>
+</p><div class='indent'>If set, contains a colon-separated list of directories where Eureka will look for IWADs.
+</div>
+</div>

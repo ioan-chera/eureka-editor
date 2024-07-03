@@ -1,0 +1,105 @@
+<div id='wikitext'>
+<h1>CHANGES IN Eureka 1.07 (r1716)</h1>
+<p><em>(Changes are since 1.00 version, r1416)</em>
+</p>
+<p class='vspace'>+  implemented Find and Replace (as a panel), with support for stepping though each item or selecting them all, and filters to control which items to visit or ignore
+</p>
+<p class='vspace'>+  added 'File / New Project' command as the proper way to create a brand new WAD file.  The 'New Map' command requires a current pwad, and will save the fresh map immediately into it
+</p>
+<p class='vspace'>+  new 'RECENT' category for Texture/Flat/Thing browsers, and rebound the '\' key to toggle this category on/off
+</p>
+<p class='vspace'>+  new 'Rename Map' and 'Delete Map' commands in FILE menu
+</p>
+<p class='vspace'>+  improvement to key binding system, support for "flags" which are parameters beginning with a forward slash, such as "/new" and "/clear".  The 'EditKey' dialog is now much easier to use too
+</p>
+<p class='vspace'>+  Windows package no longer uses an installer
+</p>
+<p class='vspace'>+  vertex reshaping commands:
+</p><pre>   -  'I' moves selected vertices onto a line
+   -  'O' moves them into a circle shape
+   -  'D' moves them into a half-circle
+   -  'C' moves them into a 120-degree arc
+   -  'Q' moves them into a 240-degree arc
+</pre><div class='vspace'></div><hr />
+<p class='vspace'>-  a preference to show smaller textures in the browser
+</p>
+<p class='vspace'>-  map checker can find unknown linedef and sector types
+</p>
+<p class='vspace'>-  Linedef panel: swapped the 'Tag' and 'Length' positions
+</p>
+<p class='vspace'>-  Linedef panel: always show a two-sided line panel when multiple lines are selected (allowing all texture parts to be edited)
+</p>
+<p class='vspace'>-  Linedef panel: don't show rail/upper tex for one-sided lines (can be disabled with the '<code>show_full_one_sided</code>' config var)
+</p>
+<p class='vspace'>-  when loading a wad specified on the command line, and it contains settings for the iwad, port and/or resources, then allow command line arguments to override those values (and _add_ new resources)
+</p>
+<p class='vspace'>-  new preference to maximize window on start (Linux, WIN32 only)
+</p>
+<p class='vspace'>-  the Default Properties now has its own panel
+</p>
+<p class='vspace'>-  Default Props: only a single wall texture now, and shows a sprite for the default thing which opens the browser when clicked on
+</p>
+<p class='vspace'>-  added back the '192' grid size
+</p>
+<div class='vspace'></div><hr />
+<p class='vspace'>-  browser: changed two key-bindings: 'T' now opens to Things and 'X' is used to open it to Textures (matching the menu shortcuts)
+</p>
+<p class='vspace'>-  browser: changed key-binding for BR_CycleCategory to '|'
+</p>
+<p class='vspace'>-  browser: the 'Sort' menu has been replaced with an 'Alpha' checkbox
+</p>
+<p class='vspace'>-  browser: made sprites a bit smaller, can now show three columns when browser is at minimum width
+</p>
+<p class='vspace'>-  better way to show how a linedef will be split (esp. when snapping)
+</p>
+<p class='vspace'>-  co-op player sprites are now colored as in DOOM
+</p>
+<p class='vspace'>-  3D view: the low/high detail flag is now a preference setting (no longer toggleable with the <code>F5</code> key)
+</p>
+<p class='vspace'>-  added info bar for 3D view, shows current position, angle, etc...
+</p>
+<p class='vspace'>-  added 'Toggle 3D View' command to View menu
+</p>
+<div class='vspace'></div><hr />
+<p class='vspace'>-  support loading a read-only wad file
+</p>
+<p class='vspace'>-  support data in a map header lump (such as <code>MAP01</code>), make sure to save it when saving the map (instead of removing it)
+</p>
+<p class='vspace'>-  node builder: added work-around for "TOO SIMPLE" levels (i.e. a single convex sector), creating a dummy node and an extra subsector and seg for the back side
+</p>
+<p class='vspace'>-  wrote a Unix man page
+</p>
+<p class='vspace'>-  vanilla DOOM: do not show "friend", "coop" or "sp" thing flags
+</p>
+<p class='vspace'>-  support <code>-warp</code> option being followed by two numeric arguments (episode and map number), compatible with vanilla DOOM
+</p>
+<p class='vspace'>-  when checking textures, ignore ones beginning with '#'
+</p>
+<p class='vspace'>-  show version _in_ the About box (not just the window title)
+</p>
+<div class='vspace'></div><hr />
+<p class='vspace'>Bug Fixes:
+</p>
+<p class='vspace'>-  fixed not loading '<code>ASHWALL</code>' texture for DOOM 1
+</p>
+<p class='vspace'>-  fixed bug when saving and using the '<code>ExMx</code>' buttons (an erroneous newline was added into the map lump name)
+</p>
+<p class='vspace'>-  3D view: fixed a vertical mis-alignment of textures (one pixel) in certain circumstances
+</p>
+<p class='vspace'>-  fixed occasional false positives with sector mismatch test
+</p>
+<p class='vspace'>-  fixed wrong focal point when zooming immediately after the 'j' (JumpToObject) command
+</p>
+<p class='vspace'>-  fixed category of linetype #68 (should be a raising floor)
+</p>
+<p class='vspace'>-  fixed clipping of mid-masked textures (e.g. the cage in <code>E1M9</code>)
+</p>
+<p class='vspace'>-  fixed not reloading textures (etc) when opening a new wad file
+</p>
+<p class='vspace'>-  fixed crash when trying to build nodes on an IWAD map which has some changes made to it, but has not been saved (exported) yet
+</p>
+<p class='vspace'>-  fixed key binding list so that pressing 'Bind', 'Copy' etc on a non-visible line will scroll to that line (make it visible)
+</p>
+<p class='vspace'>-  browser: fixed patterns like '<code>4$</code>' not working properly
+</p>
+</div>

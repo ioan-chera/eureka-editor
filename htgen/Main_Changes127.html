@@ -1,0 +1,53 @@
+<div id='wikitext'>
+<h1>CHANGES IN Eureka 1.27b</h1>
+<p>+ fixed a crash bug
+</p>
+<div class='vspace'></div><h1>CHANGES IN Eureka 1.27</h1>
+<p><em>(Since version 1.24)</em>
+</p>
+<p class='vspace'>+ use OpenGL for faster rendering of 2D and 3D views
+<br  />+ improved non-GL drawing of 2D view, much faster in Linux
+<br  />+ support mixing textures and flats for ports that allow it
+<br  />+ improved 3D mode, can move things and sector surfaces
+<br  />+ ratio lock, makes producing lines at certain angles easier
+</p>
+<p class='vspace'>- a single status bar for both 2D and 3D views
+<br  />- new popup menus to set edit mode, browser mode, scaling
+<br  />- render sectors in the 2D view with both lighting and texturing
+<br  />- create void islands by drawing lines anti-clockwise in a sector
+<br  />- snap position indicator for 2D view (a light-blue cross)
+<br  />- added scale "-" and "+" buttons, show scale as percentage
+<br  />- ability to highlight/select railings in 3D view
+<br  />- beginning of support for UDMF maps (not usable yet...)
+</p>
+<p class='vspace'>- render BOOM's deep water effect (linetype 242)
+<br  />- render 3D Floors for EDGE, LEGACY and ZDOOM ports
+<br  />- render basic slopes for EDGE, ETERNITY, ODAMEX and ZDOOM
+<br  />- render things with a NULL sprite as a blue triangle
+<br  />- render Hexen map-spots as a green triangle
+<br  />- render unknown things with a smaller '?' sprite
+</p>
+<p class='vspace'>- preference to combine flats and textures in a single browser
+<br  />- preference to show all textures on a one-sided linedef
+<br  />- preference for linedef information (Length, Angle, Ratio)
+</p>
+<p class='vspace'>- support ESC key to cancel a current action (e.g. dragging)
+<br  />- support SHIFT and CTRL when using mouse-wheel to move in 3D view
+<br  />- support the FreeDM iwad
+<br  />- support TNT and Plutonia textures in FreeDoom2 iwad
+<br  />- support Hexen map format in the ETERNITY port
+<br  />- support PNG, JPEG and TGA images in sprite/flat/patch lumps
+<br  />- added portal specials 156 and 107 to the ZDOOM port
+<br  />- added missing specials 105, 106 and 130 to the ZDOOM port
+<br  />- improvements to the Makefile
+<br  />- improvements to the MacOS build files
+</p>
+<p class='vspace'>- fixed mode menu disappearing into Window's task bar when maximized
+<br  />- fixed not remembering test-in-game EXE when port is "vanilla"
+<br  />- fixed the "Online Docs" command in the Help menu
+<br  />- fixed window title not showing correct map name
+<br  />- fixed Re-bind in key binding dialog to show new key as valid
+<br  />- fixed grid getting out-of-sync with the "hide in FREE mode"
+<br  />- fixed needless line flips when drawing clockwise within a sector
+</p>
+</div>

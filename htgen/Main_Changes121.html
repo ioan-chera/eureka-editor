@@ -1,0 +1,100 @@
+<div id='wikitext'>
+<h1>CHANGES IN Eureka 1.21</h1>
+<p><em>(Since the 1.11 version)</em>
+</p>
+<div class='vspace'></div><h2>Editing:</h2>
+<p>+  line drawing now done using <code>RMB</code> (<code>MOUSE3</code>) button
+</p>
+<p class='vspace'>+  improved drag behavior, never modify the current selection
+</p>
+<p class='vspace'>+  select/copy/paste textures in the 3D view
+</p>
+<p class='vspace'>+  an operation menu, bound to <span class='key'>F1</span> key or <code>CTRL-RMB</code>
+</p>
+<p class='vspace'>+  undo/redo: show what was undone in the status area
+</p>
+<p class='vspace'>-  improved ability to highlight/select very short linedefs
+<br  />-  improved insertion of sectors, less "area not closed" errors
+<br  />-  skew (shear) objects with the mouse, bound to <span class='key'>K</span> key
+<br  />-  "dotty" grid is a preference, rather than three-way toggle
+<br  />-  default edit mode is now Vertices, and grid-snapping OFF
+</p>
+<p class='vspace'>-  linedef/sector/thing descriptions update as the user types
+<br  />-  arrow buttons in Vertex panel for fine adjustments
+<br  />-  auto-align linedefs on the 2D map, bound to <span class='key'>a</span> key
+<br  />-  entering a negative "Length" in Linedef panel moves the start vertex of the line instead of the end vertex
+</p>
+<div class='vspace'></div><h2>General:</h2>
+<p>+  improved BSP code, can build nodes for a map on each save, building nodes no longer resets the undo/redo history, more preference settings, ability to disable GL nodes, and support for ZDoom uncompressed node format (XNOD)
+</p>
+<p class='vspace'>+  "Test Map" command for testing your map in the game
+</p>
+<p class='vspace'>+  sprite rendering on the 2D canvas (in Things mode)
+</p>
+<p class='vspace'>+  a mode to show sound propagation
+</p>
+<p class='vspace'>-  a new "File/Copy Map" command
+<br  />-  a better dialog for "File / Open Map" command
+<br  />-  a better dialog for "JumpToObject" command
+<br  />-  a "Reset All Settings" button in the preferences dialog
+</p>
+<p class='vspace'>-  find/replace: added a "Restrict to Selection" filter
+<br  />-  find/replace: better way to choose textures/things
+<br  />-  changing categories in the browser clears the search box
+<br  />-  increased number of remembered recent files
+<br  />-  better default directory for file chooser dialogs
+<br  />-  more useful info bar in the 3D view
+</p>
+<div class='vspace'></div><h2>Games and Ports:</h2>
+<p>+  properly limit which ports can be used with each game
+</p>
+<p class='vspace'>+  ZDoom definition file (thanks to Slade3)
+</p>
+<p class='vspace'>+  Strife support (based on the Slade3 config)
+</p>
+<p class='vspace'>+  support <code>TX_START</code>/<code>TX_END</code> textures, including PNG and TGA format
+</p>
+<p class='vspace'>-  find sprites outside of <code>S_START</code>/<code>S_END</code> (except in vanilla)
+</p>
+<p class='vspace'>-  support for the Harmony TC
+<br  />-  support for Doom-in-Hexen mapping
+<br  />-  added "MBF" as a separate port
+</p>
+<div class='vspace'></div><h2>Key System:</h2>
+<p>+  mouse buttons (and wheel) use the key binding system
+</p>
+<p class='vspace'>+  smooth navigation for the 2D and 3D views
+</p>
+<p class='vspace'>-  allow key bindings to override hard-coded menu shortcuts
+<br  />-  bindable commands for all the functions in the menus
+<br  />-  use <span class='key'>F1</span>..<span class='key'>F12</span> function keys for various menu shortcuts
+<br  />-  improved key binding dialog in the preferences
+</p>
+<p class='vspace'>-  changed scaling and rotation to the <span class='key'>r</span> key (was <code>MOUSE2</code>)
+<br  />-  changed map panning to use <code>MMB</code> (<code>MOUSE2</code>) or the <span class='key'>a</span> key
+<br  />-  changed browse-textures back to <span class='key'>T</span> key
+<br  />-  changed grid toggle to the <span class='key'>g</span> key
+</p>
+<p class='vspace'>-  Zoom command supports a "/center" flag
+<br  />-  LIN_Flip command was simplified with a "/force" flag
+<br  />-  Enlarge and Shrink commands support fractional values
+<br  />-  Gamma command removed, using "Toggle gamma" instead
+</p>
+<div class='vspace'></div><h2>Bugs Fixed:</h2>
+<p>+  fixed problem of unable to split lines close to an end-point
+</p>
+<p class='vspace'>-  fixed problem of deleting a loop of linedefs inside another sector could sometimes delete that outer sector too
+</p>
+<p class='vspace'>-  fixed unwanted rail texture when splitting a sector and the texture name began with '_' or '#' (such as "<code>_WALL</code>").
+</p>
+<p class='vspace'>-  fixed inaccurate criss-cross linedef detection
+<br  />-  fixed rendering of unpegged lowers under sky ceilings
+<br  />-  fixed textures in Linedef panel not updating after undo or redo
+<br  />-  fixed exporting to keep the iwad/port/resources of target wad
+</p>
+<p class='vspace'>-  fixed panel stuck on a highlighted object when going to 3D view
+<br  />-  fixed unknown texture "FIX" button to not change "-" textures
+<br  />-  fixed bad sidedef fallback when loading a map with no sectors
+<br  />-  fixed default pixel-aspect to be 0.83 (matching original DOOM)
+</p>
+</div>

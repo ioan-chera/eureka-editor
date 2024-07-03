@@ -1,0 +1,88 @@
+<div id='wikitext'>
+<h1>Key System</h1>
+<p>Eureka has a flexible system for binding commands (editing functions) to specific keys on the keyboard and buttons on the mouse.  These bindings can be created and modified in the Preferences window, in the "Keys" tab (described below).
+</p>
+<p class='vspace'>For a description of all the commands, see the <a class='wikilink' href='Docs_CommandList.html'>CommandList</a> page.
+</p>
+<div class='vspace'></div><hr />
+<div class='vspace'></div><h2>Key Names</h2>
+<p>Key names in the bindings list are based on what usually appears on the keyboard.  Letter keys are lowercase without any modifiers, for example: 'a', and are uppercase when used with the <span class='key'>SHIFT</span> key, for example: 'A'.  All other usage of the <span class='key'>SHIFT</span> modifier will show it explicitly.
+</p>
+<p class='vspace'>Some common key names:
+</p>
+<div class='vspace'></div><div class='indent'><strong>SPACE</strong> : the Spacebar key
+</div><div class='indent'><strong>BS</strong> : the Backspace key
+</div><div class='indent'><strong>INS</strong> : the Insert key
+</div><div class='indent'><strong>DEL</strong> : the Delete key
+</div><div class='indent'><strong>PGUP</strong> : the Page-Up key
+</div><div class='indent'><strong>PGDN</strong> : the Page-Down key
+</div><div class='indent'><strong>MENU</strong> : the Menu key (only on some keyboards)
+</div><div class='indent'><strong>F1</strong>, <strong>F2</strong>, <strong>F3</strong> (etc) : the function keys
+</div><p class='vspace'>The mouse buttons also have names, as follows:
+</p>
+<div class='vspace'></div><div class='indent'><strong>MOUSE1</strong> : the left mouse button
+</div><div class='indent'><strong>MOUSE2</strong> : the middle mouse button (or clickable wheel)
+</div><div class='indent'><strong>MOUSE3</strong> : the right mouse button
+<div class='vspace'></div></div><div class='indent'><strong>WHEEL_UP</strong> : mouse wheel pushed up (forward)
+</div><div class='indent'><strong>WHEEL_DOWN</strong> : mouse wheel pushed down (backward)
+</div><div class='indent'><strong>WHEEL_LEFT</strong> : mouse wheel pushed left
+</div><div class='indent'><strong>WHEEL_RIGHT</strong> : mouse wheel pushed right
+</div><p class='vspace'>Lastly, the names of some keys may be unknown.  These can still be used, but they will be shown as a cryptic code number.  For example, on my system the left "Windows" key is shown as <strong>0xfe03</strong>.
+</p>
+<div class='vspace'></div><hr />
+<div class='vspace'></div><h2>Modifiers</h2>
+<p>Modifiers are the keys like <span class='key'>SHIFT</span> and <span class='key'>CTRL</span> which you can hold down in addition to a normal key.  Modifiers can be used with mouse buttons too, including the mouse wheel.
+</p>
+<p class='vspace'>Modifiers cannot be bound to commands by themselves, they require another normal key or button.  There is no distinction between left or right versions of a modifier key.  Another restriction is that only one modifier can be used in a binding, so you cannot bind SHIFT+CTRL+SPACE to a command.
+</p>
+<p class='vspace'>The following modifiers are supported:
+</p>
+<div class='vspace'></div><div class='indent'><strong>SHIFT</strong> : all keyboards have this, 'nuff said.
+<div class='vspace'></div></div><div class='indent'><strong>CTRL</strong> : the control key. Under MacOS X this will be shown as "CMD" instead, and refers to the command key.
+<div class='vspace'></div></div><div class='indent'><strong>ALT</strong> : most keyboards have <span class='key'>ALT</span> keys, however on Linux this modifier is often used by the window manager to perform window management tasks, making it less useful for bindings.  (I am not sure about Windows or MacOS X).
+<div class='vspace'></div></div><div class='indent'><strong>META</strong> : an additional modifier key which some keyboards have, e.g. in Linux the "Windows" key is sometimes usable for this.  Eureka can generate fake META events by pressing the <span class='key'>;</span> key followed by a normal key, which can be useful for binding extra commands.
+<div class='vspace'></div></div><div class='indent'><strong>LAX</strong> : this is not a real modifier key!  Instead this means that the binding will match in a lax way, where the current state of the <span class='key'>SHIFT</span> and <span class='key'>CTRL</span> modifiers is ignored.  This is useful for the navigation commands, which change speed depending on whether the <span class='key'>SHIFT</span> or <span class='key'>CTRL</span> modifiers are pressed.
+</div><div class='vspace'></div><hr />
+<div class='vspace'></div><h2>Command Syntax</h2>
+<p>Commands are actions or functions which the editor can do.  They may be something which modifies the map in same way, like deleting a sector, or they may simply change something in the interface, such as toggling the 3D view on/off.
+</p>
+<p class='vspace'>The syntax of commands is based loosely on DOS syntax.  Some commands require a parameter or two, and some commands have optional  "flags" which are keywords that being with a '/' (forward slash).  Multiple flags can be present, and each one will affect the behavior of the command in some way.
+</p>
+<p class='vspace'>Examples:
+</p>
+<div class='vspace'></div><div class='indent'><strong>UnselectAll</strong>
+<div class='indent'>A command with no parameters and no flags.  It simply unselects all objects in the selection.
+</div><div class='vspace'></div></div><div class='indent'><strong>Zoom +1</strong>
+<div class='indent'>A command with a single parameter, "+1", which tells the Zoom command to zoom in (whereas "-1" would tell it to zoom out).
+</div><div class='vspace'></div></div><div class='indent'><strong>SEC_SelectGroup /floor_h /floor_tex</strong>
+<div class='indent'>This command is used to select contiguous sectors, and here it has two flags: the <span class='kw'>/floor_h</span> flag means the sectors must have the same floor height, and the <span class='kw'>/floor_tex</span> flag means the sectors must have the same floor texture.
+</div></div><div class='vspace'></div><hr />
+<div class='vspace'></div><h2>Special Prefixes</h2>
+<p>Some commands can only be used in a certain editing mode, and these commands have a prefix designating the mode, as follows:
+</p>
+<div class='vspace'></div><div class='indent'><strong>LIN_xxx</strong> : only usable in Linedefs mode
+</div><div class='indent'><strong>SEC_xxx</strong> : only usable in Sectors mode
+</div><div class='indent'><strong>TH_xxx</strong> : only usable in Things mode
+</div><div class='indent'><strong>VT_xxx</strong> : only usable in Vertex mode
+</div><div class='indent'><strong>3D_xxx</strong> : only usable in the 3D view
+</div><div class='indent'><strong>BR_xxx</strong> : only usable when the Browser is open
+</div><p class='vspace'>There are a few commands which have a purely descriptive prefix, but are not limited to any particular mode, for example: <strong>GRID_Set</strong>.
+</p>
+<p class='vspace'>Commands which contain "<strong>WHEEL_</strong>" can only be used with the mouse-wheel.  Binding these commands to any other key or button will not work.
+</p>
+<p class='vspace'>Commands containing "<strong>ACT_</strong>" and "<strong>NAV_</strong>" are ones which require you to hold the key or button down, such as scrolling the map with the cursor keys.  Such commands will not work when bound to the mouse-wheel or certain keys on the keyboard, such as <span class='key'>CAPSLOCK</span>, <span class='key'>NUMLOCK</span> and <span class='key'>PAUSE</span>, because these keys behave differently from normal keys.
+</p>
+<div class='vspace'></div><hr />
+<div class='vspace'></div><h2>Binding Keys</h2>
+<div><span class='rfloat'> <img src='shots/key_prefs.png' alt='' title='' /></span></div>
+<p>You can create a brand new binding by clicking the "Add" button, or modify an existing binding by selecting the binding in the list and clicking the "Edit" button.  The "Copy" button creates a copy of an existing binding and brings up the edit dialog for it.  To remove a key binding altogether, click the "Delete" button.
+</p>
+<p class='vspace'>The "Re-bind" button lets you assign a new key to the currently selected binding.  That binding will turn yellow and wait for the next key or mouse button to be pressed.  Pressing the <span class='key'>ESC</span> key cancels that process.
+<br clear='all' />
+</p>
+<div class='vspace'></div><div class='indent'>NOTE: like other preference settings, changes made to the key bindings are <em>only</em> kept when clicking the "Apply" button at the bottom of the preferences window.  Use the "Discard" button if you decide you don't want to keep your changes, e.g. if you accidentally deleted some bindings.
+</div><p class='vspace'>The key-editing dialog allows you to change any aspect of a key binding.  A new key name can be typed into the "Key" box, but an easier way is to press the "Re-bind" button, which will wait for the next key or button press.  Use the <span class='key'>ESC</span> key to cancel that process.  The "Choose" button lets you pick a different function to use, and the "Mode" button can limit the binding to a particular editing mode.
+</p>
+<p class='vspace'>Most functions require at least one parameter, a few require two or more parameters, and many functions support several optional flags.  The full set of parameters can be typed into the "Params" box, though for commands which use a keyword it is easier to pick the keyword directly from the "Keywords" menu.  Also flags may be added or removed by choosing them in the "Flags" menu.
+</p>
+</div>

@@ -1,0 +1,356 @@
+<div id='wikitext'>
+<h1>Command Reference</h1>
+<p class='vspace'>Here is a description of all the available commands which can be bound
+to keyboard keys or mouse buttons.
+</p>
+<p class='vspace'>See <a class='wikilink' href='Docs_KeySystem.html'>KeySystem</a> for general information about how commands work.
+</p>
+<div class='vspace'></div><hr />
+<div class='vspace'></div><h2>Index</h2>
+<table border='0' width='60%' ><tr ><td  align='left'><a href='#File'>File Commands</a></td><td  align='left'><a href='#General'>General Editing</a></td></tr>
+<tr ><td  align='left'><a href='#Edit'>Edit Commands</a></td><td  align='left'><a href='#Vertex'>Vertex Editing</a></td></tr>
+<tr ><td  align='left'><a href='#View'>View Commands</a></td><td  align='left'><a href='#Line'>Linedef Editing</a></td></tr>
+<tr ><td  align='left'><a href='#Browser'>Browser Commands</a></td><td  align='left'><a href='#Sector'>Sector Editing</a></td></tr>
+<tr ><td  align='left'><a href='#Help'>Help Commands</a></td><td  align='left'><a href='#Thing'>Thing Editing</a></td></tr>
+<tr ><td  align='left'><a href='#view2D'>2D View</a></td><td  align='left'><a href='#view3D'>3D View</a></td></tr>
+<tr ><td  align='left'><a href='#Misc'>Miscellaneous</a></td><td >&nbsp;</td></tr>
+</table>
+<div class='vspace'></div><hr />
+<p class='vspace'><a name='File' id='File'></a>
+</p><h2>File Commands</h2>
+<p><span  style='font-weight: bold; color: #070;'>NewProject</span>
+</p><div class='indent'>Creates a fresh map in a new wad file.  If you choose an existing file, it will be overwritten (i.e. all existing contents removed).
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>ManageProject</span>
+</p><div class='indent'>Manages several important settings about the currently edited wad.  That includes which game it is for, which source port is being used, and any resource files.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>OpenMap</span>
+</p><div class='indent'>Opens a map for editing.  This map can be found the currently edited wad, or the game iwad, or one of the resource wads, or you can even load another wad file (which becomes the currently edited file).
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>GivenFile &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Loads a new wad file for editing from the list of "given files", i.e. files that were specified on the command line when Eureka was started.
+<div class='vspace'></div></div><div class='indent'>Keywords:
+<div class='indent'><span class='kw'>next</span> : the next wad file in the list
+</div><div class='indent'><span class='kw'>prev</span> : the previous wad file in the list
+</div><div class='indent'><span class='kw'>first</span> : the very first wad file in the list
+</div><div class='indent'><span class='kw'>last</span> : the very last wad file in the list
+</div><div class='indent'><span class='kw'>current</span> : the same file currently being edited
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>FlipMap &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Opens another map in the current wad.
+<div class='vspace'></div></div><div class='indent'>Keywords:
+<div class='indent'><span class='kw'>next</span> : the next map in the wad
+</div><div class='indent'><span class='kw'>prev</span> : the previous map in the wad
+</div><div class='indent'><span class='kw'>first</span> : the very first map in the wad
+</div><div class='indent'><span class='kw'>last</span> : the very last map in the wad
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>SaveMap</span>
+</p><div class='indent'>Saves your map into the currently edited wad.  It will also build the nodes (BSP information) unless this is disabled in the preferences.  The game iwad is considered read-only, and hence this cannot be used on it, instead you will be prompted for a file to export into.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>ExportMap</span>
+</p><div class='indent'>Saves the map into another wad file, possibly a completely new file.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>FreshMap</span>
+</p><div class='indent'>Creates a fresh map in the currently edited wad.  Cannot be used on the game iwad.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>CopyMap</span>
+</p><div class='indent'>Copies the current map in the currently edited wad to another slot.  For example, duplicating MAP01 into the MAP02 slot.  Cannot be used on the game iwad.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>RenameMap</span>
+</p><div class='indent'>Renames the current map in the currently edited wad, or in other words: move the map to a different slot.  For example, moving MAP01 to the MAP23 slot.  Cannot be used on the game iwad.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>DeleteMap</span>
+</p><div class='indent'>Deletes the current map from the currently edited wad.  Cannot be used on the game iwad.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>TestMap</span>
+</p><div class='indent'>Tests your map by launching the game (using your chosen source port).
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>BuildAllNodes</span>
+</p><div class='indent'>Builds the nodes (BSP information) for all maps in the currently edited wad.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>PreferenceDialog</span>
+</p><div class='indent'>Opens the Preferences dialog.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Quit</span>
+</p><div class='indent'>Quits Eureka.  If you have unsaved changes, a dialog box will appear asking for confirmation.
+</div><div class='vspace'></div><hr />
+<p class='vspace'><a name='Edit' id='Edit'></a>
+</p><h2>Edit Commands</h2>
+<p><span  style='font-weight: bold; color: #070;'>Undo</span>
+</p><div class='indent'>Undoes (reverses) the last editing operation.  This can be repeated multiple times.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Redo</span>
+</p><div class='indent'>Redo is the opposite of Undo, it re-instates the editing operation which Undo undid.  It can be repeated multiple times.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Insert &nbsp;[flags...]</span>
+</p><div class='indent'>Inserts a new vertex, sector or thing into the map.  In vertex mode, this will begins line drawing (if not already underway).  In sector mode, this can fill empty spaces (or spaces with broken sectors) will a new, valid sector.
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/continue</span> : when line drawing, do not stop when joining existing geometry
+</div><div class='indent'><span class='kw'>/nofill</span> : when line drawing, do not fill new spaces with sectors
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Delete &nbsp;[flags...]</span>
+</p><div class='indent'>Deletes one or more objects from the map, using the highlighted object when the selection is empty.  Deleting a sector will usually delete all things in the sector too.  Deleting a single vertex that connects two linedefs causes the two linedefs to be merged into one.
+<div class='vspace'></div></div><div class='indent'>Note that deleting linedefs or groups of vertices can leave the map in a broken state.  It is generally better to go into sectors mode and delete or merge sectors there.
+<div class='vspace'></div></div><div class='indent'>This command can also be used to change textures in the 3D view, or in texture/flat images in the sector or linedef panels.  Textures will become "-" (the null texture) and flats will become sky.
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/keep</span> : when deleting sectors, keep the things in it, and don't remove any unused linedefs
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Clipboard_Cut<br /></span><span  style='font-weight: bold; color: #070;'>Clipboard_Copy<br /></span><span  style='font-weight: bold; color: #070;'>Clipboard_Paste</span>
+</p><div class='indent'>Performs the clipboard Cut, Copy and Paste functions.  On the 2D map view, this will apply to the geometry, allowing an object or groups of objects to be copied and pasted.  In the 3D view, these allow textures to be copied and pasted (the "cut" operation sets textures to their default).
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Select</span>
+</p><div class='indent'>Toggles an object in the selection, i.e. if the highlighted object is unselected, then select it, otherwise remove it from the selection.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>SelectAll</span>
+</p><div class='indent'>Adds all objects in the current editing mode to the selection.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>UnselectAll</span>
+</p><div class='indent'>Clears the selection, i.e. removes all objects from it.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>InvertSelection</span>
+</p><div class='indent'>Selects all objects not in the current selection, and unselects the rest.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>LastSelection</span>
+</p><div class='indent'>This is like "undo" for the selection, can be used to bring back a selection which was accidently cleared.  Note that it is limited to a single undo step, and it cannot bring back a selection once modifications are made to the map.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>CopyAndPaste</span>
+</p><div class='indent'>Same as doing a copy followed by a paste.  Can be a useful way of adding things to the map by copying an existing thing.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>CopyProperties &nbsp;[flags...]</span>
+</p><div class='indent'>Copies properties from a selected object to the highlight object.  Not all properties are copied though.  For things, the position and angle are not copied.  For linedefs, textures are copied but not X or Y offsets, nor the "impassible" flag.
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/reverse</span> : copy from the highlighted object to the selected object(s).
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>PruneUnused</span>
+</p><div class='indent'>Finds any unused vertices, sidedefs or sectors and removes them from the map.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>MoveObjectsDialog<br /></span><span  style='font-weight: bold; color: #070;'>ScaleObjectsDialog<br /></span><span  style='font-weight: bold; color: #070;'>RotateObjectsDialog</span>
+</p><div class='indent'>These comands open a dialog window for moving, scaling or rotating a group of selected objects.  They allow specifying an exact distance to move the objects, or an exact scaling factor, or an exact number of degrees to rotate the objects.
+</div><div class='vspace'></div><hr />
+<p class='vspace'><a name='View' id='View'></a>
+</p><h2>View Commands</h2>
+<p><span  style='font-weight: bold; color: #070;'>Zoom &nbsp;&lt;delta&gt;</span>
+</p><div class='indent'>Zooms the 2D map view in or out.  The &lt;delta&gt; parameter is <span class='kw'>+1</span> to zoom in (make everything bigger) or <span class='kw'>-1</span> to zoom out (make everything smaller).
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/center</span> : focal point of zoom is the center of 2D view (instead of where mouse is)
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>ZoomSelection</span>
+</p><div class='indent'>Scrolls and zooms the map view so that all objects in the current selection are visible.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>DefaultProps</span>
+</p><div class='indent'>Shows the Default Properties panel, or hides it if already shown.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>FindDialog</span>
+</p><div class='indent'>Shows the Find/Replace panel, or hides it if already shown.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>FindNext</span>
+</p><div class='indent'>Finds the next object in the current search.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>GoToCamera</span>
+</p><div class='indent'>Scrolls the 2D map view so that the camera (for the 3D view) is shown at the center.  Does not zoom the map view.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>PlaceCamera</span>
+</p><div class='indent'>Places the camera (for the 3D view) at the spot on the 2D map view where the mouse is.
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/open3d</span> : activate the 3D view afterwards.
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>JumpToObject</span>
+</p><div class='indent'>Brings up the "Jump To Object" dialog window, allowing you to jump to the object with a specified index number.
+</div><div class='vspace'></div><hr />
+<p class='vspace'><a name='Browser' id='Browser'></a>
+</p><h2>Browser Commands</h2>
+<p><span  style='font-weight: bold; color: #070;'>BrowserMode &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Opens the browser to a particular type of object.
+<div class='vspace'></div></div><div class='indent'>Keywords:
+<div class='indent'><span class='kw'>tex</span> : browse textures
+</div><div class='indent'><span class='kw'>flat</span> : browse flats
+</div><div class='indent'><span class='kw'>obj</span> : browse things
+</div><div class='indent'><span class='kw'>line</span> : browse linedef specials
+</div><div class='indent'><span class='kw'>sec</span> : browse sector types
+</div><div class='indent'><span class='kw'>gen</span> : generalize linedef editor (for BOOM ports only)
+</div><div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/force</span> : do not close the browser
+</div><div class='indent'><span class='kw'>/recent</span> : set the category to "Recent"
+</div><div class='vspace'></div></div><div class='indent'>NOTE: the browser can be closed using the "<span  style='font-weight: bold; color: #070;'>Set browser 0</span>" command.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>BR_CycleCategory &nbsp;&lt;dir&gt;</span>
+</p><div class='indent'>Cycles through the categories in the currently open browser.  The &lt;dir&gt; parameter is optional, when present it can be <span class='kw'>+1</span> to move forward or <span class='kw'>-1</span> to move backward through the categories.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>BR_ClearSearch</span>
+</p><div class='indent'>Clears the search box in the currently open browser.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>BR_Scroll &nbsp;&lt;delta&gt;</span>
+</p><div class='indent'>Scrolls the browser by a single step.  The &lt;delta&gt; parameter is a small negative or positive number, as follows:
+<div class='indent'><span class='kw'>-1 +1</span> : scroll a small amount
+</div><div class='indent'><span class='kw'>-2 +2</span> : scroll by a single "line"
+</div><div class='indent'><span class='kw'>-3 +3</span> : scroll by a single page
+</div><div class='indent'><span class='kw'>-4 +4</span> : scroll to the end
+</div></div><div class='vspace'></div><hr />
+<p class='vspace'><a name='Help' id='Help'></a>
+</p><h2>Help Commands</h2>
+<p><span  style='font-weight: bold; color: #070;'>LogViewer</span>
+</p><div class='indent'>Opens the log viewer window.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>OnlineDocs</span>
+</p><div class='indent'>Launches a web browser to display Eureka's absolutely fabulous documentation.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>AboutDialog</span>
+</p><div class='indent'>Displays a dialog with some brief information about Eureka.
+</div><div class='vspace'></div><hr />
+<p class='vspace'><a name='Misc' id='Misc'></a>
+</p><h2>Miscellaneous</h2>
+<p><span  style='font-weight: bold; color: #070;'>Nothing</span>
+</p><div class='indent'>Does absolutely nothing.  This can sometimes be useful to disable a certain key combination in a certain editing mode, or to disable a shortcut used in the menus.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Set &nbsp;&lt;keyword&gt; &lt;value&gt;</span>
+</p><div class='indent'>Sets the value of a certain editor state.  It requires two parameters, the first is a keyword for what is being set, and the second is the new value.  The value is usually a small number, where 0 means "off" and 1 means "on", though some keywords accept a range of values.
+<div class='vspace'></div></div><div class='indent'>Keywords:
+<div class='indent'><span class='kw'>3d</span> : whether the 3D view is active
+</div><div class='indent'><span class='kw'>browser</span> : whether the browser panel is active
+</div><div class='indent'><span class='kw'>gamma</span> : the current gamma level (brightness), 0-4
+</div><div class='indent'><span class='kw'>grid</span> : whether the grid is being drawn
+</div><div class='indent'><span class='kw'>obj_nums</span> : whether object numbers are being shown in 2D view
+</div><div class='indent'><span class='kw'>sec_render</span> : the sector rendering mode in 2D view, 0 for nothing
+</div><div class='indent'><span class='kw'>snap</span> : whether grid-snapping is active
+</div><div class='indent'><span class='kw'>sprites</span> : whether sprites are drawn in 2D view (in Things mode)
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Toggle &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Toggles or cycles the value of a certain editor state.  It accepts the same keywords as the <span  style='font-weight: bold; color: #070;'>Set</span> command above.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>MetaKey</span>
+</p><div class='indent'>Waits for the next keypress and adds the META modifier to it.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>EditMode &nbsp;&lt;mode&gt;</span>
+</p><div class='indent'>Changes the current editing mode to the one specified.  Note that the 3D mode is not handled by this command (it is changed with the Set or Toggle commands above).
+<div class='vspace'></div></div><div class='indent'>Keywords: <span class='kw'>vertex</span>, <span class='kw'>line</span>, <span class='kw'>sector</span>, <span class='kw'>thing</span>
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>OperationMenu</span>
+</p><div class='indent'>Brings up the operation menu.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>MapCheck &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Runs the map checking dialog.
+<div class='vspace'></div></div><div class='indent'>Keywords: <span class='kw'>all</span>, <span class='kw'>major</span>, <span class='kw'>vertices</span>, <span class='kw'>sectors</span>, <span class='kw'>linedefs</span>, <span class='kw'>things</span>, <span class='kw'>textures</span>, <span class='kw'>tags</span>, <span class='kw'>current</span>
+</div><div class='vspace'></div><hr />
+<p class='vspace'><a name='General' id='General'></a>
+</p><h2>General Editing</h2>
+<p><span  style='font-weight: bold; color: #070;'>Merge &nbsp;[flags...]</span>
+</p><div class='indent'>Merges two or more objects into a single one.  In things mode, this merely moves the objects to a common location (does not remove any things).  In Linedefs mode, this only handles two one-sided linedefs (which are assumed to be back-to-back or close to it).
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/keep</span> : when merging sectors, keep linedefs that would otherwise be removed.
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Disconnect</span>
+</p><div class='indent'>Disconnects one or more objects from nearby geometry.  In things mode, this separates things which exist at the same place (the coordinates must be exactly the same).  In vertex mode, this disconnects the linedefs which join at that vertex.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Mirror &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Mirrors one or more objects about a central axis.
+<div class='vspace'></div></div><div class='indent'>Keywords:
+<div class='indent'><span class='kw'>horiz</span> : mirror horizontally (stuff moves left and right)
+</div><div class='indent'><span class='kw'>vert</span> : mirror vertically (stuff moves up and down)
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Rotate90 &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Rotates one or more objects by 90 degrees around a central point.
+<div class='vspace'></div></div><div class='indent'>Keywords:
+<div class='indent'><span class='kw'>cw</span> : rotate clockwise
+</div><div class='indent'><span class='kw'>acw</span> : rotate anti-clockwise
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Enlarge &nbsp;&lt;factor&gt;<br /></span><span  style='font-weight: bold; color: #070;'>Shrink &nbsp;&lt;factor&gt;</span>
+</p><div class='indent'>Scales one or more objects, making them bigger or smaller.  The &lt;factor&gt; parameter is the value to scale by, defaulting to <span class='kw'>2.0</span> when absent.  Fractional values like "1.3" are supported.  Objects are scaled from their center point.  When a sector is enlarged or shrunk, any things it contains are moved too.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>Quantize</span>
+</p><div class='indent'>Snaps the selected objects to the nearest grid point.  For example, if the current grid size is 16 units, and several sectors are selected, all the vertices which are a part of those sectors are moved to be aligned with the 16x16 grid (if possible).
+<div class='vspace'></div></div><div class='indent'>When a vertex cannot be moved (because the nearest grid points are in use), then this command beeps with an error message, and all the vertices which could not be moved are highlighted in red.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>ApplyTag &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Applies a tag number to the selected objects, which must be either sectors or linedefs.
+<div class='vspace'></div></div><div class='indent'>Keywords:
+<div class='indent'><span class='kw'>fresh</span> : use a new tag number (one not used anywhere else)
+</div><div class='indent'><span class='kw'>last</span> : use the last (highest) tag number used on the map
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>ACT_Click &nbsp;[flags...]</span>
+</p><div class='indent'>Performs the functions typically done by a left mouse button click, namely to select or unselect objects in the 2D map view, to drag objects around, and splitting linedefs.
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/noselect</span> : disable the select function
+</div><div class='indent'><span class='kw'>/nodrag</span> : disable dragging
+</div><div class='indent'><span class='kw'>/nosplit</span> : do not split linedefs
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>ACT_Drag</span>
+</p><div class='indent'>Drags the currently selected objects.  An outline of the objects follow the mouse while the key or button is held down, and when the key/button is released the objects are actually moved.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>ACT_Transform &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Transforms the currently selected objects.  The &lt;keyword&gt; parameter determines what kind of transformation to apply.  An outline of the transformed objects is shown while the key is held down, and moving the mouse around will affect how large, how much rotation (etc) is applied.  When the key is released, the objects are actually moved to their final positions.
+<div class='vspace'></div></div><div class='indent'>Keywords:
+<div class='indent'><span class='kw'>scale</span> : scale uniformly, maintaining the same aspect ratio
+</div><div class='indent'><span class='kw'>stretch</span> : scale with stretching (can make everything wider or taller)
+</div><div class='indent'><span class='kw'>rotate</span> : rotate the objects
+</div><div class='indent'><span class='kw'>rotscale</span> : rotate and scale uniformly
+</div><div class='indent'><span class='kw'>skew</span> : skew (shear) the objects
+</div></div><div class='vspace'></div><hr />
+<p class='vspace'><a name='Vertex' id='Vertex'></a>
+</p><h2>Vertex Editing</h2>
+<p><span  style='font-weight: bold; color: #070;'>VT_ShapeLine</span>
+</p><div class='indent'>Reshapes the selected vertices so they form a straight line, and each vertex is the same distance apart.  The vertices need to be roughly in a line already, and the two vertices at the ends of that imaginary line are the anchor points and do not move, but the remaining vertices are moved.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>VT_ShapeArc &nbsp;&lt;angle&gt;</span>
+</p><div class='indent'>Reshapes the selected vertices so they form an arc of a circle.  The &lt;angle&gt; parameter is the number of degrees in this arc, and can be 360 for a full circle.  The vertices need to be roughly in the desired shape already, and will be moved to lie on the arc, with an equal distance between each one.
+</div><div class='vspace'></div><hr />
+<p class='vspace'><a name='Line' id='Line'></a>
+</p><h2>Linedef Editing</h2>
+<p><span  style='font-weight: bold; color: #070;'>LIN_Align &nbsp;[flags...]</span>
+</p><div class='indent'>Aligns the X/Y offsets on the selected linedefs.  The flags control exactly what is affected by this command.
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/x</span> : align X offsets
+</div><div class='indent'><span class='kw'>/y</span> : align Y offsets
+</div><div class='indent'><span class='kw'>/right</span> : pick walls to the right to align with (instead of the left).
+</div><div class='indent'><span class='kw'>/clear</span> : clear the X / Y offsets (instead of aligning).
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>LIN_Flip &nbsp;[flags...]</span>
+</p><div class='indent'>Flips the orientation of one or more linedefs.
+<div class='vspace'></div></div><div class='indent'>NOTE: Flipping one-sided lines generally breaks the map geometry, and the <span class='kw'>/force</span> flag will break the map in a different way: the sidedef stays facing the sector, but leaving the linedef without a right side.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>LIN_SwapSides</span>
+</p><div class='indent'>Swaps the sidedefs on some linedefs.  This is only really useful for fixing map problems.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>LIN_SplitHalf</span>
+</p><div class='indent'>Splits one or more linedefs in half, adding a vertex at the exact middle point.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>LIN_SelectPath &nbsp;[flags...]</span>
+</p><div class='indent'>Selects or unselects a group of linedefs in a path.  The path stops at forks, i.e. where there are two or more choices of which way to go.
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/fresh</span> : make the result a fresh selection (instead of modifying the current selection)
+</div><div class='indent'><span class='kw'>/onesided</span> : only handle one-sided lines (ignore two-sided lines)
+</div><div class='indent'><span class='kw'>/sametex</span> : require lines have the same texture
+</div></div><div class='vspace'></div><hr />
+<p class='vspace'><a name='Sector' id='Sector'></a>
+</p><h2>Sector Editing</h2>
+<p><span  style='font-weight: bold; color: #070;'>SEC_Floor &nbsp;&lt;delta&gt;</span>
+</p><div class='indent'>Raises or lowers the floor height of some sectors.  The &lt;delta&gt; parameter is the height value to add, which can be positive or negative.
+<div class='vspace'></div></div><div class='indent'>NOTE: a floor cannot be raised above the ceiling in the sector.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>SEC_Ceil &nbsp;&lt;delta&gt;</span>
+</p><div class='indent'>Raises or lowers the ceiling height of some sectors.  The &lt;delta&gt; parameter is the height value to add, which can be positive or negative.
+<div class='vspace'></div></div><div class='indent'>NOTE: a ceiling cannot be lowered below the floor in the sector.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>SEC_Light &nbsp;&lt;delta&gt;</span>
+</p><div class='indent'>Changes the light level in the selected sectors.  The &lt;delta&gt; parameter is the value to add, either negative or positive, and it should be a power of two such as: <span class='kw'>1</span>, <span class='kw'>2</span>, <span class='kw'>4</span>, <span class='kw'>8</span>, <span class='kw'>16</span>, <span class='kw'>32</span>, or <span class='kw'>64</span>.
+<div class='vspace'></div></div><div class='indent'>NOTE: vanilla DOOM, and some source ports, only use multiples of 16 for the lighting values.  For example, there will be no visible difference between 160 and 170 (the next usable value is 176).
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>SEC_SelectGroup &nbsp;[flags...]</span>
+</p><div class='indent'>Selects a group of contiguous sectors.  The flags will control whether neighboring sectors are considered part of the group.
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/floor_h</span> : require the same floor height
+</div><div class='indent'><span class='kw'>/floor_tex</span> : require the same floor texture
+</div><div class='indent'><span class='kw'>/ceil_h</span> : require the same ceiling height
+</div><div class='indent'><span class='kw'>/ceil_tex</span> : require the same ceiling texture
+</div><div class='indent'><span class='kw'>/light</span> : require the same lighting
+</div><div class='indent'><span class='kw'>/tag</span> : require the same tag value
+</div><div class='indent'><span class='kw'>/special</span> : require the same sector type
+<div class='vspace'></div></div><div class='indent'><span class='kw'>/fresh</span> : make the result a fresh selection (instead of modifying the current selection)
+</div><div class='indent'><span class='kw'>/doors</span> : don't stop at doors (closed sectors)
+</div><div class='indent'><span class='kw'>/can_walk</span> : only spread into a neighbor sector if the heights allow the player to walk there and back (i.e. stop at impassible lines)
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>SEC_SwapFlats</span>
+</p><div class='indent'>Swaps the floor texture with the ceiling texture in all the selected sectors.
+</div><div class='vspace'></div><hr />
+<p class='vspace'><a name='Thing' id='Thing'></a>
+</p><h2>Thing Editing</h2>
+<p><span  style='font-weight: bold; color: #070;'>TH_Spin &nbsp;&lt;delta&gt;</span>
+</p><div class='indent'>Spins the angles (the direction things face) of all the selected things.  The &lt;delta&gt; parameter is an angle to add, where negative values spin the things clockwise, and positive values spin the things anti-clockwise.  Angles are generally multiples of 45.
+</div><div class='vspace'></div><hr />
+<p class='vspace'><a name='view2D' id='view2D'></a>
+</p><h2>2D View Commands</h2>
+<p><span  style='font-weight: bold; color: #070;'>Scroll &nbsp;&lt;x&gt; &lt;y&gt;</span>
+</p><div class='indent'>Scrolls the map view by a single step.  The first parameter is the horizontal distance, and the second parameter is the vertical distance.  These values are roughly percentages of the viewing window size.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>GRID_Bump &nbsp;&lt;delta&gt;</span>
+</p><div class='indent'>Changes the current grid size.  The &lt;delta&gt; parameter should be <span class='kw'>+1</span> to increase the size to the next usable one, or <span class='kw'>-1</span> to decrease it.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>GRID_Set &nbsp;&lt;size&gt;</span>
+</p><div class='indent'>Sets the current grid size to the given value, which can be anything (i.e. it is not limited to the normal values).
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>GRID_Zoom &nbsp;&lt;scale&gt;</span>
+</p><div class='indent'>Zooms the map view.  The parameter is the scale value, which is positive for N:1 scales and negative for 1:N scales.  For example, "-3" means 1/3 scaling.  The scale factor is limited to be one of the existing ones selectable on the info bar.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>ACT_SelectBox</span>
+</p><div class='indent'>Begins drawing a selection box.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>WHEEL_Scroll &nbsp;&lt;dist&gt;</span>
+</p><div class='indent'>Scrolls the 2D map view using the mouse-wheel.  The &lt;dist&gt; parameter is roughly a percentage of the viewing window size, and each step of the mouse wheel scrolls by this amount.
+<div class='vspace'></div></div><div class='indent'>Note: this command will not work unless bound to WHEEL_XXX.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>NAV_Scroll_Left &nbsp;&lt;speed&gt;<br /></span><span  style='font-weight: bold; color: #070;'>NAV_Scroll_Right &nbsp;&lt;speed&gt;<br /></span><span  style='font-weight: bold; color: #070;'>NAV_Scroll_Up &nbsp;&lt;speed&gt;<br /></span><span  style='font-weight: bold; color: #070;'>NAV_Scroll_Down &nbsp;&lt;speed&gt;</span>
+</p><div class='indent'>These four commands are used to produce smooth scrolling of the map view.  Scrolling continues while the key is held down.  The &lt;speed&gt; parameter is roughly a percentage of the viewing window to move each second.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>NAV_MouseScroll &nbsp;&lt;speed&gt;</span>
+</p><div class='indent'>Activates scrolling the map view using the mouse.  While the key or button is held down, moving the mouse will scroll the view.  The &lt;speed&gt; parameter controls how fast to scroll, <span class='kw'>1.0</span> means the map follows the mouse 1:1, higher values scroll faster, and lower values will scroll slower.
+</div><div class='vspace'></div><hr />
+<p class='vspace'><a name='view3D' id='view3D'></a>
+</p><h2>3D View Commands</h2>
+<p><span  style='font-weight: bold; color: #070;'>3D_Click</span>
+</p><div class='indent'>Performs the usual mouse-click function of the 3D view, namely to select/unselect wall and floor surfaces.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_Set &nbsp;&lt;keyword&gt; &lt;value&gt;</span>
+</p><div class='indent'>Sets a particular state of the 3D renderer to a certain value.  The &lt;value&gt; parameter is usually a small number, where <span class='kw'>0</span> means OFF and <span class='kw'>1</span> means ON, though some keywords use a range of values.
+<div class='vspace'></div></div><div class='indent'>Keywords:
+<div class='indent'><span class='kw'>grav</span> : gravity mode, camera stays on the floor when moving
+</div><div class='indent'><span class='kw'>tex</span> : texturing of walls and floors
+</div><div class='indent'><span class='kw'>obj</span> : draw things (sprites)
+</div><div class='indent'><span class='kw'>light</span> : lighting enable
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_Toggle &nbsp;&lt;keyword&gt;</span>
+</p><div class='indent'>Toggles or cycles a particular state of the 3D renderer.  For the &lt;keyword&gt; parameter, see the <span  style='font-weight: bold; color: #070;'>3D_Set</span> command above.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_Align &nbsp;[flags...]</span>
+</p><div class='indent'>Aligns the selected wall surfaces with nearby walls, by changing their X or Y offsets.  The flags control exactly what is affected by this command.
+<div class='vspace'></div></div><div class='indent'>Flags:
+<div class='indent'><span class='kw'>/x</span> : align X offsets
+</div><div class='indent'><span class='kw'>/y</span> : align Y offsets
+</div><div class='indent'><span class='kw'>/right</span> : pick a wall to the right to align with (instead of the left).
+</div><div class='indent'><span class='kw'>/clear</span> : clear the X / Y offsets (instead of aligning).
+</div></div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_Forward &nbsp;&lt;dist&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_Backward &nbsp;&lt;dist&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_Left &nbsp;&lt;dist&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_Right &nbsp;&lt;dist&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_Up &nbsp;&lt;dist&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_Down &nbsp;&lt;dist&gt;</span>
+</p><div class='indent'>Moves the 3D camera by a single step.  The &lt;dist&gt; parameter gives the distance to move (in map units).
+<div class='vspace'></div></div><div class='indent'>NOTE: these have been superceded by the NAV versions below, which allow moving smoothing through the map.  However these are kept for backwards compatibility, and may still be useful for some people.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_Turn &nbsp;&lt;angle&gt;</span>
+</p><div class='indent'>Turns the 3D camera left or right by a single step.  The &lt;angle&gt; parameter is how far to turn, in degrees, where negative values turn right (clockwise) and positive values turn left (anti-clockwise).
+<div class='vspace'></div></div><div class='indent'>NOTE: this has been superceded by the NAV version below, which allows turning the camera smoothly.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_DropToFloor</span>
+</p><div class='indent'>Drops the 3D camera down to the floor, as though the player was standing on the ground.  This will raise the camera too if it is below that height.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_ACT_AdjustOfs </span>
+</p><div class='indent'>Adjusts the X and Y offsets on the selected surfaces.  While the key or button is held down, moving the mouse will update the offset values.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_WHEEL_Move &nbsp;&lt;speed&gt;</span>
+</p><div class='indent'>Moves the 3D camera using the mouse-wheel.  Each click of the wheel will move a single step.  The &lt;dist&gt; parameter is how far to move, in map units.  When using this with the LAX modifier, holding <span class='key'>SHIFT</span> will move much slower and holding <span class='key'>CTRL</span> will move much faster.
+<div class='vspace'></div></div><div class='indent'>NOTE: this command does not work unless bound to a mouse-wheel button.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_NAV_Forward &nbsp;&lt;speed&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_NAV_Back &nbsp;&lt;speed&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_NAV_Left &nbsp;&lt;speed&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_NAV_Right &nbsp;&lt;speed&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_NAV_Up &nbsp;&lt;speed&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_NAV_Down &nbsp;&lt;speed&gt;</span>
+</p><div class='indent'>Navigates the 3D camera smoothly through the map, while the key is held down.  The &lt;speed&gt; parameter is how fast to move, in map units per second.  When used with the LAX modifer, the <span class='key'>SHIFT</span> key will slow down movement and the <span class='key'>CTRL</span> key will move faster.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_NAV_TurnLeft &nbsp;&lt;speed&gt;<br /></span><span  style='font-weight: bold; color: #070;'>3D_NAV_TurnRight &nbsp;&lt;speed&gt;</span>
+</p><div class='indent'>Turns the 3D camera smoothly left or right.  The &lt;speed&gt; parameter is how fast to turn, in degrees per second.  When used with the LAX modifer, the <span class='key'>SHIFT</span> key will slow down turning and the <span class='key'>CTRL</span> key will turn faster.
+</div><p class='vspace'><span  style='font-weight: bold; color: #070;'>3D_NAV_MouseMove &nbsp;&lt;speed&gt;</span>
+</p><div class='indent'>Moves or turns the 3D camera while the key or button is held down.  Moving the mouse forward/back will make the camera go up/down (purely vertically), and moving the mouse left/right will turn the camera left/right.  The &lt;speed&gt; parameter controls how fast to move or turn.  When used with the LAX modifier, the <span class='key'>SHIFT</span> key will slow down movement and the <span class='key'>CTRL</span> key will move faster.
+</div>
+</div>
