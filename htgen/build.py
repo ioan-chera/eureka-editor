@@ -76,8 +76,13 @@ for item in legacy_content:
 
     template_soup.find(id='wikitext').replaceWith(item_soup)
 
+    try:
+        title = os.path.splitext(item)[0].split('_')[1]
+    except:
+        title = 'MainPage'  # index.html only one
+
     with open(os.path.join(out_path, item), 'w') as f:
-        f.write(template_soup.prettify())
+        f.write(template_soup.prettify().replace('$(TITLE)', title))
 
 
 def copyanything(src, dst):
