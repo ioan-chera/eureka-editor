@@ -33,3 +33,4 @@ src/main.aps
 htdocs-ORIGINAL/
 htdocs-OUTPUT/
 build-intel
+venv
