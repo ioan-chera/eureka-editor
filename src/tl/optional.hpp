@@ -1,7 +1,7 @@
 
 ///
 // optional - An implementation of std::optional with extensions
-// Written in 2017 by Simon Brand (simonrbrand@gmail.com, @TartanLlama)
+// Written in 2017 by Sy Brand (tartanllama@gmail.com, @TartanLlama)
 //
 // Documentation available at https://tl.tartanllama.xyz/
 //
@@ -18,7 +18,7 @@
 #define TL_OPTIONAL_HPP
 
 #define TL_OPTIONAL_VERSION_MAJOR 1
-#define TL_OPTIONAL_VERSION_MINOR 0
+#define TL_OPTIONAL_VERSION_MINOR 1
 #define TL_OPTIONAL_VERSION_PATCH 0
 
 #include <exception>
@@ -409,7 +409,7 @@ template <class T> struct optional_operations_base : optional_storage_base<T> {
     this->m_has_value = false;
   }
 
-  template <class... Args> void construct(Args &&... args) noexcept {
+  template <class... Args> void construct(Args &&... args) {
     new (std::addressof(this->m_value)) T(std::forward<Args>(args)...);
     this->m_has_value = true;
   }
@@ -452,7 +452,8 @@ struct optional_copy_base<T, false> : optional_operations_base<T> {
   using optional_operations_base<T>::optional_operations_base;
 
   optional_copy_base() = default;
-  optional_copy_base(const optional_copy_base &rhs) {
+  optional_copy_base(const optional_copy_base &rhs)
+  : optional_operations_base<T>() {
     if (rhs.has_value()) {
       this->construct(rhs.get());
     } else {
@@ -741,8 +742,7 @@ public:
     static_assert(detail::is_optional<result>::value,
                   "F must return an optional");
 
-    return has_value() ? detail::invoke(std::forward<F>(f), **this)
-                       : result(nullopt);
+    return has_value() ? detail::invoke(std::forward<F>(f), **this) : result(nullopt);
   }
 
   template <class F>
@@ -1182,7 +1182,7 @@ public:
       }
     }
 
-    if (rhs.has_value()) {
+    else if (rhs.has_value()) {
       this->construct(*rhs);
     }
 
@@ -1204,7 +1204,7 @@ public:
       }
     }
 
-    if (rhs.has_value()) {
+    else if (rhs.has_value()) {
       this->construct(std::move(*rhs));
     }
 
@@ -1322,7 +1322,7 @@ public:
     static_assert(std::is_move_constructible<T>::value &&
                       std::is_convertible<U &&, T>::value,
                   "T must be move constructible and convertible from U");
-    return has_value() ? **this : static_cast<T>(std::forward<U>(u));
+    return has_value() ? std::move(**this) : static_cast<T>(std::forward<U>(u));
   }
 
   /// Destroys the stored value if one exists, making the optional empty
@@ -1645,7 +1645,7 @@ public:
     static_assert(detail::is_optional<result>::value,
                   "F must return an optional");
 
-    return has_value() ? detail::invoke(std::forward<F>(f), **this)
+    return has_value() ? detail::invoke(std::forward<F>(f), std::move(**this))
                        : result(nullopt);
   }
 #endif
@@ -1939,12 +1939,12 @@ public:
   template <class U = T,
             detail::enable_if_t<!detail::is_optional<detail::decay_t<U>>::value>
                 * = nullptr>
-  constexpr optional(U &&u) : m_value(std::addressof(u)) {
+  constexpr optional(U &&u)  noexcept : m_value(std::addressof(u)) {
     static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
   }
 
   template <class U>
-  constexpr explicit optional(const optional<U> &rhs) : optional(*rhs) {}
+  constexpr explicit optional(const optional<U> &rhs) noexcept : optional(*rhs) {}
 
   /// No-op
   ~optional() = default;
@@ -1977,33 +1977,30 @@ public:
   ///
   /// Rebinds this optional to the referee of `rhs` if there is one. Otherwise
   /// resets the stored value in `*this`.
-  template <class U> optional &operator=(const optional<U> &rhs) {
+  template <class U> optional &operator=(const optional<U> &rhs) noexcept {
     m_value = std::addressof(rhs.value());
     return *this;
   }
 
-  /// Constructs the value in-place, destroying the current one if there is
-  /// one.
-  template <class... Args> T &emplace(Args &&... args) noexcept {
-    static_assert(std::is_constructible<T, Args &&...>::value,
-                  "T must be constructible with Args");
-
-    *this = nullopt;
-    this->construct(std::forward<Args>(args)...);
-    return value();
+  /// Rebinds this optional to `u`.
+  template <class U = T,
+            detail::enable_if_t<!detail::is_optional<detail::decay_t<U>>::value>
+                * = nullptr>
+  optional &emplace(U &&u) noexcept {
+    return *this = std::forward<U>(u);
   }
 
   void swap(optional &rhs) noexcept { std::swap(m_value, rhs.m_value); }
 
   /// Returns a pointer to the stored value
-  constexpr const T *operator->() const { return m_value; }
+  constexpr const T *operator->() const noexcept { return m_value; }
 
-  TL_OPTIONAL_11_CONSTEXPR T *operator->() { return m_value; }
+  TL_OPTIONAL_11_CONSTEXPR T *operator->() noexcept { return m_value; }
 
   /// Returns the stored value
-  TL_OPTIONAL_11_CONSTEXPR T &operator*() { return *m_value; }
+  TL_OPTIONAL_11_CONSTEXPR T &operator*() noexcept { return *m_value; }
 
-  constexpr const T &operator*() const { return *m_value; }
+  constexpr const T &operator*() const noexcept { return *m_value; }
 
   constexpr bool has_value() const noexcept { return m_value != nullptr; }
 
@@ -2024,7 +2021,7 @@ public:
   }
 
   /// Returns the stored value if there is one, otherwise returns `u`
-  template <class U> constexpr T value_or(U &&u) const & {
+  template <class U> constexpr T value_or(U &&u) const & noexcept {
     static_assert(std::is_copy_constructible<T>::value &&
                       std::is_convertible<U &&, T>::value,
                   "T must be copy constructible and convertible from U");
@@ -2032,7 +2029,7 @@ public:
   }
 
   /// \group value_or
-  template <class U> TL_OPTIONAL_11_CONSTEXPR T value_or(U &&u) && {
+  template <class U> TL_OPTIONAL_11_CONSTEXPR T value_or(U &&u) && noexcept {
     static_assert(std::is_move_constructible<T>::value &&
                       std::is_convertible<U &&, T>::value,
                   "T must be move constructible and convertible from U");

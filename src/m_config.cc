@@ -883,7 +883,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		// Which option is this?
 		for (o = options; ; o++)
 		{
-			if (std::get_if<nullptr_t>(&o->data_ptr))
+			if (std::get_if<std::nullptr_t>(&o->data_ptr))
 			{
 				ThrowException("unknown option: '%s'\n", argv[0]);
 				/* NOT REACHED */
@@ -1013,7 +1013,7 @@ void M_PrintCommandLineOptions()
 	const opt_desc_t *o;
 	int name_maxlen = 0;
 
-	for (o = options; !std::get_if<nullptr_t>(&o->data_ptr); o++)
+	for (o = options; !std::get_if<std::nullptr_t>(&o->data_ptr); o++)
 	{
 		int len;
 
@@ -1031,7 +1031,7 @@ void M_PrintCommandLineOptions()
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
-	for (o = options; !std::get_if<nullptr_t>(&o->data_ptr); o++)
+	for (o = options; !std::get_if<std::nullptr_t>(&o->data_ptr); o++)
 	{
 		if (o->flags & (OptFlag_preference | OptFlag_hide))
 			continue;
@@ -1110,7 +1110,7 @@ int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
 
 	const opt_desc_t *o;
 
-	for (o = options; !std::get_if<nullptr_t>(&o->data_ptr); o++)
+	for (o = options; !std::get_if<std::nullptr_t>(&o->data_ptr); o++)
 	{
 		if (!(o->flags & OptFlag_preference))
 			continue;

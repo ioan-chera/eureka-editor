@@ -1029,7 +1029,7 @@ static int calcThingRotation(int angle)
 	if(angle < 293)
 		return 1;
 	// if(angle < 338)
-		return 8;
+	return 8;
 }
 
 void UI_Canvas::DrawThingSprites()
