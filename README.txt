@@ -1,6 +1,6 @@
 
-Eureka 2.0.0 README
-===================
+Eureka README
+=============
 
 
 INTRODUCTION

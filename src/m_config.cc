@@ -728,7 +728,7 @@ static int parse_config_line_from_file(const SString &line, const fs::path &base
 		// found it
 		break;
 	}
-	
+
 	if(auto ptr = std::get_if<bool *>(&opt->data_ptr))
 	{
 		if(value.noCaseEqual("no") || value.noCaseEqual("false") ||
@@ -1119,7 +1119,7 @@ int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
 			continue;
 
 		os << o->long_name << ' ';
-		
+
 		if(auto ptr = std::get_if<bool *>(&o->data_ptr))
 			os << (**ptr ? "1" : "0");
 		else if(auto ptr = std::get_if<SString *>(&o->data_ptr))
