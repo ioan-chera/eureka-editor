@@ -1,0 +1,21 @@
+name: C/C++ CI clang
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Dependencies
+      run: sudo apt-get update && sudo apt-get install --fix-missing clang cmake libfltk1.3-dev libxpm-dev libz-dev python3
+    - name: CMake
+      run: export CC=/usr/bin/clang && export CXX=/usr/bin/clang++ && mkdir build-clang && cd build-clang && cmake .. && make -j$(nproc)
+    - name: Test
+      run: cd build-clang && ctest --output-on-failure
