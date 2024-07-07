@@ -113,13 +113,13 @@ static int PartialTexCmp(const char *A, const char *B)
 #endif
 
 
-bool LinedefModule::partIsVisible(const Objid& obj, char part) const
+bool LinedefModule::partIsVisible(const Objid& obj, Part part) const
 {
 	const LineDef *L  = pointer(obj);
 	const SideDef *SD = sidedefPointer(obj);
 
 	if (! L->TwoSided())
-		return (part == 'l');
+		return (part == Part::lower);
 
 	const Sector *front = &doc.getSector(*doc.getRight(*L));
 	const Sector *back  = &doc.getSector(*doc.getLeft(*L));
@@ -128,10 +128,10 @@ bool LinedefModule::partIsVisible(const Objid& obj, char part) const
 		std::swap(front, back);
 
 	// ignore sky walls
-	if (part == 'u' && inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
+	if (part == Part::upper && inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
 		return false;
 
-	if (part == 'l')
+	if (part == Part::lower)
 	{
 		if (is_null_tex(SD->LowerTex()))
 			return false;
@@ -474,8 +474,8 @@ void LinedefModule::doAlignY(EditOperation &op, const Objid& cur, const Objid& a
 //	const LineDef *adj_L  = LD_ptr(adj);
 	const SideDef *adj_SD = sidedefPointer(adj);
 
-	bool lower_vis = partIsVisible(cur, 'l');
-	bool upper_vis = partIsVisible(cur, 'u');
+	bool lower_vis = partIsVisible(cur, Part::lower);
+	bool upper_vis = partIsVisible(cur, Part::upper);
 
 	bool lower_unpeg = (L->flags & MLF_LowerUnpegged) ? true : false;
 	bool upper_unpeg = (L->flags & MLF_UpperUnpegged) ? true : false;
@@ -755,8 +755,8 @@ void Instance::CMD_LIN_Align()
 			// decide whether to use upper or lower
 			// WISH : this could be smarter....
 
-			bool lower_vis = level.linemod.partIsVisible(obj, 'l');
-			bool upper_vis = level.linemod.partIsVisible(obj, 'u');
+			bool lower_vis = level.linemod.partIsVisible(obj, LinedefModule::Part::lower);
+			bool upper_vis = level.linemod.partIsVisible(obj, LinedefModule::Part::upper);
 
 			if (! (lower_vis || upper_vis))
 				continue;
