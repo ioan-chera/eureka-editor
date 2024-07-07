@@ -30,6 +30,7 @@ legacy_content = (
     'Main_Changes124.html',
     'Main_Changes127.html',
     'Main_Changes2.0.0.html',
+    'Main_Changes2.0.1.html',
     'Main_Credits.html',
     'Main_Download.html',
     'Main_History.html',
@@ -65,6 +66,10 @@ for item in legacy_content:
         item_soup.div.append(BeautifulSoup(markdown.markdown(authors_content, extensions=['fenced_code']), 'html.parser'))
     elif item == 'Main_Changes2.0.0.html':
         with open(os.path.join(cur_path, '..', 'changelogs', '2.0.0.md')) as f:
+            changes_content = f.read()
+        item_soup.div.append(BeautifulSoup(markdown.markdown(changes_content, extensions=['fenced_code']), 'html.parser'))
+    elif item == 'Main_Changes2.0.1.html':
+        with open(os.path.join(cur_path, '..', 'changelogs', '2.0.1.md')) as f:
             changes_content = f.read()
         item_soup.div.append(BeautifulSoup(markdown.markdown(changes_content, extensions=['fenced_code']), 'html.parser'))
 
