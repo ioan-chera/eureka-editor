@@ -382,7 +382,7 @@ void Instance::SelectNeighborSectors(int objnum, SelectNeighborCriterion option,
 
 	for (const auto &line : level.linedefs)
 	{
-		if (line->OneSided())
+		if (!line->TwoSided())
 			continue;
 
 		if (level.getRight(*line)->sector == objnum || level.getLeft(*line)->sector == objnum)
