@@ -152,7 +152,7 @@ bool LinedefModule::partIsVisible(const Objid& obj, char part) const
 // calculate vertical range that the given surface occupies.
 // when part is zero, we use obj.type instead.
 //
-void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2) const
+void LinedefModule::partCalcExtent(const Objid& obj, Part part, int *z1, int *z2) const
 {
 	const LineDef *L  = pointer(obj);
 	const SideDef *SD = sidedefPointer(obj);
@@ -172,14 +172,14 @@ void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2
 		return;
 	}
 
-	if (! part)
+	if (part == Part::unspecified)
 	{
 		if (obj.parts & (PART_RT_UPPER | PART_LF_UPPER))
-			part = 'u';
+			part = Part::upper;
 		else if (obj.parts & (PART_RT_RAIL | PART_LF_RAIL))
-			part = 'r';
+			part = Part::rail;
 		else
-			part = 'l';
+			part = Part::lower;
 	}
 
 	const Sector *front = &doc.getSector(*doc.getRight(*L));
@@ -188,17 +188,17 @@ void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
 
-	if (part == 'r')
+	if (part == Part::rail)
 	{
 		*z1 = std::max(front->floorh, back->floorh);
 		*z2 = std::min(front->ceilh,  back->ceilh);
 	}
-	else if (part == 'u')
+	else if (part == Part::upper)
 	{
 		*z2 = front->ceilh;
 		*z1 = std::min(*z2, back->ceilh);
 	}
-	else  // part == 'l'
+	else  // part == Part::lower
 	{
 		*z1 = front->floorh;
 		*z2 = std::max(*z1, back->floorh);
@@ -221,8 +221,8 @@ int LinedefModule::scoreTextureMatch(const Objid& adj, const Objid& cur) const
 	int adj_z1, adj_z2;
 	int cur_z1, cur_z2;
 
-	partCalcExtent(adj, 0, &adj_z1, &adj_z2);
-	partCalcExtent(cur, 0, &cur_z1, &cur_z2);
+	partCalcExtent(adj, Part::unspecified, &adj_z1, &adj_z2);
+	partCalcExtent(cur, Part::unspecified, &cur_z1, &cur_z2);
 
 	// adjacent surface is not visible?
 	if (adj_z2 <= adj_z1)
