@@ -352,17 +352,22 @@ void LinedefModule::determineAdjoiner(Objid& result,
 		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
 			continue;
 
+		static const int partsList[] =
+		{
+			PART_RT_LOWER, PART_RT_UPPER, PART_RT_RAIL
+		};
+
 		for (int side = 0 ; side < 2 ; side++)
-		for (int what = 0 ; what < 3 ; what++)
+		for (int curParts : partsList)
 		{
 			Objid adj;
 
 			adj.type  = ObjType::linedefs;
 			adj.num   = n;
-			adj.parts = (what == 0) ? PART_RT_LOWER : (what == 1) ? PART_RT_UPPER : PART_RT_RAIL;
+			adj.parts = curParts;
 
 			if (side == 1)
-				adj.parts = adj.parts << 4;
+				adj.parts = adj.parts << PART_LEFT_SHIFT;
 
 			int score = scoreAdjoiner(adj, cur, align_flags);
 

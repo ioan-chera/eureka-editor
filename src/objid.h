@@ -58,6 +58,8 @@ enum class ObjType : byte
 #define PART_LF_RAIL		0x80
 #define PART_LF_ALL			(PART_LF_LOWER | PART_LF_UPPER | PART_LF_RAIL)
 
+static const int PART_LEFT_SHIFT = 4;
+
 
 class Objid
 {
