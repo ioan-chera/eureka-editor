@@ -816,7 +816,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 			// We need the selection list as an array so we can easily modify it during iteration
 			std::vector<int> sel = list.asArray();
 			selection_c movingGroup = list;
-			
+
 			for(auto it = sel.begin(); it != sel.end(); ++it)
 			{
 				int deletedVertex = -1;
@@ -868,7 +868,7 @@ void ObjectsModule::move(const selection_c &list, const v3double_t &delta) const
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("moved", list);
 
-	int objectsBeforeMoving;
+	int objectsBeforeMoving = 0;
 	if(inst.edit.Selected)
 		objectsBeforeMoving = doc.numObjects(inst.edit.Selected->what_type());
 
@@ -974,7 +974,7 @@ static void singleDragVertex(Instance &inst, const int vertexID, const v2double_
 	if (inst.edit.split_line.valid())
 	{
 		did_split_line = inst.edit.split_line.num;
-		
+
 		// Check if it's actually a case of splitting a neighbouring linedef
 		if(inst.level.objects.findLineBetweenLineAndVertex(did_split_line, vertexID) >= 0)
 		{

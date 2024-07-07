@@ -162,7 +162,7 @@ int64_t Lump_c::getName8() const noexcept
 		char cbuf[8];
 		int64_t cint;
 	} buffer;
-	strncpy(buffer.cbuf, Name().c_str(), 8);
+	memcpy(buffer.cbuf, Name().c_str(), std::min(Name().length() + 1, sizeof(buffer)));
 	return buffer.cint;
 }
 
@@ -210,7 +210,7 @@ retry:
 		gLog.printf("Open failed: %s\n", GetErrorMessage(what).c_str());
 		return NULL;
 	}
-	
+
 	return createAndReadDirectory(filename, mode, fp);
 }
 
@@ -230,14 +230,14 @@ std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
 std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 {
 	gLog.printf("Opening WAD folder: %s\n", path.u8string().c_str());
-	
+
 	// Reading from folder follows this rule (which should be a cross-port standard):
 	// https://eternity.youfailit.net/wiki/ZIP
-	
+
 	// Currently no editing is allowed in folder paths, which are only for resources anyway
 	auto wraw = new Wad_file(path, WadOpenMode::read);
 	auto w = std::shared_ptr<Wad_file>(wraw);
-	
+
 	fs::directory_iterator iterator;
 	try
 	{
@@ -248,15 +248,15 @@ std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 		gLog.printf("Open failed: %s\n", e.what());
 		return nullptr;
 	}
-	
+
 	auto tryAddNewLump = [](std::shared_ptr<Wad_file> &w, const fs::path &path, WadNamespace nameSpace)
 	{
 		SString lumpname = SString(path.filename().replace_extension().u8string()).asUpper().substr(0, 8);
-		
+
 		for(char &c : lumpname)
 			if(c == '^')
 				c = '\\';	// de-escape backslashes, due to vile precedent
-		
+
 		Lump_c *lump = new Lump_c(lumpname);
 		std::vector<uint8_t> data;
 		if(!FileLoad(path, data))
@@ -265,15 +265,15 @@ std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 			delete lump;
 			return;
 		}
-		
+
 		lump->setData(std::move(data));
-		
+
 		LumpRef ref = {};
 		ref.lump.reset(lump);
 		ref.ns = nameSpace;
 		w->directory.push_back(std::move(ref));
 	};
-	
+
 	for(const auto &entry : iterator)
 	{
 		if(fs::is_regular_file(entry.path()))
@@ -307,7 +307,7 @@ std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 					nameSpace = WadNamespace::TextureLumps;
 				else
 					nameSpace = WadNamespace::Global;
-				
+
 				tryAddNewLump(w, subentry.path(), nameSpace);
 			}
 		}
@@ -316,9 +316,9 @@ std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 			gLog.printf("Ignoring irregular file path %s\n", entry.path().u8string().c_str());
 		}
 	}
-	
+
 	// No DetectLevels allowed either.
-	
+
 	return w;
 }
 
@@ -335,7 +335,7 @@ std::shared_ptr<Wad_file> Wad_file::createAndReadDirectory(const fs::path &filen
 {
 	auto wraw = new Wad_file(filename, mode);
 	auto w = std::shared_ptr<Wad_file>(wraw);
-	
+
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
 	{
@@ -616,7 +616,7 @@ const Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace g
 }
 
 //
-// Searches for the 
+// Searches for the
 //
 std::vector<SpriteLumpRef> Wad_file::findFirstSpriteLump(const SString &stem) const
 {
@@ -633,11 +633,11 @@ std::vector<SpriteLumpRef> Wad_file::findFirstSpriteLump(const SString &stem) co
 			return false;
 		return true;
 	};
-	
+
 	std::vector<SpriteLumpRef> result;
 	SString substem = stem.length() > 4 ? stem.substr(0, 4) : stem;
 	std::vector<const Lump_c *> candidates;
-	
+
 	SString foundName;
 	const Lump_c *foundLump = nullptr;
 	// 1. Find the first ordered stem
@@ -661,10 +661,10 @@ std::vector<SpriteLumpRef> Wad_file::findFirstSpriteLump(const SString &stem) co
 	}
 	if(foundName.empty())
 		return {};
-	
+
 	char letter = 0;
 	char rot = 0;
-	
+
 	// 3. Find all the other rotations with that frame
 	letter = foundName[4];
 	rot = foundName[5];
@@ -687,7 +687,7 @@ std::vector<SpriteLumpRef> Wad_file::findFirstSpriteLump(const SString &stem) co
 			result[name[7] - '1'] = {lump, true};
 		}
 	}
-	
+
 	return result;
 }
 
