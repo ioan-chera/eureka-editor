@@ -1137,6 +1137,17 @@ void Instance::CMD_Delete()
 
 	bool keep = Exec_HasFlag("/keep");
 
+	auto clearSelection = [this]()
+		{
+			Editor_ClearAction();
+
+			// always clear the selection (deleting objects invalidates it)
+			Selection_Clear();
+
+			edit.highlight.clear();
+			edit.split_line.clear();
+		};
+
 	// special case for a single vertex connected to two linedefs,
 	// we delete the vertex but merge the two linedefs.
 	if (edit.mode == ObjType::vertices && edit.Selected->count_obj() == 1)
@@ -1147,7 +1158,11 @@ void Instance::CMD_Delete()
 		if (level.vertmod.howManyLinedefs(v_num) == 2)
 		{
 			if (DeleteVertex_MergeLineDefs(level, v_num))
-				goto success;
+			{
+				
+				clearSelection();
+				RedrawMap();
+			}
 		}
 
 		// delete vertex normally
@@ -1157,17 +1172,11 @@ void Instance::CMD_Delete()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("deleted", *edit.Selected);
 
-		DeleteObjects_WithUnused(op, level, *edit.Selected, keep, false /* keep_verts */, keep);
+		selection_c deleteList = *edit.Selected;
+		clearSelection();
+
+		DeleteObjects_WithUnused(op, level, deleteList, keep, false /* keep_verts */, keep);
 	}
-
-success:
-	Editor_ClearAction();
-
-	// always clear the selection (deleting objects invalidates it)
-	Selection_Clear();
-
-	edit.highlight.clear();
-	edit.split_line.clear();
 
 	RedrawMap();
 }

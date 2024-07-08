@@ -82,10 +82,10 @@ namespace thing_sec_cache
 		invalid_high = std::max(invalid_high, th);
 	}
 
-	void InvalidateAll(const Document &doc)
+	void InvalidateAll(const Document &doc, bool upcomingDelete)
 	{
 		invalid_low  = 0;
-		invalid_high = doc.numThings() - 1;
+		invalid_high = doc.numThings() - (upcomingDelete ? 2 : 1);
 	}
 
 	void Update(Instance &inst);
@@ -216,7 +216,7 @@ namespace thing_sec_cache
 		if (inst.level.numThings() != (int)inst.r_view.thing_sectors.size())
 		{
 			inst.r_view.thing_sectors.resize(inst.level.numThings());
-			thing_sec_cache::InvalidateAll(inst.level);
+			thing_sec_cache::InvalidateAll(inst.level, false);
 		}
 
 		// nothing changed?
@@ -248,7 +248,7 @@ void Render3D_NotifyInsert(ObjType type, int objnum)
 void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
 {
 	if (type == ObjType::things || type == ObjType::sectors)
-		thing_sec_cache::InvalidateAll(doc);
+		thing_sec_cache::InvalidateAll(doc, true);
 }
 
 void Render3D_NotifyChange(ObjType type, int objnum, int field)
@@ -670,7 +670,7 @@ static bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 
 void Instance::Render3D_Setup()
 {
-	thing_sec_cache::InvalidateAll(level);
+	thing_sec_cache::InvalidateAll(level, false);
 	r_view.thing_sectors.resize(0);
 
 	if (! r_view.p_type)
