@@ -27,9 +27,19 @@
 #ifndef __EUREKA_E_LINEDEF_H__
 #define __EUREKA_E_LINEDEF_H__
 
+#include "Side.h"
 #include "DocumentModule.h"
+#include "sys_type.h"
+#include <vector>
 
+class EditOperation;
+class FFixedPoint;
+class LineDef;
+class Objid;
 class selection_c;
+class SString;
+struct v2double_t;
+struct SideDef;
 
 namespace linemod
 {

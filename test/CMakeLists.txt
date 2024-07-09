@@ -22,8 +22,8 @@ list(FILTER fltk_libs INCLUDE REGEX fltk)
 # eurekasrc files
 
 add_library(
-    testutils 
-    STATIC 
+    testutils
+    STATIC
     testUtils/FatalHandler.cpp
     testUtils/FatalHandler.hpp
     testUtils/TempDirContext.cpp
@@ -53,6 +53,7 @@ add_executable(
     e_checks_test.cpp
     e_commands_test.cpp
     e_cutpaste_test.cpp
+    e_linedef_test.cpp
     e_objects_test.cpp
     FixedPointTest.cpp
     im_color_test.cpp

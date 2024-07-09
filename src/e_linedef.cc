@@ -1265,7 +1265,7 @@ void linemod::moveCoordOntoLinedef(const Document &doc, int ld, v2double_t &v)
 
 	v2double_t dv = v2 - v1;
 
-	double len_squared = dv.hypot();
+	double len_squared = pow(dv.hypot(), 2);
 
 	SYS_ASSERT(len_squared > 0);
 
