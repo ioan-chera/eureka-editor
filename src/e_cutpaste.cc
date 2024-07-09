@@ -1125,7 +1125,7 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const sele
 
 void Instance::CMD_Delete()
 {
-	if (main_win->ClipboardOp(EditCommand::del))
+	if (main_win && main_win->ClipboardOp(EditCommand::del))
 		return;
 
 	SelectHighlight unselect = edit.SelectionOrHighlight();

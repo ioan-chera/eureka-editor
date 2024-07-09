@@ -227,6 +227,7 @@ TEST_F(SelectNeighborTexture, SelectFromBottomThenAddThenClearAll)
 
     // And apply the command on it
     inst.edit.highlight.num = 4;
+	inst.edit.highlight.parts = PART_RT_LOWER;
     inst.CMD_SelectNeighbors();
     ASSERT_TRUE(inst.edit.Selected->empty());
 }
@@ -547,6 +548,7 @@ TEST_F(SelectNeighborHeight, WallGoesAcrossSectorsThenAddAnotherThenClear)
 
 	// Now select the open sector
 	inst.edit.highlight.num = 31;
+	inst.edit.highlight.parts = PART_RT_LOWER;
 	inst.CMD_SelectNeighbors();
 
 	ASSERT_EQ(inst.edit.Selected->count_obj(), 12);
@@ -556,6 +558,7 @@ TEST_F(SelectNeighborHeight, WallGoesAcrossSectorsThenAddAnotherThenClear)
 
 	// Now apply the same command on a selected line and see how all gets deselected.
 	inst.edit.highlight.num = 30;
+	inst.edit.highlight.parts = PART_RT_LOWER;
 	inst.CMD_SelectNeighbors();
 	ASSERT_TRUE(inst.edit.Selected->empty());
 }

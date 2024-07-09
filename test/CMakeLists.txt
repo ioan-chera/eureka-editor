@@ -52,6 +52,7 @@ add_executable(
     DocumentTest.cpp
     e_checks_test.cpp
     e_commands_test.cpp
+    e_cutpaste_test.cpp
     e_objects_test.cpp
     FixedPointTest.cpp
     im_color_test.cpp
