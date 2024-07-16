@@ -1322,7 +1322,7 @@ void Instance::CMD_LogViewer()
 
 void Instance::CMD_OnlineDocs()
 {
-	int rv = fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
+	int rv = fl_open_uri("https://eureka-editor.sourceforge.net/Docs_Index.html");
 	if (rv == 1)
 		Status_Set("Opened web browser");
 	else
