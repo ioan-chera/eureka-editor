@@ -23,6 +23,7 @@
 
 #include "m_strings.h"
 #include "objid.h"
+#include "FL/Enumerations.H"
 
 class Instance;
 

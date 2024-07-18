@@ -64,6 +64,7 @@ add_executable(
     m_bitvec_test.cpp
     m_files_test.cpp
     m_game_test.cpp
+    m_keys_test.cpp
     m_parse_test.cpp
     m_select_test.cpp
     m_streams_test.cpp
