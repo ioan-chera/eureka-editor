@@ -266,7 +266,7 @@ if(APPLE OR WIN32)
         if(APPLE)
             execute_process(
                 COMMAND patch "${LOCAL_FLTK_SOURCE}/src/Fl_JPEG_Image.cxx"
-                              "${CMAKE_CURRENT_SOURCE_DIR}/fltk-patch/Fl_JPEG_Image-fltk1.3.8-macos.diff"
+                              "${CMAKE_CURRENT_SOURCE_DIR}/fltk-patch/Fl_JPEG_Image-fltk1.3.9-macos.diff"
             )
         endif()
     endif()

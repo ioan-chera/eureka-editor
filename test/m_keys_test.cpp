@@ -54,3 +54,34 @@ TEST(MKeys, KeyToString)
 	key = FL_SCROLL_LOCK | 's';
 	ASSERT_EQ(keys::toString(key), "LAX-s");
 }
+
+TEST(MKeys, StringForFunc)
+{
+	key_binding_t bind = {};
+	editor_command_t command = {"CommandName"};
+	bind.cmd = &command;
+
+	
+	// No params
+	ASSERT_EQ(M_StringForFunc(bind), "CommandName");
+	
+	bind.param[0] = "parm1";
+	
+	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1");
+	
+	bind.param[1] = "other";
+	
+	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1 other");
+	
+	bind.param[2] = "thing";
+	
+	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1 other thing");
+	
+	bind.param[1].clear();
+	
+	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1");
+	
+	bind.param[1] = "aaaaabbbbbcccccdddddeeeeefffffggggg";
+	
+	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1 aaaaabbbbbcccccdddddeeeeefffff thing");
+}
