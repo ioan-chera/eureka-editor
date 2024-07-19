@@ -63,25 +63,25 @@ TEST(MKeys, StringForFunc)
 
 	
 	// No params
-	ASSERT_EQ(M_StringForFunc(bind), "CommandName");
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName");
 	
 	bind.param[0] = "parm1";
 	
-	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1");
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1");
 	
 	bind.param[1] = "other";
 	
-	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1 other");
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 other");
 	
 	bind.param[2] = "thing";
 	
-	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1 other thing");
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 other thing");
 	
 	bind.param[1].clear();
 	
-	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1");
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1");
 	
 	bind.param[1] = "aaaaabbbbbcccccdddddeeeeefffffggggg";
 	
-	ASSERT_EQ(M_StringForFunc(bind), "CommandName: parm1 aaaaabbbbbcccccdddddeeeeefffff thing");
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 aaaaabbbbbcccccdddddeeeeefffff thing");
 }

@@ -1254,7 +1254,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 		SYS_ASSERT(bind_idx >= 0);
 
 		M_GetBindingInfo(bind_idx, &new_key, &new_context);
-		new_func = M_StringForFunc(global::pref_binds[bind_idx]);
+		new_func = keys::stringForFunc(global::pref_binds[bind_idx]);
 	}
 
 

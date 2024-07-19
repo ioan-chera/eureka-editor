@@ -128,7 +128,10 @@ void M_ApplyBindings();
 int  M_NumBindings();
 void M_DetectConflictingBinds();
 
-SString M_StringForFunc(const key_binding_t &bind);
+namespace keys
+{
+SString stringForFunc(const key_binding_t &bind);
+}
 const char * M_StringForBinding(const key_binding_t& bind, bool changing_key = false);
 
 void M_GetBindingInfo(int index, keycode_t *key, KeyContext *context);

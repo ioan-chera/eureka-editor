@@ -794,34 +794,35 @@ void M_DetectConflictingBinds()
 	}
 }
 
-
-SString M_StringForFunc(const key_binding_t &bind)
+namespace keys
+{
+SString stringForFunc(const key_binding_t &bind)
 {
 	SString buffer;
 	buffer.reserve(2048);
-
+	
 	SYS_ASSERT(!!bind.cmd);
 	buffer = bind.cmd->name;
-
+	
 	// add the parameters
-
+	
 	for (int k = 0 ; k < MAX_EXEC_PARAM ; k++)
 	{
 		const SString &param = bind.param[k];
-
+		
 		if (param.empty())
 			break;
-
+		
 		if (k == 0)
 			buffer.push_back(':');
-
+		
 		buffer.push_back(' ');
 		buffer += SString::printf("%.30s", param.c_str());
 	}
-
+	
 	return buffer;
 }
-
+}
 
 const char * M_StringForBinding(const key_binding_t& bind, bool changing_key)
 {
@@ -846,7 +847,7 @@ const char * M_StringForBinding(const key_binding_t& bind, bool changing_key)
 			changing_key ? "<?"     : ModName_Space(tempk),
 			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
 			ctx_name,
-			 M_StringForFunc(bind).c_str() );
+			 keys::stringForFunc(bind).c_str() );
 
 	return buffer;
 }
