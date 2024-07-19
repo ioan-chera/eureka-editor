@@ -30,22 +30,34 @@ Wesley Johnson
 
   * Doom Legacy definition file
 
-sink666
+Pascal de Bruijn
 
-  * Eureka lump relative path fix
+  * Freedoom UGH fixes
 
-chewi
-
-  * Fixed OpenGL CMake build settings and texture rendering
-
-iccolon818
+Isaac Colón
 
   * Added the select-by-neighbors feature
   * Added Dehacked thing configuration support
 
-Pascal de Bruijn
+James Le Cuirot
 
-  * Freedoom UGH fixes
+  * Fixed OpenGL CMake build settings and texture rendering
+
+Steven Elliott
+
+  * Sprite fixes
+
+epg
+
+  * Compilation fixes
+
+natsuonde
+
+  * Test map function fixes
+
+sink666
+
+  * Eureka lump relative path fix
 
 ## Earlier Work
 
