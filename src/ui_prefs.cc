@@ -109,7 +109,7 @@ private:
 				FinishGrab();
 
 				if (key)
-					key_name->value(M_KeyToString(key).c_str());
+					key_name->value(keys::toString(key).c_str());
 
 				// if previous key was invalid, need to re-enable OK button
 				validate_callback(this, this);
@@ -128,7 +128,7 @@ private:
 					FinishGrab();
 
 					key = new_key;
-					key_name->value(M_KeyToString(key).c_str());
+					key_name->value(keys::toString(key).c_str());
 
 					// if previous key was invalid, need to re-enable OK button
 					validate_callback(this, this);
@@ -491,7 +491,7 @@ public:
 		key_name->callback((Fl_Callback*)validate_callback, this);
 
 		if (key)
-			key_name->value(M_KeyToString(key).c_str());
+			key_name->value(keys::toString(key).c_str());
 
 		grab_but = new Fl_Button(255, 25, 90, 25, "Re-bind");
 		grab_but->callback((Fl_Callback*)grab_key_callback, this);

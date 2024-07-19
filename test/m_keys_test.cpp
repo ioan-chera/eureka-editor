@@ -21,36 +21,36 @@
 TEST(MKeys, KeyToString)
 {
 	keycode_t key = EMOD_SHIFT | 'k';
-	ASSERT_EQ(M_KeyToString(key), "K");
+	ASSERT_EQ(keys::toString(key), "K");
 	
 	key = EMOD_COMMAND | 'j';
 #ifdef __APPLE__
-	ASSERT_EQ(M_KeyToString(key), "CMD-j");
+	ASSERT_EQ(keys::toString(key), "CMD-j");
 #else
-	ASSERT_EQ(M_KeyToString(key), "CTRL-j");
+	ASSERT_EQ(keys::toString(key), "CTRL-j");
 #endif
 	
 	key = EMOD_META | 'm';
-	ASSERT_EQ(M_KeyToString(key), "META-m");
+	ASSERT_EQ(keys::toString(key), "META-m");
 	
 	key = EMOD_ALT | 'a';
-	ASSERT_EQ(M_KeyToString(key), "ALT-a");
+	ASSERT_EQ(keys::toString(key), "ALT-a");
 	
 	key = EMOD_ALT | (FL_Button + 3);
-	ASSERT_EQ(M_KeyToString(key), "ALT-MOUSE3");
+	ASSERT_EQ(keys::toString(key), "ALT-MOUSE3");
 	
 	key = EMOD_ALT | FL_Volume_Down;
-	ASSERT_EQ(M_KeyToString(key), "ALT-VOL_DOWN");
+	ASSERT_EQ(keys::toString(key), "ALT-VOL_DOWN");
 	
 	key = EMOD_SHIFT | '5';
-	ASSERT_EQ(M_KeyToString(key), "SHIFT-5");
+	ASSERT_EQ(keys::toString(key), "SHIFT-5");
 	
 	key = EMOD_SHIFT | '"';
-	ASSERT_EQ(M_KeyToString(key), "SHIFT-DBLQUOTE");
+	ASSERT_EQ(keys::toString(key), "SHIFT-DBLQUOTE");
 	
 	key = EMOD_SHIFT | (FL_F + 4);
-	ASSERT_EQ(M_KeyToString(key), "SHIFT-F4");
+	ASSERT_EQ(keys::toString(key), "SHIFT-F4");
 	
 	key = FL_SCROLL_LOCK | 's';
-	ASSERT_EQ(M_KeyToString(key), "LAX-s");
+	ASSERT_EQ(keys::toString(key), "LAX-s");
 }

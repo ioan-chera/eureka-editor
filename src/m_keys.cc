@@ -325,21 +325,22 @@ static const char *ModName_Space(keycode_t mod)
 	return "";
 }
 
-
-SString M_KeyToString(keycode_t key)
+namespace keys
+{
+SString toString(keycode_t key)
 {
 	// convert SHIFT + letter --> uppercase letter
 	if ((key & EMOD_ALL_MASK) == EMOD_SHIFT &&
 		(key & FL_KEY_MASK)  <  127 &&
 		isalpha(key & FL_KEY_MASK))
 	{
-        return SString::printf("%c", toupper(key & FL_KEY_MASK));
+		return SString::printf("%c", toupper(key & FL_KEY_MASK));
 	}
-
-    return SString::printf("%s%s", ModName_Dash(key),
-                           BareKeyName(key & FL_KEY_MASK).c_str());
+	
+	return SString::printf("%s%s", ModName_Dash(key),
+						   BareKeyName(key & FL_KEY_MASK).c_str());
 }
-
+}
 
 int M_KeyCmp(keycode_t A, keycode_t B)
 {
@@ -385,7 +386,7 @@ KeyContext M_ParseKeyContext(const SString &str)
 	return KeyContext::none;
 }
 
-const char * M_KeyContextString(KeyContext context)
+static const char * M_KeyContextString(KeyContext context)
 {
 	switch (context)
 	{
@@ -640,7 +641,7 @@ void M_SaveBindings()
 			if (BindingExists(global::install_binds, bind, true /* full match */))
 				continue;
 
-			os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
+			os << M_KeyContextString(bind.context) << '\t' << keys::toString(bind.key) << '\t' <<
 				bind.cmd->name;
 
 			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
@@ -664,7 +665,7 @@ void M_SaveBindings()
 
 			if (! BindingExists(global::all_bindings, bind, false /* full match */))
 			{
-				os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
+				os << M_KeyContextString(bind.context) << '\t' << keys::toString(bind.key) << '\t' <<
 					"UNBOUND" << '\n';
 				count++;
 			}

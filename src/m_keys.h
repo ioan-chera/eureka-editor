@@ -105,11 +105,12 @@ inline constexpr KeyContext validKeyContexts[] =
 int M_KeyCmp(keycode_t A, keycode_t B);
 
 KeyContext M_ParseKeyContext(const SString &str);
-const char * M_KeyContextString(KeyContext context);
 
 keycode_t M_ParseKeyString(const SString &str);
-SString M_KeyToString(keycode_t key);
-
+namespace keys
+{
+SString toString(keycode_t key);
+}
 
 keycode_t M_TranslateKey(int key, int state);
 

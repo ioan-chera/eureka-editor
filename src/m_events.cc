@@ -595,7 +595,7 @@ int Instance::EV_RawKey(int event)
 		return 1;
 
 #if 0  // DEBUG
-	fprintf(stderr, "Key code: 0x%08x : %s\n", key, M_KeyToString(key).c_str());
+	fprintf(stderr, "Key code: 0x%08x : %s\n", key, keys::toString(key).c_str());
 #endif
 
 	// keyboard propagation logic
