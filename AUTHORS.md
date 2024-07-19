@@ -30,6 +30,23 @@ Wesley Johnson
 
   * Doom Legacy definition file
 
+sink666
+
+  * Eureka lump relative path fix
+
+chewi
+
+  * Fixed OpenGL CMake build settings and texture rendering
+
+iccolon818
+
+  * Added the select-by-neighbors feature
+  * Added Dehacked thing configuration support
+
+Pascal de Bruijn
+
+  * Freedoom UGH fixes
+
 ## Earlier Work
 
 André Majorel created the [Yadex](http://www.teaser.fr/~amajorel/yadex/) editor. Eureka began as a fork of this editor, version 1.7.0 to be precise.
