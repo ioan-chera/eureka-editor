@@ -1172,7 +1172,7 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 
 	// show we're ready to accept a new key
 
-	const char *str = M_StringForBinding(bind_idx, true /* changing_key */);
+	const char *str = M_StringForBinding(global::pref_binds[bind_idx], true /* changing_key */);
 	SYS_ASSERT(str);
 
 	prefs->key_list->text(line, str);
@@ -1254,7 +1254,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 		SYS_ASSERT(bind_idx >= 0);
 
 		M_GetBindingInfo(bind_idx, &new_key, &new_context);
-		new_func = M_StringForFunc(bind_idx);
+		new_func = M_StringForFunc(global::pref_binds[bind_idx]);
 	}
 
 
@@ -1699,7 +1699,7 @@ void UI_Preferences::LoadKeys()
 
 	for (int i = 0 ; i < M_NumBindings() ; i++)
 	{
-		const char *str = M_StringForBinding(i);
+		const char *str = M_StringForBinding(global::pref_binds[i]);
 		SYS_ASSERT(str);
 
 		key_list->add(str);
@@ -1715,7 +1715,7 @@ void UI_Preferences::ReloadKeys()
 
 	for (int i = 0 ; i < M_NumBindings() ; i++)
 	{
-		const char *str = M_StringForBinding(i);
+		const char *str = M_StringForBinding(global::pref_binds[i]);
 
 		key_list->text(i + 1, str);
 	}

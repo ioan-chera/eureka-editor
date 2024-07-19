@@ -26,6 +26,8 @@
 #include "FL/Enumerations.H"
 
 class Instance;
+struct editor_command_t;
+struct key_binding_t;
 
 /* Key value:
  *   - can be a printable ASCII character, e.g. 'a', '2', ';'
@@ -43,6 +45,11 @@ class Instance;
  *   - using my own names since "FL_CONTROL" is fucking confusing
  */
 typedef unsigned int keycode_t;
+
+namespace global
+{
+extern std::vector<key_binding_t> pref_binds;
+}
 
 #define EMOD_none     0
 
@@ -92,6 +99,7 @@ inline constexpr KeyContext validKeyContexts[] =
 	KeyContext::general
 };
 
+
 /* --- general manipulation --- */
 
 int M_KeyCmp(keycode_t A, keycode_t B);
@@ -119,8 +127,8 @@ void M_ApplyBindings();
 int  M_NumBindings();
 void M_DetectConflictingBinds();
 
-SString M_StringForFunc(int index);
-const char * M_StringForBinding(int index, bool changing_key = false);
+SString M_StringForFunc(const key_binding_t &bind);
+const char * M_StringForBinding(const key_binding_t& bind, bool changing_key = false);
 
 void M_GetBindingInfo(int index, keycode_t *key, KeyContext *context);
 
@@ -174,6 +182,20 @@ const editor_command_t * LookupEditorCommand(int index);
 
 bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM],
 							   keycode_t *code);
+
+struct key_binding_t
+{
+	keycode_t key;
+
+	KeyContext context;
+
+	const editor_command_t *cmd;
+
+	SString param[MAX_EXEC_PARAM];
+
+	// this field ONLY used by M_DetectConflictingBinds()
+	bool is_duplicate;
+};
 
 #endif  /* __EUREKA_M_KEYS_H__ */
 

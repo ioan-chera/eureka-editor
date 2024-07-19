@@ -407,20 +407,6 @@ const char * M_KeyContextString(KeyContext context)
 
 //------------------------------------------------------------------------
 
-struct key_binding_t
-{
-	keycode_t key;
-
-	KeyContext context;
-
-	const editor_command_t *cmd;
-
-	SString param[MAX_EXEC_PARAM];
-
-	// this field ONLY used by M_DetectConflictingBinds()
-	bool is_duplicate;
-};
-
 namespace global
 {
 	static std::vector<key_binding_t> all_bindings;
@@ -698,7 +684,7 @@ namespace global
 {
 	// local copy of the bindings
 	// these only become live after M_ApplyBindings()
-	static std::vector<key_binding_t> pref_binds;
+	std::vector<key_binding_t> pref_binds;
 }
 
 void M_CopyBindings(bool from_defaults)
@@ -808,13 +794,10 @@ void M_DetectConflictingBinds()
 }
 
 
-SString M_StringForFunc(int index)
+SString M_StringForFunc(const key_binding_t &bind)
 {
 	SString buffer;
 	buffer.reserve(2048);
-
-	SYS_ASSERT(index >= 0 && index < static_cast<int>(global::pref_binds.size()));
-	const key_binding_t& bind = global::pref_binds[index];
 
 	SYS_ASSERT(!!bind.cmd);
 	buffer = bind.cmd->name;
@@ -839,12 +822,8 @@ SString M_StringForFunc(int index)
 }
 
 
-const char * M_StringForBinding(int index, bool changing_key)
+const char * M_StringForBinding(const key_binding_t& bind, bool changing_key)
 {
-	SYS_ASSERT(index < (int)global::pref_binds.size());
-
-	const key_binding_t& bind = global::pref_binds[index];
-
 	static char buffer[600];
 
 	// we prefer the UI to say "3D view" instead of "render"
@@ -866,7 +845,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 			changing_key ? "<?"     : ModName_Space(tempk),
 			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
 			ctx_name,
-			 M_StringForFunc(index).c_str() );
+			 M_StringForFunc(bind).c_str() );
 
 	return buffer;
 }
