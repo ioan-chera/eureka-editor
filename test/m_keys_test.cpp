@@ -18,41 +18,43 @@
 #include "m_keys.h"
 #include "gtest/gtest.h"
 
+struct KeyMapping
+{
+	keycode_t code;
+	const char *dashString;
+	const char *spaceString;
+};
+
+static const KeyMapping testKeyCombos[] =
+{
+	{EMOD_SHIFT | 'k', "K",                     "      K         "},
+	{EMOD_COMMAND | 'j',
+#ifdef __APPLE__
+		"CMD-j",                                "  CMD j         "
+#else
+		"CTRL-j",                               " CTRL j         "
+#endif
+	},
+	{EMOD_META | 'm', "META-m",                 " META m         "},
+	{EMOD_ALT | 'a', "ALT-a",                   "  ALT a         "},
+	{EMOD_ALT | (FL_Button + 3), "ALT-MOUSE3",  "  ALT MOUSE3    "},
+	{EMOD_ALT | FL_Volume_Down, "ALT-VOL_DOWN", "  ALT VOL_DOWN  "},
+	{EMOD_SHIFT | '5', "SHIFT-5",               "SHIFT 5         "},
+	{EMOD_SHIFT | '"', "SHIFT-DBLQUOTE",        "SHIFT DBLQUOTE  "},
+	{EMOD_SHIFT | (FL_F + 4), "SHIFT-F4",       "SHIFT F4        "},
+	{FL_SCROLL_LOCK | 's', "LAX-s",             "  LAX s         "},
+
+};
+
+// TODO: use this array in tests
+
 TEST(MKeys, KeyToString)
 {
-	keycode_t key = EMOD_SHIFT | 'k';
-	ASSERT_EQ(keys::toString(key), "K");
-	
-	key = EMOD_COMMAND | 'j';
-#ifdef __APPLE__
-	ASSERT_EQ(keys::toString(key), "CMD-j");
-#else
-	ASSERT_EQ(keys::toString(key), "CTRL-j");
-#endif
-	
-	key = EMOD_META | 'm';
-	ASSERT_EQ(keys::toString(key), "META-m");
-	
-	key = EMOD_ALT | 'a';
-	ASSERT_EQ(keys::toString(key), "ALT-a");
-	
-	key = EMOD_ALT | (FL_Button + 3);
-	ASSERT_EQ(keys::toString(key), "ALT-MOUSE3");
-	
-	key = EMOD_ALT | FL_Volume_Down;
-	ASSERT_EQ(keys::toString(key), "ALT-VOL_DOWN");
-	
-	key = EMOD_SHIFT | '5';
-	ASSERT_EQ(keys::toString(key), "SHIFT-5");
-	
-	key = EMOD_SHIFT | '"';
-	ASSERT_EQ(keys::toString(key), "SHIFT-DBLQUOTE");
-	
-	key = EMOD_SHIFT | (FL_F + 4);
-	ASSERT_EQ(keys::toString(key), "SHIFT-F4");
-	
-	key = FL_SCROLL_LOCK | 's';
-	ASSERT_EQ(keys::toString(key), "LAX-s");
+	for(const KeyMapping &mapping : testKeyCombos)
+	{
+		keycode_t key = mapping.code;
+		ASSERT_EQ(keys::toString(key), mapping.dashString);
+	}
 }
 
 TEST(MKeys, StringForFunc)
@@ -84,4 +86,22 @@ TEST(MKeys, StringForFunc)
 	bind.param[1] = "aaaaabbbbbcccccdddddeeeeefffffggggg";
 	
 	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 aaaaabbbbbcccccdddddeeeeefffff thing");
+}
+
+TEST(MKeys, StringForBindingCheckModName)
+{
+	key_binding_t bind = {};
+	editor_command_t command = {"CommandName"};
+	bind.cmd = &command;
+	
+	bind.context = KeyContext::browser;
+	
+	for(const KeyMapping &mapping : testKeyCombos)
+	{
+		bind.key = mapping.code;
+		const char *string = keys::stringForBinding(bind);
+		
+		SString expected = SString(mapping.spaceString) + " browser   CommandName";
+		ASSERT_EQ(expected, string);
+	}
 }

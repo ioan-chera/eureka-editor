@@ -309,20 +309,12 @@ static const char *ModName_Dash(keycode_t mod)
 }
 
 
-static const char *ModName_Space(keycode_t mod)
+static SString ModName_Space(keycode_t mod)
 {
-#ifdef __APPLE__
-	if (mod & EMOD_COMMAND) return "CMD ";
-#else
-	if (mod & EMOD_COMMAND) return "CTRL ";
-#endif
-	if (mod & EMOD_META)    return "META ";
-	if (mod & EMOD_ALT)     return "ALT ";
-	if (mod & EMOD_SHIFT)   return "SHIFT ";
-
-	if (mod & MOD_LAX_SHIFTCTRL) return "LAX ";
-
-	return "";
+	SString result = ModName_Dash(mod);
+	if(result.back() == '-')
+		result.back() = ' ';
+	return result;
 }
 
 namespace keys
@@ -822,17 +814,16 @@ SString stringForFunc(const key_binding_t &bind)
 	
 	return buffer;
 }
-}
 
-const char * M_StringForBinding(const key_binding_t& bind, bool changing_key)
+const char * stringForBinding(const key_binding_t& bind, bool changing_key)
 {
 	static char buffer[600];
-
+	
 	// we prefer the UI to say "3D view" instead of "render"
 	const char *ctx_name = M_KeyContextString(bind.context);
 	if (y_stricmp(ctx_name, "render") == 0)
 		ctx_name = "3D view";
-
+	
 	// display SHIFT + letter as an uppercase letter
 	keycode_t tempk = bind.key;
 	if ((tempk & EMOD_ALL_MASK) == EMOD_SHIFT &&
@@ -841,17 +832,17 @@ const char * M_StringForBinding(const key_binding_t& bind, bool changing_key)
 	{
 		tempk = toupper(tempk & FL_KEY_MASK);
 	}
-
+	
 	snprintf(buffer, sizeof(buffer), "%s%6.6s%-10.10s %-9.9s %.32s",
-			bind.is_duplicate ? "@C1" : "",
-			changing_key ? "<?"     : ModName_Space(tempk),
-			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
-			ctx_name,
-			 keys::stringForFunc(bind).c_str() );
-
+			 bind.is_duplicate ? "@C1" : "",
+			 changing_key ? "<?"     : ModName_Space(tempk).c_str(),
+			 changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
+			 ctx_name,
+			 stringForFunc(bind).c_str() );
+	
 	return buffer;
 }
-
+}
 
 void M_GetBindingInfo(int index, keycode_t *key, KeyContext *context)
 {

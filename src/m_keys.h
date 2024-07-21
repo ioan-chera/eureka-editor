@@ -131,8 +131,8 @@ void M_DetectConflictingBinds();
 namespace keys
 {
 SString stringForFunc(const key_binding_t &bind);
+const char * stringForBinding(const key_binding_t& bind, bool changing_key = false);
 }
-const char * M_StringForBinding(const key_binding_t& bind, bool changing_key = false);
 
 void M_GetBindingInfo(int index, keycode_t *key, KeyContext *context);
 
