@@ -314,6 +314,10 @@ static SString ModName_Space(keycode_t mod)
 	SString result = ModName_Dash(mod);
 	if(result.back() == '-')
 		result.back() = ' ';
+#ifdef __APPLE__
+	if(result == "META ")
+		return "CTRL ";
+#endif
 	return result;
 }
 

@@ -25,6 +25,7 @@ struct KeyMapping
 	const char *spaceString;
 };
 
+// NOTE: keep the old names in the dashed names for backward compatibility
 static const KeyMapping testKeyCombos[] =
 {
 	{EMOD_SHIFT | 'k', "K",                     "      K         "},
@@ -35,7 +36,13 @@ static const KeyMapping testKeyCombos[] =
 		"CTRL-j",                               " CTRL j         "
 #endif
 	},
-	{EMOD_META | 'm', "META-m",                 " META m         "},
+	{EMOD_META | 'm',
+#ifdef __APPLE__
+		"META-m",                 " CTRL m         "
+#else
+		"META-m",                 " META m         "
+#endif
+	},
 	{EMOD_ALT | 'a', "ALT-a",                   "  ALT a         "},
 	{EMOD_ALT | (FL_Button + 3), "ALT-MOUSE3",  "  ALT MOUSE3    "},
 	{EMOD_ALT | FL_Volume_Down, "ALT-VOL_DOWN", "  ALT VOL_DOWN  "},
