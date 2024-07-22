@@ -1,0 +1,474 @@
+[CommandDoc]
+[CommandDoc.File]
+NewProject = """
+Creates a fresh map in a new wad file. If you choose an existing file, it will be overwritten (i.e. all existing contents removed).
+"""
+ManageProject = """
+Manages several important settings about the currently edited wad. That includes which game it is for, which source port is being used, and any resource files.
+"""
+OpenMap = """
+Opens a map for editing. This map can be found the currently edited wad, or the game iwad, or one of the resource wads, or you can even load another wad file (which becomes the currently edited file).
+"""
+"GivenFile <keyword>" = """
+Loads a new wad file for editing from the list of "given files", i.e. files that were specified on the command line when Eureka was started.
+
+Keywords:
+    `next` : the next wad file in the list
+    `prev` : the previous wad file in the list
+    `first` : the very first wad file in the list
+    `last` : the very last wad file in the list
+    `current` : the same file currently being edited
+"""
+"FlipMap <keyword>" = """
+Opens another map in the current wad.
+
+Keywords:
+    `next` : the next map in the wad
+    `prev` : the previous map in the wad
+    `first` : the very first map in the wad
+    `last` : the very last map in the wad
+"""
+SaveMap = """
+Saves your map into the currently edited wad. It will also build the nodes (BSP information) unless this is disabled in the preferences. The game iwad is considered read-only, and hence this cannot be used on it, instead you will be prompted for a file to export into.
+"""
+ExportMap = """
+Saves the map into another wad file, possibly a completely new file.
+"""
+FreshMap = """
+Creates a fresh map in the currently edited wad. Cannot be used on the game iwad.
+"""
+CopyMap = """
+Copies the current map in the currently edited wad to another slot. For example, duplicating MAP01 into the MAP02 slot. Cannot be used on the game iwad.
+"""
+RenameMap = """
+Renames the current map in the currently edited wad, or in other words: move the map to a different slot. For example, moving MAP01 to the MAP23 slot. Cannot be used on the game iwad.
+"""
+DeleteMap = """
+Deletes the current map from the currently edited wad. Cannot be used on the game iwad.
+"""
+TestMap = """
+Tests your map by launching the game (using your chosen source port).
+"""
+BuildAllNodes = """
+Builds the nodes (BSP information) for all maps in the currently edited wad.
+"""
+PreferenceDialog = """
+Opens the Preferences dialog.
+"""
+Quit = """
+Quits Eureka. If you have unsaved changes, a dialog box will appear asking for confirmation.
+"""
+
+[CommandDoc.Edit]
+Undo = """
+Undoes (reverses) the last editing operation. This can be repeated multiple times.
+"""
+Redo = """
+Redo is the opposite of Undo, it re-instates the editing operation which Undo undid. It can be repeated multiple times.
+"""
+"Insert [flags...]" = """
+Inserts a new vertex, sector or thing into the map. In vertex mode, this will begins line drawing (if not already underway). In sector mode, this can fill empty spaces (or spaces with broken sectors) will a new, valid sector.
+
+Flags:
+    `/continue` : when line drawing, do not stop when joining existing geometry
+    `/nofill` : when line drawing, do not fill new spaces with sectors
+"""
+"Delete [flags...]" = """
+Deletes one or more objects from the map, using the highlighted object when the selection is empty. Deleting a sector will usually delete all things in the sector too. Deleting a single vertex that connects two linedefs causes the two linedefs to be merged into one.
+
+Note that deleting linedefs or groups of vertices can leave the map in a broken state. It is generally better to go into sectors mode and delete or merge sectors there.
+
+This command can also be used to change textures in the 3D view, or in texture/flat images in the sector or linedef panels. Textures will become "-" (the null texture) and flats will become sky.
+
+Flags:
+    `/keep` : when deleting sectors, keep the things in it, and don't remove any unused linedefs
+"""
+Clipboard_Cut = ""
+Clipboard_Copy = ""
+Clipboard_Paste = """
+Performs the clipboard Cut, Copy and Paste functions. On the 2D map view, this will apply to the geometry, allowing an object or groups of objects to be copied and pasted. In the 3D view, these allow textures to be copied and pasted (the "cut" operation sets textures to their default).
+"""
+Select = """
+Toggles an object in the selection, i.e. if the highlighted object is unselected, then select it, otherwise remove it from the selection.
+"""
+SelectAll = """
+Adds all objects in the current editing mode to the selection.
+"""
+UnselectAll = """
+Clears the selection, i.e. removes all objects from it.
+"""
+InvertSelection = """
+Selects all objects not in the current selection, and unselects the rest.
+"""
+LastSelection = """
+This is like "undo" for the selection, can be used to bring back a selection which was accidently cleared. Note that it is limited to a single undo step, and it cannot bring back a selection once modifications are made to the map.
+"""
+CopyAndPaste = """
+Same as doing a copy followed by a paste. Can be a useful way of adding things to the map by copying an existing thing.
+"""
+"CopyProperties [flags...]" = """
+Copies properties from a selected object to the highlight object. Not all properties are copied though. For things, the position and angle are not copied. For linedefs, textures are copied but not X or Y offsets, nor the "impassible" flag.
+
+Flags:
+    `/reverse` : copy from the highlighted object to the selected object(s).
+"""
+PruneUnused = """
+Finds any unused vertices, sidedefs or sectors and removes them from the map.
+"""
+MoveObjectsDialog = ""
+ScaleObjectsDialog = ""
+RotateObjectsDialog = """
+These comands open a dialog window for moving, scaling or rotating a group of selected objects. They allow specifying an exact distance to move the objects, or an exact scaling factor, or an exact number of degrees to rotate the objects.
+"""
+
+[CommandDoc.View]
+"Zoom <delta>" = """
+Zooms the 2D map view in or out. The <delta> parameter is +1 to zoom in (make everything bigger) or -1 to zoom out (make everything smaller).
+
+Flags:
+    `/center` : focal point of zoom is the center of 2D view (instead of where mouse is)
+"""
+ZoomSelection = """
+Scrolls and zooms the map view so that all objects in the current selection are visible.
+"""
+DefaultProps = """
+Shows the Default Properties panel, or hides it if already shown.
+"""
+FindDialog = """
+Shows the Find/Replace panel, or hides it if already shown.
+"""
+FindNext = """
+Finds the next object in the current search.
+"""
+GoToCamera = """
+Scrolls the 2D map view so that the camera (for the 3D view) is shown at the center. Does not zoom the map view.
+"""
+PlaceCamera = """
+Places the camera (for the 3D view) at the spot on the 2D map view where the mouse is.
+
+Flags:
+    `/open3d` : activate the 3D view afterwards.
+"""
+JumpToObject = """
+Brings up the "Jump To Object" dialog window, allowing you to jump to the object with a specified index number.
+"""
+
+[CommandDoc.Browser]
+"BrowserMode <keyword>" = """
+Opens the browser to a particular type of object.
+Keywords:
+    `tex` : browse textures
+    `flat` : browse flats
+    `obj` : browse things
+    `line` : browse linedef specials
+    `sec` : browse sector types
+    `gen` : generalize linedef editor (for BOOM ports only)
+
+Flags:
+    `/force` : do not close the browser
+    `/recent` : set the category to "Recent"
+
+NOTE: the browser can be closed using the "Set browser 0" command.
+"""
+"BR_CycleCategory <dir>" = """
+Cycles through the categories in the currently open browser. The <dir> parameter is optional, when present it can be +1 to move forward or -1 to move backward through the categories.
+"""
+BR_ClearSearch = """
+Clears the search box in the currently open browser.
+"""
+"BR_Scroll <delta>" = """
+Scrolls the browser by a single step. The <delta> parameter is a small negative or positive number, as follows:
+    `-1 +1` : scroll a small amount
+    `-2 +2` : scroll by a single "line"
+    `-3 +3` : scroll by a single page
+    `-4 +4` : scroll to the end
+"""
+
+[CommandDoc.HelpCommands]
+LogViewer = """
+Opens the log viewer window.
+"""
+OnlineDocs = """
+Launches a web browser to display Eureka's absolutely fabulous documentation.
+"""
+AboutDialog = """
+Displays a dialog with some brief information about Eureka.
+"""
+
+[CommandDoc.Miscellaneous]
+Nothing = """
+Does absolutely nothing. This can sometimes be useful to disable a certain key combination in a certain editing mode, or to disable a shortcut used in the menus.
+"""
+"Set <keyword> <value>" = """
+Sets the value of a certain editor state. It requires two parameters, the first is a keyword for what is being set, and the second is the new value. The value is usually a small number, where 0 means "off" and 1 means "on", though some keywords accept a range of values.
+
+Keywords:
+    `3d` : whether the 3D view is active
+    `browser` : whether the browser panel is active
+    `gamma` : the current gamma level (brightness), 0-4
+    `grid` : whether the grid is being drawn
+    `obj_nums` : whether object numbers are being shown in 2D view
+    `sec_render` : the sector rendering mode in 2D view, 0 for nothing
+    `snap` : whether grid-snapping is active
+    `sprites` : whether sprites are drawn in 2D view (in Things mode)
+"""
+"Toggle <keyword>" = """
+Toggles or cycles the value of a certain editor state. It accepts the same keywords as the **Set** command above.
+"""
+MetaKey = """
+Waits for the next keypress and adds the META modifier to it.
+"""
+"EditMode <mode>" = """
+Changes the current editing mode to the one specified. Note that the 3D mode is not handled by this command (it is changed with the Set or Toggle commands above).
+
+Keywords: `vertex`, `line`, `sector`, `thing`
+"""
+OpMenu = """
+Brings up the operation menu.
+"""
+"MapCheck <keyword>" = """
+Runs the map checking dialog.
+
+Keywords: `all`, `major`, `vertices`, `sectors`, `linedefs`, `things`, `textures`, `tags`, `current`
+"""
+
+[CommandDoc.General]
+"Merge [flags...]" = """
+Merges two or more objects into a single one. In things mode, this merely moves the objects to a common location (does not remove any things). In Linedefs mode, this only handles two one-sided linedefs (which are assumed to be back-to-back or close to it).
+
+Flags:
+    `/keep` : when merging sectors, keep linedefs that would otherwise be removed.
+"""
+Disconnect = """
+Disconnects one or more objects from nearby geometry. In things mode, this separates things which exist at the same place (the coordinates must be exactly the same). In vertex mode, this disconnects the linedefs which join at that vertex.
+"""
+"Mirror <keyword>" = """
+Mirrors one or more objects about a central axis.
+
+Keywords:
+    `horiz` : mirror horizontally (stuff moves left and right)
+    `vert` : mirror vertically (stuff moves up and down)
+"""
+"Rotate90 <keyword>" = """
+Rotates one or more objects by 90 degrees around a central point.
+
+Keywords:
+    `cw` : rotate clockwise
+    `acw` : rotate anti-clockwise
+"""
+
+"Enlarge <factor>" = ""
+"Shrink <factor>" = """
+Scales one or more objects, making them bigger or smaller. The <factor> parameter is the value to scale by, defaulting to `2.0` when absent. Fractional values like "1.3" are supported. Objects are scaled from their center point. When a sector is enlarged or shrunk, any things it contains are moved too.
+"""
+Quantize = """
+Snaps the selected objects to the nearest grid point. For example, if the current grid size is 16 units, and several sectors are selected, all the vertices which are a part of those sectors are moved to be aligned with the 16x16 grid (if possible).
+
+When a vertex cannot be moved (because the nearest grid points are in use), then this command beeps with an error message, and all the vertices which could not be moved are highlighted in red.
+"""
+"ApplyTag <keyword>" = """
+Applies a tag number to the selected objects, which must be either sectors or linedefs.
+
+Keywords:
+    `fresh` : use a new tag number (one not used anywhere else)
+    `last` : use the last (highest) tag number used on the map
+"""
+"ACT_Click [flags...]" = """
+Performs the functions typically done by a left mouse button click, namely to select or unselect objects in the 2D map view, to drag objects around, and splitting linedefs.
+
+Flags:
+    `/noselect` : disable the select function
+    `/nodrag` : disable dragging
+    `/nosplit` : do not split linedefs
+"""
+ACT_Drag = """
+Drags the currently selected objects. An outline of the objects follow the mouse while the key or button is held down, and when the key/button is released the objects are actually moved.
+"""
+"ACT_Transform <keyword>" = """
+Transforms the currently selected objects. The <keyword> parameter determines what kind of transformation to apply. An outline of the transformed objects is shown while the key is held down, and moving the mouse around will affect how large, how much rotation (etc) is applied. When the key is released, the objects are actually moved to their final positions.
+
+Keywords:
+    `scale` : scale uniformly, maintaining the same aspect ratio
+    `stretch` : scale with stretching (can make everything wider or taller)
+    `rotate` : rotate the objects
+    `rotscale` : rotate and scale uniformly
+    `skew` : skew (shear) the objects
+"""
+
+[CommandDoc.Vertex]
+VT_ShapeLine = """
+Reshapes the selected vertices so they form a straight line, and each vertex is the same distance apart. The vertices need to be roughly in a line already, and the two vertices at the ends of that imaginary line are the anchor points and do not move, but the remaining vertices are moved.
+"""
+"VT_ShapeArc <angle>" = """
+Reshapes the selected vertices so they form an arc of a circle. The <angle> parameter is the number of degrees in this arc, and can be 360 for a full circle. The vertices need to be roughly in the desired shape already, and will be moved to lie on the arc, with an equal distance between each one.
+"""
+
+[CommandDoc.Linedef]
+"LIN_Align [flags...]" = """
+Aligns the X/Y offsets on the selected linedefs. The flags control exactly what is affected by this command.
+
+Flags:
+    `/x` : align X offsets
+    `/y` : align Y offsets
+    `/right` : pick walls to the right to align with (instead of the left).
+    `/clear` : clear the X / Y offsets (instead of aligning).
+"""
+"LIN_Flip [flags...]" = """
+Flips the orientation of one or more linedefs.
+
+NOTE: Flipping one-sided lines generally breaks the map geometry, and the `/force` flag will break the map in a different way: the sidedef stays facing the sector, but leaving the linedef without a right side.
+"""
+LIN_SwapSides = """
+Swaps the sidedefs on some linedefs. This is only really useful for fixing map problems.
+"""
+LIN_SplitHalf = """
+Splits one or more linedefs in half, adding a vertex at the exact middle point.
+"""
+"LIN_SelectPath [flags...]" = """
+Selects or unselects a group of linedefs in a path. The path stops at forks, i.e. where there are two or more choices of which way to go.
+
+Flags:
+    `/fresh` : make the result a fresh selection (instead of modifying the current selection)
+    `/onesided` : only handle one-sided lines (ignore two-sided lines)
+    `/sametex` : require lines have the same texture
+"""
+
+[CommandDoc.Sector]
+"SEC_Floor <delta>" = """
+Raises or lowers the floor height of some sectors. The <delta> parameter is the height value to add, which can be positive or negative.
+
+NOTE: a floor cannot be raised above the ceiling in the sector.
+"""
+"SEC_Ceil <delta>" = """
+Raises or lowers the ceiling height of some sectors. The <delta> parameter is the height value to add, which can be positive or negative.
+
+NOTE: a ceiling cannot be lowered below the floor in the sector.
+"""
+"SEC_Light <delta>" = """
+Changes the light level in the selected sectors. The <delta> parameter is the value to add, either negative or positive, and it should be a power of two such as: `1`, `2`, `4`, `8`, `16`, `32`, or `64`.
+
+NOTE: vanilla DOOM, and some source ports, only use multiples of 16 for the lighting values. For example, there will be no visible difference between 160 and 170 (the next usable value is 176).
+"""
+"SEC_SelectGroup [flags...]" = """
+Selects a group of contiguous sectors. The flags will control whether neighboring sectors are considered part of the group.
+
+Flags:
+    `/floor_h` : require the same floor height
+    `/floor_tex` : require the same floor texture
+    `/ceil_h` : require the same ceiling height
+    `/ceil_tex` : require the same ceiling texture
+    `/light` : require the same lighting
+    `/tag` : require the same tag value
+    `/special` : require the same sector type
+
+    `/fresh` : make the result a fresh selection (instead of modifying the current selection)
+    `/doors` : don't stop at doors (closed sectors)
+    `/can_walk` : only spread into a neighbor sector if the heights allow the player to walk there and back (i.e. stop at impassible lines)
+"""
+SEC_SwapFlats = """
+Swaps the floor texture with the ceiling texture in all the selected sectors.
+"""
+
+[CommandDoc.Thing]
+"TH_Spin <delta>" = """
+Spins the angles (the direction things face) of all the selected things. The <delta> parameter is an angle to add, where negative values spin the things clockwise, and positive values spin the things anti-clockwise. Angles are generally multiples of 45.
+"""
+
+[CommandDoc.View2D]
+"Scroll <x> <y>" = """
+Scrolls the map view by a single step. The first parameter is the horizontal distance, and the second parameter is the vertical distance. These values are roughly percentages of the viewing window size.
+"""
+"GRID_Bump <delta>" = """
+Changes the current grid size. The <delta> parameter should be `+1` to increase the size to the next usable one, or `-1` to decrease it.
+"""
+"GRID_Set <size>" = """
+Sets the current grid size to the given value, which can be anything (i.e. it is not limited to the normal values).
+"""
+"GRID_Zoom <scale>" = """
+Zooms the map view. The parameter is the scale value, which is positive for N:1 scales and negative for 1:N scales. For example, "-3" means 1/3 scaling. The scale factor is limited to be one of the existing ones selectable on the info bar.
+"""
+"ACT_SelectBox" = """
+Begins drawing a selection box.
+"""
+"WHEEL_Scroll <dist>" = """
+Scrolls the 2D map view using the mouse-wheel. The <dist> parameter is roughly a percentage of the viewing window size, and each step of the mouse wheel scrolls by this amount.
+
+Note: this command will not work unless bound to WHEEL_XXX.
+"""
+"NAV_Scroll_Left <speed>" = ""
+"NAV_Scroll_Right <speed>" = ""
+"NAV_Scroll_Up <speed>" = ""
+"NAV_Scroll_Down <speed>" = """
+These four commands are used to produce smooth scrolling of the map view. Scrolling continues while the key is held down. The <speed> parameter is roughly a percentage of the viewing window to move each second.
+"""
+"NAV_MouseScroll <speed>" = """
+Activates scrolling the map view using the mouse. While the key or button is held down, moving the mouse will scroll the view. The <speed> parameter controls how fast to scroll, 1.0 means the map follows the mouse 1:1, higher values scroll faster, and lower values will scroll slower.
+"""
+
+[CommandDoc.View3D]
+3D_Click = """
+Performs the usual mouse-click function of the 3D view, namely to select/unselect wall and floor surfaces.
+"""
+"3D_Set <keyword> <value>" = """
+Sets a particular state of the 3D renderer to a certain value. The <value> parameter is usually a small number, where `0` means OFF and `1` means ON, though some keywords use a range of values.
+
+Keywords:
+    `grav` : gravity mode, camera stays on the floor when moving
+    `tex` : texturing of walls and floors
+    `obj` : draw things (sprites)
+    `light` : lighting enable
+"""
+"3D_Toggle <keyword>" = """
+Toggles or cycles a particular state of the 3D renderer. For the <keyword> parameter, see the **3D_Set** command above.
+"""
+"3D_Align [flags...]" = """
+Aligns the selected wall surfaces with nearby walls, by changing their X or Y offsets. The flags control exactly what is affected by this command.
+
+Flags:
+    `/x` : align X offsets
+    `/y` : align Y offsets
+    `/right` : pick a wall to the right to align with (instead of the left).
+    `/clear` : clear the X / Y offsets (instead of aligning).
+"""
+"3D_Forward <dist>" = ""
+"3D_Backward <dist>" = ""
+"3D_Left <dist>" = ""
+"3D_Right <dist>" = ""
+"3D_Up <dist>" = ""
+"3D_Down <dist>" = """
+Moves the 3D camera by a single step. The <dist> parameter gives the distance to move (in map units).
+
+NOTE: these have been superceded by the NAV versions below, which allow moving smoothing through the map. However these are kept for backwards compatibility, and may still be useful for some people.
+"""
+"3D_Turn <angle>" = """
+Turns the 3D camera left or right by a single step. The <angle> parameter is how far to turn, in degrees, where negative values turn right (clockwise) and positive values turn left (anti-clockwise).
+
+NOTE: this has been superceded by the NAV version below, which allows turning the camera smoothly.
+"""
+3D_DropToFloor = """
+Drops the 3D camera down to the floor, as though the player was standing on the ground. This will raise the camera too if it is below that height.
+"""
+3D_ACT_AdjustOfs = """
+Adjusts the X and Y offsets on the selected surfaces. While the key or button is held down, moving the mouse will update the offset values.
+"""
+"3D_WHEEL_Move <speed>" = """
+Moves the 3D camera using the mouse-wheel. Each click of the wheel will move a single step. The <dist> parameter is how far to move, in map units. When using this with the LAX modifier, holding `SHIFT` will move much slower and holding `CTRL` will move much faster.
+
+NOTE: this command does not work unless bound to a mouse-wheel button.
+"""
+
+"3D_NAV_Forward <speed>" = ""
+"3D_NAV_Back <speed>" = ""
+"3D_NAV_Left <speed>" = ""
+"3D_NAV_Right <speed>" = ""
+"3D_NAV_Up <speed>" = ""
+"3D_NAV_Down <speed>" = """
+Navigates the 3D camera smoothly through the map, while the key is held down. The <speed> parameter is how fast to move, in map units per second. When used with the LAX modifer, the `SHIFT` key will slow down movement and the `CTRL` key will move faster.
+"""
+"3D_NAV_TurnLeft <speed>" = ""
+"3D_NAV_TurnRight <speed>" = """
+Turns the 3D camera smoothly left or right. The <speed> parameter is how fast to turn, in degrees per second. When used with the LAX modifer, the `SHIFT` key will slow down turning and the `CTRL` key will turn faster.
+"""
+"3D_NAV_MouseMove <speed>" = """
+Moves or turns the 3D camera while the key or button is held down. Moving the mouse forward/back will make the camera go up/down (purely vertically), and moving the mouse left/right will turn the camera left/right. The <speed> parameter controls how fast to move or turn. When used with the LAX modifier, the `SHIFT` key will slow down movement and the `CTRL` key will move faster.
+"""
