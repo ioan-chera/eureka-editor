@@ -1,5 +1,6 @@
 [CommandDoc]
 [CommandDoc.File]
+heading = "File Commands"
 NewProject = """
 Creates a fresh map in a new wad file. If you choose an existing file, it will be overwritten (i.e. all existing contents removed).
 """
@@ -60,6 +61,7 @@ Quits Eureka. If you have unsaved changes, a dialog box will appear asking for c
 """
 
 [CommandDoc.Edit]
+heading = "Edit Commands"
 Undo = """
 Undoes (reverses) the last editing operation. This can be repeated multiple times.
 """
@@ -122,6 +124,7 @@ These comands open a dialog window for moving, scaling or rotating a group of se
 """
 
 [CommandDoc.View]
+heading = "View Commands"
 "Zoom <delta>" = """
 Zooms the 2D map view in or out. The <delta> parameter is +1 to zoom in (make everything bigger) or -1 to zoom out (make everything smaller).
 
@@ -154,6 +157,7 @@ Brings up the "Jump To Object" dialog window, allowing you to jump to the object
 """
 
 [CommandDoc.Browser]
+heading = "Browser Commands"
 "BrowserMode <keyword>" = """
 Opens the browser to a particular type of object.
 Keywords:
@@ -184,7 +188,8 @@ Scrolls the browser by a single step. The <delta> parameter is a small negative 
     `-4 +4` : scroll to the end
 """
 
-[CommandDoc.HelpCommands]
+[CommandDoc.Help]
+heading = "Help Commands"
 LogViewer = """
 Opens the log viewer window.
 """
@@ -193,6 +198,38 @@ Launches a web browser to display Eureka's absolutely fabulous documentation.
 """
 AboutDialog = """
 Displays a dialog with some brief information about Eureka.
+"""
+
+[CommandDoc.View2D]
+heading = "2D View"
+"Scroll <x> <y>" = """
+Scrolls the map view by a single step. The first parameter is the horizontal distance, and the second parameter is the vertical distance. These values are roughly percentages of the viewing window size.
+"""
+"GRID_Bump <delta>" = """
+Changes the current grid size. The <delta> parameter should be `+1` to increase the size to the next usable one, or `-1` to decrease it.
+"""
+"GRID_Set <size>" = """
+Sets the current grid size to the given value, which can be anything (i.e. it is not limited to the normal values).
+"""
+"GRID_Zoom <scale>" = """
+Zooms the map view. The parameter is the scale value, which is positive for N:1 scales and negative for 1:N scales. For example, "-3" means 1/3 scaling. The scale factor is limited to be one of the existing ones selectable on the info bar.
+"""
+"ACT_SelectBox" = """
+Begins drawing a selection box.
+"""
+"WHEEL_Scroll <dist>" = """
+Scrolls the 2D map view using the mouse-wheel. The <dist> parameter is roughly a percentage of the viewing window size, and each step of the mouse wheel scrolls by this amount.
+
+Note: this command will not work unless bound to WHEEL_XXX.
+"""
+"NAV_Scroll_Left <speed>" = ""
+"NAV_Scroll_Right <speed>" = ""
+"NAV_Scroll_Up <speed>" = ""
+"NAV_Scroll_Down <speed>" = """
+These four commands are used to produce smooth scrolling of the map view. Scrolling continues while the key is held down. The <speed> parameter is roughly a percentage of the viewing window to move each second.
+"""
+"NAV_MouseScroll <speed>" = """
+Activates scrolling the map view using the mouse. While the key or button is held down, moving the mouse will scroll the view. The <speed> parameter controls how fast to scroll, 1.0 means the map follows the mouse 1:1, higher values scroll faster, and lower values will scroll slower.
 """
 
 [CommandDoc.Miscellaneous]
@@ -233,6 +270,7 @@ Keywords: `all`, `major`, `vertices`, `sectors`, `linedefs`, `things`, `textures
 """
 
 [CommandDoc.General]
+heading = "General Editing"
 "Merge [flags...]" = """
 Merges two or more objects into a single one. In things mode, this merely moves the objects to a common location (does not remove any things). In Linedefs mode, this only handles two one-sided linedefs (which are assumed to be back-to-back or close to it).
 
@@ -296,6 +334,7 @@ Keywords:
 """
 
 [CommandDoc.Vertex]
+heading = "Vertex Editing"
 VT_ShapeLine = """
 Reshapes the selected vertices so they form a straight line, and each vertex is the same distance apart. The vertices need to be roughly in a line already, and the two vertices at the ends of that imaginary line are the anchor points and do not move, but the remaining vertices are moved.
 """
@@ -304,6 +343,7 @@ Reshapes the selected vertices so they form an arc of a circle. The <angle> para
 """
 
 [CommandDoc.Linedef]
+heading = "Linedef Editing"
 "LIN_Align [flags...]" = """
 Aligns the X/Y offsets on the selected linedefs. The flags control exactly what is affected by this command.
 
@@ -334,6 +374,7 @@ Flags:
 """
 
 [CommandDoc.Sector]
+heading = "Sector Editing"
 "SEC_Floor <delta>" = """
 Raises or lowers the floor height of some sectors. The <delta> parameter is the height value to add, which can be positive or negative.
 
@@ -370,42 +411,13 @@ Swaps the floor texture with the ceiling texture in all the selected sectors.
 """
 
 [CommandDoc.Thing]
+heading = "Thing Editing"
 "TH_Spin <delta>" = """
 Spins the angles (the direction things face) of all the selected things. The <delta> parameter is an angle to add, where negative values spin the things clockwise, and positive values spin the things anti-clockwise. Angles are generally multiples of 45.
 """
 
-[CommandDoc.View2D]
-"Scroll <x> <y>" = """
-Scrolls the map view by a single step. The first parameter is the horizontal distance, and the second parameter is the vertical distance. These values are roughly percentages of the viewing window size.
-"""
-"GRID_Bump <delta>" = """
-Changes the current grid size. The <delta> parameter should be `+1` to increase the size to the next usable one, or `-1` to decrease it.
-"""
-"GRID_Set <size>" = """
-Sets the current grid size to the given value, which can be anything (i.e. it is not limited to the normal values).
-"""
-"GRID_Zoom <scale>" = """
-Zooms the map view. The parameter is the scale value, which is positive for N:1 scales and negative for 1:N scales. For example, "-3" means 1/3 scaling. The scale factor is limited to be one of the existing ones selectable on the info bar.
-"""
-"ACT_SelectBox" = """
-Begins drawing a selection box.
-"""
-"WHEEL_Scroll <dist>" = """
-Scrolls the 2D map view using the mouse-wheel. The <dist> parameter is roughly a percentage of the viewing window size, and each step of the mouse wheel scrolls by this amount.
-
-Note: this command will not work unless bound to WHEEL_XXX.
-"""
-"NAV_Scroll_Left <speed>" = ""
-"NAV_Scroll_Right <speed>" = ""
-"NAV_Scroll_Up <speed>" = ""
-"NAV_Scroll_Down <speed>" = """
-These four commands are used to produce smooth scrolling of the map view. Scrolling continues while the key is held down. The <speed> parameter is roughly a percentage of the viewing window to move each second.
-"""
-"NAV_MouseScroll <speed>" = """
-Activates scrolling the map view using the mouse. While the key or button is held down, moving the mouse will scroll the view. The <speed> parameter controls how fast to scroll, 1.0 means the map follows the mouse 1:1, higher values scroll faster, and lower values will scroll slower.
-"""
-
 [CommandDoc.View3D]
+heading = "3D View"
 3D_Click = """
 Performs the usual mouse-click function of the 3D view, namely to select/unselect wall and floor surfaces.
 """
