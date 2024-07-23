@@ -272,12 +272,15 @@ Waits for the next keypress and adds the META modifier to it. Useful when the ac
 labelled "Windows") is captured by the operating system.
 """
 "EditMode <mode>" = """
-Changes the current editing mode to the one specified. Note that the 3D mode is not handled by this command (it is changed with the Set or Toggle commands above).
+Changes the current editing mode to the one specified. Note that the 3D mode is not handled by this 
+command (it is changed with the Set or Toggle commands above).
 
 Keywords: `vertex`, `line`, `sector`, `thing`
 """
-OpMenu = """
-Brings up the operation menu.
+"OpMenu [<context>]" = """
+Brings up the operation menu. <Context> is optional and specifies which menu to show. If
+unspecified, it will depend on current mode, which can be `render`, `line`, `sector`, `vertex` or
+`thing`.
 """
 "MapCheck <keyword>" = """
 Runs the map checking dialog.
