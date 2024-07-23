@@ -203,24 +203,32 @@ Displays a dialog with some brief information about Eureka.
 [CommandDoc.View2D]
 heading = "2D View"
 "Scroll <x> <y>" = """
-Scrolls the map view by a single step. The first parameter is the horizontal distance, and the second parameter is the vertical distance. These values are roughly percentages of the viewing window size.
+Scrolls the map view by a single step. The first parameter is the horizontal distance, and the
+second parameter is the vertical distance. These values are roughly percentages of the viewing
+window size.
 """
 "GRID_Bump <delta>" = """
-Changes the current grid size. The <delta> parameter should be `+1` to increase the size to the next usable one, or `-1` to decrease it.
+Changes the current grid size. The <delta> parameter should be `+1` to increase the size to the next
+usable one, or `-1` to decrease it.
 """
 "GRID_Set <size>" = """
-Sets the current grid size to the given value, which can be anything (i.e. it is not limited to the normal values).
+Sets the current grid size to the given value, which can be anything (i.e. it is not limited to the
+normal values).
 """
 "GRID_Zoom <scale>" = """
-Zooms the map view. The parameter is the scale value, which is positive for N:1 scales and negative for 1:N scales. For example, "-3" means 1/3 scaling. The scale factor is limited to be one of the existing ones selectable on the info bar.
+Zooms the map view. The parameter is the scale value, which is positive for N:1 scales and negative
+for 1:N scales. For example, "-3" means 1/3 scaling. The scale factor is limited to be one of the
+existing ones selectable on the info bar.
 """
 "ACT_SelectBox" = """
 Begins drawing a selection box.
 """
-"WHEEL_Scroll <dist>" = """
-Scrolls the 2D map view using the mouse-wheel. The <dist> parameter is roughly a percentage of the viewing window size, and each step of the mouse wheel scrolls by this amount.
+"WHEEL_Scroll <dist> [/LAX]" = """
+Scrolls the 2D map view using the mouse-wheel. The <dist> parameter is roughly a percentage of the
+viewing window size, and each step of the mouse wheel scrolls by this amount. If `/LAX` is
+specified, also apply `SHIFT` or `CTRL` modifiers for changing speed.
 
-Note: this command will not work unless bound to WHEEL_XXX.
+Note: this command will not work unless bound to `WHEEL_XXX`.
 """
 "NAV_Scroll_Left <speed>" = ""
 "NAV_Scroll_Right <speed>" = ""
