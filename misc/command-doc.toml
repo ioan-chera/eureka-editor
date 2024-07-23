@@ -264,10 +264,12 @@ Keywords:
     `sprites` : whether sprites are drawn in 2D view (in Things mode)
 """
 "Toggle <keyword>" = """
-Toggles or cycles the value of a certain editor state. It accepts the same keywords as the **Set** command above.
+Toggles or cycles the value of a certain editor state. It accepts the same keywords as the **Set** 
+command above, as well as `recent`, which toggles current browser view between "recent" and "all".
 """
 MetaKey = """
-Waits for the next keypress and adds the META modifier to it.
+Waits for the next keypress and adds the META modifier to it. Useful when the actual meta key (often 
+labelled "Windows") is captured by the operating system.
 """
 "EditMode <mode>" = """
 Changes the current editing mode to the one specified. Note that the 3D mode is not handled by this command (it is changed with the Set or Toggle commands above).
