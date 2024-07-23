@@ -63,6 +63,7 @@ h6 { font-size:1.0em; }
   line-height:1.33em;
   font-size:14pt; font-family:Verdana,sans-serif;
 }
+.command { font-weight: bold; color: #070; }
 #wikileft2 .vspace { margin-top:1.125em; }
 #wikileft2 a { text-decoration:none; color:#09c; }
 #wikileft2 a:hover { text-decoration:underline; color:#ee0; }
