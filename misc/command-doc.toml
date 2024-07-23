@@ -234,19 +234,33 @@ Activates scrolling the map view using the mouse. While the key or button is hel
 
 [CommandDoc.Miscellaneous]
 Nothing = """
-Does absolutely nothing. This can sometimes be useful to disable a certain key combination in a certain editing mode, or to disable a shortcut used in the menus.
+Does absolutely nothing. This can sometimes be useful to disable a certain key combination in a 
+certain editing mode, or to disable a shortcut used in the menus.
 """
 "Set <keyword> <value>" = """
-Sets the value of a certain editor state. It requires two parameters, the first is a keyword for what is being set, and the second is the new value. The value is usually a small number, where 0 means "off" and 1 means "on", though some keywords accept a range of values.
+Sets the value of a certain editor state. It requires two parameters, the first is a keyword for 
+what is being set, and the second is the new value. The value is usually a small number, where 0 
+means "off" and 1 means "on", though some keywords accept a range of values.
 
 Keywords:
     `3d` : whether the 3D view is active
+
     `browser` : whether the browser panel is active
+
     `gamma` : the current gamma level (brightness), 0-4
+
     `grid` : whether the grid is being drawn
+
     `obj_nums` : whether object numbers are being shown in 2D view
-    `sec_render` : the sector rendering mode in 2D view, 0 for nothing
+
+    `ratio` : grid ratio setting: how to restrict line angles when dragging. 0 is unlocked, 1 is 
+    1:1, 2 is 2:1, 3 is 4:1, 4 is 8:1, 5 is 5:4, 6 is 7:4 and 7 is user-defined in Preferences.
+
+    `sec_render` : the sector rendering mode in 2D view, 0 for nothing, 1 floors, 2 ceilings, 3
+    lights, 4 floor brightness, 5 ceiling brightness, 6 sound alert propagation.
+
     `snap` : whether grid-snapping is active
+
     `sprites` : whether sprites are drawn in 2D view (in Things mode)
 """
 "Toggle <keyword>" = """
