@@ -174,7 +174,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 
 
 	std::vector<uchar> buf;
-	buf.resize(nw * nh * 3);
+	buf.resize((size_t)nw * nh * 3);
 
 	for (int y = 0 ; y < nh ; y++)
 	for (int x = 0 ; x < nw ; x++)
@@ -245,7 +245,7 @@ void UI_Pic::TiledImg(const Img_c *img) noexcept
 
 
 	std::vector<uchar> buf;
-	buf.resize(nw * nh * 3);
+	buf.resize((size_t)nw * nh * 3);
 
 	for (int y = 0 ; y < nh ; y++)
 	for (int x = 0 ; x < nw ; x++)
