@@ -1055,10 +1055,13 @@ static void ShowHelp()
 	fflush(stdout);
 }
 
+#ifndef BUILD_DATE
+#define BUILD_DATE __DATE__
+#endif
 
 static void ShowVersion()
 {
-	printf("Eureka version " EUREKA_VERSION " (" __DATE__ ")\n");
+	printf("Eureka version " EUREKA_VERSION " (" BUILD_DATE ")\n");
 
 	fflush(stdout);
 }
