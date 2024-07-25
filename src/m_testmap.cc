@@ -485,7 +485,12 @@ static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
 	SString argString = SString("/usr/bin/open -a ") + SString(portPath.u8string()).spaceEscape(true) + " --args " + inst.loaded.testingCommandLine + " " + buildArgString(args, true);
 	logArgs(argString);
 	
-	system(argString.c_str());
+	int ret = system(argString.c_str());
+	if(ret == -1)
+	{
+		ThrowException("Failed system to start %s: %s", portPath.u8string().c_str(),
+					   GetErrorMessage(errno).c_str());
+	}
 }
 
 static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
