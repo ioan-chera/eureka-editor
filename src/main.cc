@@ -102,6 +102,8 @@ fs::path global::install_dir;
 fs::path global::home_dir;
 fs::path global::cache_dir;
 
+fs::path global::old_linux_home_and_cache_dir;
+
 std::vector<fs::path> global::Pwad_list;
 
 //
@@ -232,8 +234,8 @@ static void CreateHomeDirs()
 #endif
 
 	// try to create home_dir (doesn't matter if it already exists)
-	FileMakeDir(global::home_dir);
-	FileMakeDir(global::cache_dir);
+	FileMakeDirs(global::home_dir);
+	FileMakeDirs(global::cache_dir);
 
 	static const fs::path subdirs[] =
 	{
@@ -291,8 +293,26 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 #else  // UNIX
 		char path[FL_PATH_MAX + 4];
 
+		auto attemptEnv = [](const char *envname, const char *fallback)
+		{
+			char path[FL_PATH_MAX + 4];
+			const char *envpath = getenv(envname);
+			if(envpath && *envpath)
+				return fs::u8path(envpath) / "eureka";
+
+			// Fall back
+			if(fl_filename_expand(path, fallback))
+				return fs::u8path(path);
+
+			return fs::path();	// empty, as before
+		};
+
+		global::home_dir = attemptEnv("XDG_CONFIG_HOME", "$HOME/.config/eureka");
+		global::cache_dir = attemptEnv("XDG_CACHE_HOME", "$HOME/.cache/eureka");
+
+		// Keep the old path in order to copy user settings from there
 		if (fl_filename_expand(path, "$HOME/.eureka"))
-			global::home_dir = path;
+			global::old_linux_home_and_cache_dir = path;
 #endif
 	}
 
@@ -383,8 +403,11 @@ static bool DetermineIWAD(Instance &inst)
 		// make lowercase
 		inst.loaded.iwadName = fs::u8path(game.get());
 
-		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
+		if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, GAMES_DIR, game))
+		{
 			ThrowException("Unknown game '%s' (no definition file)\n", game.c_str());
+		}
 
 		const fs::path *path = global::recent.queryIWAD(game);
 
@@ -404,8 +427,11 @@ static bool DetermineIWAD(Instance &inst)
 
 		SString game = GameNameFromIWAD(inst.loaded.iwadName);
 
-		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
+		if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, GAMES_DIR, game))
+		{
 			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.u8string().c_str());
+		}
 
 		global::recent.addIWAD(inst.loaded.iwadName);
 		global::recent.save(global::home_dir);
@@ -435,9 +461,12 @@ static void DeterminePort(Instance &inst)
 	// NOTE: values from the EUREKA_LUMP are already verified.
 	if (!inst.loaded.portName.empty())
 	{
-		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, PORTS_DIR, inst.loaded.portName))
+		if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, PORTS_DIR, inst.loaded.portName))
+		{
 			ThrowException("Unknown port '%s' (no definition file)\n",
 						   inst.loaded.portName.c_str());
+		}
 
 		return;
 	}
@@ -450,7 +479,8 @@ static void DeterminePort(Instance &inst)
 		gLog.printf("WARNING: Default port is empty, using vanilla.\n");
 		config::default_port = "vanilla";
 	}
-	else if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, PORTS_DIR, config::default_port))
+	else if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+			global::install_dir, PORTS_DIR, config::default_port))
 	{
 		gLog.printf("WARNING: Default port '%s' is unknown, using vanilla.\n",
 				  config::default_port.c_str());
@@ -931,7 +961,7 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 	{
 		readGameInfo(parseVars, newres.loading, newres.config);
 		readPortInfo(parseVars, newres.loading, newres.config);
-	
+
 
 		for (const fs::path& resource : newres.loading.resourceList)
 		{
@@ -1001,7 +1031,7 @@ void Instance::Main_LoadResources(const LoadingData &loading) noexcept(false)
 	loaded = std::move(newres.loading);
 	if(main_win)
 		testmap::updateMenuName(main_win->menu_bar, loaded);
-	
+
 	UpdateViewOnResources();
 }
 
@@ -1010,7 +1040,7 @@ void Instance::UpdateViewOnResources()
 	// Must deselect now
 	if(edit.Selected)
 		edit.Selected->clear_all();
-	
+
 	gLog.printf("--- DONE ---\n");
 	gLog.printf("\n");
 
@@ -1127,7 +1157,7 @@ static void setupSignalHandlers()
 	int r = sigaction(SIGCHLD, &action, nullptr);
 	if (r == -1)
 	{
-		ThrowException("Failed setting up process reaper signal handler: %s", 
+		ThrowException("Failed setting up process reaper signal handler: %s",
 					   GetErrorMessage(errno).c_str());
 	}
 #endif
@@ -1151,7 +1181,7 @@ int EurekaMain(int argc, char *argv[])
 		}
 
 		init_progress = ProgressStatus::nothing;
-		
+
 		Instance instance;
 		gInstance = &instance;
 
@@ -1195,14 +1225,20 @@ int EurekaMain(int argc, char *argv[])
 		// load all the config settings
 		config::preloading = gInstance->loaded;
 		prepareConfigPath();
-		M_ParseConfigFile(global::config_file, options);
+		if(M_ParseConfigFile(global::config_file, options) == -1 &&
+				!global::old_linux_home_and_cache_dir.empty())
+		{
+			gLog.printf("Couldn't find %s, parsing %s\n", global::config_file.u8string().c_str(),
+					(global::old_linux_home_and_cache_dir / "config.cfg").u8string().c_str());
+			M_ParseConfigFile(global::old_linux_home_and_cache_dir / "config.cfg", options);
+		}
 
 		// environment variables can override them
 		M_ParseEnvironmentVars();
 
 		// and command line arguments will override both
 		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal, global::Pwad_list, options);
-		
+
 		gInstance->loaded = config::preloading;	// update state now
 
 		// TODO: create a new instance
@@ -1212,11 +1248,12 @@ int EurekaMain(int argc, char *argv[])
 
 		init_progress = ProgressStatus::loaded;
 
-		global::recent.load(global::home_dir);
+		global::recent.load(global::home_dir, global::old_linux_home_and_cache_dir);
 
 		M_LoadBindings();
 
-		global::recent.lookForIWADs(global::install_dir, global::home_dir);
+		global::recent.lookForIWADs(global::install_dir, global::home_dir,
+				global::old_linux_home_and_cache_dir);
 
 		Main_OpenWindow(*gInstance);
 
@@ -1240,7 +1277,7 @@ int EurekaMain(int argc, char *argv[])
 			{
 				ThrowException("Cannot load pwad: %s\n", global::Pwad_list[0].u8string().c_str());
 			}
-			
+
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
 			gInstance->wad.master.ReplaceEditWad(editWad);
@@ -1261,7 +1298,9 @@ int EurekaMain(int argc, char *argv[])
 
 		if (gInstance->wad.master.editWad())
 		{
-			if (! gInstance->loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, gInstance->wad.master.editWad().get(), true /* keep_cmd_line_args */))
+			if (! gInstance->loaded.parseEurekaLump(global::home_dir,
+					global::old_linux_home_and_cache_dir, global::install_dir, global::recent,
+					gInstance->wad.master.editWad().get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance->wad.master.RemoveEditWad();

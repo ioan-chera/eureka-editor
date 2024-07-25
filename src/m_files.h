@@ -71,7 +71,7 @@ public:
 	{
 		list.clear();
 	}
-	
+
 	void insert(const fs::path &file, const SString &map);
 	void Write(std::ostream &stream) const;
 	SString Format(int index) const;
@@ -84,7 +84,7 @@ public:
 class RecentKnowledge
 {
 public:
-	void load(const fs::path &home_dir);
+	void load(const fs::path &home_dir, const fs::path &old_home_dir);
 	void save(const fs::path &home_dir) const;
 	void addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir);
 
@@ -93,7 +93,8 @@ public:
 		return get(known_iwads, game);
 	}
 
-	void lookForIWADs(const fs::path &install_dir, const fs::path &home_dir);
+	void lookForIWADs(const fs::path &install_dir, const fs::path &home_dir,
+			const fs::path &old_home_dir);
 	void addIWAD(const fs::path &path);
 	SString collectGamesForMenu(int *exist_val, const char *exist_name) const;
 	const fs::path *getFirstIWAD() const
@@ -124,7 +125,7 @@ public:
 	{
 		return files;
 	}
-	
+
 	bool hasIwadByPath(const fs::path &path) const;
 
 private:

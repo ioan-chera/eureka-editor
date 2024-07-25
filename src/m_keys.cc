@@ -332,7 +332,7 @@ SString toString(keycode_t key)
 	{
 		return SString::printf("%c", toupper(key & FL_KEY_MASK));
 	}
-	
+
 	return SString::printf("%s%s", ModName_Dash(key),
 						   BareKeyName(key & FL_KEY_MASK).c_str());
 }
@@ -598,7 +598,14 @@ void M_LoadBindings()
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();
 
-	LoadBindingsFromPath(global::home_dir.u8string(), false);
+	if(!LoadBindingsFromPath(global::home_dir.u8string(), false) &&
+			!global::old_linux_home_and_cache_dir.empty())
+	{
+		gLog.printf("%s/bindings.cfg not found. Loading bindings from old path %s/bindings.cfg\n",
+				global::home_dir.u8string().c_str(),
+				global::old_linux_home_and_cache_dir.u8string().c_str());
+		LoadBindingsFromPath(global::old_linux_home_and_cache_dir.u8string(), false);
+	}
 
 	if(gInstance->main_win)
 		menu::updateBindings(gInstance->main_win->menu_bar);
@@ -796,38 +803,38 @@ SString stringForFunc(const key_binding_t &bind)
 {
 	SString buffer;
 	buffer.reserve(2048);
-	
+
 	SYS_ASSERT(!!bind.cmd);
 	buffer = bind.cmd->name;
-	
+
 	// add the parameters
-	
+
 	for (int k = 0 ; k < MAX_EXEC_PARAM ; k++)
 	{
 		const SString &param = bind.param[k];
-		
+
 		if (param.empty())
 			break;
-		
+
 		if (k == 0)
 			buffer.push_back(':');
-		
+
 		buffer.push_back(' ');
 		buffer += SString::printf("%.30s", param.c_str());
 	}
-	
+
 	return buffer;
 }
 
 const char * stringForBinding(const key_binding_t& bind, bool changing_key)
 {
 	static char buffer[600];
-	
+
 	// we prefer the UI to say "3D view" instead of "render"
 	const char *ctx_name = M_KeyContextString(bind.context);
 	if (y_stricmp(ctx_name, "render") == 0)
 		ctx_name = "3D view";
-	
+
 	// display SHIFT + letter as an uppercase letter
 	keycode_t tempk = bind.key;
 	if ((tempk & EMOD_ALL_MASK) == EMOD_SHIFT &&
@@ -836,14 +843,14 @@ const char * stringForBinding(const key_binding_t& bind, bool changing_key)
 	{
 		tempk = toupper(tempk & FL_KEY_MASK);
 	}
-	
+
 	snprintf(buffer, sizeof(buffer), "%s%6.6s%-10.10s %-9.9s %.32s",
 			 bind.is_duplicate ? "@C1" : "",
 			 changing_key ? "<?"     : ModName_Space(tempk).c_str(),
 			 changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
 			 ctx_name,
 			 stringForFunc(bind).c_str() );
-	
+
 	return buffer;
 }
 }
@@ -1282,7 +1289,7 @@ static bool canShowUpOnMenu(keycode_t code)
 //
 // Finds key code for given command name
 //
-bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM], 
+bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM],
 							   keycode_t *code)
 {
     assert(!!code);
@@ -1291,7 +1298,7 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
 	{
 		if(y_stricmp(binding.cmd->name, command))
 			continue;
-		
+
 		bool skip = false;
 		for(int i = 0; i < MAX_EXEC_PARAM; ++i)
 		{

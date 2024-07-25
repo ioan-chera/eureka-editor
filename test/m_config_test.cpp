@@ -753,6 +753,7 @@ fs::path global::config_file;
 fs::path global::install_dir;
 bool global::show_version;
 fs::path global::home_dir;
+fs::path global::old_linux_home_and_cache_dir;
 fs::path global::log_file;
 std::vector<fs::path> global::Pwad_list;
 fs::path global::cache_dir;

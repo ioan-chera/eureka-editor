@@ -62,6 +62,7 @@ add_executable(
     lib_tga_test.cpp
     lib_util_test.cpp
     m_bitvec_test.cpp
+    m_events_test.cpp
     m_files_test.cpp
     m_game_test.cpp
     m_keys_test.cpp

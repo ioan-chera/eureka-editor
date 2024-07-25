@@ -841,7 +841,15 @@ bool Instance::M_ParseOperationFile()
 	// look in user's $HOME directory first
 	fs::path filename = global::home_dir / "operations.cfg";
 
+	// Try from old dir if given
 	LineFile file(filename);
+	if(!file.isOpen() && !global::old_linux_home_and_cache_dir.empty())
+	{
+		gLog.printf("%s not found. Trying from old Linux path %s/operations.cfg\n", filename.u8string().c_str(),
+				global::old_linux_home_and_cache_dir.u8string().c_str());
+		filename = global::old_linux_home_and_cache_dir / "operations.cfg";
+		file.open(filename);
+	}
 
 	// otherwise load it from the installation directory
 	if (! file.isOpen())

@@ -296,7 +296,7 @@ void RecentKnowledge::parseMiscConfig(std::istream &is)
 }
 
 
-void RecentKnowledge::load(const fs::path &home_dir)
+void RecentKnowledge::load(const fs::path &home_dir, const fs::path &old_home_dir)
 {
 	fs::path filename = home_dir / "misc.cfg";
 
@@ -304,7 +304,18 @@ void RecentKnowledge::load(const fs::path &home_dir)
 	if(!is.is_open())
 	{
 		gLog.printf("No recent list at: %s\n", filename.u8string().c_str());
-		return;
+		if(!old_home_dir.empty())
+		{
+			filename = old_home_dir / "misc.cfg";
+			is.open(filename);
+			if(!is.is_open())
+			{
+				gLog.printf("No recent list at: %s\n", filename.u8string().c_str());
+				return;
+			}
+		}
+		else
+			return;
 	}
 
 	gLog.printf("Reading recent list from: %s\n", filename.u8string().c_str());
@@ -534,11 +545,13 @@ static fs::path SearchForIWAD(const fs::path &home_dir, const SString &game)
 //
 // search for iwads in various places
 //
-void RecentKnowledge::lookForIWADs(const fs::path &install_dir, const fs::path &home_dir)
+void RecentKnowledge::lookForIWADs(const fs::path &install_dir, const fs::path &home_dir,
+		const fs::path &old_home_dir)
 {
 	gLog.printf("Looking for IWADs....\n");
 
-	std::vector<SString> game_list = M_CollectKnownDefs({install_dir, home_dir}, "games");
+	std::vector<SString> game_list = M_CollectKnownDefs({install_dir, old_home_dir, home_dir},
+			"games");
 
 	for (const SString &game : game_list)
 	{
@@ -547,6 +560,12 @@ void RecentKnowledge::lookForIWADs(const fs::path &install_dir, const fs::path &
 			continue;
 
 		fs::path path = SearchForIWAD(home_dir, game);
+		if (path.empty() && !old_home_dir.empty())
+		{
+			gLog.printf("Couldn't find %s IWAD in %s/iwads, trying %s/iwads\n", game.c_str(), home_dir.u8string().c_str(),
+					old_home_dir.u8string().c_str());
+			path = SearchForIWAD(old_home_dir, game);
+		}
 
 		if (!path.empty())
 		{
@@ -638,7 +657,9 @@ static void M_AddResource_Unique(LoadingData &loading, const fs::path & filename
 //
 // returns false if user wants to cancel the load
 //
-bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &install_dir, const RecentKnowledge &recent, const Wad_file *wad, bool keep_cmd_line_args)
+bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &old_home_dir,
+		const fs::path &install_dir, const RecentKnowledge &recent, const Wad_file *wad,
+		bool keep_cmd_line_args)
 {
 	gLog.printf("Parsing '%s' lump\n", EUREKA_LUMP);
 
@@ -675,7 +696,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 
 		if (key == "game")
 		{
-			if (! M_CanLoadDefinitions(home_dir, install_dir, GAMES_DIR, value))
+			if (! M_CanLoadDefinitions(home_dir, old_home_dir, install_dir, GAMES_DIR, value))
 			{
 				gLog.printf("  unknown game: %s\n", value.c_str() /* show full path */);
 
@@ -737,8 +758,10 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 		}
 		else if (key == "port")
 		{
-			if (M_CanLoadDefinitions(home_dir, install_dir, PORTS_DIR, value))
+			if (M_CanLoadDefinitions(home_dir, old_home_dir, install_dir, PORTS_DIR, value))
+			{
 				new_port = value;
+			}
 			else
 			{
 				gLog.printf("  unknown port: %s\n", value.c_str());
@@ -923,7 +946,7 @@ void M_BackupWad(const Wad_file *wad)
 	// actually back-up the file
 
 	fs::path dest_name = Backup_Name(dir_name, b_high + 1);
-	
+
 	bool copiedReadOnly = false;
 	if(wad->IsReadOnly())
 	{
