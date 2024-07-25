@@ -17,6 +17,7 @@ Ported the program to macOS, and is the current lead developer of the project.
 Fabian Greffrath
 
   * Debian packager
+  * Compilation fixes
 
 Wesley Werner
 
