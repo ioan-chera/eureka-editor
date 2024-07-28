@@ -237,54 +237,51 @@ else()
     target_compile_definitions(eurekasrc PUBLIC NO_OPENGL)
 endif()
 
-if(APPLE OR WIN32)
-    message(STATUS "Using local FLTK for portability.")
-    include(FetchContent)
+#
+# Fetch FLTK
+#
+message(STATUS "Using local FLTK for portability.")
+include(FetchContent)
 
-    FetchContent_Declare(
-        FLTK
-        GIT_REPOSITORY https://github.com/fltk/fltk
-        GIT_SHALLOW TRUE
-        GIT_TAG release-1.3.9
-    )
-    FetchContent_MakeAvailable(FLTK)
-    target_include_directories(
-        eurekasrc 
-        PUBLIC
-        ${fltk_BINARY_DIR}
-        ${fltk_SOURCE_DIR}
-    )
-    target_link_libraries(
-        eurekasrc
-        PRIVATE
-        fltk fltk_gl fltk_images fltk_jpeg fltk_png fltk_z
-    )
+FetchContent_Declare(
+    FLTK
+    GIT_REPOSITORY https://github.com/fltk/fltk
+    GIT_SHALLOW TRUE
+    GIT_TAG 9c7a4737784cfd3abe5b71ee8104a700e4f7959f    # master at some point
+)
+FetchContent_MakeAvailable(FLTK)
+target_include_directories(
+    eurekasrc 
+    PUBLIC
+    ${fltk_BINARY_DIR}
+    ${fltk_SOURCE_DIR}
+)
+target_link_libraries(
+    eurekasrc
+    PRIVATE
+    fltk fltk_gl fltk_images fltk_jpeg fltk_png fltk_z
+)
 
-    if(WIN32)
-    else()  # APPLE
-        # Need to link to them separately if FLTK is linked manually
-        find_library(CARBON_FRAMEWORK Carbon)
-        target_link_libraries(eurekasrc PUBLIC ${CARBON_FRAMEWORK})
-        find_library(COCOA_FRAMEWORK Cocoa)
-        target_link_libraries(eurekasrc PUBLIC ${COCOA_FRAMEWORK})
-        find_library(APPSERVICES_FRAMEWORK ApplicationServices)
-        target_link_libraries(eurekasrc PUBLIC ${APPSERVICES_FRAMEWORK})
-        find_package(ZLIB REQUIRED)
-        target_link_libraries(eurekasrc PUBLIC ${ZLIB_LIBRARIES})
-    endif()
+if(APPLE)
+    # Need to link to them separately if FLTK is linked manually
+    find_library(CARBON_FRAMEWORK Carbon)
+    target_link_libraries(eurekasrc PUBLIC ${CARBON_FRAMEWORK})
+    find_library(COCOA_FRAMEWORK Cocoa)
+    target_link_libraries(eurekasrc PUBLIC ${COCOA_FRAMEWORK})
+    find_library(APPSERVICES_FRAMEWORK ApplicationServices)
+    target_link_libraries(eurekasrc PUBLIC ${APPSERVICES_FRAMEWORK})
+    find_package(ZLIB REQUIRED)
+    target_link_libraries(eurekasrc PUBLIC ${ZLIB_LIBRARIES})
+endif()
 
-else()
-    # UNIX/Linux
-    find_package(FLTK REQUIRED)
-    find_package(ZLIB REQUIRED) # ZLIB is expected on Linux separately from FLTK
+if(UNIX AND NOT APPLE)
     find_package(X11 REQUIRED)  # also libXPM
-    target_include_directories(eurekasrc PUBLIC ${FLTK_INCLUDE_DIR})
-    target_link_libraries(eurekasrc PUBLIC ${FLTK_LIBRARIES})
+    target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB})
 endif()
 
 target_link_libraries(eurekasrc PUBLIC ${OPENGL_LIBRARIES})
 if(UNIX AND NOT APPLE)  # Linux
-    target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
+    target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB})
 endif()
 
 target_include_directories(eurekasrc PUBLIC

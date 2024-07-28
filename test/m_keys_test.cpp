@@ -29,14 +29,14 @@ struct KeyMapping
 static const KeyMapping testKeyCombos[] =
 {
 	{EMOD_SHIFT | 'k', "K",                     "      K         "},
-	{EMOD_COMMAND | 'j',
+	{static_cast<keycode_t>(EMOD_COMMAND) | 'j',
 #ifdef __APPLE__
 		"CMD-j",                                "  CMD j         "
 #else
 		"CTRL-j",                               " CTRL j         "
 #endif
 	},
-	{EMOD_META | 'm',
+	{static_cast<keycode_t>(EMOD_META) | 'm',
 #ifdef __APPLE__
 		"META-m",                 " CTRL m         "
 #else

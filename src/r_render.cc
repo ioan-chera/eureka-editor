@@ -1939,7 +1939,7 @@ void Instance::R3D_WHEEL_Move()
 
 		if (mod == EMOD_SHIFT)
 			speed /= 4.0f;
-		else if (mod == EMOD_COMMAND)
+		else if (mod == static_cast<keycode_t>(EMOD_COMMAND))
 			speed *= 4.0f;
 	}
 
