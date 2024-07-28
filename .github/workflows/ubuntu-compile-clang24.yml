@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install Dependencies
-      run: sudo apt-get update && sudo apt-get install --fix-missing clang cmake libjpeg-dev libpng-dev libxpm-dev libz-dev python3
+      run: sudo apt-get update && sudo apt-get install --fix-missing clang cmake libjpeg-dev libopengl-dev libpng-dev libxpm-dev libz-dev python3
     - name: CMake
       run: export CC=/usr/bin/clang && export CXX=/usr/bin/clang++ && mkdir build-clang && cd build-clang && cmake .. && make -j$(nproc)
     - name: Test
