@@ -259,7 +259,7 @@ target_include_directories(
 target_link_libraries(
     eurekasrc
     PRIVATE
-    fltk fltk_gl fltk_images fltk_jpeg fltk_png fltk_z
+    fltk fltk_gl fltk_images
 )
 
 if(APPLE)
@@ -279,7 +279,20 @@ if(UNIX AND NOT APPLE)
     find_package(ZLIB REQUIRED) # ZLIB is expected on Linux separately from FLTK
     find_package(JPEG REQUIRED)
     find_package(PNG REQUIRED)
-    target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB} ${ZLIB_LIBRARIES} ${JPEG_LIBRARIES} ${PNG_LIBRARIES})
+    target_link_libraries(
+        eurekasrc 
+        PUBLIC 
+        ${X11_Xpm_LIB} 
+        ${ZLIB_LIBRARIES} 
+        ${JPEG_LIBRARIES} 
+        ${PNG_LIBRARIES}
+    )
+else()
+    target_link_libraries(
+        eurekasrc
+        PRIVATE
+        fltk_jpeg fltk_png fltk_z
+    )
 endif()
 
 target_link_libraries(eurekasrc PUBLIC ${OPENGL_LIBRARIES})
