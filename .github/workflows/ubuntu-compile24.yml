@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install Dependencies
-      run: sudo apt-get update && sudo apt-get install --fix-missing cmake libjpeg-dev libgl-dev libpng-dev libxpm-dev libz-dev python3
+      run: sudo apt-get update && sudo apt-get install --fix-missing cmake libjpeg-dev libgl-dev libglu1-mesa-dev libpng-dev libxpm-dev libz-dev python3
     - name: CMake
       run: mkdir build && cd build && cmake .. && make -j$(nproc)
     - name: Test
