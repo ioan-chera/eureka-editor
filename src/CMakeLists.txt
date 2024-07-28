@@ -276,13 +276,11 @@ endif()
 
 if(UNIX AND NOT APPLE)
     find_package(X11 REQUIRED)  # also libXPM
-    target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB})
+    find_package(ZLIB REQUIRED) # ZLIB is expected on Linux separately from FLTK
+    target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
 endif()
 
 target_link_libraries(eurekasrc PUBLIC ${OPENGL_LIBRARIES})
-if(UNIX AND NOT APPLE)  # Linux
-    target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB})
-endif()
 
 target_include_directories(eurekasrc PUBLIC
     ${PROJECT_SOURCE_DIR}
