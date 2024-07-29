@@ -74,6 +74,7 @@
 #include "OSXCalls.h"
 #include <signal.h>
 #elif defined(_WIN32)
+#include <ShlObj.h>
 #else
 #include <sys/types.h>
 #include <sys/wait.h>

@@ -245,13 +245,12 @@ include(FetchContent)
 
 FetchContent_Declare(
     FLTK
-    GIT_REPOSITORY https://github.com/fltk/fltk
-    GIT_SHALLOW TRUE
+    GIT_REPOSITORY https://github.com/fltk/fltk.git
     GIT_TAG 9c7a4737784cfd3abe5b71ee8104a700e4f7959f    # master at some point
 )
 FetchContent_MakeAvailable(FLTK)
 target_include_directories(
-    eurekasrc 
+    eurekasrc
     PUBLIC
     ${fltk_BINARY_DIR}
     ${fltk_SOURCE_DIR}
@@ -280,11 +279,11 @@ if(UNIX AND NOT APPLE)
     find_package(JPEG REQUIRED)
     find_package(PNG REQUIRED)
     target_link_libraries(
-        eurekasrc 
-        PUBLIC 
-        ${X11_Xpm_LIB} 
-        ${ZLIB_LIBRARIES} 
-        ${JPEG_LIBRARIES} 
+        eurekasrc
+        PUBLIC
+        ${X11_Xpm_LIB}
+        ${ZLIB_LIBRARIES}
+        ${JPEG_LIBRARIES}
         ${PNG_LIBRARIES}
     )
 else()
@@ -292,6 +291,11 @@ else()
         eurekasrc
         PRIVATE
         fltk_jpeg fltk_png fltk_z
+    )
+    target_include_directories(
+        eurekasrc
+        PUBLIC
+        ${fltk_SOURCE_DIR}/zlib
     )
 endif()
 
