@@ -312,7 +312,7 @@ static const char *ModName_Dash(keycode_t mod)
 static SString ModName_Space(keycode_t mod)
 {
 	SString result = ModName_Dash(mod);
-	if(result.back() == '-')
+	if(!result.empty() && result.back() == '-')
 		result.back() = ' ';
 #ifdef __APPLE__
 	if(result == "META ")
