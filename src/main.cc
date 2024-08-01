@@ -694,9 +694,12 @@ static void Main_OpenWindow(Instance &inst)
 	std::vector<char> localmodified;
 	localmodified.resize(sizeof(logo_E4_32x32_xpm));
 	memcpy(localmodified.data(), logo_E4_32x32_xpm, localmodified.size());
-	XpmCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
-	    const_cast<char**>(logo_E4_32x32_xpm), &pm, &mask, NULL);
-	inst.main_win->icon((char *)pm);
+	if(fl_display)
+	{
+		XpmCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
+			const_cast<char**>(logo_E4_32x32_xpm), &pm, &mask, NULL);
+		inst.main_win->icon((char *)pm);
+	}
 #endif
 #ifdef _WIN32
 #include "../misc/eureka.xpm"
@@ -724,11 +727,14 @@ static void Main_OpenWindow(Instance &inst)
 	// read in the current window hints, then modify them to
 	// support icon transparency (make sure that transparency
 	// mask is enabled in the XPM icon)
-	XWMHints* hints = XGetWMHints(fl_display, fl_xid(inst.main_win));
-	hints->flags |= IconMaskHint;
-	hints->icon_mask = mask;
-	XSetWMHints(fl_display, fl_xid(inst.main_win), hints);
-	XFree(hints);
+	if(fl_display)
+	{
+		XWMHints* hints = XGetWMHints(fl_display, fl_xid(inst.main_win));
+		hints->flags |= IconMaskHint;
+		hints->icon_mask = mask;
+		XSetWMHints(fl_display, fl_xid(inst.main_win), hints);
+		XFree(hints);
+	}
 #endif
 
 	// kill the stupid bright background of the "plastic" scheme
