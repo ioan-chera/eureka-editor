@@ -23,6 +23,8 @@
 
 #include "ui_panelinput.h"
 #include "FL/Fl_Input.H"
+#include "FL/Fl_RGB_Image.H"
+#include <memory>
 
 class Img_c;
 
@@ -30,25 +32,16 @@ class Img_c;
 class UI_Pic : public Fl_Box
 {
 private:
-	Fl_RGB_Image *rgb;
+	std::unique_ptr<Fl_RGB_Image> rgb;
+	std::vector<byte> rgbBuffer;
 
-	enum
-	{
-		SP_None = 0,
-		SP_Unknown,   // texture name is not found
-		SP_Missing,   // texture is '-' but should be present
-		SP_Special,   // texture begins with '#'
-	};
+	bool allow_hl = false;
 
-	int special;
-
-	bool allow_hl;
-
-	bool highlighted;
-	bool selected;
+	bool highlighted = false;
+	bool selected = false;
 
 	SString what_text;
-	Fl_Color    what_color;
+	Fl_Color    what_color = {};
 
 	Instance &inst;
 
@@ -59,13 +52,13 @@ public:
 	int handle(int event);
 
 public:
-	void Clear();
+	void Clear() noexcept;
 
-	void MarkUnknown();
+	void MarkUnknown() noexcept;
 	void MarkMissing();
 	void MarkSpecial();
 
-	void GetFlat(const SString & fname);
+	void GetFlat(const SString & fname) noexcept; 
 	void GetTex (const SString & tname);
 	void GetSprite(int type, Fl_Color back_color);
 
@@ -83,9 +76,9 @@ private:
 	void draw_highlighted();
 	void draw_selected();
 
-	void UploadRGB(const byte *buf, int depth);
+	void UploadRGB(std::vector<byte> &&buf, int depth) noexcept;
 
-	void TiledImg(Img_c *img);
+	void TiledImg(const Img_c *img) noexcept;
 };
 
 

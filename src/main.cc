@@ -37,6 +37,7 @@
 #include "m_game.h"
 #include "m_files.h"
 #include "m_loadsave.h"
+#include "m_testmap.h"
 
 #include "e_main.h"
 #include "m_events.h"
@@ -44,6 +45,7 @@
 #include "r_render.h"
 #include "r_subdiv.h"
 
+#include "w_dehacked.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "w_wad.h"
@@ -70,6 +72,12 @@
 // IOANCH: be able to call OSX specific routines (needed for ~/Library)
 #ifdef __APPLE__
 #include "OSXCalls.h"
+#include <signal.h>
+#elif defined(_WIN32)
+#include <ShlObj.h>
+#else
+#include <sys/types.h>
+#include <sys/wait.h>
 #endif
 
 
@@ -80,14 +88,24 @@
 bool global::want_quit = false;
 bool global::app_has_focus = false;
 
-SString global::config_file;
-SString global::log_file;
+namespace signalling
+{
+#ifndef _WIN32
+	static bool hasChildProcessStatus;
+	static int childProcessStatus;
+#endif
+}
 
-SString global::install_dir;
-SString global::home_dir;
-SString global::cache_dir;
+fs::path global::config_file;
+fs::path global::log_file;
 
-std::vector<SString> global::Pwad_list;
+fs::path global::install_dir;
+fs::path global::home_dir;
+fs::path global::cache_dir;
+
+fs::path global::old_linux_home_and_cache_dir;
+
+std::vector<fs::path> global::Pwad_list;
 
 //
 // config items
@@ -101,9 +119,9 @@ SString config::default_port = "vanilla";
 int config::gui_scheme    = 1;  // gtk+
 int config::gui_color_set = 1;  // bright
 
-rgb_color_t config::gui_custom_bg = RGB_MAKE(0xCC, 0xD5, 0xDD);
-rgb_color_t config::gui_custom_ig = RGB_MAKE(255, 255, 255);
-rgb_color_t config::gui_custom_fg = RGB_MAKE(0, 0, 0);
+rgb_color_t config::gui_custom_bg = rgbMake(0xCC, 0xD5, 0xDD);
+rgb_color_t config::gui_custom_ig = rgbMake(255, 255, 255);
+rgb_color_t config::gui_custom_fg = rgbMake(0, 0, 0);
 
 
 // Progress during initialisation:
@@ -120,8 +138,8 @@ enum class ProgressStatus
 };
 static ProgressStatus init_progress;
 
-int global::show_help     = 0;
-int global::show_version  = 0;
+bool global::show_help;
+bool global::show_version;
 
 
 static void RemoveSingleNewlines(SString &buffer)
@@ -169,7 +187,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 
 	if (init_progress >= ProgressStatus::early)
 	{
-		gLog.printf("\nFATAL ERROR: %s", buffer.c_str());
+		gLog.printf("\nFATAL ERROR: %s\n", buffer.c_str());
 	}
 
 	if (init_progress >= ProgressStatus::loaded)
@@ -193,7 +211,6 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	global::app_has_focus = false;
 
 	// TODO: ALL instances. This is death.
-	gInstance.wad.master.MasterDir_CloseAll();
 	gLog.close();
 
 	exit(2);
@@ -203,45 +220,36 @@ static void CreateHomeDirs()
 {
 	SYS_ASSERT(!global::home_dir.empty());
 
-	char dir_name[FL_PATH_MAX];
+	fs::path dir_name;
 
 #ifdef __APPLE__
    // IOANCH 20130825: modified to use name-independent calls
-	fl_filename_expand(dir_name, OSX_UserDomainDirectory(macOSDirType::library,
-														 nullptr).c_str());
+	dir_name = OSX_UserDomainDirectory(macOSDirType::library, nullptr);
 	FileMakeDir(dir_name);
 
-	fl_filename_expand(dir_name,
-					   OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
-											   nullptr).c_str());
+	dir_name = OSX_UserDomainDirectory(macOSDirType::libraryAppSupport, nullptr);
 	FileMakeDir(dir_name);
 
-	fl_filename_expand(dir_name,
-					   OSX_UserDomainDirectory(macOSDirType::libraryCache,
-											   nullptr).c_str());
+	dir_name = OSX_UserDomainDirectory(macOSDirType::libraryCache, nullptr);
 	FileMakeDir(dir_name);
 #endif
 
 	// try to create home_dir (doesn't matter if it already exists)
-	FileMakeDir(global::home_dir);
-	FileMakeDir(global::cache_dir);
+	FileMakeDirs(global::home_dir);
+	FileMakeDirs(global::cache_dir);
 
-	static const char *const subdirs[] =
+	static const fs::path subdirs[] =
 	{
 		// these under $cache_dir
 		"cache", "backups",
 
 		// these under $home_dir
-		"iwads", "games", "ports",
-
-		NULL	// end of list
+		"iwads", "games", "ports"
 	};
 
-	for (int i = 0 ; subdirs[i] ; i++)
+	for (int i = 0 ; i < (int)lengthof(subdirs) ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? global::cache_dir.c_str() : global::home_dir.c_str(), subdirs[i]);
-		dir_name[FL_PATH_MAX-1] = 0;
-
+		dir_name = (i < 2 ? global::cache_dir : global::home_dir) / subdirs[i];
 		FileMakeDir(dir_name);
 	}
 }
@@ -260,40 +268,52 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr,
 										  &wpath)))
 		{
-			global::home_dir = WideToUTF8(wpath) + "\\EurekaEditor";
+			global::home_dir = fs::path(wpath) / "EurekaEditor";
 			CoTaskMemFree(wpath);
 		}
 		else
 		{
-			SYS_ASSERT(global::install_dir.good());
-			global::home_dir = global::install_dir + "\\app_data";
+			SYS_ASSERT(!global::install_dir.empty());
+			global::home_dir = global::install_dir / "app_data";
 		}
 		wpath = nullptr;
 		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr,
 										  &wpath)))
 		{
-			global::cache_dir = WideToUTF8(wpath) + "\\EurekaEditor";
+			global::cache_dir = fs::path(wpath) / "EurekaEditor";
 			CoTaskMemFree(wpath);
 		}
 
 #elif defined(__APPLE__)
-		char path[FL_PATH_MAX + 4];
-
-		fl_filename_expand(path,
-						OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
-												"eureka-editor").c_str());
+		fs::path path = OSX_UserDomainDirectory(macOSDirType::libraryAppSupport, "eureka-editor");
 		global::home_dir = path;
 
-		fl_filename_expand(path,
-						   OSX_UserDomainDirectory(macOSDirType::libraryCache,
-												   "eureka-editor").c_str());
+		path = OSX_UserDomainDirectory(macOSDirType::libraryCache, "eureka-editor");
 		global::cache_dir = path;
 
 #else  // UNIX
 		char path[FL_PATH_MAX + 4];
 
+		auto attemptEnv = [](const char *envname, const char *fallback)
+		{
+			char path[FL_PATH_MAX + 4];
+			const char *envpath = getenv(envname);
+			if(envpath && *envpath)
+				return fs::u8path(envpath) / "eureka";
+
+			// Fall back
+			if(fl_filename_expand(path, fallback))
+				return fs::u8path(path);
+
+			return fs::path();	// empty, as before
+		};
+
+		global::home_dir = attemptEnv("XDG_CONFIG_HOME", "$HOME/.config/eureka");
+		global::cache_dir = attemptEnv("XDG_CACHE_HOME", "$HOME/.cache/eureka");
+
+		// Keep the old path in order to copy user settings from there
 		if (fl_filename_expand(path, "$HOME/.eureka"))
-			global::home_dir = path;
+			global::old_linux_home_and_cache_dir = path;
 #endif
 	}
 
@@ -303,14 +323,14 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 	if (global::cache_dir.empty())
 		global::cache_dir = global::home_dir;
 
-	gLog.printf("Home  dir: %s\n", global::home_dir.c_str());
-	gLog.printf("Cache dir: %s\n", global::cache_dir.c_str());
+	gLog.printf("Home  dir: %s\n", global::home_dir.u8string().c_str());
+	gLog.printf("Cache dir: %s\n", global::cache_dir.u8string().c_str());
 
 	// create cache directory (etc)
 	CreateHomeDirs();
 
 	// determine log filename
-	global::log_file = global::home_dir + "/logs.txt";
+	global::log_file = global::home_dir / "logs.txt";
 }
 
 
@@ -323,23 +343,22 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 		global::install_dir = GetExecutablePath(argv0);
 
 #else
-		static const char *prefixes[] =
+		static const fs::path prefixes[] =
 		{
 			"/usr/local",
 			"/usr",
 			"/opt",
-			NULL
 		};
 
-		for (int i = 0 ; prefixes[i] ; i++)
+		for (const fs::path &prefix : prefixes)
 		{
-			global::install_dir = SString(prefixes[i]) + "/share/eureka";
+			global::install_dir = prefix / "share" / "eureka";
 
-			SString filename = global::install_dir + "/games/doom2.ugh";
+			fs::path filename = global::install_dir / "games" / "doom2.ugh";
 
 			gLog.debugPrintf("Trying install path: %s\n",
-							 global::install_dir.c_str());
-			gLog.debugPrintf("   looking for file: %s\n", filename.c_str());
+							 global::install_dir.u8string().c_str());
+			gLog.debugPrintf("   looking for file: %s\n", filename.u8string().c_str());
 
 			bool exists = FileExists(filename);
 
@@ -361,21 +380,13 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 	if (global::install_dir.empty())
 		ThrowException("Unable to find install directory!\n");
 
-	gLog.printf("Install dir: %s\n", global::install_dir.c_str());
+	gLog.printf("Install dir: %s\n", global::install_dir.u8string().c_str());
 }
 
 
-SString GameNameFromIWAD(const SString &iwad_name)
+SString GameNameFromIWAD(const fs::path &iwad_name)
 {
-	char game_name[FL_PATH_MAX];
-	StringCopy(game_name, sizeof(game_name),
-			   fl_filename_name(iwad_name.c_str()));
-
-	fl_filename_setext(game_name, "");
-
-	y_strlowr(game_name);
-
-	return game_name;
+	return SString(iwad_name.stem().u8string()).asLower();
 }
 
 
@@ -388,19 +399,23 @@ static bool DetermineIWAD(Instance &inst)
 	if (!inst.loaded.iwadName.empty() && FilenameIsBare(inst.loaded.iwadName))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
+		SString game = SString(inst.loaded.iwadName.u8string()).asLower();
 
 		// make lowercase
-		inst.loaded.iwadName = inst.loaded.iwadName.asLower();
+		inst.loaded.iwadName = fs::u8path(game.get());
 
-		if (! M_CanLoadDefinitions(GAMES_DIR, inst.loaded.iwadName))
-			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.c_str());
+		if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, GAMES_DIR, game))
+		{
+			ThrowException("Unknown game '%s' (no definition file)\n", game.c_str());
+		}
 
-		SString path = M_QueryKnownIWAD(inst.loaded.iwadName);
+		const fs::path *path = global::recent.queryIWAD(game);
 
-		if (path.empty())
-			ThrowException("Cannot find IWAD for game '%s'\n", inst.loaded.iwadName.c_str());
+		if (!path)
+			ThrowException("Cannot find IWAD for game '%s'\n", game.c_str());
 
-		inst.loaded.iwadName = path;
+		inst.loaded.iwadName = *path;
 	}
 	else if (!inst.loaded.iwadName.empty())
 	{
@@ -409,15 +424,18 @@ static bool DetermineIWAD(Instance &inst)
 			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName, "wad");
 
 		if (! Wad_file::Validate(inst.loaded.iwadName))
-			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.c_str());
+			ThrowException("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.u8string().c_str());
 
 		SString game = GameNameFromIWAD(inst.loaded.iwadName);
 
-		if (! M_CanLoadDefinitions(GAMES_DIR, game))
-			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.c_str());
+		if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, GAMES_DIR, game))
+		{
+			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.u8string().c_str());
+		}
 
-		M_AddKnownIWAD(inst.loaded.iwadName);
-		M_SaveRecent();
+		global::recent.addIWAD(inst.loaded.iwadName);
+		global::recent.save(global::home_dir);
 	}
 	else
 	{
@@ -444,9 +462,12 @@ static void DeterminePort(Instance &inst)
 	// NOTE: values from the EUREKA_LUMP are already verified.
 	if (!inst.loaded.portName.empty())
 	{
-		if (! M_CanLoadDefinitions(PORTS_DIR, inst.loaded.portName))
+		if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, PORTS_DIR, inst.loaded.portName))
+		{
 			ThrowException("Unknown port '%s' (no definition file)\n",
 						   inst.loaded.portName.c_str());
+		}
 
 		return;
 	}
@@ -459,7 +480,8 @@ static void DeterminePort(Instance &inst)
 		gLog.printf("WARNING: Default port is empty, using vanilla.\n");
 		config::default_port = "vanilla";
 	}
-	else if (! M_CanLoadDefinitions(PORTS_DIR, config::default_port))
+	else if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+			global::install_dir, PORTS_DIR, config::default_port))
 	{
 		gLog.printf("WARNING: Default port '%s' is unknown, using vanilla.\n",
 				  config::default_port.c_str());
@@ -473,6 +495,8 @@ static void DeterminePort(Instance &inst)
 	}
 
 	inst.loaded.portName = config::default_port;
+	if(inst.main_win)
+		testmap::updateMenuName(inst.main_win->menu_bar, inst.loaded);
 }
 
 
@@ -496,7 +520,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? inst.wad.master.edit_wad.get() : inst.wad.master.game_wad.get();
+		std::shared_ptr<Wad_file> wad = (pass == 0) ? inst.wad.master.editWad() : inst.wad.master.gameWad();
 
 		if (! wad)
 			continue;
@@ -539,7 +563,7 @@ int Main_key_handler(int event)
 	if (Fl::event_key() == FL_Escape)
 	{
 		// TODO: use the currently active instance instead
-		gInstance.EV_EscapeKey();
+		gInstance->EV_EscapeKey();
 		return 1;
 	}
 
@@ -552,13 +576,13 @@ int Main_key_handler(int event)
 int x11_check_focus_change(void *xevent, void *data)
 {
 	// TODO: get multiple windows
-	if (gInstance.main_win != NULL)
+	if (gInstance->main_win != NULL)
 	{
 		const XEvent *xev = (const XEvent *)xevent;
 
 		Window xid = xev->xany.window;
 
-		if (fl_find(xid) == gInstance.main_win)
+		if (fl_find(xid) == gInstance->main_win)
 		{
 			switch (xev->type)
 			{
@@ -656,7 +680,7 @@ static void Main_OpenWindow(Instance &inst)
 	inst.main_win = new UI_MainWindow(inst);
 
 	// Set menu bindings now that we have them.
-	updateMenuBindings();
+	menu::updateBindings(inst.main_win->menu_bar);
 
 	inst.main_win->label("Eureka v" EUREKA_VERSION);
 
@@ -670,9 +694,18 @@ static void Main_OpenWindow(Instance &inst)
 	std::vector<char> localmodified;
 	localmodified.resize(sizeof(logo_E4_32x32_xpm));
 	memcpy(localmodified.data(), logo_E4_32x32_xpm, localmodified.size());
-	XpmCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
-	    const_cast<char**>(logo_E4_32x32_xpm), &pm, &mask, NULL);
-	inst.main_win->icon((char *)pm);
+	if(fl_display)
+	{
+		XpmCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
+			const_cast<char**>(logo_E4_32x32_xpm), &pm, &mask, NULL);
+		inst.main_win->icon((char *)pm);
+	}
+#endif
+#ifdef _WIN32
+#include "../misc/eureka.xpm"
+	Fl_Pixmap pixmap(logo_E4_32x32_xpm);
+	Fl_RGB_Image image(&pixmap);
+	inst.main_win->icon(&image);
 #endif
 
 	// show window (pass some dummy arguments)
@@ -694,11 +727,14 @@ static void Main_OpenWindow(Instance &inst)
 	// read in the current window hints, then modify them to
 	// support icon transparency (make sure that transparency
 	// mask is enabled in the XPM icon)
-	XWMHints* hints = XGetWMHints(fl_display, fl_xid(inst.main_win));
-	hints->flags |= IconMaskHint;
-	hints->icon_mask = mask;
-	XSetWMHints(fl_display, fl_xid(inst.main_win), hints);
-	XFree(hints);
+	if(fl_display)
+	{
+		XWMHints* hints = XGetWMHints(fl_display, fl_xid(inst.main_win));
+		hints->flags |= IconMaskHint;
+		hints->icon_mask = mask;
+		XSetWMHints(fl_display, fl_xid(inst.main_win), hints);
+		XFree(hints);
+	}
 #endif
 
 	// kill the stupid bright background of the "plastic" scheme
@@ -717,7 +753,7 @@ static void Main_OpenWindow(Instance &inst)
 	if (config::begin_maximized)
 		inst.main_win->Maximize();
 
-	log_viewer = new UI_LogViewer(gInstance);
+	log_viewer = new UI_LogViewer(*gInstance);
 
 	gLog.openWindow([](const SString &text, void *userData)
                     {
@@ -744,7 +780,7 @@ void Main_Quit()
 
 
 // used for 'New Map' / 'Open Map' functions too
-bool Instance::Main_ConfirmQuit(const char *action) const
+bool Document::Main_ConfirmQuit(const char *action) const
 {
 	if (! MadeChanges)
 		return true;
@@ -775,26 +811,55 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 // the directory we should use for a file open/save operation.
 // returns NULL when not sure.
 //
-SString Instance::Main_FileOpFolder() const
+fs::path Instance::Main_FileOpFolder() const
 {
-	if (wad.master.Pwad_name.good())
-		return FilenameGetPath(wad.master.Pwad_name);
+	if (wad.master.editWad())
+		return FilenameGetPath(wad.master.editWad()->PathName());
 
 	return "";
+}
+
+
+static void updateStatusByChildProcesses(const Instance &inst)
+{
+#ifdef _WIN32
+#else
+	if(signalling::hasChildProcessStatus)
+	{
+		signalling::hasChildProcessStatus = false;
+		int status = signalling::childProcessStatus;
+
+		SString message;
+
+		if(WIFEXITED(status))
+		{
+			message = SString::printf("Exited with status %d", WEXITSTATUS(status));
+		}
+		else if(WIFSIGNALED(status))
+		{
+			message = SString::printf("Signalled by %d", WTERMSIG(status));
+		}
+		if(message.good())
+		{
+			inst.Status_Set("%s", message.c_str());
+			gLog.printf("--> %s\n", message.c_str());
+		}
+	}
+#endif
 }
 
 
 void Main_Loop()
 {
 	// TODO: must think this through
-	gInstance.RedrawMap();
+	gInstance->RedrawMap();
 
 	for (;;)
 	{
 		// TODO: determine the active instance
-		if (gInstance.edit.is_navigating)
+		if (gInstance->edit.is_navigating)
 		{
-			gInstance.Nav_Navigate();
+			gInstance->Nav_Navigate();
 
 			Fl::wait(0);
 
@@ -808,7 +873,7 @@ void Main_Loop()
 
 		if (global::want_quit)
 		{
-			if (gInstance.Main_ConfirmQuit("quit"))
+			if (gInstance->level.Main_ConfirmQuit("quit"))
 				break;
 
 			global::want_quit = false;
@@ -817,47 +882,31 @@ void Main_Loop()
 		// TODO: handle these in a better way
 
 		// TODO: HANDLE ALL INSTANCES
-		gInstance.main_win->UpdateTitle(gInstance.MadeChanges ? '*' : 0);
+		gInstance->main_win->UpdateTitle(gInstance->level.MadeChanges ? '*' : 0);
 
-		gInstance.main_win->scroll->UpdateBounds();
+		gInstance->main_win->scroll->UpdateBounds();
 
-		if (gInstance.edit.Selected->empty())
-			gInstance.edit.error_mode = false;
+		if (gInstance->edit.Selected->empty())
+			gInstance->edit.error_mode = false;
+
+		updateStatusByChildProcesses(*gInstance);
 	}
 }
 
 
-bool Instance::Main_LoadIWAD()
-{
-	// Load the IWAD (read only).
-	// The filename has been checked in DetermineIWAD().
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(loaded.iwadName,
-												   WadOpenMode::read);
-	if (!wad)
-	{
-		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.c_str());
-		return false;
-	}
-	this->wad.master.game_wad = wad;
-
-	this->wad.master.MasterDir_Add(this->wad.master.game_wad);
-	return true;
-}
-
-
-static void readGameInfo(LoadingData &loading, ConfigData &config)
+static void readGameInfo(std::unordered_map<SString, SString> &parseVars, LoadingData &loading, ConfigData &config)
 		noexcept(false)
 {
 	loading.gameName = GameNameFromIWAD(loading.iwadName);
 
 	gLog.printf("Game name: '%s'\n", loading.gameName.c_str());
-	gLog.printf("IWAD file: '%s'\n", loading.iwadName.c_str());
+	gLog.printf("IWAD file: '%s'\n", loading.iwadName.u8string().c_str());
 
-	readConfiguration(loading.parse_vars, "games", loading.gameName, config);
+	readConfiguration(parseVars, "games", loading.gameName, config);
 }
 
 
-void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
+static void readPortInfo(std::unordered_map<SString, SString> &parseVars, LoadingData &loading, ConfigData &config) noexcept(false)
 {
 	// we assume that the port name is valid, i.e. a config file
 	// exists for it.  That is checked by DeterminePort() and
@@ -891,7 +940,7 @@ void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 
 	gLog.printf("Port name: '%s'\n", loading.portName.c_str());
 
-	readConfiguration(loading.parse_vars, "ports", loading.portName, config);
+	readConfiguration(parseVars, "ports", loading.portName, config);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (config.features.strife_flags)
@@ -902,86 +951,102 @@ void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 	}
 }
 
+NewResources loadResources(const LoadingData& loading, const WadData &waddata) noexcept(false)
+{
+	auto newres = NewResources();
+	newres.loading = loading;
+	newres.waddata = waddata;
+
+	gLog.printf("\n");
+	gLog.printf("----- Loading Resources -----\n");
+
+	// clear the parse variables, pre-set a few vars
+	std::unordered_map<SString, SString> parseVars = loading.prepareConfigVariables();
+	std::vector<std::shared_ptr<Wad_file>> resourceWads;
+
+	try
+	{
+		readGameInfo(parseVars, newres.loading, newres.config);
+		readPortInfo(parseVars, newres.loading, newres.config);
+
+
+		for (const fs::path& resource : newres.loading.resourceList)
+		{
+			if(fs::is_directory(resource))
+			{
+				std::shared_ptr<Wad_file> wad = Wad_file::readFromDir(resource);
+				if(!wad)
+					gLog.printf("Failed opening directory: %s\n", resource.u8string().c_str());
+				else
+				{
+					resourceWads.push_back(wad);
+				}
+				continue;
+			}
+			if (MatchExtensionNoCase(resource, ".ugh"))
+			{
+				M_ParseDefinitionFile(parseVars, ParsePurpose::resource,
+					&newres.config, resource);
+				continue;
+			}
+			if(MatchExtensionNoCase(resource, ".deh") || MatchExtensionNoCase(resource, ".bex"))
+			{
+				if(!dehacked::loadFile(resource, newres.config))
+					gLog.printf("Error loading Dehacked file %s\n", resource.u8string().c_str());
+				continue;
+			}
+			// Otherwise wad
+			if (!Wad_file::Validate(resource))
+				ThrowException("Invalid resource WAD file: %s", resource.u8string().c_str());
+
+			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
+				WadOpenMode::read);
+			if (!wad)
+				ThrowException("Cannot load resource: %s", resource.u8string().c_str());
+
+			resourceWads.push_back(wad);
+		}
+
+		std::shared_ptr<Wad_file> gameWad = Wad_file::Open(newres.loading.iwadName, WadOpenMode::read);
+		if (!gameWad)
+			ThrowException("Could not load IWAD file");
+
+		newres.waddata.reloadResources(gameWad, newres.config, resourceWads);
+		dehacked::loadLumps(newres.waddata.master, newres.config);
+	}
+	catch (const std::runtime_error&e )
+	{
+		gLog.printf("%s\n", e.what());
+		throw;
+	}
+
+	return newres;
+}
 
 //
 // load all game/port definitions (*.ugh).
 // open all wads in the master directory.
 // read important content from the wads (palette, textures, etc).
 //
-void Instance::Main_LoadResources(LoadingData &loading)
+void Instance::Main_LoadResources(const LoadingData &loading) noexcept(false)
 {
-	ConfigData config = conf;
-	std::vector<std::shared_ptr<Wad_file>> resourceWads;
-	try
-	{
-		// FIXME: avoid doing this in case of error
-		if(edit.Selected)
-			edit.Selected->clear_all();
-
-		gLog.printf("\n");
-		gLog.printf("----- Loading Resources -----\n");
-
-		config.clearExceptDefaults();
-
-		// clear the parse variables, pre-set a few vars
-		loading.prepareConfigVariables();
-
-		readGameInfo(loading, config);
-		readPortInfo(loading, config);
-
-		for(const SString &resource : loading.resourceList)
-		{
-			if(MatchExtension(resource, "ugh"))
-			{
-				M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::resource,
-									  &config, resource);
-				continue;
-			}
-			// Otherwise wad
-			if(!Wad_file::Validate(resource))
-				throw ParseException("Invalid WAD file: " + resource);
-
-			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
-														   WadOpenMode::read);
-			if(!wad)
-				throw ParseException("Cannot load resource: " + resource);
-
-			resourceWads.push_back(wad);
-		}
-	}
-	catch(const ParseException &e)
-	{
-		gLog.printf("Failed reloading wads: %s\n", e.what());
-		throw;
-	}
+	auto newres = loadResources(loading, wad);
 
 	// Commit it
-	conf = config;
-	loaded = loading;
+	wad = std::move(newres.waddata);
+	conf = std::move(newres.config);
+	loaded = std::move(newres.loading);
+	if(main_win)
+		testmap::updateMenuName(main_win->menu_bar, loaded);
 
-	// reset the master directory
-	if (wad.master.edit_wad)
-		wad.master.MasterDir_Remove(wad.master.edit_wad);
+	UpdateViewOnResources();
+}
 
-	wad.master.MasterDir_CloseAll();
-
-	// TODO: check result
-	Main_LoadIWAD();
-
-	// load all resource wads
-	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
-		this->wad.master.MasterDir_Add(wad);
-
-	if (wad.master.edit_wad)
-		wad.master.MasterDir_Add(wad.master.edit_wad);
-
-	// finally, load textures and stuff...
-	wad.W_LoadPalette();
-	wad.W_LoadColormap();
-
-	wad.W_LoadFlats();
-	wad.W_LoadTextures(conf);
-	wad.images.W_ClearSprites();
+void Instance::UpdateViewOnResources()
+{
+	// Must deselect now
+	if(edit.Selected)
+		edit.Selected->clear_all();
 
 	gLog.printf("--- DONE ---\n");
 	gLog.printf("\n");
@@ -995,12 +1060,12 @@ void Instance::Main_LoadResources(LoadingData &loading)
 		if (main_win->canvas)
 			main_win->canvas->DeleteContext();
 
-		main_win->UpdateGameInfo();
+		main_win->UpdateGameInfo(loaded, conf);
 
 		main_win->browser->Populate();
 
 		// TODO: only call this when the IWAD has changed
-		Props_LoadValues(*this);
+		main_win->propsLoadValues();
 	}
 }
 
@@ -1027,10 +1092,13 @@ static void ShowHelp()
 	fflush(stdout);
 }
 
+#ifndef BUILD_DATE
+#define BUILD_DATE __DATE__
+#endif
 
 static void ShowVersion()
 {
-	printf("Eureka version " EUREKA_VERSION " (" __DATE__ ")\n");
+	printf("Eureka version " EUREKA_VERSION " (" BUILD_DATE ")\n");
 
 	fflush(stdout);
 }
@@ -1066,20 +1134,71 @@ static void ShowTime()
 #endif
 }
 
+//
+// Sets up the config path before using it
+//
+static void prepareConfigPath()
+{
+	if (global::config_file.empty())
+	{
+		if(global::home_dir.empty())
+			ThrowException("Home directory not set.");
+
+		global::config_file = global::home_dir / "config.cfg";
+	}
+}
+
+static void setupSignalHandlers()
+{
+#ifdef _WIN32
+#else
+	struct sigaction action = {};
+	action.sa_handler = [](int signalNumber)
+	{
+		int status;
+		pid_t pid;
+		while((pid = waitpid(-1, &status, WNOHANG)) > 0)
+		{
+			signalling::hasChildProcessStatus = true;
+			signalling::childProcessStatus = status;
+		}
+	};
+	action.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+	int r = sigaction(SIGCHLD, &action, nullptr);
+	if (r == -1)
+	{
+		ThrowException("Failed setting up process reaper signal handler: %s",
+					   GetErrorMessage(errno).c_str());
+	}
+#endif
+}
 
 //
-//  the program starts here
+//  Common entry point, called by main or other handlers depending on system
 //
-int main(int argc, char *argv[])
+int EurekaMain(int argc, char *argv[])
 {
 	try
 	{
+		try
+		{
+			setupSignalHandlers();
+		}
+		catch(const std::runtime_error &e)
+		{
+			// non-critical error, may cause issues
+			gLog.printf("WARNING: %s\n", e.what());
+		}
+
 		init_progress = ProgressStatus::nothing;
+
+		Instance instance;
+		gInstance = &instance;
 
 
 		// a quick pass through the command line arguments
 		// to handle special options, like --help, --install, --config
-		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::early);
+		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::early, global::Pwad_list, options);
 
 		if (global::show_help)
 		{
@@ -1110,36 +1229,47 @@ int main(int argc, char *argv[])
 
 		if(!gLog.openFile(global::log_file))
 			gLog.printf("WARNING: failed opening log file '%s'\n",
-						global::log_file.c_str());
+						global::log_file.u8string().c_str());
 
 
 		// load all the config settings
-		M_ParseConfigFile();
+		config::preloading = gInstance->loaded;
+		prepareConfigPath();
+		if(M_ParseConfigFile(global::config_file, options) == -1 &&
+				!global::old_linux_home_and_cache_dir.empty())
+		{
+			gLog.printf("Couldn't find %s, parsing %s\n", global::config_file.u8string().c_str(),
+					(global::old_linux_home_and_cache_dir / "config.cfg").u8string().c_str());
+			M_ParseConfigFile(global::old_linux_home_and_cache_dir / "config.cfg", options);
+		}
 
 		// environment variables can override them
 		M_ParseEnvironmentVars();
 
 		// and command line arguments will override both
-		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal);
+		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal, global::Pwad_list, options);
+
+		gInstance->loaded = config::preloading;	// update state now
 
 		// TODO: create a new instance
-		gInstance.Editor_Init();
+		gInstance->Editor_Init();
 
 		Main_SetupFLTK();
 
 		init_progress = ProgressStatus::loaded;
 
+		global::recent.load(global::home_dir, global::old_linux_home_and_cache_dir);
 
-		M_LoadRecent();
 		M_LoadBindings();
 
-		M_LookForIWADs();
+		global::recent.lookForIWADs(global::install_dir, global::home_dir,
+				global::old_linux_home_and_cache_dir);
 
-		Main_OpenWindow(gInstance);
+		Main_OpenWindow(*gInstance);
 
 		init_progress = ProgressStatus::window;
 
-		gInstance.M_LoadOperationMenus();
+		gInstance->M_LoadOperationMenus();
 
 
 		// open a specified PWAD now
@@ -1151,25 +1281,21 @@ int main(int argc, char *argv[])
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			gInstance.wad.master.Pwad_name = global::Pwad_list[0];
-
 			// TODO: main instance
-			gInstance.wad.master.edit_wad = Wad_file::Open(gInstance.wad.master.Pwad_name,
-												WadOpenMode::append);
-			if (!gInstance.wad.master.edit_wad)
-				ThrowException("Cannot load pwad: %s\n", gInstance.wad.master.Pwad_name.c_str());
+			std::shared_ptr<Wad_file> editWad = Wad_file::Open(global::Pwad_list[0], WadOpenMode::append);
+			if(!editWad)
+			{
+				ThrowException("Cannot load pwad: %s\n", global::Pwad_list[0].u8string().c_str());
+			}
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.wad.master.MasterDir_Add(gInstance.wad.master.edit_wad);
+			gInstance->wad.master.ReplaceEditWad(editWad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
-		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
+		else if (config::auto_load_recent && ! (!gInstance->loaded.iwadName.empty() || !gInstance->loaded.levelName.empty()))
 		{
-			if (gInstance.M_TryOpenMostRecent())
-			{
-				gInstance.wad.master.MasterDir_Add(gInstance.wad.master.edit_wad);
-			}
+			gInstance->M_TryOpenMostRecent();
 		}
 
 
@@ -1180,41 +1306,47 @@ int main(int argc, char *argv[])
 		// Note: there is logic in M_ParseEurekaLump() to ensure that command
 		// line arguments can override the EUREKA_LUMP values.
 
-		if (gInstance.wad.master.edit_wad)
+		if (gInstance->wad.master.editWad())
 		{
-			if (! gInstance.M_ParseEurekaLump(gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
+			if (! gInstance->loaded.parseEurekaLump(global::home_dir,
+					global::old_linux_home_and_cache_dir, global::install_dir, global::recent,
+					gInstance->wad.master.editWad().get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
-				gInstance.wad.master.RemoveEditWad();
+				gInstance->wad.master.RemoveEditWad();
 			}
 		}
 
 
 		// determine which IWAD to use
 		// TODO: instance management
-		if (! DetermineIWAD(gInstance))
+		std::shared_ptr<Wad_file> gameWad;
+		if (! DetermineIWAD(*gInstance))
+			goto quit;
+		gameWad = Wad_file::Open(gInstance->loaded.iwadName, WadOpenMode::read);
+		if(!gameWad)
 			goto quit;
 
-		DeterminePort(gInstance);
+		DeterminePort(*gInstance);
 
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
 		// TODO: check result
-		gInstance.Main_LoadIWAD();
-
+		gInstance->wad.master.setGameWad(gameWad);
+		gameWad.reset();
 
 		// load the initial level
 		// TODO: first instance
-		gInstance.loaded.levelName = DetermineLevel(gInstance);
+		gInstance->loaded.levelName = DetermineLevel(*gInstance);
 
-		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
+		gLog.printf("Loading initial map : %s\n", gInstance->loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.wad.master.edit_wad ? gInstance.wad.master.edit_wad.get() : gInstance.wad.master.game_wad.get(), gInstance.loaded.levelName);
+		gInstance->LoadLevel(gInstance->wad.master.activeWad().get(), gInstance->loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
-		gInstance.Main_LoadResources(gInstance.loaded);	// TODO: instance management
+		gInstance->Main_LoadResources(gInstance->loaded);	// TODO: instance management
 
 
 		Main_Loop();
@@ -1228,7 +1360,6 @@ int main(int argc, char *argv[])
 		global::app_has_focus = false;
 
 		// TODO: all instances
-		gInstance.wad.master.MasterDir_CloseAll();
 		gLog.close();
 
 		return 0;

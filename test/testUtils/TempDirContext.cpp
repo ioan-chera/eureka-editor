@@ -18,6 +18,8 @@
 
 #include "TempDirContext.hpp"
 
+#include "m_strings.h"
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <rpc.h>
@@ -31,11 +33,7 @@
 void TempDirContext::SetUp()
 {
 #ifdef _WIN32
-	char tempPath[MAX_PATH] = {};
-	DWORD result = GetTempPathA(sizeof(tempPath), tempPath);
-	
-	ASSERT_GT(result, 0u);
-	ASSERT_EQ(result, strlen(tempPath));
+	fs::path tempPath = fs::temp_directory_path();
 
 	UUID uuid = {};
 	RPC_STATUS status = UuidCreate(&uuid);
@@ -43,59 +41,43 @@ void TempDirContext::SetUp()
 
 	ASSERT_NE(uuid.Data1, 0);
 
-	mTempDir = SString::printf("%sEurekaTest%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x", tempPath, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
+	mTempDir = tempPath / SString::printf("EurekaTest%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x", 
+		uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], 
+		uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]).get();
 
-	ASSERT_TRUE(CreateDirectoryA(mTempDir.c_str(), nullptr));
+	fs::create_directory(mTempDir);
 #else
 	char pattern[] = "/tmp/tempdirXXXXXX";
 	char *result = mkdtemp(pattern);
 	ASSERT_NE(result, nullptr);
 	mTempDir = result;
-	ASSERT_TRUE(mTempDir.good());
-#endif
-}
-
-//
-// Portable way to delete file or folder. Under Windows it seems that remove can't delete folders.
-//
-static bool deleteFileOrFolder(const char *path)
-{
-#ifdef _WIN32
-	DWORD attributes = GetFileAttributesA(path);
-	EXPECT_NE(attributes, INVALID_FILE_ATTRIBUTES);
-	if(attributes != INVALID_FILE_ATTRIBUTES && attributes & FILE_ATTRIBUTE_DIRECTORY)
-		return RemoveDirectoryA(path) != FALSE;
-	return remove(path) == 0;
-#else
-	return remove(path) == 0;
+	ASSERT_FALSE(mTempDir.empty());
 #endif
 }
 
 void TempDirContext::TearDown()
 {
-	if(mTempDir.good())
+	if(!mTempDir.empty())
 	{
 		while(!mDeleteList.empty())
 		{
 			// Don't assert fatally, so we get the change to delete what we can.
-			EXPECT_TRUE(deleteFileOrFolder(mDeleteList.top().c_str()));
+			fs::remove(mDeleteList.top());
 			mDeleteList.pop();
 		}
-		ASSERT_TRUE(deleteFileOrFolder(mTempDir.c_str()));
+		fs::remove(mTempDir);
 	}
 }
 
 //
 // Gets a child path
 //
-SString TempDirContext::getChildPath(const char *path)
+fs::path TempDirContext::getChildPath(const fs::path &path) const
 {
-	EXPECT_TRUE(path);
-	EXPECT_TRUE(*path);
-	return mTempDir + "/" + path;
+	return mTempDir / path;
 }
 
 TEST_F(TempDirContext, Test)
 {
-	ASSERT_TRUE(mTempDir.good());
+	ASSERT_FALSE(mTempDir.empty());
 }

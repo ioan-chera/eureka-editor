@@ -32,6 +32,9 @@
 
 #include <memory>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 class Wad_file;
 
 //
@@ -69,8 +72,6 @@ public:
 	}
 };
 
-const char *WadNamespaceString(WadNamespace ns);
-
 class Lump_c
 {
 friend class Wad_file;
@@ -81,10 +82,12 @@ private:
 	std::vector<byte> mData;
 	int mPos = 0;	// insertion point for reading or writing
 
-	// constructor is private
-	explicit Lump_c(const SString &_nam);
-
 public:
+	Lump_c() = default;
+	explicit Lump_c(const SString& _nam);
+	Lump_c(Lump_c&& other) = default;
+	Lump_c& operator = (Lump_c&& other) = default;
+
 	const SString &Name() const noexcept
 	{
 		return name;
@@ -97,16 +100,6 @@ public:
 	// do not call this directly, use Wad_file::RenameLump()
 	void Rename(const char *new_name);
 
-	// attempt to seek to a position within the lump (default is
-	// the beginning).  Returns true if OK, false on error.
-	void Seek(int offset = 0) noexcept;
-
-	// read some data from the lump, returning true if OK.
-	bool Read(void *data, int len) noexcept;
-
-	// read a line of text, returns true if OK, false on EOF
-	bool GetLine(SString &string) noexcept;
-
 	// write some data to the lump.  Only the lump which had just
 	// been created with Wad_file::AddLump() or RecreateLump() can be
 	// written to.
@@ -117,11 +110,15 @@ public:
 
 	// Memory buffer actions
 	size_t writeData(FILE *f, int len);
+	void setData(std::vector<byte> &&data)
+	{
+		mData = std::move(data);
+	}
 
     //
     // Clear the lump data
     //
-    void clearData()
+    void clearData() noexcept
     {
         mData.clear();
         mPos = 0;
@@ -130,9 +127,9 @@ public:
 	//
 	// Gets the data from lump without moving the insertion point.
 	//
-	const void *getData() const noexcept
+	const std::vector<byte> &getData() const noexcept
 	{
-		return mData.data();
+		return mData;
 	}
 
 	int64_t getName8() const noexcept;
@@ -141,6 +138,21 @@ private:
 	// deliberately don't implement these
 	Lump_c(const Lump_c& other);
 	Lump_c& operator= (const Lump_c& other);
+};
+
+class LumpInputStream
+{
+public:
+	explicit LumpInputStream(const Lump_c &lump) : lump(lump)
+	{
+	}
+	
+	bool read(void *data, int len) noexcept;
+	bool readLine(SString &string) noexcept;
+	
+private:
+	const Lump_c &lump;
+	int pos = 0;
 };
 
 
@@ -152,11 +164,16 @@ struct LumpRef
 	WadNamespace ns;
 };
 
+struct SpriteLumpRef
+{
+	const Lump_c *lump;
+	bool flipped;
+};
 
 class Wad_file
 {
 private:
-	const SString filename;
+	const fs::path filename;
 
 	WadOpenMode mode;  // mode value passed to ::Open()
 
@@ -171,7 +188,7 @@ private:
 	int insert_point = -1;
 
 	// constructor is private
-	Wad_file(const SString &_name, WadOpenMode _mode) :
+	Wad_file(const fs::path &_name, WadOpenMode _mode) :
 	   filename(_name), mode(_mode)
 	{
 	}
@@ -189,14 +206,16 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static std::shared_ptr<Wad_file> Open(const SString &filename,
+	static std::shared_ptr<Wad_file> Open(const fs::path &filename,
 										  WadOpenMode mode
 										  = WadOpenMode::append);
+	static std::shared_ptr<Wad_file> loadFromFile(const fs::path &filename);
+	static std::shared_ptr<Wad_file> readFromDir(const fs::path &path);
 
 	// check the given wad file exists and is a WAD file
-	static bool Validate(const SString &filename);
+	static bool Validate(const fs::path &filename);
 
-	const SString &PathName() const noexcept
+	const fs::path &PathName() const noexcept
 	{
 		return filename;
 	}
@@ -209,7 +228,7 @@ public:
 		return kind == WadKind::IWAD;
 	}
 
-	int TotalSize() const;
+	int TotalSize() const noexcept;
 
 	int NumLumps() const noexcept
 	{
@@ -219,8 +238,9 @@ public:
 	Lump_c * FindLump(const SString &name) const noexcept;
 	int FindLumpNum(const SString &name) const noexcept;
 
-	Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group)
+	const Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group)
 			const noexcept;
+	std::vector<SpriteLumpRef> findFirstSpriteLump(const SString &stem) const;
 
 	int LevelCount() const noexcept
 	{
@@ -243,7 +263,7 @@ public:
 
 	// backup the current wad into the given filename.
 	// returns true if successful, false on error.
-	bool Backup(const char *new_filename);
+	bool Backup(const fs::path &new_filename) const;
 
 	void writeToDisk() noexcept(false);
 
@@ -257,7 +277,7 @@ public:
 
 	// this removes the level marker PLUS all associated level lumps
 	// which follow it.
-	void RemoveLevel(int lev_num);
+	std::vector<Lump_c> RemoveLevel(int lev_num);
 
 	// removes any GL-Nodes lumps that are associated with the given
 	// level.
@@ -271,7 +291,7 @@ public:
 	// The 'max_size' parameter (if >= 0) specifies the most data
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
-	Lump_c * AddLump (const SString &name);
+	Lump_c & AddLump (const SString &name);
 	Lump_c * AddLevel(const SString &name, int *lev_num = nullptr);
 
 	// set the insertion point -- the next lump will be added _before_
@@ -281,7 +301,7 @@ public:
 	// passing a negative value or invalid index will reset the
 	// insertion point -- future lumps get added at the END.
 	// RemoveLumps(), RemoveLevel() and EndWrite() also reset it.
-	void InsertPoint(int index = -1);
+	void InsertPoint(int index = -1) noexcept;
 
 	const std::vector<LumpRef> &getDir() const
 	{
@@ -289,8 +309,10 @@ public:
 	}
 
 private:
-	static std::shared_ptr<Wad_file> Create(const SString &filename,
+	static std::shared_ptr<Wad_file> Create(const fs::path &filename,
 											WadOpenMode mode);
+	static std::shared_ptr<Wad_file> createAndReadDirectory(const fs::path &filename,
+															WadOpenMode mode, FILE *fp);
 
 	// read the existing directory.
 	bool ReadDirectory(FILE *fp, int totalSize);
@@ -300,22 +322,20 @@ private:
 
 	void FixLevelGroup(int index, int num_added, int num_removed);
 
-	void writeToPath(const SString &path) const noexcept(false);
+	void writeToPath(const fs::path &path) const noexcept(false);
 
-private:
 	// deliberately don't implement these
 	Wad_file(const Wad_file& other);
 	Wad_file& operator= (const Wad_file& other);
 
-private:
 	// predicate for sorting the levels[] vector
 	struct level_name_CMP_pred
 	{
 	private:
-		Wad_file *wad;
+		const Wad_file *wad;
 
 	public:
-		level_name_CMP_pred(Wad_file * _w) : wad(_w)
+		level_name_CMP_pred(const Wad_file * _w) : wad(_w)
 		{ }
 
 		inline bool operator() (const int A, const int B) const noexcept
@@ -327,9 +347,6 @@ private:
 		}
 	};
 };
-
-// load the lump into memory, returning the size
-int  W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer);
 
 void W_StoreString(char *buf, const SString &str, size_t buflen);
 

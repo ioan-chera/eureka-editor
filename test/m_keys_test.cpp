@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2021 Ioan Chera
+//  Copyright (C) 2024 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -15,197 +15,100 @@
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
 #include "m_keys.h"
-#include "testUtils/TempDirContext.hpp"
-#include "Instance.h"
+#include "gtest/gtest.h"
 
-#ifdef __APPLE__
-#define CMD "CMD"
-#else
-#define CMD "CTRL"
-#endif
-
-void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
+struct KeyMapping
 {
-}
-
-static int sUpdates;
-void updateMenuBindings()
-{
-    ++sUpdates;
-}
-
-void Instance::Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const
-{
-}
-
-//========================================================================
-
-//
-// Fixture
-//
-class MKeys : public TempDirContext
-{
-protected:
-    void SetUp() override
-    {
-        TempDirContext::SetUp();
-        static bool loaded;
-        if(!loaded)
-        {
-            static editor_command_t commands[] =
-            {
-                { "BR_ClearSearch", "Browser", nullptr },
-                { "BR_Scroll", "Browser", nullptr },
-                { "3D_NAV_Left", NULL, nullptr },
-                { "3D_NAV_Right", NULL, nullptr },
-                { "LIN_SelectPath", NULL, nullptr },
-                { "GivenFile",  "File", nullptr },
-                { "Insert",    "Edit", nullptr },
-                { "Delete",    "Edit", nullptr },
-                { "Mirror",    "General", nullptr },
-            };
-            M_RegisterCommandList(commands);
-            loaded = true;
-        }
-        global::home_dir = mTempDir;
-        global::install_dir = getChildPath("install");
-        ASSERT_TRUE(FileMakeDir(global::install_dir));
-        mDeleteList.push(global::install_dir);
-
-        writeBindingsFile();
-        M_LoadBindings();
-        --sUpdates; // don't increment it here
-    }
-
-    void TearDown() override
-    {
-        global::config_file.clear();
-        global::install_dir.clear();
-        global::home_dir.clear();
-        sUpdates = 0;   // reset it to 0
-        TempDirContext::TearDown();
-    }
-private:
-    void writeBindingsFile();
+	keycode_t code;
+	const char *dashString;
+	const char *spaceString;
 };
 
-//
-// Write the bindings file
-//
-void MKeys::writeBindingsFile()
+// NOTE: keep the old names in the dashed names for backward compatibility
+static const KeyMapping testKeyCombos[] =
 {
-    FILE *f = fopen((global::install_dir + "/bindings.cfg").c_str(), "wt");
-    ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::install_dir + "/bindings.cfg");
+	{EMOD_SHIFT | 'k', "K",                     "      K         "},
+	{static_cast<keycode_t>(EMOD_COMMAND) | 'j',
+#ifdef __APPLE__
+		"CMD-j",                                "  CMD j         "
+#else
+		"CTRL-j",                               " CTRL j         "
+#endif
+	},
+	{static_cast<keycode_t>(EMOD_META) | 'm',
+#ifdef __APPLE__
+		"META-m",                 " CTRL m         "
+#else
+		"META-m",                 " META m         "
+#endif
+	},
+	{EMOD_ALT | 'a', "ALT-a",                   "  ALT a         "},
+	{EMOD_ALT | (FL_Button + 3), "ALT-MOUSE3",  "  ALT MOUSE3    "},
+	{EMOD_ALT | FL_Volume_Down, "ALT-VOL_DOWN", "  ALT VOL_DOWN  "},
+	{EMOD_SHIFT | '5', "SHIFT-5",               "SHIFT 5         "},
+	{EMOD_SHIFT | '"', "SHIFT-DBLQUOTE",        "SHIFT DBLQUOTE  "},
+	{EMOD_SHIFT | (FL_F + 4), "SHIFT-F4",       "SHIFT F4        "},
+	{FL_SCROLL_LOCK | 's', "LAX-s",             "  LAX s         "},
 
-    fprintf(f, "browser    CMD-k    BR_ClearSearch\n");
-    fprintf(f, "browser    PGUP    BR_Scroll    -3\n");
-    fprintf(f, "browser    PGDN    BR_Scroll    +3\n");
-    fprintf(f, "render    ALT-LEFT    3D_NAV_Left    384\n");
-    fprintf(f, "render    ALT-RIGHT    3D_NAV_Right    384\n");
-    fprintf(f, "line    E    LIN_SelectPath    /sametex\n");
-    fprintf(f, "general    META-n    GivenFile    next\n");
-    fprintf(f, "general    CMD-SPACE    Insert    /nofill\n");
+};
 
-    int n = fclose(f);
-    ASSERT_EQ(n, 0);
+// TODO: use this array in tests
 
-    f = fopen((global::home_dir + "/bindings.cfg").c_str(), "wt");
-    ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::home_dir + "/bindings.cfg");
-
-    fprintf(f, "general SHIFT-DEL    Delete    /keep\n");
-    fprintf(f, "general    SHIFT-BS    Delete    /keep\n");
-    fprintf(f, "general    CMD-k    Mirror    horiz\n");
-
-    n = fclose(f);
-    ASSERT_EQ(n, 0);
+TEST(MKeys, KeyToString)
+{
+	for(const KeyMapping &mapping : testKeyCombos)
+	{
+		keycode_t key = mapping.code;
+		ASSERT_EQ(keys::toString(key), mapping.dashString);
+	}
 }
 
-TEST_F(MKeys, MKeyToString)
+TEST(MKeys, StringForFunc)
 {
-    ASSERT_EQ(M_KeyToString(EMOD_COMMAND | 'a'), CMD "-a");
-    ASSERT_EQ(M_KeyToString(EMOD_SHIFT | 'a'), "A");
-    ASSERT_EQ(M_KeyToString(EMOD_SHIFT | FL_Page_Up), "SHIFT-PGUP");
-    ASSERT_EQ(M_KeyToString(EMOD_META | FL_Page_Down), "META-PGDN");
+	key_binding_t bind = {};
+	editor_command_t command = {"CommandName"};
+	bind.cmd = &command;
+
+	
+	// No params
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName");
+	
+	bind.param[0] = "parm1";
+	
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1");
+	
+	bind.param[1] = "other";
+	
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 other");
+	
+	bind.param[2] = "thing";
+	
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 other thing");
+	
+	bind.param[1].clear();
+	
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1");
+	
+	bind.param[1] = "aaaaabbbbbcccccdddddeeeeefffffggggg";
+	
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 aaaaabbbbbcccccdddddeeeeefffff thing");
 }
 
-TEST_F(MKeys, MIsKeyBound)
+TEST(MKeys, StringForBindingCheckModName)
 {
-    ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KeyContext::browser));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::browser));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::general));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | 'e', KeyContext::line));
-    ASSERT_FALSE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::render));
-}
-
-TEST_F(MKeys, MRemoveBindingAndSave)
-{
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
-    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KeyContext::vertex);
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
-    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KeyContext::general);
-    ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
-    M_RemoveBinding(EMOD_ALT | FL_Left, KeyContext::render);
-    ASSERT_FALSE(M_IsKeyBound(EMOD_ALT | FL_Left, KeyContext::render));
-    M_SaveBindings();
-
-    M_LoadBindings();
-
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::browser));
-    ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KeyContext::browser));
-    ASSERT_TRUE(M_IsKeyBound(FL_Page_Down, KeyContext::browser));
-    ASSERT_FALSE(M_IsKeyBound(EMOD_ALT | FL_Left, KeyContext::render));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_ALT | FL_Right, KeyContext::render));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | 'e', KeyContext::line));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_META | 'n', KeyContext::general));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | ' ', KeyContext::general));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_Delete, KeyContext::general));
-    ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::general));
-
-}
-
-TEST_F(MKeys, FindKeyCodeForCommandName)
-{
-    const char *params[MAX_EXEC_PARAM] = {};
-    keycode_t code = 0;
-
-    params[0] = "-3";
-    ASSERT_TRUE(findKeyCodeForCommandName("BR_Scroll", params, &code));
-    ASSERT_EQ(code, FL_Page_Up);
-
-    params[0] = "+3";
-    ASSERT_TRUE(findKeyCodeForCommandName("BR_Scroll", params, &code));
-    ASSERT_EQ(code, FL_Page_Down);
-
-    params[0] = nullptr;
-    ASSERT_FALSE(findKeyCodeForCommandName("Mirror", params, &code));
-    params[0] = "horiz";
-    ASSERT_TRUE(findKeyCodeForCommandName("Mirror", params, &code));
-    ASSERT_EQ(code, EMOD_COMMAND | 'k');
-}
-
-TEST_F(MKeys, UpdateMenuBindingsCall)
-{
-    ASSERT_EQ(sUpdates, 0);
-    M_LoadBindings();
-    ASSERT_EQ(sUpdates, 1);
-
-    // Restore
-    M_CopyBindings();
-    ASSERT_EQ(sUpdates, 1);
-    M_ChangeBindingKey(0, 'a');
-    ASSERT_EQ(sUpdates, 1);
-
-    M_ApplyBindings();
-    ASSERT_EQ(sUpdates, 2);
-
-    const char *params[MAX_EXEC_PARAM] = {};
-    keycode_t code = 0;
-    ASSERT_TRUE(findKeyCodeForCommandName("BR_ClearSearch", params, &code));
-    ASSERT_EQ(code, 'a');
-    ASSERT_EQ(sUpdates, 2);
+	key_binding_t bind = {};
+	editor_command_t command = {"CommandName"};
+	bind.cmd = &command;
+	
+	bind.context = KeyContext::browser;
+	
+	for(const KeyMapping &mapping : testKeyCombos)
+	{
+		bind.key = mapping.code;
+		const char *string = keys::stringForBinding(bind);
+		
+		SString expected = SString(mapping.spaceString) + " browser   CommandName";
+		ASSERT_EQ(expected, string);
+	}
 }

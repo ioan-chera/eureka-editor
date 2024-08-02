@@ -21,25 +21,26 @@
 #ifndef __EUREKA_UI_NOMBRE_H__
 #define __EUREKA_UI_NOMBRE_H__
 
+#include "m_strings.h"
 #include "FL/Fl_Box.H"
 
 class UI_Nombre : public Fl_Box
 {
 private:
-	int index;
-	int total;
-	int selected;
+	int index = -1;
+	int total = 0;
+	int selected = 0;
 
 	SString type_name;
 
-	void Update();
+	void Update() noexcept;
 
 public:
 	UI_Nombre(int X, int Y, int W, int H, const char *what = NULL);
 
 public:
 	void SetIndex(int _idx);  // _idx < 0 means "no index"
-	void SetTotal(int _tot);
+	void SetTotal(int _tot) noexcept;
 	void SetSelected(int _sel);
 };
 

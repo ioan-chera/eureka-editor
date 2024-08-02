@@ -115,36 +115,6 @@ Use CMake, same as on macOS. Similarly, the FLTK project shall be downloaded and
 built.
 
 
-For previous versions the official Windows executable was built
-using a "cross compiler" under Linux, using the MingW-w64 tools.
-THIS IS NOT CURRENTLY SUPPORTED, so it may fail.
-
-Dependencies (if you still want to cross-compile):
-
-1. C++ cross compiler and tools
-   package: mingw-w64
-
-2. GNU make
-   package: make
-
-3. FLTK 1.3.5
-   website: http://www.fltk.org/
-
-The FLTK library must be in a directory called "lib_win32" with the
-name "fltk-1.3.5" (it can be a symlink to the actual location), and
-it needs to be cross-compiled with MingW-w64.  Our makefile assumes
-that FLTK was compiled to use its internal copies of the zlib, png
-and jpeg libraries.  FLTK has some information on cross-compiling
-in the "README.CMake.txt" document.
-
-Assuming all those dependencies are met, then the following shell
-command will build the Eureka binary. (the '>' is just the prompt)
-
-   > make -f Makefile.xming
-
-WARNING: at this moment, this Makefile.xming file may be outdated.
-
-
 
 SETTING UP Eureka
 =================
@@ -158,9 +128,9 @@ for next time.
 Places where Eureka looks for IWADs:
 
   1. The "iwads" directory in Eureka's home directory.  In Linux
-     this will be "~/.eureka/iwads".  It is created automatically
-     the first time Eureka is run (though there is no harm in
-     creating it yourself).
+     this will be "~/.config/eureka/iwads" (or "$XDG_CONFIG_HOME/eureka/iwads").
+     It is created automatically the first time Eureka is run (though there
+     is no harm in creating it yourself).
 
   2. (a) In Linux: /usr/share/games/doom
      (b) In Windows: C:\DOOM and C:\DOOM2

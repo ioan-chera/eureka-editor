@@ -27,27 +27,66 @@
 #ifndef __EUREKA_E_LOADSAVE_H__
 #define __EUREKA_E_LOADSAVE_H__
 
+#include "Document.h"
+#include "m_game.h"
 #include "w_wad.h"
+#include "WadData.h"
+#include <unordered_map>
+
+class RecentKnowledge;
 
 //
 // Background loading data for Main_LoadResources
 //
 struct LoadingData
 {
-	void prepareConfigVariables();
+	std::unordered_map<SString, SString> prepareConfigVariables() const;
+	bool parseEurekaLump(const fs::path &home_dir, const fs::path &old_home_dir,
+			const fs::path &install_dir, const RecentKnowledge &recent, const Wad_file *wad,
+			bool keep_cmd_line_args = false);
+	void writeEurekaLump(Wad_file &wad) const;
 
 	SString gameName;	// Name of game "doom", "doom2", "heretic", ...
 	SString portName;	// Name of source port "vanilla", "boom", ...
-	SString iwadName;	// Filename of the iwad
+	fs::path iwadName;	// Filename of the iwad
 	SString levelName;	// Name of map lump we are editing
 	SString udmfNamespace;	// for UDMF, the current namespace
-	std::vector<SString> resourceList;
+	std::vector<fs::path> resourceList;
 	MapFormat levelFormat = {};	// format of current map
-
-	std::unordered_map<SString, SString> parse_vars;
+	SString testingCommandLine;	// command-line for testing map (stored in Eureka lump due to possible port and mod-specific features)
 };
 
-void OpenFileMap(const SString &filename, const SString &map_name = "");
+
+struct NewResources
+{
+	ConfigData config;
+	LoadingData loading;
+	WadData waddata;
+};
+
+struct BadCount
+{
+	bool exists() const
+	{
+		return linedef_count || sector_refs || sidedef_refs;
+	}
+
+	int linedef_count;
+	int sector_refs;
+	int sidedef_refs;
+};
+
+
+struct NewDocument
+{
+	Document doc;
+	LoadingData loading;
+	BadCount bad;
+};
+
+void OpenFileMap(const fs::path &filename, const SString &map_name = "") noexcept(false);
+
+const Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *load_wad, const char *name);
 
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 

@@ -208,7 +208,7 @@ SString SString::vprintf(const char *format, va_list ap)
 	// Algorithm: keep doubling the allocated buffer size
 	// until the output fits. Based on code by Darren Salt.
 
-	char *buf = NULL;
+	std::vector<char> buf;
 	int buf_size = 128;
 
 	for (;;)
@@ -217,19 +217,16 @@ SString SString::vprintf(const char *format, va_list ap)
 
 		buf_size *= 2;
 
-		buf = (char*)realloc(buf, buf_size);
-		if (!buf)
-			ThrowException("Out of memory (formatting string)\n");
+		buf.resize(buf_size);
 
-		out_len = vsnprintf(buf, buf_size, format, ap);
+		out_len = vsnprintf(buf.data(), buf_size, format, ap);
 
 		// old versions of vsnprintf() simply return -1 when
 		// the output doesn't fit.
 		if (out_len < 0 || out_len >= buf_size)
 			continue;
 
-		SString result(buf);
-		free(buf);
+		SString result(buf.data());
 		return result;
 	}
 }
@@ -411,13 +408,39 @@ StringID StringTable::add(const SString &text)
 //
 // Get a text (handle it robustly)
 //
-SString StringTable::get(StringID offset) const
+SString StringTable::get(StringID offset) const noexcept
 {
 	// this should never happen
 	// [ but handle it gracefully, for the sake of robustness ]
 	if(offset.isInvalid() || offset.get() >= (int)mStrings.size())
 		return "???ERROR";
 	return mStrings[offset.get()];
+}
+
+//
+// If string has spaces, surrounds it in double quotes. If there are any quotes, it doubles them (MS-DOS convention)
+//
+SString SString::spaceEscape(bool backslash) const
+{
+	if(empty())
+		return "\"\"";
+	bool needsQuotes = false;
+	for(char c : data)
+		if(isspace(c) || c == '"' || c == '#')
+		{
+			needsQuotes = true;
+			break;
+		}
+
+	SString result(*this);
+	if(needsQuotes)
+	{
+		size_t pos = std::string::npos;
+		while((pos = result.data.find('"', pos == std::string::npos ? 0 : pos + 2)) != std::string::npos)
+			result.data.insert(result.data.begin() + pos, backslash ? '\\' : '"');
+		return "\"" + result + "\"";
+	}
+	return result;
 }
 
 #ifdef _WIN32
@@ -455,6 +478,44 @@ SString WideToUTF8(const wchar_t *text)
 		return FailSafeWideToUTF8(text);
 	}
 	SString result = buffer;
+	delete[] buffer;
+	return result;
+}
+
+//
+// Fail safe so we avoid failures
+//
+static std::wstring FailSafeUTF8ToWide(const char* text)
+{
+	size_t len = strlen(text);
+	std::wstring result;
+	result.reserve(len);
+	for (size_t i = 0; i < len; ++i)
+	{
+		result.push_back(static_cast<wchar_t>(text[i]));
+	}
+	return result;
+}
+
+//
+// Converts UTF8 characters to wide. Mainly for Windows
+//
+std::wstring UTF8ToWide(const char* text)
+{
+	wchar_t* buffer;
+	int n = MultiByteToWideChar(CP_UTF8, 0, text, -1, nullptr, 0);
+	if (!n)
+	{
+		return FailSafeUTF8ToWide(text);
+	}
+	buffer = new wchar_t[n];
+	n = MultiByteToWideChar(CP_UTF8, 0, text, -1, buffer, n);
+	if (!n)
+	{
+		delete[] buffer;
+		return FailSafeUTF8ToWide(text);
+	}
+	std::wstring result = buffer;
 	delete[] buffer;
 	return result;
 }

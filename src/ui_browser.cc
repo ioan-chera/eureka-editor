@@ -728,7 +728,7 @@ SString TidyLineDesc(const char *name)
 }
 
 
-void UI_Browser_Box::Populate_Images(BrowserMode imkind, const std::map<SString, Img_c *> & img_list)
+void UI_Browser_Box::Populate_Images(BrowserMode imkind, const std::map<SString, Img_c> & img_list)
 {
 	/* Note: the side-by-side packing is done in Filter() method */
 
@@ -738,7 +738,7 @@ void UI_Browser_Box::Populate_Images(BrowserMode imkind, const std::map<SString,
 	scroll->resize_horiz(false);
 	scroll->Line_size(98);
 
-	std::map<SString, Img_c *>::const_iterator TI;
+	std::map<SString, Img_c>::const_iterator TI;
 
 	int cx = scroll->x() + SBAR_W;
 	int cy = scroll->y();
@@ -749,24 +749,24 @@ void UI_Browser_Box::Populate_Images(BrowserMode imkind, const std::map<SString,
 	{
 		const SString &name = TI->first;
 
-		Img_c *image = TI->second;
+		const Img_c &image = TI->second;
 
 		if ((false)) /* NO PICS */
 			snprintf(full_desc, sizeof(full_desc), "%-8s : %3dx%d", name.c_str(),
-					 image->width(), image->height());
+					 image.width(), image.height());
 		else
 			snprintf(full_desc, sizeof(full_desc), "%-8s", name.c_str());
 
-		int pic_w = (kind == BrowserMode::flats || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
-		int pic_h = (kind == BrowserMode::flats) ? 64 : std::min(128, std::max(4, image->height()));
+		int pic_w = (kind == BrowserMode::flats || image.width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
+		int pic_h = (kind == BrowserMode::flats) ? 64 : std::min(128, std::max(4, image.height()));
 
 		if (config::browser_small_tex && imkind == BrowserMode::textures)
 		{
 			pic_w = 64;
-			pic_h = std::min(64, std::max(4, image->height()));
+			pic_h = std::min(64, std::max(4, image.height()));
 		}
 
-		if (image->width() >= 256 && image->height() == 128)
+		if (image.width() >= 256 && image.height() == 128)
 		{
 			pic_w = 128;
 			pic_h = 64;
@@ -1182,21 +1182,21 @@ void UI_Browser_Box::ToggleRecent(bool force_recent)
 class UI_Generalized_Item : public Fl_Choice
 {
 public:
-	const generalized_field_t * field;
+	const generalized_field_t field;
 
 public:
 	UI_Generalized_Item(int X, int Y, int W, int H,
 						const generalized_field_t *_field) :
 		Fl_Choice(X, Y, W, H, ""),
-		field(_field)
+		field(*_field)
 	{
 		char label_buf[256];
 
-		snprintf(label_buf, sizeof(label_buf), "%s: ", field->name.c_str());
+		snprintf(label_buf, sizeof(label_buf), "%s: ", field.name.c_str());
 
 		copy_label(label_buf);
 
-		for (const auto &keyword : field->keywords)
+		for (const auto &keyword : field.keywords)
 		{
 			add(keyword.c_str());
 		}
@@ -1209,17 +1209,17 @@ public:
 
 	int Compute() const
 	{
-		return (value() << field->shift) & field->mask;
+		return (value() << field.shift) & field.mask;
 	}
 
 	void Decode(int line_type)
 	{
-		value((line_type & field->mask) >> field->shift);
+		value((line_type & field.mask) >> field.shift);
 	}
 
 	void Reset()
 	{
-		int def_val = clamp(0, field->default_val, static_cast<int>(field->keywords.size()) - 1);
+		int def_val = clamp(0, field.default_val, static_cast<int>(field.keywords.size()) - 1);
 
 		value(def_val);
 	}

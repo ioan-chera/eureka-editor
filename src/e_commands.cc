@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2018 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -131,7 +131,6 @@ void Instance::CMD_UnselectAll()
 	RedrawMap();
 }
 
-
 void Instance::CMD_InvertSelection()
 {
 	// do not clear selection when in error mode
@@ -142,11 +141,10 @@ void Instance::CMD_InvertSelection()
 	if (edit.Selected->what_type() != edit.mode)
 	{
 		// convert the selection
-		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode, true /* extended */);
+		selection_c prev_sel = *edit.Selected;
+		edit.Selected.emplace(edit.mode, true /* extended */);
 
-		ConvertSelection(level, *prev_sel, *edit.Selected);
-		delete prev_sel;
+		ConvertSelection(level, prev_sel, *edit.Selected);
 	}
 
 	edit.Selected->frob_range(0, total-1, BitOp::toggle);
@@ -191,7 +189,7 @@ static void SetGamma(Instance &inst, int new_val)
 {
 	config::usegamma = clamp(0, new_val, 4);
 
-	inst.wad.palette.updateGamma();
+	inst.wad.palette.updateGamma(config::usegamma, config::panel_gamma);
 
 	// for OpenGL, need to reload all images
 	if (inst.main_win && inst.main_win->canvas)
@@ -261,11 +259,7 @@ void Instance::CMD_SetVar()
 		SetGamma(*this, int_val);
 	}
 	else if (var_name.noCaseEqual("ratio"))
-	{
-		grid.ratio = clamp(0, int_val, 7);
-		main_win->info_bar->UpdateRatio();
-		RedrawMap();
-	}
+		grid.configureRatio(clamp(0, int_val, 7), true);
 	else if (var_name.noCaseEqual("sec_render"))
 	{
 		int_val = clamp(0, int_val, (int)SREND_SoundProp);
@@ -334,15 +328,7 @@ void Instance::CMD_ToggleVar()
 		SetGamma(*this, (config::usegamma >= 4) ? 0 : config::usegamma + 1);
 	}
 	else if (var_name.noCaseEqual("ratio"))
-	{
-		if (grid.ratio >= 7)
-			grid.ratio = 0;
-		else
-			grid.ratio++;
-
-		main_win->info_bar->UpdateRatio();
-		RedrawMap();
-	}
+		grid.configureRatio(grid.getRatio() >= 7 ? 0 : grid.getRatio() + 1, true);
 	else if (var_name.noCaseEqual("sec_render"))
 	{
 		if (edit.sector_render_mode >= SREND_SoundProp)
@@ -407,7 +393,7 @@ void Instance::CMD_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	delta *= base_size / 100.0 / grid.Scale;
+	delta *= base_size / 100.0 / grid.getScale();
 
 	grid.Scroll(delta);
 }
@@ -427,11 +413,11 @@ void Instance::navigationScroll(float *editNav, nav_release_func_t func)
 		return;
 
 	if(!edit.is_navigating)
-		Editor_ClearNav();
+		edit.clearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	*editNav = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	*editNav = static_cast<float>(perc * base_size / 100.0 / grid.getScale());
 
 	Nav_SetKey(EXEC_CurKey, func);
 }
@@ -488,7 +474,7 @@ void Instance::CMD_NAV_MouseScroll()
 	edit.panning_lax = Exec_HasFlag("/LAX");
 
 	if (! edit.is_navigating)
-		Editor_ClearNav();
+		edit.clearNav();
 
 	if (Nav_SetKey(EXEC_CurKey, &Instance::NAV_MouseScroll_release))
 	{
@@ -548,12 +534,12 @@ void Instance::DoBeginDrag()
 		{
 			edit.drag_thing_num = edit.clicked.num;
 			edit.drag_thing_floorh = static_cast<float>(edit.drag_start.z);
-			edit.drag_thing_up_down = (loaded.levelFormat != MapFormat::doom && !grid.snap);
+			edit.drag_thing_up_down = (loaded.levelFormat != MapFormat::doom && !grid.snaps());
 
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
 			{
-				const Thing *T = level.things[edit.drag_thing_num];
+				const auto T = level.things[edit.drag_thing_num];
 
 				Objid sec = hover::getNearestSector(level, T->xy());
 
@@ -606,7 +592,7 @@ void Instance::ACT_SelectBox_release()
 		return;
 	}
 
-	SelectObjectsInBox(level, edit.Selected, edit.mode, pos1, pos2);
+	SelectObjectsInBox(level, &*edit.Selected, edit.mode, pos1, pos2);
 	RedrawMap();
 }
 
@@ -721,7 +707,7 @@ void Instance::CMD_ACT_Click()
 	{
 		if (edit.highlight.type == ObjType::things)
 		{
-			const Thing *T = level.things[edit.highlight.num];
+			const auto T = level.things[edit.highlight.num];
 			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->xy()));
 		}
 		else
@@ -747,7 +733,7 @@ void Instance::CMD_ACT_Click()
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
-		const LineDef *L = level.linedefs[split_ld];
+		const auto L = level.linedefs[split_ld];
 
 		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 		int new_vert;
@@ -757,7 +743,7 @@ void Instance::CMD_ACT_Click()
 
 			new_vert = op.addNew(ObjType::vertices);
 
-			Vertex *V = level.vertices[new_vert];
+			auto V = level.vertices[new_vert];
 
 			V->SetRawXY(loaded.levelFormat, edit.split);
 
@@ -863,7 +849,7 @@ void Instance::Transform_Update()
 		case TRANS_K_Stretch:
 			if (dv0.x)
 				edit.trans_param.scale.x = dv1.x / dv0.x;
-			if (dv0.y) 
+			if (dv0.y)
 				edit.trans_param.scale.y = dv1.y / dv0.y;
 			break;
 
@@ -1003,7 +989,7 @@ void Instance::CMD_WHEEL_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
+	speed = static_cast<float>(speed * base_size / 100.0 / grid.getScale());
 
 	grid.Scroll(delta * speed);
 }
@@ -1076,7 +1062,7 @@ void Instance::CMD_Zoom()
 	auto mid = v2int_t(edit.map.xy);
 
 	if (Exec_HasFlag("/center"))
-		mid = grid.orig.iround();
+		mid = grid.getOrig().iround();
 
 	Editor_Zoom(delta, mid);
 }
@@ -1249,7 +1235,7 @@ void Instance::CMD_GRID_Zoom()
 	if (scale < 0)
 		scale = -1.0 / scale;
 
-	float S1 = static_cast<float>(grid.Scale);
+	float S1 = static_cast<float>(grid.getScale());
 
 	grid.NearestScale(scale);
 
@@ -1336,7 +1322,7 @@ void Instance::CMD_LogViewer()
 
 void Instance::CMD_OnlineDocs()
 {
-	int rv = fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
+	int rv = fl_open_uri("https://eureka-editor.sourceforge.net/Docs_Index.html");
 	if (rv == 1)
 		Status_Set("Opened web browser");
 	else
@@ -1540,6 +1526,13 @@ static editor_command_t  command_table[] =
 	{	"UnselectAll",	"Edit",
 		&Instance::CMD_UnselectAll
 	},
+	
+	{
+		"SelectNeighbors", "Edit",
+		&Instance::CMD_SelectNeighbors,
+		/* flags */ NULL,
+		/* keywords */ "height texture"
+	},
 
 	{	"InvertSelection",	"Edit",
 		&Instance::CMD_InvertSelection
@@ -1624,6 +1617,10 @@ static editor_command_t  command_table[] =
 
 	{	"TestMap",  "Tools",
 		&Instance::CMD_TestMap
+	},
+
+	{	"ChangeTestSettings", "Tools",
+		&Instance::CMD_ChangeTestSettings
 	},
 
 	{	"RecalcSectors",  "Tools",

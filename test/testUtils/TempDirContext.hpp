@@ -19,20 +19,22 @@
 #ifndef TempDirContext_hpp
 #define TempDirContext_hpp
 
-#include "m_strings.h"
 #include "gtest/gtest.h"
 
 #include <stack>
+
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
 
 class TempDirContext : public ::testing::Test
 {
 protected:
 	void SetUp() override;
 	void TearDown() override;
-	SString getChildPath(const char *path);
+	fs::path getChildPath(const fs::path &path) const;
 
-	SString mTempDir;
-	std::stack<SString> mDeleteList;
+	fs::path mTempDir;
+	std::stack<fs::path> mDeleteList;
 };
 
 #endif /* TempDirContext_hpp */

@@ -257,7 +257,7 @@ UI_OpenMap::UI_OpenMap(Instance &inst) :
 		look_where->add("the PWAD above|the Game IWAD|the Resource wads");
 		look_where->callback(look_callback, this);
 
-		look_where->value(inst.wad.master.edit_wad ? LOOK_PWad : LOOK_IWad);
+		look_where->value(inst.wad.master.editWad() ? LOOK_PWad : LOOK_IWad);
 	}
 
 	{
@@ -326,8 +326,8 @@ std::shared_ptr<Wad_file> UI_OpenMap::Run(SString* map_v, bool * did_load)
 	map_v->clear();
 	*did_load = false;
 
-	if (inst.wad.master.edit_wad)
-		SetPWAD(inst.wad.master.edit_wad->PathName());
+	if (inst.wad.master.editWad())
+		SetPWAD(inst.wad.master.editWad()->PathName().u8string());
 
 	Populate();
 
@@ -396,26 +396,21 @@ void UI_OpenMap::Populate()
 
 	if (look_where->value() == LOOK_IWad)
 	{
-		using_wad = inst.wad.master.game_wad;
+		using_wad = inst.wad.master.gameWad();
 		PopulateButtons();
 	}
 	else if (look_where->value() >= LOOK_Resource)
 	{
-		int first = 1;
-		int last  = (int)inst.wad.master.dir.size() - 1;
-
-		if (inst.wad.master.edit_wad)
-			last--;
-
 		// we simply use the last resource which contains levels
 
 		// TODO: probably should collect ones with a map, add to look_where choices
 
-		for (int r = last ; r >= first ; r--)
+		for (auto it = inst.wad.master.resourceWads().rbegin();
+			 it != inst.wad.master.resourceWads().rend(); ++it)
 		{
-			if (inst.wad.master.dir[r]->LevelCount() >= 0)
+			if ((*it)->LevelCount() >= 0)
 			{
-				using_wad = inst.wad.master.dir[r];
+				using_wad = *it;
 				PopulateButtons();
 				break;
 			}
@@ -426,9 +421,9 @@ void UI_OpenMap::Populate()
 		using_wad = loaded_wad;
 		PopulateButtons();
 	}
-	else if (inst.wad.master.edit_wad)
+	else if (inst.wad.master.editWad())
 	{
-		using_wad = inst.wad.master.edit_wad;
+		using_wad = inst.wad.master.editWad();
 		PopulateButtons();
 	}
 
@@ -592,7 +587,7 @@ void UI_OpenMap::LoadFile()
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(inst.Main_FileOpFolder().c_str());
+	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
 
 	// Show native chooser
 	switch (chooser.show())
@@ -614,7 +609,7 @@ void UI_OpenMap::LoadFile()
 	}
 
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(chooser.filename(),
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(fs::u8path(chooser.filename()),
 												   WadOpenMode::append);
 
 	if (! wad)
@@ -638,7 +633,7 @@ void UI_OpenMap::LoadFile()
 
 	loaded_wad = wad;
 
-	SetPWAD(loaded_wad->PathName());
+	SetPWAD(loaded_wad->PathName().u8string());
 
 	if (using_wad == loaded_wad)
 		using_wad = wad;
@@ -657,9 +652,8 @@ void UI_OpenMap::LoadFile()
 
 
 UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_startup) :
-	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
-	action(ACT_none),
-	map_format(MapFormat::invalid), name_space(), inst(inst)
+	UI_Escapable_Window(is_startup ? 400 : 500, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
+	inst(inst)
 {
 	callback(close_callback, this);
 
@@ -723,14 +717,14 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 
 	if (! is_startup)
 	{
-		Fl_Box *res_title = new Fl_Box(15, by+190, 185, 30, "Resource Files:");
+		Fl_Box *res_title = new Fl_Box(15, by+190, 185, 30, "Resource Files or Folders:");
 		res_title->labelfont(FL_HELVETICA_BOLD);
 		res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
-		res[r].clear();
+		result.resources[r].clear();
 
 		if (is_startup)
 			continue;
@@ -748,16 +742,27 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 		kill->labelsize(20);
 		kill->callback((Fl_Callback*)kill_callback, this);
 
-		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load");
-		mResourceButtons[r] = load;
+		// NOTE: on Apple, when selecting a folder picker, we can already pick files too, so unify the buttons
+#ifdef __APPLE__
+		Fl_Button *load = new Fl_Button(315, cy, 75 + 10 + 90, 25, "Load File or Folder");
+		mResourceFileButtons[r] = load;
 		load->callback((Fl_Callback*)load_callback, this);
+#else
+		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load File");
+		mResourceFileButtons[r] = load;
+		load->callback((Fl_Callback*)load_callback, this);
+		
+		load = new Fl_Button(load->x() + load->w() + 10, cy, 90, 25, "Load Folder");
+		mResourceDirButtons[r] = load;
+		load->callback((Fl_Callback*)load_callback, this);
+#endif
 	}
 
 	// bottom buttons
 	{
 		by += is_startup ? 80 : 375;
 
-		Fl_Group *g = new Fl_Group(0, by, 400, h() - by);
+		Fl_Group *g = new Fl_Group(0, by, w(), h() - by);
 		g->box(FL_FLAT_BOX);
 		g->color(WINDOW_BG, WINDOW_BG);
 
@@ -768,7 +773,7 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 
 		const char *ok_text = (is_startup | new_project) ? "OK" : "Use";
 
-		ok_but = new Fl_Button(240, g->y() + 14, 80, 35, ok_text);
+		ok_but = new Fl_Button(w() - 160, g->y() + 14, 80, 35, ok_text);
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback((Fl_Callback*)use_callback, this);
 
@@ -779,12 +784,7 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 }
 
 
-UI_ProjectSetup::~UI_ProjectSetup()
-{
-}
-
-
-bool UI_ProjectSetup::Run()
+tl::optional<UI_ProjectSetup::Result> UI_ProjectSetup::Run()
 {
 	PopulateIWADs();
 	PopulatePort();
@@ -795,35 +795,12 @@ bool UI_ProjectSetup::Run()
 
 	show();
 
-	while (action == ACT_none)
+	while (action == Action::none)
 	{
 		Fl::wait(0.2);
 	}
 
-	return (action == ACT_ACCEPT);
-}
-
-//
-// Gets all the loading data from the dialog box
-//
-void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
-{
-	SYS_ASSERT(game.good());
-
-    loading.gameName = game;
-    loading.portName = port;
-
-    loading.iwadName = M_QueryKnownIWAD(game);
-	SYS_ASSERT(loading.iwadName.good());
-
-    loading.levelFormat = map_format;
-    loading.udmfNamespace = name_space;
-
-	SYS_ASSERT(loading.levelFormat != MapFormat::invalid);
-
-	for(int i = 0; i < RES_NUM; ++i)
-		if(res[i].good())
-            loading.resourceList.push_back(res[i]);
+	return (action == Action::accept) ? result : tl::optional<UI_ProjectSetup::Result>{};
 }
 
 void UI_ProjectSetup::PopulateIWADs()
@@ -832,7 +809,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	// the user has found a new iwad.  For the latter case, we want
 	// to show the newly found game.
 
-	SString prev_game = game;
+	SString prev_game = result.game;
 
 	if (prev_game.empty())
 		prev_game = inst.loaded.gameName;
@@ -840,24 +817,24 @@ void UI_ProjectSetup::PopulateIWADs()
 		prev_game = "doom2";
 
 
-	game.clear();
+	result.game.clear();
 	game_choice->clear();
 
 
 	SString menu_string;
 	int menu_value = 0;
 
-	menu_string = M_CollectGamesForMenu(&menu_value, prev_game.c_str());
+	menu_string = global::recent.collectGamesForMenu(&menu_value, prev_game.c_str());
 
 	if (!menu_string.empty())
 	{
 		game_choice->add(menu_string.c_str());
 		game_choice->value(menu_value);
 
-		game = game_choice->mvalue()->text;
+		result.game = game_choice->mvalue()->text;
 	}
 
-	if (!game.empty())
+	if (!result.game.empty())
 		ok_but->activate();
 	else
 		ok_but->deactivate();
@@ -877,12 +854,12 @@ void UI_ProjectSetup::PopulatePort()
 		prev_port = "vanilla";
 
 
-	port = "vanilla";
+	result.port = "vanilla";
 
 	port_choice->clear();
 
 	// if no game, port doesn't matter
-	if (game.empty())
+	if (result.game.empty())
 		return;
 
 
@@ -906,14 +883,14 @@ void UI_ProjectSetup::PopulatePort()
 		port_choice->add  (menu_string.c_str());
 		port_choice->value(menu_value);
 
-		port = port_choice->mvalue()->text;
+		result.port = port_choice->mvalue()->text;
 	}
 }
 
 
 void UI_ProjectSetup::PopulateMapFormat()
 {
-	MapFormat prev_fmt = map_format;
+	MapFormat prev_fmt = result.mapFormat;
 
 	if (prev_fmt == MapFormat::invalid)
 		prev_fmt = inst.loaded.levelFormat;
@@ -922,10 +899,10 @@ void UI_ProjectSetup::PopulateMapFormat()
 	format_choice->clear();
 
 	// if no game, format doesn't matter
-	if (game.empty())
+	if (result.game.empty())
 	{
-		map_format = MapFormat::doom;
-		name_space = "";
+		result.mapFormat = MapFormat::doom;
+		result.nameSpace = "";
 		return;
 	}
 
@@ -940,7 +917,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	if (port_choice->mvalue())
 		c_port = port_choice->mvalue()->text;
 
-	usable_formats = M_DetermineMapFormats(inst, c_game, c_port);
+	usable_formats = M_DetermineMapFormats(c_game, c_port);
 
 	SYS_ASSERT(usable_formats != 0);
 
@@ -980,16 +957,16 @@ void UI_ProjectSetup::PopulateMapFormat()
 
 
 	// determine the UDMF namespace
-	name_space = "";
+	result.nameSpace = "";
 
 	const PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
 	if (pinfo)
-		name_space = pinfo->udmf_namespace;
+		result.nameSpace = pinfo->udmf_namespace;
 
 	// don't leave namespace as "" when chosen format is UDMF.
 	// [ this is to handle broken config files somewhat sanely ]
-	if (name_space.empty() && map_format == MapFormat::udmf)
-		name_space = "Hexen";
+	if (result.nameSpace.empty() && result.mapFormat == MapFormat::udmf)
+		result.nameSpace = "Hexen";
 }
 
 
@@ -1041,6 +1018,10 @@ void UI_ProjectSetup::PopulateNamespaces()
 #endif
 }
 
+inline static fs::path fileOrDirName(const fs::path &path)
+{
+	return path.has_filename() ? path.filename() : path.parent_path().filename();
+}
 
 void UI_ProjectSetup::PopulateResources()
 {
@@ -1055,9 +1036,9 @@ void UI_ProjectSetup::PopulateResources()
 
 		if (r < (int)inst.loaded.resourceList.size())
 		{
-			res[r] = inst.loaded.resourceList[r];
+			result.resources[r] = inst.loaded.resourceList[r];
 
-			res_name[r]->value(fl_filename_name(res[r].c_str()));
+			res_name[r]->value(fileOrDirName(result.resources[r]).u8string().c_str());
 		}
 	}
 }
@@ -1067,7 +1048,7 @@ void UI_ProjectSetup::close_callback(Fl_Widget *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	that->action = ACT_CANCEL;
+	that->action = Action::cancel;
 }
 
 
@@ -1075,7 +1056,7 @@ void UI_ProjectSetup::use_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	that->action = ACT_ACCEPT;
+	that->action = Action::accept;
 }
 
 
@@ -1085,14 +1066,14 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 
 	const char * name = w->mvalue()->text;
 
-	if (!M_QueryKnownIWAD(name).empty())
+	if (global::recent.queryIWAD(name))
 	{
-		that->game = name;
+		that->result.game = name;
 		that->ok_but->activate();
 	}
 	else
 	{
-		that->game.clear();
+		that->result.game.clear();
 		that->ok_but->deactivate();
 	}
 
@@ -1107,7 +1088,7 @@ void UI_ProjectSetup::port_callback(Fl_Choice *w, void *data)
 
 	const char * name = w->mvalue()->text;
 
-	that->port = name;
+	that->result.port = name;
 
 	that->PopulateMapFormat();
 }
@@ -1120,11 +1101,11 @@ void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
 	const char * fmt_str = w->mvalue()->text;
 
 	if (strstr(fmt_str, "UDMF"))
-		that->map_format = MapFormat::udmf;
+		that->result.mapFormat = MapFormat::udmf;
 	else if (strstr(fmt_str, "Hexen"))
-		that->map_format = MapFormat::hexen;
+		that->result.mapFormat = MapFormat::hexen;
 	else
-		that->map_format = MapFormat::doom;
+		that->result.mapFormat = MapFormat::doom;
 
 	that->PopulateNamespaces();
 }
@@ -1134,7 +1115,7 @@ void UI_ProjectSetup::namespace_callback(Fl_Choice *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	that->name_space = w->mvalue()->text;
+	that->result.nameSpace = w->mvalue()->text;
 }
 
 
@@ -1147,7 +1128,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(that->inst.Main_FileOpFolder().c_str());
+	chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{
@@ -1164,20 +1145,20 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	// check that a game definition exists
 
-	SString game = GameNameFromIWAD(chooser.filename());
+	SString game = GameNameFromIWAD(fs::u8path(chooser.filename()));
 
-	if (! M_CanLoadDefinitions(GAMES_DIR, game))
+	if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+			global::install_dir, GAMES_DIR, game))
 	{
 		DLG_Notify("That game is not supported (no definition file).\n\n"
 		           "Please try again.");
 		return;
 	}
 
+	global::recent.addIWAD(fs::u8path(chooser.filename()));
+	global::recent.save(global::home_dir);
 
-	M_AddKnownIWAD(chooser.filename());
-	M_SaveRecent();
-
-	that->game = game;
+	that->result.game = game;
 
 	that->PopulateIWADs();
 	that->PopulatePort();
@@ -1189,13 +1170,13 @@ void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
 	// FIXME : deactivate button when this is true
-	if (that->game.empty() || that->port.empty())
+	if (that->result.game.empty() || that->result.port.empty())
 	{
 		fl_beep();
 		return;
 	}
 
-	that->inst.M_PortSetupDialog(that->port, that->game);
+	that->inst.M_PortSetupDialog(that->result.port, that->result.game, {});
 }
 
 
@@ -1203,19 +1184,39 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 {
 	auto that = static_cast<UI_ProjectSetup*>(data);
 	int r;
+	bool isdir = false;
 	for (r = 0; r < RES_NUM; ++r)
-		if (w == that->mResourceButtons[r])
+		if (w == that->mResourceFileButtons[r] || w == that->mResourceDirButtons[r])
+		{
+			isdir = w == that->mResourceDirButtons[r];
 			break;
+		}
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
 	SYS_ASSERT(that);
+	
+	const char *title = isdir ? "Pick folder to open" : "Pick file to open";
+#ifdef __APPLE__
+	title = "Pick file or folder to open";
+	isdir = true;
+#endif
 
 	Fl_Native_File_Chooser chooser;
 
-	chooser.title("Pick file to open");
-	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-	chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh");
-	chooser.directory(that->inst.Main_FileOpFolder().c_str());
+	chooser.title(title);
+	if(isdir)
+	{
+		chooser.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
+#ifdef __APPLE__
+		chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh\nDehacked files\t*.deh\nBEX files\t*.bex");
+#endif
+	}
+	else
+	{
+		chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+		chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh\nDehacked files\t*.deh\nBEX files\t*.bex");
+	}
+	chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{
@@ -1230,9 +1231,9 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 			break;  // OK
 	}
 
-	that->res[r] = chooser.filename();
+	that->result.resources[r] = fs::u8path(chooser.filename());
 
-	that->res_name[r]->value(fl_filename_name(that->res[r].c_str()));
+	that->res_name[r]->value(fileOrDirName(that->result.resources[r]).u8string().c_str());
 }
 
 
@@ -1247,9 +1248,9 @@ void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
 
 	SYS_ASSERT(that);
 
-	if (!that->res[r].empty())
+	if (!that->result.resources[r].empty())
 	{
-		that->res[r].clear();
+		that->result.resources[r].clear();
 
 		that->res_name[r]->value("");
 	}

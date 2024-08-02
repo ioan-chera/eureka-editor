@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2016 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -37,7 +37,6 @@
 #include "r_grid.h"
 #include "r_render.h"
 #include "Sector.h"
-#include "SideDef.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"
@@ -57,48 +56,48 @@ select_lines_in_path_flag_e;
 
 static bool MatchingTextures(const Document &doc, int index1, int index2)
 {
-	LineDef *L1 = doc.linedefs[index1];
-	LineDef *L2 = doc.linedefs[index2];
+	const auto L1 = doc.linedefs[index1];
+	const auto L2 = doc.linedefs[index2];
 
 	// lines with no sidedefs only match each other
-	if (! L1->Right(doc) || ! L2->Right(doc))
-		return L1->Right(doc) == L2->Right(doc);
+	if (! doc.getRight(*L1) || ! doc.getRight(*L2))
+		return doc.getRight(*L1) == doc.getRight(*L2);
 
 	// determine texture to match from first line
 	StringID texture;
 
 	if (! L1->TwoSided())
 	{
-		texture = L1->Right(doc)->mid_tex;
+		texture = doc.getRight(*L1)->mid_tex;
 	}
 	else
 	{
-		int f_diff = L1->Left(doc)->SecRef(doc)->floorh - L1->Right(doc)->SecRef(doc)->floorh;
-		int c_diff = L1->Left(doc)->SecRef(doc)->ceilh  - L1->Right(doc)->SecRef(doc)->ceilh;
+		int f_diff = doc.getSector(*doc.getLeft(*L1)).floorh - doc.getSector(*doc.getRight(*L1)).floorh;
+		int c_diff = doc.getSector(*doc.getLeft(*L1)).ceilh  - doc.getSector(*doc.getRight(*L1)).ceilh;
 
 		if (f_diff == 0 && c_diff != 0)
-			texture = (c_diff > 0) ? L1->Left(doc)->upper_tex : L1->Right(doc)->upper_tex;
+			texture = (c_diff > 0) ? doc.getLeft(*L1)->upper_tex : doc.getRight(*L1)->upper_tex;
 		else
-			texture = (f_diff < 0) ? L1->Left(doc)->lower_tex : L1->Right(doc)->lower_tex;
+			texture = (f_diff < 0) ? doc.getLeft(*L1)->lower_tex : doc.getRight(*L1)->lower_tex;
 	}
 
 	// match texture with other line
 
 	if (! L2->TwoSided())
 	{
-		return (L2->Right(doc)->mid_tex == texture);
+		return (doc.getRight(*L2)->mid_tex == texture);
 	}
 	else
 	{
-		int f_diff = L2->Left(doc)->SecRef(doc)->floorh - L2->Right(doc)->SecRef(doc)->floorh;
-		int c_diff = L2->Left(doc)->SecRef(doc)->ceilh  - L2->Right(doc)->SecRef(doc)->ceilh;
+		int f_diff = doc.getSector(*doc.getLeft(*L2)).floorh - doc.getSector(*doc.getRight(*L2)).floorh;
+		int c_diff = doc.getSector(*doc.getLeft(*L2)).ceilh  - doc.getSector(*doc.getRight(*L2)).ceilh;
 
 		if (c_diff != 0)
-			if (texture == ((c_diff > 0) ? L2->Left(doc)->upper_tex : L2->Right(doc)->upper_tex))
+			if (texture == ((c_diff > 0) ? doc.getLeft(*L2)->upper_tex : doc.getRight(*L2)->upper_tex))
 				return true;
 
 		if (f_diff != 0)
-			if (texture == ((f_diff < 0) ? L2->Left(doc)->lower_tex : L2->Right(doc)->lower_tex))
+			if (texture == ((f_diff < 0) ? doc.getLeft(*L2)->lower_tex : doc.getRight(*L2)->lower_tex))
 				return true;
 
 		return false;
@@ -249,19 +248,19 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 	bool do_tag     = inst.Exec_HasFlag("/tag");
 	bool do_special = inst.Exec_HasFlag("/special");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		if (! L->TwoSided())
 			continue;
 
-		int sec1 = L->Right(inst.level)->sector;
-		int sec2 = L-> Left(inst.level)->sector;
+		int sec1 = inst.level.getRight(*L)->sector;
+		int sec2 = inst.level.getLeft(*L)->sector;
 
 		if (sec1 == sec2)
 			continue;
 
-		Sector *S1 = inst.level.sectors[sec1];
-		Sector *S2 = inst.level.sectors[sec2];
+		const auto S1 = inst.level.sectors[sec1];
+		const auto S2 = inst.level.sectors[sec2];
 
 		// skip closed doors
 		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))
@@ -388,7 +387,7 @@ void Instance::GoToSelection()
 	// zoom in when bbox is very small (say < 20% of window)
 	for (int loop = 0 ; loop < 30 ; loop++)
 	{
-		if (grid.Scale >= 1.0)
+		if (grid.getScale() >= 1.0)
 			break;
 
 		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(pos1.x), static_cast<int>(pos1.y), static_cast<int>(pos2.x), static_cast<int>(pos2.y));
@@ -470,7 +469,7 @@ void Instance::CMD_PruneUnused()
 	selection_c used_sides(ObjType::sidedefs);
 	selection_c used_verts(ObjType::vertices);
 
-	for (const LineDef *L : level.linedefs)
+	for (const auto &L : level.linedefs)
 	{
 		used_verts.set(L->start);
 		used_verts.set(L->end);
@@ -478,13 +477,13 @@ void Instance::CMD_PruneUnused()
 		if (L->left >= 0)
 		{
 			used_sides.set(L->left);
-			used_secs.set(L->Left(level)->sector);
+			used_secs.set(level.getLeft(*L)->sector);
 		}
 
 		if (L->right >= 0)
 		{
 			used_sides.set(L->right);
-			used_secs.set(L->Right(level)->sector);
+			used_secs.set(level.getRight(*L)->sector);
 		}
 	}
 
@@ -526,13 +525,13 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 	{
 		changes = false;
 
-		for (const LineDef *L : inst.level.linedefs)
+		for (const auto &L : inst.level.linedefs)
 		{
 			if (! L->TwoSided())
 				continue;
 
-			int sec1 = L->WhatSector(Side::right, inst.level);
-			int sec2 = L->WhatSector(Side::left, inst.level);
+			int sec1 = inst.level.getSectorID(*L, Side::right);
+			int sec2 = inst.level.getSectorID(*L, Side::left);
 
 			SYS_ASSERT(sec1 >= 0);
 			SYS_ASSERT(sec2 >= 0);

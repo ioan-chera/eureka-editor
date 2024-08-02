@@ -19,12 +19,10 @@
 #ifndef SafeOutFile_h
 #define SafeOutFile_h
 
-#include "m_strings.h"
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
 
-#include <stdio.h>
-#include <random>
-
-struct ReportedResult;
+#include <stdint.h>
 
 //
 // Exception-safe, atomic file writer. It starts by writing everything to an
@@ -32,31 +30,19 @@ struct ReportedResult;
 //
 // Does NOT directly throw exceptions.
 //
-class SafeOutFile
+class BufferedOutFile
 {
 public:
-	explicit SafeOutFile(const SString &path);
-	~SafeOutFile()
+	explicit BufferedOutFile(const fs::path& path) : mPath(path)
 	{
-		close();
 	}
 
-	ReportedResult openForWriting();
-	ReportedResult commit();
-	void close();
-
-	ReportedResult write(const void *data, size_t size) const;
+	void write(const void* data, size_t size);
+	void commit();
 
 private:
-	SString generateRandomPath() const;
-	ReportedResult makeValidRandomPath(SString &path) const;
-
-	const SString mPath;	// the target path
-	// the random temporary path. Only valid if mFile non-null
-	SString mRandomPath;
-
-	FILE *mFile = nullptr;
-	mutable std::mt19937 mRandom;
+	const fs::path mPath;	// the target path
+	std::vector<uint8_t> mData;
 };
 
 #endif /* SafeOutFile_h */

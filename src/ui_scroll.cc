@@ -390,19 +390,19 @@ void UI_CanvasScroll::UpdateBounds()
 
 void UI_CanvasScroll::UpdateBounds_X()
 {
-	if (last_bounds[0] == mInstance.Map_bound1.x &&
-		last_bounds[1] == mInstance.Map_bound2.x)
+	if (last_bounds[0] == mInstance.level.Map_bound1.x &&
+		last_bounds[1] == mInstance.level.Map_bound2.x)
 	{
 		return;
 	}
 
-	last_bounds[0] = static_cast<int>(mInstance.Map_bound1.x);
-	last_bounds[1] = static_cast<int>(mInstance.Map_bound2.x);
+	last_bounds[0] = static_cast<int>(mInstance.level.Map_bound1.x);
+	last_bounds[1] = static_cast<int>(mInstance.level.Map_bound2.x);
 
-	int expand = static_cast<int>(512 + (mInstance.Map_bound2.x - mInstance.Map_bound1.x) / 8);
+	int expand = static_cast<int>(512 + (mInstance.level.Map_bound2.x - mInstance.level.Map_bound1.x) / 8);
 
-	bound_x1 = static_cast<int>(mInstance.Map_bound1.x - expand);
-	bound_x2 = static_cast<int>(mInstance.Map_bound2.x + expand);
+	bound_x1 = static_cast<int>(mInstance.level.Map_bound1.x - expand);
+	bound_x2 = static_cast<int>(mInstance.level.Map_bound2.x + expand);
 
 	Adjust_X();
 }
@@ -410,19 +410,19 @@ void UI_CanvasScroll::UpdateBounds_X()
 
 void UI_CanvasScroll::UpdateBounds_Y()
 {
-	if (last_bounds[2] == mInstance.Map_bound1.y &&
-		last_bounds[3] == mInstance.Map_bound2.y)
+	if (last_bounds[2] == mInstance.level.Map_bound1.y &&
+		last_bounds[3] == mInstance.level.Map_bound2.y)
 	{
 		return;
 	}
 
-	last_bounds[2] = static_cast<int>(mInstance.Map_bound1.y);
-	last_bounds[3] = static_cast<int>(mInstance.Map_bound2.y);
+	last_bounds[2] = static_cast<int>(mInstance.level.Map_bound1.y);
+	last_bounds[3] = static_cast<int>(mInstance.level.Map_bound2.y);
 
-	int expand = static_cast<int>(512 + (mInstance.Map_bound2.y - mInstance.Map_bound1.y) / 8);
+	int expand = static_cast<int>(512 + (mInstance.level.Map_bound2.y - mInstance.level.Map_bound1.y) / 8);
 
-	bound_y1 = static_cast<int>(mInstance.Map_bound1.y - expand);
-	bound_y2 = static_cast<int>(mInstance.Map_bound2.y + expand);
+	bound_y1 = static_cast<int>(mInstance.level.Map_bound1.y - expand);
+	bound_y2 = static_cast<int>(mInstance.level.Map_bound2.y + expand);
 
 	Adjust_Y();
 }
@@ -439,8 +439,8 @@ void UI_CanvasScroll::Adjust_X()
 {
 	int cw = canvas->w();
 
-	int map_w = iround(cw / mInstance.grid.Scale);
-	int map_x = static_cast<int>(mInstance.grid.orig.x - map_w / 2);
+	int map_w = iround(cw / mInstance.grid.getScale());
+	int map_x = static_cast<int>(mInstance.grid.getOrig().x - map_w / 2);
 
 	if (map_x > bound_x2 - map_w) map_x = bound_x2 - map_w;
 	if (map_x < bound_x1) map_x = bound_x1;
@@ -453,8 +453,8 @@ void UI_CanvasScroll::Adjust_Y()
 {
 	int ch = canvas->h();
 
-	int map_h = iround(ch / mInstance.grid.Scale);
-	int map_y = static_cast<int>(mInstance.grid.orig.y - map_h / 2);
+	int map_h = iround(ch / mInstance.grid.getScale());
+	int map_y = static_cast<int>(mInstance.grid.getOrig().y - map_h / 2);
 
 	// invert, since screen coords are the reverse of map coords
 	map_y = bound_y2 - map_h - (map_y - bound_y1);
@@ -470,11 +470,11 @@ void UI_CanvasScroll::Scroll_X()
 {
 	int pos = horiz->value();
 
-	double map_w = canvas->w() / mInstance.grid.Scale;
+	double map_w = canvas->w() / mInstance.grid.getScale();
 
 	double new_x = pos + map_w / 2.0;
 
-	mInstance.grid.MoveTo({ new_x, mInstance.grid.orig.y });
+	mInstance.grid.MoveTo({ new_x, mInstance.grid.getOrig().y });
 }
 
 
@@ -482,11 +482,11 @@ void UI_CanvasScroll::Scroll_Y()
 {
 	int pos = vert->value();
 
-	double map_h = canvas->h() / mInstance.grid.Scale;
+	double map_h = canvas->h() / mInstance.grid.getScale();
 
 	double new_y = bound_y2 - map_h / 2.0 - (pos - bound_y1);
 
-	mInstance.grid.MoveTo({ mInstance.grid.orig.x, new_y });
+	mInstance.grid.MoveTo({ mInstance.grid.getOrig().x, new_y });
 }
 
 

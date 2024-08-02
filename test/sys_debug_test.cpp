@@ -19,6 +19,7 @@
 #include "sys_debug.h"
 
 #include "m_streams.h"
+#include "m_strings.h"
 #include "testUtils/TempDirContext.hpp"
 #include "gtest/gtest.h"
 
@@ -37,16 +38,16 @@ TEST_F(SysDebugTempDir, LifeCycle)
 
     Log log;
 
-    SString path = getChildPath("log.txt");
+    fs::path path = getChildPath("log.txt");
     log.printf("Test message\n");
     log.printf("Here it goes\n");
     log.debugPrintf("No text\n");
-    ASSERT_TRUE(log.openFile(path.c_str()));
+    ASSERT_TRUE(log.openFile(path));
     mDeleteList.push(path);
     log.printf("One more message\n");
 
-    SString savedPath = getChildPath("log2.txt");
-    std::ofstream os(savedPath.c_str(), std::ios::trunc);
+    fs::path savedPath = getChildPath("log2.txt");
+    std::ofstream os(savedPath, std::ios::trunc);
     ASSERT_TRUE(os.is_open());
     mDeleteList.push(savedPath);
     log.saveTo(os);
@@ -131,13 +132,13 @@ TEST_F(SysDebugTempDir, LifeCycle)
     ASSERT_EQ(localWindowMessages.size(), 2);    // it didn't get added to missing window
 
     // Now check saving current status works
-    os.open(savedPath.get(), std::ios::trunc);
+    os.open(savedPath, std::ios::trunc);
     ASSERT_TRUE(os.is_open());
     log.saveTo(os);
     os.close();
 
 
-    log.openFile(path.c_str());
+    log.openFile(path);
     log.debugPrintf("Debug writeout\n");
     log.printf("Extra stuff four\n");
     log.debugPrintf("Debug\nwriteout2\n");

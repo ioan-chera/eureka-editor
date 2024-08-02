@@ -22,15 +22,21 @@
 #define __EUREKA_BSP_H__
 
 #include "lib_util.h"
+#include "m_strings.h"
 #include "sys_type.h"
+#include "Thing.h"
 
+#include <functional>
 #include <vector>
 
+struct ConfigData;
 class Instance;
 class Lump_c;
 struct Sector;
 enum class Side;
 struct Document;
+class Wad_file;
+struct LoadingData;
 
 // Node Build Information Structure
 //
@@ -83,7 +89,7 @@ enum build_result_e
 };
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &inst, const Document &doc, const LoadingData& loading, Wad_file &wad);
 
 
 //======================================================================
@@ -95,10 +101,6 @@ build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instan
 namespace ajbsp
 {
 
-
-// internal storage of node building parameters
-
-extern nodebuildinfo_t * cur_info;
 
 
 
@@ -122,8 +124,6 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 
 void PrintDetail(const char *fmt, ...);
 
-void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
-void Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
 
 // allocate and clear some memory.  guaranteed not to fail.
 void *UtilCalloc(int size);
@@ -142,9 +142,9 @@ SString UtilTimeString(void);
 angle_g UtilComputeAngle(double dx, double dy);
 
 // checksum functions
-void Adler32_Begin(u32_t *crc);
-void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length);
-void Adler32_Finish(u32_t *crc);
+void Adler32_Begin(uint32_t *crc);
+void Adler32_AddBlock(uint32_t *crc, const uint8_t *data, int length);
+void Adler32_Finish(uint32_t *crc);
 
 
 //------------------------------------------------------------------------
@@ -283,7 +283,7 @@ public:
 // it must be a very high value.
 #define SEG_IS_GARBAGE  (1 << 29)
 
-
+class LevelData;
 struct subsec_t
 {
 	// list of segs
@@ -305,7 +305,7 @@ public:
 	void ClockwiseOrder(const Document &doc);
 	void RenumberSegs();
 
-	void RoundOff();
+	void RoundOff(LevelData &lev_data);
 	void Normalise();
 
 	void SanityCheckClosed();
@@ -349,7 +349,7 @@ struct node_t
 	int index;
 
 public:
-	void SetPartition(const seg_t *part, const Instance &inst);
+	void SetPartition(LevelData &lev_data, const seg_t *part);
 };
 
 
@@ -398,35 +398,269 @@ public:
 
 /* ----- Level data arrays ----------------------- */
 
-extern std::vector<vertex_t *>  lev_vertices;
-extern std::vector<seg_t *>     lev_segs;
-extern std::vector<subsec_t *>  lev_subsecs;
-extern std::vector<node_t *>    lev_nodes;
-extern std::vector<walltip_t *> lev_walltips;
+class ZLibContext;
+struct intersection_t;
+struct eval_info_t;
+class LevelData
+{
+	
+public:
+	typedef std::function<void(const SString &)> ReportFunc;
+	
+	LevelData(MapFormat format, Wad_file &wad, const Document &doc, const ConfigData &config, const ReportFunc &reportLog) : format(format), wad(wad), doc(doc), config(config), reportLog(reportLog)
+	{
+	}
+	LevelData(const LevelData& other) = delete;
+	LevelData& operator = (const LevelData& other) = delete;
 
-#define num_vertices  ((int)lev_vertices.size())
-#define num_segs      ((int)lev_segs.size())
-#define num_subsecs   ((int)lev_subsecs.size())
-#define num_nodes     ((int)lev_nodes.size())
-#define num_walltips  ((int)lev_walltips.size())
+	MapFormat GetFormat() const
+	{
+		return format;
+	}
 
-extern int num_old_vert;
-extern int num_new_vert;
+	const Document& GetDoc() const
+	{
+		return doc;
+	}
+
+	// return a new end vertex to compensate for a seg that would end up
+	// being zero-length (after integer rounding).  Doesn't compute the
+	// wall-tip info (thus this routine should only be used _after_ node
+	// building).
+	//
+	vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
+	
+	// MAIN STUFF
+	build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx);
+	
+	void Warning(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
+	
+private:
+	struct Block
+	{
+		void CreateMap(const Document &doc);
+		void CompressMap();
+		void InitMap(const Document &doc);
+		void FreeMap();
+		
+		int block_x = 0;
+		int block_y = 0;
+		int block_w = 0;
+		int block_h = 0;
+		int block_count = 0;
+		uint16_t ** block_lines = nullptr;
+		uint16_t *block_ptrs = nullptr;
+		uint16_t *block_dups = nullptr;
+		int compression = 0;
+		int overflowed = 0;
+		
+	private:
+		void Add(int blk_num, int line_index);
+		void AddLine(int line_index, const Document &doc);
+		int Compare(const void *p1, const void *p2) const;
+	};
+	
+	struct Reject
+	{
+		void Init(const Document &doc);
+		void Free();
+		void GroupSectors(const Document &doc);
+		void ProcessSectors(const Document &doc);
+		
+		uint8_t *rej_matrix = nullptr;
+		int   rej_total_size = 0;	// in bytes
+		std::vector<int> rej_sector_groups;
+	};
+	
+	/* ----- create blockmap ------------------------------------ */
+	
+	void WriteBlockmap() const;
+	
+	void PutBlockmap();
+	
+	// REJECT : Generate the reject table
+	void Reject_WriteLump() const;
+	void PutReject();
+	
+	// allocation routines
+	vertex_t *NewVertex();
+	seg_t     *NewSeg();
+	subsec_t  *NewSubsec();
+	node_t    *NewNode();
+	walltip_t *NewWallTip();
+	
+	/* ----- free routines ---------------------------- */
+	void FreeVertices();
+	void FreeSegs();
+	void FreeSubsecs();
+	void FreeNodes();
+	void FreeWallTips();
+	
+	/* ----- reading routines ------------------------------ */
+	void GetVertices();
+	
+	/* ----- writing routines ------------------------------ */
+	void MarkOverflow(int flags);
+	void PutVertices(const char *name, int do_gl);
+	void PutGLVertices(int do_v5) const;
+	inline uint32_t VertexIndex_XNOD(const vertex_t *v) const noexcept
+	{
+		if (v->is_new)
+			return (uint32_t) (num_old_vert + v->index);
+
+		return (uint32_t) v->index;
+	}
+	void PutSegs();
+	void PutGLSegs() const;
+	void PutGLSegs_V5() const;
+	void PutSubsecs(const char *name, int do_gl);
+	void PutGLSubsecs_V5() const;
+	void PutNodes(const char *name, int do_v5, node_t *root);
+	void PutOneNode(node_t *node, Lump_c *lump);
+	void PutOneNode_V5(node_t *node, Lump_c *lump);
+	void CheckLimits(bool& force_v5, bool& force_xnod);
+	void SortSegs();
+	
+	/* ----- ZDoom format writing --------------------------- */
+	void putZItems(std::vector<byte>& lumpData, node_t* root_node, bool do_xgl3);
+	void PutZVertices(ZLibContext &zcontext) const noexcept(false);
+	void PutZSubsecs(ZLibContext &zcontext) const noexcept(false);
+	void PutZSegs(ZLibContext &zcontext) const noexcept(false);
+	void PutXGL3Segs(ZLibContext &zcontext) const noexcept(false);
+	void PutOneZNode(ZLibContext &zcontext, node_t *node, bool do_xgl3) noexcept(false);
+	void PutZNodes(ZLibContext &zcontext, node_t *root, bool do_xgl3) noexcept(false);
+	void SaveZDFormat(node_t *root_node);
+	void SaveXGL3Format(node_t *root_node);
+	
+	/* ----- whole-level routines --------------------------- */
+	void LoadLevel();
+	void FreeLevel();
+	uint32_t CalcGLChecksum() const;
+	inline SString CalcOptionsString() const
+	{
+		return SString::printf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
+	}
+	void UpdateGLMarker(Lump_c *marker) const;
+	void AddMissingLump(const char *name, const char *after);
+	build_result_e SaveLevel(node_t *root_node);
+	build_result_e SaveUDMF(node_t *root_node);
+	
+	/* ---------------------------------------------------------------- */
+	Lump_c * FindLevelLump(const char *name) const noexcept;
+	Lump_c & CreateLevelLump(const char *name) const;
+	Lump_c & CreateGLMarker() const;
+	
+	// NODES
+	seg_t * SplitSeg(seg_t *old_seg, double x, double y);
+	void DivideOneSeg(seg_t *seg, seg_t *part,
+					  seg_t **left_list, seg_t **right_list,
+					  intersection_t ** cut_list);
+	void SeparateSegs(quadtree_c *tree, seg_t *part,
+					  seg_t **left_list, seg_t **right_list,
+					  intersection_t ** cut_list);
+	void AddMinisegs(intersection_t *cut_list, seg_t *part,
+					 seg_t **left_list, seg_t **right_list);
+	// takes the seg list and determines if it is convex.  When it is, the
+	// segs are converted to a subsector, and '*S' is the new subsector
+	// (and '*N' is set to NULL).  Otherwise the seg list is divided into
+	// two halves, a node is created by calling this routine recursively,
+	// and '*N' is the new node (and '*S' is set to NULL).  Normally
+	// returns BUILD_OK, or BUILD_Cancelled if user stopped it.
+	//
+	build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
+		node_t ** N, subsec_t ** S, int depth);
+	seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
+						int sidedef, int what_side /* 0 or 1 */);
+	// scan all the linedef of the level and convert each sidedef into a
+	// seg (or seg pair).  Returns the list of segs.
+	//
+	seg_t *CreateSegs();
+	subsec_t *CreateSubsector(quadtree_c *tree);
+	// put all the segs in each subsector into clockwise order, and renumber
+	// the seg indices.
+	//
+	// [ This cannot be done DURING BuildNodes() since splitting a seg with
+	//   a partner will insert another seg into that partner's list, usually
+	//   in the wrong place order-wise. ]
+	//
+	void ClockwiseBspTree();
+	// traverse the BSP tree and do whatever is necessary to convert the
+	// node information from GL standard to normal standard (for example,
+	// removing minisegs).
+	//
+	void NormaliseBspTree() const;
+	void RoundOffVertices();
+	// traverse the BSP tree, doing whatever is necessary to round
+	// vertices to integer coordinates (for example, removing segs whose
+	// rounded coordinates degenerate to the same point).
+	//
+	void RoundOffBspTree();
+	
+	void MarkPolyobjPoint(double x, double y);
+
+	// detection routines
+	void DetectOverlappingVertices() const;
+	void DetectPolyobjSectors();
+	
+	int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
+								   int best_cost, eval_info_t *info);
+	int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost);
+	seg_t *FindFastSeg(quadtree_c *tree);
+	bool PickNodeWorker(quadtree_c *part_list,
+						quadtree_c *tree, seg_t ** best, int *best_cost);
+	// scan all the segs in the list, and choose the best seg to use as a
+	// partition line, returning it.  If no seg can be used, returns NULL.
+	// The 'depth' parameter is the current depth in the tree, used for
+	// computing the current progress.
+	//
+	seg_t *PickNode(quadtree_c *tree, int depth);
+	
+	/* ----- vertex routines ------------------------------- */
+	void VertexAddWallTip(vertex_t *vert, double dx, double dy,
+						  int open_left, int open_right);
+	// computes the wall tips for all of the vertices
+	void CalculateWallTips();
+	// return a new vertex (with correct wall-tip info) for the split that
+	// happens along the given seg at the given location.
+	//
+	vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y);
+	
+	void Failure(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
+	
+	void PrintMsg(EUR_FORMAT_STRING(const char *format), ...) const EUR_PRINTF(2, 3);
+	
+	Block block = {};
+	Reject rej = {};
+	
+	SString current_name;
+	int current_idx = 0;
+	int current_start = 0;
+	int overflows = 0;
+	
+	int num_old_vert = 0;
+	int num_new_vert = 0;
+	int num_real_lines = 0;
+	int node_cur_index = 0;
+	
+	std::vector<vertex_t *>  vertices;
+	std::vector<subsec_t *>  subsecs;
+	std::vector<seg_t *>     segs;
+	std::vector<node_t *>    nodes;
+	std::vector<walltip_t *> walltips;
+	
+	// internal storage of node building parameters
+	nodebuildinfo_t * cur_info = NULL;
+
+	const MapFormat format;
+	Wad_file& wad;
+	const Document& doc;
+	const ConfigData &config;
+	
+	const ReportFunc reportLog;
+};
 
 
 /* ----- function prototypes ----------------------- */
-
-// allocation routines
-vertex_t  *NewVertex();
-seg_t     *NewSeg();
-subsec_t  *NewSubsec();
-node_t    *NewNode();
-walltip_t *NewWallTip();
-
-// Zlib compression support
-void ZLibBeginLump(Lump_c *lump);
-void ZLibAppendLump(const void *data, int length);
-void ZLibFinishLump(void);
 
 /* limit flags, to show what went wrong */
 #define LIMIT_VERTEXES     0x000001
@@ -450,24 +684,8 @@ void ZLibFinishLump(void);
 
 
 // detection routines
-void DetectOverlappingVertices(const Document &doc);
+
 void DetectOverlappingLines(const Document &doc);
-void DetectPolyobjSectors(const Instance &inst);
-
-// computes the wall tips for all of the vertices
-void CalculateWallTips(const Document &doc);
-
-// return a new vertex (with correct wall-tip info) for the split that
-// happens along the given seg at the given location.
-//
-vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc);
-
-// return a new end vertex to compensate for a seg that would end up
-// being zero-length (after integer rounding).  Doesn't compute the
-// wall-tip info (thus this routine should only be used _after_ node
-// building).
-//
-vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end);
 
 // check whether a line with the given delta coordinates from this
 // vertex is open or closed.  If there exists a walltip at same
@@ -522,12 +740,6 @@ struct intersection_t
 
 /* -------- functions ---------------------------- */
 
-// scan all the segs in the list, and choose the best seg to use as a
-// partition line, returning it.  If no seg can be used, returns NULL.
-// The 'depth' parameter is the current depth in the tree, used for
-// computing the current progress.
-//
-seg_t *PickNode(quadtree_c *tree, int depth, const bbox_t *bbox);
 
 // compute the boundary of the list of segs
 void FindLimits2(seg_t *list, bbox_t *bbox);
@@ -568,46 +780,14 @@ void FreeQuickAllocCuts(void);
 
 
 
-// scan all the linedef of the level and convert each sidedef into a
-// seg (or seg pair).  Returns the list of segs.
-//
-seg_t *CreateSegs(const Instance &inst);
 
 quadtree_c *TreeFromSegList(seg_t *list);
 
-// takes the seg list and determines if it is convex.  When it is, the
-// segs are converted to a subsector, and '*S' is the new subsector
-// (and '*N' is set to NULL).  Otherwise the seg list is divided into
-// two halves, a node is created by calling this routine recursively,
-// and '*N' is the new node (and '*S' is set to NULL).  Normally
-// returns BUILD_OK, or BUILD_Cancelled if user stopped it.
-//
-build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
-    node_t ** N, subsec_t ** S, int depth, const Instance &inst);
 
 // compute the height of the bsp tree, starting at 'node'.
 int ComputeBspHeight(node_t *node);
 
-// put all the segs in each subsector into clockwise order, and renumber
-// the seg indices.
-//
-// [ This cannot be done DURING BuildNodes() since splitting a seg with
-//   a partner will insert another seg into that partner's list, usually
-//   in the wrong place order-wise. ]
-//
-void ClockwiseBspTree(const Document &doc);
 
-// traverse the BSP tree and do whatever is necessary to convert the
-// node information from GL standard to normal standard (for example,
-// removing minisegs).
-//
-void NormaliseBspTree();
-
-// traverse the BSP tree, doing whatever is necessary to round
-// vertices to integer coordinates (for example, removing segs whose
-// rounded coordinates degenerate to the same point).
-//
-void RoundOffBspTree();
 
 // free all the superblocks on the quick-alloc list
 void FreeQuickAllocSupers(void);

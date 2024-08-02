@@ -24,6 +24,11 @@ bool Instance::is_sky(const SString &flat) const
    return false;
 }
 
+bool is_null_tex(const SString &tex)
+{
+   return false;
+}
+
 const linetype_t &Instance::M_GetLineType(int type) const
 {
    static linetype_t linetype;

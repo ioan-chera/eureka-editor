@@ -47,9 +47,9 @@ private:
 
 		// FIXME : use this location for all platforms
 #ifdef WIN32
-		snprintf(filename, sizeof(filename), "%s/common/about_logo.png", global::install_dir.c_str());
+		snprintf(filename, sizeof(filename), "%s/common/about_logo.png", global::install_dir.u8string().c_str());
 #else
-		snprintf(filename, sizeof(filename), "%s/about_logo.png", global::install_dir.c_str());
+		snprintf(filename, sizeof(filename), "%s/about_logo.png", global::install_dir.u8string().c_str());
 #endif
 		filename[FL_PATH_MAX-1] = 0;
 
@@ -100,7 +100,7 @@ const char *UI_About::Text1 =
 
 
 const char *UI_About::Text2 =
-	"Copyright (C) 2014-2020 Ioan Chera                \n"
+	"Copyright (C) 2014-2024 Ioan Chera                \n"
 	"Copyright (C) 2001-2020 Andrew Apted, et al\n"
 	"Copyright (C) 1997-2003 André Majorel, et al\n"
 	"\n"

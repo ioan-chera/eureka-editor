@@ -1,0 +1,46 @@
+<div id='wikitext'>
+<h1>CHANGES IN Eureka 0.84 (r304)</h1>
+<p><em>(Changes are since the 0.81 version, r186)</em>
+</p>
+<p class='vspace'>+  multi-select : LMB toggles each object (no need for CTRL key)
+</p>
+<p class='vspace'>+  can click on a texture in the LineDef or Sector panels, it becomes highlighted, the browser is opened (if not already), and only the selected parts are changed when clicking in the browser.
+</p>
+<p class='vspace'>+  implemented a -merge option for resource wads
+</p>
+<p class='vspace'>+  reload the wad/map after building the nodes (no longer exit)
+</p>
+<p class='vspace'>-  ESC key no longer quits
+<br  />-  plain MMB now inserts an object (like SPACE or INSERT key)
+<br  />-  thing panel has radial arrow buttons for setting the angle
+</p>
+<p class='vspace'>-  insert thing: if one already selected, copy its properties
+<br  />-  improved line split highlighting when SNAP mode is active
+<br  />-  limit size of drawn vertices when zooming right in
+</p>
+<p class='vspace'>-  allow running locally (without a '<code>make install</code>')
+<br  />-  iwad search: check more places (like <code>/usr/share/games/doom</code>)
+</p>
+<p class='vspace'>-  fixed possible fatal error with zero-length lines
+<br  />-  fixed state persistence to ignore unused vertices (etc)
+<br  />-  fixed inner sector getting defaults when closing simple loop
+<br  />-  fixed pink-highlighted tagged sectors when line was off-screen
+<br  />-  fixed CMD key on MacOS X to only trigger menu commands
+</p>
+<p class='vspace'>-  config: can specify a boolean value on the command-line
+<br  />-  config: new simpler syntax for config files
+<br  />-  config: added var: <code>escape_key_quits</code>
+<br  />-  config: added var: <code>leave_offsets_alone</code>
+<br  />-  config: added var: <code>mouse_wheel_scrolls_map</code>
+<br  />-  config: added var: <code>new_islands_are_void</code>
+</p>
+<p class='vspace'>-  Browser: faster scrolling with the mouse wheel
+</p>
+<p class='vspace'>-  Heretic: fixed the default port (i.e. not BOOM)
+</p>
+<p class='vspace'>-  3D view: can use WASD keys in 3D mode to move around
+<br  />-  3D view: the 'g' key toggles gravity (walking on the ground)
+<br  />-  3D view: toggle sprites changed key to 'o' (objects)
+<br  />-  3D view: removed CTRL-L function, resync objects with 'o' key
+</p>
+</div>

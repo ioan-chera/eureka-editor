@@ -48,16 +48,6 @@ const double UI_InfoBar::scale_amounts[9] =
 	0.0625, 0.125, 0.25, 0.33333, 0.5, 1.0, 2.0, 4.0, 8.0
 };
 
-const char *UI_InfoBar::grid_options_str =
-	"1024|512|256|192|128| 64| 32| 16|  8|  4|  2|OFF";
-
-const int UI_InfoBar::grid_amounts[12] =
-{
-	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2,
-	-1 /* OFF */
-};
-
-
 //
 // UI_InfoBar Constructor
 //
@@ -117,7 +107,7 @@ UI_InfoBar::UI_InfoBar(Instance &inst, int X, int Y, int W, int H, const char *l
 	grid_size = new Fl_Menu_Button(X+44, Y, 72, H, "OFF");
 
 	grid_size->align(FL_ALIGN_INSIDE);
-	grid_size->add(grid_options_str);
+	grid_size->add(grid::getValuesFLTKMenuString().c_str());
 	grid_size->callback(grid_callback, this);
 	grid_size->labelsize(16);
 
@@ -125,7 +115,7 @@ UI_InfoBar::UI_InfoBar(Instance &inst, int X, int Y, int W, int H, const char *l
 
 
 	grid_snap = new Fl_Toggle_Button(X+4, Y, 72, H);
-	grid_snap->value(inst.grid.snap ? 1 : 0);
+	grid_snap->value(inst.grid.snaps() ? 1 : 0);
 	grid_snap->color(FREE_COLOR);
 	grid_snap->selection_color(SNAP_COLOR);
 	grid_snap->callback(snap_callback, this);
@@ -221,8 +211,8 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 	// need sectors mode for sound propagation display
 	if (bar->inst.edit.sector_render_mode == SREND_SoundProp && bar->inst.edit.mode != ObjType::sectors)
 		bar->inst.Editor_ChangeMode('s');
-	
-	bar->inst.RedrawMap(); 
+
+	bar->inst.RedrawMap();
 }
 
 
@@ -255,7 +245,7 @@ void UI_InfoBar::grid_callback(Fl_Widget *w, void *data)
 	auto bar = static_cast<UI_InfoBar *>(data);
 	Fl_Menu_Button *gsize = (Fl_Menu_Button *)w;
 
-	int new_step = grid_amounts[gsize->value()];
+	int new_step = grid::values[gsize->value()];
 
 	if (new_step < 0)
 		bar->inst.grid.SetShown(false);
@@ -279,8 +269,7 @@ void UI_InfoBar::ratio_callback(Fl_Widget *w, void *data)
 	Fl_Menu_Button *ratio_lock = (Fl_Menu_Button *)w;
 	auto bar = static_cast<const UI_InfoBar *>(data);
 
-	bar->inst.grid.ratio = ratio_lock->value();
-	bar->inst.main_win->info_bar->UpdateRatio();
+	bar->inst.grid.configureRatio(ratio_lock->value(), false);
 }
 
 
@@ -341,7 +330,7 @@ void UI_InfoBar::SetGrid(int new_step)
 
 void UI_InfoBar::UpdateSnap()
 {
-   grid_snap->value(inst.grid.snap ? 1 : 0);
+   grid_snap->value(inst.grid.snaps() ? 1 : 0);
 
    UpdateSnapText();
 }
@@ -370,12 +359,12 @@ void UI_InfoBar::UpdateSecRend()
 
 void UI_InfoBar::UpdateRatio()
 {
-	if (inst.grid.ratio == 0)
+	if (inst.grid.getRatio() == 0)
 		ratio_lock->color(FL_BACKGROUND_COLOR);
 	else
 		ratio_lock->color(RATIO_COLOR);
 
-	if (inst.grid.ratio == 7)
+	if (inst.grid.getRatio() == 7)
 	{
 		char buffer[256];
 		snprintf(buffer, sizeof(buffer), "Usr %d:%d", config::grid_ratio_high, config::grid_ratio_low);
@@ -388,7 +377,7 @@ void UI_InfoBar::UpdateRatio()
 	}
 	else
 	{
-		ratio_lock->copy_label(ratio_lock->text(inst.grid.ratio));
+		ratio_lock->copy_label(ratio_lock->text(inst.grid.getRatio()));
 	}
 }
 
@@ -619,7 +608,7 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 	if (hl.valid() && hl.parts >= 2)
 	{
-		const LineDef *L = inst.level.linedefs[hl.num];
+		const auto L = inst.level.linedefs[hl.num];
 
 		int x_offset = 0;
 		int y_offset = 0;
@@ -627,9 +616,9 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 		const SideDef *SD = NULL;
 
 		if (hl.parts & PART_LF_ALL)
-			SD = L->Left(inst.level);
+			SD = inst.level.getLeft(*L);
 		else
-			SD = L->Right(inst.level);
+			SD = inst.level.getRight(*L);
 
 		if (SD != NULL)
 		{
@@ -651,7 +640,7 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	if (! inst.edit.drawLine.from.valid())
 		return;
 
-	const Vertex *V = inst.level.vertices[inst.edit.drawLine.from.num];
+	const auto V = inst.level.vertices[inst.edit.drawLine.from.num];
 
 	v2double_t dv = inst.edit.drawLine.to - V->xy();
 

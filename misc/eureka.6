@@ -88,8 +88,8 @@ normal installation directory.
 .BI "\-\-home" " <dir>"
 The home directory where user settings, backups, etc are stored.
 This defaults to the
-.I "~/.eureka"
-directory.
+.I "~/.config/eureka"
+directory on Linux.
 .TP
 .BI "\-\-log" " <file>"
 File where all log messages are written.
@@ -109,17 +109,17 @@ This directory contains the standard key bindings,
 plus all the definition files (with .ugh extension)
 for the supported games, ports and mods.
 .TP
-.I "~/.eureka/config.cfg"
+.I "~/.config/eureka/config.cfg"
 Contains user settings
 .TP
-.I "~/.eureka/bindings.cfg"
+.I "~/.config/eureka/bindings.cfg"
 Contains user key bindings
 .TP
-.I "~/.eureka/logs.txt"
+.I "~/.config/eureka/logs.txt"
 The logs from the previous session of Eureka,
 or the current one if Eureka is currently running.
 .TP
-.I "~/.eureka/backups"
+.I "~/.cache/eureka/backups"
 Whenever a file is saved, Eureka makes a backup of the existing file
 and stores it here, in a directory based on the filename.
 Multiple backups are made, up to a configurable limit on number and
@@ -127,7 +127,7 @@ total size of the files.
 
 If something goes awry with your wad, look here!
 .TP
-.I "~/.eureka/iwads"
+.I "~/.config/eureka/iwads"
 IWAD files can be placed here and Eureka will find them automatically
 .SH "ENVIRONMENT"
 .TP

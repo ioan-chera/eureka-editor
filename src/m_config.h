@@ -28,8 +28,47 @@
 #define __EUREKA_M_CONFIG_H__
 
 #include "im_color.h"
+#include <variant>
+#include <vector>
+
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
+struct LoadingData;
 
 /* ==== CONFIG VARIABLES ==================== */
+
+enum
+{
+	OptFlag_pass1 = 1 << 0,
+	OptFlag_helpNewline = 1 << 1,
+	OptFlag_preference = 1 << 2,
+	OptFlag_warp = 1 << 3,
+	OptFlag_hide = 1 << 4,
+};
+
+typedef std::variant<bool *, int *, rgb_color_t *, SString *, fs::path *, std::vector<SString> *, 
+					 std::vector<fs::path> *, std::nullptr_t> ArgData;
+
+struct opt_desc_t
+{
+	const char *long_name;  // Command line arg. or keyword
+	const char *short_name; // Abbreviated command line argument
+
+	unsigned flags;    // Flags for this option :
+	// '1' : process only on pass 1 of parse_command_line_options()
+	// '<' : print extra newline after this option (when dumping)
+	// 'v' : a real variable (preference setting)
+	// 'w' : warp hack -- accept two numeric args
+	// 'H' : hide option from --help display
+
+	const char *desc;   // Description of the option
+	const char *arg_desc;  // Description of the argument (NULL --> none or default)
+
+	// Pointer to the data
+	ArgData data_ptr;
+};
+
 
 namespace config
 {
@@ -63,7 +102,7 @@ extern int  sector_render_default;
 extern int   thing_render_default;
 
 extern int  grid_style;
-extern int  grid_default_mode;
+extern bool grid_default_mode;
 extern bool grid_default_snap;
 extern int  grid_default_size;
 extern bool grid_hide_in_free_mode;
@@ -113,7 +152,11 @@ extern bool bsp_gl_nodes;
 extern bool bsp_force_v5;
 extern bool bsp_force_zdoom;
 extern bool bsp_compressed;
+
+extern LoadingData preloading;
 }
+
+extern const opt_desc_t options[];
 
 enum class CommandLinePass
 {
@@ -121,16 +164,15 @@ enum class CommandLinePass
 	normal
 };
 
+
 /* ==== FUNCTIONS ==================== */
 
-int M_ParseConfigFile() noexcept(false);
-int M_WriteConfigFile();
-
-int M_ParseDefaultConfigFile();
+int M_ParseConfigFile(const fs::path &path, const opt_desc_t *options);
+int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options);
 
 void M_ParseEnvironmentVars();
 void M_ParseCommandLine(int argc, const char *const *argv,
-						CommandLinePass pass);
+						CommandLinePass pass, std::vector<fs::path> &Pwad_list, const opt_desc_t *options);
 
 void M_PrintCommandLineOptions();
 

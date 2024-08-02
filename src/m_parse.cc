@@ -116,3 +116,109 @@ int M_ParseLine(const SString &cline, std::vector<SString> &tokens,
 
 	return static_cast<int>(tokens.size());
 }
+
+//
+// Get the next word from a token list
+//
+bool TokenWordParse::getNext(SString &word)
+{
+	SString item;
+	for(; mPos < (int)mLine.length(); ++mPos)
+	{
+		char c = mLine[mPos];
+		switch(mState)
+		{
+		case State::open:
+			if(isspace(c))
+				continue;
+			if(c == '"')
+			{
+				mState = State::multiWord;
+				continue;
+			}
+			if(mHasComments && c == '#')
+			{
+				mState = State::comment;
+				return false;
+			}
+			mState = State::singleWord;
+			item.push_back(c);
+			continue;
+		case State::singleWord:
+			if(isspace(c))
+			{
+				mState = State::open;
+				++mPos;
+				word = std::move(item);
+				return true;
+			}
+			if(c == '"')
+			{
+				mState = State::multiWord;
+				++mPos;
+				word = std::move(item);
+				return true;
+			}
+			if(mHasComments && c == '#')
+			{
+				mState = State::comment;
+				word = std::move(item);
+				return true;
+			}
+			item.push_back(c);
+			continue;
+		case State::multiWord:
+			if(c == '"')
+			{
+				mState = State::firstQuoteInString;
+				continue;
+			}
+			item.push_back(c);
+			continue;
+		case State::firstQuoteInString:
+			if(c == '"')
+			{
+				item.push_back('"');
+				mState = State::multiWord;
+				continue;
+			}
+			if(mHasComments && c == '#')
+			{
+				mState = State::comment;
+				word = std::move(item);
+				return true;
+			}
+			
+			mState = State::open;
+			word = std::move(item);
+			return true;
+		case State::comment:
+			return false;
+		}
+	}
+
+	// Now past the end
+	switch(mState)
+	{
+	case State::open:
+	case State::comment:
+		break;
+	case State::singleWord:
+	case State::multiWord:
+	case State::firstQuoteInString:
+		word = std::move(item);
+		mState = State::open;
+		return true;
+	}
+
+	return false;
+}
+
+bool TokenWordParse::getNext(fs::path &path)
+{
+	SString word;
+	bool result = getNext(word);
+	if(result)
+		path = fs::u8path(word.get());
+	return result;
+}

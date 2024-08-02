@@ -25,79 +25,69 @@ class SafeOutFileTest : public TempDirContext
 {
 };
 
-static void checkFileContent(const char *path, const char *content)
+static void checkFileContent(const fs::path &path, const char *content)
 {
-	FILE *f = fopen(path, "rt");
-	ASSERT_NE(f, nullptr);
+	std::ifstream stream(path);
+	ASSERT_TRUE(stream.is_open());
 	char msg[128] = {};
-	ASSERT_EQ(fgets(msg, sizeof(msg) - 1, f), msg);
-	ASSERT_TRUE(feof(f));
-	ASSERT_FALSE(ferror(f));
-	ASSERT_EQ(fclose(f), 0);
+	ASSERT_TRUE(stream.get(msg, sizeof(msg)));
+	ASSERT_TRUE(stream.eof());
+	ASSERT_FALSE(stream.fail());
+	stream.close();
 	ASSERT_STREQ(msg, content);
 }
 
 TEST_F(SafeOutFileTest, Stuff)
 {
-	SString path = getChildPath("somefile.txt");
+	fs::path path = getChildPath("somefile.txt");
 
 	// Assert no file if merely created (will fail when tearing down)
 	{
-		SafeOutFile sof(path);
+		BufferedOutFile sof(path);
 	}
 
 	{
-		SafeOutFile sof(path);
-		ASSERT_TRUE(sof.openForWriting().success);	// opening should work
-		ASSERT_TRUE(sof.write("Hello, world!", 13).success);	// and this
-		ASSERT_TRUE(sof.write(" more.", 6).success);	// and this
-		// forget about commiting.
-		// Tearing down should not be blocked by child folder
-		sof.close();
+		{
+			BufferedOutFile sof(path);
+			sof.write("Hello, world!", 13);	// and this
+			sof.write(" more.", 6);	// and this
+			// forget about commiting.
+			// Tearing down should not be blocked by child folder
+		}
 
-		ASSERT_TRUE(sof.openForWriting().success);	// reopen it
-		ASSERT_TRUE(sof.write("Hello, world!", 13).success);	// and this
-		ASSERT_TRUE(sof.write(" more.", 6).success);	// and this
+		BufferedOutFile sof(path);	// reopen it
+		sof.write("Hello, world!", 13);	// and this
+		sof.write(" more.", 6);	// and this
 		// Check the destructor too
 	}
 
 	{
-		// Check that writing to an unopen file will fail
-		SafeOutFile sof(path);
-		ASSERT_FALSE(sof.write("Hello, world2!", 14).success);	// and this
-		ASSERT_FALSE(sof.commit().success);
-	}
-	{
 		// Now it will work
-		SafeOutFile sof(path);
-		ASSERT_TRUE(sof.openForWriting().success);
-		ASSERT_TRUE(sof.write("Hello, world2!", 14).success);	// and this
-		ASSERT_TRUE(sof.write(" more.", 6).success);	// and this
-		ASSERT_TRUE(sof.commit().success);
+		BufferedOutFile sof(path);
+		sof.write("Hello, world2!", 14);	// and this
+		sof.write(" more.", 6);	// and this
+		sof.commit();
 	}
 	mDeleteList.push(path);	// the delete list
 
 	// Now check it
-	checkFileContent(path.c_str(), "Hello, world2! more.");
+	checkFileContent(path, "Hello, world2! more.");
 
 	{
 		// Check that forgetting to commit won't overwrite the original
-		SafeOutFile sof(path);
-		ASSERT_TRUE(sof.openForWriting().success);
-		ASSERT_TRUE(sof.write("New stuff!", 10).success);
-		sof.close();	// no commit
+		BufferedOutFile sof(path);
+		sof.write("New stuff!", 10);
+		// no commit
 	}
 
-	checkFileContent(path.c_str(), "Hello, world2! more.");
+	checkFileContent(path, "Hello, world2! more.");
 
 	{
 		// Check that we can overwrite an old file
-		SafeOutFile sof(path);
-		ASSERT_TRUE(sof.openForWriting().success);
-		ASSERT_TRUE(sof.write("New stuff!", 10).success);
-		ASSERT_TRUE(sof.commit().success);
-		sof.close();	// no commit
+		BufferedOutFile sof(path);
+		sof.write("New stuff!", 10);
+		sof.commit();
 	}
 
-	checkFileContent(path.c_str(), "New stuff!");
+	checkFileContent(path, "New stuff!");
 }

@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2016 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr√© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Rapha√´l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ int VertexModule::findDragOther(int v_num) const
 
 	for (int i = 0 ; i < doc.numLinedefs() ; i++)
 	{
-		const LineDef *L = doc.linedefs[i];
+		const auto L = doc.linedefs[i];
 
 		if (L->end == v_num)
 			return L->start;
@@ -87,7 +87,7 @@ int VertexModule::howManyLinedefs(int v_num) const
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 			count++;
@@ -104,14 +104,14 @@ int VertexModule::howManyLinedefs(int v_num) const
 //
 void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v, selection_c& del_lines) const
 {
-	LineDef *L1 = doc.linedefs[ld1];
-	LineDef *L2 = doc.linedefs[ld2];
+	const auto L1 = doc.linedefs[ld1];
+	const auto L2 = doc.linedefs[ld2];
 
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
 
-	StringID new_mid_tex = (ld1_onesided) ? L1->Right(doc)->mid_tex :
-			     		  (ld2_onesided) ? L2->Right(doc)->mid_tex : StringID();
+	StringID new_mid_tex = (ld1_onesided) ? doc.getRight(*L1)->mid_tex :
+			     		  (ld2_onesided) ? doc.getRight(*L2)->mid_tex : StringID();
 
 	// flip L1 so it would be parallel with L2 (after merging the other
 	// endpoint) but going the opposite direction.
@@ -120,8 +120,8 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 		doc.linemod.flipLinedef(op, ld1);
 	}
 
-	bool same_left  = (L2->WhatSector(Side::left, doc)  == L1->WhatSector(Side::left, doc));
-	bool same_right = (L2->WhatSector(Side::right, doc) == L1->WhatSector(Side::right, doc));
+	bool same_left  = (doc.getSectorID(*L2, Side::left)  == doc.getSectorID(*L1, Side::left));
+	bool same_right = (doc.getSectorID(*L2, Side::right) == doc.getSectorID(*L1, Side::right));
 
 	if (same_left && same_right)
 	{
@@ -150,7 +150,7 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 
 
 	// fix orientation of remaining linedef if needed
-	if (L2->Left(doc) && ! L2->Right(doc))
+	if (doc.getLeft(*L2) && ! doc.getRight(*L2))
 	{
 		doc.linemod.flipLinedef(op, ld2);
 	}
@@ -192,7 +192,7 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 	int sandwichesMerged = 0;
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		if (! L->TouchesVertex(v1))
 			continue;
@@ -209,7 +209,7 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 			if (k == n)
 				continue;
 
-			const LineDef *K = doc.linedefs[k];
+			const auto K = doc.linedefs[k];
 
 			if ((K->start == v3 && K->end == v2) ||
 				(K->start == v2 && K->end == v3))
@@ -232,7 +232,7 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		// change *ALL* references, this is critical
 		// [ to-be-deleted lines will get start == end, that is OK ]
@@ -253,7 +253,7 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 // the first vertex is kept, all the other vertices are deleted
 // (after fixing the attached linedefs).
 //
-void VertexModule::mergeList(EditOperation &op, selection_c &verts) const
+void VertexModule::mergeList(EditOperation &op, selection_c &verts, selection_c *delResultList) const
 {
 	if (verts.count_obj() < 2)
 		return;
@@ -288,6 +288,12 @@ void VertexModule::mergeList(EditOperation &op, selection_c &verts) const
 	// all vertices of an isolated sector and end up with NOTHING!
 	DeleteObjects_WithUnused(op, doc, del_lines, false /* keep_things */, true /* keep_verts */, false /* keep_lines */);
 
+	if(delResultList)
+	{
+		delResultList->clear_all();
+		delResultList->change_type(ObjType::vertices);
+		delResultList->merge(verts);
+	}
 	verts.clear_all();
 }
 
@@ -309,7 +315,7 @@ void Instance::commandVertexMerge()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("merged", *edit.Selected);
 
-		level.vertmod.mergeList(op, *edit.Selected);
+		level.vertmod.mergeList(op, *edit.Selected, nullptr);
 	}
 
 	Selection_Clear(true /* no_save */);
@@ -370,7 +376,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 			list.set(v_other);	// first one is the one kept
 			list.set(v_num);
 
-			mergeList(op, list);
+			mergeList(op, list, nullptr);
 		}
 
 		inst.edit.Selected->set(v_other);
@@ -420,10 +426,10 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y) const
 {
-	const Vertex * V = doc.vertices[v_num];
+	const auto V = doc.vertices[v_num];
 
-	double dx = L->End(doc)->x() - L->Start(doc)->x();
-	double dy = L->End(doc)->y() - L->Start(doc)->y();
+	double dx = doc.getEnd(*L).x() - doc.getStart(*L).x();
+	double dy = doc.getEnd(*L).y() - doc.getStart(*L).y();
 
 	if (L->end == v_num)
 	{
@@ -463,12 +469,12 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		LineDef *L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 		{
 			double new_x, new_y;
-			calcDisconnectCoord(L, v_num, &new_x, &new_y);
+			calcDisconnectCoord(L.get(), v_num, &new_x, &new_y);
 
 			// the _LAST_ linedef keeps the current vertex, the rest
 			// need a new one.
@@ -514,7 +520,7 @@ void Instance::commandVertexDisconnect()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("disconnected", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			int v_num = *it;
 
@@ -539,7 +545,7 @@ void Instance::commandVertexDisconnect()
 
 void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert, bool *seen_one) const
 {
-	const LineDef *L = doc.linedefs[ld];
+	const auto L = doc.linedefs[ld];
 
 	int v_num = which_vert ? L->end : L->start;
 
@@ -553,7 +559,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 		if (inst.edit.Selected->get(n))
 			continue;
 
-		LineDef *N = doc.linedefs[n];
+		const auto N = doc.linedefs[n];
 
 		if (N->start == v_num || N->end == v_num)
 		{
@@ -566,16 +572,16 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 		return;
 
 	double new_x, new_y;
-	calcDisconnectCoord(doc.linedefs[ld], v_num, &new_x, &new_y);
+	calcDisconnectCoord(doc.linedefs[ld].get(), v_num, &new_x, &new_y);
 
 	int new_v = op.addNew(ObjType::vertices);
 
 	doc.vertices[new_v]->SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
 	// fix all linedefs in the selection to use this new vertex
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		LineDef *L2 = doc.linedefs[*it];
+		const auto L2 = doc.linedefs[*it];
 
 		if (L2->start == v_num)
 			op.changeLinedef(*it, LineDef::F_START, new_v);
@@ -610,7 +616,7 @@ void Instance::commandLineDisconnect()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("disconnected", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			level.vertmod.doDisconnectLinedef(op, *it, 0, &seen_one);
 			level.vertmod.doDisconnectLinedef(op, *it, 1, &seen_one);
@@ -634,11 +640,11 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef * L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = L->Left(doc)  && inst.edit.Selected->get(L->Left(doc)->sector);
-		bool right_in = L->Right(doc) && inst.edit.Selected->get(L->Right(doc)->sector);
+		bool  left_in = doc.getLeft(*L)  && inst.edit.Selected->get(doc.getLeft(*L)->sector);
+		bool right_in = doc.getRight(*L) && inst.edit.Selected->get(doc.getRight(*L)->sector);
 
 		if (! (left_in || right_in))
 			continue;
@@ -646,7 +652,7 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 		bool innie = false;
 		bool outie = false;
 
-		if (L->Right(doc))
+		if (doc.getRight(*L))
 		{
 			if (right_in)
 				innie = true;
@@ -654,7 +660,7 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 				outie = true;
 		}
 
-		if (L->Left(doc))
+		if (doc.getLeft(*L))
 		{
 			if (left_in)
 				innie = true;
@@ -685,12 +691,12 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 
 void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2, int end2, Side in_side) const
 {
-	const LineDef * L1 = doc.linedefs[ld_num];
+	const auto L1 = doc.linedefs[ld_num];
 
 	int new_ld = op.addNew(ObjType::linedefs);
 	int lost_sd;
 
-	LineDef * L2 = doc.linedefs[new_ld];
+	const auto L2 = doc.linedefs[new_ld];
 
 	if (in_side == Side::left)
 	{
@@ -730,7 +736,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 	StringID tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	const SideDef * SD = doc.sidedefs[L1->right];
+	const SideDef * SD = doc.sidedefs[L1->right].get();
 
 	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
@@ -742,7 +748,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 	// now fix the second line's textures
 
-	SD = doc.sidedefs[lost_sd];
+	SD = doc.sidedefs[lost_sd].get();
 
 	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
@@ -778,7 +784,7 @@ void VertexModule::DETSEC_CalcMoveVector(const selection_c & detach_verts, doubl
 	if (fabs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
 	if (fabs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
 
-	double mul = 1.0 / clamp(0.25, inst.grid.Scale, 1.0);
+	double mul = 1.0 / clamp(0.25, inst.grid.getScale(), 1.0);
 
 	*dx = (*dx) * mul;
 	*dy = (*dy) * mul;
@@ -837,7 +843,7 @@ void Instance::commandSectorDisconnect()
 
 			mapping[*it] = new_v;
 
-			Vertex *newbie = level.vertices[new_v];
+			auto newbie = level.vertices[new_v];
 
 			*newbie = *level.vertices[*it];
 		}
@@ -847,11 +853,11 @@ void Instance::commandSectorDisconnect()
 
 		for (n = level.numLinedefs() -1 ; n >= 0 ; n--)
 		{
-			const LineDef * L = level.linedefs[n];
+			const auto L = level.linedefs[n];
 
 			// only process lines which touch a selected sector
-			bool  left_in = L->Left(level)  && edit.Selected->get(L->Left(level)->sector);
-			bool right_in = L->Right(level) && edit.Selected->get(L->Right(level)->sector);
+			bool  left_in = level.getLeft(*L)  && edit.Selected->get(level.getLeft(*L)->sector);
+			bool right_in = level.getRight(*L) && edit.Selected->get(level.getRight(*L)->sector);
 
 			if (! (left_in || right_in))
 				continue;
@@ -885,7 +891,7 @@ void Instance::commandSectorDisconnect()
 
 		for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 		{
-			const Vertex * V = level.vertices[*it];
+			const auto V = level.vertices[*it];
 
 			op.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(loaded.levelFormat, move_dx));
 			op.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(loaded.levelFormat, move_dy));
@@ -984,11 +990,11 @@ void Instance::CMD_VT_ShapeLine()
 	double by = 0;
 	double b_total = 0;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = level.vertices[*it];
+		const auto V = level.vertices[*it];
 
-		double weight = WeightForVertex(V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, -1);
+		double weight = WeightForVertex(V.get(), pos1.x,pos1.y, pos2.x,pos2.y, width,height, -1);
 
 		if (weight > 0)
 		{
@@ -998,7 +1004,7 @@ void Instance::CMD_VT_ShapeLine()
 			a_total += weight;
 		}
 
-		weight = WeightForVertex(V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, +1);
+		weight = WeightForVertex(V.get(), pos1.x,pos1.y, pos2.x,pos2.y, width,height, +1);
 
 		if (weight > 0)
 		{
@@ -1040,9 +1046,9 @@ void Instance::CMD_VT_ShapeLine()
 
 	std::vector< vert_along_t > along_list;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = level.vertices[*it];
+		const auto V = level.vertices[*it];
 
 		vert_along_t ALONG(*it, AlongDist(V->xy(), { ax,ay }, { bx, by }));
 
@@ -1053,8 +1059,8 @@ void Instance::CMD_VT_ShapeLine()
 
 
 	// compute proper positions for start and end of the line
-	const Vertex *V1 = level.vertices[along_list.front().vert_num];
-	const Vertex *V2 = level.vertices[along_list. back().vert_num];
+	const auto V1 = level.vertices[along_list.front().vert_num];
+	const auto V2 = level.vertices[along_list. back().vert_num];
 
 	double along1 = along_list.front().along;
 	double along2 = along_list. back().along;
@@ -1150,7 +1156,7 @@ double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_
 	{
 		unsigned int k = (start_idx + i) % along_list.size();
 
-		const Vertex *V = doc.vertices[along_list[k].vert_num];
+		const auto V = doc.vertices[along_list[k].vert_num];
 
 		double frac = i / (double)(along_list.size() - (partial_circle ? 1 : 0));
 
@@ -1228,9 +1234,9 @@ void Instance::CMD_VT_ShapeArc()
 
 	std::vector< vert_along_t > along_list;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = level.vertices[*it];
+		const auto V = level.vertices[*it];
 
 		double dx = V->x() - mid.x;
 		double dy = V->y() - mid.y;
@@ -1272,8 +1278,8 @@ void Instance::CMD_VT_ShapeArc()
 	else
 		end_idx = static_cast<unsigned>(along_list.size() - 1);
 
-	const Vertex * start_V = level.vertices[along_list[start_idx].vert_num];
-	const Vertex * end_V   = level.vertices[along_list[  end_idx].vert_num];
+	const auto start_V = level.vertices[along_list[start_idx].vert_num];
+	const auto end_V   = level.vertices[along_list[  end_idx].vert_num];
 
 	double start_end_dist = hypot(end_V->x() - start_V->x(), end_V->y() - start_V->y());
 

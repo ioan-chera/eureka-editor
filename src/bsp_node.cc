@@ -37,13 +37,8 @@
 // Rewritten again by Andrew Apted (-AJA-), 1999-2000.
 //
 
-#include "Errors.h"
-#include "Instance.h"
-#include "LineDef.h"
-#include "SideDef.h"
-#include "Vertex.h"
 #include "bsp.h"
-
+#include "Instance.h"
 #include "w_rawdef.h"
 
 
@@ -71,7 +66,7 @@ namespace ajbsp
 static int current_seg_index;
 
 
-typedef struct eval_info_s
+struct eval_info_t
 {
 	int cost;
 	int splits;
@@ -99,8 +94,7 @@ public:
 		else
 			mini_right++;
 	}
-}
-eval_info_t;
+};
 
 
 static intersection_t *quick_alloc_cuts = NULL;
@@ -170,7 +164,7 @@ void seg_t::Recompute()
 //       segs (except the one we are currently splitting) must exist
 //       on a singly-linked list somewhere.
 //
-static seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc)
+seg_t * LevelData::SplitSeg(seg_t *old_seg, double x, double y)
 {
 	seg_t *new_seg;
 	vertex_t *new_vert;
@@ -183,7 +177,7 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc)
 		gLog.debugPrintf("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
 # endif
 
-	new_vert = NewVertexFromSplitSeg(old_seg, x, y, doc);
+	new_vert = NewVertexFromSplitSeg(old_seg, x, y);
 	new_seg  = NewSeg();
 
 	// copy seg info
@@ -344,8 +338,8 @@ static void AddIntersection(intersection_t ** cut_list,
 //
 // Returns true if a "bad seg" was found early.
 //
-static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
-		int best_cost, eval_info_t *info, const Document &doc)
+int LevelData::EvalPartitionWorker(quadtree_c *tree, seg_t *part,
+		int best_cost, eval_info_t *info)
 {
 	double qnty;
 	double a, b, fa, fb;
@@ -519,7 +513,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 	{
 		if (tree->subs[c] && !tree->subs[c]->Empty())
 		{
-			if (EvalPartitionWorker(tree->subs[c], part, best_cost, info, doc))
+			if (EvalPartitionWorker(tree->subs[c], part, best_cost, info))
 				return true;
 		}
 	}
@@ -536,7 +530,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 // Returns the computed cost, or a negative value if the seg should be
 // skipped altogether.
 //
-static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Document &doc)
+int LevelData::EvalPartition(quadtree_c *tree, seg_t *part, int best_cost)
 {
 	eval_info_t info;
 
@@ -551,7 +545,7 @@ static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Doc
 	info.mini_left  = 0;
 	info.mini_right = 0;
 
-	if (EvalPartitionWorker(tree, part, best_cost, &info, doc))
+	if (EvalPartitionWorker(tree, part, best_cost, &info))
 		return -1;
 
 	/* make sure there is at least one real seg on each side */
@@ -649,7 +643,7 @@ static void EvaluateFastWorker(quadtree_c *tree,
 }
 
 
-static seg_t *FindFastSeg(quadtree_c *tree, const Document &doc)
+seg_t *LevelData::FindFastSeg(quadtree_c *tree)
 {
 	seg_t *best_H = NULL;
 	seg_t *best_V = NULL;
@@ -663,10 +657,10 @@ static seg_t *FindFastSeg(quadtree_c *tree, const Document &doc)
 	int V_cost = -1;
 
 	if (best_H)
-		H_cost = EvalPartition(tree, best_H, 99999999, doc);
+		H_cost = EvalPartition(tree, best_H, 99999999);
 
 	if (best_V)
-		V_cost = EvalPartition(tree, best_V, 99999999, doc);
+		V_cost = EvalPartition(tree, best_V, 99999999);
 
 # if DEBUG_PICKNODE
 	gLog.debugPrintf("FindFastSeg: best_H=%p (cost %d) | best_V=%p (cost %d)\n",
@@ -684,8 +678,8 @@ static seg_t *FindFastSeg(quadtree_c *tree, const Document &doc)
 
 
 /* returns false if cancelled */
-static bool PickNodeWorker(quadtree_c *part_list,
-		quadtree_c *tree, seg_t ** best, int *best_cost, const Document &doc)
+bool LevelData::PickNodeWorker(quadtree_c *part_list,
+		quadtree_c *tree, seg_t ** best, int *best_cost)
 {
 	// try each partition
 	for (seg_t *part=part_list->list ; part ; part = part->next)
@@ -703,7 +697,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 		if (part->linedef < 0)
 			continue;
 
-		int cost = EvalPartition(tree, part, *best_cost, doc);
+		int cost = EvalPartition(tree, part, *best_cost);
 
 		/* seg unsuitable or too costly ? */
 		if (cost < 0 || cost >= *best_cost)
@@ -722,7 +716,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 	{
 		if (part_list->subs[c] && !part_list->subs[c]->Empty())
 		{
-			PickNodeWorker(part_list->subs[c], tree, best, best_cost, doc);
+			PickNodeWorker(part_list->subs[c], tree, best, best_cost);
 		}
 	}
 
@@ -733,7 +727,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 //
 // Find the best seg in the seg_list to use as a partition line.
 //
-static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
+seg_t *LevelData::PickNode(quadtree_c *tree, int depth)
 {
 	seg_t *best=NULL;
 
@@ -753,7 +747,7 @@ static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
 		gLog.debugPrintf("PickNode: Looking for Fast node...\n");
 #   endif
 
-		best = FindFastSeg(tree, doc);
+		best = FindFastSeg(tree);
 
 		if (best)
 		{
@@ -766,7 +760,7 @@ static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
 		}
 	}
 
-	if (! PickNodeWorker(tree, tree, &best, &best_cost, doc))
+	if (! PickNodeWorker(tree, tree, &best, &best_cost))
 	{
 		/* hack here : BuildNodes will detect the cancellation */
 		return NULL;
@@ -800,9 +794,9 @@ static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
 //       same logic when determining which segs should go left, right
 //       or be split.
 //
-static void DivideOneSeg(seg_t *seg, seg_t *part,
+void LevelData::DivideOneSeg(seg_t *seg, seg_t *part,
 		seg_t **left_list, seg_t **right_list,
-		intersection_t ** cut_list, const Document &doc)
+		intersection_t ** cut_list)
 {
 	seg_t *new_seg;
 
@@ -812,7 +806,7 @@ static void DivideOneSeg(seg_t *seg, seg_t *part,
 	double a = part->PerpDist(seg->psx, seg->psy);
 	double b = part->PerpDist(seg->pex, seg->pey);
 
-	bool self_ref = (seg->linedef >= 0) ? doc.linedefs[seg->linedef]->IsSelfRef(doc) : false;
+	bool self_ref = (seg->linedef >= 0) ? doc.isSelfRef(*doc.linedefs[seg->linedef]) : false;
 
 	if (seg->source_line == part->source_line)
 		a = b = 0;
@@ -867,7 +861,7 @@ static void DivideOneSeg(seg_t *seg, seg_t *part,
 
 	ComputeIntersection(seg, part, a, b, &x, &y);
 
-	new_seg = SplitSeg(seg, x, y, doc);
+	new_seg = SplitSeg(seg, x, y);
 
 	AddIntersection(cut_list, seg->end, part, self_ref);
 
@@ -884,9 +878,9 @@ static void DivideOneSeg(seg_t *seg, seg_t *part,
 }
 
 
-static void SeparateSegs(quadtree_c *tree, seg_t *part,
+void LevelData::SeparateSegs(quadtree_c *tree, seg_t *part,
 		seg_t **left_list, seg_t **right_list,
-		intersection_t ** cut_list, const Document &doc)
+		intersection_t ** cut_list)
 {
 	while (tree->list != NULL)
 	{
@@ -895,14 +889,14 @@ static void SeparateSegs(quadtree_c *tree, seg_t *part,
 
 		seg->quad = NULL;
 
-		DivideOneSeg(seg, part, left_list, right_list, cut_list, doc);
+		DivideOneSeg(seg, part, left_list, right_list, cut_list);
 	}
 
 	// recursively handle sub-blocks
 	if (tree->subs[0])
 	{
-		SeparateSegs(tree->subs[0], part, left_list, right_list, cut_list, doc);
-		SeparateSegs(tree->subs[1], part, left_list, right_list, cut_list, doc);
+		SeparateSegs(tree->subs[0], part, left_list, right_list, cut_list);
+		SeparateSegs(tree->subs[1], part, left_list, right_list, cut_list);
 	}
 
 	// this quadtree_c is empty now
@@ -944,7 +938,7 @@ void FindLimits2(seg_t *list, bbox_t *bbox)
 }
 
 
-void AddMinisegs(intersection_t *cut_list, seg_t *part,
+void LevelData::AddMinisegs(intersection_t *cut_list, seg_t *part,
 		seg_t **left_list, seg_t **right_list)
 {
 	if (! cut_list)
@@ -1150,32 +1144,32 @@ void quadtree_c::VerifySide(seg_t *part, int side)
 #endif
 
 
-void node_t::SetPartition(const seg_t *part, const Instance &inst)
+void node_t::SetPartition(LevelData &lev_data, const seg_t *part)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
-	const LineDef *part_L = inst.level.linedefs[part->linedef];
+	const auto part_L = lev_data.GetDoc().linedefs[part->linedef];
 
 	if (part->side == 0)  /* right side */
 	{
-		x  = part_L->Start(inst.level)->x();
-		y  = part_L->Start(inst.level)->y();
-		dx = part_L->End(inst.level)->x() - x;
-		dy = part_L->End(inst.level)->y() - y;
+		x  = lev_data.GetDoc().getStart(*part_L).x();
+		y  = lev_data.GetDoc().getStart(*part_L).y();
+		dx = lev_data.GetDoc().getEnd(*part_L).x() - x;
+		dy = lev_data.GetDoc().getEnd(*part_L).y() - y;
 	}
 	else  /* left side */
 	{
-		x  = part_L->End(inst.level)->x();
-		y  = part_L->End(inst.level)->y();
-		dx = part_L->Start(inst.level)->x() - x;
-		dy = part_L->Start(inst.level)->y() - y;
+		x  = lev_data.GetDoc().getEnd(*part_L).x();
+		y  = lev_data.GetDoc().getEnd(*part_L).y();
+		dx = lev_data.GetDoc().getStart(*part_L).x() - x;
+		dy = lev_data.GetDoc().getStart(*part_L).y() - y;
 	}
 
 	/* check for very long partition (overflow of dx,dy in NODES) */
 
 	if (fabs(dx) > 32000 || fabs(dy) > 32000)
 	{
-		if (inst.loaded.levelFormat == MapFormat::udmf)
+		if (lev_data.GetFormat() == MapFormat::udmf)
 		{
 			// XGL3 nodes are 16.16 fixed point, hence we still need
 			// to reduce the delta.
@@ -1186,7 +1180,7 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 		{
 			if (((int)dx | (int)dy) & 1)
 			{
-				Warning(inst, "Loss of accuracy on VERY long node: "
+				lev_data.Warning("Loss of accuracy on VERY long node: "
 						"(%f,%f) -> (%f,%f)\n", x, y, x + dx, y+ dy);
 			}
 
@@ -1318,17 +1312,17 @@ void quadtree_c::ConvertToList(seg_t **_list)
 }
 
 
-static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
-		int sidedef, int what_side /* 0 or 1 */, const Instance &inst)
+seg_t *LevelData::CreateOneSeg(int line, vertex_t *start, vertex_t *end,
+		int sidedef, int what_side /* 0 or 1 */)
 {
-	SideDef *sd = NULL;
+	const SideDef *sd = NULL;
 	if (sidedef >= 0)
-		sd = inst.level.sidedefs[sidedef];
+		sd = doc.sidedefs[sidedef].get();
 
 	// check for bad sidedef
-	if (sd && !inst.level.isSector(sd->sector))
+	if (sd && !doc.isSector(sd->sector))
 	{
-		Warning(inst, "Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
+		Warning("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
 	}
 
 	// handle overlapping vertices, pick a nominal one
@@ -1356,19 +1350,19 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 // Initially create all segs, one for each linedef.
 // Must be called *after* InitBlockmap().
 //
-seg_t *CreateSegs(const Instance &inst)
+seg_t *LevelData::CreateSegs()
 {
 	seg_t *list = NULL;
 
-	for (int i=0 ; i < inst.level.numLinedefs() ; i++)
+	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
-		const LineDef *line = inst.level.linedefs[i];
+		const auto line = doc.linedefs[i];
 
 		seg_t *left  = NULL;
 		seg_t *right = NULL;
 
 		// ignore zero-length lines
-		if (line->IsZeroLength(inst.level))
+		if (doc.isZeroLength(*line))
 			continue;
 
 		// ignore overlapping lines
@@ -1376,23 +1370,23 @@ seg_t *CreateSegs(const Instance &inst)
 			continue;
 
 		// check for extremely long lines
-		if (line->CalcLength(inst.level) >= 30000)
-			Warning(inst, "Linedef #%d is VERY long, it may cause problems\n", i);
+		if (doc.calcLength(*line) >= 30000)
+			Warning("Linedef #%d is VERY long, it may cause problems\n", i);
 
 		if (line->right >= 0)
 		{
-			right = CreateOneSeg(i, lev_vertices[line->start], lev_vertices[line->end], line->right, 0, inst);
+			right = CreateOneSeg(i, vertices[line->start], vertices[line->end], line->right, 0);
 
 			ListAddSeg(&list, right);
 		}
 		else
 		{
-			Warning(inst, "Linedef #%d has no right sidedef!\n", i);
+			Warning("Linedef #%d has no right sidedef!\n", i);
 		}
 
 		if (line->left >= 0)
 		{
-			left = CreateOneSeg(i, lev_vertices[line->end], lev_vertices[line->start], line->left, 1, inst);
+			left = CreateOneSeg(i, vertices[line->end], vertices[line->start], line->left, 1);
 
 			ListAddSeg(&list, left);
 
@@ -1409,7 +1403,7 @@ seg_t *CreateSegs(const Instance &inst)
 		else
 		{
 			if (line->flags & MLF_TwoSided)
-				Warning(inst, "Linedef #%d is 2s but has no left sidedef\n", i);
+				Warning("Linedef #%d is 2s but has no left sidedef\n", i);
 		}
 	}
 
@@ -1451,7 +1445,7 @@ void subsec_t::DetermineMiddle()
 }
 
 
-void subsec_t::ClockwiseOrder(const Document &doc)
+void subsec_t::ClockwiseOrder(const Document& doc)
 {
 	seg_t *seg;
 
@@ -1526,7 +1520,7 @@ void subsec_t::ClockwiseOrder(const Document &doc)
 		// miniseg?
 		if (array[i]->linedef < 0)
 			cur_score = 0;
-		else if (doc.linedefs[array[i]->linedef]->IsSelfRef(doc))
+		else if (doc.isSelfRef(*doc.linedefs[array[i]->linedef]))
 			cur_score = 2;
 
 		if (cur_score > best_score)
@@ -1635,12 +1629,12 @@ void subsec_t::RenumberSegs()
 //
 // Create a subsector from a list of segs.
 //
-static subsec_t *CreateSubsector(quadtree_c *tree)
+subsec_t *LevelData::CreateSubsector(quadtree_c *tree)
 {
 	subsec_t *sub = NewSubsec();
 
 	// compute subsector's index
-	sub->index = num_subsecs - 1;
+	sub->index = (int)subsecs.size() - 1;
 
 	// copy segs into subsector
 	// [ assumes seg_list field is NULL ]
@@ -1687,8 +1681,8 @@ static void DebugShowSegs(seg_t *list)
 #endif
 
 
-build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
-						  node_t ** N, subsec_t ** S, int depth, const Instance &inst)
+build_result_e LevelData::BuildNodes(seg_t *list, bbox_t *bounds /* output */,
+						  node_t ** N, subsec_t ** S, int depth)
 {
 	*N = NULL;
 	*S = NULL;
@@ -1708,7 +1702,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 
 	/* pick partition line  None indicates convexicity */
-	seg_t *part = PickNode(tree, depth, inst.level);
+	seg_t *part = PickNode(tree, depth);
 
 	if (part == NULL)
 	{
@@ -1739,7 +1733,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	seg_t *rights = NULL;
 	intersection_t *cut_list = NULL;
 
-	SeparateSegs(tree, part, &lefts, &rights, &cut_list, inst.level);
+	SeparateSegs(tree, part, &lefts, &rights, &cut_list);
 
 	delete tree;
 	tree = NULL;
@@ -1753,14 +1747,14 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 	AddMinisegs(cut_list, part, &lefts, &rights);
 
-	node->SetPartition(part, inst);
+	node->SetPartition(*this, part);
 
 # if DEBUG_BUILDER
 	gLog.debugPrintf("Build: Going LEFT\n");
 # endif
 
 	build_result_e ret;
-	ret = BuildNodes(lefts, &node->l.bounds, &node->l.node, &node->l.subsec, depth+1, inst);
+	ret = BuildNodes(lefts, &node->l.bounds, &node->l.node, &node->l.subsec, depth+1);
 
 	if (ret != BUILD_OK)
 		return ret;
@@ -1769,7 +1763,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	gLog.debugPrintf("Build: Going RIGHT\n");
 # endif
 
-	ret = BuildNodes(rights, &node->r.bounds, &node->r.node, &node->r.subsec, depth+1, inst);
+	ret = BuildNodes(rights, &node->r.bounds, &node->r.node, &node->r.subsec, depth+1);
 
 # if DEBUG_BUILDER
 	gLog.debugPrintf("Build: DONE\n");
@@ -1779,13 +1773,13 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 }
 
 
-void ClockwiseBspTree(const Document &doc)
+void LevelData::ClockwiseBspTree()
 {
 	current_seg_index = 0;
 
-	for (int i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < (int)subsecs.size() ; i++)
 	{
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = subsecs[i];
 
 		sub->ClockwiseOrder(doc);
 		sub->RenumberSegs();
@@ -1846,15 +1840,15 @@ void subsec_t::Normalise()
 }
 
 
-void NormaliseBspTree()
+void LevelData::NormaliseBspTree() const
 {
 	// unlinks all minisegs from each subsector
 
 	current_seg_index = 0;
 
-	for (int i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < (int)subsecs.size() ; i++)
 	{
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = subsecs[i];
 
 		sub->Normalise();
 		sub->RenumberSegs();
@@ -1862,11 +1856,11 @@ void NormaliseBspTree()
 }
 
 
-static void RoundOffVertices()
+void LevelData::RoundOffVertices()
 {
-	for (int i = 0 ; i < num_vertices ; i++)
+	for (int i = 0 ; i < (int)vertices.size() ; i++)
 	{
-		vertex_t *vert = lev_vertices[i];
+		vertex_t *vert = vertices[i];
 
 		if (vert->is_new)
 		{
@@ -1879,7 +1873,7 @@ static void RoundOffVertices()
 }
 
 
-void subsec_t::RoundOff()
+void subsec_t::RoundOff(LevelData &lev_data)
 {
 	// use head + tail to maintain same order of segs
 	seg_t *new_head = NULL;
@@ -1890,6 +1884,7 @@ void subsec_t::RoundOff()
 
 	int real_total  = 0;
 	int degen_total = 0;
+   (void)degen_total;
 
 # if DEBUG_SUBSEC
 	gLog.debugPrintf("Subsec: Rounding off %d\n", index);
@@ -1934,7 +1929,7 @@ void subsec_t::RoundOff()
 #   endif
 
 		// create a new vertex for this baby
-		last_real_degen->end = NewVertexDegenerate(
+		last_real_degen->end = lev_data.NewVertexDegenerate(
 				last_real_degen->start, last_real_degen->end);
 
 #   if DEBUG_SUBSEC
@@ -1987,17 +1982,17 @@ void subsec_t::RoundOff()
 }
 
 
-void RoundOffBspTree()
+void LevelData::RoundOffBspTree()
 {
 	current_seg_index = 0;
 
 	RoundOffVertices();
 
-	for (int i=0 ; i < num_subsecs ; i++)
+	for (int i=0 ; i < (int)subsecs.size() ; i++)
 	{
-		subsec_t *sub = lev_subsecs[i];
+		subsec_t *sub = subsecs[i];
 
-		sub->RoundOff();
+		sub->RoundOff(*this);
 		sub->RenumberSegs();
 	}
 }

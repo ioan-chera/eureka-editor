@@ -30,11 +30,7 @@
 
 #define EUREKA_TITLE  "Eureka DOOM Editor"
 
-#ifdef BUILT_VIA_CMAKE
 #include "version.h"
-#else
-#define EUREKA_VERSION "2.0.0"
-#endif
 
 #define EUREKA_LUMP  "__EUREKA"
 
@@ -126,28 +122,36 @@ namespace global
 	extern bool want_quit;
 	extern bool app_has_focus;
 	
-	extern SString install_dir;  // install dir (e.g. /usr/share/eureka)
-	extern SString home_dir;      // home dir (e.g. $HOME/.eureka)
-	extern SString cache_dir;    // for caches and backups, can be same as home_dir
+	extern fs::path install_dir;  // install dir (e.g. /usr/share/eureka)
+	extern fs::path home_dir;      // home dir (e.g. $HOME/.eureka)
+	extern fs::path cache_dir;    // for caches and backups, can be same as home_dir
+
+	extern fs::path old_linux_home_and_cache_dir;
 }
 
 namespace global
 {
-	extern SString config_file; // Name of the configuration file, or NULL
-	extern SString log_file;    // Name of log file, or NULL
+	extern fs::path config_file; // Name of the configuration file, or NULL
+	extern fs::path log_file;    // Name of log file, or NULL
 }
 
 namespace global
 {
-	extern std::vector<SString> Pwad_list;
+	extern std::vector<fs::path> Pwad_list;
 }
 
 namespace global
 {
-	extern int   show_help;		// Print usage message and exit.
-	extern int   show_version;	// Print version info and exit.
+	extern bool   show_help;		// Print usage message and exit.
+	extern bool   show_version;	// Print version info and exit.
 }
 
+
+struct LoadingData;
+struct NewResources;
+struct WadData;
+
+NewResources loadResources(const LoadingData& loading, const WadData& waddata) noexcept(false);
 
 /*
  *  Various global functions
@@ -160,7 +164,11 @@ void DLG_ShowError(bool fatal, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRIN
 void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 int  DLG_Confirm(const std::vector<SString> &buttons, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
 
-SString GameNameFromIWAD(const SString &iwad_name);
+extern std::function<void(const char *msg, va_list ap)> DLG_Notify_Override;
+extern std::function<int(const std::vector<SString> &buttons, const char *msg,
+						 va_list ap)> DLG_Confirm_Override;
+
+SString GameNameFromIWAD(const fs::path &iwad_name);
 
 #endif  /* __EUREKA_MAIN_H__ */
 

@@ -42,10 +42,10 @@ bool M_ReadTextLine(SString &string, std::istream &is)
 //
 // Opens the file
 //
-bool LineFile::open(const SString &path) noexcept
+bool LineFile::open(const fs::path &path) noexcept
 {
     is.close();
-    is.open(path.get());
+    is.open(path);
     return is.is_open();
 }
 

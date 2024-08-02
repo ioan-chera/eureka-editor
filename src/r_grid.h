@@ -22,14 +22,34 @@
 #define __EUREKA_R_GRID_H__
 
 #include "m_vector.h"
+#include "m_strings.h"
 
 class Instance;
 
-class Grid_State_c final
+namespace grid
 {
-friend class Instance;
+static const int values[] = 
+{
+	1024, 512, 256, 192, 128, 64, 32, 16, 8, 4, 2,
+	-1	// off
+};
 
+class Listener
+{
 public:
+	virtual void gridRedrawMap() = 0;
+	virtual void gridSetGrid(int grid) = 0;
+	virtual void gridUpdateSnap() = 0;
+	virtual void gridAdjustPos() = 0;
+	virtual void gridPointerPos() = 0;
+	virtual void gridSetScale(double scale) = 0;
+	virtual void gridBeep(const char *message) = 0;
+	virtual void gridUpdateRatio() = 0;
+};
+
+class State final
+{
+private:
 	// the actual grid step (64, 128, etc)
 	int step = 64;
 
@@ -50,7 +70,7 @@ public:
 	double Scale = 1.0;
 
 public:
-	explicit Grid_State_c(Instance &inst) : inst(inst)
+	explicit State(Listener& listener) : listener(listener)
 	{
 	}
 
@@ -126,20 +146,49 @@ public:
 
 	bool OnGrid(double map_x, double map_y) const;
 
-private:
-	void DoSetScale(double new_scale);
+	void configureRatio(int ratio, bool redraw);
 
+	int getStep() const
+	{
+		return step;
+	}
+	bool snaps() const
+	{
+		return snap;
+	}
+	int getRatio() const
+	{
+		return ratio;
+	}
+	const v2double_t &getOrig() const
+	{
+		return orig;
+	}
+	double getScale() const
+	{
+		return Scale;
+	}
+	
+	bool parseUser(const std::vector<SString> &tokens);
+	void writeUser(std::ostream &os) const;
+
+private:
 	void RawSetStep(int i);
 	void RawSetScale(int i);
 	void RawSetShown(bool new_shown);
+	
+	void configureGrid(int step, bool shown);
+	void configureSnap(bool snap);
 
-private:
 	static const double scale_values[];
 	static const int digit_scales[];
-	static const int grid_values[];
 
-	Instance &inst;
+	Listener& listener;
 };
+
+std::string getValuesFLTKMenuString();
+
+} // namespace grid
 
 #endif  /* __EUREKA_R_GRID_H__ */
 

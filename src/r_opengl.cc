@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2020 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr√© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -138,7 +138,7 @@ public:
 
 	inline int DeltaToX(double iz, float tx)
 	{
-		int x = int(inst.r_view.aspect_sw * tx * iz);
+		int x = int(static_cast<double>(inst.r_view.aspect_sw) * tx * iz);
 
 		x = (x + inst.r_view.screen_w) / 2;
 
@@ -174,10 +174,10 @@ public:
 			return NULL;
 		}
 
-		Img_c *img = inst.wad.images.W_GetFlat(inst.conf, fname);
+		Img_c *img = inst.wad.images.getMutableFlat(inst.conf, fname);
 		if (! img)
 		{
-			img = inst.wad.images.IM_UnknownFlat(inst.conf);
+			img = &inst.wad.images.getMutableUnknownFlat(inst.conf);
 			fullbright = config::render_unknown_bright;
 		}
 
@@ -211,20 +211,20 @@ public:
 
 		if (is_null_tex(tname))
 		{
-			img = inst.wad.images.IM_MissingTex(inst.conf);
+			img = &inst.wad.images.getMutableMissingTexture(inst.conf);
 			fullbright = config::render_missing_bright;
 		}
 		else if (is_special_tex(tname))
 		{
-			img = inst.wad.images.IM_SpecialTex(inst.wad.palette);
+			img = &inst.wad.images.getMutableSpecialTexture(inst.wad.palette);
 		}
 		else
 		{
-			img = inst.wad.images.getTexture(inst.conf, tname);
+			img = inst.wad.images.getMutableTexture(inst.conf, tname);
 
 			if (! img)
 			{
-				img = inst.wad.images.IM_UnknownTex(inst.conf);
+				img = &inst.wad.images.getMutableUnknownTexture(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 		}
@@ -775,9 +775,9 @@ public:
 			int light = front->light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->IsVertical(inst.level))
+			if (inst.level.isVertical(*ld))
 				light += 16;
-			else if (ld->IsHorizontal(inst.level))
+			else if (inst.level.isHorizontal(*ld))
 				light -= 16;
 
 			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
@@ -855,12 +855,12 @@ public:
 
 		if (inst.r_view.lighting && !fullbright)
 		{
-			int light = sd->SecRef(inst.level)->light;
+			int light = inst.level.getSector(*sd).light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->IsVertical(inst.level))
+			if (inst.level.isVertical(*ld))
 				light += 16;
-			else if (ld->IsHorizontal(inst.level))
+			else if (inst.level.isHorizontal(*ld))
 				light -= 16;
 
 			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
@@ -875,18 +875,18 @@ public:
 
 	void DrawLine(int ld_index)
 	{
-		const LineDef *ld = inst.level.linedefs[ld_index];
+		const auto ld = inst.level.linedefs[ld_index];
 
 		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
 			return;
 
-		if (! ld->Right(inst.level))
+		if (! inst.level.getRight(*ld))
 			return;
 
-		float x1 = static_cast<float>(ld->Start(inst.level)->x() - inst.r_view.x);
-		float y1 = static_cast<float>(ld->Start(inst.level)->y() - inst.r_view.y);
-		float x2 = static_cast<float>(ld->End(inst.level)->x() - inst.r_view.x);
-		float y2 = static_cast<float>(ld->End(inst.level)->y() - inst.r_view.y);
+		float x1 = static_cast<float>(inst.level.getStart(*ld).x() - inst.r_view.x);
+		float y1 = static_cast<float>(inst.level.getStart(*ld).y() - inst.r_view.y);
+		float x2 = static_cast<float>(inst.level.getEnd(*ld).x() - inst.r_view.x);
+		float y2 = static_cast<float>(inst.level.getEnd(*ld).y() - inst.r_view.y);
 
 		float tx1 = static_cast<float>(x1 * inst.r_view.Sin - y1 * inst.r_view.Cos);
 		float ty1 = static_cast<float>(x1 * inst.r_view.Cos + y1 * inst.r_view.Sin);
@@ -914,7 +914,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		const SideDef *sd = (side == Side::left) ? ld->Left(inst.level) : ld->Right(inst.level);
+		const SideDef *sd = (side == Side::left) ? inst.level.getLeft(*ld) : inst.level.getRight(*ld);
 
 		if (! sd)
 			return;
@@ -973,26 +973,26 @@ public:
 			return;
 
 		bool self_ref = false;
-		if (ld->Left(inst.level) && ld->Right(inst.level) && ld->Left(inst.level)->sector == ld->Right(inst.level)->sector)
+		if (inst.level.getLeft(*ld) && inst.level.getRight(*ld) && inst.level.getLeft(*ld)->sector == inst.level.getRight(*ld)->sector)
 			self_ref = true;
 
 		// mark sectors to be drawn
 		// [ this method means we don't need to check visibility of sectors ]
 		if (! self_ref)
 		{
-			if (ld->Left(inst.level) && inst.level.isSector(ld->Left(inst.level)->sector))
-				seen_sectors.set(ld->Left(inst.level)->sector);
+			if (inst.level.getLeft(*ld) && inst.level.isSector(inst.level.getLeft(*ld)->sector))
+				seen_sectors.set(inst.level.getLeft(*ld)->sector);
 
-			if (ld->Right(inst.level) && inst.level.isSector(ld->Right(inst.level)->sector))
-				seen_sectors.set(ld->Right(inst.level)->sector);
+			if (inst.level.getRight(*ld) && inst.level.isSector(inst.level.getRight(*ld)->sector))
+				seen_sectors.set(inst.level.getRight(*ld)->sector);
 		}
 
 		/* actually draw it... */
 
-		x1 = static_cast<float>(ld->Start(inst.level)->x());
-		y1 = static_cast<float>(ld->Start(inst.level)->y());
-		x2 = static_cast<float>(ld->End(inst.level)->x());
-		y2 = static_cast<float>(ld->End(inst.level)->y());
+		x1 = static_cast<float>(inst.level.getStart(*ld).x());
+		y1 = static_cast<float>(inst.level.getStart(*ld).y());
+		x2 = static_cast<float>(inst.level.getEnd(*ld).x());
+		y2 = static_cast<float>(inst.level.getEnd(*ld).y());
 
 		if (side == Side::left)
 		{
@@ -1002,7 +1002,7 @@ public:
 
 		float ld_len = hypotf(x2 - x1, y2 - y1);
 
-		const Sector *front = sd ? sd->SecRef(inst.level) : NULL;
+		const Sector *front = sd ? &inst.level.getSector(*sd) : NULL;
 
 		bool sky_front = inst.is_sky(front->CeilTex());
 		bool sky_upper = false;
@@ -1011,23 +1011,22 @@ public:
 		{
 			sector_3dfloors_c *ex = inst.Subdiv_3DFloorsForSector(sd->sector);
 
-			DrawSide('W', ld, sd, sd->MidTex(), front, NULL, false,
+			DrawSide('W', ld.get(), sd, sd->MidTex(), front, NULL, false,
 				ld_len, x1, y1, &ex->f_plane, x2, y2, &ex->c_plane);
 		}
 		else
 		{
-			const SideDef *sd_back = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
-			const Sector *back  = sd_back ? sd_back->SecRef(inst.level) : NULL;
+			const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(*ld) : inst.level.getLeft(*ld);
+			const Sector *back  = sd_back ? &inst.level.getSector(*sd_back) : NULL;
 
 			sky_upper = sky_front && inst.is_sky(back->CeilTex());
 
 			// check for BOOM 242 invisible platforms
 			bool invis_back = false;
-			const Sector *dummy = NULL;
 			sector_3dfloors_c *b_ex = inst.Subdiv_3DFloorsForSector(sd_back->sector);
 			if (b_ex->heightsec >= 0)
 			{
-				dummy = inst.level.sectors[b_ex->heightsec];
+				const auto dummy = inst.level.sectors[b_ex->heightsec];
 				if (dummy->floorh < back->floorh)
 					invis_back = true;
 			}
@@ -1037,7 +1036,7 @@ public:
 			slope_plane_c dummy_fp;
 			if (f_ex->heightsec >= 0)
 			{
-				dummy = inst.level.sectors[f_ex->heightsec];
+				const auto dummy = inst.level.sectors[f_ex->heightsec];
 				if (dummy->floorh < front->floorh)
 				{
 					dummy_fp.Init(static_cast<float>(dummy->floorh));
@@ -1051,17 +1050,17 @@ public:
 
 			// lower part
 			if ((back->floorh > front->floorh || f_sloped) && !self_ref && !invis_back)
-				DrawSide('L', ld, sd, sd->LowerTex(), front, back, sky_upper,
+				DrawSide('L', ld.get(), sd, sd->LowerTex(), front, back, sky_upper,
 					ld_len, x1, y1, f_floorp, x2, y2, &b_ex->f_plane);
 
 			// upper part
 			if ((back->ceilh < front->ceilh || c_sloped) && !self_ref && !sky_upper)
-				DrawSide('U', ld, sd, sd->UpperTex(), front, back, sky_upper,
+				DrawSide('U', ld.get(), sd, sd->UpperTex(), front, back, sky_upper,
 					ld_len, x1, y1, &b_ex->c_plane, x2, y2, &f_ex->c_plane);
 
 			// railing tex
 			if (!is_null_tex(sd->MidTex()) && inst.r_view.texturing)
-				DrawMidMasker(ld, sd, front, back, sky_upper,
+				DrawMidMasker(ld.get(), sd, front, back, sky_upper,
 					ld_len, x1, y1, x2, y2);
 
 			// draw sides of extrafloors
@@ -1070,8 +1069,8 @@ public:
 				for (size_t k = 0 ; k < b_ex->floors.size() ; k++)
 				{
 					const extrafloor_c& EF = b_ex->floors[k];
-					const SideDef *ef_sd = inst.level.sidedefs[EF.sd];
-					const Sector *dummy = inst.level.sectors[ef_sd->sector];
+					const auto ef_sd = inst.level.sidedefs[EF.sd];
+					const auto dummy = inst.level.sectors[ef_sd->sector];
 
 					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))
 						continue;
@@ -1096,7 +1095,7 @@ public:
 					slope_plane_c p1; p1.Init(static_cast<float>(bottom_h));
 					slope_plane_c p2; p2.Init(static_cast<float>(top_h));
 
-					DrawSide('E', ld, sd, tex, front, back, false,
+					DrawSide('E', ld.get(), sd, tex, front, back, false,
 						ld_len, x1, y1, &p1, x2, y2, &p2);
 				}
 			}
@@ -1114,7 +1113,7 @@ public:
 			slope_plane_c p1; p1.Init(static_cast<float>(front->ceilh));
 			slope_plane_c p2; p2.Init(static_cast<float>(front->ceilh + 16384.0));
 
-			DrawSide('U', ld, sd, "-", front, NULL, true /* sky_upper */,
+			DrawSide('U', ld.get(), sd, "-", front, NULL, true /* sky_upper */,
 				ld_len, x1, y1, &p1, x2, y2, &p2);
 		}
 	}
@@ -1126,8 +1125,7 @@ public:
 		if (! subdiv)
 			return;
 
-		const Sector *sec = inst.level.sectors[sec_index];
-		const Sector *dummy = NULL;
+		const auto sec = inst.level.sectors[sec_index];
 
 		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sec_index);
 
@@ -1136,57 +1134,57 @@ public:
 		// support for BOOM's 242 "transfer heights" line type
 		if (exfloor->heightsec >= 0)
 		{
-			dummy = inst.level.sectors[exfloor->heightsec];
+			const auto dummy = inst.level.sectors[exfloor->heightsec];
 
 			if (dummy->floorh > sec->floorh && inst.r_view.z < dummy->floorh)
 			{
 				// space C : underwater
-				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->floorh), dummy->CeilTex());
-				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(sec->floorh), dummy->FloorTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->floorh), dummy->CeilTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(sec->floorh), dummy->FloorTex());
 
 				// this helps the view to not look weird when clipping around
 				if (dummy->ceilh > sec->floorh)
-					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
+					DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 			else if (dummy->ceilh < sec->ceilh && inst.r_view.z > dummy->ceilh)
 			{
 				// space A : head over ceiling
-				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), dummy->FloorTex());
-				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(sec->ceilh), dummy->CeilTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), dummy->FloorTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(sec->ceilh), dummy->CeilTex());
 
 				if (dummy->floorh < sec->ceilh)
-					DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
+					DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 			}
 			else if (dummy->floorh < sec->floorh)
 			{
 				// invisible platform
-				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
 				if (!inst.is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
+					DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 			else
 			{
 				// space B : normal
-				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
 				if (!inst.is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
+					DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 		} else {
 
 			// normal sector
-			DrawSectorPolygons(sec, subdiv, &exfloor->f_plane, +1, static_cast<float>(sec->floorh), sec->FloorTex());
+			DrawSectorPolygons(sec.get(), subdiv, &exfloor->f_plane, +1, static_cast<float>(sec->floorh), sec->FloorTex());
 
 			if (!inst.is_sky(sec->CeilTex()))
-				DrawSectorPolygons(sec, subdiv, &exfloor->c_plane, -1, static_cast<float>(sec->ceilh), sec->CeilTex());
+				DrawSectorPolygons(sec.get(), subdiv, &exfloor->c_plane, -1, static_cast<float>(sec->ceilh), sec->CeilTex());
 		}
 
 		// draw planes of 3D floors
 		for (size_t k = 0 ; k < exfloor->floors.size() ; k++)
 		{
 			const extrafloor_c& EF = exfloor->floors[k];
-			const Sector *dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector];
+			const auto dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector];
 
 			// TODO: supporting translucent surfaces is non-trivial and needs
 			//       to be done in separate pass with a depth sort.
@@ -1209,16 +1207,16 @@ public:
 				std::swap(top_tex, bottom_tex);
 			}
 
-			DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(top_h), top_tex);
-			DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(bottom_h), bottom_tex);
+			DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(top_h), top_tex);
+			DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(bottom_h), bottom_tex);
 		}
 	}
 
 	void DrawThing(int th_index)
 	{
-		Thing *th = inst.level.things[th_index];
+		const auto th = inst.level.things[th_index];
 
-		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
+		const thingtype_t &info = inst.conf.getThingType(th->type);
 
 		// project sprite to check if it is off-screen
 
@@ -1241,13 +1239,16 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *img = inst.wad.W_GetSprite(inst.conf, th->type);
+		Img_c *img = inst.wad.getMutableSprite(inst.conf, th->type, inst.loaded, Render3D_CalcRotation(inst.r_view.angle, th->angle));
 		if (! img)
 		{
-			img = inst.wad.images.IM_UnknownSprite(inst.conf);
+			img = &inst.wad.images.IM_UnknownSprite(inst.conf);
 			fullbright = true;
 			scale = 0.33f;
 		}
+
+		int offsetX, offsetY;
+		img->getSpriteOffset(offsetX, offsetY);
 
 		float scale_w = img->width() * scale;
 		float scale_h = img->height() * scale;
@@ -1285,7 +1286,7 @@ public:
 		}
 		else
 		{
-			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th->h());
+			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th->h() + std::max(0, offsetY - img->height()));
 			z2 = z1 + scale_h;
 		}
 
@@ -1331,28 +1332,28 @@ public:
 
 	void HighlightLine(int ld_index, int part)
 	{
-		const LineDef *L = inst.level.linedefs[ld_index];
+		const auto L = inst.level.linedefs[ld_index];
 
 		Side side = (part & PART_LF_ALL) ? Side::left : Side::right;
 
-		const SideDef *sd = (side == Side::left) ? L->Left(inst.level) : L->Right(inst.level);
+		const SideDef *sd = (side == Side::left) ? inst.level.getLeft(*L) : inst.level.getRight(*L);
 		if (sd == NULL)
 			return;
 
-		float x1 = static_cast<float>(L->Start(inst.level)->x());
-		float y1 = static_cast<float>(L->Start(inst.level)->y());
-		float x2 = static_cast<float>(L->End(inst.level)->x());
-		float y2 = static_cast<float>(L->End(inst.level)->y());
+		float x1 = static_cast<float>(inst.level.getStart(*L).x());
+		float y1 = static_cast<float>(inst.level.getStart(*L).y());
+		float x2 = static_cast<float>(inst.level.getEnd(*L).x());
+		float y2 = static_cast<float>(inst.level.getEnd(*L).y());
 
 		// check that this side is facing the camera
 		Side cam_side = PointOnLineSide(inst.r_view.x, inst.r_view.y, x1,y1,x2,y2);
 		if (cam_side != side)
 			return;
 
-		const SideDef *sd_back = (side == Side::left) ? L->Right(inst.level) : L->Left(inst.level);
+		const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(*L) : inst.level.getLeft(*L);
 
-		const Sector *front = sd->SecRef(inst.level);
-		const Sector *back  = sd_back ? sd_back->SecRef(inst.level) : NULL;
+		const Sector *front = &inst.level.getSector(*sd);
+		const Sector *back  = sd_back ? &inst.level.getSector(*sd_back) : NULL;
 
 		float z1, z2;
 
@@ -1372,7 +1373,7 @@ public:
 			{
 				int zi1, zi2;
 
-				if (! inst.LD_RailHeights(zi1, zi2, L, sd, front, back))
+				if (! inst.LD_RailHeights(zi1, zi2, L.get(), sd, front, back))
 					return;
 
 				z1 = static_cast<float>(zi1); z2 = static_cast<float>(zi2);
@@ -1399,7 +1400,7 @@ public:
 
 	void HighlightSector(int sec_index, int part)
 	{
-		const Sector *sec = inst.level.sectors[sec_index];
+		const auto sec = inst.level.sectors[sec_index];
 
 		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 
@@ -1420,14 +1421,14 @@ public:
 				return;
 		}
 
-		for (const LineDef *L : inst.level.linedefs)
+		for (const auto &L : inst.level.linedefs)
 		{
-			if (L->TouchesSector(sec_index, inst.level))
+			if (inst.level.touchesSector(*L, sec_index))
 			{
-				float x1 = static_cast<float>(L->Start(inst.level)->x());
-				float y1 = static_cast<float>(L->Start(inst.level)->y());
-				float x2 = static_cast<float>(L->End(inst.level)->x());
-				float y2 = static_cast<float>(L->End(inst.level)->y());
+				float x1 = static_cast<float>(inst.level.getStart(*L).x());
+				float y1 = static_cast<float>(inst.level.getStart(*L).y());
+				float x2 = static_cast<float>(inst.level.getEnd(*L).x());
+				float y2 = static_cast<float>(inst.level.getEnd(*L).y());
 
 				glBegin(GL_LINE_STRIP);
 				glVertex3f(x1, y1, z);
@@ -1439,7 +1440,7 @@ public:
 
 	void HighlightThing(int th_index)
 	{
-		Thing *th = inst.level.things[th_index];
+		const auto th = inst.level.things[th_index];
 		float tx = static_cast<float>(th->x());
 		float ty = static_cast<float>(th->y());
 
@@ -1454,14 +1455,14 @@ public:
 			drag_dz = static_cast<float>(inst.edit.drag_cur.z - inst.edit.drag_start.z);
 		}
 
-		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
+		const thingtype_t &info = inst.conf.getThingType(th->type);
 
 		float scale = info.scale;
 
-		Img_c *img = inst.wad.W_GetSprite(inst.conf, th->type);
+		const Img_c *img = inst.wad.getSprite(inst.conf, th->type, inst.loaded, Render3D_CalcRotation(inst.r_view.angle, th->angle));
 		if (! img)
 		{
-			img = inst.wad.images.IM_UnknownSprite(inst.conf);
+			img = &inst.wad.images.IM_UnknownSprite(inst.conf);
 			scale = 0.33f;
 		}
 
@@ -1556,7 +1557,7 @@ public:
 
 		bool saw_hl = false;
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			if (inst.edit.highlight.valid() && *it == inst.edit.highlight.num)
 			{

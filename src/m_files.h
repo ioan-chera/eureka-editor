@@ -21,41 +21,135 @@
 #ifndef __EUREKA_M_FILES_H__
 #define __EUREKA_M_FILES_H__
 
+#include "lib_util.h"
+#include "m_strings.h"
+#include "sys_type.h"
+
+#include <deque>
+#include <ostream>
+
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 class Wad_file;
 
-void M_LoadRecent();
-void M_SaveRecent();
-
-void M_AddRecent(const SString &filename, const SString &map_name);
-void M_OpenRecentFromMenu(void *priv_data);
-
-// these three only for menu code
-int M_RecentCount();
-SString M_RecentShortName(int index);
-void * M_RecentData(int index);
 
 
-void M_LookForIWADs();
-void M_AddKnownIWAD(const SString &path);
-SString M_QueryKnownIWAD(const SString &game);
-SString M_CollectGamesForMenu(int *exist_val, const char *exist_name);
+//------------------------------------------------------------------------
+//  RECENT FILE HANDLING
+//------------------------------------------------------------------------
 
-void M_ValidateGivenFiles();
-int  M_FindGivenFile(const char *filename);
-
-void M_BackupWad(Wad_file *wad);
+#define MAX_RECENT  24
 
 
-struct port_path_info_t
+// this is for the "File/Recent" menu callbacks
+struct RecentMap
 {
-	SString exe_filename;
+	fs::path file;
+	SString map;
 };
 
-port_path_info_t * M_QueryPortPath(const SString &name, bool create_it = false);
 
-bool M_IsPortPathValid(const port_path_info_t *info);
+class RecentFiles_c
+{
+private:
+	typedef std::deque<RecentMap> Deque;
 
-bool readBuffer(FILE* f, size_t size, std::vector<byte>& target);
+	void push_front(const fs::path &file, const SString &map);
+	Deque::iterator find(const fs::path &file);
+
+	Deque list;
+
+public:
+
+	int getSize() const
+	{
+		return (int)list.size();
+	}
+
+	void clear()
+	{
+		list.clear();
+	}
+
+	void insert(const fs::path &file, const SString &map);
+	void Write(std::ostream &stream) const;
+	SString Format(int index) const;
+	const RecentMap &Lookup(int index) const;
+};
+
+//
+// Holds recently collected knowledge
+//
+class RecentKnowledge
+{
+public:
+	void load(const fs::path &home_dir, const fs::path &old_home_dir);
+	void save(const fs::path &home_dir) const;
+	void addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir);
+
+	const fs::path *queryIWAD(const SString &game) const
+	{
+		return get(known_iwads, game);
+	}
+
+	void lookForIWADs(const fs::path &install_dir, const fs::path &home_dir,
+			const fs::path &old_home_dir);
+	void addIWAD(const fs::path &path);
+	SString collectGamesForMenu(int *exist_val, const char *exist_name) const;
+	const fs::path *getFirstIWAD() const
+	{
+		return known_iwads.empty() ? nullptr : &known_iwads.begin()->second;
+	}
+
+	//
+	// Query port path
+	//
+	const fs::path *queryPortPath(const SString &name) const
+	{
+		return get(port_paths, name);
+	}
+
+	//
+	// Changes the port path from name
+	//
+	void setPortPath(const SString &name, const fs::path &path)
+	{
+		port_paths[name] = path;
+	}
+
+	//
+	// Constant getter of recent files
+	//
+	const RecentFiles_c &getFiles() const
+	{
+		return files;
+	}
+
+	bool hasIwadByPath(const fs::path &path) const;
+
+private:
+	void parseMiscConfig(std::istream &is);
+	void writeKnownIWADs(std::ostream &os) const;
+	void parsePortPath(const SString &name, const SString &cpath);
+	void writePortPaths(std::ostream &os) const;
+
+	RecentFiles_c files;
+	std::map<SString, fs::path> known_iwads;
+	std::map<SString, fs::path> port_paths;
+};
+
+void M_OpenRecentFromMenu(void *priv_data);
+
+void M_ValidateGivenFiles();
+int  M_FindGivenFile(const fs::path &filename);
+
+void M_BackupWad(const Wad_file *wad);
+
+namespace global
+{
+	extern RecentKnowledge recent;
+}
 
 #endif  /* __EUREKA_M_FILES_H__ */
 

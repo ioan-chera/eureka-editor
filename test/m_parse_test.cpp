@@ -132,3 +132,80 @@ TEST(MParse, MParseLine)
         ASSERT_EQ(M_ParseLine("\"\"\"", tokens, option), ParseLine_stringError);
     }
 }
+
+TEST(MParse, TokenWordParse)
+{
+	TokenWordParse parse("word1 w2 ...g3+gh-\\ \"\" \"have\"\"double word\" \"\"\"\" \"Veac#caev\"#Jackson", true);
+	std::vector<SString> words;
+	SString word;
+	while(parse.getNext(word))
+		words.push_back(word);
+
+	ASSERT_EQ(words.size(), 7);
+	ASSERT_EQ(words[0], "word1");
+	ASSERT_EQ(words[1], "w2");
+	ASSERT_EQ(words[2], "...g3+gh-\\");
+	ASSERT_EQ(words[3], "");
+	ASSERT_EQ(words[4], "have\"double word");
+	ASSERT_EQ(words[5], "\"");
+	ASSERT_EQ(words[6], "Veac#caev");
+}
+
+TEST(MParse, TokenWordParsePath)
+{
+	TokenWordParse parse("word1 w2/w3 word3", true);
+	SString word;
+	fs::path path;
+
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "word1");
+	ASSERT_TRUE(parse.getNext(path));
+	ASSERT_EQ(path, fs::path("w2") / "w3");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "word3");
+}
+
+TEST(MParse, TokenWordParseEmpty)
+{
+	TokenWordParse parse(" \t\t\r\n", true);
+	SString word;
+	ASSERT_FALSE(parse.getNext(word));
+
+	TokenWordParse parse2("", true);
+	ASSERT_FALSE(parse2.getNext(word));
+}
+
+TEST(MParse, TokenWordParseUnendedQuote)
+{
+	SString word;
+
+	TokenWordParse parse3("\"", true);
+	ASSERT_TRUE(parse3.getNext(word));
+	ASSERT_EQ(word, "");
+	ASSERT_FALSE(parse3.getNext(word));
+
+	TokenWordParse parse4("\"jackson", true);
+	ASSERT_TRUE(parse4.getNext(word));
+	ASSERT_EQ(word, "jackson");
+	ASSERT_FALSE(parse4.getNext(word));
+}
+
+TEST(MParse, TokenWordParseImmediateQuotes)
+{
+	SString word;
+
+	TokenWordParse parse("Michael\"Rogers\"Jack\"\"son\"NoEnd", true);
+
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "Michael");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "Rogers");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "Jack");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "son");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "NoEnd");
+}

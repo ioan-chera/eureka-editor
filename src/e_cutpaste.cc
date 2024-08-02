@@ -301,7 +301,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 	// determine needed sidedefs
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
-		LineDef *L = doc.linedefs[*it];
+		const auto L = doc.linedefs[*it];
 
 		if (L->right >= 0) side_sel.set(L->right);
 		if (L->left  >= 0) side_sel.set(L->left);
@@ -402,12 +402,12 @@ bool Instance::Clipboard_DoCopy()
 	switch (edit.mode)
 	{
 		case ObjType::things:
-			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 				clip_board->things.push_back(*level.things[*it]);
 			break;
 
 		case ObjType::vertices:
-			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 				clip_board->verts.push_back(*level.vertices[*it]);
 			break;
 
@@ -467,7 +467,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		Vertex * V = op.doc.vertices[new_v];
+		auto V = op.doc.vertices[new_v];
 
 		vert_map[i] = new_v;
 
@@ -479,7 +479,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
 		int new_s = op.addNew(ObjType::sectors);
-		Sector * S = op.doc.sectors[new_s];
+		auto S = op.doc.sectors[new_s];
 
 		sector_map[i] = new_s;
 
@@ -496,7 +496,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 		}
 
 		int new_sd = op.addNew(ObjType::sidedefs);
-		SideDef * SD = op.doc.sidedefs[new_sd];
+		auto SD = op.doc.sidedefs[new_sd];
 
 		side_map[i] = new_sd;
 
@@ -513,7 +513,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
 		int new_l = op.addNew(ObjType::linedefs);
-		LineDef * L = op.doc.linedefs[new_l];
+		auto L = op.doc.linedefs[new_l];
 
 		*L = clip_board->lines[i];
 
@@ -525,33 +525,33 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 		L->end   = vert_map[L->end  ];
 
 		// adjust sidedef references
-		if (L->Right(op.doc))
+		if (op.doc.getRight(*L))
 		{
 			SYS_ASSERT(side_map.find(L->right) != side_map.end());
 			L->right = side_map[L->right];
 		}
 
-		if (L->Left(op.doc))
+		if (op.doc.getLeft(*L))
 		{
 			SYS_ASSERT(side_map.find(L->left) != side_map.end());
 			L->left = side_map[L->left];
 		}
 
 		// flip linedef if necessary
-		if (L->Left(op.doc) && ! L->Right(op.doc))
+		if (op.doc.getLeft(*L) && ! op.doc.getRight(*L))
 		{
 			op.doc.linemod.flipLinedef(op, new_l);
 		}
 
 		// if the linedef lost a side, fix texturing
-		if (L->OneSided() && is_null_tex(L->Right(op.doc)->MidTex()))
+		if (L->OneSided() && is_null_tex(op.doc.getRight(*L)->MidTex()))
 			op.doc.linemod.fixForLostSide(op, new_l);
 	}
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
 		int new_t = op.addNew(ObjType::things);
-		Thing * T = op.doc.things[new_t];
+		auto T = op.doc.things[new_t];
 
 		*T = clip_board->things[i];
 
@@ -634,7 +634,7 @@ bool Instance::Clipboard_DoPaste()
 
 	if (! edit.pointer_in_window)
 	{
-		pos = grid.orig;
+		pos = grid.getOrig();
 	}
 
 	// honor the grid snapping setting
@@ -655,7 +655,7 @@ bool Instance::Clipboard_DoPaste()
 				for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 				{
 					int new_t = op.addNew(ObjType::things);
-					Thing * T = level.things[new_t];
+					auto T = level.things[new_t];
 
 					*T = clip_board->things[i];
 
@@ -673,7 +673,7 @@ bool Instance::Clipboard_DoPaste()
 				for (i = 0 ; i < clip_board->verts.size() ; i++)
 				{
 					int new_v = op.addNew(ObjType::vertices);
-					Vertex * V = level.vertices[new_v];
+					auto V = level.vertices[new_v];
 
 					*V = clip_board->verts[i];
 
@@ -796,7 +796,7 @@ void UnusedVertices(const Document &doc, const selection_c &lines, selection_c &
 		if (lines.get(n))
 			continue;
 
-		const LineDef *L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		result.clear(L->start);
 		result.clear(L->end);
@@ -816,15 +816,15 @@ void UnusedSideDefs(const Document &doc, const selection_c &lines, const selecti
 		if (lines.get(n))
 			continue;
 
-		const LineDef *L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
-		if (L->Right(doc)) result.clear(L->right);
-		if (L->Left(doc))  result.clear(L->left);
+		if (doc.getRight(*L)) result.clear(L->right);
+		if (doc.getLeft(*L))  result.clear(L->left);
 	}
 
 	for (int i = 0 ; i < doc.numSidedefs(); i++)
 	{
-		const SideDef *SD = doc.sidedefs[i];
+		const auto SD = doc.sidedefs[i];
 
 		if (secs && secs->get(SD->sector))
 			result.set(i);
@@ -838,14 +838,14 @@ static void UnusedLineDefs(const Document &doc, const selection_c &sectors, sele
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		// check if touches a to-be-deleted sector
 		//    -1 : no side
 		//     0 : deleted side
 		//    +1 : kept side
-		int right_m = (L->right < 0) ? -1 : sectors.get(L->Right(doc)->sector) ? 0 : 1;
-		int  left_m = (L->left  < 0) ? -1 : sectors.get(L->Left(doc) ->sector) ? 0 : 1;
+		int right_m = (L->right < 0) ? -1 : sectors.get(doc.getRight(*L)->sector) ? 0 : 1;
+		int  left_m = (L->left  < 0) ? -1 : sectors.get(doc.getLeft(*L) ->sector) ? 0 : 1;
 
 		if (std::max(right_m, left_m) == 0)
 		{
@@ -866,16 +866,16 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *linedef = doc.linedefs[n];
+		const auto linedef = doc.linedefs[n];
 
 		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
 		{
 			del_lines.set(n);
 
-			if (linedef->WhatSector(Side::left, doc) >= 0)
-				result.set(linedef->WhatSector(Side::left, doc));
-			if (linedef->WhatSector(Side::right, doc) >= 0)
-				result.set(linedef->WhatSector(Side::right, doc));
+			if (doc.getSectorID(*linedef, Side::left) >= 0)
+				result.set(doc.getSectorID(*linedef, Side::left));
+			if (doc.getSectorID(*linedef, Side::right) >= 0)
+				result.set(doc.getSectorID(*linedef, Side::right));
 		}
 	}
 
@@ -887,14 +887,14 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 		if(result.empty())	// stop looking if there's nothing else to remove
 			return;
 
-		const LineDef *linedef = doc.linedefs[n];
+		const auto linedef = doc.linedefs[n];
 
 		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
 			continue;
 
 		for (Side what_side : kSides)
 		{
-			int sec_num = linedef->WhatSector(what_side, doc);
+			int sec_num = doc.getSectorID(*linedef, what_side);
 
 			if (sec_num < 0)
 				continue;
@@ -909,14 +909,14 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 			// know that this sector should be kept.
 
 			Side opp_side;
-			int opp_ld = doc.hover.getOppositeLinedef(n, what_side, &opp_side, &del_lines);
+			int opp_ld = doc.hover.getOppositeLinedef(n, what_side, &opp_side, &del_lines, nullptr);
 
 			if (opp_ld < 0)
 				continue;
 
-			const LineDef *oppositeLinedef = doc.linedefs[opp_ld];
+			const auto oppositeLinedef = doc.linedefs[opp_ld];
 
-			if (oppositeLinedef->WhatSector(opp_side, doc) == sec_num)
+			if (doc.getSectorID(*oppositeLinedef, opp_side) == sec_num)
 				result.clear(sec_num);
 		}
 	}
@@ -927,13 +927,13 @@ static void FixupLineDefs(EditOperation &op, const Document &doc, selection_c *l
 {
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
-		const LineDef *L = doc.linedefs[*it];
+		const auto L = doc.linedefs[*it];
 
 		// the logic is ugly here mainly to handle flipping (in particular,
 		// not to flip the line when _both_ sides are unlinked).
 
-		bool do_right = L->Right(doc) ? sectors->get(L->Right(doc)->sector) : false;
-		bool do_left  = L->Left(doc)  ? sectors->get(L->Left(doc) ->sector) : false;
+		bool do_right = doc.getRight(*L) ? sectors->get(doc.getRight(*L)->sector) : false;
+		bool do_left  = doc.getLeft(*L)  ? sectors->get(doc.getLeft(*L) ->sector) : false;
 
 		// line shouldn't be in list unless it touches the sector
 		SYS_ASSERT(do_right || do_left);
@@ -967,7 +967,7 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto L = doc.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 		{
@@ -983,11 +983,11 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	SYS_ASSERT(ld1 >= 0);
 	SYS_ASSERT(ld2 >= 0);
 
-	LineDef *L1 = doc.linedefs[ld1];
-	LineDef *L2 = doc.linedefs[ld2];
+	const LineDef *L1 = doc.linedefs[ld1].get();
+	const LineDef *L2 = doc.linedefs[ld2].get();
 
 	// we merge L2 into L1, unless L1 is significantly shorter
-	if (L1->CalcLength(doc) < L2->CalcLength(doc) * 0.7)
+	if (doc.calcLength(*L1) < doc.calcLength(*L2) * 0.7)
 	{
 		std::swap(ld1, ld2);
 		std::swap(L1,  L2);
@@ -1060,7 +1060,7 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const sele
 	{
 		for (int n = 0 ; n < doc.numLinedefs(); n++)
 		{
-			const LineDef *L = doc.linedefs[n];
+			const auto L = doc.linedefs[n];
 
 			if (list.get(L->start) || list.get(L->end))
 				line_sel.set(n);
@@ -1125,7 +1125,7 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const sele
 
 void Instance::CMD_Delete()
 {
-	if (main_win->ClipboardOp(EditCommand::del))
+	if (main_win && main_win->ClipboardOp(EditCommand::del))
 		return;
 
 	SelectHighlight unselect = edit.SelectionOrHighlight();
@@ -1137,6 +1137,17 @@ void Instance::CMD_Delete()
 
 	bool keep = Exec_HasFlag("/keep");
 
+	auto clearSelection = [this]()
+		{
+			Editor_ClearAction();
+
+			// always clear the selection (deleting objects invalidates it)
+			Selection_Clear();
+
+			edit.highlight.clear();
+			edit.split_line.clear();
+		};
+
 	// special case for a single vertex connected to two linedefs,
 	// we delete the vertex but merge the two linedefs.
 	if (edit.mode == ObjType::vertices && edit.Selected->count_obj() == 1)
@@ -1147,7 +1158,11 @@ void Instance::CMD_Delete()
 		if (level.vertmod.howManyLinedefs(v_num) == 2)
 		{
 			if (DeleteVertex_MergeLineDefs(level, v_num))
-				goto success;
+			{
+				
+				clearSelection();
+				RedrawMap();
+			}
 		}
 
 		// delete vertex normally
@@ -1157,17 +1172,11 @@ void Instance::CMD_Delete()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("deleted", *edit.Selected);
 
-		DeleteObjects_WithUnused(op, level, *edit.Selected, keep, false /* keep_verts */, keep);
+		selection_c deleteList = *edit.Selected;
+		clearSelection();
+
+		DeleteObjects_WithUnused(op, level, deleteList, keep, false /* keep_verts */, keep);
 	}
-
-success:
-	Editor_ClearAction();
-
-	// always clear the selection (deleting objects invalidates it)
-	Selection_Clear();
-
-	edit.highlight.clear();
-	edit.split_line.clear();
 
 	RedrawMap();
 }

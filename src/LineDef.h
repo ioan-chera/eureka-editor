@@ -20,12 +20,7 @@
 #ifndef LINEDEF_H_
 #define LINEDEF_H_
 
-#include "FixedPoint.h"
 #include "Side.h"
-
-struct SideDef;
-struct Vertex;
-struct Document;
 
 class LineDef
 {
@@ -50,13 +45,6 @@ public:
 		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
-	Vertex *Start(const Document &doc) const;
-	Vertex *End(const Document &doc)   const;
-
-	// remember: these two can return NULL!
-	SideDef *Right(const Document &doc) const;
-	SideDef *Left(const Document &doc)  const;
-
 	bool TouchesVertex(int v_num) const
 	{
 		return (start == v_num) || (end == v_num);
@@ -69,10 +57,6 @@ public:
 	{
 		return start == v_num ? end : start;
 	}
-
-	bool TouchesCoord(FFixedPoint tx, FFixedPoint ty, const Document &doc) const;
-
-	bool TouchesSector(int sec_num, const Document &doc) const;
 
 	bool NoSided() const
 	{
@@ -90,18 +74,7 @@ public:
 	}
 
 	// side is either SIDE_LEFT or SIDE_RIGHT
-	int WhatSector(Side side, const Document &doc) const;
 	int WhatSideDef(Side side) const;
-
-	double CalcLength(const Document &doc) const;
-
-	bool IsZeroLength(const Document &doc) const;
-
-	bool IsSelfRef(const Document &doc) const;
-
-	bool IsHorizontal(const Document &doc) const;
-
-	bool IsVertical(const Document &doc) const;
 
 	int Arg(int which /* 1..5 */) const
 	{

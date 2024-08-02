@@ -25,10 +25,12 @@
 #include "im_img.h"
 #include "m_game.h"
 #include "m_loadsave.h"
+#include "m_nodes.h"
 #include "main.h"
 #include "r_grid.h"
 #include "r_render.h"
 #include "r_subdiv.h"
+#include "ui_file.h"
 #include "w_texture.h"
 #include "w_wad.h"
 #include "WadData.h"
@@ -39,14 +41,25 @@ class Fl_RGB_Image;
 class Lump_c;
 class UI_NodeDialog;
 class UI_ProjectSetup;
+struct BadCount;
+struct NewDocument;
 struct v2double_t;
 struct v2int_t;
+
+//
+// For SelectNeighborLines and SelectNeighborSectors
+//
+enum SelectNeighborCriterion
+{
+	height,
+	texture,
+};
 
 //
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
 //
-class Instance
+class Instance : public grid::Listener
 {
 public:
 	// E_COMMANDS
@@ -137,9 +150,11 @@ public:
 	void CMD_SEC_SwapFlats();
 	void CMD_Select();
 	void CMD_SelectAll();
+	void CMD_SelectNeighbors();
 	void CMD_SetVar();
 	void CMD_Shrink();
 	void CMD_TestMap();
+	void CMD_ChangeTestSettings();
 	void CMD_TH_SpinThings();
 	void CMD_ToggleVar();
 	void CMD_Undo();
@@ -190,11 +205,9 @@ public:
 		const Sector *front, const Sector *back) const;
 
 	// E_MAIN
-	void CalculateLevelBounds();
 	void Editor_ChangeMode(char mode_char);
 	void Editor_ChangeMode_Raw(ObjType new_mode);
-	void Editor_ClearAction();
-	void Editor_DefaultState();
+	void Editor_ClearAction() noexcept;
 	void Editor_Init();
 	bool Editor_ParseUser(const std::vector<SString> &tokens);
 	void Editor_WriteUser(std::ostream &os) const;
@@ -212,7 +225,7 @@ public:
 	void RecUsed_WriteUser(std::ostream &os) const;
 	void RedrawMap();
 	void Selection_Clear(bool no_save = false);
-	void Selection_InvalidateLast();
+	void Selection_InvalidateLast() noexcept;
 	void Selection_NotifyBegin();
 	void Selection_NotifyDelete(ObjType type, int objnum);
 	void Selection_NotifyEnd();
@@ -234,7 +247,6 @@ public:
 
 	// M_EVENTS
 	void ClearStickyMod();
-	void Editor_ClearNav();
 	void Editor_ScrollMap(int mode, v2int_t dpos = {}, keycode_t mod = 0);
 	void Editor_SetAction(EditorAction new_action);
 	void EV_EscapeKey();
@@ -247,15 +259,12 @@ public:
 	unsigned Nav_TimeDiff();
 
 	// M_FILES
-	bool M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args = false);
-	SString M_PickDefaultIWAD() const;
+	fs::path M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
-	void M_WriteEurekaLump(Wad_file *wad) const;
 
 	// M_GAME
 	bool is_sky(const SString &flat) const;
 	char M_GetFlatType(const SString &name) const;
-	const linetype_t &M_GetLineType(int type) const;
 	const sectortype_t &M_GetSectorType(int type) const;
 	char M_GetTextureType(const SString &name) const;
 	SString M_LineCategoryString(SString &letters) const;
@@ -270,32 +279,28 @@ public:
 	bool ExecuteKey(keycode_t key, KeyContext context);
 
 	// M_LOADSAVE
-	Lump_c *Load_LookupAndSeek(const Wad_file *wad, const char *name) const;
-	void LoadLevel(Wad_file *wad, const SString &level);
-	void LoadLevelNum(Wad_file *wad, int lev_num);
+	NewDocument openDocument(const LoadingData &inLoading, const Wad_file &wad, int level);
+	void LoadLevel(const Wad_file *wad, const SString &level) noexcept(false);
+	void LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false);
 	bool MissingIWAD_Dialog();
-	void ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad);
-	bool M_SaveMap();
-	void ValidateVertexRefs(LineDef *ld, int num);
-	void ValidateSectorRef(SideDef *sd, int num);
-	void ValidateSidedefRefs(LineDef *ld, int num);
-	
+	bool M_SaveMap(bool inhibit_node_build);
+	void refreshViewAfterLoad(const BadCount& bad, const Wad_file* wad, const SString& map_name, bool new_resources);
+
 	// M_NODES
-	void BuildNodesAfterSave(int lev_idx);
-	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const EUR_PRINTF(2, 3);
+	void BuildNodesAfterSave(int lev_idx, const LoadingData& loading, Wad_file &wad);
+	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
 
 	// M_TESTMAP
-	bool M_PortSetupDialog(const SString& port, const SString& game);
+	bool M_PortSetupDialog(const SString& port, const SString& game, const tl::optional<SString> &commandLine);
 
 	// M_UDMF
-	void UDMF_LoadLevel(const Wad_file *load_wad);
-	void UDMF_SaveLevel() const;
+	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Document &doc, LoadingData &loading, BadCount &bad) const;
+	void UDMF_SaveLevel(const LoadingData &loading, Wad_file &wad) const;
 
 	// MAIN
-	bool Main_ConfirmQuit(const char *action) const;
-	SString Main_FileOpFolder() const;
-	bool Main_LoadIWAD();
-	void Main_LoadResources(LoadingData &loading);
+	fs::path Main_FileOpFolder() const;
+	void Main_LoadResources(const LoadingData &loading) noexcept(false);
+	void UpdateViewOnResources();
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;
@@ -313,7 +318,7 @@ public:
 
 	// R_SUBDIV
 	sector_3dfloors_c *Subdiv_3DFloorsForSector(int num);
-	void Subdiv_InvalidateAll();
+	void Subdiv_InvalidateAll() noexcept;
 	bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx, double map_hy);
 	sector_subdivision_c *Subdiv_PolygonsForSector(int num);
 
@@ -326,9 +331,53 @@ public:
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 	void Status_Clear() const;
+	
+	// GridListener
+	void gridRedrawMap() override
+	{
+		RedrawMap();
+	}
+	
+	void gridSetGrid(int grid) override
+	{
+		if (main_win)
+			main_win->info_bar->SetGrid(grid);
+	}
+	
+	void gridUpdateSnap() override
+	{
+		if (main_win)
+			main_win->info_bar->UpdateSnap();
+	}
+	
+	void gridAdjustPos() override
+	{
+		if (main_win)
+			main_win->scroll->AdjustPos();
+	}
+	
+	void gridPointerPos() override
+	{
+		if (main_win)
+			main_win->canvas->PointerPos();
+	}
+	
+	void gridSetScale(double scale) override
+	{
+		if (main_win)
+			main_win->info_bar->SetScale(scale);
+	}
+	
+	void gridBeep(const char *message) override
+	{
+		Beep("%s", message);
+	}
 
-	// UI_MENU
-	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
+	void gridUpdateRatio() override
+	{
+		if(main_win)
+			main_win->info_bar->UpdateRatio();
+	}
 
 private:
 	// New private methods
@@ -351,6 +400,7 @@ private:
 	void Editor_ClearErrorMode();
 	void UpdateDrawLine();
 	void zoom_fit();
+	void SelectNeighborSectors(int objnum, SelectNeighborCriterion option, byte parts);
 
 	// E_SECTOR
 	void commandSectorMerge();
@@ -377,46 +427,20 @@ private:
 	void DoExecuteCommand(const editor_command_t *cmd);
 
 	// M_LOADSAVE
-	void CreateFallbackSector();
-	void CreateFallbackSideDef();
-	void EmptyLump(const char *name) const;
 	void FreshLevel();
-	void LoadBehavior(const Wad_file *load_wad);
-	void LoadHeader(const Wad_file *load_wad);
-	void LoadLineDefs(const Wad_file *load_wad);
-	void LoadLineDefs_Hexen(const Wad_file *load_wad);
-	void LoadScripts(const Wad_file *load_wad);
-	void LoadSectors(const Wad_file *load_wad);
-	void LoadSideDefs(const Wad_file *load_wad);
-	void LoadThings(const Wad_file *load_wad);
-	void LoadThings_Hexen(const Wad_file *load_wad);
-	void LoadVertices(const Wad_file *load_wad);
-	bool M_ExportMap();
+	
+	bool M_ExportMap(bool inhibit_node_build);
 	void Navigate2D();
-	void Project_ApplyChanges(UI_ProjectSetup *dialog);
-	bool Project_AskFile(SString& filename) const;
-	void SaveBehavior();
-	void SaveHeader(const SString &level);
-	void SaveLevel(const SString &level);
-	void SaveLineDefs();
-	void SaveLineDefs_Hexen();
-	void SaveThings();
-	void SaveThings_Hexen();
-	void SaveScripts();
-	void SaveSectors();
-	void SaveSideDefs();
-	void SaveVertices();
-	void ShowLoadProblem() const;
+	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
+	tl::optional<fs::path> Project_AskFile() const;
+	void SaveLevel(LoadingData &loading, const SString &level, Wad_file &wad, bool inhibit_node_build);
+	void ConfirmLevelSaveSuccess(const LoadingData &loading, const Wad_file &wad);
+	void SaveLevelAndUpdateWindow(LoadingData& loading, const SString& level, Wad_file &wad, bool inhibit_node_build);
 
 	// M_NODES
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);
 
-	// M_UDMF
-	void ValidateLevel_UDMF();
-
 	// R_GRID
-	bool Grid_ParseUser(const std::vector<SString> &tokens);
-	void Grid_WriteUser(std::ostream &os) const;
 
 	// R_RENDER
 	StringID GrabSelectedFlat();
@@ -461,14 +485,11 @@ public:	// will be private when we encapsulate everything
 	//
 	// Selection stuff
 	//
-	selection_c *last_Sel = nullptr;
+	tl::optional<selection_c> last_Sel;
 
 	//
 	// Document stuff
 	//
-	bool MadeChanges = false;
-	v2double_t Map_bound1 = { 32767, 32767 };	/* minimum XY value of map */
-	v2double_t Map_bound2 = { -32767, -32767 };	/* maximum XY value of map */
 	int moved_vertex_count = 0;
 	int new_vertex_minimum = 0;
 	bool recalc_map_bounds = false;
@@ -476,17 +497,11 @@ public:	// will be private when we encapsulate everything
 	Recently_used recent_flats{ *this };
 	Recently_used recent_textures{ *this };
 	Recently_used recent_things{ *this };
-	int bad_linedef_count = 0;
-	int bad_sector_refs = 0;
-	int bad_sidedef_refs = 0;
-	// this is only used to prevent a M_SaveMap which happens inside
-	// CMD_BuildAllNodes from building that saved level twice.
-	bool inhibit_node_build = false;
 	int last_given_file = 0;
-	int loading_level = 0;
-	int saving_level = 0;
-	UI_NodeDialog *nodeialog = nullptr;
+	tl::optional<UI_NodeDialog> nodeialog;
 	nodebuildinfo_t *nb_info = nullptr;
+	
+	int tagInMemory = 0;
 
 	WadData wad;
 
@@ -522,11 +537,11 @@ public:	// will be private when we encapsulate everything
 	//
 	// Rendering
 	//
-	Grid_State_c grid{ *this };
+	grid::State grid{ *this };
 	Render_View_t r_view{ *this };
 	sector_info_cache_c sector_info_cache{ *this };
 };
 
-extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
+extern Instance *gInstance;	// for now we run with one instance, will have more for the MDI.
 
 #endif

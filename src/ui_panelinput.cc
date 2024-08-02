@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------
 
 #include "ui_panelinput.h"
+#include "ui_nombre.h"
 
 //
 // Given a list of fields, assigns secondary callbacks
@@ -61,7 +62,7 @@ void PanelFieldFixUp::checkDirtyFields()
 //
 // Convenience that also sets the dirty field. Only use it for targeted fields
 //
-void PanelFieldFixUp::setInputValue(ICallback2 *input, const char *value)
+void PanelFieldFixUp::setInputValue(ICallback2 *input, const char *value) noexcept
 {
 	input->setValue(value);
 	mDirtyFields.erase(input);
@@ -95,4 +96,23 @@ void PanelFieldFixUp::clearDirtyCallback(Fl_Widget *widget, void *data)
 	auto it = fixup->mOriginalCallbacks.find(control);
 	if(it != fixup->mOriginalCallbacks.end())
 		it->second.callback(widget, it->second.data);
+}
+
+void MapItemBox::SetObj(int _index, int _count)
+{
+	if (obj == _index && count == _count)
+		return;
+
+	obj   = _index;
+	count = _count;
+
+	which->SetIndex(obj);
+	which->SetSelected(count);
+
+	UpdateField();
+
+	if (obj < 0)
+		UnselectPics();
+
+	redraw();
 }

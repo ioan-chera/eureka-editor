@@ -104,6 +104,11 @@ TEST(SString, Construct)
 
     SString nullStringSized(nullptr, 4);
     ASSERT_TRUE(nullStringSized.empty());
+
+	// C++ string
+	std::string jackson = "Michael Jackson";
+	SString sjackson(jackson);
+	ASSERT_EQ(sjackson, "Michael Jackson");
 }
 
 TEST(SString, FindSpace)
@@ -305,4 +310,16 @@ TEST(SString, ToNumberOverloads)
 	SString fourtytwo = "42a";
 	ASSERT_EQ(strtol(fourtytwo, &endptr, 0), 42);
 	ASSERT_EQ(endptr, fourtytwo.c_str() + 2);
+}
+
+TEST(SString, Escape)
+{
+	ASSERT_EQ(SString("OneWord").spaceEscape(), "OneWord");
+	ASSERT_EQ(SString("One Word").spaceEscape(), "\"One Word\"");
+	ASSERT_EQ(SString("One\"Word").spaceEscape(), "\"One\"\"Word\"");
+	ASSERT_EQ(SString("One\"Word").spaceEscape(true), "\"One\\\"Word\"");
+	ASSERT_EQ(SString("One \"Ripper\" Word").spaceEscape(), "\"One \"\"Ripper\"\" Word\"");
+	ASSERT_EQ(SString("").spaceEscape(), "\"\"");
+
+	ASSERT_EQ(SString("LA#SEC").spaceEscape(), "\"LA#SEC\"");
 }

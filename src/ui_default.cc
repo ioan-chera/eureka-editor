@@ -194,7 +194,7 @@ void UI_DefaultProps::SetIntVal(Fl_Int_Input *w, int value)
 
 void UI_DefaultProps::UpdateThingDesc()
 {
-	const thingtype_t &info = M_GetThingType(inst.conf, inst.conf.default_thing);
+	const thingtype_t &info = inst.conf.getThingType(inst.conf.default_thing);
 
 	th_desc->value(info.desc.c_str());
 	th_sprite->GetSprite(inst.conf.default_thing, FL_DARK2);
@@ -357,7 +357,7 @@ void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
 
 	int value = atoi(box->thing->value());
 
-	const thingtype_t &info = M_GetThingType(box->inst.conf, value);
+	const thingtype_t &info = box->inst.conf.getThingType(value);
 
 	box->th_desc->value(info.desc.c_str());
 	box->th_sprite->GetSprite(value, FL_DARK2);
@@ -592,14 +592,6 @@ void Instance::Props_WriteUser(std::ostream &os) const
 	os << "default floor_tex \"" << conf.default_floor_tex.getTidy("\"") << "\"\n";
 	os << "default ceil_tex \"" << conf.default_ceil_tex.getTidy("\"") << "\"\n";
 }
-
-
-void Props_LoadValues(const Instance &inst)
-{
-	if (inst.main_win)
-		inst.main_win->props_box->LoadValues();
-}
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

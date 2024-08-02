@@ -53,15 +53,22 @@ private:
 public:
 	explicit bitvec_c(int n_elements = 64);
 
+	bitvec_c(const bitvec_c &other) = default;
+	bitvec_c(bitvec_c &&other) : data(std::move(other.data)), num_elem(other.num_elem)
+	{
+		other.num_elem = 0;
+	}
+	bitvec_c &operator = (bitvec_c &&other) = default;
+
 	inline int size() const
 	{
 		return num_elem;
 	}
 
-	bool get(int n) const;	// Get bit <n>
+	bool get(int n) const noexcept;	// Get bit <n>
 
 	void set(int n);		// Set bit <n> to 1
-	void clear(int n);		// Set bit <n> to 0
+	void clear(int n) noexcept;		// Set bit <n> to 0
 	void toggle(int n);		// Toggle bit <n>
 
 	void frob(int n, BitOp op);
@@ -73,7 +80,7 @@ public:
 private:
 	/* NOTE : these functions do no range checking! */
 
-	inline bool raw_get(int n) const
+	inline bool raw_get(int n) const noexcept
 	{
 		return !!(data[n >> 3] & (1 << (n & 7)));
 	}
@@ -83,7 +90,7 @@ private:
 		data[n >> 3] |= (1 << (n & 7));
 	}
 
-	inline void raw_clear(int n)
+	inline void raw_clear(int n) noexcept
 	{
 		data[n >> 3] &= ~(1 << (n & 7));
 	}

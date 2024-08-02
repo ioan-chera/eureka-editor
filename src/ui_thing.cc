@@ -70,8 +70,7 @@ const char *const *arrow_pixmaps[8] =
 // UI_ThingBox Constructor
 //
 UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label),
-    obj(-1), count(0), inst(inst)
+    MapItemBox(inst, X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX);
 
@@ -328,30 +327,6 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 	resizable(NULL);
 }
 
-//
-// UI_ThingBox Destructor
-//
-UI_ThingBox::~UI_ThingBox()
-{
-}
-
-
-void UI_ThingBox::SetObj(int _index, int _count)
-{
-	if (obj == _index && count == _count)
-		return;
-
-	obj   = _index;
-	count = _count;
-
-	which->SetIndex(obj);
-	which->SetSelected(count);
-
-	UpdateField();
-
-	redraw();
-}
-
 
 void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 {
@@ -359,7 +334,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 	int new_type = atoi(box->type->value());
 
-	const thingtype_t &info = M_GetThingType(box->inst.conf, new_type);
+	const thingtype_t &info = box->inst.conf.getThingType(new_type);
 
 	box->desc->value(info.desc.c_str());
 	box->sprite->GetSprite(new_type, FL_DARK2);
@@ -369,7 +344,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			op.changeThing(*it, Thing::F_TYPE, new_type);
 		}
@@ -386,7 +361,7 @@ void UI_ThingBox::dyntype_callback(Fl_Widget *w, void *data)
 
 	int value = atoi(box->type->value());
 
-	const thingtype_t &info = M_GetThingType(box->inst.conf, value);
+	const thingtype_t &info = box->inst.conf.getThingType(value);
 
 	box->desc->value(info.desc.c_str());
 	box->sprite->GetSprite(value, FL_DARK2);
@@ -399,7 +374,7 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 
 	int new_type = atoi(box->spec_type->value());
 
-	const linetype_t &info = box->inst.M_GetLineType(new_type);
+	const linetype_t &info = box->inst.conf.getLineType(new_type);
 
 	if (new_type == 0)
 		box->spec_desc->value("");
@@ -411,7 +386,7 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited special of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			op.changeThing(*it, Thing::F_SPECIAL, new_type);
 		}
@@ -430,7 +405,7 @@ void UI_ThingBox::dynspec_callback(Fl_Widget *w, void *data)
 
 	if (value)
 	{
-		const linetype_t &info = box->inst.M_GetLineType(value);
+		const linetype_t &info = box->inst.conf.getLineType(value);
 		box->spec_desc->value(info.desc.c_str());
 	}
 	else
@@ -500,7 +475,7 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited angle of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeThing(*it, Thing::F_ANGLE, new_ang);
 		}
@@ -520,7 +495,7 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited TID of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeThing(*it, Thing::F_TID, new_tid);
 		}
@@ -539,7 +514,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited X of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			op.changeThing(*it, Thing::F_X, MakeValidCoord(box->inst.loaded.levelFormat, new_x));
 
 	}
@@ -556,7 +531,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			op.changeThing(*it, Thing::F_Y, MakeValidCoord(box->inst.loaded.levelFormat, new_y));
 	}
 }
@@ -572,7 +547,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			op.changeThing(*it, Thing::F_H, FFixedPoint(new_h));
 	}
 }
@@ -593,9 +568,9 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const Thing *T = box->inst.level.things[*it];
+			const auto T = box->inst.level.things[*it];
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
@@ -632,7 +607,7 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 			snprintf(buffer, sizeof(buffer), "%d", i * 45);
 
 			box->mFixUp.setInputValue(box->angle, buffer);
-			
+
 			angle_callback(box->angle, box);
 		}
 	}
@@ -657,7 +632,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeThing(*it, static_cast<Thing::IntAddress>(Thing::F_ARG1 + arg_idx),
                                               new_value);
@@ -807,7 +782,7 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (inst.level.isThing(obj))
 		{
-			const Thing *T = inst.level.things[obj];
+			const auto T = inst.level.things[obj];
 
 			// @@ FIXME show decimals in UDMF
 			mFixUp.setInputValue(pos_x, SString(static_cast<int>(T->x())).c_str());
@@ -843,7 +818,7 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (inst.level.isThing(obj))
 		{
-			const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[obj]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[obj]->type);
 			desc->value(info.desc.c_str());
 			mFixUp.setInputValue(type, SString(inst.level.things[obj]->type).c_str());
 			sprite->GetSprite(inst.level.things[obj]->type, FL_DARK2);
@@ -871,7 +846,7 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (inst.level.isThing(obj) && inst.level.things[obj]->special)
 		{
-			const linetype_t &info = inst.M_GetLineType(inst.level.things[obj]->special);
+			const linetype_t &info = inst.conf.getLineType(inst.level.things[obj]->special);
 			spec_desc->value(info.desc.c_str());
 			mFixUp.setInputValue(spec_type, SString(inst.level.things[obj]->special).c_str());
 		}
@@ -893,10 +868,10 @@ void UI_ThingBox::UpdateField(int field)
 
 		if (inst.level.isThing(obj))
 		{
-			const Thing *T = inst.level.things[obj];
+			const auto T = inst.level.things[obj];
 
-			const thingtype_t &info = M_GetThingType(inst.conf, T->type);
-			const linetype_t  &spec = inst.M_GetLineType (T->special);
+			const thingtype_t &info = inst.conf.getThingType(T->type);
+			const linetype_t  &spec = inst.conf.getLineType (T->special);
 
 			// set argument values and tooltips
 			for (int a = 0 ; a < 5 ; a++)
@@ -929,15 +904,15 @@ void UI_ThingBox::UpdateField(int field)
 }
 
 
-void UI_ThingBox::UpdateTotal()
+void UI_ThingBox::UpdateTotal(const Document &doc) noexcept
 {
-	which->SetTotal(inst.level.numThings());
+	which->SetTotal(doc.numThings());
 }
 
 
-void UI_ThingBox::UpdateGameInfo()
+void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
-	if (inst.conf.features.coop_dm_flags || inst.loaded.levelFormat != MapFormat::doom)
+	if (config.features.coop_dm_flags || loaded.levelFormat != MapFormat::doom)
 	{
 		o_sp  ->show();
 		o_coop->show();
@@ -956,13 +931,13 @@ void UI_ThingBox::UpdateGameInfo()
 		o_dm  ->hide();
 	}
 
-	if (inst.conf.features.friend_flag && !inst.conf.features.strife_flags)
+	if (config.features.friend_flag && !config.features.strife_flags)
 		o_friend->show();
 	else
 		o_friend->hide();
 
 
-	if (inst.conf.features.strife_flags)
+	if (config.features.strife_flags)
 	{
 		o_ambush->hide();
 
@@ -988,7 +963,7 @@ void UI_ThingBox::UpdateGameInfo()
 
 	thing_opt_CB_data_c *ocb;
 
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	if (loaded.levelFormat != MapFormat::doom)
 	{
 		pos_z->show();
 

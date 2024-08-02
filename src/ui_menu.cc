@@ -81,15 +81,24 @@ static void file_do_delete(Fl_Widget *w, void * data)
 
 static void file_do_load_given(Fl_Widget *w, void *data)
 {
-	const char *filename = (const char *) data;
+	auto filename = static_cast<const fs::path *>(data);
+	assert(filename);
 
-	int given_idx = M_FindGivenFile(filename);
+	int given_idx = M_FindGivenFile(*filename);
 
 	// TODO: think up the right instance to get this
 	if (given_idx >= 0)
-		gInstance.last_given_file = given_idx;
+		gInstance->last_given_file = given_idx;
 
-	OpenFileMap(filename);
+	try
+	{
+		OpenFileMap(*filename);
+	}
+	catch (const std::runtime_error& e)
+	{
+		gLog.printf("%s\n", e.what());
+		DLG_ShowError(false, "Cannot load %s: %s", filename->u8string().c_str(), e.what());
+	}
 }
 
 static void file_do_load_recent(Fl_Widget *w, void *data)
@@ -365,7 +374,7 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 static void tools_do_preferences(Fl_Widget *w, void * data)
 {
 	// FIXME: this uses the global instance because it's also used globally on Mac
-	gInstance.ExecuteCommand("PreferenceDialog");
+	gInstance->ExecuteCommand("PreferenceDialog");
 }
 
 static void tools_do_build_nodes(Fl_Widget *w, void * data)
@@ -376,6 +385,11 @@ static void tools_do_build_nodes(Fl_Widget *w, void * data)
 static void tools_do_test_map(Fl_Widget *w, void * data)
 {
 	static_cast<Instance *>(data)->ExecuteCommand("TestMap");
+}
+
+static void tools_do_change_test_settings(Fl_Widget* w, void* data)
+{
+	static_cast<Instance *>(data)->ExecuteCommand("ChangeTestSettings");
 }
 
 static void tools_do_lump_editor(Fl_Widget *w, void * data)
@@ -491,6 +505,7 @@ static std::unordered_map<void(*)(Fl_Widget *, void *), MenuCommand> s_menu_comm
 	{tools_do_preferences, {"PreferenceDialog"} },
 	{tools_do_build_nodes, {"BuildAllNodes"} },
 	{tools_do_test_map, {"TestMap"} },
+	{tools_do_change_test_settings, {"ChangeTestSettings"}},
 	{tools_do_lump_editor, {"EditLump"} },
 	{tools_do_add_behavior, {"AddBehavior"} },
 	{tools_do_view_logs, {"LogViewer"} },
@@ -654,6 +669,10 @@ static Fl_Menu_Item menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
+		{ "&Change Test Settings...",       0, FCAL tools_do_change_test_settings },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER | FL_MENU_INACTIVE },
+
 		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes },
 		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
 		{ "&Add BEHAVIOR Lump  ", 0, FCAL tools_do_add_behavior },
@@ -710,7 +729,8 @@ static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
 // make for nicer looking menus in Windows/Linux, but are not
 // needed for the MacOS system menu bar.
 //
-void Menu_PackForMac(Fl_Menu_Item *src)
+#ifdef __APPLE__
+static void Menu_PackForMac(Fl_Menu_Item *src)
 {
 	int depth = 0;
 
@@ -747,7 +767,7 @@ void Menu_PackForMac(Fl_Menu_Item *src)
 		*dest++ = *src++;
 	}
 }
-
+#endif
 
 static int Menu_FindItem(const Fl_Menu_Item *items, const char *text)
 {
@@ -817,14 +837,14 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		SString short_name = fl_filename_name(global::Pwad_list[k].c_str());
+		SString short_name = fl_filename_name(global::Pwad_list[k].u8string().c_str());
 
 		short_name = SString::printf("%s%s%d:  %s", (k < 9) ? "  " : "",
 									 (k < 9) ? "&" : "", 1+k, short_name.c_str());
 
 		Menu_AddItem(pos, short_name.c_str(),
 					 FCAL file_do_load_given,
-					 (void *)global::Pwad_list[k].c_str(), 0);
+					 &global::Pwad_list[k], 0);
 	}
 
 	for ( ; menu_pos < total ; menu_pos++)
@@ -836,7 +856,7 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback *cb)
 {
-	int count = M_RecentCount();
+	int count = global::recent.getFiles().getSize();
 
 	if (count < 1)
 		return items;
@@ -862,9 +882,9 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		SString name = M_RecentShortName(k);
+		SString name = global::recent.getFiles().Format(k);
 
-		void *data = M_RecentData(k);
+		auto data = new RecentMap(global::recent.getFiles().Lookup(k));
 
 		Menu_AddItem(pos, name.c_str(), cb, data, 0);
 	}
@@ -875,8 +895,77 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 	return new_array;
 }
 
+namespace menu
+{
 
-Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
+static int locateMenuItem(const Fl_Sys_Menu_Bar &bar, Fl_Callback_p callback)
+{
+	int menuSize = bar.size();
+	const Fl_Menu_Item *items = bar.menu();
+	
+	for(int i = 0; i < menuSize; ++i)
+	{
+		const Fl_Menu_Item &item = items[i];
+		if(item.callback() == callback)
+			return i;
+	}
+	return -1;
+}
+
+void setTestMapDetail(Fl_Sys_Menu_Bar *bar, const SString &text)
+{
+	if(!bar)
+		return;
+	int index = locateMenuItem(*bar, tools_do_test_map);
+
+	if(index < 0)
+		return;
+	
+	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> testMapDetailStorage;
+
+	if(text.good())
+		testMapDetailStorage[bar] = SString::printf("&Test in Game (%s)", text.c_str());
+	else
+		testMapDetailStorage[bar] = "&Test in Game";
+	
+	bar->replace(index, testMapDetailStorage[bar].c_str());
+}
+
+void setUndoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb)
+{
+	if(!bar)
+		return;
+	int index = locateMenuItem(*bar, edit_do_undo);
+	if(index < 0)
+		return;
+	
+	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> undoDetailStorage;
+	
+	if(verb.good())
+		undoDetailStorage[bar] = SString("&Undo ") + verb;
+	else
+		undoDetailStorage[bar] = "&Undo";
+	bar->replace(index, undoDetailStorage[bar].c_str());
+}
+
+void setRedoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb)
+{
+	if(!bar)
+		return;
+	int index = locateMenuItem(*bar, edit_do_redo);
+	if(index < 0)
+		return;
+	
+	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> redoDetailStorage;
+	
+	if(verb.good())
+		redoDetailStorage[bar] = SString("&Redo ") + verb;
+	else
+		redoDetailStorage[bar] = "&Redo";
+	bar->replace(index, redoDetailStorage[bar].c_str());
+}
+
+Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
 
@@ -900,7 +989,7 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 	int total = items[0].size();
 	for(int i = 0; i < total; ++i)
 		if(items[i].text && items[i].callback_ && !items[i].user_data_)
-			items[i].user_data_ = this;
+			items[i].user_data_ = userData;
 
 	bar->menu(items);
 
@@ -921,16 +1010,14 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 //
 // Update all the menu shortcut displays after all_bindings got updated
 //
-void updateMenuBindings()
+void updateBindings(Fl_Sys_Menu_Bar *bar)
 {
 	// If window not made yet, it will call this itself
-	if(!gInstance.main_win || !gInstance.main_win->menu_bar)
+	if(!bar)
 		return;
-
-	Fl_Sys_Menu_Bar *bar = gInstance.main_win->menu_bar;
 	int menuSize = bar->size();
 	const Fl_Menu_Item *items = bar->menu();
-
+	
 	for(int i = 0; i < menuSize; ++i)
 	{
 		auto it = s_menu_command_map.find(items[i].callback());
@@ -940,7 +1027,7 @@ void updateMenuBindings()
 		keycode_t code;
 		if(!findKeyCodeForCommandName(command.command, command.param, &code))
 			continue;
-
+		
 		// Convert Eureka code to FLTK code
 		if(code & EMOD_COMMAND)
 			code = (code & ~EMOD_COMMAND) | FL_COMMAND;
@@ -948,11 +1035,11 @@ void updateMenuBindings()
 			code = (code & ~EMOD_META) | FL_META;
 		if(code & EMOD_ALT)
 			code = (code & ~EMOD_ALT) | FL_ALT;
-
+		
 		bar->shortcut(i, code);
 	}
 }
-
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

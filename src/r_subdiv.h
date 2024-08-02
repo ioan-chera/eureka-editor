@@ -180,14 +180,22 @@ class sector_info_cache_c
 public:
 	int total = -1;
 	std::vector<sector_extra_info_t> infos;
-	Instance &inst;
+	
 public:
-	explicit sector_info_cache_c(Instance &inst) : inst(inst)
+	explicit sector_info_cache_c(const Instance &inst) : inst(inst)
 	{ }
-
+	sector_info_cache_c(const sector_info_cache_c &other) = default;
+	sector_info_cache_c &operator = (const sector_info_cache_c &other)
+	{
+		total = other.total;
+		infos = other.infos;
+		return *this;
+	}
 
 public:
 	void Update();
+	
+private:
 	void Rebuild();
 	void CheckBoom242(const LineDef *L);
 	void CheckExtraFloor(const LineDef *L, int ld_num);
@@ -202,6 +210,8 @@ public:
 	void PlaneTiltByThing(const Thing *T, int plane);
 	void SlopeFromLine(slope_plane_c& pl, double x1, double y1, double z1,
 					   double x2, double y2, double z2);
+
+	const Instance &inst;
 };
 
 #endif  /* __EUREKA_R_SUBDIV_H__ */

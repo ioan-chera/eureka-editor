@@ -38,9 +38,9 @@ extern void LogViewer_AddLine(const char *str);
 //
 // Open a file
 //
-bool Log::openFile(const SString &filename)
+bool Log::openFile(const fs::path &filename)
 {
-	log_fp = fopen(filename.c_str(), "w+");
+	log_fp = fopen(filename.u8string().c_str(), "w+");
 
 	if (! log_fp)
 		return false;

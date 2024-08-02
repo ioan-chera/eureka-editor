@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version")
 
-project(eureka-editor VERSION 2.0.0)
+project(eureka-editor VERSION 2.1.0)
 
 # Why not use the latest C++
 set(CMAKE_CXX_STANDARD 17)
@@ -43,6 +43,8 @@ foreach(dir ${resource_common_dirs})
 endforeach()
 
 if(WIN32)
+    configure_file(src/main.rc.in src/main.rc)
+    target_sources(eureka PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/main.rc)
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT eureka)
     list(TRANSFORM resource_common_cfgs PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 
@@ -65,6 +67,10 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/misc/about_logo.png"
             "$<TARGET_FILE_DIR:eureka>/common"
     )
+endif()
+
+if(NOT APPLE)
+    target_sources(eureka PRIVATE mainroot.cc)
 endif()
 
 if(APPLE)
@@ -119,6 +125,10 @@ if(APPLE)
         XCODE_ATTRIBUTE_SKIP_INSTALL "No"
         XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME "YES"
         XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS  ${CMAKE_SOURCE_DIR}/osx/EurekaApp/eureka.entitlements
+
+        XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS           "YES"
+        XCODE_ATTRIBUTE_STRIP_INSTALLED_PRODUCT                  "NO"
+        XCODE_ATTRIBUTE_COPY_PHASE_STRIP                  "NO"
     )
 
 else()

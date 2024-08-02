@@ -21,6 +21,8 @@
 #ifndef __EUREKA_UI_INFOBAR_H__
 #define __EUREKA_UI_INFOBAR_H__
 
+#include <FL/Fl_Group.H>
+
 class Fl_Menu_Button;
 class Fl_Toggle_Button;
 
@@ -58,9 +60,6 @@ public:
 private:
 	static const char  *scale_options_str;
 	static const double scale_amounts[9];
-
-	static const char *grid_options_str;
-	static const int   grid_amounts[12];
 
 	void UpdateModeColor();
 	void UpdateSnapText();
