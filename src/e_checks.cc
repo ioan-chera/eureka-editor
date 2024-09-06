@@ -2133,7 +2133,7 @@ static void LineDefs_FindManualDoors(selection_c& lines, const Instance &inst)
 		if (L->left >= 0)
 			continue;
 
-		const linetype_t &info = inst.M_GetLineType(L->type);
+		const linetype_t &info = inst.conf.getLineType(L->type);
 
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
@@ -2167,7 +2167,7 @@ static void LineDefs_FixManualDoors(Instance &inst)
 		if (L->type <= 0 || L->left >= 0)
 			continue;
 
-		const linetype_t &info = inst.M_GetLineType(L->type);
+		const linetype_t &info = inst.conf.getLineType(L->type);
 
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
@@ -2293,7 +2293,7 @@ static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, c
 		if (type_num == 0)
 			continue;
 
-		const linetype_t &info = inst.M_GetLineType(type_num);
+		const linetype_t &info = inst.conf.getLineType(type_num);
 
 		// Boom generalized line type?
 		if (inst.conf.features.gen_types && is_genline(type_num))
@@ -3121,7 +3121,7 @@ static void Tags_FindUnmatchedSectors(selection_c& secs, const Instance &inst)
 }
 
 
-static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc)
+static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc, const ConfigData &config)
 {
 	lines.change_type(ObjType::linedefs);
 
@@ -3132,13 +3132,33 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc)
 		if (L->tag <= 0)
 			continue;
 
-		// TODO: handle special BOOM types (e.g. line-to-line teleporter)
-
 		if (L->type <= 0)
 			continue;
 
-		if (! SEC_tag_exists(L->tag, doc))
-			lines.set(n);
+		SpecialTagInfo info = {};
+		bool hasinfo = getSpecialTagInfo(ObjType::linedefs, n, L->type, L.get(), config, info);
+		
+		if(!hasinfo)
+			continue;
+		
+		for(int i = 0; i < info.numtags; ++i)
+		{
+			if(!SEC_tag_exists(info.tags[i], doc))
+			{
+				lines.set(n);
+				goto nextline;
+			}
+		}
+		for(int i = 0; i < info.numlineids; ++i)
+		{
+			if(!LD_tag_exists(info.lineids[i], doc))
+			{
+				lines.set(n);
+				goto nextline;
+			}
+		}
+	nextline:
+		;
 	}
 }
 
@@ -3159,7 +3179,7 @@ static void Tags_ShowUnmatchedLineDefs(Instance &inst)
 	if (inst.edit.mode != ObjType::linedefs)
 		inst.Editor_ChangeMode('l');
 
-	Tags_FindUnmatchedLineDefs(*inst.edit.Selected, inst.level);
+	Tags_FindUnmatchedLineDefs(*inst.edit.Selected, inst.level, inst.conf);
 
 	inst.GoToErrors();
 }
@@ -3183,8 +3203,14 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 		// e.g. D1, DR, --, and lowercase first letter all mean "no tag".
 
 		// TODO: boom generalized manual doors (etc??)
-		const linetype_t &info = inst.M_GetLineType(L->type);
+		const linetype_t &info = inst.conf.getLineType(L->type);
 
+		if(info.desc.empty())
+		{
+			gLog.printf("WARNING: invalid empty description for line type %d\n", L->type);
+			continue;
+		}
+		
 		char first = info.desc[0];
 
 		if (first == 'D' || first == '-' || ('a' <= first && first <= 'z'))
@@ -3332,7 +3358,7 @@ private:
 
 CheckResult ChecksModule::checkTags(int min_severity) const
 {
-	UI_Check_Tags *dialog = new UI_Check_Tags(min_severity > 0, inst);
+	UI_Check_Tags dialog(min_severity > 0, inst);
 
 	selection_c  sel;
 	SString check_buffer;
@@ -3342,25 +3368,25 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		Tags_FindMissingTags(sel, inst);
 
 		if (sel.empty())
-			dialog->AddLine("No linedefs missing a needed tag");
+			dialog.AddLine("No linedefs missing a needed tag");
 		else
 		{
 			check_buffer = SString::printf("%d linedefs missing a needed tag", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 2, 320,
+			dialog.AddLine(check_buffer, 2, 320,
 			                "Show", &UI_Check_Tags::action_show_missing_tag);
 		}
 
 
-		Tags_FindUnmatchedLineDefs(sel, doc);
+		Tags_FindUnmatchedLineDefs(sel, doc, inst.conf);
 
 		if (sel.empty())
-			dialog->AddLine("No tagged linedefs w/o a matching sector");
+			dialog.AddLine("No tagged linedefs w/o a matching sector");
 		else
 		{
 			check_buffer = SString::printf("%d tagged linedefs w/o a matching sector", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 2, 350,
+			dialog.AddLine(check_buffer, 2, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_line);
 		}
 
@@ -3368,12 +3394,12 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		Tags_FindUnmatchedSectors(sel, inst);
 
 		if (sel.empty())
-			dialog->AddLine("No tagged sectors w/o a matching linedef");
+			dialog.AddLine("No tagged sectors w/o a matching linedef");
 		else
 		{
 			check_buffer = SString::printf("%d tagged sectors w/o a matching linedef", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 350,
+			dialog.AddLine(check_buffer, 1, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_sec);
 		}
 
@@ -3381,16 +3407,16 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		Tags_FindBeastMarks(sel, inst);
 
 		if (sel.empty())
-			dialog->AddLine("No sectors with tag 666 or 667 used on the wrong map");
+			dialog.AddLine("No sectors with tag 666 or 667 used on the wrong map");
 		else
 		{
 			check_buffer = SString::printf("%d sectors have an invalid 666/667 tag", sel.count_obj());
 
-			dialog->AddLine(check_buffer, 1, 350,
+			dialog.AddLine(check_buffer, 1, 350,
 			                "Show", &UI_Check_Tags::action_show_beast_marks);
 		}
 
-		dialog->AddGap(10);
+		dialog.AddGap(10);
 
 
 		int min_tag, max_tag;
@@ -3398,41 +3424,35 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		tagsUsedRange(&min_tag, &max_tag);
 
 		if (max_tag <= 0)
-			dialog->AddLine("No tags are in use");
+			dialog.AddLine("No tags are in use");
 		else
 		{
 			check_buffer = SString::printf("Lowest tag: %d   Highest tag: %d", min_tag, max_tag);
-			dialog->AddLine(check_buffer);
+			dialog.AddLine(check_buffer);
 		}
 
 		if ((inst.edit.mode == ObjType::linedefs || inst.edit.mode == ObjType::sectors) &&
 		    inst.edit.Selected->notempty())
 		{
 			// always assume sector beastmark tags here
-			dialog->fresh_tag = findFreeTag(inst, true);
+			dialog.fresh_tag = findFreeTag(inst, true);
 
-			dialog->AddGap(10);
-			dialog->AddLine("Apply a fresh tag to the selection", 0, 250, "Apply",
+			dialog.AddGap(10);
+			dialog.AddLine("Apply a fresh tag to the selection", 0, 250, "Apply",
 			                &UI_Check_Tags::action_fresh_tag);
 		}
 
-		if (dialog->WorstSeverity() < min_severity)
-		{
-			delete dialog;
-
+		if (dialog.WorstSeverity() < min_severity)
 			return CheckResult::ok;
-		}
 
-		CheckResult result = dialog->Run();
+		CheckResult result = dialog.Run();
 
 		if (result == CheckResult::tookAction)
 		{
 			// repeat the tests
-			dialog->Reset();
+			dialog.Reset();
 			continue;
 		}
-
-		delete dialog;
 
 		return result;
 	}

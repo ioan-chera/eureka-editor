@@ -652,7 +652,7 @@ void UI_OpenMap::LoadFile()
 
 
 UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_startup) :
-	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
+	UI_Escapable_Window(is_startup ? 400 : 500, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
 	inst(inst)
 {
 	callback(close_callback, this);
@@ -717,7 +717,7 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 
 	if (! is_startup)
 	{
-		Fl_Box *res_title = new Fl_Box(15, by+190, 185, 30, "Resource Files:");
+		Fl_Box *res_title = new Fl_Box(15, by+190, 185, 30, "Resource Files or Folders:");
 		res_title->labelfont(FL_HELVETICA_BOLD);
 		res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
@@ -742,16 +742,27 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 		kill->labelsize(20);
 		kill->callback((Fl_Callback*)kill_callback, this);
 
-		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load");
-		mResourceButtons[r] = load;
+		// NOTE: on Apple, when selecting a folder picker, we can already pick files too, so unify the buttons
+#ifdef __APPLE__
+		Fl_Button *load = new Fl_Button(315, cy, 75 + 10 + 90, 25, "Load File or Folder");
+		mResourceFileButtons[r] = load;
 		load->callback((Fl_Callback*)load_callback, this);
+#else
+		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load File");
+		mResourceFileButtons[r] = load;
+		load->callback((Fl_Callback*)load_callback, this);
+		
+		load = new Fl_Button(load->x() + load->w() + 10, cy, 90, 25, "Load Folder");
+		mResourceDirButtons[r] = load;
+		load->callback((Fl_Callback*)load_callback, this);
+#endif
 	}
 
 	// bottom buttons
 	{
 		by += is_startup ? 80 : 375;
 
-		Fl_Group *g = new Fl_Group(0, by, 400, h() - by);
+		Fl_Group *g = new Fl_Group(0, by, w(), h() - by);
 		g->box(FL_FLAT_BOX);
 		g->color(WINDOW_BG, WINDOW_BG);
 
@@ -762,7 +773,7 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 
 		const char *ok_text = (is_startup | new_project) ? "OK" : "Use";
 
-		ok_but = new Fl_Button(240, g->y() + 14, 80, 35, ok_text);
+		ok_but = new Fl_Button(w() - 160, g->y() + 14, 80, 35, ok_text);
 		ok_but->labelfont(FL_HELVETICA_BOLD);
 		ok_but->callback((Fl_Callback*)use_callback, this);
 
@@ -1007,6 +1018,10 @@ void UI_ProjectSetup::PopulateNamespaces()
 #endif
 }
 
+inline static fs::path fileOrDirName(const fs::path &path)
+{
+	return path.has_filename() ? path.filename() : path.parent_path().filename();
+}
 
 void UI_ProjectSetup::PopulateResources()
 {
@@ -1023,7 +1038,7 @@ void UI_ProjectSetup::PopulateResources()
 		{
 			result.resources[r] = inst.loaded.resourceList[r];
 
-			res_name[r]->value(result.resources[r].filename().u8string().c_str());
+			res_name[r]->value(fileOrDirName(result.resources[r]).u8string().c_str());
 		}
 	}
 }
@@ -1132,7 +1147,8 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	SString game = GameNameFromIWAD(fs::u8path(chooser.filename()));
 
-	if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
+	if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+			global::install_dir, GAMES_DIR, game))
 	{
 		DLG_Notify("That game is not supported (no definition file).\n\n"
 		           "Please try again.");
@@ -1168,18 +1184,38 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 {
 	auto that = static_cast<UI_ProjectSetup*>(data);
 	int r;
+	bool isdir = false;
 	for (r = 0; r < RES_NUM; ++r)
-		if (w == that->mResourceButtons[r])
+		if (w == that->mResourceFileButtons[r] || w == that->mResourceDirButtons[r])
+		{
+			isdir = w == that->mResourceDirButtons[r];
 			break;
+		}
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
 	SYS_ASSERT(that);
+	
+	const char *title = isdir ? "Pick folder to open" : "Pick file to open";
+#ifdef __APPLE__
+	title = "Pick file or folder to open";
+	isdir = true;
+#endif
 
 	Fl_Native_File_Chooser chooser;
 
-	chooser.title("Pick file to open");
-	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-	chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh\nDehacked files\t*.deh\nBEX files\t*.bex");
+	chooser.title(title);
+	if(isdir)
+	{
+		chooser.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
+#ifdef __APPLE__
+		chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh\nDehacked files\t*.deh\nBEX files\t*.bex");
+#endif
+	}
+	else
+	{
+		chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+		chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh\nDehacked files\t*.deh\nBEX files\t*.bex");
+	}
 	chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
@@ -1197,7 +1233,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 
 	that->result.resources[r] = fs::u8path(chooser.filename());
 
-	that->res_name[r]->value(that->result.resources[r].filename().u8string().c_str());
+	that->res_name[r]->value(fileOrDirName(that->result.resources[r]).u8string().c_str());
 }
 
 

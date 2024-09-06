@@ -1,12 +1,12 @@
 
-Eureka 1.27 README
-==================
+Eureka README
+=============
 
 
 INTRODUCTION
 
 Eureka is a map editor for the classic DOOM games, and a few related
-games such as Heretic and Hexen.  The supported operating systems are
+games such as Heretic, Hexen and Strife.  The supported operating systems are
 Linux (and other Unix-likes), Windows and macOS.
 
 
@@ -52,8 +52,11 @@ See the INSTALL.txt document (in source code)
 
 RUNNING
 
+
+Command line:
+
 You can run Eureka from the command line, or it can be run from
-the desktop menu (if your OS handles .desktop files as per the
+the desktop menu (on Linux: if your OS handles .desktop files as per the
 XDG specs).  Eureka will need to be able to find an IWAD to run,
 if it cannot find any then the "Manage Wads" dialog will open up,
 allowing you to "Find" one (which is remembered for next time).
@@ -274,7 +277,7 @@ COPYRIGHT and LICENSE
 
   Eureka DOOM Editor
 
-  Copyright (C) 2014-2020 Ioan Chera
+  Copyright (C) 2014-2024 Ioan Chera
   Copyright (C) 2001-2020 Andrew Apted, et al
   Copyright (C) 1997-2003 Andre Majorel et al
 

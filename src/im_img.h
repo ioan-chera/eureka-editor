@@ -117,6 +117,8 @@ public:
 	// paste a copy of another image into this one, but skip any
 	// transparent pixels.
 	void compose(const Img_c &other, int x, int y);
+	
+	void flipHorizontally();
 
 	Img_c spectrify(const ConfigData &config) const;
 

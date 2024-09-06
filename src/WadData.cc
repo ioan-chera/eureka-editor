@@ -32,20 +32,25 @@ bool LumpNameCompare::operator()(const Lump_c &lump1, const Lump_c &lump2) const
 //
 // Locates the first four-stem sprite from the master dir
 //
-const Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
+std::vector<SpriteLumpRef> MasterDir::findFirstSpriteLump(const SString &stem) const
 {
 	SString firstName;
-	const Lump_c *result = nullptr;
+	std::vector<SpriteLumpRef> result;
 	std::vector<std::shared_ptr<Wad_file>> wads = getAll();
 	for(auto it = wads.rbegin(); it != wads.rend(); ++it)
 	{
-		const Lump_c *lump = (*it)->findFirstSpriteLump(stem);
-		if(!lump)
+		std::vector<SpriteLumpRef> spriteset = (*it)->findFirstSpriteLump(stem);
+		if(spriteset.empty())
 			continue;
-		if(firstName.empty() || firstName.get() > lump->Name().get())
+		if(spriteset.size() == 1)
+			return spriteset;
+		if(result.empty())
+			result = spriteset;
+		else
 		{
-			firstName = lump->Name();
-			result = lump;
+			for(size_t i = 0; i < spriteset.size(); ++i)
+				if(!result[i].lump && spriteset[i].lump)
+					result[i] = spriteset[i];
 		}
 	}
 	return result;

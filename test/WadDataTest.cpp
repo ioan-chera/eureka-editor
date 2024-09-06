@@ -87,7 +87,8 @@ TEST(MasterDir, FindFirstSpriteLump)
 	wad->AddLump("TROOC1").Printf("a");
 	Lump_c &wad1troob1 = wad->AddLump("TROOB1");
 	wad1troob1.Printf("a");
-	wad->AddLump("TROOD1").Printf("a");
+	Lump_c &wad1trood1 = wad->AddLump("TROOD1");
+	wad1trood1.Printf("a");
 	wad->AddLump("S_END");
 
 	master.setGameWad(wad);
@@ -98,11 +99,45 @@ TEST(MasterDir, FindFirstSpriteLump)
 	wad2->AddLump("S_START");
 	Lump_c &wad2possa1 = wad2->AddLump("POSSA1");
 	wad2possa1.Printf("a");
-	wad2->AddLump("TROOE1").Printf("a");
+	Lump_c &wad2trooe1 = wad2->AddLump("TROOE1");
+	wad2trooe1.Printf("a");
 	wad2->AddLump("S_END");
 
 	master.ReplaceEditWad(wad2);
-
-	ASSERT_EQ(master.findFirstSpriteLump("POSS"), &wad2possa1);
-	ASSERT_EQ(master.findFirstSpriteLump("TROO"), &wad1troob1);
+	
+	std::vector<SpriteLumpRef> tested, expected;
+	tested = master.findFirstSpriteLump("POSS");
+	expected = {
+		{&wad2possa1, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+	};
+	for(int i = 0; i < 8; ++i)
+	{
+		ASSERT_EQ(tested.at(i).lump, expected[i].lump);
+		ASSERT_EQ(tested.at(i).flipped, expected[i].flipped);
+	}
+	
+	tested = master.findFirstSpriteLump("TROO");
+	expected = {
+		{&wad2trooe1, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+		{nullptr, false},
+	};
+	
+	for(int i = 0; i < 8; ++i)
+	{
+		ASSERT_EQ(tested.at(i).lump, expected[i].lump);
+		ASSERT_EQ(tested.at(i).flipped, expected[i].flipped);
+	}
 }

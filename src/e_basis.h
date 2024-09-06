@@ -229,10 +229,21 @@ private:
 		{
 			mMessage = message;
 		}
+		
+		void setMenuName(const SString &menuName)
+		{
+			mMenuName = menuName;
+		}
+		
+		const SString &getMenuName() const
+		{
+			return mMenuName;
+		}
 
 	private:
 		std::vector<EditUnit> mOps;
 		SString mMessage = DEFAULT_UNDO_GROUP_MESSAGE;
+		SString mMenuName;
 		int mDir = 0;	// dir must be +1 or -1 if active
 	};
 

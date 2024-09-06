@@ -25,9 +25,9 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
-#include "main.h"
 
 #include "m_bitvec.h"
+#include "sys_debug.h"
 
 
 bitvec_c::bitvec_c(int n_elements) : num_elem(n_elements)

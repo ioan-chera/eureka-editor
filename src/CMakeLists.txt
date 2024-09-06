@@ -7,9 +7,6 @@ set(source_base
     Document.h
     DocumentModule.cc
     DocumentModule.h
-    Errors.cc
-    Errors.h
-    FixedPoint.h
     hdr_fltk.h
     Instance.cc
     Instance.h
@@ -18,8 +15,6 @@ set(source_base
     main.cc
     main.h
     objid.h
-    SafeOutFile.cc
-    SafeOutFile.h
     Sector.cc
     Sector.h
     Side.h
@@ -80,19 +75,11 @@ set(source_im
 )
 
 set(source_lib
-    lib_adler.cc
-    lib_adler.h
-    lib_file.cc
-    lib_file.h
     lib_tga.cc
     lib_tga.h
-    lib_util.cc
-    lib_util.h
 )
 
 set(source_m
-    m_bitvec.cc
-    m_bitvec.h
     m_config.cc
     m_config.h
     m_editlump.cc
@@ -108,19 +95,11 @@ set(source_m
     m_loadsave.h
     m_nodes.cc
     m_nodes.h
-    m_parse.cc
-    m_parse.h
     m_select.cc
     m_select.h
-    m_streams.cc
-    m_streams.h
-    m_strings.cc
-    m_strings.h
     m_testmap.cc
     m_testmap.h
     m_udmf.cc
-    m_vector.cc
-    m_vector.h
 )
 
 set(source_r
@@ -132,14 +111,6 @@ set(source_r
     r_software.cc
     r_subdiv.cc
     r_subdiv.h
-)
-
-set(source_sys
-    sys_debug.cc
-    sys_debug.h
-    sys_endian.h
-    sys_macro.h
-    sys_type.h
 )
 
 set(source_ui
@@ -213,20 +184,51 @@ add_library(
     ${source_lib}
     ${source_m}
     ${source_r}
-    ${source_sys}
     ${source_thirdparty}
     ${source_ui}
     ${source_w}
 )
 
+add_library(
+    eurekacore STATIC
+    Errors.cc
+    Errors.h
+    filesystem.hpp
+    FixedPoint.h
+    lib_adler.cc
+    lib_adler.h
+    lib_file.cc
+    lib_file.h
+    lib_util.cc
+    lib_util.h
+    m_bitvec.cc
+    m_bitvec.h
+    m_strings.cc
+    m_strings.h
+    m_parse.cc
+    m_parse.h
+    m_streams.cc
+    m_streams.h
+    m_vector.cc
+    m_vector.h
+    PrintfMacros.h
+    SafeOutFile.cc
+    SafeOutFile.h
+    sys_debug.cc
+    sys_debug.h
+    sys_endian.h
+    sys_macro.h
+    sys_type.h
+    WindowsSanitization.h
+)
+
+target_link_libraries(eurekasrc PRIVATE eurekacore)
+
 # Needed for macOS release archiving!
-set_target_properties(eurekasrc PROPERTIES ARCHIVE_OUTPUT_DIRECTORY
+set_target_properties(eurekasrc eurekacore PROPERTIES ARCHIVE_OUTPUT_DIRECTORY
                       ${PROJECT_BINARY_DIR}/out/library)
 
 option(ENABLE_OPENGL "Use OpenGL instead of software rendering" ON)
-
-# TODO: remove this when everything is moved to CMake
-target_compile_definitions(eurekasrc PUBLIC BUILT_VIA_CMAKE)
 
 if(ENABLE_OPENGL)
     find_package(OpenGL REQUIRED)
@@ -235,115 +237,72 @@ else()
     target_compile_definitions(eurekasrc PUBLIC NO_OPENGL)
 endif()
 
-if(APPLE OR WIN32)
-    message(STATUS "Using local FLTK for portability.")
+#
+# Fetch FLTK
+#
+message(STATUS "Using local FLTK for portability.")
+include(FetchContent)
 
-	set(LOCAL_FLTK_VERSION "1.3.8")
-	set(LOCAL_FLTK_URL "https://www.fltk.org/pub/fltk/${LOCAL_FLTK_VERSION}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz")
-	set(LOCAL_FLTK_MD5_HASH 84907602c2e50fadec3bc40fb61935cd)
-	set(LOCAL_FLTK_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/fltk-${LOCAL_FLTK_VERSION}")
+FetchContent_Declare(
+    FLTK
+    GIT_REPOSITORY https://github.com/fltk/fltk.git
+    GIT_TAG 9c7a4737784cfd3abe5b71ee8104a700e4f7959f    # master at some point
+)
+FetchContent_MakeAvailable(FLTK)
+target_include_directories(
+    eurekasrc
+    PUBLIC
+    ${fltk_BINARY_DIR}
+    ${fltk_SOURCE_DIR}
+)
+target_link_libraries(
+    eurekasrc
+    PRIVATE
+    fltk fltk_gl fltk_images
+)
 
-    set(LOCAL_FLTK_ARCHIVE "${CMAKE_CURRENT_BINARY_DIR}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz")
-    set(LOCAL_FLTK_BUILD "${LOCAL_FLTK_SOURCE}/build")
+if(APPLE)
+    # Need to link to them separately if FLTK is linked manually
+    find_library(CARBON_FRAMEWORK Carbon)
+    target_link_libraries(eurekasrc PUBLIC ${CARBON_FRAMEWORK})
+    find_library(COCOA_FRAMEWORK Cocoa)
+    target_link_libraries(eurekasrc PUBLIC ${COCOA_FRAMEWORK})
+    find_library(APPSERVICES_FRAMEWORK ApplicationServices)
+    target_link_libraries(eurekasrc PUBLIC ${APPSERVICES_FRAMEWORK})
+    find_package(ZLIB REQUIRED)
+    target_link_libraries(eurekasrc PUBLIC ${ZLIB_LIBRARIES})
+endif()
 
-    # Download it if not found
-    if(NOT EXISTS "${LOCAL_FLTK_ARCHIVE}")
-        message(STATUS "Downloading FLTK from ${LOCAL_FLTK_URL}")
-        file(
-            DOWNLOAD ${LOCAL_FLTK_URL} "${LOCAL_FLTK_ARCHIVE}"
-            EXPECTED_HASH MD5=${LOCAL_FLTK_MD5_HASH}
-        )
-    endif()
-    if(NOT EXISTS "${LOCAL_FLTK_SOURCE}")
-        message(STATUS "Extracting to ${LOCAL_FLTK_SOURCE}")
-        execute_process(
-            COMMAND "${CMAKE_COMMAND}" -E tar xzf "${LOCAL_FLTK_ARCHIVE}"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-        )
-        # Patch needed to prevent optimization bug
-        if(APPLE)
-            execute_process(
-                COMMAND patch "${LOCAL_FLTK_SOURCE}/src/Fl_JPEG_Image.cxx"
-                              "${CMAKE_CURRENT_SOURCE_DIR}/fltk-patch/Fl_JPEG_Image-fltk1.3.8-macos.diff"
-            )
-        endif()
-    endif()
-    if(NOT EXISTS "${LOCAL_FLTK_BUILD}/lib")
-
-        message(STATUS "Building ${LOCAL_FLTK_SOURCE}")
-
-        set(LOCAL_FLTK_DEFS -D CMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
-                            -D CMAKE_BUILD_TYPE=Release
-                            -D OPTION_USE_SYSTEM_LIBJPEG=OFF -D OPTION_USE_SYSTEM_LIBPNG=OFF
-                            -D OPTION_USE_SYSTEM_ZLIB=OFF
-        )
-        if(CMAKE_GENERATOR_PLATFORM)
-            list(APPEND LOCAL_FLTK_DEFS -A ${CMAKE_GENERATOR_PLATFORM})
-        endif()
-        if(FLTK_SKIP_OPENGL)
-            list(APPEND LOCAL_FLTK_DEFS -D OPTION_USE_GL=OFF)
-        endif()
-        if(WIN32)
-            list(APPEND LOCAL_FLTK_DEFS -G ${CMAKE_GENERATOR})
-        endif()
-
-        execute_process(
-            COMMAND "${CMAKE_COMMAND}" -S "${LOCAL_FLTK_SOURCE}" -B "${LOCAL_FLTK_BUILD}"
-                    ${LOCAL_FLTK_DEFS}
-            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-        )
-        include(ProcessorCount)
-        ProcessorCount(nproc)
-        message(STATUS "Building...")
-        execute_process(
-            COMMAND "${CMAKE_COMMAND}" --build "${LOCAL_FLTK_BUILD}" -j ${nproc} --config Release
-            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-        )
-    endif()
-
-    set(FLTK_INCLUDE_DIR "${LOCAL_FLTK_SOURCE};${LOCAL_FLTK_BUILD}")
-    if(WIN32)
-        set(FLTK_LIBRARIES "${LOCAL_FLTK_BUILD}/lib/Release/fltk.lib"
-                           "${LOCAL_FLTK_BUILD}/lib/Release/fltk_gl.lib"
-                           "${LOCAL_FLTK_BUILD}/lib/Release/fltk_images.lib"
-                           "${LOCAL_FLTK_BUILD}/lib/Release/fltk_jpeg.lib"
-                           "${LOCAL_FLTK_BUILD}/lib/Release/fltk_png.lib"
-                           "${LOCAL_FLTK_BUILD}/lib/Release/fltk_z.lib"
-        )
-        target_include_directories(eurekasrc PUBLIC "${LOCAL_FLTK_SOURCE}/zlib")
-    else()  # APPLE
-        set(FLTK_LIBRARIES "${LOCAL_FLTK_BUILD}/lib/libfltk.a"
-                           "${LOCAL_FLTK_BUILD}/lib/libfltk_gl.a"
-                           "${LOCAL_FLTK_BUILD}/lib/libfltk_images.a"
-                           "${LOCAL_FLTK_BUILD}/lib/libfltk_jpeg.a"
-                           "${LOCAL_FLTK_BUILD}/lib/libfltk_z.a"
-                           "${LOCAL_FLTK_BUILD}/lib/libfltk_png.a"
-        )
-
-        # Need to link to them separately if FLTK is linked manually
-        find_library(CARBON_FRAMEWORK Carbon)
-        target_link_libraries(eurekasrc PUBLIC ${CARBON_FRAMEWORK})
-        find_library(COCOA_FRAMEWORK Cocoa)
-        target_link_libraries(eurekasrc PUBLIC ${COCOA_FRAMEWORK})
-        find_library(APPSERVICES_FRAMEWORK ApplicationServices)
-        target_link_libraries(eurekasrc PUBLIC ${APPSERVICES_FRAMEWORK})
-    endif()
-
-else()
-    # UNIX/Linux
-    find_package(FLTK REQUIRED)
-    find_package(ZLIB REQUIRED) # ZLIB is expected on Linux separately from FLTK
+if(UNIX AND NOT APPLE)
     find_package(X11 REQUIRED)  # also libXPM
+    find_package(ZLIB REQUIRED) # ZLIB is expected on Linux separately from FLTK
+    find_package(JPEG REQUIRED)
+    find_package(PNG REQUIRED)
+    target_link_libraries(
+        eurekasrc
+        PUBLIC
+        ${X11_Xpm_LIB}
+        ${ZLIB_LIBRARIES}
+        ${JPEG_LIBRARIES}
+        ${PNG_LIBRARIES}
+    )
+else()
+    target_link_libraries(
+        eurekasrc
+        PRIVATE
+        fltk_jpeg fltk_png fltk_z
+    )
+    target_include_directories(
+        eurekasrc
+        PUBLIC
+        ${fltk_SOURCE_DIR}/zlib
+    )
 endif()
 
-target_link_libraries(eurekasrc PUBLIC ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
-if(UNIX AND NOT APPLE)  # Linux
-    target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
-endif()
+target_link_libraries(eurekasrc PUBLIC ${OPENGL_LIBRARIES})
 
 target_include_directories(eurekasrc PUBLIC
     ${PROJECT_SOURCE_DIR}
-    ${FLTK_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
 )
 
@@ -356,7 +315,7 @@ if(MSVC)
 endif()
 
 if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
-    target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS}" -Wall -Wextra -Werror
+    target_compile_options(eurekasrc PUBLIC -Wall -Wextra -Werror
                            -Wno-unused-parameter -Wno-missing-field-initializers -Wunused-variable)
 endif()
 if ( MSVC )
@@ -372,7 +331,6 @@ source_group("im_ source" FILES ${source_im})
 source_group("lib_ source" FILES ${source_lib})
 source_group("m_ source" FILES ${source_m})
 source_group("r_ source" FILES ${source_r})
-source_group("sys_ source" FILES ${source_sys})
 source_group("ui_ source" FILES ${source_ui})
 source_group("w_ source" FILES ${source_w})
 source_group("third-party" FILES ${source_thirdparty})

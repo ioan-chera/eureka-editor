@@ -888,7 +888,7 @@ public:
 
 		float scale = info.scale;
 
-		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type, inst.loaded);
+		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type, inst.loaded, Render3D_CalcRotation(inst.r_view.angle, th->angle));
 		if (! sprite)
 		{
 			sprite = &inst.wad.images.IM_UnknownSprite(inst.conf);
@@ -2048,12 +2048,12 @@ public:
 
 static void BlitHires(const Instance &inst, int ox, int oy, int ow, int oh)
 {
-	u8_t *line_rgb = new u8_t[inst.r_view.screen_w * 3];
+	uint8_t *line_rgb = new uint8_t[inst.r_view.screen_w * 3];
 
 	for (int ry = 0 ; ry < inst.r_view.screen_h ; ry++)
 	{
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + inst.r_view.screen_w * 3;
+		uint8_t *dest = line_rgb;
+		uint8_t *dest_end = line_rgb + inst.r_view.screen_w * 3;
 
 		const img_pixel_t *src = inst.r_view.screen + ry * inst.r_view.screen_w;
 
@@ -2071,14 +2071,14 @@ static void BlitHires(const Instance &inst, int ox, int oy, int ow, int oh)
 static void BlitLores(const Instance &inst, int ox, int oy, int ow, int oh)
 {
 	// if destination width is odd, we store an extra pixel here
-	u8_t *line_rgb = new u8_t[(ow + 1) * 3];
+	uint8_t *line_rgb = new uint8_t[(ow + 1) * 3];
 
 	for (int ry = 0 ; ry < inst.r_view.screen_h ; ry++)
 	{
 		const img_pixel_t *src = inst.r_view.screen + ry * inst.r_view.screen_w;
 
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + ow * 3;
+		uint8_t *dest = line_rgb;
+		uint8_t *dest_end = line_rgb + ow * 3;
 
 		for (; dest < dest_end ; dest += 6, src++)
 		{

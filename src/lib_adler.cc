@@ -26,16 +26,16 @@
 //
 //------------------------------------------------------------------------
 
-#include "main.h"
 
 #include "lib_adler.h"
+#include <math.h>
 
 // ---- Primitive routines ----
 
-crc32_c& crc32_c::operator+= (u8_t data)
+crc32_c& crc32_c::operator+= (uint8_t data)
 {
-	u32_t s1 = raw & 0xFFFF;
-	u32_t s2 = (raw >> 16) & 0xFFFF;
+	uint32_t s1 = raw & 0xFFFF;
+	uint32_t s2 = (raw >> 16) & 0xFFFF;
 
 	s1 = (s1 + data) % 65521;
 	s2 = (s2 + s1)   % 65521;
@@ -51,10 +51,10 @@ crc32_c& crc32_c::operator+= (u8_t data)
 	return *this;
 }
 
-crc32_c& crc32_c::AddBlock(const u8_t *data, int len)
+crc32_c& crc32_c::AddBlock(const uint8_t *data, int len)
 {
-	u32_t s1 = raw & 0xFFFF;
-	u32_t s2 = (raw >> 16) & 0xFFFF;
+	uint32_t s1 = raw & 0xFFFF;
+	uint32_t s2 = (raw >> 16) & 0xFFFF;
 
 	for (; len > 0; data++, len--)
 	{
@@ -73,20 +73,20 @@ crc32_c& crc32_c::AddBlock(const u8_t *data, int len)
 
 // ---- Non-primitive routines ----
 
-crc32_c& crc32_c::operator+= (u16_t value)
+crc32_c& crc32_c::operator+= (uint16_t value)
 {
-	*this += (u8_t) (value >> 8);
-	*this += (u8_t) (value);
+	*this += (uint8_t) (value >> 8);
+	*this += (uint8_t) (value);
 
 	return *this;
 }
 
-crc32_c& crc32_c::operator+= (u32_t value)
+crc32_c& crc32_c::operator+= (uint32_t value)
 {
-	*this += (u8_t) (value >> 24);
-	*this += (u8_t) (value >> 16);
-	*this += (u8_t) (value >> 8);
-	*this += (u8_t) (value);
+	*this += (uint8_t) (value >> 24);
+	*this += (uint8_t) (value >> 16);
+	*this += (uint8_t) (value >> 8);
+	*this += (uint8_t) (value);
 
 	return *this;
 }
@@ -97,10 +97,10 @@ crc32_c& crc32_c::operator+= (float value)
 	value = (float)fabs(value);
 
 	int exp;
-	u32_t mant = (u32_t) (ldexp(frexp(value, &exp), 30));
+	uint32_t mant = (uint32_t) (ldexp(frexp(value, &exp), 30));
 
-	*this += (u8_t) (neg ? '-' : '+');
-	*this += (u32_t) exp;
+	*this += (uint8_t) (neg ? '-' : '+');
+	*this += (uint32_t) exp;
 	*this += mant;
 
 	return *this;
@@ -108,6 +108,6 @@ crc32_c& crc32_c::operator+= (float value)
 
 crc32_c& crc32_c::AddCStr(const char *str)
 {
-	return AddBlock((const u8_t *) str, (int)strlen(str));
+	return AddBlock((const uint8_t *) str, (int)strlen(str));
 }
 

@@ -196,15 +196,15 @@ SString UtilTimeString(void)
 //  Adler-32 CHECKSUM Code
 //------------------------------------------------------------------------
 
-void Adler32_Begin(u32_t *crc)
+void Adler32_Begin(uint32_t *crc)
 {
 	*crc = 1;
 }
 
-void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length)
+void Adler32_AddBlock(uint32_t *crc, const uint8_t *data, int length)
 {
-	u32_t s1 = (*crc) & 0xFFFF;
-	u32_t s2 = ((*crc) >> 16) & 0xFFFF;
+	uint32_t s1 = (*crc) & 0xFFFF;
+	uint32_t s2 = ((*crc) >> 16) & 0xFFFF;
 
 	for ( ; length > 0 ; data++, length--)
 	{
@@ -215,7 +215,7 @@ void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length)
 	*crc = (s2 << 16) | s1;
 }
 
-void Adler32_Finish(u32_t *crc)
+void Adler32_Finish(uint32_t *crc)
 {
 	/* nothing to do */
 }
@@ -445,8 +445,8 @@ void LevelData::DetectPolyobjSectors()
 
 static FFixedPoint VertexCompare(const Document &doc, const void *p1, const void *p2)
 {
-	int vert1 = static_cast<const u16_t *>(p1)[0];
-	int vert2 = static_cast<const u16_t *>(p2)[0];
+	int vert1 = static_cast<const uint16_t *>(p1)[0];
+	int vert2 = static_cast<const uint16_t *>(p2)[0];
 
 	if (vert1 == vert2)
 		return FFixedPoint{};
@@ -465,14 +465,14 @@ void LevelData::DetectOverlappingVertices() const
 {
 	SYS_ASSERT((int)vertices.size() == doc.numVertices());
 
-	u16_t *array = new u16_t[(int)vertices.size()];
+	uint16_t *array = new uint16_t[(int)vertices.size()];
 
 	// sort array of indices
 	int i;
 	for (i=0 ; i < (int)vertices.size() ; i++)
-		array[i] = static_cast<u16_t>(i);
+		array[i] = static_cast<uint16_t>(i);
 
-	std::sort(array, array + (int)vertices.size(), [this](u16_t left, u16_t right)
+	std::sort(array, array + (int)vertices.size(), [this](uint16_t left, uint16_t right)
 		{
 			return VertexCompare(doc, &left, &right).raw() < 0;
 		});

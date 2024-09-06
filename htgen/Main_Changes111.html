@@ -1,0 +1,74 @@
+<div id='wikitext'>
+<h1>CHANGES IN Eureka 1.11</h1>
+<p><em>(Since the 1.07 version)</em>
+</p>
+<p class='vspace'><strong>Games and Ports:</strong>
+</p>
+<p class='vspace'>+  Hexen support!
+</p><pre>  (thanks to printz for doing some of the heavy lifting)
+</pre><p class='vspace'>+  Boom generalized lines and sectors
+</p>
+<p class='vspace'>+  treat Freedoom Phase 1 and Phase 2 as separate games
+</p>
+<p class='vspace'>+  added Eternity port definition, thanks to printz
+</p>
+<p class='vspace'>-  Heretic: categorized the textures and flats
+<br  />-  changed default port from Boom --&gt; Vanilla
+</p>
+<p class='vspace'><strong>Editing:</strong>
+</p>
+<p class='vspace'>+  rendering of sector flats/lighting in the 2D window
+</p>
+<p class='vspace'>+  easier vertex "drawing mode" using the <code>LMB</code>
+</p>
+<p class='vspace'>+  when adding lines, automatically split crossed lines
+</p>
+<p class='vspace'>-  inserting a vertex with <code>SHIFT</code> continues the drawing mode
+<br  />-  inserting a vertex with <code>CTRL</code> inhibits creation of sectors
+</p>
+<p class='vspace'>-  <code>SHIFT</code> + <code>LMB</code> in sectors mode always opens a selection box
+<br  />-  better merging of linedefs when dragging a vertex
+<br  />-  prevent overlapping lines when deleting 3rd vertex of a triangle
+</p>
+<p class='vspace'>-  much less chance to accidentally drag an object
+<br  />-  when a line splits a sector, use a consistent orientation
+<br  />-  when creating a fresh map, add all four player starts
+<br  />-  allow loading a map with no vertices, no linedefs (etc)
+</p>
+<p class='vspace'><strong>UI:</strong>
+</p>
+<p class='vspace'>+  fixed texture warping in 3D preview
+</p>
+<p class='vspace'>-  sector panel: buttons for quickly setting the headroom
+<br  />-  sector panel: <code>MMB</code> on the ceiling flat sets it to sky
+<br  />-  right-click on a sidedef or sector texture sets it to default
+<br  />-  various layout tweaks to the editing panels
+</p>
+<p class='vspace'>-  added "Recent Textures" command (etc) to Browser menu
+<br  />-  fixed RECENT category to show most recent items at the top
+<br  />-  status bar lets you see full message via a tooltip
+</p>
+<p class='vspace'><strong>Commands:</strong>
+</p>
+<p class='vspace'>-  new "Last Selection" command, undo an accidental clearing
+<br  />-  added /reverse flag for CopyProperties command
+<br  />-  extended LIN_Flip command, avoid making lines with no right side
+</p>
+<p class='vspace'><strong>Map checking:</strong>
+</p>
+<p class='vspace'>-  find "dangling" vertices
+<br  />-  detect the Medusa Effect on 2S lines
+<br  />-  detect transparent tex on solid walls
+</p>
+<p class='vspace'>-  find manual doors on 1S lines
+<br  />-  don't consider teleport things to be stuck in monsters
+<br  />-  ability to SHOW unused vertices
+</p>
+<p class='vspace'><strong>Miscellaneous:</strong>
+</p>
+<p class='vspace'>-  improved eureka.desktop file, courtesy Fabian Greffrath
+<br  />-  have a fallback sprite for the MBF dog thing (id 888)
+<br  />-  replaced "Aspect ratio" with "Pixel aspect ratio" in preferences
+<br  />-  use absolute paths for resource filenames in __EUREKA lump
+</p>
+</div>

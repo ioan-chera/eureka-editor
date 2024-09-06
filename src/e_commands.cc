@@ -259,11 +259,7 @@ void Instance::CMD_SetVar()
 		SetGamma(*this, int_val);
 	}
 	else if (var_name.noCaseEqual("ratio"))
-	{
-		grid.ratio = clamp(0, int_val, 7);
-		main_win->info_bar->UpdateRatio();
-		RedrawMap();
-	}
+		grid.configureRatio(clamp(0, int_val, 7), true);
 	else if (var_name.noCaseEqual("sec_render"))
 	{
 		int_val = clamp(0, int_val, (int)SREND_SoundProp);
@@ -332,15 +328,7 @@ void Instance::CMD_ToggleVar()
 		SetGamma(*this, (config::usegamma >= 4) ? 0 : config::usegamma + 1);
 	}
 	else if (var_name.noCaseEqual("ratio"))
-	{
-		if (grid.ratio >= 7)
-			grid.ratio = 0;
-		else
-			grid.ratio++;
-
-		main_win->info_bar->UpdateRatio();
-		RedrawMap();
-	}
+		grid.configureRatio(grid.getRatio() >= 7 ? 0 : grid.getRatio() + 1, true);
 	else if (var_name.noCaseEqual("sec_render"))
 	{
 		if (edit.sector_render_mode >= SREND_SoundProp)
@@ -405,7 +393,7 @@ void Instance::CMD_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	delta *= base_size / 100.0 / grid.Scale;
+	delta *= base_size / 100.0 / grid.getScale();
 
 	grid.Scroll(delta);
 }
@@ -429,7 +417,7 @@ void Instance::navigationScroll(float *editNav, nav_release_func_t func)
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	*editNav = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	*editNav = static_cast<float>(perc * base_size / 100.0 / grid.getScale());
 
 	Nav_SetKey(EXEC_CurKey, func);
 }
@@ -546,7 +534,7 @@ void Instance::DoBeginDrag()
 		{
 			edit.drag_thing_num = edit.clicked.num;
 			edit.drag_thing_floorh = static_cast<float>(edit.drag_start.z);
-			edit.drag_thing_up_down = (loaded.levelFormat != MapFormat::doom && !grid.snap);
+			edit.drag_thing_up_down = (loaded.levelFormat != MapFormat::doom && !grid.snaps());
 
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
@@ -1001,7 +989,7 @@ void Instance::CMD_WHEEL_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
+	speed = static_cast<float>(speed * base_size / 100.0 / grid.getScale());
 
 	grid.Scroll(delta * speed);
 }
@@ -1074,7 +1062,7 @@ void Instance::CMD_Zoom()
 	auto mid = v2int_t(edit.map.xy);
 
 	if (Exec_HasFlag("/center"))
-		mid = grid.orig.iround();
+		mid = grid.getOrig().iround();
 
 	Editor_Zoom(delta, mid);
 }
@@ -1247,7 +1235,7 @@ void Instance::CMD_GRID_Zoom()
 	if (scale < 0)
 		scale = -1.0 / scale;
 
-	float S1 = static_cast<float>(grid.Scale);
+	float S1 = static_cast<float>(grid.getScale());
 
 	grid.NearestScale(scale);
 
@@ -1334,7 +1322,7 @@ void Instance::CMD_LogViewer()
 
 void Instance::CMD_OnlineDocs()
 {
-	int rv = fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
+	int rv = fl_open_uri("https://eureka-editor.sourceforge.net/Docs_Index.html");
 	if (rv == 1)
 		Status_Set("Opened web browser");
 	else

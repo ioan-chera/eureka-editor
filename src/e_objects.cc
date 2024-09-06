@@ -439,7 +439,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			new_vert = inst.edit.highlight.num;
 
 		// if no highlight, look for a vertex at snapped coord
-		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == EditorAction::drawLine))
+		if (new_vert < 0 && inst.grid.snaps() && ! (inst.edit.action == EditorAction::drawLine))
 			new_vert = doc.vertmod.findExact(FFixedPoint(newpos.x), FFixedPoint(newpos.y));
 
 		//
@@ -736,7 +736,7 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 // Move a single vertex, without depending on the user interface highlighting
 //
 static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID,
-						 const v2double_t &delta, int &deletedVertexID)
+						 const v2double_t &delta, int &deletedVertexID, const selection_c &movingGroup)
 {
 	const Vertex &vertex = *inst.level.vertices[vertexID];
 	deletedVertexID = -1;
@@ -744,7 +744,7 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID,
 	v2double_t dest = vertex.xy() + delta;
 
 	Objid obj = hover::getNearbyObject(ObjType::vertices, inst.level, inst.conf, inst.grid, dest);
-	if(obj.valid() && obj.num != vertexID)
+	if(obj.valid() && obj.num != vertexID && !movingGroup.get(obj.num))
 	{
 		// Vertex merging
 		// TODO: messaging
@@ -765,17 +765,22 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID,
 							   splitPoint, dest, vertexID);
 	if(obj.valid())
 	{
-		splitLine = obj.num;
-		if(inst.level.objects.findLineBetweenLineAndVertex(splitLine, vertexID) >= 0)
+		const auto& L = inst.level.linedefs[obj.num];
+		assert(L);
+		if (!movingGroup.get(L->start) && !movingGroup.get(L->end))
 		{
-			// TODO: messaging
-			selection_c del_list;
-			inst.level.objects.splitLinedefAndMergeSandwich(op, splitLine, vertexID, delta,
-															&del_list);
-			deletedVertexID = del_list.find_first();
-			return;
+			splitLine = obj.num;
+			if (inst.level.objects.findLineBetweenLineAndVertex(splitLine, vertexID) >= 0)
+			{
+				// TODO: messaging
+				selection_c del_list;
+				inst.level.objects.splitLinedefAndMergeSandwich(op, splitLine, vertexID, delta,
+					&del_list);
+				deletedVertexID = del_list.find_first();
+				return;
+			}
+			inst.level.linemod.splitLinedefAtVertex(op, splitLine, vertexID);
 		}
-		inst.level.linemod.splitLinedefAtVertex(op, splitLine, vertexID);
 	}
 
 	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + MakeValidCoord(inst.loaded.levelFormat,
@@ -810,15 +815,21 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 		{
 			// We need the selection list as an array so we can easily modify it during iteration
 			std::vector<int> sel = list.asArray();
-			
+			selection_c movingGroup = list;
+
 			for(auto it = sel.begin(); it != sel.end(); ++it)
 			{
 				int deletedVertex = -1;
-				doMoveVertex(op, inst, *it, delta.xy, deletedVertex);
-				if(deletedVertex >= 0 && deletedVertex < list.max_obj())
-					for(auto jt = it + 1; jt != sel.end(); ++jt)
-						if(*jt > deletedVertex)
-							-- *jt;
+				doMoveVertex(op, inst, *it, delta.xy, deletedVertex, movingGroup);
+				if (deletedVertex >= 0 && deletedVertex < list.max_obj())
+					for (auto jt = it + 1; jt != sel.end(); ++jt)
+						if (*jt > deletedVertex)
+						{
+							movingGroup.clear(*jt);
+							--*jt;
+							movingGroup.set(*jt);
+						}
+				movingGroup.clear(*it);
 			}
 			break;
 		}
@@ -857,7 +868,7 @@ void ObjectsModule::move(const selection_c &list, const v3double_t &delta) const
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("moved", list);
 
-	int objectsBeforeMoving;
+	int objectsBeforeMoving = 0;
 	if(inst.edit.Selected)
 		objectsBeforeMoving = doc.numObjects(inst.edit.Selected->what_type());
 
@@ -963,7 +974,7 @@ static void singleDragVertex(Instance &inst, const int vertexID, const v2double_
 	if (inst.edit.split_line.valid())
 	{
 		did_split_line = inst.edit.split_line.num;
-		
+
 		// Check if it's actually a case of splitting a neighbouring linedef
 		if(inst.level.objects.findLineBetweenLineAndVertex(did_split_line, vertexID) >= 0)
 		{
@@ -1413,7 +1424,7 @@ v2double_t ObjectsModule::getDragFocus(const v2double_t &ptr) const
 	int count = 0;
 	int total = 0;
 
-	if (inst.grid.snap)
+	if (inst.grid.snaps())
 	{
 		dragCountOnGrid(&count, &total);
 

@@ -1,0 +1,64 @@
+<div id='wikitext'>
+<h1>Visplane Explorer</h1>
+<h2>Introduction</h2>
+<p>Visplane Explorer is a stand-alone program to visualize possible visplane overflow (VPO) errors in DOOM maps.  This is useful when mapping for vanilla DOOM, because when an overflow occurs the game simply quits with an error message (or crashes), which is pretty harsh on the person playing.
+</p>
+<p class='vspace'>Visplane Explorer can check not only "visplanes", but also "draw-segs" and "solid-segs".  When draw-segs overflow, it is not too bad since it just produces rendering glitches, but solid-seg overflow will corrupt memory and probably crash.  Visplane Explorer works by using a stripped down version of the DOOM rendering code, with increased limits and extra checks to prevent overflowing the buffers and crashing.
+</p>
+<p class='vspace'><strong>Caveat</strong> : while this program is a useful tool, it cannot predict every situation (for example, an Archvile making the player jump in the air, which means more geometry can be seen and hence higher visplane counts).
+You should always test your map in the original game.
+</p>
+<p class='vspace'><em>(Note: there is also a plugin for Doom Builder 2 called "Visplane Explorer", which was based on this program.  If you are looking for that, then I suggest trying the Doom Builder website or forums.)</em>
+</p>
+<div class='vspace'></div><h2>Screenshot</h2>
+<div><img src='shots/visexp1.png' alt='' title='' /></div>
+<div class='vspace'></div><h2>Downloads</h2>
+<p>Windows binary :
+<a class='urllink' href='http://sourceforge.net/projects/vis-explorer/files/1.0/visexp-1.0-win32.zip/download' rel='nofollow'>visexp-1.0-win32.zip</a>
+</p>
+<p class='vspace'>MacOS X package :
+<a class='urllink' href='http://sourceforge.net/projects/vis-explorer/files/1.0/visexp-1.0-osx.dmg/download' rel='nofollow'>visexp-1.0-osx.dmg</a>
+</p>
+<p class='vspace'>Debian Linux package  :
+<a class='urllink' href='http://sourceforge.net/projects/vis-explorer/files/1.0/visplane-explorer_1.0-1_i386.deb/download' rel='nofollow'>visplane-explorer_1.0-1_i386.deb</a>
+</p>
+<p class='vspace'>Source code :
+<a class='urllink' href='http://sourceforge.net/projects/vis-explorer/files/1.0/visexp-1.0-source.tar.gz/download' rel='nofollow'>visexp-1.0-source.tar.gz</a> and
+</p>
+<div class='vspace'></div><h2>Summary of Keyboard and Mouse usage:</h2>
+<ul><li> scroll map with mouse button or cursor keys
+</li><li> zoom with the mouse wheel or + / - keys
+</li><li> switch modes quickly with <code>V</code> / <code>D</code> / <code>S</code> keys
+</li></ul><div class='vspace'></div><h2>Credits</h2>
+<p>This GUI program was created by Andrew Apted (me).
+</p>
+<p class='vspace'>The MacOS X package was made by Ioan Chera.
+</p>
+<p class='vspace'>It includes a very stripped down version of the DOOM rendering code, which I took from
+Chocolate Doom (by Simon Howard), which in turn is based on the DOOM source code release by Id Software.  Hence these guys are included in the copyright notice.
+</p>
+<div class='vspace'></div><h2>Copyright and License</h2>
+<table border='1' bgcolor='#ffffcc' ><tr><td  valign='top'>
+<pre class='escaped'>
+
+  Visplane Explorer
+
+  Copyright (C) 2012-2014 Andrew Apted
+  Copyright (C) 2005-2008 Simon Howard
+  Copyright (C) 1993-1996 Id Software, Inc.
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published
+  by the Free Software Foundation; either version 2 of the License,
+  or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+</pre>
+</td></tr></table>
+<p class='vspace'>See <a class='urllink' href='http://www.gnu.org/licenses/gpl-2.0.txt' rel='nofollow'>GNU General Public License</a> for the full text.
+</p>
+</div>

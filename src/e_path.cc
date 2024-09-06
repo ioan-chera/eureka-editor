@@ -387,7 +387,7 @@ void Instance::GoToSelection()
 	// zoom in when bbox is very small (say < 20% of window)
 	for (int loop = 0 ; loop < 30 ; loop++)
 	{
-		if (grid.Scale >= 1.0)
+		if (grid.getScale() >= 1.0)
 			break;
 
 		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(pos1.x), static_cast<int>(pos1.y), static_cast<int>(pos2.x), static_cast<int>(pos2.y));

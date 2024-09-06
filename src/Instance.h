@@ -59,7 +59,7 @@ enum SelectNeighborCriterion
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
 //
-class Instance
+class Instance : public grid::Listener
 {
 public:
 	// E_COMMANDS
@@ -265,7 +265,6 @@ public:
 	// M_GAME
 	bool is_sky(const SString &flat) const;
 	char M_GetFlatType(const SString &name) const;
-	const linetype_t &M_GetLineType(int type) const;
 	const sectortype_t &M_GetSectorType(int type) const;
 	char M_GetTextureType(const SString &name) const;
 	SString M_LineCategoryString(SString &letters) const;
@@ -332,6 +331,53 @@ public:
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 	void Status_Clear() const;
+	
+	// GridListener
+	void gridRedrawMap() override
+	{
+		RedrawMap();
+	}
+	
+	void gridSetGrid(int grid) override
+	{
+		if (main_win)
+			main_win->info_bar->SetGrid(grid);
+	}
+	
+	void gridUpdateSnap() override
+	{
+		if (main_win)
+			main_win->info_bar->UpdateSnap();
+	}
+	
+	void gridAdjustPos() override
+	{
+		if (main_win)
+			main_win->scroll->AdjustPos();
+	}
+	
+	void gridPointerPos() override
+	{
+		if (main_win)
+			main_win->canvas->PointerPos();
+	}
+	
+	void gridSetScale(double scale) override
+	{
+		if (main_win)
+			main_win->info_bar->SetScale(scale);
+	}
+	
+	void gridBeep(const char *message) override
+	{
+		Beep("%s", message);
+	}
+
+	void gridUpdateRatio() override
+	{
+		if(main_win)
+			main_win->info_bar->UpdateRatio();
+	}
 
 private:
 	// New private methods
@@ -395,8 +441,6 @@ private:
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);
 
 	// R_GRID
-	bool Grid_ParseUser(const std::vector<SString> &tokens);
-	void Grid_WriteUser(std::ostream &os) const;
 
 	// R_RENDER
 	StringID GrabSelectedFlat();
@@ -493,11 +537,11 @@ public:	// will be private when we encapsulate everything
 	//
 	// Rendering
 	//
-	Grid_State_c grid{ *this };
+	grid::State grid{ *this };
 	Render_View_t r_view{ *this };
 	sector_info_cache_c sector_info_cache{ *this };
 };
 
-extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
+extern Instance *gInstance;	// for now we run with one instance, will have more for the MDI.
 
 #endif

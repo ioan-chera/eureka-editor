@@ -39,9 +39,10 @@ class Palette;
 class Wad_file;
 struct ConfigData;
 struct LoadingData;
+struct SpriteLumpRef;
 
 // maps type number to an image
-typedef std::map<int, tl::optional<Img_c>> sprite_map_t;
+typedef std::map<int, std::vector<Img_c>> sprite_map_t;	// can have one or eight images
 
 //
 // Wad image set
@@ -171,7 +172,7 @@ public:
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
 
 	const Lump_c *findGlobalLump(const SString &name) const;
-	const Lump_c *findFirstSpriteLump(const SString &stem) const;
+	std::vector<SpriteLumpRef> findFirstSpriteLump(const SString &stem) const;
 
 	const std::shared_ptr<Wad_file> &gameWad() const
 	{
@@ -218,10 +219,10 @@ struct WadData
 	void loadDehacked(ConfigData &config);
 	void W_LoadTextures(const ConfigData &config);
 
-	const Img_c *getSprite(const ConfigData &config, int type, const LoadingData &loading);
-	Img_c *getMutableSprite(const ConfigData &config, int type, const LoadingData &loading)
+	const Img_c *getSprite(const ConfigData &config, int type, const LoadingData &loading, int rot);
+	Img_c *getMutableSprite(const ConfigData &config, int type, const LoadingData &loading, int rot)
 	{
-		return const_cast<Img_c *>(getSprite(config, type, loading));
+		return const_cast<Img_c *>(getSprite(config, type, loading, rot));
 	}
 	
 	void reloadResources(const std::shared_ptr<Wad_file> &gameWad, const ConfigData &config, const std::vector<std::shared_ptr<Wad_file>> &resourceWads) noexcept(false);

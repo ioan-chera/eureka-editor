@@ -485,7 +485,12 @@ static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
 	SString argString = SString("/usr/bin/open -a ") + SString(portPath.u8string()).spaceEscape(true) + " --args " + inst.loaded.testingCommandLine + " " + buildArgString(args, true);
 	logArgs(argString);
 	
-	system(argString.c_str());
+	int ret = system(argString.c_str());
+	if(ret == -1)
+	{
+		ThrowException("Failed system to start %s: %s", portPath.u8string().c_str(),
+					   GetErrorMessage(errno).c_str());
+	}
 }
 
 static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
@@ -503,9 +508,6 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 	std::vector<char *> argv;
 	argv.reserve(args.size() + 2);
 	fs::path portName = portPath.filename();
-	SString portPathStorage = portName.u8string();
-	
-	argv.push_back(portPathStorage.get().data());
 	SString argString;
 	for(SString &arg : args)
 	{
@@ -653,7 +655,7 @@ void updateMenuName(Fl_Sys_Menu_Bar *bar, const LoadingData &loading)
 	if(!info || !M_IsPortPathValid(*info))
 		menu::setTestMapDetail(bar, "");
 	else
-		menu::setTestMapDetail(bar, SString(info->filename().replace_extension()));
+		menu::setTestMapDetail(bar, SString(info->filename().replace_extension().u8string()));
 }
 }
 

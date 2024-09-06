@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version")
 
-project(eureka-editor VERSION 2.0.0)
+project(eureka-editor VERSION 2.1.0)
 
 # Why not use the latest C++
 set(CMAKE_CXX_STANDARD 17)
@@ -69,6 +69,10 @@ if(WIN32)
     )
 endif()
 
+if(NOT APPLE)
+    target_sources(eureka PRIVATE mainroot.cc)
+endif()
+
 if(APPLE)
     set(exe_display_name "Eureka Doom Editor")
     set_target_properties(eureka PROPERTIES OUTPUT_NAME "${exe_display_name}")
@@ -121,6 +125,10 @@ if(APPLE)
         XCODE_ATTRIBUTE_SKIP_INSTALL "No"
         XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME "YES"
         XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS  ${CMAKE_SOURCE_DIR}/osx/EurekaApp/eureka.entitlements
+
+        XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS           "YES"
+        XCODE_ATTRIBUTE_STRIP_INSTALLED_PRODUCT                  "NO"
+        XCODE_ATTRIBUTE_COPY_PHASE_STRIP                  "NO"
     )
 
 else()

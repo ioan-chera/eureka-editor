@@ -1182,21 +1182,21 @@ void UI_Browser_Box::ToggleRecent(bool force_recent)
 class UI_Generalized_Item : public Fl_Choice
 {
 public:
-	const generalized_field_t * field;
+	const generalized_field_t field;
 
 public:
 	UI_Generalized_Item(int X, int Y, int W, int H,
 						const generalized_field_t *_field) :
 		Fl_Choice(X, Y, W, H, ""),
-		field(_field)
+		field(*_field)
 	{
 		char label_buf[256];
 
-		snprintf(label_buf, sizeof(label_buf), "%s: ", field->name.c_str());
+		snprintf(label_buf, sizeof(label_buf), "%s: ", field.name.c_str());
 
 		copy_label(label_buf);
 
-		for (const auto &keyword : field->keywords)
+		for (const auto &keyword : field.keywords)
 		{
 			add(keyword.c_str());
 		}
@@ -1209,17 +1209,17 @@ public:
 
 	int Compute() const
 	{
-		return (value() << field->shift) & field->mask;
+		return (value() << field.shift) & field.mask;
 	}
 
 	void Decode(int line_type)
 	{
-		value((line_type & field->mask) >> field->shift);
+		value((line_type & field.mask) >> field.shift);
 	}
 
 	void Reset()
 	{
-		int def_val = clamp(0, field->default_val, static_cast<int>(field->keywords.size()) - 1);
+		int def_val = clamp(0, field.default_val, static_cast<int>(field.keywords.size()) - 1);
 
 		value(def_val);
 	}

@@ -57,7 +57,7 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
 
     LoadingData loading;
 
-    auto image = wadData.getSprite(config, 3004, loading);
+    auto image = wadData.getSprite(config, 3004, loading, 3);
     ASSERT_TRUE(image);
 }
 
@@ -71,9 +71,9 @@ TEST(Texture, WadDataGetNullSprite)
     LoadingData loading;
 
     WadData wadData;
-    auto image = wadData.getSprite(config, 1234, loading);
+    auto image = wadData.getSprite(config, 1234, loading, 1);
     ASSERT_FALSE(image);
     // Try twice to make sure we don't crash (happened before)
-    image = wadData.getSprite(config, 1234, loading);
+    image = wadData.getSprite(config, 1234, loading, 1);
     ASSERT_FALSE(image);
 }

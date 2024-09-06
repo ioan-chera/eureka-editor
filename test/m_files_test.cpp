@@ -76,7 +76,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 
 	// Now read the data
 	// Expected content is:
-	SString expected = 
+	SString expected =
 		"# Eureka project info\n"
 		"game Mood\n"
 		"testing_command_line \"\"\n"
@@ -140,7 +140,7 @@ protected:
 	std::shared_ptr<Wad_file> wad;
 	LoadingData loading;
 
-	fs::path home_dir, install_dir;
+	fs::path home_dir, old_home_dir, install_dir;
 	RecentKnowledge recent;
 };
 
@@ -231,7 +231,7 @@ void ParseEurekaLumpFixture::makeGame(const fs::path &gamesDir, const char *ughN
 TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 {
 	// Safe on empty wad
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	assertEmptyLoading();
 
 	// Safe on wad with some lumps
@@ -243,7 +243,7 @@ TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 
 	ASSERT_EQ(wad->NumLumps(), 2);
 
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	assertEmptyLoading();
 }
 
@@ -274,7 +274,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	};
 
 	// Decide to keep trying, but nothing to get
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_TRUE(gameWarning);
@@ -283,7 +283,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 	// Situation 2: same, but with cancelling
 	decision = 1;
-	ASSERT_FALSE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_FALSE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 
 	// Situation 3: add home dir
 	prepareHomeDir();
@@ -292,7 +292,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	// but no emag.ugh: same problem
 	decision = 0;	// no ignore
 	gameWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_TRUE(gameWarning);
@@ -303,7 +303,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	makeGame(gamesDir, "emag.ugh");
 
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
@@ -316,7 +316,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
@@ -328,13 +328,13 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	home_dir.clear();
 	decision = 1;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_FALSE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_FALSE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 
 	// Situation 7: set the install dir instead
 	install_dir = goodHomeDir;
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
@@ -353,7 +353,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	mDeleteList.push(tropPath);
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_EQ(loading.portName, "trop");
 	ASSERT_FALSE(gameWarning);
@@ -413,7 +413,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 		errmsg = SString::vprintf(message, ap);
 	};
 
-	loading.parseEurekaLump(home_dir, install_dir, recent, wad.get());
+	loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get());
 
 	// Check that the sole error message we get is about nopath.wad
 	ASSERT_EQ(errorcount, 1);
@@ -470,7 +470,7 @@ TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 	prepareHomeDir();
 	makeGame(makeGamesDir(), "doom.ugh");
 
-	loading.parseEurekaLump(home_dir, install_dir, recent, wad.get());
+	loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get());
 	ASSERT_EQ(loading.resourceList.size(), 2);
 	ASSERT_EQ(loading.resourceList[0], getChildPath("samename.wad"));	// not the second one too
 	ASSERT_EQ(loading.resourceList[1], getChildPath("othername.wad"));
@@ -502,7 +502,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 		++errorcount;
 	};
 
-	loading.parseEurekaLump(home_dir, install_dir, recent, wad.get());
+	loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get());
 
 	ASSERT_EQ(errorcount, 1);
 	ASSERT_TRUE(loading.resourceList.empty());
@@ -510,7 +510,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	// Now change content and add a relative path
 	eureka.clearData();
 	eureka.Printf("resource ../res.wad\n");
-	loading.parseEurekaLump(home_dir, install_dir, recent, wad.get());
+	loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get());
 
 	ASSERT_EQ(errorcount, 1);
 	ASSERT_EQ(loading.resourceList.size(), 1);
@@ -609,6 +609,8 @@ TEST(RecentFiles, InsertPastCap)
 
 class RecentFilesFixture : public TempDirContext
 {
+protected:
+	void testLoadRecent(const fs::path &homePath, const fs::path &oldHomePath, const fs::path &miscPath);
 };
 
 TEST_F(RecentFilesFixture, WriteFile)
@@ -633,7 +635,7 @@ TEST_F(RecentFilesFixture, WriteFile)
 
 	std::ifstream stream(datapath);
 	ASSERT_TRUE(stream.is_open());
-	
+
 	std::string keyword, map, file;
 	stream >> keyword >> map >> file;
 	ASSERT_EQ(keyword, "recent");
@@ -657,14 +659,14 @@ TEST_F(RecentFilesFixture, WriteFile)
 	stream.close();
 }
 
-TEST_F(RecentFilesFixture, MLoadRecent)
+void RecentFilesFixture::testLoadRecent(const fs::path &homePath, const fs::path &oldHomePath,
+		const fs::path &miscPath)
 {
-	fs::path home_dir = mTempDir;
+	fs::path home_dir = homePath;
+	fs::path old_home_dir = oldHomePath;
 	RecentKnowledge recent;
 
-	// TODO: write the files
-	// TODO: write the necessary IWADs
-	fs::path path = getChildPath("misc.cfg");
+	fs::path path = miscPath;
 	std::ofstream stream(path);
 	ASSERT_TRUE(stream.is_open());
 	mDeleteList.push(path);
@@ -689,7 +691,7 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	stream << "recent \"E3 M5\" " << escape(hticPath) << std::endl;
 	stream << "recent E7M7 " << escape(deletedPath) << std::endl;	// missing wad
 	stream << "recent MAP03 " << escape(doom3Path) << std::endl;	// should overwrite the other Doom3 wad recent
-	
+
 	stream << "known_iwad heretic " << escape(hticPath) << std::endl;
 	stream << "known_iwad mood " << std::endl;	// malformed
 	stream << "known_iwad \"doom \"\"3\"\"\" " << escape(doom3Path) << std::endl;
@@ -697,7 +699,7 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	stream << "known_iwad inexistent " << escape(deletedPath) << std::endl;	// file not found
 	stream << "known_iwad malformed " << escape(badPath) << std::endl;	// bad file (both cases should be "invalid"
 	stream << "known_iwad heretic " << escape(hereticPath) << std::endl;	// overwrite
-	
+
 	stream << "port_path boom |/home/jillson/boom.wad" << std::endl;
 	stream << "port_path zdoom |/home/jillson/zdoom.wad" << std::endl;
 	stream << "port_path goom /home/jillson/goom.wad" << std::endl;	// malformed
@@ -717,7 +719,7 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 		wadstream.close();
 	}
 
-	recent.load(home_dir);
+	recent.load(home_dir, old_home_dir);
 
 	// Check the recent files
 	ASSERT_EQ(recent.getFiles().getSize(), 3);
@@ -746,6 +748,21 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	ASSERT_EQ(*recent.queryPortPath("zdoom"), "/home/jackson/zdoom.wad");
 	ASSERT_TRUE(recent.queryPortPath("boom"));
 	ASSERT_EQ(*recent.queryPortPath("boom"), "/home/jillson/boom.wad");
+}
+
+TEST_F(RecentFilesFixture, MLoadRecent)
+{
+	testLoadRecent(mTempDir, fs::path(), getChildPath("misc.cfg"));
+}
+
+TEST_F(RecentFilesFixture, MLoadRecentOldPath)
+{
+	fs::path home_dir = mTempDir;
+	fs::path old_home_dir = getChildPath("old");
+	ASSERT_TRUE(FileMakeDir(old_home_dir));
+	mDeleteList.push(old_home_dir);
+
+	testLoadRecent(home_dir, old_home_dir, old_home_dir / "misc.cfg");
 }
 
 TEST_F(RecentFilesFixture, MSaveRecent)
@@ -827,4 +844,3 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 		ASSERT_EQ(*recent.queryPortPath(item.first), item.second);
 	}
 }
-

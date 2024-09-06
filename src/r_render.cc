@@ -50,7 +50,6 @@
 #include "ui_window.h"
 #include "Vertex.h"
 
-
 // config items
 rgb_color_t config::transparent_col = rgbMake(0, 255, 255);
 
@@ -83,10 +82,10 @@ namespace thing_sec_cache
 		invalid_high = std::max(invalid_high, th);
 	}
 
-	void InvalidateAll(const Document &doc)
+	void InvalidateAll(const Document &doc, bool upcomingDelete)
 	{
 		invalid_low  = 0;
-		invalid_high = doc.numThings() - 1;
+		invalid_high = doc.numThings() - (upcomingDelete ? 2 : 1);
 	}
 
 	void Update(Instance &inst);
@@ -217,7 +216,7 @@ namespace thing_sec_cache
 		if (inst.level.numThings() != (int)inst.r_view.thing_sectors.size())
 		{
 			inst.r_view.thing_sectors.resize(inst.level.numThings());
-			thing_sec_cache::InvalidateAll(inst.level);
+			thing_sec_cache::InvalidateAll(inst.level, false);
 		}
 
 		// nothing changed?
@@ -249,7 +248,7 @@ void Render3D_NotifyInsert(ObjType type, int objnum)
 void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
 {
 	if (type == ObjType::things || type == ObjType::sectors)
-		thing_sec_cache::InvalidateAll(doc);
+		thing_sec_cache::InvalidateAll(doc, true);
 }
 
 void Render3D_NotifyChange(ObjType type, int objnum, int field)
@@ -266,6 +265,28 @@ void Render3D_NotifyEnd(Instance &inst)
 	thing_sec_cache::Update(inst);
 }
 
+int Render3D_CalcRotation(double viewAngle_rad, int thingAngle_deg)
+{
+	// thingAngle(deg) - viewAngle(deg)
+	
+	// 1: front. 45 degrees around 180 difference.  157d30': 202d30'
+	// 2: front-left                                112d30': 157d30'
+	// 3: left                                       67d30': 112d30'
+	// 4: back-left                                  22d30':  67d30'
+	// 5: back                                      -22d30':  22d30'
+	// 6: back-right                                -67d30': -22d30'
+	// 7: right                                    -112d30': -67d30'
+	// 8: front-right.                             -157d30':-112d30'
+	
+	double thingAngle_rad = M_PI / 180.0 * thingAngle_deg;
+	double angleDelta_rad = thingAngle_rad - viewAngle_rad;
+	while(angleDelta_rad > 202.5 * M_PI / 180.0)
+		angleDelta_rad -= 2 * M_PI;
+	while(angleDelta_rad < -157.5 * M_PI / 180.0)
+		angleDelta_rad += 2 * M_PI;
+	
+	return clamp((int)floor((202.5 * M_PI / 180.0 - angleDelta_rad) / (M_PI / 4.0) + 1.0), 1, 8);
+}
 
 //------------------------------------------------------------------------
 
@@ -649,7 +670,7 @@ static bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 
 void Instance::Render3D_Setup()
 {
-	thing_sec_cache::InvalidateAll(level);
+	thing_sec_cache::InvalidateAll(level, false);
 	r_view.thing_sectors.resize(0);
 
 	if (! r_view.p_type)
@@ -1918,7 +1939,7 @@ void Instance::R3D_WHEEL_Move()
 
 		if (mod == EMOD_SHIFT)
 			speed /= 4.0f;
-		else if (mod == EMOD_COMMAND)
+		else if (mod == static_cast<keycode_t>(EMOD_COMMAND))
 			speed *= 4.0f;
 	}
 

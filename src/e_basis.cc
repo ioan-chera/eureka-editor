@@ -117,7 +117,14 @@ void Basis::end()
 	else
 	{
 		SString message = mCurrentGroup.getMessage();
+		SString menuDetail = mCurrentGroup.getMenuName();
 		mUndoHistory.push(std::move(mCurrentGroup));
+		if(inst.main_win)
+		{
+			Fl_Sys_Menu_Bar *bar = inst.main_win->menu_bar;
+			menu::setUndoDetail(bar, menuDetail);
+			menu::setRedoDetail(bar, "");
+		}
 		inst.Status_Set("%s", message.c_str());
 	}
 	doProcessChangeStatus();
@@ -143,6 +150,54 @@ void Basis::abort(bool keepChanges)
 	doProcessChangeStatus();
 }
 
+static SString makeInfinitive(const SString &phrase)
+{
+	static const std::map<SString, SString> map = {
+		{"added", "Add"},
+		{"adjusted", "Adjust"},
+		{"aligned", "Align"},
+		{"cleared", "Clear"},
+		{"copied", "Copy"},
+		{"cut", "Cut"},
+		{"darkened", "Darken"},
+		{"defaulted", "Default"},
+		{"deleted", "Delete"},
+		{"disconnected", "Disconnect"},
+		{"edited", "Edit"},
+		{"enlarged", "Enlarge"},
+		{"fixed", "Fix"},
+		{"flipped", "Flip"},
+		{"halved", "Halve"},
+		{"lowered", "Lower"},
+		{"merge", "Merge"},
+		{"merged", "Merge"},
+		{"mirrored", "Mirror"},
+		{"moved", "Move"},
+		{"new", "Add New"},
+		{"pasted", "Paste"},
+		{"pruned", "Prune"},
+		{"quantized", "Quantize"},
+		{"raised", "Raise"},
+		{"removed", "Remove"},
+		{"replacement", "Replace"},
+		{"rotated", "Rotate"},
+		{"scaled", "Scale"},
+		{"set length", "Set Length"},
+		{"shaped", "Shape"},
+		{"shrunk", "Shrink"},
+		{"split", "Split"},
+		{"spun", "Spin"},
+		{"swapped", "Swap"},
+		{"unpacked", "Unpack"},
+	};
+	for(const auto &pair : map)
+	{
+		if(phrase.startsWith(pair.first.c_str()))
+			return pair.second;
+	}
+	return "";
+}
+
 //
 // assign a message to the current operation.
 // this can be called multiple times.
@@ -154,8 +209,11 @@ void Basis::setMessage(EUR_FORMAT_STRING(const char *format), ...)
 
 	va_list arg_ptr;
 	va_start(arg_ptr, format);
-	mCurrentGroup.setMessage(SString::vprintf(format, arg_ptr));
+	SString message = SString::vprintf(format, arg_ptr);
+	mCurrentGroup.setMessage(message);
 	va_end(arg_ptr);
+	
+	mCurrentGroup.setMenuName(makeInfinitive(message));
 }
 
 //
@@ -400,6 +458,15 @@ bool Basis::undo()
 	mUndoHistory.pop();
 
 	inst.Status_Set("UNDO: %s", grp.getMessage().c_str());
+	if(inst.main_win)
+	{
+		Fl_Sys_Menu_Bar *bar = inst.main_win->menu_bar;
+		if(bar)
+		{
+			menu::setRedoDetail(bar, grp.getMenuName());
+			menu::setUndoDetail(bar, mUndoHistory.empty() ? "" : mUndoHistory.top().getMenuName());
+		}
+	}
 
 	grp.reapply(*this);
 
@@ -424,6 +491,16 @@ bool Basis::redo()
 	mRedoFuture.pop();
 
 	inst.Status_Set("Redo: %s", grp.getMessage().c_str());
+	
+	if(inst.main_win)
+	{
+		Fl_Sys_Menu_Bar *bar = inst.main_win->menu_bar;
+		if(bar)
+		{
+			menu::setUndoDetail(bar, grp.getMenuName());
+			menu::setRedoDetail(bar, mRedoFuture.empty() ? "" : mRedoFuture.top().getMenuName());
+		}
+	}
 
 	grp.reapply(*this);
 
@@ -439,6 +516,12 @@ void Basis::clear()
 		mUndoHistory.pop();
 	while(!mRedoFuture.empty())
 		mRedoFuture.pop();
+	
+	if(inst.main_win)
+	{
+		menu::setUndoDetail(inst.main_win->menu_bar, "");
+		menu::setRedoDetail(inst.main_win->menu_bar, "");
+	}
 	
 	// Note: we don't clear the string table, since there can be
 	//       string references in the clipboard.
@@ -843,6 +926,7 @@ Basis::UndoGroup &Basis::UndoGroup::operator = (UndoGroup &&other) noexcept
 	mOps = std::move(other.mOps);
 	mDir = other.mDir;
 	mMessage = std::move(other.mMessage);
+	mMenuName = std::move(other.mMenuName);
 
 	other.reset();	// ensure the other goes into the default state
 	return *this;

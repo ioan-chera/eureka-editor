@@ -113,13 +113,13 @@ static int PartialTexCmp(const char *A, const char *B)
 #endif
 
 
-bool LinedefModule::partIsVisible(const Objid& obj, char part) const
+bool LinedefModule::partIsVisible(const Objid& obj, Part part) const
 {
 	const LineDef *L  = pointer(obj);
 	const SideDef *SD = sidedefPointer(obj);
 
 	if (! L->TwoSided())
-		return (part == 'l');
+		return (part == Part::lower);
 
 	const Sector *front = &doc.getSector(*doc.getRight(*L));
 	const Sector *back  = &doc.getSector(*doc.getLeft(*L));
@@ -128,10 +128,10 @@ bool LinedefModule::partIsVisible(const Objid& obj, char part) const
 		std::swap(front, back);
 
 	// ignore sky walls
-	if (part == 'u' && inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
+	if (part == Part::upper && inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
 		return false;
 
-	if (part == 'l')
+	if (part == Part::lower)
 	{
 		if (is_null_tex(SD->LowerTex()))
 			return false;
@@ -152,7 +152,7 @@ bool LinedefModule::partIsVisible(const Objid& obj, char part) const
 // calculate vertical range that the given surface occupies.
 // when part is zero, we use obj.type instead.
 //
-void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2) const
+void LinedefModule::partCalcExtent(const Objid& obj, Part part, int *z1, int *z2) const
 {
 	const LineDef *L  = pointer(obj);
 	const SideDef *SD = sidedefPointer(obj);
@@ -172,14 +172,14 @@ void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2
 		return;
 	}
 
-	if (! part)
+	if (part == Part::unspecified)
 	{
 		if (obj.parts & (PART_RT_UPPER | PART_LF_UPPER))
-			part = 'u';
+			part = Part::upper;
 		else if (obj.parts & (PART_RT_RAIL | PART_LF_RAIL))
-			part = 'r';
+			part = Part::rail;
 		else
-			part = 'l';
+			part = Part::lower;
 	}
 
 	const Sector *front = &doc.getSector(*doc.getRight(*L));
@@ -188,17 +188,17 @@ void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
 
-	if (part == 'r')
+	if (part == Part::rail)
 	{
 		*z1 = std::max(front->floorh, back->floorh);
 		*z2 = std::min(front->ceilh,  back->ceilh);
 	}
-	else if (part == 'u')
+	else if (part == Part::upper)
 	{
 		*z2 = front->ceilh;
 		*z1 = std::min(*z2, back->ceilh);
 	}
-	else  // part == 'l'
+	else  // part == Part::lower
 	{
 		*z1 = front->floorh;
 		*z2 = std::max(*z1, back->floorh);
@@ -221,8 +221,8 @@ int LinedefModule::scoreTextureMatch(const Objid& adj, const Objid& cur) const
 	int adj_z1, adj_z2;
 	int cur_z1, cur_z2;
 
-	partCalcExtent(adj, 0, &adj_z1, &adj_z2);
-	partCalcExtent(cur, 0, &cur_z1, &cur_z2);
+	partCalcExtent(adj, Part::unspecified, &adj_z1, &adj_z2);
+	partCalcExtent(cur, Part::unspecified, &cur_z1, &cur_z2);
 
 	// adjacent surface is not visible?
 	if (adj_z2 <= adj_z1)
@@ -352,17 +352,22 @@ void LinedefModule::determineAdjoiner(Objid& result,
 		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
 			continue;
 
+		static const int partsList[] =
+		{
+			PART_RT_LOWER, PART_RT_UPPER, PART_RT_RAIL
+		};
+
 		for (int side = 0 ; side < 2 ; side++)
-		for (int what = 0 ; what < 3 ; what++)
+		for (int curParts : partsList)
 		{
 			Objid adj;
 
 			adj.type  = ObjType::linedefs;
 			adj.num   = n;
-			adj.parts = (what == 0) ? PART_RT_LOWER : (what == 1) ? PART_RT_UPPER : PART_RT_RAIL;
+			adj.parts = curParts;
 
 			if (side == 1)
-				adj.parts = adj.parts << 4;
+				adj.parts = adj.parts << PART_LEFT_SHIFT;
 
 			int score = scoreAdjoiner(adj, cur, align_flags);
 
@@ -469,8 +474,8 @@ void LinedefModule::doAlignY(EditOperation &op, const Objid& cur, const Objid& a
 //	const LineDef *adj_L  = LD_ptr(adj);
 	const SideDef *adj_SD = sidedefPointer(adj);
 
-	bool lower_vis = partIsVisible(cur, 'l');
-	bool upper_vis = partIsVisible(cur, 'u');
+	bool lower_vis = partIsVisible(cur, Part::lower);
+	bool upper_vis = partIsVisible(cur, Part::upper);
 
 	bool lower_unpeg = (L->flags & MLF_LowerUnpegged) ? true : false;
 	bool upper_unpeg = (L->flags & MLF_UpperUnpegged) ? true : false;
@@ -750,8 +755,8 @@ void Instance::CMD_LIN_Align()
 			// decide whether to use upper or lower
 			// WISH : this could be smarter....
 
-			bool lower_vis = level.linemod.partIsVisible(obj, 'l');
-			bool upper_vis = level.linemod.partIsVisible(obj, 'u');
+			bool lower_vis = level.linemod.partIsVisible(obj, LinedefModule::Part::lower);
+			bool upper_vis = level.linemod.partIsVisible(obj, LinedefModule::Part::upper);
 
 			if (! (lower_vis || upper_vis))
 				continue;
@@ -1260,7 +1265,7 @@ void linemod::moveCoordOntoLinedef(const Document &doc, int ld, v2double_t &v)
 
 	v2double_t dv = v2 - v1;
 
-	double len_squared = dv.hypot();
+	double len_squared = pow(dv.hypot(), 2);
 
 	SYS_ASSERT(len_squared > 0);
 
@@ -1559,8 +1564,8 @@ static int SidedefCompare(const void *p1, const void *p2)
 {
 	int comp;
 
-	int side1 = ((const u16_t *) p1)[0];
-	int side2 = ((const u16_t *) p2)[0];
+	int side1 = ((const uint16_t *) p1)[0];
+	int side2 = ((const uint16_t *) p2)[0];
 
 	sidedef_t *A = lev_sidedefs[side1];
 	sidedef_t *B = lev_sidedefs[side2];
@@ -1604,7 +1609,7 @@ static int SidedefCompare(const void *p1, const void *p2)
 void DetectDuplicateSidedefs(void)
 {
 	int i;
-	u16_t *array = (u16_t *)UtilCalloc(num_sidedefs * sizeof(u16_t));
+	uint16_t *array = (uint16_t *)UtilCalloc(num_sidedefs * sizeof(uint16_t));
 
 	GB_DisplayTicker();
 
@@ -1612,7 +1617,7 @@ void DetectDuplicateSidedefs(void)
 	for (i=0; i < num_sidedefs; i++)
 		array[i] = i;
 
-	qsort(array, num_sidedefs, sizeof(u16_t), SidedefCompare);
+	qsort(array, num_sidedefs, sizeof(uint16_t), SidedefCompare);
 
 	// now mark them off
 	for (i=0; i < num_sidedefs - 1; i++)

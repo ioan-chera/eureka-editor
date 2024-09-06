@@ -731,7 +731,7 @@ bool config::browser_small_tex = false;
 int config::default_edit_mode = 3;  // Vertices
 int  config::grid_default_size = 64;
 bool config::grid_default_snap = false;
-int  config::grid_default_mode = 0;  // off
+bool config::grid_default_mode = false;
 bool config::render_high_detail    = false;
 bool config::browser_combine_tex = false;
 bool config::grid_snap_indicator = true;
@@ -753,6 +753,7 @@ fs::path global::config_file;
 fs::path global::install_dir;
 bool global::show_version;
 fs::path global::home_dir;
+fs::path global::old_linux_home_and_cache_dir;
 fs::path global::log_file;
 std::vector<fs::path> global::Pwad_list;
 fs::path global::cache_dir;
@@ -769,7 +770,7 @@ bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	return true;
 }
 
-void Grid_State_c::Init()
+void grid::State::Init()
 {
 	sUnitTokens["default"].push_back("gridInit");
 }
@@ -793,7 +794,7 @@ void Instance::ZoomWholeMap()
 	sUnitTokens["default"].push_back("zoomWholeMap");
 }
 
-bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
+bool grid::State::parseUser(const std::vector<SString> &tokens)
 {
 	if(tokens.empty() || tokens[0] != "grid")
 		return false;
@@ -843,7 +844,7 @@ void Document::getLevelChecksum(crc32_c &crc) const
 {
 }
 
-void Instance::Grid_WriteUser(std::ostream &os) const
+void grid::State::writeUser(std::ostream &os) const
 {
 	sUnitTokens["WriteUser"].push_back("grid");
 }
@@ -890,4 +891,32 @@ UI_NodeDialog::UI_NodeDialog() : Fl_Double_Window(100, 100)
 int UI_NodeDialog::handle(int event)
 {
 	return 0;
+}
+
+void UI_Canvas::PointerPos(bool in_event)
+{
+}
+
+void UI_InfoBar::SetScale(double new_scale)
+{
+}
+
+void UI_InfoBar::SetGrid(int new_step)
+{
+}
+
+void UI_InfoBar::UpdateSnap()
+{
+}
+
+void UI_InfoBar::UpdateRatio()
+{
+}
+
+void UI_CanvasScroll::AdjustPos()
+{
+}
+
+void Instance::RedrawMap()
+{
 }

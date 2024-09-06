@@ -36,7 +36,7 @@ class Lump_c;
 class SString;
 struct WadData;
 
-typedef u32_t rgb_color_t;
+typedef uint32_t rgb_color_t;
 
 #define RGB_RED(col)    ((col >> 24) & 255)
 #define RGB_GREEN(col)  ((col >> 16) & 255)
@@ -52,7 +52,7 @@ static constexpr rgb_color_t rgbMake(int r, int g, int b)
 
 // this is a version of rgb_color_t with an alpha channel
 // [ currently only used by the TGA loading code ]
-typedef u32_t rgba_color_t;
+typedef uint32_t rgba_color_t;
 #define RGBA_ALPHA(col)   ((col) & 255)
 #define RGBA_MAKE(r, g, b, a)  (((r) << 24) | ((g) << 16) | ((b) << 8) | (a))
 

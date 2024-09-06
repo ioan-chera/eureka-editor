@@ -128,9 +128,9 @@ for next time.
 Places where Eureka looks for IWADs:
 
   1. The "iwads" directory in Eureka's home directory.  In Linux
-     this will be "~/.eureka/iwads".  It is created automatically
-     the first time Eureka is run (though there is no harm in
-     creating it yourself).
+     this will be "~/.config/eureka/iwads" (or "$XDG_CONFIG_HOME/eureka/iwads").
+     It is created automatically the first time Eureka is run (though there
+     is no harm in creating it yourself).
 
   2. (a) In Linux: /usr/share/games/doom
      (b) In Windows: C:\DOOM and C:\DOOM2

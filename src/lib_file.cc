@@ -19,7 +19,8 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
-#include "main.h"
+#include "lib_file.h"
+#include "sys_debug.h"
 
 #ifdef WIN32
 #include <io.h>
@@ -250,6 +251,19 @@ bool FileMakeDir(const fs::path &dir_name)
 	catch(const fs::filesystem_error &e)
 	{
 		gLog.printf("Error creating directory %s: %s\n", dir_name.u8string().c_str(), e.what());
+		return false;
+	}
+}
+
+bool FileMakeDirs(const fs::path &dir_name)
+{
+	try
+	{
+		return fs::create_directories(dir_name);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Error creating directories down to %s: %s\n", dir_name.u8string().c_str(), e.what());
 		return false;
 	}
 }

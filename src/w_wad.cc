@@ -162,7 +162,7 @@ int64_t Lump_c::getName8() const noexcept
 		char cbuf[8];
 		int64_t cint;
 	} buffer;
-	strncpy(buffer.cbuf, Name().c_str(), 8);
+	memcpy(buffer.cbuf, Name().c_str(), std::min(Name().length() + 1, sizeof(buffer)));
 	return buffer.cint;
 }
 
@@ -211,40 +211,7 @@ retry:
 		return NULL;
 	}
 
-	auto wraw = new Wad_file(filename, mode);
-
-	auto w = std::shared_ptr<Wad_file>(wraw);
-
-	// determine total size (seek to end)
-	if (fseek(fp, 0, SEEK_END) != 0)
-	{
-		fclose(fp);
-		ThrowException("Error determining WAD size.\n");
-	}
-
-	int total_size = (int)ftell(fp);
-
-	gLog.debugPrintf("total_size = %d\n", total_size);
-
-	if (total_size < 0)
-	{
-		fclose(fp);
-		ThrowException("Error determining WAD size.\n");
-	}
-
-	if (! w->ReadDirectory(fp, total_size))
-	{
-		gLog.printf("Open wad failed (reading directory)\n");
-		fclose(fp);
-		return NULL;
-	}
-
-	w->DetectLevels();
-	w->ProcessNamespaces();
-
-	fclose(fp);
-
-	return w;
+	return createAndReadDirectory(filename, mode, fp);
 }
 
 std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
@@ -257,9 +224,118 @@ std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
 		gLog.printf("Open failed: %s\n", GetErrorMessage(errno).c_str());
 		return nullptr;
 	}
-	auto wraw = new Wad_file(filename, WadOpenMode::append);
+	return createAndReadDirectory(filename, WadOpenMode::append, fp);
+}
+
+std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
+{
+	gLog.printf("Opening WAD folder: %s\n", path.u8string().c_str());
+
+	// Reading from folder follows this rule (which should be a cross-port standard):
+	// https://eternity.youfailit.net/wiki/ZIP
+
+	// Currently no editing is allowed in folder paths, which are only for resources anyway
+	auto wraw = new Wad_file(path, WadOpenMode::read);
 	auto w = std::shared_ptr<Wad_file>(wraw);
-	
+
+	fs::directory_iterator iterator;
+	try
+	{
+		iterator = fs::directory_iterator(path);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Open failed: %s\n", e.what());
+		return nullptr;
+	}
+
+	auto tryAddNewLump = [](std::shared_ptr<Wad_file> &w, const fs::path &path, WadNamespace nameSpace)
+	{
+		SString lumpname = SString(path.filename().replace_extension().u8string()).asUpper().substr(0, 8);
+
+		for(char &c : lumpname)
+			if(c == '^')
+				c = '\\';	// de-escape backslashes, due to vile precedent
+
+		Lump_c *lump = new Lump_c(lumpname);
+		std::vector<uint8_t> data;
+		if(!FileLoad(path, data))
+		{
+			gLog.printf("Failed reading %s\n", path.u8string().c_str());
+			delete lump;
+			return;
+		}
+
+		lump->setData(std::move(data));
+
+		LumpRef ref = {};
+		ref.lump.reset(lump);
+		ref.ns = nameSpace;
+		w->directory.push_back(std::move(ref));
+	};
+
+	for(const auto &entry : iterator)
+	{
+		if(fs::is_regular_file(entry.path()))
+		{
+			// Promptly add the lump now
+			tryAddNewLump(w, entry.path(), WadNamespace::Global);
+		}
+		else if(fs::is_directory(entry.path()))
+		{
+			fs::directory_iterator subiterator;
+			try
+			{
+				subiterator = fs::directory_iterator(entry.path());
+			}
+			catch(const fs::filesystem_error &e)
+			{
+				gLog.printf("Error opening subfolder %s: %s\n", entry.path().u8string().c_str(), e.what());
+			}
+			for(const auto &subentry : subiterator)
+			{
+				if(!fs::is_regular_file(subentry.path()))
+					continue;	// only allow one sub level
+				// Check namespaces by the way
+				SString folderName = entry.path().filename().u8string();
+				WadNamespace nameSpace;
+				if(folderName.noCaseEqual("flats"))
+					nameSpace = WadNamespace::Flats;
+				else if(folderName.noCaseEqual("sprites"))
+					nameSpace = WadNamespace::Sprites;
+				else if(folderName.noCaseEqual("textures"))
+					nameSpace = WadNamespace::TextureLumps;
+				else
+					nameSpace = WadNamespace::Global;
+
+				tryAddNewLump(w, subentry.path(), nameSpace);
+			}
+		}
+		else
+		{
+			gLog.printf("Ignoring irregular file path %s\n", entry.path().u8string().c_str());
+		}
+	}
+
+	// No DetectLevels allowed either.
+
+	return w;
+}
+
+std::shared_ptr<Wad_file> Wad_file::Create(const fs::path &filename,
+										   WadOpenMode mode)
+{
+	gLog.printf("Creating new WAD file: %s\n", filename.u8string().c_str());
+
+	return std::shared_ptr<Wad_file>(new Wad_file(filename, mode));
+}
+
+std::shared_ptr<Wad_file> Wad_file::createAndReadDirectory(const fs::path &filename,
+														   WadOpenMode mode, FILE *fp)
+{
+	auto wraw = new Wad_file(filename, mode);
+	auto w = std::shared_ptr<Wad_file>(wraw);
+
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
 	{
@@ -291,16 +367,6 @@ std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
 
 	return w;
 }
-
-
-std::shared_ptr<Wad_file> Wad_file::Create(const fs::path &filename,
-										   WadOpenMode mode)
-{
-	gLog.printf("Creating new WAD file: %s\n", filename.u8string().c_str());
-
-	return std::shared_ptr<Wad_file>(new Wad_file(filename, mode));
-}
-
 
 bool Wad_file::Validate(const fs::path &filename)
 {
@@ -550,62 +616,78 @@ const Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace g
 }
 
 //
-// Searches for the 
+// Searches for the
 //
-const Lump_c *Wad_file::findFirstSpriteLump(const SString &stem) const
+std::vector<SpriteLumpRef> Wad_file::findFirstSpriteLump(const SString &stem) const
 {
-	SString firstName;
-	const Lump_c *result = nullptr;
-	for(const LumpRef &lumpRef : directory)
+	auto isSprite = [](const LumpRef &ref)
 	{
-		if(lumpRef.ns != WadNamespace::Sprites)
-			continue;
-		const SString &name = lumpRef.lump->name;
+		if(ref.ns != WadNamespace::Sprites)
+			return false;
+		const SString &name = ref.lump->name;
 		if(name.length() != 6 && name.length() != 8)
+			return false;
+		if(name[5] < '0' || name[5] > '8')
+			return false;
+		if(name.length() == 8 && (name[7] < '0' || name[7] > '8'))
+			return false;
+		return true;
+	};
+
+	std::vector<SpriteLumpRef> result;
+	SString substem = stem.length() > 4 ? stem.substr(0, 4) : stem;
+	std::vector<const Lump_c *> candidates;
+
+	SString foundName;
+	const Lump_c *foundLump = nullptr;
+	// 1. Find the first ordered stem
+	// 2. Find the first ordered frame
+	for(const LumpRef &ref : directory)
+	{
+		if(!isSprite(ref))
 			continue;
-		if(stem.length() <= 4)
+		const SString &name = ref.lump->name;
+		if(name.startsWith(substem.c_str()))
 		{
-			if(!name.startsWith(stem.c_str()))
-				continue;
+			candidates.push_back(ref.lump.get());
 		}
-		else
+		if(!name.startsWith(stem.c_str()))
+			continue;
+		if(foundName.empty() || foundName.get() > name.get())
 		{
-			if(!name.startsWith(stem.substr(0, 4).c_str()))
-				continue;
-			if(stem.length() == 5)
-			{
-				char letter = stem[4];
-				if(name[4] != letter && (name.length() != 8 || name[6] != letter))
-					continue;
-			}
-			else if(stem.length() == 6)
-			{
-				const char *pair = stem.c_str() + 4;
-				if((name[4] != pair[0] || name[5] != pair[1]) &&
-				   (name.length() != 8 || name[6] != pair[0] || name[7] != pair[1]))
-				{
-					continue;
-				}
-			}
-			else if(stem.length() == 7)
-			{
-				if(name.startsWith(stem.c_str()))
-				{
-					return lumpRef.lump.get();
-				}
-			}
-			else if(stem.length() == 8)
-			{
-				if(name == stem)
-					return lumpRef.lump.get();
-			}
-		}
-		if(firstName.empty() || firstName.get() > name.get())
-		{
-			firstName = name;
-			result = lumpRef.lump.get();
+			foundName = name;
+			foundLump = ref.lump.get();
 		}
 	}
+	if(foundName.empty())
+		return {};
+
+	char letter = 0;
+	char rot = 0;
+
+	// 3. Find all the other rotations with that frame
+	letter = foundName[4];
+	rot = foundName[5];
+	if(rot == '0')
+		return {{foundLump, false}};	// got one see-all-around sprite already
+	// we got some rotation
+	result.resize(8);
+	// Now look for all rotations
+	for(const Lump_c *lump : candidates)
+	{
+		const SString &name = lump->Name();
+		if(stem.length() < 4 && name.substr(0, 4) != foundName.substr(0, 4))
+			continue;
+		if(name[4] == letter)
+			result[name[5] - '1'] = {lump, false};
+		if(name.length() == 8 && name[6] == letter)
+		{
+			if(name[7] == '0')
+				return {{lump, true}};
+			result[name[7] - '1'] = {lump, true};
+		}
+	}
+
 	return result;
 }
 

@@ -52,6 +52,7 @@ bool FileExists(const fs::path &filename);
 bool FileDelete(const fs::path &filename);
 bool FileChangeDir(const fs::path &dir_name);
 bool FileMakeDir(const fs::path &dir_name);
+bool FileMakeDirs(const fs::path &dir_name);
 
 bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data);
 

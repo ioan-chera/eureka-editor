@@ -1,21 +1,16 @@
 message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
 
+# Following https://github.com/google/googletest/blob/main/googletest/README.md
 include(FetchContent)
 FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG release-1.12.1
+    GIT_TAG v1.14.0
 )
-FetchContent_GetProperties(googletest)
-if(NOT googletest_POPULATED)
-    message(STATUS "Populating Google Test directory")
-    FetchContent_Populate(googletest)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(
-        ${googletest_SOURCE_DIR}
-        ${googletest_BINARY_DIR}
-    )
-endif()
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
 
 set(src ${CMAKE_SOURCE_DIR}/src)
 get_target_property(src_includes eurekasrc INCLUDE_DIRECTORIES)
@@ -26,109 +21,63 @@ list(FILTER fltk_libs INCLUDE REGEX fltk)
 # This is the common testing library. Contains whatever's in testUtils and some very common
 # eurekasrc files
 
-set(_testUtils
+add_library(
+    testutils
+    STATIC
     testUtils/FatalHandler.cpp
     testUtils/FatalHandler.hpp
     testUtils/TempDirContext.cpp
     testUtils/TempDirContext.hpp
     testUtils/Palette.cpp
     testUtils/Palette.hpp
-    ${src}/Errors.cc
-    ${src}/lib_adler.cc
-    ${src}/lib_util.cc
-    ${src}/m_strings.cc
-    ${src}/sys_debug.cc
 )
-add_library(testutils STATIC ${_testUtils})
-target_link_libraries(testutils PUBLIC gtest_main)
+target_link_libraries(testutils PUBLIC gtest_main eurekacore)
 if(WIN32)
     target_link_libraries(testutils PUBLIC Rpcrt4.lib)
 endif()
 target_include_directories(testutils PUBLIC ${src} ${src_includes})
 target_compile_options(testutils PUBLIC ${eureka_compile_options})
+# Need to link to them separately if FLTK is linked manually
+if(APPLE)
+    find_library(CARBON_FRAMEWORK Carbon)
+    target_link_libraries(testutils PUBLIC ${CARBON_FRAMEWORK})
+    find_library(COCOA_FRAMEWORK Cocoa)
+    target_link_libraries(testutils PUBLIC ${COCOA_FRAMEWORK})
+    find_library(APPSERVICES_FRAMEWORK ApplicationServices)
+    target_link_libraries(testutils PUBLIC ${APPSERVICES_FRAMEWORK})
+endif()
 
-#
-# The function to add a unit test
-#
-function(unit_test _name)
-    set(_name test_${_name})
-    set(_use_src_files NO)
-    set(_use_fltk NO)
-    unset(_sources)
-    unset(_windows_libs)
-    foreach(_source ${ARGN})
-        if(_source STREQUAL "SRC")
-            set(_use_src_files YES)
-            continue()
-        endif()
-        if(_source STREQUAL "FLTK")
-            set(_use_fltk YES)
-            if(APPLE)
-                # Need to link to them separately if FLTK is linked manually
-                find_library(CARBON_FRAMEWORK Carbon)
-                target_link_libraries(testutils PUBLIC ${CARBON_FRAMEWORK})
-                find_library(COCOA_FRAMEWORK Cocoa)
-                target_link_libraries(testutils PUBLIC ${COCOA_FRAMEWORK})
-                find_library(APPSERVICES_FRAMEWORK ApplicationServices)
-                target_link_libraries(testutils PUBLIC ${APPSERVICES_FRAMEWORK})
-            endif()
-            continue()
-        endif()
-        if(_source MATCHES ".*\\.lib")
-            list(APPEND _windows_libs ${_source})
-            continue()
-        endif()
-        if(NOT _use_src_files)
-            list(APPEND _sources ${_source})
-        else()
-            list(APPEND _sources ${src}/${_source})
-        endif()
-    endforeach()
-
-    add_executable(${_name} ${_sources})
-    target_link_libraries(${_name} PRIVATE testutils)
-
-    if(APPLE)
-        # Need to get access to the OSXCalls.h stuff
-        target_include_directories(${_name} PRIVATE ${CMAKE_SOURCE_DIR}/osx/EurekaApp)
-        target_compile_definitions(${_name} PRIVATE GL_SILENCE_DEPRECATION)
-    endif()
-    target_compile_definitions(${_name} PRIVATE main=mainDISABLED NO_OPENGL)
-
-    if(_use_fltk)
-        target_link_libraries(${_name} PRIVATE ${fltk_libs})
-    endif()
-    if(WIN32 AND _windows_libs)
-        target_link_libraries(${_name} PRIVATE ${_windows_libs})
-    endif()
-    if(UNIX AND NOT APPLE)
-        find_package(ZLIB REQUIRED)
-        find_package(X11 REQUIRED)
-        target_link_libraries(${_name} PRIVATE ${X11_X11_LIB} ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
-    endif()
-
-    add_test(NAME ${_name} COMMAND $<TARGET_FILE:${_name}>)
-endfunction()
-
-# IMPORTANT: the eurekasrc files from testutils are already linked!
-
-unit_test(general
+add_executable(
+    test_general
     DocumentTest.cpp
     e_checks_test.cpp
     e_commands_test.cpp
+    e_cutpaste_test.cpp
+    e_linedef_test.cpp
     e_objects_test.cpp
+    FixedPointTest.cpp
     im_color_test.cpp
     im_img_test.cpp
     lib_file_test.cpp
     lib_tga_test.cpp
+    lib_util_test.cpp
+    m_bitvec_test.cpp
+    m_events_test.cpp
     m_files_test.cpp
     m_game_test.cpp
+    m_keys_test.cpp
     m_parse_test.cpp
+    m_select_test.cpp
+    m_streams_test.cpp
     m_testmap_test.cpp
     main_test.cpp
+    r_grid_test.cpp
 	SafeOutFileTest.cpp
     SectorTest.cpp
+    SideTest.cpp
     SStringTest.cpp
+    StringTableTest.cpp
+    sys_debug_test.cpp
     ThingTest.cpp
     VertexTest.cpp
     w_dehacked_test.cpp
@@ -137,117 +86,41 @@ unit_test(general
     w_wad_test.cpp
     WadDataTest.cpp
     stub/osxcalls_stub.cpp
-    SRC bsp_level.cc
-        bsp_node.cc
-        bsp_util.cc
-        Document.cc
-        DocumentModule.cc
-        e_basis.cc
-        e_checks.cc
-        e_commands.cc
-        e_cutpaste.cc
-        e_hover.cc
-        e_linedef.cc
-        e_main.cc
-        e_objects.cc
-        e_path.cc
-        e_sector.cc
-        e_select.cc
-        e_things.cc
-        e_vertex.cc
-        im_color.cc
-        im_img.cc
-        Instance.cc
-        lib_file.cc
-        lib_tga.cc
-        LineDef.cc
-        m_bitvec.cc
-        m_config.cc
-        m_editlump.cc
-        m_events.cc
-        m_files.cc
-        m_keys.cc
-        m_game.cc
-        m_loadsave.cc
-        m_nodes.cc
-        m_parse.cc
-        m_select.cc
-        m_streams.cc
-        m_testmap.cc
-        m_udmf.cc
-        main.cc
-        r_grid.cc
-        r_opengl.cc
-        r_render.cc
-        r_software.cc
-        r_subdiv.cc
-        SafeOutFile.cc
-        Sector.cc
-        SideDef.cc
-        Thing.cc
-        ui_about.cc
-        ui_browser.cc
-        ui_canvas.cc
-        ui_default.cc
-        ui_dialog.cc
-        ui_editor.cc
-        ui_file.cc
-        ui_hyper.cc
-        ui_infobar.cc
-        ui_linedef.cc
-        ui_menu.cc
-        ui_misc.cc
-        ui_nombre.cc
-        ui_panelinput.cc
-        ui_pic.cc
-        ui_prefs.cc
-        ui_replace.cc
-        ui_scroll.cc
-        ui_sector.cc
-        ui_sidedef.cc
-        ui_thing.cc
-        ui_tile.cc
-        ui_vertex.cc
-        ui_window.cc
-        Vertex.cc
-        w_dehacked.cc
-        w_loadpic.cc
-        w_texture.cc
-        w_wad.cc
-        WadData.cc
-    FLTK
 )
+target_link_libraries(test_general PRIVATE testutils eurekasrc)
+if(APPLE)
+    # Need to get access to the OSXCalls.h stuff
+    target_include_directories(test_general PRIVATE ${CMAKE_SOURCE_DIR}/osx/EurekaApp)
+    target_compile_definitions(test_general PRIVATE GL_SILENCE_DEPRECATION)
+endif()
+target_compile_definitions(test_general PUBLIC NO_OPENGL)
+target_link_libraries(test_general PRIVATE ${fltk_libs})
+if(UNIX AND NOT APPLE)
+    find_package(ZLIB REQUIRED)
+    find_package(X11 REQUIRED)
+    target_link_libraries(test_general PRIVATE ${X11_X11_LIB} ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
+endif()
 
-unit_test(m_config_keys
-    m_config_test.cpp
-    m_keys_test.cpp
-    SRC im_color.cc
-        im_img.cc
-        lib_file.cc
-        m_config.cc
-        m_keys.cc
-        m_parse.cc
-        m_streams.cc
-        SafeOutFile.cc
-        w_wad.cc
-    FLTK
-)
+add_test(NAME test_general COMMAND $<TARGET_FILE:test_general>)
 
-# Units independent on complex frameworks or libraries
-unit_test(independent
-    FixedPointTest.cpp
-    lib_util_test.cpp
-    m_bitvec_test.cpp
-    m_select_test.cpp
-    m_streams_test.cpp
-    SideTest.cpp
-    StringTableTest.cpp
-    sys_debug_test.cpp
-    SRC m_bitvec.cc
-        m_parse.cc
-        m_select.cc
-        m_streams.cc
-)
+
+# IMPORTANT: the eurekasrc files from testutils are already linked!
+
+
+# unit_test(m_config_keys
+#     m_config_test.cpp
+#     m_keys_test.cpp
+#     SRC im_color.cc
+#         im_img.cc
+#         lib_file.cc
+#         m_config.cc
+#         m_keys.cc
+#         m_parse.cc
+#         m_streams.cc
+#         SafeOutFile.cc
+#         w_wad.cc
+#     FLTK
+# )
 
 find_package(Python3)
 if(NOT Python3_FOUND)

@@ -88,7 +88,7 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 
 	// TODO: think up the right instance to get this
 	if (given_idx >= 0)
-		gInstance.last_given_file = given_idx;
+		gInstance->last_given_file = given_idx;
 
 	try
 	{
@@ -374,7 +374,7 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 static void tools_do_preferences(Fl_Widget *w, void * data)
 {
 	// FIXME: this uses the global instance because it's also used globally on Mac
-	gInstance.ExecuteCommand("PreferenceDialog");
+	gInstance->ExecuteCommand("PreferenceDialog");
 }
 
 static void tools_do_build_nodes(Fl_Widget *w, void * data)
@@ -897,34 +897,72 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 namespace menu
 {
-static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> testMapDetailStorage;
+
+static int locateMenuItem(const Fl_Sys_Menu_Bar &bar, Fl_Callback_p callback)
+{
+	int menuSize = bar.size();
+	const Fl_Menu_Item *items = bar.menu();
+	
+	for(int i = 0; i < menuSize; ++i)
+	{
+		const Fl_Menu_Item &item = items[i];
+		if(item.callback() == callback)
+			return i;
+	}
+	return -1;
+}
 
 void setTestMapDetail(Fl_Sys_Menu_Bar *bar, const SString &text)
 {
 	if(!bar)
 		return;
-	int menuSize = bar->size();
-	const Fl_Menu_Item *items = bar->menu();
-	
-	int index = -1;
-	for(int i = 0; i < menuSize; ++i)
-	{
-		const Fl_Menu_Item &item = items[i];
-		if(item.callback() == tools_do_test_map)
-		{
-			index = i;
-			break;
-		}
-	}
+	int index = locateMenuItem(*bar, tools_do_test_map);
 
 	if(index < 0)
 		return;
+	
+	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> testMapDetailStorage;
+
 	if(text.good())
 		testMapDetailStorage[bar] = SString::printf("&Test in Game (%s)", text.c_str());
 	else
 		testMapDetailStorage[bar] = "&Test in Game";
 	
 	bar->replace(index, testMapDetailStorage[bar].c_str());
+}
+
+void setUndoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb)
+{
+	if(!bar)
+		return;
+	int index = locateMenuItem(*bar, edit_do_undo);
+	if(index < 0)
+		return;
+	
+	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> undoDetailStorage;
+	
+	if(verb.good())
+		undoDetailStorage[bar] = SString("&Undo ") + verb;
+	else
+		undoDetailStorage[bar] = "&Undo";
+	bar->replace(index, undoDetailStorage[bar].c_str());
+}
+
+void setRedoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb)
+{
+	if(!bar)
+		return;
+	int index = locateMenuItem(*bar, edit_do_redo);
+	if(index < 0)
+		return;
+	
+	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> redoDetailStorage;
+	
+	if(verb.good())
+		redoDetailStorage[bar] = SString("&Redo ") + verb;
+	else
+		redoDetailStorage[bar] = "&Redo";
+	bar->replace(index, redoDetailStorage[bar].c_str());
 }
 
 Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData)

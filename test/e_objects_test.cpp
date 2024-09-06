@@ -535,7 +535,7 @@ TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 	};
 
 	Document &doc = inst.level;
-	inst.grid.step = 8;
+	inst.grid.ForceStep(8);
 
 	for(size_t i = 0; i < 5; ++i)
 	{

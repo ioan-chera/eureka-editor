@@ -118,14 +118,12 @@ TEST_F(DocumentFixture, CRC)
 	crc32_c crc2;
 	doc.getLevelChecksum(crc2);
 
-	ASSERT_NE(crc.raw, crc2.raw);
-	ASSERT_NE(crc.extra, crc2.extra);
+	ASSERT_NE(crc.getPath(), crc2.getPath());
 
 	// Now add back one thing
 	doc.things.push_back(std::make_shared<Thing>());
 
 	crc32_c crc3;
 	doc.getLevelChecksum(crc3);
-	ASSERT_EQ(crc.raw, crc3.raw);
-	ASSERT_EQ(crc.extra, crc3.extra);
+	ASSERT_EQ(crc.getPath(), crc3.getPath());
 }

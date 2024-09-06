@@ -360,7 +360,7 @@ const opt_desc_t options[] =
 	{	"grid_default_mode",
 		0,
 		OptFlag_preference,
-		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
+		"Default grid mode: 0 = OFF, 1 = normal",
 		NULL,
 		&config::grid_default_mode
 	},
@@ -728,7 +728,7 @@ static int parse_config_line_from_file(const SString &line, const fs::path &base
 		// found it
 		break;
 	}
-	
+
 	if(auto ptr = std::get_if<bool *>(&opt->data_ptr))
 	{
 		if(value.noCaseEqual("no") || value.noCaseEqual("false") ||
@@ -883,7 +883,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		// Which option is this?
 		for (o = options; ; o++)
 		{
-			if (std::get_if<nullptr_t>(&o->data_ptr))
+			if (std::get_if<std::nullptr_t>(&o->data_ptr))
 			{
 				ThrowException("unknown option: '%s'\n", argv[0]);
 				/* NOT REACHED */
@@ -1013,7 +1013,7 @@ void M_PrintCommandLineOptions()
 	const opt_desc_t *o;
 	int name_maxlen = 0;
 
-	for (o = options; !std::get_if<nullptr_t>(&o->data_ptr); o++)
+	for (o = options; !std::get_if<std::nullptr_t>(&o->data_ptr); o++)
 	{
 		int len;
 
@@ -1031,7 +1031,7 @@ void M_PrintCommandLineOptions()
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
-	for (o = options; !std::get_if<nullptr_t>(&o->data_ptr); o++)
+	for (o = options; !std::get_if<std::nullptr_t>(&o->data_ptr); o++)
 	{
 		if (o->flags & (OptFlag_preference | OptFlag_hide))
 			continue;
@@ -1110,7 +1110,7 @@ int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
 
 	const opt_desc_t *o;
 
-	for (o = options; !std::get_if<nullptr_t>(&o->data_ptr); o++)
+	for (o = options; !std::get_if<std::nullptr_t>(&o->data_ptr); o++)
 	{
 		if (!(o->flags & OptFlag_preference))
 			continue;
@@ -1119,7 +1119,7 @@ int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
 			continue;
 
 		os << o->long_name << ' ';
-		
+
 		if(auto ptr = std::get_if<bool *>(&o->data_ptr))
 			os << (**ptr ? "1" : "0");
 		else if(auto ptr = std::get_if<SString *>(&o->data_ptr))
@@ -1148,8 +1148,7 @@ int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
 
 static fs::path PersistFilename(const crc32_c& crc)
 {
-	fs::path filename = fs::u8path(SString::printf("%08X%08X.dat", crc.extra, crc.raw).get());
-	return global::cache_dir / "cache" / filename;
+	return global::cache_dir / "cache" / crc.getPath();
 }
 
 
@@ -1192,7 +1191,7 @@ bool Instance::M_LoadUserState()
 		}
 
 		if (  Editor_ParseUser(tokens) ||
-		        Grid_ParseUser(tokens) ||
+		        grid.parseUser(tokens) ||
 		    Render3D_ParseUser(tokens) ||
 		     Browser_ParseUser(*this, tokens) ||
 		       Props_ParseUser(*this, tokens) ||
@@ -1236,7 +1235,7 @@ bool Instance::M_SaveUserState() const
 	}
 
 	Editor_WriteUser(os);
-	Grid_WriteUser(os);
+	grid.writeUser(os);
 	Render3D_WriteUser(os);
 	Browser_WriteUser(os);
 	Props_WriteUser(os);

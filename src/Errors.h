@@ -31,26 +31,6 @@
 
 #define BugError  ThrowLogicException
 
-//
-// Wad read exception
-//
-class WadReadException : public std::runtime_error
-{
-public:
-	WadReadException(const SString& msg) : std::runtime_error(msg.c_str())
-	{
-	}
-};
-
-//
-// Result with message in case of failure
-//
-struct ReportedResult
-{
-	bool success;
-	SString message;
-};
-
 
 [[noreturn]] void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 [[noreturn]] void ThrowLogicException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);

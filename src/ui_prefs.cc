@@ -109,7 +109,7 @@ private:
 				FinishGrab();
 
 				if (key)
-					key_name->value(M_KeyToString(key).c_str());
+					key_name->value(keys::toString(key).c_str());
 
 				// if previous key was invalid, need to re-enable OK button
 				validate_callback(this, this);
@@ -128,7 +128,7 @@ private:
 					FinishGrab();
 
 					key = new_key;
-					key_name->value(M_KeyToString(key).c_str());
+					key_name->value(keys::toString(key).c_str());
 
 					// if previous key was invalid, need to re-enable OK button
 					validate_callback(this, this);
@@ -491,7 +491,7 @@ public:
 		key_name->callback((Fl_Callback*)validate_callback, this);
 
 		if (key)
-			key_name->value(M_KeyToString(key).c_str());
+			key_name->value(keys::toString(key).c_str());
 
 		grab_but = new Fl_Button(255, 25, 90, 25, "Re-bind");
 		grab_but->callback((Fl_Callback*)grab_key_callback, this);
@@ -1172,7 +1172,7 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 
 	// show we're ready to accept a new key
 
-	const char *str = M_StringForBinding(bind_idx, true /* changing_key */);
+	const char *str = keys::stringForBinding(global::pref_binds[bind_idx], true /* changing_key */);
 	SYS_ASSERT(str);
 
 	prefs->key_list->text(line, str);
@@ -1254,7 +1254,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 		SYS_ASSERT(bind_idx >= 0);
 
 		M_GetBindingInfo(bind_idx, &new_key, &new_context);
-		new_func = M_StringForFunc(bind_idx);
+		new_func = keys::stringForFunc(global::pref_binds[bind_idx]);
 	}
 
 
@@ -1479,11 +1479,8 @@ void UI_Preferences::LoadValues()
 	if (config::grid_style < 0 || config::grid_style > 1)
 		config::grid_style = 1;
 
-	if (config::grid_default_mode < 0 || config::grid_default_mode > 1)
-		config::grid_default_mode = 1;
-
 	grid_cur_style->value(config::grid_style);
-	grid_enabled->value(config::grid_default_mode);
+	grid_enabled->value(config::grid_default_mode ? 1 : 0);
 	grid_snap->value(config::grid_default_snap ? 1 : 0);
 	grid_size->value(GridSizeToChoice(config::grid_default_size));
 	grid_hide_free ->value(config::grid_hide_in_free_mode ? 1 : 0);
@@ -1581,7 +1578,7 @@ void UI_Preferences::SaveValues()
 		Fl::foreground(0, 0, 0);
 
 		// TODO: update for ALL windows
-		gInstance.main_win->redraw();
+		gInstance->main_win->redraw();
 	}
 	else if (config::gui_color_set == 2)
 	{
@@ -1593,7 +1590,7 @@ void UI_Preferences::SaveValues()
 						RGB_BLUE(config::gui_custom_fg));
 
 		// TODO: update for ALL windows
-		gInstance.main_win->redraw();
+		gInstance->main_win->redraw();
 	}
 
 	/* General Tab */
@@ -1626,7 +1623,7 @@ void UI_Preferences::SaveValues()
 		config::browser_combine_tex = new_combo;
 
 		// TODO: update for ALL windows
-		gInstance.main_win->browser->Populate();
+		gInstance->main_win->browser->Populate();
 	}
 
 	// decode the user ratio
@@ -1639,12 +1636,12 @@ void UI_Preferences::SaveValues()
 		std::swap(config::grid_ratio_low, config::grid_ratio_high);
 
 	// TODO: update for ALL windows
-	gInstance.main_win->info_bar->UpdateRatio();
+	gInstance->main_win->info_bar->UpdateRatio();
 
 	/* Grid Tab */
 
 	config::grid_style        = grid_cur_style->value();
-	config::grid_default_mode = grid_enabled->value();
+	config::grid_default_mode = !!grid_enabled->value();
 	config::grid_default_snap = grid_snap->value() ? true : false;
 	config::grid_default_size = atoi(grid_size->mvalue()->text);
 	config::grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
@@ -1702,7 +1699,7 @@ void UI_Preferences::LoadKeys()
 
 	for (int i = 0 ; i < M_NumBindings() ; i++)
 	{
-		const char *str = M_StringForBinding(i);
+		const char *str = keys::stringForBinding(global::pref_binds[i]);
 		SYS_ASSERT(str);
 
 		key_list->add(str);
@@ -1718,7 +1715,7 @@ void UI_Preferences::ReloadKeys()
 
 	for (int i = 0 ; i < M_NumBindings() ; i++)
 	{
-		const char *str = M_StringForBinding(i);
+		const char *str = keys::stringForBinding(global::pref_binds[i]);
 
 		key_list->text(i + 1, str);
 	}

@@ -306,9 +306,9 @@ public:
 };
 
 static Objid getNearestThing(const Document &doc, const ConfigData &config,
-							 const Grid_State_c &grid, const v2double_t &pos);
-static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, const v2double_t &pos);
-static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, const v2double_t &pos);
+							 const grid::State &grid, const v2double_t &pos);
+static Objid getNearestVertex(const Document &doc, const grid::State &grid, const v2double_t &pos);
+static Objid getNearestLinedef(const Document &doc, const grid::State &grid, const v2double_t &pos);
 
 //
 //  Returns the object which is under the pointer at the given
@@ -316,7 +316,7 @@ static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, co
 //  is chosen.
 //
 Objid hover::getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
-							 const Grid_State_c &grid, const v2double_t &pos)
+							 const grid::State &grid, const v2double_t &pos)
 {
 	switch(type)
 	{
@@ -440,14 +440,14 @@ static int getClosestLine_CastingVert(const Document &doc, v2double_t pos, Side 
 	return best_match;
 }
 
-static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Grid_State_c &grid,
+static Objid getNearestSplitLine(const Document &doc, MapFormat format, const grid::State &grid,
 								 const v2double_t &pos, int ignore_vert);
 
 //
 // Finds a split line
 //
 Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_State_t &edit,
-						   const Grid_State_c &grid, v2double_t &out_pos, const v2double_t &ptr,
+						   const grid::State &grid, v2double_t &out_pos, const v2double_t &ptr,
 						   int ignore_vert)
 {
 	out_pos = {};
@@ -464,7 +464,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 
 	double len = (v2 - v1).hypot();
 
-	if(grid.ratio > 0 && edit.action == EditorAction::drawLine)
+	if(grid.getRatio() > 0 && edit.action == EditorAction::drawLine)
 	{
 		const auto V = doc.vertices[edit.drawLine.from.num];
 
@@ -491,7 +491,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 
 		out_pos = v1 + (v2 - v1) * c;
 	}
-	else if(grid.snap)
+	else if(grid.snaps())
 	{
 		// don't highlight the line if the new vertex would snap onto
 		// the same coordinate as the start or end of the linedef.
@@ -530,7 +530,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 // Find a split line for a dangling vertex
 //
 Objid hover::findSplitLineForDangler(const Document &doc, MapFormat format,
-									 const Grid_State_c &grid, int v_num)
+									 const grid::State &grid, int v_num)
 {
 	return getNearestSplitLine(doc, format, grid, doc.vertices[v_num]->xy(), v_num);
 }
@@ -675,7 +675,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 	cross.end = p2;
 
 	// when zooming out, make it easier to hit a vertex
-	double close_dist = 4 * sqrt(1.0 / inst.grid.Scale);
+	double close_dist = 4 * sqrt(1.0 / inst.grid.getScale());
 
 	close_dist = clamp(1.0, close_dist, 12.0);
 
@@ -751,9 +751,9 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 // determine which thing is under the mouse pointer
 //
 static Objid getNearestThing(const Document &doc, const ConfigData &config,
-							 const Grid_State_c &grid, const v2double_t &pos)
+							 const grid::State &grid, const v2double_t &pos)
 {
-	double mapslack = 1 + 16.0f / grid.Scale;
+	double mapslack = 1 + 16.0f / grid.getScale();
 
 	double max_radius = MAX_RADIUS + ceil(mapslack);
 
@@ -804,15 +804,15 @@ static Objid getNearestThing(const Document &doc, const ConfigData &config,
 //
 // determine which vertex is under the pointer
 //
-static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, const v2double_t &pos)
+static Objid getNearestVertex(const Document &doc, const grid::State &grid, const v2double_t &pos)
 {
-	const int screen_pix = vertex_radius(grid.Scale);
+	const int screen_pix = vertex_radius(grid.getScale());
 
-	double mapslack = 1 + (4 + screen_pix) / grid.Scale;
+	double mapslack = 1 + (4 + screen_pix) / grid.getScale();
 
 	// workaround for overly zealous highlighting when zoomed in far
-	if(grid.Scale >= 15.0) mapslack *= 0.7;
-	if(grid.Scale >= 31.0) mapslack *= 0.5;
+	if(grid.getScale() >= 15.0) mapslack *= 0.7;
+	if(grid.getScale() >= 31.0) mapslack *= 0.5;
 
 	v2double_t lpos = pos - v2double_t(mapslack + 0.5);
 	v2double_t hpos = pos + v2double_t(mapslack + 0.5);
@@ -854,10 +854,10 @@ static double getApproximateDistanceToLinedef(const Document &doc, const LineDef
 //
 // determine which linedef is under the pointer
 //
-static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, const v2double_t &pos)
+static Objid getNearestLinedef(const Document &doc, const grid::State &grid, const v2double_t &pos)
 {
 	// slack in map units
-	double mapslack = 2.5 + 16.0f / grid.Scale;
+	double mapslack = 2.5 + 16.0f / grid.getScale();
 
 	v2double_t lpos = pos - v2double_t(mapslack);
 	v2double_t hpos = pos + v2double_t(mapslack);
@@ -990,11 +990,11 @@ static double getApproximateDistanceToLinedef(const Document &doc, const LineDef
 // determine which linedef would be split if a new vertex were
 // added at the given coordinates.
 //
-static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Grid_State_c &grid,
+static Objid getNearestSplitLine(const Document &doc, MapFormat format, const grid::State &grid,
 								 const v2double_t &pos, int ignore_vert)
 {
 	// slack in map units
-	double mapslack = 1.5 + ceil(8.0f / grid.Scale);
+	double mapslack = 1.5 + ceil(8.0f / grid.getScale());
 
 	v2double_t lpos = pos - v2double_t(mapslack);
 	v2double_t hpos = pos + v2double_t(mapslack);

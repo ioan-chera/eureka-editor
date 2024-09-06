@@ -99,7 +99,7 @@ static Document makeFreshDocument(Instance &inst, const ConfigData &config, MapF
 	}
 
 	doc.CalculateLevelBounds();
-	
+
 	return doc;
 }
 
@@ -209,32 +209,32 @@ void Instance::CMD_NewProject()
 	{
 		if (!level.Main_ConfirmQuit("create a new project"))
 			return;
-		
+
 		/* first, ask for the output file */
-		
+
 		tl::optional<fs::path> filename = Project_AskFile();
-		
+
 		if (!filename)
 			return;
-		
+
 		if(global::recent.hasIwadByPath(*filename))
 		{
 			DLG_Notify("Cannot overwrite a game IWAD: %s", filename.value().u8string().c_str());
 			return;
 		}
-		
-		
+
+
 		/* second, query what Game, Port and Resources to use */
 		// TODO: new instance
 		UI_ProjectSetup dialog(*this, true /* new_project */, false /* is_startup */);
-		
+
 		tl::optional<UI_ProjectSetup::Result> result = dialog.Run();
-		
+
 		if (!result)
 		{
 			return;
 		}
-		
+
 		if(FileExists(*filename))
 		{
 			if(!DLG_Confirm({"Cancel", "&Overwrite"}, "Are you sure you want to overwrite %s with a new project?", filename.value().u8string().c_str()))
@@ -262,28 +262,28 @@ void Instance::CMD_NewProject()
 			gLog.printf("Error reading old WAD %s: %s\n", filename->u8string().c_str(), e.what());
 		}
 
-		
+
 		LoadingData loading = loaded;
 		updateLoading(*result, loading);
 		newres = loadResources(loading, wad);
-		
-		
+
+
 		// determine map name (same as first level in the IWAD)
 		SString map_name = "MAP01";
-		
+
 		int idx = newres.waddata.master.gameWad()->LevelFindFirst();
-		
+
 		if (idx >= 0)
 		{
 			idx = newres.waddata.master.gameWad()->LevelHeader(idx);
 			map_name = newres.waddata.master.gameWad()->GetLump(idx)->Name();
 		}
-		
+
 		gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename->u8string().c_str());
-		
-		
+
+
 		std::shared_ptr<Wad_file> wad = Wad_file::Open(*filename, WadOpenMode::write);
-		
+
 		if (!wad)
 		{
 			DLG_Notify("Unable to create the new WAD file.");
@@ -296,14 +296,14 @@ void Instance::CMD_NewProject()
 		loaded = std::move(newres.loading);
 		if(main_win)
 			testmap::updateMenuName(main_win->menu_bar, loaded);
-		
+
 		this->wad = std::move(newres.waddata);
-		
+
 		SaveLevel(loaded, map_name, *wad, false);
 		this->wad.master.ReplaceEditWad(wad);
 		ConfirmLevelSaveSuccess(loaded, *wad);
 		UpdateViewOnResources();
-		
+
 		RedrawMap();
 	}
 	catch(const std::runtime_error &e)
@@ -315,7 +315,7 @@ void Instance::CMD_NewProject()
 			level = std::move(backupDoc.value());
 		if(main_win)
 			testmap::updateMenuName(main_win->menu_bar, loaded);
-		
+
 		DLG_ShowError(false, "Could not create new project: %s", e.what());
 	}
 }
@@ -335,7 +335,7 @@ bool Instance::MissingIWAD_Dialog()
 		const fs::path *iwad = global::recent.queryIWAD(loaded.gameName);
 		SYS_ASSERT(!!iwad);
 		loaded.iwadName = *iwad;
-		
+
 		if(main_win)
 			testmap::updateMenuName(main_win->menu_bar, loaded);
 	}
@@ -367,9 +367,9 @@ void Instance::CMD_FreshMap()
 		SString map_name;
 		{
 			UI_ChooseMap dialog(loaded.levelName.c_str());
-			
+
 			dialog.PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), wad.master.editWad().get());
-			
+
 			map_name = dialog.Run();
 		}
 
@@ -622,7 +622,7 @@ void Document::LoadBehavior(int loading_level, const Wad_file *load_wad)
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "BEHAVIOR");
 	if (! lump)
 		ThrowException("No BEHAVIOR lump!\n");
-	
+
 	behaviorData = lump->getData();
 }
 
@@ -633,7 +633,7 @@ void Document::LoadScripts(int loading_level, const Wad_file *load_wad)
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "SCRIPTS");
 	if (! lump)
 		return;
-	
+
 	scriptsData = lump->getData();
 }
 
@@ -649,7 +649,7 @@ void Document::LoadThings(int loading_level, const Wad_file *load_wad)
 # if DEBUG_LOAD
 	PrintDebug("GetThings: num = %d\n", count);
 # endif
-	
+
 	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
@@ -685,7 +685,7 @@ void Document::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 # if DEBUG_LOAD
 	PrintDebug("GetThings: num = %d\n", count);
 # endif
-	
+
 	LumpInputStream stream(*lump);
 
 	for (int i = 0; i < count; ++i)
@@ -729,7 +729,7 @@ void Document::LoadSideDefs(int loading_level, const Wad_file *load_wad, const C
 # if DEBUG_LOAD
 	PrintDebug("GetSidedefs: num = %d\n", count);
 # endif
-	
+
 	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
@@ -775,7 +775,7 @@ void Document::LoadLineDefs(int loading_level, const Wad_file *load_wad, const C
 
 	if (count == 0)
 		return;
-	
+
 	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
@@ -823,7 +823,7 @@ void Document::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, c
 
 	if (count == 0)
 		return;
-	
+
 	LumpInputStream stream(*lump);
 
 	for (int i = 0 ; i < count ; i++)
@@ -966,7 +966,7 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	Document& doc = newdoc.doc;
 	LoadingData& loading = newdoc.loading;
 	BadCount& bad = newdoc.bad;
-	
+
 	loading.levelFormat = wad.LevelFormat(level);
 	doc.LoadHeader(level, wad);
 	if(loading.levelFormat == MapFormat::udmf)
@@ -1000,7 +1000,7 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	doc.checks.sidedefsUnpack(true);
 	doc.CalculateLevelBounds();
 	doc.MadeChanges = false;
-	
+
 	return newdoc;
 }
 
@@ -1069,7 +1069,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
-	if (! gInstance.level.Main_ConfirmQuit("open another map"))
+	if (! gInstance->level.Main_ConfirmQuit("open another map"))
 		return;
 
 
@@ -1110,11 +1110,12 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 		return;
 	}
 
-	LoadingData loading = gInstance.loaded;
+	LoadingData loading = gInstance->loaded;
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (! loading.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
+		if (! loading.parseEurekaLump(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, global::recent, wad.get()))
 		{
 			return;
 		}
@@ -1135,19 +1136,19 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// These 2 may throw, but it's safe here
-	NewDocument newdoc = gInstance.openDocument(loading, *wad, lev_num);
-	NewResources newres = loadResources(newdoc.loading, gInstance.wad);
+	NewDocument newdoc = gInstance->openDocument(loading, *wad, lev_num);
+	NewResources newres = loadResources(newdoc.loading, gInstance->wad);
 
-	gInstance.level = std::move(newdoc.doc);
-	gInstance.conf = std::move(newres.config);
-	gInstance.loaded = std::move(newres.loading);
-	gInstance.wad = std::move(newres.waddata);
-	gInstance.wad.master.ReplaceEditWad(wad);
-	
-	if(gInstance.main_win)
-		testmap::updateMenuName(gInstance.main_win->menu_bar, gInstance.loaded);
+	gInstance->level = std::move(newdoc.doc);
+	gInstance->conf = std::move(newres.config);
+	gInstance->loaded = std::move(newres.loading);
+	gInstance->wad = std::move(newres.waddata);
+	gInstance->wad.master.ReplaceEditWad(wad);
 
-	gInstance.refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, true);
+	if(gInstance->main_win)
+		testmap::updateMenuName(gInstance->main_win->menu_bar, gInstance->loaded);
+
+	gInstance->refreshViewAfterLoad(newdoc.bad, wad.get(), map_name, true);
 }
 
 
@@ -1175,7 +1176,7 @@ void Instance::CMD_OpenMap()
 
 	LoadingData loading = loaded;
 	if (did_load && wad->FindLump(EUREKA_LUMP) && !loading.parseEurekaLump(global::home_dir,
-		global::install_dir, global::recent, wad.get()))
+		global::old_linux_home_and_cache_dir, global::install_dir, global::recent, wad.get()))
 	{
 		return;
 	}
@@ -1210,12 +1211,12 @@ void Instance::CMD_OpenMap()
 	}
 	catch (const std::runtime_error& e)
 	{
-		DLG_ShowError(false, "Could not open %s of %s. %s", map_name.c_str(), 
+		DLG_ShowError(false, "Could not open %s of %s. %s", map_name.c_str(),
 			wad->PathName().u8string().c_str(), e.what());
 		return;
 	}
 
-	
+
 	if (new_resources)
 	{
 		// TODO: call a safe version of Main_LoadResources
@@ -1234,7 +1235,7 @@ void Instance::CMD_OpenMap()
 		conf = std::move(newres.config);
 		loaded = std::move(newres.loading);
 		this->wad = std::move(newres.waddata);
-		
+
 		if(main_win)
 			testmap::updateMenuName(main_win->menu_bar, loaded);
 
@@ -1519,12 +1520,12 @@ void Document::SaveThings_Hexen(Wad_file& wad) const
 		raw.type    = LE_U16(th->type);
 		raw.options = LE_U16(th->options);
 
-		raw.special = static_cast<u8_t>(th->special);
-		raw.args[0] = static_cast<u8_t>(th->arg1);
-		raw.args[1] = static_cast<u8_t>(th->arg2);
-		raw.args[2] = static_cast<u8_t>(th->arg3);
-		raw.args[3] = static_cast<u8_t>(th->arg4);
-		raw.args[4] = static_cast<u8_t>(th->arg5);
+		raw.special = static_cast<uint8_t>(th->special);
+		raw.args[0] = static_cast<uint8_t>(th->arg1);
+		raw.args[1] = static_cast<uint8_t>(th->arg2);
+		raw.args[2] = static_cast<uint8_t>(th->arg3);
+		raw.args[3] = static_cast<uint8_t>(th->arg4);
+		raw.args[4] = static_cast<uint8_t>(th->arg5);
 
 		lump.Write(&raw, sizeof(raw));
 	}
@@ -1589,13 +1590,13 @@ void Document::SaveLineDefs_Hexen(Wad_file &wad) const
 		raw.end   = LE_U16(ld->end);
 
 		raw.flags = LE_U16(ld->flags);
-		raw.type  = static_cast<u8_t>(ld->type);
+		raw.type  = static_cast<uint8_t>(ld->type);
 
-		raw.args[0] = static_cast<u8_t>(ld->tag);
-		raw.args[1] = static_cast<u8_t>(ld->arg2);
-		raw.args[2] = static_cast<u8_t>(ld->arg3);
-		raw.args[3] = static_cast<u8_t>(ld->arg4);
-		raw.args[4] = static_cast<u8_t>(ld->arg5);
+		raw.args[0] = static_cast<uint8_t>(ld->tag);
+		raw.args[1] = static_cast<uint8_t>(ld->arg2);
+		raw.args[2] = static_cast<uint8_t>(ld->arg3);
+		raw.args[3] = static_cast<uint8_t>(ld->arg4);
+		raw.args[4] = static_cast<uint8_t>(ld->arg5);
 
 		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
 		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
@@ -1807,8 +1808,11 @@ bool Instance::M_ExportMap(bool inhibit_node_build)
 	LoadingData loading = loaded;
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (!loading.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
+		if (!loading.parseEurekaLump(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, global::recent, wad.get()))
+		{
 			return false;
+		}
 	}
 
 	// ask user for map name
@@ -1850,10 +1854,10 @@ bool Instance::M_ExportMap(bool inhibit_node_build)
 
 
 	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
-	
+
 	try
 	{
-		
+
 		SaveLevel(loading, map_name, *wad, inhibit_node_build);
 	}
 	catch(const std::runtime_error &e)
@@ -1861,7 +1865,7 @@ bool Instance::M_ExportMap(bool inhibit_node_build)
 		DLG_ShowError(false, "Could not export map: %s", e.what());
 		return false;
 	}
-		
+
 	try
 	{
 		// do this after the save (in case it fatal errors)
@@ -1948,7 +1952,7 @@ void Instance::CMD_CopyMap()
 	{
 		DLG_ShowError(false, "Could not copy map: %s", e.what());
 	}
-	
+
 }
 
 
@@ -2019,7 +2023,7 @@ void Instance::CMD_RenameMap()
 
 		if (lev_num >= 0)
 		{
-						
+
 			int level_lump = wad.master.editWad()->LevelHeader(lev_num);
 			backupIndex = level_lump;
 			backupName = wad.master.editWad()->GetLump(level_lump)->Name();
@@ -2040,7 +2044,7 @@ void Instance::CMD_RenameMap()
 			wad.master.editWad()->RenameLump(*backupIndex, backupName->c_str());
 		DLG_ShowError(false, "Could not rename map: %s", e.what());
 	}
-	
+
 }
 
 
@@ -2129,7 +2133,7 @@ void Instance::CMD_DeleteMap()
 		DLG_ShowError(false, "Failed changing map after deleting a level: %s\n\nThe PWAD will be closed.", e.what());
 		if (!wad.master.gameWad())
 			throw;
-		
+
 		int lump_idx = wad.master.gameWad()->LevelHeader(0);
 		const Lump_c* lump = wad.master.gameWad()->GetLump(lump_idx);
 		if (!lump)

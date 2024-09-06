@@ -209,6 +209,15 @@ TEST_F(LibFileTempDir, FileMakeDir)
 
 }
 
+TEST_F(LibFileTempDir, FileMakeDirs)
+{
+	fs::path path = getChildPath("dir1/dir2/dir3");
+	ASSERT_TRUE(FileMakeDirs(path));
+	mDeleteList.push(getChildPath("dir1"));
+	mDeleteList.push(getChildPath("dir1/dir2"));
+	mDeleteList.push(getChildPath("dir1/dir2/dir3"));
+}
+
 TEST_F(LibFileTempDir, FileLoad)
 {
 	// Must test a sufficiently large file

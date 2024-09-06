@@ -96,15 +96,15 @@ void Instance::ZoomWholeMap()
 
 void Instance::RedrawMap()
 {
-	if (!main_win)
-		return;
-
 	UpdateHighlight();
 
-	main_win->scroll->UpdateRenderMode();
-	main_win->info_bar->UpdateSecRend();
-	main_win->status_bar->redraw();
-	main_win->canvas->redraw();
+	if(main_win)
+	{
+		main_win->scroll->UpdateRenderMode();
+		main_win->info_bar->UpdateSecRend();
+		main_win->status_bar->redraw();
+		main_win->canvas->redraw();
+	}
 }
 
 static int Selection_FirstLine(const Document &doc, const selection_c &list);
@@ -146,25 +146,28 @@ static void UpdatePanel(const Instance &inst)
 			obj_idx = inst.edit.Selected->find_first();
 	}
 
-	switch (inst.edit.mode)
+	if(inst.main_win)
 	{
-		case ObjType::things:
-			inst.main_win->thing_box->SetObj(obj_idx, obj_count);
-			break;
-
-		case ObjType::linedefs:
-			inst.main_win->line_box->SetObj(obj_idx, obj_count);
-			break;
-
-		case ObjType::sectors:
-			inst.main_win->sec_box->SetObj(obj_idx, obj_count);
-			break;
-
-		case ObjType::vertices:
-			inst.main_win->vert_box->SetObj(obj_idx, obj_count);
-			break;
-
-		default: break;
+		switch (inst.edit.mode)
+		{
+			case ObjType::things:
+				inst.main_win->thing_box->SetObj(obj_idx, obj_count);
+				break;
+				
+			case ObjType::linedefs:
+				inst.main_win->line_box->SetObj(obj_idx, obj_count);
+				break;
+				
+			case ObjType::sectors:
+				inst.main_win->sec_box->SetObj(obj_idx, obj_count);
+				break;
+				
+			case ObjType::vertices:
+				inst.main_win->vert_box->SetObj(obj_idx, obj_count);
+				break;
+				
+			default: break;
+		}
 	}
 }
 
@@ -178,7 +181,7 @@ void Instance::UpdateDrawLine()
 
 	v2double_t newpos = edit.map.xy;
 
-	if (grid.ratio > 0)
+	if (grid.getRatio() > 0)
 	{
 		grid.RatioSnapXY(newpos, V->xy());
 	}
@@ -198,7 +201,7 @@ void Instance::UpdateDrawLine()
 	edit.drawLine.to = newpos;
 
 	// when drawing mode, highlight a vertex at the snap position
-	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
+	if (grid.snaps() && edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
 		int near_vert = level.vertmod.findExact(FFixedPoint(newpos.x), FFixedPoint(newpos.y));
 		if (near_vert >= 0)
@@ -240,7 +243,8 @@ static void UpdateSplitLine(Instance &inst, const v2double_t &map)
 	}
 
 done:
-	inst.main_win->canvas->UpdateHighlight();
+	if(inst.main_win)
+		inst.main_win->canvas->UpdateHighlight();
 }
 
 
@@ -271,7 +275,7 @@ void Instance::UpdateHighlight()
 
 		// if drawing a line and ratio lock is ON, only highlight a
 		// vertex if it is *exactly* the right ratio.
-		if (grid.ratio > 0 && edit.action == EditorAction::drawLine &&
+		if (grid.getRatio() > 0 && edit.action == EditorAction::drawLine &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
 			const auto V = level.vertices[edit.highlight.num];
@@ -292,8 +296,11 @@ void Instance::UpdateHighlight()
 	UpdateSplitLine(*this, edit.map.xy);
 	UpdateDrawLine();
 
-	main_win->canvas->UpdateHighlight();
-	main_win->canvas->CheckGridSnap();
+	if(main_win)
+	{
+		main_win->canvas->UpdateHighlight();
+		main_win->canvas->CheckGridSnap();
+	}
 
 	UpdatePanel(*this);
 }
@@ -512,7 +519,7 @@ void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
 	if (type != edit.mode)
 		return;
 
-	if (objnum > main_win->GetPanelObjNum())
+	if (main_win && objnum > main_win->GetPanelObjNum())
 		return;
 
 	invalidated_panel_obj = true;

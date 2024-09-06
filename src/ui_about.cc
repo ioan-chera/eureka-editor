@@ -100,7 +100,7 @@ const char *UI_About::Text1 =
 
 
 const char *UI_About::Text2 =
-	"Copyright (C) 2014-2020 Ioan Chera                \n"
+	"Copyright (C) 2014-2024 Ioan Chera                \n"
 	"Copyright (C) 2001-2020 Andrew Apted, et al\n"
 	"Copyright (C) 1997-2003 André Majorel, et al\n"
 	"\n"

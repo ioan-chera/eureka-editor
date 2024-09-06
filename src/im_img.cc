@@ -164,6 +164,17 @@ void Img_c::compose(const Img_c &other, int x, int y)
 	}
 }
 
+void Img_c::flipHorizontally()
+{
+	assert((int)pixels.size() >= w * h);
+	for(int y = 0; y < h; ++y)
+		for(int x = 0; x < w / 2; ++x)
+		{
+			assert(y * w + x >= 0 && y * w + x < (int)pixels.size());
+			assert(y * w + w - x - 1 >= 0 && y * w + w - x - 1 < (int)pixels.size());
+			std::swap(pixels[y * w + x], pixels[y * w + w - x - 1]);
+		}
+}
 
 //
 // make a game image look vaguely like a spectre
@@ -190,11 +201,13 @@ Img_c Img_c::spectrify(const ConfigData &config) const
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
 	{
+		assert(y * W + x >= 0 && y * W + x < (int)pixels.size());
 		img_pixel_t pix = src[y * W + x];
 
 		if (pix != TRANS_PIXEL)
 			pix = static_cast<img_pixel_t>(invis_start + (rand() >> 4) % invis_len);
 
+		assert(y * W + x >= 0 && y * W + x < (int)omg.pixels.size());
 		dest[y * W + x] = pix;
 	}
 

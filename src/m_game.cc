@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr√© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Rapha√´l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -175,7 +175,8 @@ std::unordered_map<SString, SString> LoadingData::prepareConfigVariables() const
 	{
 		parse_vars["$GAME_NAME"] = gameName;
 
-		if (M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, gameName))
+		if (M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, GAMES_DIR, gameName))
 		{
 			SString base_game = M_GetBaseGame(gameName);
 			parse_vars["$BASE_GAME"] = base_game;
@@ -381,10 +382,12 @@ static void ParseFeatureDef(ConfigData &config, const char **argv, int argc)
 // Both strings are required
 // Returns "" if not found.
 //
-static tl::optional<fs::path> FindDefinitionFile(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name)
+static tl::optional<fs::path> FindDefinitionFile(const fs::path &home_dir,
+		const fs::path &old_home_dir, const fs::path &install_dir, const fs::path &folder,
+		const SString &name)
 {
 	SYS_ASSERT(!folder.empty() && name.good());
-	const fs::path lookupDirs[] = { home_dir, install_dir };
+	const fs::path lookupDirs[] = { home_dir, old_home_dir, install_dir };
 	for (const fs::path &base_dir : lookupDirs)
 	{
 		if (base_dir.empty())
@@ -402,9 +405,11 @@ static tl::optional<fs::path> FindDefinitionFile(const fs::path &home_dir, const
 }
 
 
-bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name)
+bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &old_home_dir,
+		const fs::path &install_dir, const fs::path &folder, const SString &name)
 {
-	tl::optional<fs::path> filename = FindDefinitionFile(home_dir, install_dir, folder, name);
+	tl::optional<fs::path> filename = FindDefinitionFile(home_dir, old_home_dir, install_dir,
+			folder, name);
 
 	return filename.has_value();
 }
@@ -437,7 +442,8 @@ void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 
 	gLog.printf("Loading Definitions : %s\n", prettyname.u8string().c_str());
 
-	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir, global::install_dir, folder, name);
+	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+			global::old_linux_home_and_cache_dir, global::install_dir, folder, name);
 
 	if (!filename)
 	{
@@ -474,7 +480,7 @@ void parser_state_c::tokenize()
 {
 	// break the line into whitespace-separated tokens.
 	// whitespace can be enclosed in double quotes.
-	
+
 	TokenWordParse parse(readstring, true);
 	SString word;
 	args.clear();
@@ -1038,13 +1044,17 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 				pst->fail("Too many includes (check for a loop)");
 
 			fs::path new_folder = folder;
-			tl::optional<fs::path> new_name = FindDefinitionFile(global::home_dir, global::install_dir, new_folder, pst->argv[1]);
+			tl::optional<fs::path> new_name = FindDefinitionFile(global::home_dir,
+					global::old_linux_home_and_cache_dir, global::install_dir, new_folder,
+					pst->argv[1]);
 
 			// if not found, check the common/ folder
 			if (!new_name && folder != "common")
 			{
 				new_folder = "common";
-				new_name = FindDefinitionFile(global::home_dir, global::install_dir, new_folder, pst->argv[1]);
+				new_name = FindDefinitionFile(global::home_dir,
+						global::old_linux_home_and_cache_dir, global::install_dir, new_folder,
+						pst->argv[1]);
 			}
 
 			if (!new_name)
@@ -1088,7 +1098,8 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	if(it != global::sLoadedGameDefs.end())
 		return it->second;
 
-	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir, global::install_dir, GAMES_DIR, game);
+	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+			global::old_linux_home_and_cache_dir, global::install_dir, GAMES_DIR, game);
 	if(!filename)
 		return {};
 	GameInfo loadingGame = GameInfo(game);
@@ -1113,7 +1124,8 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 	if (IT != global::loaded_port_defs.end())
 		return &IT->second;
 
-	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir, global::install_dir, PORTS_DIR, port);
+	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+			global::old_linux_home_and_cache_dir, global::install_dir, PORTS_DIR, port);
 	if (!filename)
 		return NULL;
 
@@ -1156,6 +1168,8 @@ std::vector<SString> M_CollectKnownDefs(const std::initializer_list<fs::path> &d
 	};
 	for(const fs::path &parentPath : dirList)
 	{
+		if(parentPath.empty())
+			continue;
 		fs::path path = parentPath / folder;
 		ScanDirectory(path, scanner_add_file);
 	}
@@ -1237,7 +1251,8 @@ bool M_CheckPortSupportsGame(const SString &base_game,
 SString M_CollectPortsForMenu(const char *base_game,
 							  int *exist_val, const char *exist_name) noexcept(false)
 {
-	std::vector<SString> list = M_CollectKnownDefs({global::install_dir, global::home_dir}, "ports");
+	std::vector<SString> list = M_CollectKnownDefs({global::install_dir,
+			global::old_linux_home_and_cache_dir, global::home_dir}, "ports");
 
 	if (list.empty())
 		return "";
@@ -1313,16 +1328,16 @@ const sectortype_t &Instance::M_GetSectorType(int type) const
 }
 
 
-const linetype_t &Instance::M_GetLineType(int type) const
+const linetype_t &ConfigData::getLineType(int type) const
 {
 	std::map<int, linetype_t>::const_iterator LI;
 
-	LI = conf.line_types.find(type);
+	LI = line_types.find(type);
 
-	if (LI != conf.line_types.end())
+	if (LI != line_types.end())
 		return LI->second;
 
-	static linetype_t dummy_type =
+	static const linetype_t dummy_type =
 	{
 		0, "UNKNOWN TYPE"
 	};

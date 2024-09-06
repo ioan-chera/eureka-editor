@@ -41,7 +41,9 @@ class RecentKnowledge;
 struct LoadingData
 {
 	std::unordered_map<SString, SString> prepareConfigVariables() const;
-	bool parseEurekaLump(const fs::path &home_dir, const fs::path &install_dir, const RecentKnowledge &recent, const Wad_file *wad, bool keep_cmd_line_args = false);
+	bool parseEurekaLump(const fs::path &home_dir, const fs::path &old_home_dir,
+			const fs::path &install_dir, const RecentKnowledge &recent, const Wad_file *wad,
+			bool keep_cmd_line_args = false);
 	void writeEurekaLump(Wad_file &wad) const;
 
 	SString gameName;	// Name of game "doom", "doom2", "heretic", ...

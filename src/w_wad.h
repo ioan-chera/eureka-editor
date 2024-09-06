@@ -164,6 +164,11 @@ struct LumpRef
 	WadNamespace ns;
 };
 
+struct SpriteLumpRef
+{
+	const Lump_c *lump;
+	bool flipped;
+};
 
 class Wad_file
 {
@@ -205,6 +210,7 @@ public:
 										  WadOpenMode mode
 										  = WadOpenMode::append);
 	static std::shared_ptr<Wad_file> loadFromFile(const fs::path &filename);
+	static std::shared_ptr<Wad_file> readFromDir(const fs::path &path);
 
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const fs::path &filename);
@@ -234,7 +240,7 @@ public:
 
 	const Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group)
 			const noexcept;
-	const Lump_c *findFirstSpriteLump(const SString &stem) const;
+	std::vector<SpriteLumpRef> findFirstSpriteLump(const SString &stem) const;
 
 	int LevelCount() const noexcept
 	{
@@ -305,6 +311,8 @@ public:
 private:
 	static std::shared_ptr<Wad_file> Create(const fs::path &filename,
 											WadOpenMode mode);
+	static std::shared_ptr<Wad_file> createAndReadDirectory(const fs::path &filename,
+															WadOpenMode mode, FILE *fp);
 
 	// read the existing directory.
 	bool ReadDirectory(FILE *fp, int totalSize);

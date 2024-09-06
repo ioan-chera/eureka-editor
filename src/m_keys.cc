@@ -309,37 +309,34 @@ static const char *ModName_Dash(keycode_t mod)
 }
 
 
-static const char *ModName_Space(keycode_t mod)
+static SString ModName_Space(keycode_t mod)
 {
+	SString result = ModName_Dash(mod);
+	if(!result.empty() && result.back() == '-')
+		result.back() = ' ';
 #ifdef __APPLE__
-	if (mod & EMOD_COMMAND) return "CMD ";
-#else
-	if (mod & EMOD_COMMAND) return "CTRL ";
+	if(result == "META ")
+		return "CTRL ";
 #endif
-	if (mod & EMOD_META)    return "META ";
-	if (mod & EMOD_ALT)     return "ALT ";
-	if (mod & EMOD_SHIFT)   return "SHIFT ";
-
-	if (mod & MOD_LAX_SHIFTCTRL) return "LAX ";
-
-	return "";
+	return result;
 }
 
-
-SString M_KeyToString(keycode_t key)
+namespace keys
+{
+SString toString(keycode_t key)
 {
 	// convert SHIFT + letter --> uppercase letter
 	if ((key & EMOD_ALL_MASK) == EMOD_SHIFT &&
 		(key & FL_KEY_MASK)  <  127 &&
 		isalpha(key & FL_KEY_MASK))
 	{
-        return SString::printf("%c", toupper(key & FL_KEY_MASK));
+		return SString::printf("%c", toupper(key & FL_KEY_MASK));
 	}
 
-    return SString::printf("%s%s", ModName_Dash(key),
-                           BareKeyName(key & FL_KEY_MASK).c_str());
+	return SString::printf("%s%s", ModName_Dash(key),
+						   BareKeyName(key & FL_KEY_MASK).c_str());
 }
-
+}
 
 int M_KeyCmp(keycode_t A, keycode_t B)
 {
@@ -385,7 +382,7 @@ KeyContext M_ParseKeyContext(const SString &str)
 	return KeyContext::none;
 }
 
-const char * M_KeyContextString(KeyContext context)
+static const char * M_KeyContextString(KeyContext context)
 {
 	switch (context)
 	{
@@ -406,20 +403,6 @@ const char * M_KeyContextString(KeyContext context)
 
 
 //------------------------------------------------------------------------
-
-struct key_binding_t
-{
-	keycode_t key;
-
-	KeyContext context;
-
-	const editor_command_t *cmd;
-
-	SString param[MAX_EXEC_PARAM];
-
-	// this field ONLY used by M_DetectConflictingBinds()
-	bool is_duplicate;
-};
 
 namespace global
 {
@@ -615,10 +598,17 @@ void M_LoadBindings()
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();
 
-	LoadBindingsFromPath(global::home_dir.u8string(), false);
+	if(!LoadBindingsFromPath(global::home_dir.u8string(), false) &&
+			!global::old_linux_home_and_cache_dir.empty())
+	{
+		gLog.printf("%s/bindings.cfg not found. Loading bindings from old path %s/bindings.cfg\n",
+				global::home_dir.u8string().c_str(),
+				global::old_linux_home_and_cache_dir.u8string().c_str());
+		LoadBindingsFromPath(global::old_linux_home_and_cache_dir.u8string(), false);
+	}
 
-	if(gInstance.main_win)
-		menu::updateBindings(gInstance.main_win->menu_bar);
+	if(gInstance->main_win)
+		menu::updateBindings(gInstance->main_win->menu_bar);
 }
 
 
@@ -654,7 +644,7 @@ void M_SaveBindings()
 			if (BindingExists(global::install_binds, bind, true /* full match */))
 				continue;
 
-			os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
+			os << M_KeyContextString(bind.context) << '\t' << keys::toString(bind.key) << '\t' <<
 				bind.cmd->name;
 
 			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
@@ -678,7 +668,7 @@ void M_SaveBindings()
 
 			if (! BindingExists(global::all_bindings, bind, false /* full match */))
 			{
-				os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
+				os << M_KeyContextString(bind.context) << '\t' << keys::toString(bind.key) << '\t' <<
 					"UNBOUND" << '\n';
 				count++;
 			}
@@ -698,7 +688,7 @@ namespace global
 {
 	// local copy of the bindings
 	// these only become live after M_ApplyBindings()
-	static std::vector<key_binding_t> pref_binds;
+	std::vector<key_binding_t> pref_binds;
 }
 
 void M_CopyBindings(bool from_defaults)
@@ -712,8 +702,8 @@ void M_ApplyBindings()
 {
     global::all_bindings = global::pref_binds;
 
-	if(gInstance.main_win)
-		menu::updateBindings(gInstance.main_win->menu_bar);
+	if(gInstance->main_win)
+		menu::updateBindings(gInstance->main_win->menu_bar);
 }
 
 
@@ -807,14 +797,12 @@ void M_DetectConflictingBinds()
 	}
 }
 
-
-SString M_StringForFunc(int index)
+namespace keys
+{
+SString stringForFunc(const key_binding_t &bind)
 {
 	SString buffer;
 	buffer.reserve(2048);
-
-	SYS_ASSERT(index >= 0 && index < static_cast<int>(global::pref_binds.size()));
-	const key_binding_t& bind = global::pref_binds[index];
 
 	SYS_ASSERT(!!bind.cmd);
 	buffer = bind.cmd->name;
@@ -838,13 +826,8 @@ SString M_StringForFunc(int index)
 	return buffer;
 }
 
-
-const char * M_StringForBinding(int index, bool changing_key)
+const char * stringForBinding(const key_binding_t& bind, bool changing_key)
 {
-	SYS_ASSERT(index < (int)global::pref_binds.size());
-
-	const key_binding_t& bind = global::pref_binds[index];
-
 	static char buffer[600];
 
 	// we prefer the UI to say "3D view" instead of "render"
@@ -862,15 +845,15 @@ const char * M_StringForBinding(int index, bool changing_key)
 	}
 
 	snprintf(buffer, sizeof(buffer), "%s%6.6s%-10.10s %-9.9s %.32s",
-			bind.is_duplicate ? "@C1" : "",
-			changing_key ? "<?"     : ModName_Space(tempk),
-			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
-			ctx_name,
-			 M_StringForFunc(index).c_str() );
+			 bind.is_duplicate ? "@C1" : "",
+			 changing_key ? "<?"     : ModName_Space(tempk).c_str(),
+			 changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
+			 ctx_name,
+			 stringForFunc(bind).c_str() );
 
 	return buffer;
 }
-
+}
 
 void M_GetBindingInfo(int index, keycode_t *key, KeyContext *context)
 {
@@ -1306,7 +1289,7 @@ static bool canShowUpOnMenu(keycode_t code)
 //
 // Finds key code for given command name
 //
-bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM], 
+bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM],
 							   keycode_t *code)
 {
     assert(!!code);
@@ -1315,7 +1298,7 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
 	{
 		if(y_stricmp(binding.cmd->name, command))
 			continue;
-		
+
 		bool skip = false;
 		for(int i = 0; i < MAX_EXEC_PARAM; ++i)
 		{

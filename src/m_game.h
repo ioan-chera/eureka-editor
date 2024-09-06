@@ -315,7 +315,8 @@ struct generalized_linetype_t
 static const char GAMES_DIR[] = "games";
 static const char PORTS_DIR[] = "ports";
 
-bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name);
+bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &old_home_dir,
+		const fs::path &install_dir, const fs::path &folder, const SString &name);
 void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 					   const fs::path &folder, const SString &name,
 					   ConfigData &config) noexcept(false);
@@ -366,6 +367,7 @@ struct ConfigData
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
 
 	const thingtype_t &getThingType(int type) const;
+	const linetype_t &getLineType(int type) const;
 };
 
 //
