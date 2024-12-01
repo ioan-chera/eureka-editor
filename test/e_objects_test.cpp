@@ -678,3 +678,240 @@ TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 		}
 	}
 }
+
+TEST_F(EObjectsFixture, AvoidAccidentalDegeneration)
+{
+   static const FFixedPoint vertexCoordinates[12][2] = {
+	   { FFixedPoint(-256), FFixedPoint(256) },
+	   { FFixedPoint(-256), FFixedPoint(768) },
+	   { FFixedPoint(256), FFixedPoint(768) },
+	   { FFixedPoint(-64), FFixedPoint(256) },
+
+	   { FFixedPoint(-64), FFixedPoint(448) },
+	   { FFixedPoint(256), FFixedPoint(512) },
+	   { FFixedPoint(0), FFixedPoint(256) },
+	   { FFixedPoint(0), FFixedPoint(448) },
+
+	   { FFixedPoint(256), FFixedPoint(448) },
+	   { FFixedPoint(64), FFixedPoint(256) },
+	   { FFixedPoint(64), FFixedPoint(384) },
+	   { FFixedPoint(256), FFixedPoint(384) },
+   };
+
+	Document &doc = inst.level;
+	inst.grid.ForceStep(64);
+	inst.grid.NearestScale(0.33);
+
+	for(size_t i = 0; i < 12; ++i)
+	{
+		auto vertex = std::make_shared<Vertex>();
+		vertex->raw_x = vertexCoordinates[i][0];
+		vertex->raw_y = vertexCoordinates[i][1];
+		doc.vertices.push_back(std::move(vertex));
+	}
+
+	std::shared_ptr<Sector> sector;
+
+	sector = std::make_shared<Sector>();
+	doc.sectors.push_back(std::move(sector));
+
+	sector = std::make_shared<Sector>();
+	doc.sectors.push_back(std::move(sector));
+
+	sector = std::make_shared<Sector>();
+	doc.sectors.push_back(std::move(sector));
+
+	std::shared_ptr<SideDef> side;	// 0
+
+	side = std::make_shared<SideDef>();
+	side->sector = 0;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 0;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 0;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 0;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 1;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 1;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 1;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 1;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 0;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 0;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 2;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 2;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 2;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 2;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 1;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 1;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 2;
+	doc.sidedefs.push_back(std::move(side));
+
+	side = std::make_shared<SideDef>();
+	side->sector = 2;
+	doc.sidedefs.push_back(std::move(side));
+
+	std::shared_ptr<LineDef> line;
+
+	line = std::make_shared<LineDef>();
+	line->start = 3;
+	line->end = 0;
+	line->right = 1;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 0;
+	line->end = 1;
+	line->right = 2;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 1;
+	line->end = 2;
+	line->right = 3;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 2;
+	line->end = 5;
+	line->right = 0;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 6;
+	line->end = 3;
+	line->right = 4;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 3;
+	line->end = 4;
+	line->right = 7;
+	line->right = 9;
+	line->flags = MLF_TwoSided;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 5;
+	line->end = 8;
+	line->right = 5;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 4;
+	line->end = 5;
+	line->right = 6;
+	line->right = 8;
+	line->flags = MLF_TwoSided;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 9;
+	line->end = 6;
+	line->right = 10;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 6;
+	line->end = 7;
+	line->right = 13;
+	line->right = 15;
+	line->flags = MLF_TwoSided;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 8;
+	line->end = 11;
+	line->right = 11;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 7;
+	line->end = 8;
+	line->right = 12;
+	line->right = 14;
+	line->flags = MLF_TwoSided;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 10;
+	line->end = 9;
+	line->right = 17;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	line = std::make_shared<LineDef>();
+	line->start = 11;
+	line->end = 10;
+	line->right = 16;
+	line->flags = MLF_Blocking;
+	doc.linedefs.push_back(std::move(line));
+
+	selection_c selection(ObjType::sectors);
+	for(int i = 0; i < doc.numSectors(); ++i)
+		selection.set(i);
+
+	int numverts = doc.numVertices();
+	int numsectors = doc.numSectors();
+	int numsides = doc.numSidedefs();
+	int numlines = doc.numLinedefs();
+
+	doc.objects.move(selection, v3double_t(256, 128, 0));
+
+	ASSERT_EQ(doc.numVertices(), numverts);
+	ASSERT_EQ(doc.numSectors(), numsectors);
+	ASSERT_EQ(doc.numSidedefs(), numsides);
+	ASSERT_EQ(doc.numLinedefs(), numlines);
+}

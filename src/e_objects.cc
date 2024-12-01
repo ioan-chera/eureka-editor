@@ -829,7 +829,6 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 							--*jt;
 							movingGroup.set(*jt);
 						}
-				movingGroup.clear(*it);
 			}
 			break;
 		}
