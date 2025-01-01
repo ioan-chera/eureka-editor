@@ -294,6 +294,10 @@ static void ParseClearKeywords(ConfigData &config, const char ** argv, int argc,
 			config.thing_groups.clear();
 			config.thing_types.clear();
 		}
+		else if (y_stricmp(argv[0], "thingflags") == 0)
+		{
+			config.thing_flags.clear();
+		}
 		else if (y_stricmp(argv[0], "textures") == 0)
 		{
 			config.texture_groups.clear();
@@ -672,6 +676,39 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		tg.desc  = argv[3];
 
 		config.thing_groups[tg.group] = tg;
+	}
+
+	else if(y_stricmp(argv[0], "thingflag") == 0)
+	{
+		if(nargs != 5)
+			pst->fail(bad_arg_count_fail, argv[0], 5);
+
+		thingflag_t flag = {};
+		flag.row = atoi(argv[1]);
+		flag.column = atoi(argv[2]);
+		flag.label = argv[3];
+		if(!y_stricmp(argv[4], "off"))
+			flag.defaultSet = thingflag_t::DefaultMode::off;
+		else if(!y_stricmp(argv[4], "on"))
+			flag.defaultSet = thingflag_t::DefaultMode::on;
+		else if(!y_stricmp(argv[4], "on-opposite"))
+			flag.defaultSet = thingflag_t::DefaultMode::onOpposite;
+		else
+			pst->fail("invalid default setting \"%s\", expected off, on or on-opposite", argv[4]);
+		flag.value = (int)strtol(argv[5], nullptr, 0);
+
+		// Check if we already have one in the same location, and replace it if so (needed for
+		// ports like BOOM which overwrite vanilla flags)
+		bool found = false;
+		for(thingflag_t &existingflag : config.thing_flags)
+			if(existingflag.row == flag.row && existingflag.column == flag.column)
+			{
+				existingflag = flag;
+				found = true;
+				break;
+			}
+		if(!found)
+			config.thing_flags.push_back(flag);
 	}
 
 	else if (y_stricmp(argv[0], "thing") == 0)

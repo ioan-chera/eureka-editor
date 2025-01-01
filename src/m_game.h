@@ -121,6 +121,25 @@ struct thingtype_t
 };
 
 
+// thingflag <row> <column> <label> <off/on> <value>
+// This is the thing flag as it would appear in the thing panel as a checkbox
+struct thingflag_t
+{
+	enum class DefaultMode
+	{
+		off,
+		on,
+		onOpposite
+	};
+
+	int row;
+	int column;
+	SString label;
+	DefaultMode defaultSet;
+	int value;
+};
+
+
 enum thingdef_flags_e
 {
 	THINGDEF_INVIS   = (1 << 0),  // partially invisible
@@ -362,6 +381,7 @@ struct ConfigData
 	std::map<char, texturegroup_t> texture_groups;
 	std::map<char, thinggroup_t> thing_groups;
 	std::map<int, thingtype_t> thing_types;
+	std::vector<thingflag_t> thing_flags;
 
 	int num_gen_linetypes = 0;
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines

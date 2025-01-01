@@ -27,6 +27,29 @@
 
 class Sticker;
 class UI_DynIntInput;
+class UI_ThingBox;
+struct thingflag_t;
+
+class thing_opt_CB_data_c
+{
+public:
+	UI_ThingBox *parent;
+
+	int mask;
+
+public:
+	thing_opt_CB_data_c(UI_ThingBox *_parent, int _mask) :
+		parent(_parent), mask(_mask)
+	{ }
+
+};
+
+struct FlagButton
+{
+	std::unique_ptr<Fl_Check_Button> button;
+	std::unique_ptr<thing_opt_CB_data_c> data;
+	const thingflag_t *info;
+};
 
 class UI_ThingBox : public MapItemBox
 {
@@ -49,28 +72,31 @@ private:
 	UI_DynIntInput *pos_z;
 
 	// Options
-	Fl_Check_Button *o_easy;
-	Fl_Check_Button *o_medium;
-	Fl_Check_Button *o_hard;
+//	Fl_Check_Button *o_easy;
+//	Fl_Check_Button *o_medium;
+//	Fl_Check_Button *o_hard;
 
-	Fl_Check_Button *o_sp;
-	Fl_Check_Button *o_coop;
-	Fl_Check_Button *o_dm;
-	Fl_Check_Button *o_vanilla_dm;
+//	Fl_Check_Button *o_sp;
+//	Fl_Check_Button *o_coop;
+//	Fl_Check_Button *o_dm;
+//	Fl_Check_Button *o_vanilla_dm;
 
-	Fl_Check_Button *o_fight;   //
-	Fl_Check_Button *o_cleric;  // Hexen
-	Fl_Check_Button *o_mage;    //
+//	Fl_Check_Button *o_fight;   //
+//	Fl_Check_Button *o_cleric;  // Hexen
+//	Fl_Check_Button *o_mage;    //
 
-	Fl_Check_Button *o_ambush;
-	Fl_Check_Button *o_friend;   // Boom / MBF / Strife
-	Fl_Check_Button *o_dormant;  // Hexen
+//	Fl_Check_Button *o_ambush;
+//	Fl_Check_Button *o_friend;   // Boom / MBF / Strife
+//	Fl_Check_Button *o_dormant;  // Hexen
 
-	Fl_Check_Button *o_sf_shadow;  //
-	Fl_Check_Button *o_sf_altvis;  //
-	Fl_Check_Button *o_sf_stand;   // Strife
-	Fl_Check_Button *o_sf_ambush;  //
-	Fl_Check_Button *o_sf_friend;  //
+//	Fl_Check_Button *o_sf_shadow;  //
+//	Fl_Check_Button *o_sf_altvis;  //
+//	Fl_Check_Button *o_sf_stand;   // Strife
+//	Fl_Check_Button *o_sf_ambush;  //
+//	Fl_Check_Button *o_sf_friend;  //
+
+	std::vector<FlagButton> flagButtons;
+	int optionStartX, optionStartY;
 
 	UI_Pic *sprite;
 

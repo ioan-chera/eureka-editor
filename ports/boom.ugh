@@ -42,6 +42,11 @@ feature lax_sprites  1
 
 #---- BOOM THINGS -------------
 
+# These will overwrite the vanilla DOOM columns
+thingflag 0 1 sp   on-opposite 0x10
+thingflag 1 1 coop on-opposite 0x20
+thingflag 2 1 dm   on-opposite 0x40
+
 # Note: Boom and MBF just ignore the extra player starts
 thing 4001 p - 16 NULL "Player 5 start"
 thing 4002 p - 16 NULL "Player 6 start"

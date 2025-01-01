@@ -37,6 +37,29 @@ if $ALLOW_BOOM is 1
 endif
 
 
+if $MAP_FORMAT not DOOM
+  # Need to clear from base game, which may fail to be Hexen format
+  clear thingflags
+  thingflag 0 0 easy    on  0x0001
+  thingflag 1 0 medium  on  0x0002
+  thingflag 2 0 hard    on  0x0004
+  thingflag 0 1 sp      on  0x0100
+  thingflag 1 1 coop    on  0x0200
+  thingflag 2 1 dm      on  0x0400
+  thingflag 0 2 Fighter on  0x0020
+  thingflag 1 2 Cleric  on  0x0040
+  thingflag 2 2 Mage    on  0x0080
+
+  thingflag 4 0 ambush  off 0x0008
+  thingflag 4 1 friend  off 0x2000
+  thingflag 4 2 dormant off 0x0010
+
+  thingflag 5 0 stand   off 0x4000
+  thingflag 5 1 shadow  off 0x0800
+  thingflag 5 2 alt-vis off 0x1000
+endif
+
+
 map_formats DOOM HEXEN UDMF
 
 supported_games doom doom2 heretic hexen strife

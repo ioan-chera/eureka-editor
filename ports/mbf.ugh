@@ -30,6 +30,8 @@ feature friend_flag 1
 
 #---- THINGS -------------
 
+thingflag 4 1 friend off 0x80
+
 thing  888 - -  12 DOGS   "Dog (MBF)"
 
 
