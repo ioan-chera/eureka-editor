@@ -71,6 +71,9 @@ private:
 	UI_DynIntInput *pos_y;
 	UI_DynIntInput *pos_z;
 
+	UI_DynIntInput *flagBox;
+	Fl_Color flagBoxDefaultColor;
+
 	std::vector<FlagButton> flagButtons;
 	int optionStartX, optionStartY;
 
@@ -116,6 +119,7 @@ private:
 	static void dyntype_callback(Fl_Widget *, void *);
 
 	static void  angle_callback(Fl_Widget *w, void *data);
+	static void  flags_callback(Fl_Widget *w, void *data);
 	static void    tid_callback(Fl_Widget *w, void *data);
 	static void option_callback(Fl_Widget *w, void *data);
 	static void button_callback(Fl_Widget *w, void *data);

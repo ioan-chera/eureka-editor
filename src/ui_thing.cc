@@ -152,13 +152,16 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 		ang_buts[i]->callback(button_callback, this);
 	}
 
-	Y = Y + 50;
+	Y = Y + 46;
 
+	flagBox = new UI_DynIntInput(X+70, Y, 64, 24, "Options: ");
+	flagBox->align(FL_ALIGN_LEFT);
+	flagBox->callback(flags_callback, this);
+	flagBox->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Fl_Box *opt_lab = new Fl_Box(X+10, Y, W, 22, "Options Flags:");
-	opt_lab->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+	flagBoxDefaultColor = flagBox->color();
 
-	Y = Y + opt_lab->h() + 2;
+	Y = Y + flagBox->h() + 6;
 
 	optionStartX = X - X0;
 	optionStartY = Y - Y0;
@@ -224,7 +227,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	args[0]->label("Args: ");
 
-	mFixUp.loadFields({type, angle, tid, exfloor, pos_x, pos_y, pos_z, spec_type,
+	mFixUp.loadFields({type, angle, flagBox, tid, exfloor, pos_x, pos_y, pos_z, spec_type,
 					  args[0], args[1], args[2], args[3], args[4]});
 
 	end();
@@ -383,6 +386,24 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeThing(*it, Thing::F_ANGLE, new_ang);
+		}
+	}
+}
+
+void UI_ThingBox::flags_callback(Fl_Widget *w, void *data)
+{
+	UI_ThingBox *box = (UI_ThingBox *)data;
+
+	int new_flags = atoi(box->flagBox->value());
+
+	if (!box->inst.edit.Selected->empty())
+	{
+		EditOperation op(box->inst.level.basis);
+		op.setMessageForSelection("edited options of", *box->inst.edit.Selected);
+
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+		{
+			op.changeThing(*it, Thing::F_OPTIONS, new_flags);
 		}
 	}
 }
@@ -678,10 +699,29 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_OPTIONS)
 	{
+		int options;
+		SString optString;
 		if (inst.level.isThing(obj))
-			OptionsFromInt(inst.level.things[obj]->options);
+		{
+			options = inst.level.things[obj]->options;
+			optString = SString(options);
+		}
 		else
-			OptionsFromInt(0);
+		{
+			options = 0;
+			optString = "";
+		}
+		OptionsFromInt(options);
+		mFixUp.setInputValue(flagBox, optString.c_str());
+
+		// Check if anything's out of the fields
+		unsigned mask = 0;
+		for(const thingflag_t &flag : inst.conf.thing_flags)
+			mask |= flag.value;
+		if(options & ~mask)
+			flagBox->color(fl_rgb_color(255, 255, 0));
+		else
+			flagBox->color(flagBoxDefaultColor);
 	}
 
 	if (inst.loaded.levelFormat == MapFormat::doom)
