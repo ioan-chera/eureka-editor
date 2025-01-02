@@ -146,8 +146,9 @@ TEST_F(MGameFixture, MCollectKnownDefs)
 	ASSERT_EQ(M_CollectKnownDefs({install_dir, home_dir}, folder), expected);
 }
 
-TEST_F(MGameFixture, ParseDefinitionFileClearThingFlags)
+TEST_F(MGameFixture, ParseDefinitionFileThingFlags)
 {
+	// Tests both the population, the clearing and the same-position overriding
 	std::unordered_map<SString, SString> parseVars;
 	ParsePurpose purpose = ParsePurpose::normal;
 	fs::path filename = getChildPath("test.ugh");
@@ -162,6 +163,7 @@ TEST_F(MGameFixture, ParseDefinitionFileClearThingFlags)
 	stream << "clear thingflags"               << std::endl;
 	stream << "thingflag 2 1 ambush  off 0x04" << std::endl;
 	stream << "thingflag 3 1 friend  on-opposite 0x08" << std::endl;
+	stream << "thingflag 2 1 doppel  on 0x10" << std::endl;
 
 	stream.close();
 
@@ -170,12 +172,17 @@ TEST_F(MGameFixture, ParseDefinitionFileClearThingFlags)
 	M_ParseDefinitionFile(parseVars, purpose, &config, filename);
 
 	ASSERT_EQ(config.thing_flags.size(), 2);
+
+	// Also test that the same position gets overwritten
 	ASSERT_EQ(config.thing_flags[0].row, 2);
 	ASSERT_EQ(config.thing_flags[0].column, 1);
-	ASSERT_EQ(config.thing_flags[0].value, 4);
-	ASSERT_EQ(config.thing_flags[0].defaultSet, thingflag_t::DefaultMode::off);
+	ASSERT_EQ(config.thing_flags[0].value, 16);
+	ASSERT_EQ(config.thing_flags[0].defaultSet, thingflag_t::DefaultMode::on);
+	ASSERT_EQ(config.thing_flags[0].label, "doppel");
+
 	ASSERT_EQ(config.thing_flags[1].row, 3);
 	ASSERT_EQ(config.thing_flags[1].column, 1);
 	ASSERT_EQ(config.thing_flags[1].value, 8);
 	ASSERT_EQ(config.thing_flags[1].defaultSet, thingflag_t::DefaultMode::onOpposite);
+	ASSERT_EQ(config.thing_flags[1].label, "friend");
 }
