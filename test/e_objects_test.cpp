@@ -915,3 +915,35 @@ TEST_F(EObjectsFixture, AvoidAccidentalDegeneration)
 	ASSERT_EQ(doc.numSidedefs(), numsides);
 	ASSERT_EQ(doc.numLinedefs(), numlines);
 }
+
+TEST_F(EObjectsFixture, InsertThingWithDefaultFlags)
+{
+	inst.edit.mode = ObjType::things;
+	inst.edit.Selected = selection_c(ObjType::things);
+	inst.conf.default_thing = 1234;
+
+	thingflag_t flag = {};
+	flag.value = 1;
+	flag.defaultSet = thingflag_t::DefaultMode::off;
+	inst.conf.thing_flags.push_back(flag);
+	flag.value = 2;
+	flag.defaultSet = thingflag_t::DefaultMode::off;
+	inst.conf.thing_flags.push_back(flag);
+	flag.value = 4;
+	flag.defaultSet = thingflag_t::DefaultMode::on;
+	inst.conf.thing_flags.push_back(flag);
+	flag.value = 8;
+	flag.defaultSet = thingflag_t::DefaultMode::off;
+	inst.conf.thing_flags.push_back(flag);
+	flag.value = 16;
+	flag.defaultSet = thingflag_t::DefaultMode::onOpposite;
+	inst.conf.thing_flags.push_back(flag);
+	flag.value = 32;
+	flag.defaultSet = thingflag_t::DefaultMode::on;
+	inst.conf.thing_flags.push_back(flag);
+
+	inst.CMD_ObjectInsert();
+
+	ASSERT_EQ(inst.level.things.size(), 1);
+	ASSERT_EQ(inst.level.things[0]->options, 36);
+}
