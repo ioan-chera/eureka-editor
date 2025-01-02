@@ -60,6 +60,9 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 {
 	box(FL_FLAT_BOX);
 
+	const int Y0 = Y;
+	const int X0 = X;
+
 	X += 6;
 	Y += 6;
 
@@ -157,8 +160,8 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	Y = Y + opt_lab->h() + 2;
 
-	optionStartX = X;
-	optionStartY = Y;
+	optionStartX = X - X0;
+	optionStartY = Y - Y0;
 
 
 	// when appear: two rows of three on/off buttons
@@ -928,7 +931,10 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 		this->remove(button.button.get());
 	flagButtons.clear();
 
-	int Y = optionStartY;
+
+	gLog.printf("%s: %zu flags\n", __func__, config.thing_flags.size());
+
+	int Y = y() + optionStartY;
 	if(!config.thing_flags.empty())
 	{
 		std::vector<const thingflag_t *> rowSortedFlags;
@@ -941,9 +947,9 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 			return a->row < b->row;
 		});
 		const int W = w() - 12;
-		const int AX = optionStartX + W / 3 + 4;
-		const int BX = optionStartX + 2 * W / 3 - 20;
-		const int xpos[3] = { optionStartX + 28, AX + 28, BX + 28 };
+		const int AX = x() + optionStartX + W / 3 + 4;
+		const int BX = x() + optionStartX + 2 * W / 3 - 20;
+		const int xpos[3] = { x() + optionStartX + 28, AX + 28, BX + 28 };
 
 		const int FW = W / 3 - 12;
 
