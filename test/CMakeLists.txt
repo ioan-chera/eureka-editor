@@ -1,16 +1,22 @@
 message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
 
 # Following https://github.com/google/googletest/blob/main/googletest/README.md
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG v1.14.0
-)
+# include(FetchContent)
+# FetchContent_Declare(
+#     googletest
+#     GIT_REPOSITORY https://github.com/google/googletest.git
+#     GIT_TAG v1.14.0
+# )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# FetchContent_MakeAvailable(googletest)
 
+find_package(GTest REQUIRED)
+message(STATUS "Found GTEST_INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}")
+message(STATUS "Found GTEST_LIBRARIES ${GTEST_LIBRARIES}")
+message(STATUS "Found GTEST_MAIN_LIBRARIES ${GTEST_MAIN_LIBRARIES}")
+message(STATUS "Found GTEST_BOTH_LIBRARIES ${GTEST_BOTH_LIBRARIES}")
+add_library(gtest_main ALIAS GTest::gtest_main)
 
 set(src ${CMAKE_SOURCE_DIR}/src)
 get_target_property(src_includes eurekasrc INCLUDE_DIRECTORIES)
