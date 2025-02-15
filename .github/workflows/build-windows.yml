@@ -27,6 +27,8 @@ jobs:
         run: test -z $(git rev-list --after="24 hours" ${{ github.sha }}) && echo "::set-output name=should-run::false"
 
   build-windows:
+    needs: check-date
+    if: ${{ needs.check-date.outputs.should-run != 'false' }}
     strategy:
       matrix:
         arch: [x64, Win32]
@@ -38,7 +40,7 @@ jobs:
       - name: Build
         run: cmake --build build --config Release --parallel
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build --output-on-failure -C Release
       - name: Archive
         run: |
           Copy-Item AUTHORS.md GPL.txt README.txt TODO.txt build\Release
