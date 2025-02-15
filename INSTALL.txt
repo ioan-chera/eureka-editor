@@ -14,8 +14,14 @@ Dependencies:
 2. CMake
    package: cmake
 
-3. FLTK 1.3
+3. FLTK 1.3 or 1.4
+
+   Downloaded by CMake by default. Add `-DUSE_SYSTEM_FLTK=ON` to the CMake
+   command-line to use the system installed FLTK.
+
    website: http://www.fltk.org/
+
+   If using system FLTK:
    package: libfltk1.3-dev
 
    You may also need: libxft-dev
@@ -38,8 +44,14 @@ Dependencies:
    (only needed for Linux, to install the desktop and icon files)
    package: xdg-utils
 
+If you want or need to use system installed FLTK and Google Test instead of
+CMake fetching them from GitHub, add the following parameters to the `cmake`
+command line:
 
-Assuming all those dependencies are met, then the following shell
+   -DUSE_SYSTEM_FLTK=ON -DUSE_SYSTEM_GOOGLE_TEST=ON
+
+
+Assuming all the dependencies are met, then the following shell
 commands will build the Eureka binary. (the '>' is just the prompt)
 
    > mkdir build
@@ -85,11 +97,9 @@ Use CMake. You can download and install CMake from their website, or use a
 third-party package manager such as Homebrew. Easiest to use is the graphical
 interface version of CMake (CMake GUI).
 
-Unlike on Linux, the CMake script will download and build FLTK from their
-website. You don't need to download it yourself. This is by design, so that the
-final built app is self-contained with all that it needs to run, and that it
-will always use the exact same dependencies without varying on how the user may
-have installed FLTK on their system.
+Unlike on Linux, on Mac it's strongly advised to let CMake fetch FLTK from
+GitHub; do not set USE_SYSTEM_FLTK to ON. This is needed because of some late
+bug fixes on macOS FLTK.
 
 The generated Xcode project or Makefile will ultimately produce an "Eureka Doom
 Editor" graphical application. If you generated a Makefile, there's no "make
@@ -112,7 +122,7 @@ COMPILING (Windows)
 ===================
 
 Use CMake, same as on macOS. Similarly, the FLTK project shall be downloaded and
-built.
+built by CMake itself.
 
 
 

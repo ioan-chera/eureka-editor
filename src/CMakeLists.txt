@@ -240,22 +240,25 @@ endif()
 #
 # Fetch FLTK
 #
-message(STATUS "Using local FLTK for portability.")
-include(FetchContent)
 
-# FetchContent_Declare(
-#     FLTK
-#     GIT_REPOSITORY https://github.com/fltk/fltk.git
-#     GIT_TAG 9c7a4737784cfd3abe5b71ee8104a700e4f7959f    # master at some point
-# )
-# FetchContent_MakeAvailable(FLTK)
-
-find_package(FLTK REQUIRED)
-message(STATUS "Found FLTK_INCLUDE_DIR ${FLTK_INCLUDE_DIR}")
-message(STATUS "Found FLTK_LIBRARIES ${FLTK_LIBRARIES}")
-message(STATUS "Found FLTK_FLUID_EXECUTABLE ${FLTK_FLUID_EXECUTABLE}")
-message(STATUS "fltk_BINARY_DIR: ${fltk_BINARY_DIR}")
-message(STATUS "fltk_SOURCE_DIR: ${fltk_SOURCE_DIR}")
+option(USE_SYSTEM_FLTK "Use system FLTK instead of locally-fetched source")
+if(USE_SYSTEM_FLTK)
+    message(STATUS "Using system FLTK.")
+    find_package(FLTK REQUIRED)
+    message(VERBOSE "Found FLTK_INCLUDE_DIR ${FLTK_INCLUDE_DIR}")
+    message(VERBOSE "Found FLTK_LIBRARIES ${FLTK_LIBRARIES}")
+    message(VERBOSE "Found FLTK_FLUID_EXECUTABLE ${FLTK_FLUID_EXECUTABLE}")
+    set(LOCAL_FLTK_INSTALL_LIBS X11)    # Extra libraries needed with 1.3
+else()
+    message(STATUS "Using fetch-content FLTK for portability.")
+    include(FetchContent)
+    FetchContent_Declare(
+        FLTK
+        GIT_REPOSITORY https://github.com/fltk/fltk.git
+        GIT_TAG 9c7a4737784cfd3abe5b71ee8104a700e4f7959f    # master at some point
+    )
+    FetchContent_MakeAvailable(FLTK)
+endif()
 
 target_include_directories(
     eurekasrc
@@ -267,7 +270,7 @@ target_include_directories(
 target_link_libraries(
     eurekasrc
     PRIVATE
-    fltk fltk_gl fltk_images X11
+    fltk fltk_gl fltk_images ${LOCAL_FLTK_INSTALL_LIBS}
 )
 
 if(APPLE)
