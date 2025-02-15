@@ -43,7 +43,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure -C Release
       - name: Archive
         run: |
-          Copy-Item AUTHORS.md GPL.txt README.txt TODO.txt build\Release
+          Copy-Item AUTHORS.md,GPL.txt,README.txt,TODO.txt build\Release
           Compress-Archive -Path build\Release\* -DestinationPath EurekaEditor-${{ matrix.arch}}.zip
       - name: Publish
         uses: actions/upload-artifact@v4
