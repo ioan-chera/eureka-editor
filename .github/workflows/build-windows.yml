@@ -3,8 +3,7 @@ name: Build for Windows
 on:
   schedule:
     - cron: 0 0 * * *
-  push:
-    branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   #
@@ -44,9 +43,8 @@ jobs:
       - name: Archive
         run: |
           Copy-Item AUTHORS.md,GPL.txt,README.txt,TODO.txt build\Release
-          Compress-Archive -Path build\Release\* -DestinationPath EurekaEditor-${{ matrix.arch}}.zip
       - name: Publish
         uses: actions/upload-artifact@v4
         with:
           name: EurekaEditor-${{ matrix.arch }}
-          path: EurekaEditor-${{ matrix.arch }}.zip
+          path: build/Release/*
