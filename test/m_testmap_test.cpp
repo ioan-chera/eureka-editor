@@ -54,11 +54,11 @@ protected:
 	fs::path res1Path;
 	fs::path res2Path;
 	fs::path editWadPath;
-	
+
 #ifdef __APPLE__
 	fs::path macPath;
 #endif
-	
+
 private:
 #ifndef _WIN32
 	void writeShellScript(const fs::path &path);
@@ -107,7 +107,7 @@ void TestMapFixture::SetUp()
 	stream << "echo done > " << SString(finishMarkPath.u8string()).spaceEscape(false) << std::endl;
 	stream.close();
 #else
-	portPath = getChildPath("port.sh");
+	portPath = getChildPath("port-script");
 	writeShellScript(portPath);
 #endif
 #ifdef __APPLE__
@@ -227,17 +227,17 @@ std::vector<std::string> TestMapFixture::testMapAndGetLines()
 TEST_F(TestMapFixture, TestMapVanillaWithResources)
 {
 	setPortName("vanilla");
-	
+
 	addIWAD();
-	
+
 	addResources();
-	
+
 	addPWAD();
-	
+
 	inst.loaded.levelName = "MAP14";
-	
+
 	// Now run
-	
+
 	std::vector<std::string> lines = testMapAndGetLines();
 	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-merge",
 		res1Path.u8string(), res2Path.u8string(), "-file", editWadPath.u8string(), "-warp", "14"};
@@ -247,15 +247,15 @@ TEST_F(TestMapFixture, TestMapVanillaWithResources)
 TEST_F(TestMapFixture, TestMapPortWithResources)
 {
 	setPortName("boom");
-	
+
 	addIWAD();
-	
+
 	addResources();
-	
+
 	addPWAD();
-	
+
 	inst.loaded.levelName = "MAP14";
-		
+
 	std::vector<std::string> lines = testMapAndGetLines();
 	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file",
 		res1Path.u8string(), res2Path.u8string(), editWadPath.u8string(), "-warp", "14"};
@@ -265,13 +265,13 @@ TEST_F(TestMapFixture, TestMapPortWithResources)
 TEST_F(TestMapFixture, TestMapPortWithoutResources)
 {
 	setPortName("boom");
-	
+
 	addIWAD();
-		
+
 	addPWAD();
-	
+
 	inst.loaded.levelName = "MAP14";
-	
+
 	std::vector<std::string> lines = testMapAndGetLines();
 	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string(), "-warp", "14"};
 	ASSERT_EQ(lines, expected);
@@ -280,13 +280,13 @@ TEST_F(TestMapFixture, TestMapPortWithoutResources)
 TEST_F(TestMapFixture, TestMapPortWithoutResourcesDoom1Map)
 {
 	setPortName("boom");
-	
+
 	addIWAD();
-		
+
 	addPWAD();
-	
+
 	inst.loaded.levelName = "E6M9";
-	
+
 	std::vector<std::string> lines = testMapAndGetLines();
 	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string(), "-warp", "6", "9"};
 	ASSERT_EQ(lines, expected);
@@ -295,13 +295,13 @@ TEST_F(TestMapFixture, TestMapPortWithoutResourcesDoom1Map)
 TEST_F(TestMapFixture, TestMapPortWithoutResourcesNonstandardMap)
 {
 	setPortName("boom");
-	
+
 	addIWAD();
-		
+
 	addPWAD();
-	
+
 	inst.loaded.levelName = "ZOMFG65";
-		
+
 	std::vector<std::string> lines = testMapAndGetLines();
 	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string(), "-warp", "65"};
 	ASSERT_EQ(lines, expected);
@@ -310,13 +310,13 @@ TEST_F(TestMapFixture, TestMapPortWithoutResourcesNonstandardMap)
 TEST_F(TestMapFixture, TestMapPortWithoutResourcesBadMap)
 {
 	setPortName("boom");
-	
+
 	addIWAD();
-		
+
 	addPWAD();
-	
+
 	inst.loaded.levelName = "NOTHING";
-	
+
 	std::vector<std::string> lines = testMapAndGetLines();
 	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string()};
 	ASSERT_EQ(lines, expected);
