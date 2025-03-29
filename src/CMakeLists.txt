@@ -255,7 +255,7 @@ else()
     FetchContent_Declare(
         FLTK
         GIT_REPOSITORY https://github.com/fltk/fltk.git
-        GIT_TAG 9c7a4737784cfd3abe5b71ee8104a700e4f7959f    # master at some point
+        GIT_TAG release-1.4.2
     )
     FetchContent_MakeAvailable(FLTK)
 endif()
