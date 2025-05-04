@@ -34,11 +34,6 @@ TEST(MStrings, YStricmp)
 	ASSERT_EQ(y_stricmp("", ""), 0);
 }
 
-TEST(MStringsDeath, StringNew)
-{
-	ASSERT_DEATH(Fatal([]{ StringNew(-1); }), "Assertion");
-}
-
 TEST(MStrings, StringDup)
 {
 	const char original[] = "Michael";

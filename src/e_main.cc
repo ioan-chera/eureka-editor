@@ -505,7 +505,7 @@ void Instance::ObjectBox_NotifyInsert(ObjType type, int objnum)
 	if (type != edit.mode)
 		return;
 
-	if (objnum > main_win->GetPanelObjNum())
+	if (main_win && objnum > main_win->GetPanelObjNum())
 		return;
 
 	invalidated_panel_obj = true;

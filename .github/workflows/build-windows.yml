@@ -1,0 +1,50 @@
+name: Build for Windows
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+  workflow_dispatch:
+
+jobs:
+  #
+  # Nightly build helper
+  # https://stackoverflow.com/a/67527144
+  #
+  check-date:
+    runs-on: ubuntu-latest
+    name: Check latest commit
+    outputs:
+      should-run: ${{ steps.should-run.outputs.should-run }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: print latest commit
+        run: echo ${{ github.sha }}
+      - id: should-run
+        continue-on-error: true
+        name: check latest commit is less than a day
+        if: ${{ github.event_name == 'schedule' }}
+        run: test -z $(git rev-list --after="24 hours" ${{ github.sha }}) && echo "should-run=false" >> $GITHUB_OUTPUT
+
+  build-windows:
+    needs: check-date
+    if: ${{ needs.check-date.outputs.should-run != 'false' }}
+    strategy:
+      matrix:
+        arch: [x64, Win32]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate project
+        run: cmake -B build -G "Visual Studio 17 2022" -A ${{ matrix.arch }}
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure -C Release
+      - name: Archive
+        run: |
+          Copy-Item AUTHORS.md,GPL.txt,README.txt,TODO.txt build\Release
+      - name: Publish
+        uses: actions/upload-artifact@v4
+        with:
+          name: EurekaEditor-${{ matrix.arch }}
+          path: build/Release/*

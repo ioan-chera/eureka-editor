@@ -146,13 +146,10 @@ void ObjectsModule::insertThing() const
 		else
 		{
 			T->type = inst.conf.default_thing;
-			T->options = MTF_Easy | MTF_Medium | MTF_Hard;
 
-			if (inst.loaded.levelFormat != MapFormat::doom)
-			{
-				T->options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
-				T->options |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
-			}
+			for(const thingflag_t &flag : inst.conf.thing_flags)
+				if(flag.defaultSet == thingflag_t::DefaultMode::on)
+					T->options |= flag.value;
 		}
 
 		T->SetRawX(inst.loaded.levelFormat, inst.grid.SnapX(inst.edit.map.x));
@@ -829,7 +826,6 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 							--*jt;
 							movingGroup.set(*jt);
 						}
-				movingGroup.clear(*it);
 			}
 			break;
 		}

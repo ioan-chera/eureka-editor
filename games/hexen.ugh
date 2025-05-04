@@ -57,6 +57,19 @@ color unknown_thing  236
 
 #---- THING TYPES ---------------
 
+thingflag 0 0 easy    on  0x001
+thingflag 1 0 medium  on  0x002
+thingflag 2 0 hard    on  0x004
+thingflag 0 1 sp      on  0x100
+thingflag 1 1 coop    on  0x200
+thingflag 2 1 dm      on  0x400
+thingflag 0 2 Fighter on  0x020
+thingflag 1 2 Cleric  on  0x040
+thingflag 2 2 Mage    on  0x080
+
+thingflag 4 0 ambush  off 0x008
+thingflag 4 2 dormant off 0x010
+
 thinggroup p 4F4 "Player"
 thinggroup m F00 "Monster"
 thinggroup w FA0 "Weapon"

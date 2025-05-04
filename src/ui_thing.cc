@@ -32,20 +32,6 @@
 
 #include <assert.h>
 
-class thing_opt_CB_data_c
-{
-public:
-	UI_ThingBox *parent;
-
-	int mask;
-
-public:
-	thing_opt_CB_data_c(UI_ThingBox *_parent, int _mask) :
-		parent(_parent), mask(_mask)
-	{ }
-
-};
-
 
 extern const char *const arrow_0_xpm[];
 extern const char *const arrow_45_xpm[];
@@ -73,6 +59,9 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
     MapItemBox(inst, X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX);
+
+	const int Y0 = Y;
+	const int X0 = X;
 
 	X += 6;
 	Y += 6;
@@ -163,101 +152,20 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 		ang_buts[i]->callback(button_callback, this);
 	}
 
-	Y = Y + 50;
+	Y = Y + 46;
 
+	flagBox = new UI_DynIntInput(X+70, Y, 64, 24, "Options: ");
+	flagBox->align(FL_ALIGN_LEFT);
+	flagBox->callback(flags_callback, this);
+	flagBox->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Fl_Box *opt_lab = new Fl_Box(X+10, Y, W, 22, "Options Flags:");
-	opt_lab->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+	flagBoxDefaultColor = flagBox->color();
 
-	Y = Y + opt_lab->h() + 2;
+	Y = Y + flagBox->h() + 6;
 
+	optionStartX = X - X0;
+	optionStartY = Y - Y0;
 
-	// when appear: two rows of three on/off buttons
-	int AX = X+W/3+4;
-	int BX = X+2*W/3-20;
-	int FW = W/3 - 12;
-
-	int AY = Y+22;
-	int BY = Y+22*2;
-
-	o_easy   = new Fl_Check_Button( X+28,  Y, FW, 22, "easy");
-	o_medium = new Fl_Check_Button( X+28, AY, FW, 22, "medium");
-	o_hard   = new Fl_Check_Button( X+28, BY, FW, 22, "hard");
-
-	o_sp     = new Fl_Check_Button(AX+28,  Y, FW, 22, "sp");
-	o_coop   = new Fl_Check_Button(AX+28, AY, FW, 22, "coop");
-	o_dm     = new Fl_Check_Button(AX+28, BY, FW, 22, "dm");
-
-	// this is shown only for Vanilla DOOM (instead of the above three).
-	// it is also works differently, no negated like the above.
-	o_vanilla_dm = new Fl_Check_Button(AX+28, BY, FW, 22, "dm");
-
-	o_easy  ->value(1);  o_sp  ->value(1);
-	o_medium->value(1);  o_coop->value(1);
-	o_hard  ->value(1);  o_dm  ->value(1);
-
-	o_vanilla_dm->value(0);
-
-	o_easy  ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Easy));
-	o_medium->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Medium));
-	o_hard  ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hard));
-
-	o_sp    ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Not_SP));
-	o_coop  ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Not_COOP));
-	o_dm    ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Not_DM));
-
-	o_vanilla_dm->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Not_SP));
-
-
-	// Hexen class flags
-	o_fight   = new Fl_Check_Button(BX+28,  Y, FW, 22, "Fighter");
-	o_cleric  = new Fl_Check_Button(BX+28, AY, FW, 22, "Cleric");
-	o_mage    = new Fl_Check_Button(BX+28, BY, FW, 22, "Mage");
-
-	o_fight ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Fighter));
-	o_cleric->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Cleric));
-	o_mage  ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Mage));
-
-	o_fight ->hide();
-	o_cleric->hide();
-	o_mage  ->hide();
-
-
-	// Strife flags
-	o_sf_shadow  = new Fl_Check_Button(BX+28, AY, FW, 22, "shadow");
-	o_sf_altvis  = new Fl_Check_Button(BX+28, BY, FW, 22, "alt-vis");
-
-	o_sf_shadow->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_Shadow));
-	o_sf_altvis->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_AltVis));
-
-	o_sf_shadow->hide();
-	o_sf_altvis->hide();
-
-
-	Y = BY + 35;
-
-
-	o_ambush  = new Fl_Check_Button( X+28, Y, FW, 22, "ambush");
-	o_friend  = new Fl_Check_Button(AX+28, Y, FW, 22, "friend");
-	o_dormant = new Fl_Check_Button(BX+28, Y, FW, 22, "dormant");
-
-	o_ambush ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Ambush));
-	o_friend ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Friend));
-	o_dormant->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Hexen_Dormant));
-
-	o_dormant->hide();
-
-	o_sf_ambush = new Fl_Check_Button( X+28, Y, FW, 22, "ambush");
-	o_sf_friend = new Fl_Check_Button(AX+28, Y, FW, 22, "friend");
-	o_sf_stand  = new Fl_Check_Button( X+28, Y+22, FW, 22, "stand");
-
-	o_sf_ambush->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_Ambush));
-	o_sf_friend->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_Friend));
-	o_sf_stand ->callback(option_callback, new thing_opt_CB_data_c(this, MTF_Strife_Stand));
-
-	o_sf_ambush->hide();
-	o_sf_friend->hide();
-	o_sf_stand ->hide();
 
 	Y = Y + 45;
 
@@ -319,7 +227,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	args[0]->label("Args: ");
 
-	mFixUp.loadFields({type, angle, tid, exfloor, pos_x, pos_y, pos_z, spec_type,
+	mFixUp.loadFields({type, angle, flagBox, tid, exfloor, pos_x, pos_y, pos_z, spec_type,
 					  args[0], args[1], args[2], args[3], args[4]});
 
 	end();
@@ -478,6 +386,24 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeThing(*it, Thing::F_ANGLE, new_ang);
+		}
+	}
+}
+
+void UI_ThingBox::flags_callback(Fl_Widget *w, void *data)
+{
+	UI_ThingBox *box = (UI_ThingBox *)data;
+
+	int new_flags = atoi(box->flagBox->value());
+
+	if (!box->inst.edit.Selected->empty())
+	{
+		EditOperation op(box->inst.level.basis);
+		op.setMessageForSelection("edited options of", *box->inst.edit.Selected);
+
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+		{
+			op.changeThing(*it, Thing::F_OPTIONS, new_flags);
 		}
 	}
 }
@@ -662,50 +588,21 @@ void UI_ThingBox::AdjustExtraFloor(int dir)
 
 void UI_ThingBox::OptionsFromInt(int options)
 {
-	o_easy  ->value((options & MTF_Easy)   ? 1 : 0);
-	o_medium->value((options & MTF_Medium) ? 1 : 0);
-	o_hard  ->value((options & MTF_Hard)   ? 1 : 0);
-
-	o_ambush->value((options & MTF_Ambush) ? 1 : 0);
-
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	for(const FlagButton &button : flagButtons)
 	{
-		o_sp  ->value((options & MTF_Hexen_SP)   ? 1 : 0);
-		o_coop->value((options & MTF_Hexen_COOP) ? 1 : 0);
-		o_dm  ->value((options & MTF_Hexen_DM)   ? 1 : 0);
-
-		o_fight ->value((options & MTF_Hexen_Fighter) ? 1 : 0);
-		o_cleric->value((options & MTF_Hexen_Cleric)  ? 1 : 0);
-		o_mage  ->value((options & MTF_Hexen_Mage)    ? 1 : 0);
-
-		o_dormant->value((options & MTF_Hexen_Dormant) ? 1 : 0);
-	}
-	else
-	{
-		o_sp  ->value((options & MTF_Not_SP)   ? 0 : 1);
-		o_coop->value((options & MTF_Not_COOP) ? 0 : 1);
-		o_dm  ->value((options & MTF_Not_DM)   ? 0 : 1);
-
-		o_vanilla_dm->value((options & MTF_Not_SP) ? 1 : 0);
+		auto data = static_cast<const thing_opt_CB_data_c *>(button.button->user_data());
+		if(button.info->defaultSet == thingflag_t::DefaultMode::onOpposite)
+			button.button->value((options & data->mask) ? 0 : 1);
+		else
+			button.button->value((options & data->mask) ? 1 : 0);
 	}
 
 	if (inst.loaded.levelFormat == MapFormat::doom)
 	{
-		o_friend->value((options & MTF_Friend) ? 1 : 0);
-
 		if(options & MTF_EXFLOOR_MASK)
 			mFixUp.setInputValue(exfloor, SString((options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT).c_str());
 		else
 			mFixUp.setInputValue(exfloor, "");
-	}
-
-	if (inst.conf.features.strife_flags)
-	{
-		o_sf_ambush->value((options & MTF_Strife_Ambush) ? 1 : 0);
-		o_sf_friend->value((options & MTF_Strife_Friend) ? 1 : 0);
-		o_sf_shadow->value((options & MTF_Strife_Shadow) ? 1 : 0);
-		o_sf_altvis->value((options & MTF_Strife_AltVis) ? 1 : 0);
-		o_sf_stand ->value((options & MTF_Strife_Stand) ? 1 : 0);
 	}
 }
 
@@ -714,51 +611,20 @@ int UI_ThingBox::CalcOptions() const
 {
 	int options = 0;
 
-	if (o_easy  ->value()) options |= MTF_Easy;
-	if (o_medium->value()) options |= MTF_Medium;
-	if (o_hard  ->value()) options |= MTF_Hard;
+	for(const FlagButton &button : flagButtons)
+	{
+		if(button.info->defaultSet == thingflag_t::DefaultMode::onOpposite)
+		{
+			if(!button.button->value())
+				options |= button.info->value;
+		}
+		else if(button.button->value())
+			options |= button.info->value;
 
-	if (inst.conf.features.strife_flags)
-	{
-		if (o_sf_ambush->value()) options |= MTF_Strife_Ambush;
-		if (o_sf_friend->value()) options |= MTF_Strife_Friend;
-		if (o_sf_shadow->value()) options |= MTF_Strife_Shadow;
-		if (o_sf_altvis->value()) options |= MTF_Strife_AltVis;
-		if (o_sf_stand ->value()) options |= MTF_Strife_Stand;
-	}
-	else
-	{
-		if (o_ambush->value()) options |= MTF_Ambush;
-	}
-
-	if (inst.loaded.levelFormat != MapFormat::doom)
-	{
-		if (o_sp  ->value()) options |= MTF_Hexen_SP;
-		if (o_coop->value()) options |= MTF_Hexen_COOP;
-		if (o_dm  ->value()) options |= MTF_Hexen_DM;
-
-		if (o_fight ->value()) options |= MTF_Hexen_Fighter;
-		if (o_cleric->value()) options |= MTF_Hexen_Cleric;
-		if (o_mage  ->value()) options |= MTF_Hexen_Mage;
-
-		if (o_dormant->value()) options |= MTF_Hexen_Dormant;
-	}
-	else if (inst.conf.features.coop_dm_flags)
-	{
-		if (0 == o_sp  ->value()) options |= MTF_Not_SP;
-		if (0 == o_coop->value()) options |= MTF_Not_COOP;
-		if (0 == o_dm  ->value()) options |= MTF_Not_DM;
-	}
-	else
-	{
-		if (o_vanilla_dm->value()) options |= MTF_Not_SP;
 	}
 
 	if (inst.loaded.levelFormat == MapFormat::doom)
 	{
-		if (inst.conf.features.friend_flag && o_friend->value())
-			options |= MTF_Friend;
-
 #if 0
 		int exfl_num = atoi(exfloor->value());
 
@@ -833,10 +699,29 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_OPTIONS)
 	{
+		int options;
+		SString optString;
 		if (inst.level.isThing(obj))
-			OptionsFromInt(inst.level.things[obj]->options);
+		{
+			options = inst.level.things[obj]->options;
+			optString = SString(options);
+		}
 		else
-			OptionsFromInt(0);
+		{
+			options = 0;
+			optString = "";
+		}
+		OptionsFromInt(options);
+		mFixUp.setInputValue(flagBox, optString.c_str());
+
+		// Check if anything's out of the fields
+		unsigned mask = 0;
+		for(const thingflag_t &flag : inst.conf.thing_flags)
+			mask |= flag.value;
+		if(options & ~mask)
+			flagBox->color(fl_rgb_color(255, 255, 0));
+		else
+			flagBox->color(flagBoxDefaultColor);
 	}
 
 	if (inst.loaded.levelFormat == MapFormat::doom)
@@ -912,56 +797,68 @@ void UI_ThingBox::UpdateTotal(const Document &doc) noexcept
 
 void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
-	if (config.features.coop_dm_flags || loaded.levelFormat != MapFormat::doom)
+	for(const FlagButton &button : flagButtons)
+		this->remove(button.button.get());
+	flagButtons.clear();
+
+
+	gLog.printf("%s: %zu flags\n", __func__, config.thing_flags.size());
+
+	int Y = y() + optionStartY;
+	if(!config.thing_flags.empty())
 	{
-		o_sp  ->show();
-		o_coop->show();
-		o_dm  ->show();
+		std::vector<const thingflag_t *> rowSortedFlags;
+		for(const thingflag_t &flag : config.thing_flags)
+			rowSortedFlags.push_back(&flag);
+		// We need to sort by row, because we increment Y this way
+		std::sort(rowSortedFlags.begin(), rowSortedFlags.end(), [](const thingflag_t *a,
+																   const thingflag_t *b)
+		{
+			return a->row < b->row;
+		});
+		const int W = w() - 12;
+		const int AX = x() + optionStartX + W / 3 + 4;
+		const int BX = x() + optionStartX + 2 * W / 3 - 20;
+		const int xpos[3] = { x() + optionStartX + 28, AX + 28, BX + 28 };
 
-		o_vanilla_dm->hide();
-	}
-	else
-	{
-		// this is appropriate for Strife too
+		const int FW = W / 3 - 12;
 
-		o_vanilla_dm->show();
-
-		o_sp  ->hide();
-		o_coop->hide();
-		o_dm  ->hide();
-	}
-
-	if (config.features.friend_flag && !config.features.strife_flags)
-		o_friend->show();
-	else
-		o_friend->hide();
-
-
-	if (config.features.strife_flags)
-	{
-		o_ambush->hide();
-
-		o_sf_ambush->show();
-		o_sf_friend->show();
-		o_sf_shadow->show();
-		o_sf_altvis->show();
-		o_sf_stand ->show();
-	}
-	else
-	{
-		o_ambush->show();
-
-		o_sf_ambush->hide();
-		o_sf_friend->hide();
-		o_sf_shadow->hide();
-		o_sf_altvis->hide();
-		o_sf_stand ->hide();
+		int currow = 0;
+		begin();
+		for(const thingflag_t *flag : rowSortedFlags)
+		{
+			if(flag->row >= currow + 2)
+				Y += 35;	// gap
+			else if(flag->row > currow)
+				Y += 22;
+			currow = flag->row;
+			int col = clamp(0, flag->column, 2);
+			FlagButton flagButton;
+			flagButton.button = std::make_unique<Fl_Check_Button>(xpos[col], Y, FW, 22,
+																  flag->label.c_str());
+			flagButton.button->value(flag->defaultSet != thingflag_t::DefaultMode::off ? 1 : 0);
+			flagButton.data = std::make_unique<thing_opt_CB_data_c>(this, flag->value);
+			flagButton.button->callback(option_callback, flagButton.data.get());
+			flagButton.info = flag;
+			flagButtons.push_back(std::move(flagButton));
+		}
+		end();
+		Y += 45;
 	}
 
+	// Adjust the position of the rest of the controls
+//	exfloor->Fl_Widget::position(exfloor->x(), Y);
+//	efl_down->y(Y + 1);
+//	efl_up->y(Y + 1);
+	spec_type->Fl_Widget::position(spec_type->x(), Y);
+	spec_choose->Fl_Widget::position(spec_choose->x(), Y);
+	Y += spec_type->h() + 2;
+	spec_desc->Fl_Widget::position(spec_desc->x(), Y);
+	Y += spec_desc->h() + 2;
+	for (int a = 0; a < 5; a++)
+		args[a]->Fl_Widget::position(args[a]->x(), Y);
 
 	/* map format stuff */
-
-	thing_opt_CB_data_c *ocb;
 
 	if (loaded.levelFormat != MapFormat::doom)
 	{
@@ -969,35 +866,18 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 
 		tid->show();
 
-		o_fight ->show();
-		o_cleric->show();
-		o_mage  ->show();
-
-		o_dormant->show();
-
 		spec_type  ->show();
 		spec_choose->show();
 		spec_desc  ->show();
 
 		for (int a = 0 ; a < 5 ; a++)
 			args[a]->show();
-
-		// fix the masks for SP/COOP/DM
-		ocb = (thing_opt_CB_data_c *) o_sp  ->user_data(); ocb->mask = MTF_Hexen_SP;
-		ocb = (thing_opt_CB_data_c *) o_coop->user_data(); ocb->mask = MTF_Hexen_COOP;
-		ocb = (thing_opt_CB_data_c *) o_dm  ->user_data(); ocb->mask = MTF_Hexen_DM;
 	}
 	else
 	{
 		pos_z->hide();
 
 		tid->hide();
-
-		o_fight ->hide();
-		o_cleric->hide();
-		o_mage  ->hide();
-
-		o_dormant->hide();
 
 		spec_type  ->hide();
 		spec_choose->hide();
@@ -1006,10 +886,6 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 		for (int a = 0 ; a < 5 ; a++)
 			args[a]->hide();
 
-		// fix the masks for SP/COOP/DM
-		ocb = (thing_opt_CB_data_c *) o_sp  ->user_data(); ocb->mask = MTF_Not_SP;
-		ocb = (thing_opt_CB_data_c *) o_coop->user_data(); ocb->mask = MTF_Not_COOP;
-		ocb = (thing_opt_CB_data_c *) o_dm  ->user_data(); ocb->mask = MTF_Not_DM;
 	}
 
 	redraw();
