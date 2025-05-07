@@ -349,12 +349,15 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const
 
 //------------------------------------------------------------------------
 
-static void CalcWarpString(const SString& levelName, std::vector<SString> &args)
+static void CalcWarpString(const SString& levelName, const Instance &inst, std::vector<SString> &args)
 {
 	SYS_ASSERT(!levelName.empty());
 	// FIXME : EDGE allows a full name: -warp MAP03
 	//         Eternity too.
 	//         ZDOOM too, but different syntax: +map MAP03
+
+	// TEMP
+	args.push_back(SString::printf("+warp %d %d", (int)inst.r_view.x, (int)inst.r_view.y));
 
 	// most common syntax is "MAP##" or "MAP###"
 	if (levelName.length() >= 4 && levelName.noCaseStartsWith("MAP") && isdigit(levelName[3]))
@@ -480,7 +483,7 @@ static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
-	CalcWarpString(inst.loaded.levelName, args);
+	CalcWarpString(inst.loaded.levelName, inst, args);
 	
 	SString argString = SString("/usr/bin/open -a ") + SString(portPath.u8string()).spaceEscape(true) + " --args " + inst.loaded.testingCommandLine + " " + buildArgString(args, true);
 	logArgs(argString);
@@ -497,7 +500,7 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
-	CalcWarpString(inst.loaded.levelName, args);
+	CalcWarpString(inst.loaded.levelName, inst, args);
 
 	SString arg;
 	TokenWordParse parse(inst.loaded.testingCommandLine, false);
