@@ -349,7 +349,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const
 
 //------------------------------------------------------------------------
 
-static void CalcWarpString(const SString& levelName, const Instance &inst, std::vector<SString> &args)
+static void CalcWarpString(const SString& levelName, std::vector<SString> &args)
 {
 	SYS_ASSERT(!levelName.empty());
 	// FIXME : EDGE allows a full name: -warp MAP03
@@ -480,7 +480,7 @@ static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
-	CalcWarpString(inst.loaded.levelName, inst, args);
+	CalcWarpString(inst.loaded.levelName, args);
 	
 	SString argString = SString("/usr/bin/open -a ") + SString(portPath.u8string()).spaceEscape(true) + " --args " + inst.loaded.testingCommandLine + " " + buildArgString(args, true);
 	logArgs(argString);
@@ -497,7 +497,7 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
-	CalcWarpString(inst.loaded.levelName, inst, args);
+	CalcWarpString(inst.loaded.levelName, args);
 
 	SString arg;
 	TokenWordParse parse(inst.loaded.testingCommandLine, false);
