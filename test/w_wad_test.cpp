@@ -458,6 +458,26 @@ TEST_F(WadFileTest, Backup)
 	readFromPath(path, data);
 	readFromPath(path2, data2);
 	ASSERT_FALSE(data.empty());
+	if(data != data2)
+	{
+		// Try to diagnose if this fails, as it may happen and GTest will truncate
+		printf("data.size: %zu\n", data.size());
+		for(size_t i = 0; i < data.size(); ++i)
+		{
+			printf("%02x", data[i]);
+			if((i + 1) % 32 == 0)
+				puts("");
+		}
+		puts("");
+		printf("data2.size: %zu\n", data2.size());
+		for(size_t i = 0; i < data2.size(); ++i)
+		{
+			printf("%02x", data2[i]);
+			if((i + 1) % 32 == 0)
+				puts("");
+		}
+		puts("");
+	}
 	ASSERT_EQ(data, data2);
 }
 
