@@ -162,6 +162,7 @@ int64_t Lump_c::getName8() const noexcept
 		char cbuf[8];
 		int64_t cint;
 	} buffer;
+	buffer.cint = 0;	// reset to 0 to prevent garbage bytes
 	memcpy(buffer.cbuf, Name().c_str(), std::min(Name().length() + 1, sizeof(buffer)));
 	return buffer.cint;
 }
