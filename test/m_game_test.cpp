@@ -101,10 +101,10 @@ TEST_F(MGameFixture, MCollectKnownDefs)
 	};
 
 	// We need the install and home dirs for this test
-	const fs::path install_dir = getChildPath("install");
+	const fs::path install_dir = getSubPath("install");
 	makeDir(install_dir);
 
-	const fs::path home_dir = getChildPath("home");
+	const fs::path home_dir = getSubPath("home");
 	makeDir(home_dir);
 
 	// Now add some other folder inside both of them
@@ -151,7 +151,7 @@ TEST_F(MGameFixture, ParseDefinitionFileThingFlags)
 	// Tests both the population, the clearing and the same-position overriding
 	std::unordered_map<SString, SString> parseVars;
 	ParsePurpose purpose = ParsePurpose::normal;
-	fs::path filename = getChildPath("test.ugh");
+	fs::path filename = getSubPath("test.ugh");
 
 	std::ofstream stream(filename);
 	ASSERT_TRUE(stream.is_open());

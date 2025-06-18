@@ -39,7 +39,7 @@ static void checkFileContent(const fs::path &path, const char *content)
 
 TEST_F(SafeOutFileTest, Stuff)
 {
-	fs::path path = getChildPath("somefile.txt");
+	fs::path path = getSubPath("somefile.txt");
 
 	// Assert no file if merely created (will fail when tearing down)
 	{

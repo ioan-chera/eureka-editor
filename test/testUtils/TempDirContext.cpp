@@ -70,9 +70,9 @@ void TempDirContext::TearDown()
 }
 
 //
-// Gets a child path
+// Gets a sub path
 //
-fs::path TempDirContext::getChildPath(const fs::path &path) const
+fs::path TempDirContext::getSubPath(const fs::path &path) const
 {
 	return mTempDir / path;
 }

@@ -89,8 +89,8 @@ void TestMapFixture::writeShellScript(const fs::path &path)
 void TestMapFixture::SetUp()
 {
 	TempDirContext::SetUp();
-	outputPath = getChildPath("output.list");
-	finishMarkPath = getChildPath("finish.mark");
+	outputPath = getSubPath("output.list");
+	finishMarkPath = getSubPath("finish.mark");
 
 	// Setup the program
 #ifdef _WIN32
@@ -107,11 +107,11 @@ void TestMapFixture::SetUp()
 	stream << "echo done > " << SString(finishMarkPath.u8string()).spaceEscape(false) << std::endl;
 	stream.close();
 #else
-	portPath = getChildPath("port-script");
+	portPath = getSubPath("port-script");
 	writeShellScript(portPath);
 #endif
 #ifdef __APPLE__
-	macPath = getChildPath("port.app");
+	macPath = getSubPath("port.app");
 	bool result;
 	result = FileMakeDir(macPath);
 	ASSERT_TRUE(result);
@@ -157,7 +157,7 @@ void TestMapFixture::setPortName(const char* name)
 
 void TestMapFixture::addIWAD()
 {
-	gameWadPath = getChildPath("ga me.wad");
+	gameWadPath = getSubPath("ga me.wad");
 	std::shared_ptr<Wad_file> gameWad = Wad_file::Open(gameWadPath, WadOpenMode::write);
 	inst.wad.master.setGameWad(gameWad);
 }
@@ -165,8 +165,8 @@ void TestMapFixture::addIWAD()
 void TestMapFixture::addResources()
 {
 	std::vector<std::shared_ptr<Wad_file>> resources;
-	res1Path = getChildPath("re s1.wad");
-	res2Path = getChildPath("re s2.wad");
+	res1Path = getSubPath("re s1.wad");
+	res2Path = getSubPath("re s2.wad");
 	resources.push_back(Wad_file::Open(res1Path, WadOpenMode::write));
 	resources.push_back(Wad_file::Open(res2Path, WadOpenMode::write));
 	inst.wad.master.setResources(resources);
@@ -174,7 +174,7 @@ void TestMapFixture::addResources()
 
 void TestMapFixture::addPWAD()
 {
-	editWadPath = getChildPath("ed it.wad");
+	editWadPath = getSubPath("ed it.wad");
 	std::shared_ptr<Wad_file> editWad = Wad_file::Open(editWadPath, WadOpenMode::write);
 	inst.wad.master.ReplaceEditWad(editWad);
 }

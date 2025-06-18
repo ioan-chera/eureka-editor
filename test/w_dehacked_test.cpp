@@ -62,10 +62,10 @@ protected:
 
 void DehackedTest::makeFile()
 {
-	std::ofstream stream(getChildPath("tested.deh"));
+	std::ofstream stream(getSubPath("tested.deh"));
 	ASSERT_TRUE(stream.is_open());
-	mDeleteList.push(getChildPath("tested.deh"));
-	
+	mDeleteList.push(getSubPath("tested.deh"));
+
 	// Add some bogus headers
 	for(const char *line : headerBoilerplate)
 		stream << line << std::endl;
@@ -131,7 +131,7 @@ TEST_F(DehackedTest, LoadFile)
 	
 	ConfigData config = baseConfig();
 	
-	bool result = dehacked::loadFile(getChildPath("tested.deh"), config);
+	bool result = dehacked::loadFile(getSubPath("tested.deh"), config);
 	ASSERT_TRUE(result);
 	
 	assertChangedConfig(config);

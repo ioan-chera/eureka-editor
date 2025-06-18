@@ -50,11 +50,11 @@ private:
 TEST_F(MEventsFixture, ParseOperationFileOldPathFallback)
 {
     Instance inst;
-    global::home_dir = getChildPath("homedir");
+    global::home_dir = getSubPath("homedir");
     ASSERT_TRUE(FileMakeDir(global::home_dir));
     mDeleteList.push(global::home_dir);
 
-    global::old_linux_home_and_cache_dir = getChildPath("olddir");
+    global::old_linux_home_and_cache_dir = getSubPath("olddir");
     ASSERT_TRUE(FileMakeDir(global::old_linux_home_and_cache_dir));
     mDeleteList.push(global::old_linux_home_and_cache_dir);
 

@@ -64,17 +64,17 @@ TEST_F(WadFileTest, Open)
 	std::shared_ptr<Wad_file> wad;
 
 	// Opening a missing file for reading should fail
-	wad = Wad_file::Open(getChildPath("inexistent.wad"), WadOpenMode::read);
+	wad = Wad_file::Open(getSubPath("inexistent.wad"), WadOpenMode::read);
 	ASSERT_FALSE(wad);
 
 	// Opening for writing or appending should be fine.
-	wad = Wad_file::Open(getChildPath("newwad.wad"), WadOpenMode::write);
+	wad = Wad_file::Open(getSubPath("newwad.wad"), WadOpenMode::write);
 	ASSERT_TRUE(wad);
 	// File won't get created per se, so don't add it to the delete list.
 	// Zero lumps for the new file.
 	ASSERT_EQ(wad->NumLumps(), 0);
 
-	wad = Wad_file::Open(getChildPath("appendwad.wad"), WadOpenMode::append);
+	wad = Wad_file::Open(getSubPath("appendwad.wad"), WadOpenMode::append);
 	ASSERT_TRUE(wad);
 	// Same as with writing, no file created unless "writeToDisk". In addition,
 	// check that it's empty, just like the writing mode.
@@ -91,7 +91,7 @@ TEST_F(WadFileTest, WriteRead)
 	std::shared_ptr<Wad_file> read;
 
 	// Prepare the test path
-	fs::path path = getChildPath("newwad.wad");
+	fs::path path = getSubPath("newwad.wad");
 	wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_EQ(wad->PathName(), path);
 	ASSERT_FALSE(wad->IsReadOnly());
@@ -227,9 +227,9 @@ TEST_F(WadFileTest, WriteRead)
 TEST_F(WadFileTest, Validate)
 {
 	// Inexistent path should fail validation
-	ASSERT_FALSE(Wad_file::Validate(getChildPath("None.wad")));
+	ASSERT_FALSE(Wad_file::Validate(getSubPath("None.wad")));
 
-	fs::path path = getChildPath("wad.wad");
+	fs::path path = getSubPath("wad.wad");
 
 	FILE *f = fopen(path.u8string().c_str(), "wb");
 	ASSERT_NE(f, nullptr);
@@ -322,7 +322,7 @@ TEST_F(WadFileTest, FindLumpInNamespace)
 //
 TEST_F(WadFileTest, LevelQuery)
 {
-	fs::path path = getChildPath("wad.wad");
+	fs::path path = getSubPath("wad.wad");
 	auto wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
@@ -438,8 +438,8 @@ TEST_F(WadFileTest, LevelQuery)
 //
 TEST_F(WadFileTest, Backup)
 {
-	fs::path path = getChildPath("wad.wad");
-	fs::path path2 = getChildPath("wad2.wad");
+	fs::path path = getSubPath("wad.wad");
+	fs::path path2 = getSubPath("wad2.wad");
 	auto wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
@@ -518,7 +518,7 @@ TEST_F(WadFileTest, LumpIO)
 
 TEST_F(WadFileTest, LumpFromFile)
 {
-	fs::path path = getChildPath("wad.wad");
+	fs::path path = getSubPath("wad.wad");
 	auto wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 	wad->writeToDisk();
@@ -645,10 +645,10 @@ TEST_F(WadFileTest, FindFirstSpriteLump)
 
 TEST_F(WadFileTest, ReadFromInvalidDir)
 {
-	auto wad = Wad_file::readFromDir(getChildPath("jackson"));
+	auto wad = Wad_file::readFromDir(getSubPath("jackson"));
 	ASSERT_FALSE(wad);
 	
-	fs::path normalFile = getChildPath("file.txt");
+	fs::path normalFile = getSubPath("file.txt");
 	std::ofstream ofs(normalFile);
 	ASSERT_TRUE(ofs);
 	mDeleteList.push(normalFile);
@@ -660,7 +660,7 @@ TEST_F(WadFileTest, ReadFromInvalidDir)
 
 TEST_F(WadFileTest, ReadDirectory)
 {
-	fs::path dir = getChildPath("dir");
+	fs::path dir = getSubPath("dir");
 	fs::create_directory(dir);
 	mDeleteList.push(dir);
 	auto addFile = [this](const fs::path &dir, const fs::path &name, const char *content)

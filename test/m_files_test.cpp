@@ -44,17 +44,17 @@ protected:
 TEST_F(EurekaLumpFixture, WriteEurekaLump)
 {
 	static const char wadpathbase[] = "first/wad.wad";
-	fs::path wadpath(getChildPath(wadpathbase));
+	fs::path wadpath(getSubPath(wadpathbase));
 	// Set up a nested directory WAD so we can test relative paths to resources
 	std::shared_ptr<Wad_file> wad = Wad_file::Open(wadpath, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
 	loaded.gameName = "Mood";	// just pick two random names
 	loaded.portName = "Voom";
-	loaded.resourceList.push_back(getChildPath(fs::path("first") / "res.png"));	// same path
-	loaded.resourceList.push_back(getChildPath(fs::path("first") / "deep" / "call.txt"));	// child path
-	loaded.resourceList.push_back(getChildPath("upper.txt"));		// upper path
-	loaded.resourceList.push_back(getChildPath(fs::path("second") / "music.mid"));	// sibling path
+	loaded.resourceList.push_back(getSubPath(fs::path("first") / "res.png"));	// same path
+	loaded.resourceList.push_back(getSubPath(fs::path("first") / "deep" / "call.txt"));	// child path
+	loaded.resourceList.push_back(getSubPath("upper.txt"));		// upper path
+	loaded.resourceList.push_back(getSubPath(fs::path("second") / "music.mid"));	// sibling path
 
 	// In case of Windows, also check different drive letter
 	fs::path wadpathobj = fs::path(wadpath.c_str());
@@ -151,7 +151,7 @@ void ParseEurekaLumpFixture::SetUp()
 {
 	TempDirContext::SetUp();
 
-	wad = Wad_file::Open(getChildPath("wad.wad"), WadOpenMode::write);
+	wad = Wad_file::Open(getSubPath("wad.wad"), WadOpenMode::write);
 	ASSERT_TRUE(wad);
 }
 
@@ -200,7 +200,7 @@ void ParseEurekaLumpFixture::assertEmptyLoading() const
 //
 void ParseEurekaLumpFixture::prepareHomeDir()
 {
-	home_dir = getChildPath("home");
+	home_dir = getSubPath("home");
 	ASSERT_TRUE(FileMakeDir(home_dir));
 	mDeleteList.push(home_dir);
 }
@@ -311,7 +311,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	ASSERT_TRUE(portWarning);
 
 	// Situation 5: now add the IWAD
-	fs::path iwadPath = getChildPath("emag.wad");
+	fs::path iwadPath = getSubPath("emag.wad");
 	recent.addIWAD(iwadPath);	// NOTE: no need to add file
 
 	decision = 0;
@@ -370,12 +370,12 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	eureka.Printf("resource bogus/subpath.wad\n");
 	eureka.Printf("resource iwadpath.wad\n");
 	eureka.Printf("resource nopath.wad\n");
-	eureka.Printf("resource %s\n", getChildPath(fs::path("abs") / "abspath.wad").u8string().c_str());
+	eureka.Printf("resource %s\n", getSubPath(fs::path("abs") / "abspath.wad").u8string().c_str());
 	eureka.Printf("resource \n");	// add something else to check how we go
 
 	auto makesubfile = [this](const char *path)
 	{
-		fs::path filepath = getChildPath(path);
+		fs::path filepath = getSubPath(path);
 		FILE *f = fopen(filepath.u8string().c_str(), "wb");
 		ASSERT_TRUE(f);
 		fclose(f);
@@ -386,10 +386,10 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	makesubfile("subpath.wad");
 
 	// Prepare the IWAD
-	fs::path path = getChildPath("iwad");
+	fs::path path = getSubPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	recent.addIWAD(getChildPath(fs::path("iwad") / "doom.wad"));
+	recent.addIWAD(getSubPath(fs::path("iwad") / "doom.wad"));
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
@@ -399,7 +399,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	makesubfile("iwad/iwadpath.wad");
 
 	// And add the absolute subpath
-	path = getChildPath("abs");
+	path = getSubPath("abs");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
 	makesubfile("abs/abspath.wad");
@@ -424,10 +424,10 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	const auto &res = loading.resourceList;
 
 	// Now check we have the resources, with their correct paths
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("samepath.wad")), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("subpath.wad")), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("iwad") / "iwadpath.wad")), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("abs") / "abspath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getSubPath("samepath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getSubPath("subpath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getSubPath(fs::path("iwad") / "iwadpath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getSubPath(fs::path("abs") / "abspath.wad")), res.end());
 }
 
 TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
@@ -440,20 +440,20 @@ TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 
 	// Make the files
 	std::ofstream stream;
-	fs::path path = getChildPath("samename.wad");
+	fs::path path = getSubPath("samename.wad");
 	stream.open(path);
 	ASSERT_TRUE(stream.is_open());
 	stream.close();
 	mDeleteList.push(path);
-	path = getChildPath("sub");
+	path = getSubPath("sub");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	path = getChildPath("sub/SameName.Wad");
+	path = getSubPath("sub/SameName.Wad");
 	stream.open(path);
 	ASSERT_TRUE(stream.is_open());
 	stream.close();
 	mDeleteList.push(path);
-	path = getChildPath("othername.wad");
+	path = getSubPath("othername.wad");
 	stream.open(path);
 	ASSERT_TRUE(stream.is_open());
 	stream.close();
@@ -461,10 +461,10 @@ TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 	stream.close();
 
 	// Prepare the IWAD
-	path = getChildPath("iwad");
+	path = getSubPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	recent.addIWAD(getChildPath("iwad/doom.wad"));
+	recent.addIWAD(getSubPath("iwad/doom.wad"));
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
@@ -472,23 +472,23 @@ TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 
 	loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get());
 	ASSERT_EQ(loading.resourceList.size(), 2);
-	ASSERT_EQ(loading.resourceList[0], getChildPath("samename.wad"));	// not the second one too
-	ASSERT_EQ(loading.resourceList[1], getChildPath("othername.wad"));
+	ASSERT_EQ(loading.resourceList[0], getSubPath("samename.wad"));	// not the second one too
+	ASSERT_EQ(loading.resourceList[1], getSubPath("othername.wad"));
 }
 
 TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 {
 	// Re-create wad to be from a subpath
-	ASSERT_TRUE(FileMakeDir(getChildPath("sub")));
-	mDeleteList.push(getChildPath("sub"));
-	wad = Wad_file::Open(getChildPath(fs::path("sub") / "wad.wad"), WadOpenMode::write);
+	ASSERT_TRUE(FileMakeDir(getSubPath("sub")));
+	mDeleteList.push(getSubPath("sub"));
+	wad = Wad_file::Open(getSubPath(fs::path("sub") / "wad.wad"), WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
 	// Create a parent path resource
-	FILE *f = fopen(getChildPath("res.wad").u8string().c_str(), "wb");
+	FILE *f = fopen(getSubPath("res.wad").u8string().c_str(), "wb");
 	ASSERT_TRUE(f);
 	fclose(f);
-	mDeleteList.push(getChildPath("res.wad"));
+	mDeleteList.push(getSubPath("res.wad"));
 
 	// Prepare the lump
 	Lump_c &eureka = wad->AddLump(EUREKA_LUMP);
@@ -514,7 +514,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 
 	ASSERT_EQ(errorcount, 1);
 	ASSERT_EQ(loading.resourceList.size(), 1);
-	ASSERT_EQ(loading.resourceList[0], getChildPath("res.wad"));
+	ASSERT_EQ(loading.resourceList[0], getSubPath("res.wad"));
 }
 
 // Recent files
@@ -623,7 +623,7 @@ TEST_F(RecentFilesFixture, WriteFile)
 	files.insert("Oth er/Jack.wad", "H5M6");	// will override previous map
 	files.insert("Doo.wad", "MAP03");	// this will override second map
 
-	fs::path datapath = getChildPath("data.ini");
+	fs::path datapath = getSubPath("data.ini");
 
 	std::ofstream os(datapath);
 	ASSERT_TRUE(os.is_open());
@@ -677,12 +677,12 @@ void RecentFilesFixture::testLoadRecent(const fs::path &homePath, const fs::path
 	stream << "  # comment after line" << std::endl;	// ignore comment after space
 
 
-	fs::path hticPath = getChildPath("htic.wad");
-	fs::path doom3Path = getChildPath("doom3.wad");
-	fs::path freedoomPath = getChildPath("freedoom.wad");
-	fs::path deletedPath = getChildPath("deleted.wad");
-	fs::path badPath = getChildPath("bad.wad");
-	fs::path hereticPath = getChildPath("here tic.wad");
+	fs::path hticPath = getSubPath("htic.wad");
+	fs::path doom3Path = getSubPath("doom3.wad");
+	fs::path freedoomPath = getSubPath("freedoom.wad");
+	fs::path deletedPath = getSubPath("deleted.wad");
+	fs::path badPath = getSubPath("bad.wad");
+	fs::path hereticPath = getSubPath("here tic.wad");
 
 	stream << "recent MAP02 " << escape(doom3Path) << " # recent" << std::endl;
 	stream << "recent H5M6 " << std::endl;	// malformed
@@ -752,13 +752,13 @@ void RecentFilesFixture::testLoadRecent(const fs::path &homePath, const fs::path
 
 TEST_F(RecentFilesFixture, MLoadRecent)
 {
-	testLoadRecent(mTempDir, fs::path(), getChildPath("misc.cfg"));
+	testLoadRecent(mTempDir, fs::path(), getSubPath("misc.cfg"));
 }
 
 TEST_F(RecentFilesFixture, MLoadRecentOldPath)
 {
 	fs::path home_dir = mTempDir;
-	fs::path old_home_dir = getChildPath("old");
+	fs::path old_home_dir = getSubPath("old");
 	ASSERT_TRUE(FileMakeDir(old_home_dir));
 	mDeleteList.push(old_home_dir);
 
