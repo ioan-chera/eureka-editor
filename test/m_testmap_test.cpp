@@ -94,7 +94,7 @@ void TestMapFixture::SetUp()
 
 	// Setup the program
 #ifdef _WIN32
-	portPath = getChildPath("port.bat");
+	portPath = getSubPath("port.bat");
 	std::ofstream stream(portPath);
 	ASSERT_TRUE(stream.is_open());
 	mDeleteList.push(portPath);
