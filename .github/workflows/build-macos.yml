@@ -8,6 +8,7 @@ jobs:
   # Nightly build helper
   # https://stackoverflow.com/a/67527144
   # https://docs.github.com/en/actions/use-cases-and-examples/deploying/installing-an-apple-certificate-on-macos-runners-for-xcode-development
+  # https://github.com/marketplace/actions/code-sign-action
   #
   build-with-signing:
     runs-on: macos-latest
@@ -35,16 +36,26 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s $KEYCHAIN_PATH
       - name: Generate project
-        run: cmake -B build -G "Visual Studio 17 2022" -A ${{ matrix.arch }}
+        run: cmake -B build
       - name: Build
         run: cmake --build build --config Release --parallel
-      - name: Test
-        run: ctest --test-dir build --output-on-failure -C Release
-      - name: Archive
-        run: |
-          Copy-Item AUTHORS.md,GPL.txt,README.txt,TODO.txt build\Release
+      # TODO: install app store connect API key (see the apple-code-signing link above)
+      - name: Sign and notarize the bundle
+        uses: lando/code-sign-action@v2
+        with:
+          file: build/Eureka Doom Editor.app
+          certificate-data: ${{ secrets.MACOS_BUILD_CERTIFICATE_BASE64 }}
+          certificate-password: ${{ secrets.MACOS_P12_PASSWORD }}
+          apple-notary-user: ${{ secrets.MACOS_NOTARY_USER }}
+          apple-notary-password: ${{ secrets.MACOS_NOTARY_PASSWORD }}
+          apple-notary-tool: notarytool
+          apple-team-id: ${{ secrets.MACOS_TEAM_ID }}
+          apple-product-id: com.eureka.Eureka-Doom-Editor
+          options: --options runtime --entitlements osx/EurekaApp/eureka.entitlements
+      # TODO: test
+      # TODO: archive
       - name: Publish
         uses: actions/upload-artifact@v4
         with:
-          name: EurekaEditor-${{ matrix.arch }}
-          path: build/Release/*
+          name: EurekaEditor-macOS
+          path: build/Eureka Doom Editor.app
