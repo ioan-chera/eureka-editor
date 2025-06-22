@@ -57,7 +57,7 @@ jobs:
           username: ${{ secrets.MACOS_NOTARY_USER }}
           password: ${{ secrets.MACOS_NOTARY_PASSWORD }}
           apple-team-id: ${{ secrets.MACOS_TEAM_ID }}
-          app-path: build/Eureka\ Doom\ Editor.app
+          app-path: build/Eureka Doom Editor.app
       # TODO: test
       # TODO: archive
       - name: Publish
