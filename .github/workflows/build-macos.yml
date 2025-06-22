@@ -1,4 +1,4 @@
-name: Build for Windows
+name: Build for macOS
 
 on:
   workflow_dispatch:
@@ -40,7 +40,13 @@ jobs:
       - name: Generate project
         run: cmake -B build
       - name: Build
-        run: cmake --build build --config Release --parallel
+        run: |
+          cmake --build build --config Release --parallel
+          ls -al
+          echo "CURDIR"
+          pwd
+          echo "BUILD DIR"
+          ls -al build
       # TODO: install app store connect API key (see the apple-code-signing link above)
       - name: Sign and notarize the bundle
         uses: lando/code-sign-action@v2
