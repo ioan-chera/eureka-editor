@@ -36,6 +36,7 @@ jobs:
           certificate-password: ${{ secrets.MACOS_P12_PASSWORD }}
           username: ${{ secrets.MACOS_NOTARY_USER }}
           password: ${{ secrets.MACOS_NOTARY_PASSWORD }}
+          entitlements-path: osx/EurekaApp/eureka.entitlements
           apple-team-id: ${{ secrets.MACOS_TEAM_ID }}
           app-path: build/Eureka Doom Editor.app
       # TODO: test
