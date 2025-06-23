@@ -2,8 +2,6 @@ name: Build for macOS
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ master ]
 
 jobs:
   #
@@ -41,8 +39,20 @@ jobs:
           app-path: build/Eureka Doom Editor.app
       # TODO: test
       # TODO: archive
+      - name: Stage files for DMG
+        run: |
+          DMG_ROOT="dmg_temp"
+          VOL_NAME="Eureka Doom Editor"
+          OUTPUT="Eureka-Doom-Editor.dmg"
+          mkdir "$DMG_ROOT"
+          cp -R build/Eureka\ Doom\ Editor.app "$DMG_ROOT/"
+          cp AUTHORS.md GPL.txt README.txt TODO.txt "$DMG_ROOT/"
+          echo "Contents staged in $DMG_ROOT, will build $OUTPUT"
+      - name: Create compressed DMG
+        run: |
+          hdiutil create -volname "Eureka Doom Editor" -srcfolder dmg_temp -ov -format UDZO "Eureka-Doom-Editor.dmg"
       - name: Publish
         uses: actions/upload-artifact@v4
         with:
           name: EurekaEditor-macOS
-          path: build/Eureka Doom Editor.app
+          path: Eureka-Doom-Editor.dmg
