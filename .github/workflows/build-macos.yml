@@ -30,7 +30,7 @@ jobs:
           ls -al build
       # TODO: install app store connect API key (see the apple-code-signing link above)
       - name: Sign and notarize the bundle
-        uses: toitlang/action-macos-sign-notarize@v1.2.0
+        uses: ioan-chera/action-macos-sign-notarize@v1.3
         with:
           certificate: ${{ secrets.MACOS_BUILD_CERTIFICATE_BASE64 }}
           certificate-password: ${{ secrets.MACOS_P12_PASSWORD }}
