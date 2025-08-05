@@ -619,7 +619,7 @@ static void AdjustOfs_RenderPost(const Instance &inst)
 
 //------------------------------------------------------------------------
 
-void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
+void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh, int pixel_w, int pixel_h)
 {
 	inst.r_view.PrepareToRender(ow, oh);
 
@@ -628,7 +628,7 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 #ifdef NO_OPENGL
 	inst.SW_RenderWorld(ox, oy, ow, oh);
 #else
-	RGL_RenderWorld(inst, ox, oy, ow, oh);
+	RGL_RenderWorld(inst, ox, oy, pixel_w, pixel_h);
 #endif
 
 	AdjustOfs_RenderPost(inst);

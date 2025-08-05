@@ -1626,7 +1626,7 @@ public:
 				DrawThing(t);
 	}
 
-	void Begin(int ow, int oh)
+	void Begin(int pixel_w, int pixel_h)
 	{
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1642,11 +1642,7 @@ public:
 		// setup projection
 
 		// Note: this crud is a workaround for retina displays on MacOS
-		Fl::use_high_res_GL(true);
-		int pix = iround(inst.main_win->canvas->pixels_per_unit());
-		Fl::use_high_res_GL(false);
-
-		glViewport(0, 0, ow * pix, oh * pix);
+		glViewport(0, 0, pixel_w, pixel_h);
 
 		GLdouble angle = inst.r_view.angle * 180.0 / M_PI;
 
@@ -1667,7 +1663,7 @@ public:
 		glMatrixMode(GL_PROJECTION);
 
 		float x_slope = 100.0f / config::render_pixel_aspect;
-		float y_slope = (float)oh / (float)ow;
+		float y_slope = (float)pixel_h / (float)pixel_w;
 
 		// this matches behavior of S/W renderer.
 		// [ currently it is important since we use the S/W path
@@ -1696,11 +1692,11 @@ public:
 };
 
 
-void RGL_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh)
+void RGL_RenderWorld(Instance &inst, int ox, int oy, int pixel_w, int pixel_h)
 {
 	RendInfo3D rend(inst);
 
-	rend.Begin(ow, oh);
+	rend.Begin(pixel_w, pixel_h);
 	rend.Render();
 	rend.Highlight();
 	rend.Finish();

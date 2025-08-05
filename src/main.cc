@@ -616,6 +616,8 @@ static void Main_SetupFLTK()
 	Fl::gl_visual(FL_RGB);
 #endif
 
+	Fl::use_high_res_GL(true);
+
 	// disable keyboard navigation, as it often interferes with our
 	// user interface, especially TAB key for toggling the 3D view.
 	Fl::option(Fl::OPTION_VISIBLE_FOCUS, false);

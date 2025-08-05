@@ -95,7 +95,7 @@ void Render3D_RegisterCommands();
 void Render3D_Enable(Instance &inst, bool _enable);
 
 // this is basically the FLTK draw() method
-void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh);
+void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh, int pixel_w, int pixel_h);
 
 // perform a query to see what the mouse pointer is over.
 // returns true if something was hit, false otherwise.

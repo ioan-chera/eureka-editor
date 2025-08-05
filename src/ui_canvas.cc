@@ -158,7 +158,7 @@ void UI_Canvas::draw()
 
 	if (inst.edit.render3d)
 	{
-		Render3D_Draw(inst, x(), y(), w(), h());
+		Render3D_Draw(inst, x(), y(), w(), h(), pixel_w(), pixel_h());
 		return;
 	}
 
@@ -184,12 +184,8 @@ void UI_Canvas::draw()
 	// setup projection matrix for 2D drawing
 
 	// Note: this crud is a workaround for retina displays on MacOS
-	Fl::use_high_res_GL(true);
-	int pix = iround(inst.main_win->canvas->pixels_per_unit());
-	Fl::use_high_res_GL(false);
-
 	glLoadIdentity();
-	glViewport(0, 0, w() * pix, h() * pix);
+	glViewport(0, 0, pixel_w(), pixel_h());
 	glOrtho(0, w(), 0, h(), -1, 1);
 #endif
 
