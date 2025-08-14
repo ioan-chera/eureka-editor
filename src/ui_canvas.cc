@@ -2438,10 +2438,13 @@ void UI_Canvas::RenderSector(int num)
 
 			if (img)
 			{
-				// this logic follows ZDoom, which scales large flats to
-				// occupy a 64x64 unit area.  I presume wall textures are
-				// handled similarily....
-				glTexCoord2f(poly->mx[p] / 64.0f, poly->my[p] / 64.0f);
+				int w = img->width();
+				int h = img->height();
+				if(!w)
+					w = 64;
+				if(!h)
+					h = 64;
+				glTexCoord2f(poly->mx[p] / w, poly->my[p] / h);
 			}
 
 			glVertex2i(sx, sy);
