@@ -596,6 +596,17 @@ public:
 		byte r0, g0, b0;
 		bool fullbright;
 		Img_c *img = FindFlat(fname, r0, g0, b0, fullbright);
+		int img_w = 0;
+		int img_h = 0;
+		if(img)
+		{
+			img_w = img->width();
+			img_h = img->height();
+		}
+		if(!img_w)
+			img_w = 64;
+		if(!img_h)
+			img_h = 64;
 
 		float r = r0 / 255.0f;
 		float g = g0 / 255.0f;
@@ -615,20 +626,20 @@ public:
 				float ax = poly->mx[0];
 				float ay = poly->my[0];
 				float az = static_cast<float>(plane ? plane->SlopeZ(ax, ay) : z);
-				float atx = ax / 64.0f;  // see note below
-				float aty = ay / 64.0f;
+				float atx = ax / img_w;
+				float aty = ay / img_h;
 
 				float bx = poly->mx[1];
 				float by = poly->my[1];
 				float bz = static_cast<float>(plane ? plane->SlopeZ(bx, by) : z);
-				float btx = bx / 64.0f;  // see note below
-				float bty = by / 64.0f;
+				float btx = bx / img_w;
+				float bty = by / img_h;
 
 				float cx = poly->mx[2];
 				float cy = poly->my[2];
 				float cz = static_cast<float>(plane ? plane->SlopeZ(cx, cy) : z);
-				float ctx = cx / 64.0f;
-				float cty = cy / 64.0f;
+				float ctx = cx / img_w;
+				float cty = cy / img_h;
 
 				LightClippedTriangle(ax, ay, az, atx, aty,
 									 bx, by, bz, btx, bty,
@@ -640,8 +651,8 @@ public:
 					float dx = poly->mx[3];
 					float dy = poly->my[3];
 					float dz = static_cast<float>(plane ? plane->SlopeZ(dx, dy) : z);
-					float dtx = dx / 64.0f;
-					float dty = dy / 64.0f;
+					float dtx = dx / img_w;
+					float dty = dy / img_h;
 
 					LightClippedTriangle(ax, ay, az, atx, aty,
 										 cx, cy, cz, ctx, cty,
@@ -662,10 +673,7 @@ public:
 
 					if (img)
 					{
-						// this logic follows ZDoom, which scales large flats to
-						// occupy a 64x64 unit area.  I presume wall textures
-						// used on floors or ceilings is the same....
-						glTexCoord2f(px / 64.0f, py / 64.0f);
+						glTexCoord2f(px / img_w, py / img_h);
 					}
 
 					glVertex3f(px, py, pz);

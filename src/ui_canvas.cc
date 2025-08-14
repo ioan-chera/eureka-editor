@@ -2287,6 +2287,19 @@ void UI_Canvas::RenderSector(int num)
 		}
 	}
 
+	int img_w = 0;
+	int img_h = 0;
+	if(img)
+	{
+		img_w = img->width();
+		img_h = img->height();
+	}
+	if(!img_w)
+		img_w = 64;
+	if(!img_h)
+		img_h = 64;
+
+
 #ifdef NO_OPENGL
 	int tw = img ? img->width()  : 1;
 	int th = img ? img->height() : 1;
@@ -2438,13 +2451,7 @@ void UI_Canvas::RenderSector(int num)
 
 			if (img)
 			{
-				int w = img->width();
-				int h = img->height();
-				if(!w)
-					w = 64;
-				if(!h)
-					h = 64;
-				glTexCoord2f(poly->mx[p] / w, poly->my[p] / h);
+				glTexCoord2f(poly->mx[p] / img_w, poly->my[p] / img_h);
 			}
 
 			glVertex2i(sx, sy);
