@@ -139,6 +139,9 @@ else()
 endif()
 
 add_subdirectory(src)
+if(UNIX AND NOT APPLE)  # Linux
+    target_include_directories(eurekasrc PRIVATE /usr/include/cairo)
+endif()
 if(APPLE)
     target_link_libraries(eurekasrc PRIVATE eurekamac)
     target_link_libraries(eurekamac PRIVATE eurekasrc)
