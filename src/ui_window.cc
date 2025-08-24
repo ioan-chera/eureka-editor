@@ -28,6 +28,10 @@
 #include "ui_window.h"
 #include "w_wad.h"
 
+#ifdef __APPLE__
+#include "OSXCalls.h"
+#endif
+
 #ifndef WIN32
 #include <unistd.h>
 #endif
@@ -345,6 +349,11 @@ void UI_MainWindow::SetTitle(const SString &wad_namem, const SString &map_name,
 	}
 
 	copy_label(title_buf);
+
+#ifdef __APPLE__
+    OSX_SetWindowRepresentedFile((void*)fl_xid(this), wad_namem.good() ? wad_namem.c_str() : nullptr, title_buf);
+    OSX_SetWindowDocumentEdited((void*)fl_xid(this), false);
+#endif
 }
 
 
@@ -373,6 +382,10 @@ void UI_MainWindow::UpdateTitle(char want_prefix)
 	title_buf.insert(title_buf.length(), src);
 
 	copy_label(title_buf.c_str());
+
+#ifdef __APPLE__
+	OSX_SetWindowDocumentEdited((void*)fl_xid(this), want_prefix != 0);
+#endif
 }
 
 

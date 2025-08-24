@@ -31,7 +31,7 @@
 #ifdef __APPLE__
 
 #include "m_strings.h"
-#import "Foundation/Foundation.h"
+#import <Cocoa/Cocoa.h>
 #include "OSXCalls.h"
 
 
@@ -42,31 +42,79 @@
 //
 fs::path OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir)
 {
-   NSSearchPathDirectory spd;
-   switch (dirtype)
-   {
-	   case macOSDirType::library:
-         spd = NSLibraryDirectory;
-         break;
-         
-	   case macOSDirType::libraryAppSupport:
-         spd = NSApplicationSupportDirectory;
-         break;
-         
-	   case macOSDirType::libraryCache:
-         spd = NSCachesDirectory;
-         break;
+   @autoreleasepool {
+      NSSearchPathDirectory spd;
+      switch (dirtype)
+      {
+	      case macOSDirType::library:
+            spd = NSLibraryDirectory;
+            break;
+            
+	      case macOSDirType::libraryAppSupport:
+            spd = NSApplicationSupportDirectory;
+            break;
+            
+	      case macOSDirType::libraryCache:
+            spd = NSCachesDirectory;
+            break;
+      }
+      
+      NSArray *paths = NSSearchPathForDirectoriesInDomains(spd, NSUserDomainMask, YES);
+      if([paths count] <= 0)
+         return "."; // shouldn't normally occur
+      
+      NSString *retDir = [paths objectAtIndex:0];
+      if(subdir)
+         retDir = [retDir stringByAppendingPathComponent:[NSString stringWithCString:subdir encoding:NSUTF8StringEncoding]];
+      
+      return [retDir cStringUsingEncoding:NSUTF8StringEncoding];
    }
-   
-   NSArray *paths = NSSearchPathForDirectoriesInDomains(spd, NSUserDomainMask, YES);
-   if([paths count] <= 0)
-      return "."; // shouldn't normally occur
-   
-   NSString *retDir = [paths objectAtIndex:0];
-   if(subdir)
-      retDir = [retDir stringByAppendingPathComponent:[NSString stringWithCString:subdir encoding:NSUTF8StringEncoding]];
-   
-   return [retDir cStringUsingEncoding:NSUTF8StringEncoding];
 }
+
+//
+// Sets the represented file for a given NSWindow and restores the title.
+// Passing nullptr as filename removes the represented file (and thus the icon).
+// The window parameter is the native handle obtained via fl_xid().
+//
+void OSX_SetWindowRepresentedFile(void *window, const char *filename, const char *title)
+{
+   if (!window)
+      return;
+
+   @autoreleasepool {
+      NSWindow *win = (__bridge NSWindow *)window;
+
+      if (filename && filename[0])
+      {
+         NSString *path = [NSString stringWithUTF8String:filename];
+         NSURL *url = [NSURL fileURLWithPath:path];
+         
+         [win setRepresentedURL:url];
+      }
+      else
+      {
+         [win setRepresentedURL:nil];
+      }
+
+      if (title)
+      {
+         NSString *nsTitle = [NSString stringWithUTF8String:title];
+         [win setTitle:nsTitle];
+      }
+   }
+}
+
+// Marks the NSWindow as edited or not, showing the unsaved indicator on macOS.
+void OSX_SetWindowDocumentEdited(void *window, bool edited)
+{
+   if (!window)
+      return;
+
+   @autoreleasepool {
+      NSWindow *win = (__bridge NSWindow *)window;
+      [win setDocumentEdited:edited ? YES : NO];
+   }
+}
+
 
 #endif
