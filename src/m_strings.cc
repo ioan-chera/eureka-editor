@@ -443,6 +443,17 @@ SString SString::spaceEscape(bool backslash) const
 	return result;
 }
 
+void SString::findAndReplace(const SString& target, const SString& replacement)
+{
+	size_t pos = 0;
+	while ((pos = data.find(target.data, pos)) != std::string::npos)
+	{
+		data.replace(pos, target.length(), replacement.data);
+		pos += replacement.length();
+	}
+}
+
+
 #ifdef _WIN32
 //
 // Fail safe so we avoid failures
