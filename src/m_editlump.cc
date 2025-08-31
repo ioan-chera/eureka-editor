@@ -138,14 +138,14 @@ private:
 
 	Fl_Return_Button *ok_but;
 
-	enum
+	enum class Action
 	{
-		ACT_none = 0,
-		ACT_CLOSE,
-		ACT_ACCEPT
+		none = 0,
+		close,
+		accept
 	};
 
-	int action;
+	Action action = Action::none;
 
 public:
 	explicit UI_ChooseTextLump(MapFormat levelFormat);
@@ -167,8 +167,7 @@ private:
 
 
 UI_ChooseTextLump::UI_ChooseTextLump(MapFormat levelFormat) :
-	UI_Escapable_Window(420, 385, "Choose Text Lump"),
-	action(ACT_none)
+	UI_Escapable_Window(420, 385, "Choose Text Lump")
 {
 	resizable(NULL);
 
@@ -272,7 +271,7 @@ void UI_ChooseTextLump::close_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
 
-	win->action = ACT_CLOSE;
+	win->action = Action::close;
 }
 
 
@@ -282,7 +281,7 @@ void UI_ChooseTextLump::ok_callback(Fl_Widget *w, void *data)
 
 	// sanity check
 	if (ValidLumpToEdit(win->lump_name->value()))
-		win->action = ACT_ACCEPT;
+		win->action = Action::accept;
 	else
 		fl_beep();
 }
@@ -324,7 +323,7 @@ void UI_ChooseTextLump::header_callback(Fl_Widget *w, void *data)
 	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
 
 	win->lump_name->value(EDLUMP_HEADER);
-	win->action = ACT_ACCEPT;
+	win->action = Action::accept;
 }
 
 
@@ -333,7 +332,7 @@ void UI_ChooseTextLump::script_callback(Fl_Widget *w, void *data)
 	UI_ChooseTextLump *win = (UI_ChooseTextLump *)data;
 
 	win->lump_name->value(EDLUMP_SCRIPTS);
-	win->action = ACT_ACCEPT;
+	win->action = Action::accept;
 }
 
 
@@ -344,7 +343,7 @@ void UI_ChooseTextLump::button_callback(Fl_Widget *w, void *data)
 
 	// the button's label is the lump name
 	win->lump_name->value(but->label());
-	win->action = ACT_ACCEPT;
+	win->action = Action::accept;
 }
 
 
@@ -353,12 +352,12 @@ SString UI_ChooseTextLump::Run()
 	set_modal();
 	show();
 
-	while (action == ACT_none)
+	while (action == Action::none)
 	{
 		Fl::wait(0.2);
 	}
 
-	if (action == ACT_CLOSE)
+	if (action == Action::close)
 		return "";
 
 	const char *name = lump_name->value();
