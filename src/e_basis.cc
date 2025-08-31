@@ -118,7 +118,7 @@ void Basis::end()
 	{
 		SString message = mCurrentGroup.getMessage();
 		SString menuDetail = mCurrentGroup.getMenuName();
-		mUndoHistory.push(std::move(mCurrentGroup));
+		mUndoHistory.push_back(std::move(mCurrentGroup));
 		if(inst.main_win)
 		{
 			Fl_Sys_Menu_Bar *bar = inst.main_win->menu_bar;
@@ -469,8 +469,8 @@ bool Basis::undo()
 
 	doClearChangeStatus();
 
-	UndoGroup grp = std::move(mUndoHistory.top());
-	mUndoHistory.pop();
+	UndoGroup grp = std::move(mUndoHistory.back());
+	mUndoHistory.pop_back();
 
 	inst.Status_Set("UNDO: %s", grp.getMessage().c_str());
 	if(inst.main_win)
@@ -479,7 +479,7 @@ bool Basis::undo()
 		if(bar)
 		{
 			menu::setRedoDetail(bar, grp.getMenuName());
-			menu::setUndoDetail(bar, mUndoHistory.empty() ? "" : mUndoHistory.top().getMenuName());
+			menu::setUndoDetail(bar, mUndoHistory.empty() ? "" : mUndoHistory.back().getMenuName());
 		}
 	}
 
@@ -519,7 +519,7 @@ bool Basis::redo()
 
 	grp.reapply(*this);
 
-	mUndoHistory.push(std::move(grp));
+	mUndoHistory.push_back(std::move(grp));
 
 	doProcessChangeStatus();
 	return true;
@@ -528,7 +528,7 @@ bool Basis::redo()
 void Basis::clear()
 {
 	while(!mUndoHistory.empty())
-		mUndoHistory.pop();
+		mUndoHistory.pop_back();
 	while(!mRedoFuture.empty())
 		mRedoFuture.pop();
 	
@@ -1030,7 +1030,7 @@ void Basis::doProcessChangeStatus() const
 	if(mDidMakeChanges)
 	{
 		// TODO: the other modules
-		doc.MadeChanges = true;
+		doc.MadeChanges = mSavedStack != mUndoHistory;
 		inst.RedrawMap();
 	}
 

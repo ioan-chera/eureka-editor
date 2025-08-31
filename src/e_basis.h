@@ -93,12 +93,18 @@ public:
 	bool undo();
 	bool redo();
 	void clear();
+	void setSavedStack()
+	{
+		mSavedStack = mUndoHistory;
+	}
+
 	
 	Basis &operator = (Basis &&other) noexcept
 	{
 		mCurrentGroup = std::move(other.mCurrentGroup);
 		mUndoHistory = std::move(other.mUndoHistory);
 		mRedoFuture = std::move(other.mRedoFuture);
+		mSavedStack = std::move(other.mSavedStack);
 		mDidMakeChanges = other.mDidMakeChanges;
 		return *this;
 	}
@@ -139,6 +145,27 @@ private:
 		void apply(Basis &basis);
 		void destroy();
 
+		bool operator == (const EditUnit &other) const
+		{
+			return action == other.action
+				&& objtype == other.objtype
+				&& field == other.field
+				&& objnum == other.objnum
+				&& thing == other.thing
+				&& vertex == other.vertex
+				&& sector == other.sector
+				&& sidedef == other.sidedef
+				&& linedef == other.linedef
+				&& value == other.value
+				&& lumptype == other.lumptype
+				&& lumpData == other.lumpData;
+		}
+
+		bool operator != (const EditUnit &other) const
+		{
+			return !(*this == other);
+		}
+
 	private:
 		void rawChange(Basis &basis);
 
@@ -177,9 +204,8 @@ private:
 				it->destroy();
 		}
 
-		// Ensure we only use move semantics
-		UndoGroup(const UndoGroup &other) = delete;
-		UndoGroup &operator = (const UndoGroup &other) = delete;
+		UndoGroup(const UndoGroup &other) = default;
+		UndoGroup &operator = (const UndoGroup &other) = default;
 
 		//
 		// Move constructor takes same semantics as operator
@@ -189,6 +215,19 @@ private:
 			*this = std::move(other);
 		}
 		UndoGroup &operator = (UndoGroup &&other) noexcept;
+
+		bool operator != (const UndoGroup &other) const
+		{
+			return mOps != other.mOps
+				|| mMessage != other.mMessage
+				|| mMenuName != other.mMenuName
+				|| mDir != other.mDir;
+		}
+
+		bool operator == (const UndoGroup &other) const
+		{
+			return !(*this != other);
+		}
 
 		void reset();
 
@@ -285,8 +324,10 @@ private:
 
 	UndoGroup mCurrentGroup;
 	// FIXME: use a better data type here
-	std::stack<UndoGroup> mUndoHistory;
+	std::vector<UndoGroup> mUndoHistory;
 	std::stack<UndoGroup> mRedoFuture;
+
+	std::vector<UndoGroup> mSavedStack;
 
 	bool mDidMakeChanges = false;
 };

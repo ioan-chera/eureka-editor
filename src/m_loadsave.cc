@@ -1697,6 +1697,7 @@ void Instance::ConfirmLevelSaveSuccess(const LoadingData &loading, const Wad_fil
 	}
 
 	this->level.MadeChanges = false;
+	this->level.basis.setSavedStack();
 }
 
 //
