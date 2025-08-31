@@ -69,6 +69,13 @@ namespace global
 
 // See objid.h for obj_type_e (OBJ_THINGS etc)
 
+enum class LumpType : byte
+{
+	header,
+	behavior,
+	scripts
+};
+
 // E_BASIS
 
 FFixedPoint MakeValidCoord(MapFormat format, double x);
@@ -105,7 +112,8 @@ private:
 		none,	// initial state (invalid)
 		change,
 		insert,
-		del
+		del,
+		lump_change
 	};
 
 	//
@@ -123,6 +131,10 @@ private:
 		std::shared_ptr<SideDef> sidedef;
 		std::shared_ptr<LineDef> linedef;
 		int value = 0;
+		
+		// For lump changes
+		LumpType lumptype = LumpType::header;
+		std::vector<byte> lumpData;
 
 		void apply(Basis &basis);
 		void destroy();
@@ -143,6 +155,8 @@ private:
 		void rawInsertSector(Document &doc);
 		void rawInsertSidedef(Document &doc);
 		void rawInsertLinedef(Document &doc);
+
+		void rawChangeLump(Basis &basis);
 
 		void deleteFinally();
 	};
@@ -261,6 +275,7 @@ private:
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeLinedef(int line, byte field, int value);
+	void changeLump(LumpType lumpType, std::vector<byte> &&newData);
 	void del(ObjType type, int objnum);
 	void end();
 	void abort(bool keepChanges);
@@ -346,6 +361,11 @@ public:
 	bool changeLinedef(int line, byte field, int value)
 	{
 		return basis.changeLinedef(line, field, value);
+	}
+
+	void changeLump(LumpType lumpType, std::vector<byte> &&newData)
+	{
+		basis.changeLump(lumpType, std::move(newData));
 	}
 
 	void del(ObjType type, int objnum)

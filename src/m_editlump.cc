@@ -465,13 +465,21 @@ void Instance::CMD_EditLump()
 
 		if (lump_name == EDLUMP_HEADER)
 		{
-			editor.SaveMemory(level.headerData);
-			level.MadeChanges = true;
+			std::vector<byte> newData;
+			editor.SaveMemory(newData);
+			
+			EditOperation op(level.basis);
+			op.setMessage("edited header lump");
+			op.changeLump(LumpType::header, std::move(newData));
 		}
 		else if (lump_name == EDLUMP_SCRIPTS)
 		{
-			editor.SaveMemory(level.scriptsData);
-			level.MadeChanges = true;
+			std::vector<byte> newData;
+			editor.SaveMemory(newData);
+			
+			EditOperation op(level.basis);
+			op.setMessage("edited scripts lump");
+			op.changeLump(LumpType::scripts, std::move(newData));
 		}
 		else
 		{
@@ -537,9 +545,9 @@ void Instance::CMD_AddBehaviorLump()
 		return;
 	}
 
-	level.behaviorData = std::move(data);
-
-	level.MadeChanges = true;
+	EditOperation op(level.basis);
+	op.setMessage("loaded BEHAVIOR lump");
+	op.changeLump(LumpType::behavior, std::move(data));
 }
 
 //--- editor settings ---

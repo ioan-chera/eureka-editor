@@ -444,6 +444,21 @@ bool Basis::changeLinedef(int line, byte field, int value)
 }
 
 //
+// Change lump data
+//
+void Basis::changeLump(LumpType lumpType, std::vector<byte> &&newData)
+{
+	SYS_ASSERT(mCurrentGroup.isActive());
+
+	EditUnit op;
+	op.action = EditType::lump_change;
+	op.lumptype = lumpType;
+	op.lumpData = std::move(newData);
+	
+	mCurrentGroup.addApply(std::move(op), *this);
+}
+
+//
 // attempt to undo the last normal or redo operation.  Returns
 // false if the undo history is empty.
 //
@@ -545,6 +560,9 @@ void Basis::EditUnit::apply(Basis &basis)
 	case EditType::insert:
 		rawInsert(basis);
 		action = EditType::del;	// reverse the operation
+		return;
+	case EditType::lump_change:
+		rawChangeLump(basis);
 		return;
 	default:
 		BugError("Basis::EditOperation::apply\n");
@@ -898,6 +916,28 @@ void Basis::EditUnit::rawInsertLinedef(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numLinedefs());
 	doc.linedefs.insert(doc.linedefs.begin() + objnum, std::move(linedef));
+}
+
+//
+// Raw change lump
+//
+void Basis::EditUnit::rawChangeLump(Basis &basis)
+{
+	basis.mDidMakeChanges = true;
+
+	// Swap the stored data with the current data in the document
+	switch(lumptype)
+	{
+	case LumpType::header:
+		std::swap(lumpData, basis.doc.headerData);
+		break;
+	case LumpType::behavior:
+		std::swap(lumpData, basis.doc.behaviorData);
+		break;
+	case LumpType::scripts:
+		std::swap(lumpData, basis.doc.scriptsData);
+		break;
+	}
 }
 
 //
