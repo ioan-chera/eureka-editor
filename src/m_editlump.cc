@@ -405,7 +405,6 @@ void Instance::CMD_EditLump()
 	bool special = lump_name == EDLUMP_HEADER || lump_name == EDLUMP_SCRIPTS;
 
 	// uppercase the lump name
-	// [ another small memory leak ]
 	if (!special)
 		lump_name = lump_name.asUpper();
 
