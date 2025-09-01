@@ -64,6 +64,17 @@ TEST_P(BasisLumpChangeFixture, ChangeUndoRedo)
 
     ASSERT_TRUE(doc.basis.undo());
     EXPECT_EQ(data, original);
+
+	// Now change something to see that redo becomes unavailable
+	{
+		EditOperation op(doc.basis);
+		op.changeLump(type, std::vector<byte>{6, 7});
+	}
+	ASSERT_FALSE(doc.basis.redo());
+	ASSERT_TRUE(doc.basis.undo());
+	EXPECT_EQ(data, original);
+
+	ASSERT_FALSE(doc.basis.undo());
 }
 
 INSTANTIATE_TEST_SUITE_P(
