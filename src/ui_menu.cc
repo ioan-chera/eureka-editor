@@ -558,8 +558,12 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Undo",   FL_COMMAND + 'z',  FCAL edit_do_undo },
-		{ "&Redo",   FL_COMMAND + 'y',  FCAL edit_do_redo },
+                { "&Undo",   FL_COMMAND + 'z',  FCAL edit_do_undo },
+#if defined(_WIN32)
+                { "&Redo",   FL_COMMAND + 'y',  FCAL edit_do_redo },
+#else
+                { "&Redo",   FL_COMMAND + FL_SHIFT + 'z',  FCAL edit_do_redo },
+#endif
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

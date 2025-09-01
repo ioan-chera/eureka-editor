@@ -1290,14 +1290,20 @@ static bool canShowUpOnMenu(keycode_t code)
 // Finds key code for given command name
 //
 bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM],
-							   keycode_t *code)
+                                                            keycode_t *code)
 {
     assert(!!code);
     *code = UINT_MAX;
+    bool preferRedo = (y_stricmp(command, "Redo") == 0);
+#if defined(_WIN32)
+    keycode_t preferredRedo = EMOD_COMMAND | 'y';
+#else
+    keycode_t preferredRedo = EMOD_COMMAND | EMOD_SHIFT | 'z';
+#endif
     for(const key_binding_t &binding : global::all_bindings)
-	{
-		if(y_stricmp(binding.cmd->name, command))
-			continue;
+        {
+                if(y_stricmp(binding.cmd->name, command))
+                        continue;
 
 		bool skip = false;
 		for(int i = 0; i < MAX_EXEC_PARAM; ++i)
@@ -1315,14 +1321,19 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
 				break;
 			}
 		}
-		if(skip)
-			continue;
+                if(skip)
+                        continue;
+        if(preferRedo && binding.key == preferredRedo && canShowUpOnMenu(binding.key))
+        {
+            *code = binding.key;
+            return true;
+        }
         if(canShowUpOnMenu(binding.key) && binding.key < *code)
             *code = binding.key;
         // Continue looking until we find the lowest numbered key code. That is the smallest ASCII
         // character with no shortcut keys
-	}
-	return *code < UINT_MAX;
+        }
+        return *code < UINT_MAX;
 }
 
 //--- editor settings ---
