@@ -41,8 +41,8 @@ struct Document
 {
 private:
 	Instance &inst;	// make this private because we don't want to access it from Document
-        bool mMadeChanges = false;
-        friend class Basis;
+	bool mMadeChanges = false;
+	friend class Basis;
 public:
 
 	std::vector<std::shared_ptr<Thing>> things;
@@ -54,10 +54,10 @@ public:
 	std::vector<byte> headerData;
 	std::vector<byte> behaviorData;
 	std::vector<byte> scriptsData;
-	
+
 	v2double_t Map_bound1 = { 32767, 32767 };	/* minimum XY value of map */
 	v2double_t Map_bound2 = { -32767, -32767 };	/* maximum XY value of map */
-	
+
 
 	Basis basis;
 	ChecksModule checks;
@@ -71,42 +71,42 @@ public:
 	linemod(*this), vertmod(*this), secmod(*this), objects(*this)
 	{
 	}
-	
-	Document(Document &&other) noexcept : inst(other.inst), basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this) 
+
+	Document(Document &&other) noexcept : inst(other.inst), basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this)
 	{
 		*this = std::move(other);
 	}
-	
-        Document &operator = (Document &&other) noexcept
-        {
-                things = std::move(other.things);
-                vertices = std::move(other.vertices);
-                sectors = std::move(other.sectors);
-                sidedefs = std::move(other.sidedefs);
-                linedefs = std::move(other.linedefs);
-                headerData = std::move(other.headerData);
-                behaviorData = std::move(other.behaviorData);
-                scriptsData = std::move(other.scriptsData);
-                Map_bound1 = other.Map_bound1;
-                Map_bound2 = other.Map_bound2;
-                mMadeChanges = other.mMadeChanges;
-                // TODO: basis
-                basis = std::move(other.basis);
-                return *this;
-        }
 
-        bool hasChanges() const noexcept { return mMadeChanges; }
-        void markSaved() { mMadeChanges = false; basis.setSavedStack(); }
+	Document &operator = (Document &&other) noexcept
+	{
+		things = std::move(other.things);
+		vertices = std::move(other.vertices);
+		sectors = std::move(other.sectors);
+		sidedefs = std::move(other.sidedefs);
+		linedefs = std::move(other.linedefs);
+		headerData = std::move(other.headerData);
+		behaviorData = std::move(other.behaviorData);
+		scriptsData = std::move(other.scriptsData);
+		Map_bound1 = other.Map_bound1;
+		Map_bound2 = other.Map_bound2;
+		mMadeChanges = other.mMadeChanges;
+		// TODO: basis
+		basis = std::move(other.basis);
+		return *this;
+	}
+
+	bool hasChanges() const noexcept { return mMadeChanges; }
+	void markSaved() { mMadeChanges = false; basis.setSavedStack(); }
 
 private:
-        void setMadeChanges(bool val) { mMadeChanges = val; }
+	void setMadeChanges(bool val) { mMadeChanges = val; }
 
 public:
 
-        //
-        // Count map objects
-        //
-        int numThings() const noexcept
+	//
+	// Count map objects
+	//
+	int numThings() const noexcept
 	{
 		return static_cast<int>(things.size());
 	}
@@ -176,7 +176,7 @@ public:
 	bool isSelfRef(const LineDef &line) const;
 	bool isHorizontal(const LineDef &line) const;
 	bool isVertical(const LineDef &line) const;
-	
+
 	void LoadHeader(int loading_level, const Wad_file &load_wad);
 	void LoadThings(int loading_level, const Wad_file *load_wad);
 	void LoadThings_Hexen(int loading_level, const Wad_file *load_wad);
@@ -187,9 +187,9 @@ public:
 	void LoadSideDefs(int loading_level, const Wad_file *load_wad, const ConfigData &config, BadCount &bad);
 	void LoadBehavior(int loading_level, const Wad_file *load_wad);
 	void LoadScripts(int loading_level, const Wad_file *load_wad);
-	
+
 	void RemoveUnusedVerticesAtEnd();
-	
+
 	void CreateFallbackVertices();
 	void CreateFallbackSideDef(const ConfigData &config);
 	void CreateFallbackSector(const ConfigData &config);
@@ -197,7 +197,7 @@ public:
 	void ValidateSidedefRefs(LineDef &ld, int num, const ConfigData &config, BadCount &bad);
 	void ValidateSectorRef(SideDef &sd, int num, const ConfigData &config, BadCount &bad);
 	void ValidateLevel_UDMF(const ConfigData &config, BadCount &bad);
-	
+
 	void CalculateLevelBounds() noexcept;
 	void UpdateLevelBounds(int start_vert) noexcept;
 
@@ -211,7 +211,7 @@ public:
 	void SaveSectors(Wad_file& wad) const;
 	void SaveBehavior(Wad_file& wad) const;
 	void SaveScripts(Wad_file& wad) const;
-	
+
 	void clear();
 
 	bool Main_ConfirmQuit(const char* action) const;

@@ -999,7 +999,7 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	doc.RemoveUnusedVerticesAtEnd();
 	doc.checks.sidedefsUnpack(true);
 	doc.CalculateLevelBounds();
-        doc.markSaved();
+	doc.markSaved();
 
 	return newdoc;
 }

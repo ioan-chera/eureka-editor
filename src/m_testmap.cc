@@ -90,27 +90,27 @@ static bool isMacOSAppBundle(const fs::path &path)
 		return false;
 	}
 	CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, pathString, kCFURLPOSIXPathStyle, true);
-	
+
 	CFRelease(pathString);
 	if(!url)
 	{
 		gLog.printf("ERROR: Failed allocating macOS app bundle CF URL: %s\n", path.u8string().c_str());
-		
+
 		return false;
 	}
-	
+
 	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, url);
 	CFRelease(url);
 	if(!bundle)
 	{
 		gLog.printf("Could not load, or invalid macOS app CF bundle: %s\n", path.u8string().c_str());
-		
+
 		return false;
 	}
-	
+
 	CFDictionaryRef infoDict = CFBundleGetInfoDictionary(bundle);
 	CFRelease(bundle);
-	
+
 	return !!infoDict;
 #else
 	return false;
@@ -138,7 +138,7 @@ public:
 	static const int BOTTOM_BUTTON_SPACING = 45;
 
 	Fl_Output *exe_display;
-	
+
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;
 
@@ -481,10 +481,10 @@ static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
 	CalcWarpString(inst.loaded.levelName, args);
-	
+
 	SString argString = SString("/usr/bin/open -a ") + SString(portPath.u8string()).spaceEscape(true) + " --args " + inst.loaded.testingCommandLine + " " + buildArgString(args, true);
 	logArgs(argString);
-	
+
 	int ret = system(argString.c_str());
 	if(ret == -1)
 	{
@@ -504,7 +504,7 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 	while(parse.getNext(arg))
 		args.push_back(arg);
 	args.insert(args.begin(), portPath.u8string());
-	
+
 	std::vector<char *> argv;
 	argv.reserve(args.size() + 2);
 	fs::path portName = portPath.filename();
@@ -533,11 +533,11 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 		{
 			DirChangeContext dirChangeContext(FilenameGetPath(portPath));
 			execvp(portPath.u8string().c_str(), argv.data());
-			
+
 			// on failure
 			int err = errno;
 			gLog.printf("--> Failed starting %s: %s\n", portName.u8string().c_str(), GetErrorMessage(err).c_str());
-			
+
 			_exit(err);
 		}
 		catch(const std::exception &e)
@@ -583,7 +583,7 @@ void Instance::CMD_TestMap()
 {
 	try
 	{
-                if (level.hasChanges())
+		if (level.hasChanges())
 		{
 			if (DLG_Confirm({ "Cancel", "&Save" },
 				"You have unsaved changes, do you want to save them now "
@@ -634,14 +634,14 @@ void Instance::CMD_TestMap()
 			main_win->redraw();
 		Fl::wait(0.1);
 		Fl::wait(0.1);
-		
+
 	}
 	catch(const std::runtime_error &e)
 	{
 		Status_Set("Failed testing map");
 		DLG_ShowError(false, "Could not start map for testing: %s", e.what());
 	}
-	
+
 }
 
 namespace testmap

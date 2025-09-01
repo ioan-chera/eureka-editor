@@ -212,7 +212,7 @@ void Basis::setMessage(EUR_FORMAT_STRING(const char *format), ...)
 	SString message = SString::vprintf(format, arg_ptr);
 	mCurrentGroup.setMessage(message);
 	va_end(arg_ptr);
-	
+
 	mCurrentGroup.setMenuName(makeInfinitive(message));
 }
 
@@ -454,7 +454,7 @@ void Basis::changeLump(LumpType lumpType, std::vector<byte> &&newData)
 	op.action = EditType::lump_change;
 	op.lumptype = lumpType;
 	op.lumpData = std::move(newData);
-	
+
 	mCurrentGroup.addApply(std::move(op), *this);
 }
 
@@ -506,7 +506,7 @@ bool Basis::redo()
 	mRedoFuture.pop();
 
 	inst.Status_Set("Redo: %s", grp.getMessage().c_str());
-	
+
 	if(inst.main_win)
 	{
 		Fl_Sys_Menu_Bar *bar = inst.main_win->menu_bar;
@@ -531,13 +531,13 @@ void Basis::clear()
 		mUndoHistory.pop_back();
 	while(!mRedoFuture.empty())
 		mRedoFuture.pop();
-	
+
 	if(inst.main_win)
 	{
 		menu::setUndoDetail(inst.main_win->menu_bar, "");
 		menu::setRedoDetail(inst.main_win->menu_bar, "");
 	}
-	
+
 	// Note: we don't clear the string table, since there can be
 	//       string references in the clipboard.
 
@@ -1030,7 +1030,7 @@ void Basis::doProcessChangeStatus() const
 	if(mDidMakeChanges)
 	{
 		// TODO: the other modules
-                doc.setMadeChanges(mSavedStack != mUndoHistory);
+		doc.setMadeChanges(mSavedStack != mUndoHistory);
 		inst.RedrawMap();
 	}
 
