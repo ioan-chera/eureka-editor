@@ -85,7 +85,7 @@ void Instance::zoom_fit()
 
 void Instance::ZoomWholeMap()
 {
-	if (level.MadeChanges)
+	if (level.hasChanges())
 		level.CalculateLevelBounds();
 
 	zoom_fit();
@@ -153,19 +153,19 @@ static void UpdatePanel(const Instance &inst)
 			case ObjType::things:
 				inst.main_win->thing_box->SetObj(obj_idx, obj_count);
 				break;
-				
+
 			case ObjType::linedefs:
 				inst.main_win->line_box->SetObj(obj_idx, obj_count);
 				break;
-				
+
 			case ObjType::sectors:
 				inst.main_win->sec_box->SetObj(obj_idx, obj_count);
 				break;
-				
+
 			case ObjType::vertices:
 				inst.main_win->vert_box->SetObj(obj_idx, obj_count);
 				break;
-				
+
 			default: break;
 		}
 	}
@@ -938,7 +938,7 @@ void Instance::Selection_Push()
 
 	// OK copy it
 
-	
+
 	last_Sel.emplace(edit.Selected->what_type(), true);
 
 	last_Sel->merge(*edit.Selected);
@@ -1260,7 +1260,7 @@ void Instance::Editor_Init()
 
 	grid.Init();
 
-	level.MadeChanges = false;
+	level.markSaved();
 
 	  Editor_RegisterCommands();
 	Render3D_RegisterCommands();

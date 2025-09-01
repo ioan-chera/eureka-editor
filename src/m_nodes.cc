@@ -285,7 +285,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 		try
 		{
 			NewDocument newdoc = openDocument(loaded, *wad.master.editWad(), n);
-			
+
 			ret = AJBSP_BuildLevel(info, n, *this, newdoc.doc, newdoc.loading, *wad.master.editWad());
 		}
 		catch(const std::runtime_error &e)
@@ -311,7 +311,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 			nb_info->cancelled = true;
 		}
 	}
-	
+
 	try
 	{
 		wad.master.editWad()->writeToDisk();
@@ -382,7 +382,7 @@ void Instance::CMD_BuildAllNodes()
 		return;
 	}
 
-	if (level.MadeChanges)
+	if (level.hasChanges())
 	{
 		if (DLG_Confirm({ "Cancel", "&Save" },
 			"You have unsaved changes, do you want to save them now "
