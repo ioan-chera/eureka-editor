@@ -61,6 +61,7 @@ endif()
 add_executable(
     test_general
     DocumentTest.cpp
+    e_basis_test.cpp
     e_checks_test.cpp
     e_commands_test.cpp
     e_cutpaste_test.cpp
