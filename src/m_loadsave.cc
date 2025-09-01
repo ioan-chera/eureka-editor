@@ -999,7 +999,7 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	doc.RemoveUnusedVerticesAtEnd();
 	doc.checks.sidedefsUnpack(true);
 	doc.CalculateLevelBounds();
-	doc.MadeChanges = false;
+        doc.markSaved();
 
 	return newdoc;
 }
@@ -1696,8 +1696,7 @@ void Instance::ConfirmLevelSaveSuccess(const LoadingData &loading, const Wad_fil
 		M_SaveUserState();
 	}
 
-	this->level.MadeChanges = false;
-	this->level.basis.setSavedStack();
+        this->level.markSaved();
 }
 
 //

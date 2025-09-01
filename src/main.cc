@@ -784,8 +784,8 @@ void Main_Quit()
 // used for 'New Map' / 'Open Map' functions too
 bool Document::Main_ConfirmQuit(const char *action) const
 {
-	if (! MadeChanges)
-		return true;
+        if (! hasChanges())
+                return true;
 
 	SString secondButton = SString::printf("&%s", action);
 	// convert action string like "open a new map" to a simple "Open"
@@ -884,7 +884,7 @@ void Main_Loop()
 		// TODO: handle these in a better way
 
 		// TODO: HANDLE ALL INSTANCES
-		gInstance->main_win->UpdateTitle(gInstance->level.MadeChanges ? '*' : 0);
+                gInstance->main_win->UpdateTitle(gInstance->level.hasChanges() ? '*' : 0);
 
 		gInstance->main_win->scroll->UpdateBounds();
 

@@ -41,6 +41,8 @@ struct Document
 {
 private:
 	Instance &inst;	// make this private because we don't want to access it from Document
+        bool mMadeChanges = false;
+        friend class Basis;
 public:
 
 	std::vector<std::shared_ptr<Thing>> things;
@@ -56,7 +58,6 @@ public:
 	v2double_t Map_bound1 = { 32767, 32767 };	/* minimum XY value of map */
 	v2double_t Map_bound2 = { -32767, -32767 };	/* maximum XY value of map */
 	
-	bool MadeChanges = false;
 
 	Basis basis;
 	ChecksModule checks;
@@ -76,28 +77,36 @@ public:
 		*this = std::move(other);
 	}
 	
-	Document &operator = (Document &&other) noexcept
-	{
-		things = std::move(other.things);
-		vertices = std::move(other.vertices);
-		sectors = std::move(other.sectors);
-		sidedefs = std::move(other.sidedefs);
-		linedefs = std::move(other.linedefs);
-		headerData = std::move(other.headerData);
-		behaviorData = std::move(other.behaviorData);
-		scriptsData = std::move(other.scriptsData);
-		Map_bound1 = other.Map_bound1;
-		Map_bound2 = other.Map_bound2;
-		MadeChanges = other.MadeChanges;
-		// TODO: basis
-		basis = std::move(other.basis);
-		return *this;
-	}
+        Document &operator = (Document &&other) noexcept
+        {
+                things = std::move(other.things);
+                vertices = std::move(other.vertices);
+                sectors = std::move(other.sectors);
+                sidedefs = std::move(other.sidedefs);
+                linedefs = std::move(other.linedefs);
+                headerData = std::move(other.headerData);
+                behaviorData = std::move(other.behaviorData);
+                scriptsData = std::move(other.scriptsData);
+                Map_bound1 = other.Map_bound1;
+                Map_bound2 = other.Map_bound2;
+                mMadeChanges = other.mMadeChanges;
+                // TODO: basis
+                basis = std::move(other.basis);
+                return *this;
+        }
 
-	//
-	// Count map objects
-	//
-	int numThings() const noexcept
+        bool hasChanges() const noexcept { return mMadeChanges; }
+        void markSaved() { mMadeChanges = false; basis.setSavedStack(); }
+
+private:
+        void setMadeChanges(bool val) { mMadeChanges = val; }
+
+public:
+
+        //
+        // Count map objects
+        //
+        int numThings() const noexcept
 	{
 		return static_cast<int>(things.size());
 	}

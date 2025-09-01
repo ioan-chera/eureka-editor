@@ -82,3 +82,70 @@ INSTANTIATE_TEST_SUITE_P(
     BasisLumpChangeFixture,
     ::testing::Values(LumpType::header, LumpType::behavior, LumpType::scripts));
 
+class BasisChangeStatusFixture : public ::testing::Test
+{
+protected:
+    Instance inst;
+    Document doc{inst};
+
+    void changeHeader(const std::vector<byte> &data)
+    {
+        EditOperation op(doc.basis);
+        op.changeLump(LumpType::header, std::vector<byte>(data));
+    }
+};
+
+// Saving should update the saved stack and clear MadeChanges
+TEST_F(BasisChangeStatusFixture, SavingResetsMadeChanges)
+{
+    doc.headerData = {1};
+    changeHeader({2});
+    EXPECT_TRUE(doc.hasChanges());
+
+    doc.markSaved();
+    EXPECT_FALSE(doc.hasChanges());
+}
+
+// Undoing and redoing toggles MadeChanges depending on the saved stack
+TEST_F(BasisChangeStatusFixture, UndoRedoTogglesMadeChanges)
+{
+    doc.headerData = {1};
+
+    changeHeader({2});
+    doc.markSaved();
+
+    changeHeader({3});
+    EXPECT_TRUE(doc.hasChanges());
+
+    ASSERT_TRUE(doc.basis.undo());
+    EXPECT_FALSE(doc.hasChanges());
+
+    ASSERT_TRUE(doc.basis.undo());
+    EXPECT_TRUE(doc.hasChanges());
+
+    ASSERT_TRUE(doc.basis.redo());
+    EXPECT_FALSE(doc.hasChanges());
+
+    ASSERT_TRUE(doc.basis.redo());
+    EXPECT_TRUE(doc.hasChanges());
+}
+
+// Repeating a redo operation manually can clear the MadeChanges flag
+TEST_F(BasisChangeStatusFixture, ManualRedoActionClearsMadeChanges)
+{
+    doc.headerData = {1};
+
+    changeHeader({2});
+    changeHeader({3});
+    doc.markSaved();
+
+    ASSERT_TRUE(doc.basis.undo());
+    EXPECT_TRUE(doc.hasChanges());
+
+    changeHeader({3});
+    EXPECT_FALSE(doc.hasChanges());
+
+    changeHeader({4});
+    EXPECT_TRUE(doc.hasChanges());
+}
+

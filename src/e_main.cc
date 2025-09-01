@@ -85,8 +85,8 @@ void Instance::zoom_fit()
 
 void Instance::ZoomWholeMap()
 {
-	if (level.MadeChanges)
-		level.CalculateLevelBounds();
+        if (level.hasChanges())
+                level.CalculateLevelBounds();
 
 	zoom_fit();
 
@@ -1260,7 +1260,7 @@ void Instance::Editor_Init()
 
 	grid.Init();
 
-	level.MadeChanges = false;
+        level.markSaved();
 
 	  Editor_RegisterCommands();
 	Render3D_RegisterCommands();

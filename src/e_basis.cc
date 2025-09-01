@@ -1030,7 +1030,7 @@ void Basis::doProcessChangeStatus() const
 	if(mDidMakeChanges)
 	{
 		// TODO: the other modules
-		doc.MadeChanges = mSavedStack != mUndoHistory;
+                doc.setMadeChanges(mSavedStack != mUndoHistory);
 		inst.RedrawMap();
 	}
 
