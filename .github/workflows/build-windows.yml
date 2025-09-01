@@ -39,7 +39,7 @@ jobs:
       - name: Build
         run: cmake --build build --config Release --parallel
       - name: Test
-        run: ctest --test-dir build --output-on-failure -C Release
+        run: ctest --test-dir build --output-on-failure -C Release --verbose
       - name: Archive
         run: |
           Copy-Item AUTHORS.md,GPL.txt,README.txt,TODO.txt build\Release
