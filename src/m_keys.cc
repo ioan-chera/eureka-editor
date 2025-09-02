@@ -314,18 +314,6 @@ static SString ModName_Dash(keycode_t mod)
 }
 
 
-static SString ModName_Space(keycode_t mod)
-{
-	SString result = ModName_Dash(mod);
-	if(!result.empty() && result.back() == '-')
-		result.back() = ' ';
-#ifdef __APPLE__
-	if(result == "META ")
-		return "CTRL ";
-#endif
-	return result;
-}
-
 namespace keys
 {
 SString toString(keycode_t key)
@@ -849,12 +837,13 @@ const char * stringForBinding(const key_binding_t& bind, bool changing_key)
 		tempk = toupper(tempk & FL_KEY_MASK);
 	}
 
-	snprintf(buffer, sizeof(buffer), "%s%6.6s%-10.10s %-9.9s %.32s",
-			 bind.is_duplicate ? "@C1" : "",
-			 changing_key ? "<?"     : ModName_Space(tempk).c_str(),
-			 changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
-			 ctx_name,
-			 stringForFunc(bind).c_str() );
+	SString key_str = changing_key ? SString("<?>") : toString(tempk);
+
+	snprintf(buffer, sizeof(buffer), "%s%s\t%s\t%s",
+		         bind.is_duplicate ? "@C1" : "",
+		         key_str.c_str(),
+		         ctx_name,
+		         stringForFunc(bind).c_str() );
 
 	return buffer;
 }
