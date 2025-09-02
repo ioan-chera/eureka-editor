@@ -314,18 +314,6 @@ static SString ModName_Dash(keycode_t mod)
 }
 
 
-static SString ModName_Space(keycode_t mod)
-{
-	SString result = ModName_Dash(mod);
-	if(!result.empty() && result.back() == '-')
-		result.back() = ' ';
-#ifdef __APPLE__
-	if(result == "META ")
-		return "CTRL ";
-#endif
-	return result;
-}
-
 namespace keys
 {
 SString toString(keycode_t key)
@@ -831,9 +819,9 @@ SString stringForFunc(const key_binding_t &bind)
 	return buffer;
 }
 
-const char * stringForBinding(const key_binding_t& bind, bool changing_key)
+SString stringForBinding(const key_binding_t& bind, bool changing_key)
 {
-	static char buffer[600];
+	char buffer[256];
 
 	// we prefer the UI to say "3D view" instead of "render"
 	const char *ctx_name = M_KeyContextString(bind.context);
@@ -849,12 +837,26 @@ const char * stringForBinding(const key_binding_t& bind, bool changing_key)
 		tempk = toupper(tempk & FL_KEY_MASK);
 	}
 
-	snprintf(buffer, sizeof(buffer), "%s%6.6s%-10.10s %-9.9s %.32s",
-			 bind.is_duplicate ? "@C1" : "",
-			 changing_key ? "<?"     : ModName_Space(tempk).c_str(),
-			 changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
-			 ctx_name,
-			 stringForFunc(bind).c_str() );
+	SString key_str = changing_key ? SString("<?>") : toString(tempk);
+
+	auto separateDigitFromColorMarker = [](bool enabled, const SString &str) -> SString
+	{
+		if (!enabled || str.empty())
+			return str;
+
+		if(isdigit(str[0]))
+			return " " + str;
+
+		return str;
+	};
+
+	snprintf(buffer, sizeof(buffer), "%s%s\t%s%s\t%s%s",
+		         bind.is_duplicate ? "@C1" : "",
+		         separateDigitFromColorMarker(bind.is_duplicate, key_str).c_str(),
+		         bind.is_duplicate ? "@C1" : "",
+		         separateDigitFromColorMarker(bind.is_duplicate, ctx_name).c_str(),
+		         bind.is_duplicate ? "@C1" : "",
+		         separateDigitFromColorMarker(bind.is_duplicate, stringForFunc(bind)).c_str());
 
 	return buffer;
 }

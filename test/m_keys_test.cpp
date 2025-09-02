@@ -22,34 +22,33 @@ struct KeyMapping
 {
 	keycode_t code;
 	const char *dashString;
-	const char *spaceString;
 };
 
 // NOTE: keep the old names in the dashed names for backward compatibility
 static const KeyMapping testKeyCombos[] =
 {
-	{EMOD_SHIFT | 'k', "K",                     "      K         "},
+	{EMOD_SHIFT | 'k', "K"},
 	{static_cast<keycode_t>(EMOD_COMMAND) | 'j',
 #ifdef __APPLE__
-		"CMD-j",                                "  CMD j         "
+	        "CMD-j"
 #else
-		"CTRL-j",                               " CTRL j         "
+	        "CTRL-j"
 #endif
 	},
 	{static_cast<keycode_t>(EMOD_META) | 'm',
 #ifdef __APPLE__
-		"META-m",                 " CTRL m         "
+	        "META-m"
 #else
-		"META-m",                 " META m         "
+	        "META-m"
 #endif
 	},
-	{EMOD_ALT | 'a', "ALT-a",                   "  ALT a         "},
-	{EMOD_ALT | (FL_Button + 3), "ALT-MOUSE3",  "  ALT MOUSE3    "},
-	{EMOD_ALT | FL_Volume_Down, "ALT-VOL_DOWN", "  ALT VOL_DOWN  "},
-	{EMOD_SHIFT | '5', "SHIFT-5",               "SHIFT 5         "},
-	{EMOD_SHIFT | '"', "SHIFT-DBLQUOTE",        "SHIFT DBLQUOTE  "},
-	{EMOD_SHIFT | (FL_F + 4), "SHIFT-F4",       "SHIFT F4        "},
-	{FL_SCROLL_LOCK | 's', "LAX-s",             "  LAX s         "},
+	{EMOD_ALT | 'a', "ALT-a"},
+	{EMOD_ALT | (FL_Button + 3), "ALT-MOUSE3"},
+	{EMOD_ALT | FL_Volume_Down, "ALT-VOL_DOWN"},
+	{EMOD_SHIFT | '5', "SHIFT-5"},
+	{EMOD_SHIFT | '"', "SHIFT-DBLQUOTE"},
+	{EMOD_SHIFT | (FL_F + 4), "SHIFT-F4"},
+	{FL_SCROLL_LOCK | 's', "LAX-s"},
 
 };
 
@@ -70,28 +69,28 @@ TEST(MKeys, StringForFunc)
 	editor_command_t command = {"CommandName"};
 	bind.cmd = &command;
 
-	
+
 	// No params
 	ASSERT_EQ(keys::stringForFunc(bind), "CommandName");
-	
+
 	bind.param[0] = "parm1";
-	
+
 	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1");
-	
+
 	bind.param[1] = "other";
-	
+
 	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 other");
-	
+
 	bind.param[2] = "thing";
-	
+
 	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 other thing");
-	
+
 	bind.param[1].clear();
-	
+
 	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1");
-	
+
 	bind.param[1] = "aaaaabbbbbcccccdddddeeeeefffffggggg";
-	
+
 	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 aaaaabbbbbcccccdddddeeeeefffff thing");
 }
 
@@ -100,15 +99,15 @@ TEST(MKeys, StringForBindingCheckModName)
 	key_binding_t bind = {};
 	editor_command_t command = {"CommandName"};
 	bind.cmd = &command;
-	
+
 	bind.context = KeyContext::browser;
-	
+
 	for(const KeyMapping &mapping : testKeyCombos)
 	{
 		bind.key = mapping.code;
-		const char *string = keys::stringForBinding(bind);
-		
-		SString expected = SString(mapping.spaceString) + " browser   CommandName";
+		SString string = keys::stringForBinding(bind);
+
+		SString expected = SString(mapping.dashString) + "\tbrowser\tCommandName";
 		ASSERT_EQ(expected, string);
 	}
 }
@@ -121,29 +120,29 @@ TEST(MKeys, ParseKeyString)
 	ASSERT_EQ(M_ParseKeyString("9"), static_cast<keycode_t>('9'));
 	ASSERT_EQ(M_ParseKeyString("!"), static_cast<keycode_t>('!'));
 	ASSERT_EQ(M_ParseKeyString(";"), static_cast<keycode_t>(';'));
-	
+
 	ASSERT_EQ(M_ParseKeyString("A"), static_cast<keycode_t>(EMOD_SHIFT | 'a'));
 	ASSERT_EQ(M_ParseKeyString("Z"), static_cast<keycode_t>(EMOD_SHIFT | 'z'));
-	
+
 	ASSERT_EQ(M_ParseKeyString("CMD-a"), static_cast<keycode_t>(EMOD_COMMAND | 'a'));
 	ASSERT_EQ(M_ParseKeyString("CTRL-b"), static_cast<keycode_t>(EMOD_COMMAND | 'b'));
 	ASSERT_EQ(M_ParseKeyString("META-c"), static_cast<keycode_t>(EMOD_META | 'c'));
 	ASSERT_EQ(M_ParseKeyString("ALT-d"), static_cast<keycode_t>(EMOD_ALT | 'd'));
 	ASSERT_EQ(M_ParseKeyString("SHIFT-e"), static_cast<keycode_t>(EMOD_SHIFT | 'e'));
 	ASSERT_EQ(M_ParseKeyString("LAX-f"), static_cast<keycode_t>(FL_SCROLL_LOCK | 'f'));
-	
+
 	ASSERT_EQ(M_ParseKeyString("cmd-a"), static_cast<keycode_t>(EMOD_COMMAND | 'a'));
 	ASSERT_EQ(M_ParseKeyString("Ctrl-B"), static_cast<keycode_t>(EMOD_COMMAND | EMOD_SHIFT | 'b'));
 	ASSERT_EQ(M_ParseKeyString("meta-C"), static_cast<keycode_t>(EMOD_META | EMOD_SHIFT | 'c'));
 	ASSERT_EQ(M_ParseKeyString("Alt-D"), static_cast<keycode_t>(EMOD_ALT | EMOD_SHIFT | 'd'));
 	ASSERT_EQ(M_ParseKeyString("shift-E"), static_cast<keycode_t>(EMOD_SHIFT | EMOD_SHIFT | 'e'));
 	ASSERT_EQ(M_ParseKeyString("lax-F"), static_cast<keycode_t>(FL_SCROLL_LOCK | EMOD_SHIFT | 'f'));
-	
+
 	ASSERT_EQ(M_ParseKeyString("CMD-ALT-g"), static_cast<keycode_t>(EMOD_COMMAND | EMOD_ALT | 'g'));
 	ASSERT_EQ(M_ParseKeyString("SHIFT-CTRL-h"), static_cast<keycode_t>(EMOD_SHIFT | EMOD_COMMAND | 'h'));
 	ASSERT_EQ(M_ParseKeyString("META-SHIFT-i"), static_cast<keycode_t>(EMOD_META | EMOD_SHIFT | 'i'));
 	ASSERT_EQ(M_ParseKeyString("ALT-SHIFT-LAX-j"), static_cast<keycode_t>(EMOD_ALT | EMOD_SHIFT | FL_SCROLL_LOCK | 'j'));
-	
+
 	ASSERT_EQ(M_ParseKeyString("F1"), static_cast<keycode_t>(FL_F + 1));
 	ASSERT_EQ(M_ParseKeyString("F12"), static_cast<keycode_t>(FL_F + 12));
 	ASSERT_EQ(M_ParseKeyString("f3"), static_cast<keycode_t>(FL_F + 3));
@@ -177,17 +176,17 @@ TEST(MKeys, ParseKeyString)
 	ASSERT_EQ(M_ParseKeyString("VOL_DOWN"), static_cast<keycode_t>(FL_Volume_Down));
 	ASSERT_EQ(M_ParseKeyString("WHEEL_UP"), static_cast<keycode_t>(0xEF91));
 	ASSERT_EQ(M_ParseKeyString("WHEEL_DOWN"), static_cast<keycode_t>(0xEF92));
-	
+
 	ASSERT_EQ(M_ParseKeyString("KP_5"), static_cast<keycode_t>(FL_KP + '5'));
 	ASSERT_EQ(M_ParseKeyString("kp_9"), static_cast<keycode_t>(FL_KP + '9'));
 	ASSERT_EQ(M_ParseKeyString("KP_Enter"), static_cast<keycode_t>(FL_KP_Enter));
-	
+
 	ASSERT_EQ(M_ParseKeyString("0x41"), static_cast<keycode_t>(0x41));
 	ASSERT_EQ(M_ParseKeyString("0xFF"), static_cast<keycode_t>(0xFF));
 	ASSERT_EQ(M_ParseKeyString("0x1234"), static_cast<keycode_t>(0x1234));
 	ASSERT_EQ(M_ParseKeyString("0x0"), static_cast<keycode_t>(0x0));
 	ASSERT_EQ(M_ParseKeyString("0xabcd"), static_cast<keycode_t>(0xabcd));
-	
+
 	ASSERT_EQ(M_ParseKeyString(""), 0);
 	ASSERT_EQ(M_ParseKeyString("invalid"), 0);
 	ASSERT_EQ(M_ParseKeyString("NONEXISTENT"), 0);
@@ -197,7 +196,7 @@ TEST(MKeys, ParseKeyString)
 	ASSERT_EQ(M_ParseKeyString("0x"), 0);
 	ASSERT_EQ(M_ParseKeyString("CMD-"), 0);
 	ASSERT_EQ(M_ParseKeyString("SHIFT-"), 0);
-	
+
 	ASSERT_EQ(M_ParseKeyString("~"), static_cast<keycode_t>('~'));
 	ASSERT_EQ(M_ParseKeyString("@"), static_cast<keycode_t>('@'));
 	ASSERT_EQ(M_ParseKeyString("#"), static_cast<keycode_t>('#'));
