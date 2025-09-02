@@ -941,11 +941,17 @@ void setUndoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb)
 	
 	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> undoDetailStorage;
 	
-	if(verb.good())
+	bool enable = verb.good();
+	if(enable)
 		undoDetailStorage[bar] = SString("&Undo ") + verb;
 	else
 		undoDetailStorage[bar] = "&Undo";
 	bar->replace(index, undoDetailStorage[bar].c_str());
+	int mode = bar->mode(index);
+	if(enable)
+		bar->mode(index, mode & ~FL_MENU_INACTIVE);
+	else
+		bar->mode(index, mode | FL_MENU_INACTIVE);
 }
 
 void setRedoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb)
@@ -958,11 +964,17 @@ void setRedoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb)
 	
 	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> redoDetailStorage;
 	
-	if(verb.good())
+	bool enable = verb.good();
+	if(enable)
 		redoDetailStorage[bar] = SString("&Redo ") + verb;
 	else
 		redoDetailStorage[bar] = "&Redo";
 	bar->replace(index, redoDetailStorage[bar].c_str());
+	int mode = bar->mode(index);
+	if(enable)
+		bar->mode(index, mode & ~FL_MENU_INACTIVE);
+	else
+		bar->mode(index, mode | FL_MENU_INACTIVE);
 }
 
 Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData)
@@ -992,6 +1004,8 @@ Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData)
 			items[i].user_data_ = userData;
 
 	bar->menu(items);
+	setUndoDetail(bar, "");
+	setRedoDetail(bar, "");
 
 	// for macOS, the preferences shall be in the app menu
 #ifdef __APPLE__
