@@ -219,27 +219,27 @@ keycode_t M_ParseKeyString(const SString &mstr)
 		key |= EMOD_COMMAND;
 		str.erase(0, 4);
 	}
-	else if (str.noCaseStartsWith("CTRL-"))
+	if (str.noCaseStartsWith("CTRL-"))
 	{
 		key |= EMOD_COMMAND;
 		str.erase(0, 5);
 	}
-	else if (str.noCaseStartsWith("META-"))
+	if (str.noCaseStartsWith("META-"))
 	{
 		key |= EMOD_META;
 		str.erase(0, 5);
 	}
-	else if (str.noCaseStartsWith("ALT-"))
+	if (str.noCaseStartsWith("ALT-"))
 	{
 		key |= EMOD_ALT;
 		str.erase(0, 4);
 	}
-	else if (str.noCaseStartsWith("SHIFT-"))
+	if (str.noCaseStartsWith("SHIFT-"))
 	{
 		key |= EMOD_SHIFT;
 		str.erase(0, 6);
 	}
-	else if (str.noCaseStartsWith("LAX-"))
+	if (str.noCaseStartsWith("LAX-"))
 	{
 		key |= MOD_LAX_SHIFTCTRL;
 		str.erase(0, 4);
@@ -247,7 +247,7 @@ keycode_t M_ParseKeyString(const SString &mstr)
 
 	// convert uppercase letter --> lowercase + EMOD_SHIFT
 	if (str.length() == 1 && str[0] >= 'A' && str[0] <= 'Z')
-		return EMOD_SHIFT | (unsigned char) tolower(str[0]);
+		return key | EMOD_SHIFT | (unsigned char) tolower(str[0]);
 
 	if (str.length() == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
 		return key | (unsigned char) str[0];
@@ -292,20 +292,21 @@ static SString BareKeyName(keycode_t key)
 }
 
 
-static const char *ModName_Dash(keycode_t mod)
+static SString ModName_Dash(keycode_t mod)
 {
+	SString result;
 #ifdef __APPLE__
-	if (mod & EMOD_COMMAND) return "CMD-";
+	if (mod & EMOD_COMMAND) result += "CMD-";
 #else
-	if (mod & EMOD_COMMAND) return "CTRL-";
+	if (mod & EMOD_COMMAND) result += "CTRL-";
 #endif
-	if (mod & EMOD_META)    return "META-";
-	if (mod & EMOD_ALT)     return "ALT-";
-	if (mod & EMOD_SHIFT)   return "SHIFT-";
+	if (mod & EMOD_META)    result += "META-";
+	if (mod & EMOD_ALT)     result += "ALT-";
+	if (mod & EMOD_SHIFT)   result += "SHIFT-";
 
-	if (mod & MOD_LAX_SHIFTCTRL) return "LAX-";
+	if (mod & MOD_LAX_SHIFTCTRL) result += "LAX-";
 
-	return "";
+	return result;
 }
 
 
@@ -333,7 +334,7 @@ SString toString(keycode_t key)
 		return SString::printf("%c", toupper(key & FL_KEY_MASK));
 	}
 
-	return SString::printf("%s%s", ModName_Dash(key),
+	return SString::printf("%s%s", ModName_Dash(key).c_str(),
 						   BareKeyName(key & FL_KEY_MASK).c_str());
 }
 }
@@ -996,12 +997,10 @@ keycode_t M_TranslateKey(int key, int state)
 	if (key == '\t') key = FL_Tab;
 	if (key == '\b') key = FL_BackSpace;
 
-	// modifier logic -- only allow a single one
-
-	     if (state & EMOD_COMMAND) key |= EMOD_COMMAND;
-	else if (state & EMOD_META)    key |= EMOD_META;
-	else if (state & EMOD_ALT)     key |= EMOD_ALT;
-	else if (state & EMOD_SHIFT)   key |= EMOD_SHIFT;
+	if (state & EMOD_COMMAND) key |= EMOD_COMMAND;
+	if (state & EMOD_META)    key |= EMOD_META;
+	if (state & EMOD_ALT)     key |= EMOD_ALT;
+	if (state & EMOD_SHIFT)   key |= EMOD_SHIFT;
 
 	return key;
 }
@@ -1011,9 +1010,9 @@ int M_KeyToShortcut(keycode_t key)
 {
 	int shortcut = key & FL_KEY_MASK;
 
-	     if (key & EMOD_COMMAND) shortcut |= EMOD_COMMAND;
-	else if (key & EMOD_ALT)     shortcut |= EMOD_ALT;
-	else if (key & EMOD_SHIFT)   shortcut |= EMOD_SHIFT;
+	if (key & EMOD_COMMAND) shortcut |= EMOD_COMMAND;
+	if (key & EMOD_ALT)     shortcut |= EMOD_ALT;
+	if (key & EMOD_SHIFT)   shortcut |= EMOD_SHIFT;
 
 	return shortcut;
 }
