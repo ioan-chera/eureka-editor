@@ -34,6 +34,7 @@
 #include "SideDef.h"
 #include "Thing.h"
 #include "Vertex.h"
+#include "ui_menu.h"
 
 // need these for the XXX_Notify() prototypes
 #include "r_render.h"
@@ -99,6 +100,8 @@ void Basis::begin()
 		BugError("Basis::begin called twice without Basis::end\n");
 	while(!mRedoFuture.empty())
 		mRedoFuture.pop();
+	if(inst.main_win)
+		menu::setRedoDetail(inst.main_win->menu_bar, "");
 	mCurrentGroup.activate();
 	doClearChangeStatus();
 }
@@ -531,6 +534,8 @@ void Basis::clear()
 		mUndoHistory.pop_back();
 	while(!mRedoFuture.empty())
 		mRedoFuture.pop();
+	if(inst.main_win)
+		menu::setRedoDetail(inst.main_win->menu_bar, "");
 
 	if(inst.main_win)
 	{
