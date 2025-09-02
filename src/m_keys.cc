@@ -819,9 +819,9 @@ SString stringForFunc(const key_binding_t &bind)
 	return buffer;
 }
 
-const char * stringForBinding(const key_binding_t& bind, bool changing_key)
+SString stringForBinding(const key_binding_t& bind, bool changing_key)
 {
-	static char buffer[600];
+	char buffer[256];
 
 	// we prefer the UI to say "3D view" instead of "render"
 	const char *ctx_name = M_KeyContextString(bind.context);

@@ -31,6 +31,7 @@
 #include "ui_prefs.h"
 
 #include <FL/Fl_Color_Chooser.H>
+#include <FL/fl_draw.H>
 
 
 #define PREF_WINDOW_W  600
@@ -593,6 +594,10 @@ private:
 	// normally zero (not waiting for a key)
 	int awaiting_line;
 
+	// dynamic column widths for key bindings browser
+	int key_col_widths[4];
+	static constexpr int default_key_col_widths[4] = {125, 75, 205, 0};
+
 	const opt_desc_t *const options;
 
 	static void  close_callback(Fl_Widget *w, void *data);
@@ -625,6 +630,7 @@ public:
 	void SetBinding(keycode_t key);
 
 	void EnsureKeyVisible(int line);
+	void AdjustKeyColumnWidths();
 
 public:
 	Fl_Tabs *tabs;
@@ -742,6 +748,9 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 	  key_sort_mode('k'), key_sort_rev(false),
 	  awaiting_line(0), options(options)
 {
+	// Initialize dynamic column widths with defaults
+	memcpy(key_col_widths, default_key_col_widths, sizeof(key_col_widths));
+
 	if (config::gui_color_set == 2)
 		color(fl_gray_ramp(4));
 	else
@@ -863,8 +872,7 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		}
 		{ key_list = new Fl_Hold_Browser(20, 115, 442, 308);
 		  key_list->has_scrollbar(Fl_Browser_::VERTICAL);
-		  static int widths[] = {125, 75, 205, 0};
-		  key_list->column_widths(widths);
+		  key_list->column_widths(key_col_widths);
 		  key_list->column_char('\t');
 		}
 		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
@@ -1174,10 +1182,9 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 
 	// show we're ready to accept a new key
 
-	const char *str = keys::stringForBinding(global::pref_binds[bind_idx], true /* changing_key */);
-	SYS_ASSERT(str);
+	SString str = keys::stringForBinding(global::pref_binds[bind_idx], true /* changing_key */);
 
-	prefs->key_list->text(line, str);
+	prefs->key_list->text(line, str.c_str());
 	prefs->key_list->selection_color(FL_YELLOW);
 
 	Fl::focus(prefs);
@@ -1697,14 +1704,16 @@ void UI_Preferences::LoadKeys()
 	M_SortBindings(key_sort_mode, key_sort_rev);
 	M_DetectConflictingBinds();
 
+	// Adjust column widths before populating the list
+	AdjustKeyColumnWidths();
+
 	key_list->clear();
 
 	for (int i = 0 ; i < M_NumBindings() ; i++)
 	{
-		const char *str = keys::stringForBinding(global::pref_binds[i]);
-		SYS_ASSERT(str);
+		SString str = keys::stringForBinding(global::pref_binds[i]);
 
-		key_list->add(str);
+		key_list->add(str.c_str());
 	}
 
 	key_list->select(1);
@@ -1715,11 +1724,14 @@ void UI_Preferences::ReloadKeys()
 {
 	M_DetectConflictingBinds();
 
+	// Adjust column widths before reloading
+	AdjustKeyColumnWidths();
+
 	for (int i = 0 ; i < M_NumBindings() ; i++)
 	{
-		const char *str = keys::stringForBinding(global::pref_binds[i]);
+		SString str = keys::stringForBinding(global::pref_binds[i]);
 
-		key_list->text(i + 1, str);
+		key_list->text(i + 1, str.c_str());
 	}
 }
 
@@ -1785,6 +1797,93 @@ int UI_Preferences::handle(int event)
 	}
 
 	return Fl_Double_Window::handle(event);
+}
+
+
+void UI_Preferences::AdjustKeyColumnWidths()
+{
+	// Calculate the maximum width needed for the first column (KEY)
+	int max_key_width = default_key_col_widths[0]; // Start with default minimum
+
+	// Use FLTK's text measuring capabilities
+	fl_font(FL_HELVETICA, FL_NORMAL_SIZE);
+
+	for (int i = 0; i < M_NumBindings(); i++)
+	{
+		SString str = keys::stringForBinding(global::pref_binds[i]);
+		// Extract just the key portion (first column) from the tab-separated string
+		size_t tab_pos = str.find('\t');
+		if (tab_pos != std::string::npos)
+		{
+			// Create a temporary string with just the key portion
+			size_t key_len = tab_pos;
+			SString key_str = str.substr(0, key_len);
+
+			// Strip any color codes (starting with @)
+			if(key_str.length() >= 3 && key_str[0] == '@' && key_str[1] == 'C' && isdigit(key_str[2]))
+			{
+				if(key_str.length() >= 4 && key_str[3] == ' ')
+					key_str = key_str.substr(4);
+				else
+					key_str = key_str.substr(3);
+			}
+
+			// Measure the text width and add some padding
+			int text_width = (int)round(fl_width(key_str.c_str())) + 10; // 10 pixels padding
+			if (text_width > max_key_width)
+				max_key_width = text_width;
+		}
+	}
+
+	// Only adjust if we need more width than default
+	if (max_key_width > default_key_col_widths[0])
+	{
+		// Calculate the difference
+		int width_diff = max_key_width - default_key_col_widths[0];
+
+		// Adjust the first column width
+		key_col_widths[0] = max_key_width;
+
+		// Reduce other columns proportionally to maintain total width
+		// Reduce MODE column by 1/3 of the difference, FUNCTION by 2/3
+		int mode_reduction = width_diff / 3;
+		int func_reduction = width_diff - mode_reduction;
+
+		key_col_widths[1] = default_key_col_widths[1] - mode_reduction;
+		key_col_widths[2] = default_key_col_widths[2] - func_reduction;
+
+		// Ensure minimum widths
+		if (key_col_widths[1] < 50)
+			key_col_widths[1] = 50;
+		if (key_col_widths[2] < 100)
+			key_col_widths[2] = 100;
+
+		// Update header button widths to match
+		key_key->size(key_col_widths[0], key_key->h());
+		key_group->size(key_col_widths[1], key_group->h());
+		key_group->position(key_key->x() + key_col_widths[0] + 5, key_group->y());
+		key_func->size(key_col_widths[2], key_func->h());
+		key_func->position(key_group->x() + key_col_widths[1] + 5, key_func->y());
+	}
+	else
+	{
+		// Restore default widths
+		for (int i = 0; i < 4; i++) {
+			key_col_widths[i] = default_key_col_widths[i];
+		}
+
+		// Restore default header button positions and sizes
+		key_key->size(default_key_col_widths[0], key_key->h());
+		key_key->position(25, key_key->y());
+		key_group->size(default_key_col_widths[1], key_group->h());
+		key_group->position(155, key_group->y());
+		key_func->size(default_key_col_widths[2], key_func->h());
+		key_func->position(235, key_func->y());
+	}
+
+	// Update the browser's column widths
+	key_list->column_widths(key_col_widths);
+	redraw();
 }
 
 
