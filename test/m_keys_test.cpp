@@ -50,6 +50,53 @@ static const KeyMapping testKeyCombos[] =
 	{EMOD_SHIFT | '"', "SHIFT-DBLQUOTE",        "SHIFT DBLQUOTE  "},
 	{EMOD_SHIFT | (FL_F + 4), "SHIFT-F4",       "SHIFT F4        "},
 	{FL_SCROLL_LOCK | 's', "LAX-s",             "  LAX s         "},
+	{static_cast<keycode_t>(EMOD_COMMAND | EMOD_ALT) | 'w',
+#ifdef __APPLE__
+		"CMD-ALT-w",                            "  CMD ALT w     "
+#else
+		"CTRL-ALT-w",             " CTRL ALT w     "
+#endif
+	},
+	{static_cast<keycode_t>(EMOD_COMMAND | EMOD_SHIFT) | 'x',
+#ifdef __APPLE__
+		"CMD-SHIFT-x",                  "  CMD SHIFT x         "
+#else
+		"CTRL-SHIFT-x",                 " CTRL SHIFT x         "
+#endif
+	},
+	{EMOD_ALT | EMOD_SHIFT | 'y', "ALT-SHIFT-y",       "  ALT SHIFT y         "},
+	{static_cast<keycode_t>(EMOD_META | EMOD_SHIFT | 'z'), "META-SHIFT-z",     " META SHIFT z         "},
+	{static_cast<keycode_t>(EMOD_COMMAND | EMOD_META) | 'n',
+#ifdef __APPLE__
+		"CMD-META-n",             "  CMD CTRL n   "
+#else
+		"CTRL-META-n",            " CTRL META n   "
+#endif
+	},
+	{static_cast<keycode_t>(EMOD_ALT | EMOD_META | 'o'), "META-ALT-o",   "  META ALT o    "},
+	{static_cast<keycode_t>(EMOD_COMMAND | EMOD_ALT | EMOD_SHIFT) | 'p',
+#ifdef __APPLE__
+		"CMD-ALT-SHIFT-p",              "  CMD ALT SHIFT p     "
+#else
+		"CTRL-ALT-SHIFT-p",             " CTRL ALT SHIFT p     "
+#endif
+	},
+	{EMOD_ALT | EMOD_SHIFT | FL_SCROLL_LOCK | 'q', "ALT-SHIFT-LAX-q", "  ALT SHIFT LAX q"},
+	{static_cast<keycode_t>(EMOD_COMMAND | EMOD_META | EMOD_ALT | EMOD_SHIFT) | 'r',
+#ifdef __APPLE__
+		"CMD-META-ALT-SHIFT-r",         "  CMD CTRL ALT SHIFT r"
+#else
+		"CTRL-META-ALT-SHIFT-r",        " CTRL META ALT SHIFT r"
+#endif
+	},
+	{FL_SCROLL_LOCK | EMOD_SHIFT | (FL_F + 1), "SHIFT-LAX-F1", "  SHIFT LAX F1  "},
+	{static_cast<keycode_t>(EMOD_COMMAND | FL_SCROLL_LOCK) | (FL_Button + 2),
+#ifdef __APPLE__
+		"CMD-LAX-MOUSE2",         "  CMD LAX MOUSE2"
+#else
+		"CTRL-LAX-MOUSE2",        " CTRL LAX MOUSE2"
+#endif
+	},
 
 };
 
@@ -134,6 +181,7 @@ TEST(MKeys, ParseKeyString)
 	
 	ASSERT_EQ(M_ParseKeyString("cmd-a"), static_cast<keycode_t>(EMOD_COMMAND | 'a'));
 	ASSERT_EQ(M_ParseKeyString("Ctrl-B"), static_cast<keycode_t>(EMOD_COMMAND | EMOD_SHIFT | 'b'));
+	ASSERT_EQ(M_ParseKeyString("Ctrl-Shift-b"), static_cast<keycode_t>(EMOD_COMMAND | EMOD_SHIFT | 'b'));
 	ASSERT_EQ(M_ParseKeyString("meta-C"), static_cast<keycode_t>(EMOD_META | EMOD_SHIFT | 'c'));
 	ASSERT_EQ(M_ParseKeyString("Alt-D"), static_cast<keycode_t>(EMOD_ALT | EMOD_SHIFT | 'd'));
 	ASSERT_EQ(M_ParseKeyString("shift-E"), static_cast<keycode_t>(EMOD_SHIFT | EMOD_SHIFT | 'e'));
