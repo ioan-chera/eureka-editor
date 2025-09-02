@@ -839,13 +839,24 @@ const char * stringForBinding(const key_binding_t& bind, bool changing_key)
 
 	SString key_str = changing_key ? SString("<?>") : toString(tempk);
 
+	auto separateDigitFromColorMarker = [](bool enabled, const SString &str) -> SString
+	{
+		if (!enabled || str.empty())
+			return str;
+
+		if(isdigit(str[0]))
+			return " " + str;
+
+		return str;
+	};
+
 	snprintf(buffer, sizeof(buffer), "%s%s\t%s%s\t%s%s",
 		         bind.is_duplicate ? "@C1" : "",
-		         key_str.c_str(),
+		         separateDigitFromColorMarker(bind.is_duplicate, key_str).c_str(),
 		         bind.is_duplicate ? "@C1" : "",
-		         ctx_name,
+		         separateDigitFromColorMarker(bind.is_duplicate, ctx_name).c_str(),
 		         bind.is_duplicate ? "@C1" : "",
-		         stringForFunc(bind).c_str() );
+		         separateDigitFromColorMarker(bind.is_duplicate, stringForFunc(bind)).c_str());
 
 	return buffer;
 }
