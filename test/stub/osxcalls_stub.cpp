@@ -27,7 +27,9 @@ enum class macOSDirType
 	libraryCache
 };
 
+#ifndef __APPLE__
 fs::path OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir)
 {
     return fs::path();
 }
+#endif
