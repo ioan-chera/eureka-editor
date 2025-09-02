@@ -839,10 +839,12 @@ const char * stringForBinding(const key_binding_t& bind, bool changing_key)
 
 	SString key_str = changing_key ? SString("<?>") : toString(tempk);
 
-	snprintf(buffer, sizeof(buffer), "%s%s\t%s\t%s",
+	snprintf(buffer, sizeof(buffer), "%s%s\t%s%s\t%s%s",
 		         bind.is_duplicate ? "@C1" : "",
 		         key_str.c_str(),
+		         bind.is_duplicate ? "@C1" : "",
 		         ctx_name,
+		         bind.is_duplicate ? "@C1" : "",
 		         stringForFunc(bind).c_str() );
 
 	return buffer;
