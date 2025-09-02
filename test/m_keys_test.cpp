@@ -147,14 +147,14 @@ TEST(MKeys, ParseKeyString)
 	ASSERT_EQ(M_ParseKeyString("F1"), static_cast<keycode_t>(FL_F + 1));
 	ASSERT_EQ(M_ParseKeyString("F12"), static_cast<keycode_t>(FL_F + 12));
 	ASSERT_EQ(M_ParseKeyString("f3"), static_cast<keycode_t>(FL_F + 3));
-	ASSERT_EQ(M_ParseKeyString("SHIFT-F5"), static_cast<keycode_t>(EMOD_SHIFT | FL_F + 5));
-	ASSERT_EQ(M_ParseKeyString("CMD-f10"), static_cast<keycode_t>(EMOD_COMMAND | FL_F + 10));
-	
+	ASSERT_EQ(M_ParseKeyString("SHIFT-F5"), static_cast<keycode_t>(EMOD_SHIFT | (FL_F + 5)));
+	ASSERT_EQ(M_ParseKeyString("CMD-f10"), static_cast<keycode_t>(EMOD_COMMAND | (FL_F + 10)));
+
 	ASSERT_EQ(M_ParseKeyString("MOUSE1"), static_cast<keycode_t>(FL_Button + 1));
 	ASSERT_EQ(M_ParseKeyString("MOUSE3"), static_cast<keycode_t>(FL_Button + 3));
 	ASSERT_EQ(M_ParseKeyString("mouse5"), static_cast<keycode_t>(FL_Button + 5));
-	ASSERT_EQ(M_ParseKeyString("ALT-MOUSE2"), static_cast<keycode_t>(EMOD_ALT | FL_Button + 2));
-	
+	ASSERT_EQ(M_ParseKeyString("ALT-MOUSE2"), static_cast<keycode_t>(EMOD_ALT | (FL_Button + 2)));
+
 	ASSERT_EQ(M_ParseKeyString("SPACE"), static_cast<keycode_t>(' '));
 	ASSERT_EQ(M_ParseKeyString("space"), static_cast<keycode_t>(' '));
 	ASSERT_EQ(M_ParseKeyString("SPC"), static_cast<keycode_t>(' '));
