@@ -861,10 +861,12 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		  key_func->align(Fl_Align(FL_ALIGN_INSIDE));
 		  key_func->callback((Fl_Callback*)sort_key_callback, this);
 		}
-		{ key_list = new Fl_Hold_Browser(20, 115, 442, 308);
-		  key_list->textfont(FL_COURIER);
-		  key_list->has_scrollbar(Fl_Browser_::VERTICAL);
-		}
+                { key_list = new Fl_Hold_Browser(20, 115, 442, 308);
+                  key_list->has_scrollbar(Fl_Browser_::VERTICAL);
+                  static int widths[] = {125, 75, 205, 0};
+                  key_list->column_widths(widths);
+                  key_list->column_char('\t');
+                }
 		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
 		  key_add->callback((Fl_Callback*)edit_key_callback, this);
 		}

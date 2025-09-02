@@ -20,36 +20,35 @@
 
 struct KeyMapping
 {
-	keycode_t code;
-	const char *dashString;
-	const char *spaceString;
+        keycode_t code;
+        const char *dashString;
 };
 
 // NOTE: keep the old names in the dashed names for backward compatibility
 static const KeyMapping testKeyCombos[] =
 {
-	{EMOD_SHIFT | 'k', "K",                     "      K         "},
-	{static_cast<keycode_t>(EMOD_COMMAND) | 'j',
+        {EMOD_SHIFT | 'k', "K"},
+        {static_cast<keycode_t>(EMOD_COMMAND) | 'j',
 #ifdef __APPLE__
-		"CMD-j",                                "  CMD j         "
+                "CMD-j"
 #else
-		"CTRL-j",                               " CTRL j         "
+                "CTRL-j"
 #endif
-	},
-	{static_cast<keycode_t>(EMOD_META) | 'm',
+        },
+        {static_cast<keycode_t>(EMOD_META) | 'm',
 #ifdef __APPLE__
-		"META-m",                 " CTRL m         "
+                "META-m"
 #else
-		"META-m",                 " META m         "
+                "META-m"
 #endif
-	},
-	{EMOD_ALT | 'a', "ALT-a",                   "  ALT a         "},
-	{EMOD_ALT | (FL_Button + 3), "ALT-MOUSE3",  "  ALT MOUSE3    "},
-	{EMOD_ALT | FL_Volume_Down, "ALT-VOL_DOWN", "  ALT VOL_DOWN  "},
-	{EMOD_SHIFT | '5', "SHIFT-5",               "SHIFT 5         "},
-	{EMOD_SHIFT | '"', "SHIFT-DBLQUOTE",        "SHIFT DBLQUOTE  "},
-	{EMOD_SHIFT | (FL_F + 4), "SHIFT-F4",       "SHIFT F4        "},
-	{FL_SCROLL_LOCK | 's', "LAX-s",             "  LAX s         "},
+        },
+        {EMOD_ALT | 'a', "ALT-a"},
+        {EMOD_ALT | (FL_Button + 3), "ALT-MOUSE3"},
+        {EMOD_ALT | FL_Volume_Down, "ALT-VOL_DOWN"},
+        {EMOD_SHIFT | '5', "SHIFT-5"},
+        {EMOD_SHIFT | '"', "SHIFT-DBLQUOTE"},
+        {EMOD_SHIFT | (FL_F + 4), "SHIFT-F4"},
+        {FL_SCROLL_LOCK | 's', "LAX-s"},
 
 };
 
@@ -108,9 +107,9 @@ TEST(MKeys, StringForBindingCheckModName)
 		bind.key = mapping.code;
 		const char *string = keys::stringForBinding(bind);
 		
-		SString expected = SString(mapping.spaceString) + " browser   CommandName";
-		ASSERT_EQ(expected, string);
-	}
+                SString expected = SString(mapping.dashString) + "\tbrowser\tCommandName";
+                ASSERT_EQ(expected, string);
+        }
 }
 
 TEST(MKeys, ParseKeyString)
