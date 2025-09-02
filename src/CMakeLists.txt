@@ -145,6 +145,8 @@ set(source_ui
     ui_pic.h
     ui_prefs.cc
     ui_prefs.h
+    ui_table_browser.cc
+    ui_table_browser.h
     ui_replace.cc
     ui_replace.h
     ui_scroll.cc

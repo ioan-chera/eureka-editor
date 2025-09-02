@@ -29,6 +29,7 @@
 
 #include "ui_window.h"
 #include "ui_prefs.h"
+#include "ui_table_browser.h"
 
 #include <FL/Fl_Color_Chooser.H>
 #include <FL/fl_draw.H>
@@ -603,7 +604,7 @@ private:
 	static void  close_callback(Fl_Widget *w, void *data);
 	static void  color_callback(Fl_Button *w, void *data);
 
-	static void sort_key_callback(Fl_Button *w, void *data);
+	static void sort_key_callback(Fl_Widget *w, void *data);
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
@@ -658,11 +659,7 @@ public:
 
 	/* Keys Tab */
 
-	Fl_Hold_Browser *key_list;
-
-	Fl_Button *key_group;
-	Fl_Button *key_key;
-	Fl_Button *key_func;
+	UI_TableBrowser *key_list;
 
 	Fl_Button *key_add;
 	Fl_Button *key_copy;
@@ -855,25 +852,17 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_key = new Fl_Button(25, 87, 125, 25, "KEY");
-		  key_key->color((Fl_Color)231);
-		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_key->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_group = new Fl_Button(155, 87, 75, 25, "MODE");
-		  key_group->color((Fl_Color)231);
-		  key_group->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_group->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_func = new Fl_Button(235, 87, 205, 25, "FUNCTION");
-		  key_func->color((Fl_Color)231);
-		  key_func->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_func->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_list = new Fl_Hold_Browser(20, 115, 442, 308);
-		  key_list->has_scrollbar(Fl_Browser_::VERTICAL);
+		{ key_list = new UI_TableBrowser(20, 87, 442, 336);
 		  key_list->column_widths(key_col_widths);
 		  key_list->column_char('\t');
+		  
+		  // Set column headers
+		  std::vector<std::string> headers = {"KEY", "MODE", "FUNCTION"};
+		  key_list->SetColumnHeaders(headers);
+		  
+		  // Set callbacks
+		  key_list->SetSortCallback((void (*)(Fl_Widget*, void*))sort_key_callback, this);
+		  key_list->SetRebindCallback((void (*)(Fl_Widget*, void*))bind_key_callback, this);
 		}
 		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
 		  key_add->callback((Fl_Callback*)edit_key_callback, this);
@@ -1193,40 +1182,25 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
+void UI_Preferences::sort_key_callback(Fl_Widget *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
+	UI_TableBrowser *table = (UI_TableBrowser *)w;
 
-	if (w == prefs->key_group)
+	int col = table->GetSortColumn();
+	bool ascending = table->GetSortAscending();
+	
+	// Map column index to sort mode
+	char new_sort_mode = 'k';
+	switch (col)
 	{
-		if (prefs->key_sort_mode != 'c')
-		{
-			prefs->key_sort_mode  = 'c';
-			prefs->key_sort_rev = false;
-		}
-		else
-			prefs->key_sort_rev = !prefs->key_sort_rev;
+		case 0: new_sort_mode = 'k'; break;  // KEY column
+		case 1: new_sort_mode = 'c'; break;  // MODE column  
+		case 2: new_sort_mode = 'f'; break;  // FUNCTION column
 	}
-	else if (w == prefs->key_key)
-	{
-		if (prefs->key_sort_mode != 'k')
-		{
-			prefs->key_sort_mode  = 'k';
-			prefs->key_sort_rev = false;
-		}
-		else
-			prefs->key_sort_rev = !prefs->key_sort_rev;
-	}
-	else if (w == prefs->key_func)
-	{
-		if (prefs->key_sort_mode != 'f')
-		{
-			prefs->key_sort_mode  = 'f';
-			prefs->key_sort_rev = false;
-		}
-		else
-			prefs->key_sort_rev = !prefs->key_sort_rev;
-	}
+	
+	prefs->key_sort_mode = new_sort_mode;
+	prefs->key_sort_rev = !ascending;
 
 	prefs->LoadKeys();
 }
@@ -1719,7 +1693,6 @@ void UI_Preferences::LoadKeys()
 	key_list->select(1);
 }
 
-
 void UI_Preferences::ReloadKeys()
 {
 	M_DetectConflictingBinds();
@@ -1738,10 +1711,7 @@ void UI_Preferences::ReloadKeys()
 
 void UI_Preferences::EnsureKeyVisible(int line)
 {
-	if (! key_list->displayed(line))
-	{
-		key_list->middleline(line);
-	}
+	key_list->EnsureVisible(line);
 }
 
 
@@ -1858,12 +1828,6 @@ void UI_Preferences::AdjustKeyColumnWidths()
 		if (key_col_widths[2] < 100)
 			key_col_widths[2] = 100;
 
-		// Update header button widths to match
-		key_key->size(key_col_widths[0], key_key->h());
-		key_group->size(key_col_widths[1], key_group->h());
-		key_group->position(key_key->x() + key_col_widths[0] + 5, key_group->y());
-		key_func->size(key_col_widths[2], key_func->h());
-		key_func->position(key_group->x() + key_col_widths[1] + 5, key_func->y());
 	}
 	else
 	{
@@ -1871,14 +1835,6 @@ void UI_Preferences::AdjustKeyColumnWidths()
 		for (int i = 0; i < 4; i++) {
 			key_col_widths[i] = default_key_col_widths[i];
 		}
-
-		// Restore default header button positions and sizes
-		key_key->size(default_key_col_widths[0], key_key->h());
-		key_key->position(25, key_key->y());
-		key_group->size(default_key_col_widths[1], key_group->h());
-		key_group->position(155, key_group->y());
-		key_func->size(default_key_col_widths[2], key_func->h());
-		key_func->position(235, key_func->y());
 	}
 
 	// Update the browser's column widths

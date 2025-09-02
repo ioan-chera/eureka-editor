@@ -54,6 +54,7 @@
 #include <FL/Fl_Scrollbar.H>
 #include <FL/Fl_Slider.H>
 #include <FL/Fl_Sys_Menu_Bar.H>
+#include <FL/Fl_Table.H>
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Text_Buffer.H>
 #include <FL/Fl_Text_Editor.H>
