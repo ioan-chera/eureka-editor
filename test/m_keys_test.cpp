@@ -191,14 +191,13 @@ TEST(MKeys, ParseKeyString)
 	ASSERT_EQ(M_ParseKeyString(""), 0);
 	ASSERT_EQ(M_ParseKeyString("invalid"), 0);
 	ASSERT_EQ(M_ParseKeyString("NONEXISTENT"), 0);
-	ASSERT_EQ(M_ParseKeyString("F"), 0);
+	ASSERT_EQ(M_ParseKeyString("F"), static_cast<keycode_t>(EMOD_SHIFT | 'f'));
 	ASSERT_EQ(M_ParseKeyString("MOUSE"), 0);
 	ASSERT_EQ(M_ParseKeyString("KP_"), 0);
 	ASSERT_EQ(M_ParseKeyString("0x"), 0);
 	ASSERT_EQ(M_ParseKeyString("CMD-"), 0);
 	ASSERT_EQ(M_ParseKeyString("SHIFT-"), 0);
 	
-	ASSERT_EQ(M_ParseKeyString(" "), static_cast<keycode_t>(' '));
 	ASSERT_EQ(M_ParseKeyString("~"), static_cast<keycode_t>('~'));
 	ASSERT_EQ(M_ParseKeyString("@"), static_cast<keycode_t>('@'));
 	ASSERT_EQ(M_ParseKeyString("#"), static_cast<keycode_t>('#'));
@@ -210,6 +209,8 @@ TEST(MKeys, ParseKeyString)
 	ASSERT_EQ(M_ParseKeyString("("), static_cast<keycode_t>('('));
 	ASSERT_EQ(M_ParseKeyString(")"), static_cast<keycode_t>(')'));
 	ASSERT_EQ(M_ParseKeyString("-"), static_cast<keycode_t>('-'));
+	ASSERT_EQ(M_ParseKeyString("CMD--"), static_cast<keycode_t>(EMOD_COMMAND | '-'));
+	ASSERT_EQ(M_ParseKeyString("ALT-SHIFT-META-CMD--"), static_cast<keycode_t>(EMOD_COMMAND | EMOD_ALT | EMOD_META | EMOD_SHIFT | '-'));
 	ASSERT_EQ(M_ParseKeyString("_"), static_cast<keycode_t>('_'));
 	ASSERT_EQ(M_ParseKeyString("="), static_cast<keycode_t>('='));
 	ASSERT_EQ(M_ParseKeyString("+"), static_cast<keycode_t>('+'));

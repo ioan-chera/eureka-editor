@@ -213,37 +213,41 @@ keycode_t M_ParseKeyString(const SString &mstr)
 	// for EMOD_COMMAND, accept both CMD and CTRL prefixes
 
 	SString str = mstr;
-
-	if (str.noCaseStartsWith("CMD-"))
+	SString before;
+	do
 	{
-		key |= EMOD_COMMAND;
-		str.erase(0, 4);
-	}
-	if (str.noCaseStartsWith("CTRL-"))
-	{
-		key |= EMOD_COMMAND;
-		str.erase(0, 5);
-	}
-	if (str.noCaseStartsWith("META-"))
-	{
-		key |= EMOD_META;
-		str.erase(0, 5);
-	}
-	if (str.noCaseStartsWith("ALT-"))
-	{
-		key |= EMOD_ALT;
-		str.erase(0, 4);
-	}
-	if (str.noCaseStartsWith("SHIFT-"))
-	{
-		key |= EMOD_SHIFT;
-		str.erase(0, 6);
-	}
-	if (str.noCaseStartsWith("LAX-"))
-	{
-		key |= MOD_LAX_SHIFTCTRL;
-		str.erase(0, 4);
-	}
+		before = str;
+		if (str.noCaseStartsWith("CMD-"))
+		{
+			key |= EMOD_COMMAND;
+			str.erase(0, 4);
+		}
+		if (str.noCaseStartsWith("CTRL-"))
+		{
+			key |= EMOD_COMMAND;
+			str.erase(0, 5);
+		}
+		if (str.noCaseStartsWith("META-"))
+		{
+			key |= EMOD_META;
+			str.erase(0, 5);
+		}
+		if (str.noCaseStartsWith("ALT-"))
+		{
+			key |= EMOD_ALT;
+			str.erase(0, 4);
+		}
+		if (str.noCaseStartsWith("SHIFT-"))
+		{
+			key |= EMOD_SHIFT;
+			str.erase(0, 6);
+		}
+		if (str.noCaseStartsWith("LAX-"))
+		{
+			key |= MOD_LAX_SHIFTCTRL;
+			str.erase(0, 4);
+		}
+	} while (str != before);
 
 	// convert uppercase letter --> lowercase + EMOD_SHIFT
 	if (str.length() == 1 && str[0] >= 'A' && str[0] <= 'Z')
