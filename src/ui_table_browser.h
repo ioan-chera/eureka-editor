@@ -39,30 +39,30 @@ private:
 	std::vector<std::string> data_rows;
 	std::vector<std::string> column_headers;
 	std::vector<int> default_col_widths;
-	
+
 	int selected_row = 0;
 	int sort_column = 0;
 	bool sort_ascending = true;
-		
+
 	// Callback for header clicks (sorting)
 	void (*sort_callback)(Fl_Widget *w, void *data) = nullptr;
 	void *sort_callback_data = nullptr;
-	
+
 	// Callback for double-click on first column
 	void (*rebind_callback)(Fl_Widget *w, void *data) = nullptr;
 	void *rebind_callback_data = nullptr;
-	
+
 	// Callback for selection change
 	void (*selection_callback)(Fl_Widget *w, void *data) = nullptr;
 	void *selection_callback_data = nullptr;
-	
+
 protected:
 	void draw_cell(TableContext context, int R, int C, int X, int Y, int W, int H) override;
 	int handle(int event) override;
-	
+
 public:
 	UI_TableBrowser(int X, int Y, int W, int H, const char *label);
-	
+
 	// Interface compatible with Fl_Hold_Browser
 	void clear() override;
 	void add(const char *text);
@@ -72,27 +72,33 @@ public:
 	{
 		return (int)data_rows.size();
 	}
-	
+
 	// Selection methods
 	int value() const { return selected_row; }
 	void select(int line);
 	bool selected(int line) const { return line == selected_row; }
 	const char *text(int line) const;
-	
+
 	// Column management
 	void column_widths(const int *widths);
 	void SetColumnHeaders(const std::vector<std::string> &headers);
-	
+
 	// Callback methods
 	void SetSortCallback(void (*cb)(Fl_Widget *w, void *data), void *data);
 	void SetRebindCallback(void (*cb)(Fl_Widget *w, void *data), void *data);
 	void SetSelectionCallback(void (*cb)(Fl_Widget *w, void *data), void *data);
-	
+
 	// Utility methods
 	void EnsureVisible(int line);
 	void AutoFitColumn(int col);
-	int GetSortColumn() const { return sort_column; }
-	bool GetSortAscending() const { return sort_ascending; }
+	int GetSortColumn() const
+	{
+		return sort_column;
+	}
+	bool GetSortAscending() const
+	{
+		return sort_ascending;
+	}
 };
 
 #endif  /* __EUREKA_UI_TABLE_BROWSER_H__ */

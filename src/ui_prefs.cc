@@ -605,7 +605,7 @@ private:
 	static void  color_callback(Fl_Button *w, void *data);
 
 	static void sort_key_callback(Fl_Widget *w, void *data);
-	static void bind_key_callback(Fl_Button *w, void *data);
+	static void bind_key_callback(Fl_Widget *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
 
@@ -854,14 +854,14 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 
 		{ key_list = new UI_TableBrowser(20, 87, 442, 336, nullptr);
 			key_list->column_widths(key_col_widths);
-			
+
 			// Set column headers
 			std::vector<std::string> headers = {"KEY", "MODE", "FUNCTION"};
 			key_list->SetColumnHeaders(headers);
-			
+
 			// Set callbacks
-			key_list->SetSortCallback((void (*)(Fl_Widget*, void*))sort_key_callback, this);
-			key_list->SetRebindCallback((void (*)(Fl_Widget*, void*))bind_key_callback, this);
+			key_list->SetSortCallback(sort_key_callback, this);
+			key_list->SetRebindCallback(bind_key_callback, this);
 			key_list->end();
 		}
 		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
@@ -878,7 +878,7 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		  key_delete->shortcut(FL_Delete);
 		}
 		{ key_rebind = new Fl_Button(480, 370, 85, 30, "&Re-bind");
-		  key_rebind->callback((Fl_Callback*)bind_key_callback, this);
+		  key_rebind->callback(bind_key_callback, this);
 		  // key_rebind->shortcut(FL_Enter);
 		}
 		o->end();
@@ -1153,7 +1153,7 @@ void UI_Preferences::color_callback(Fl_Button *w, void *data)
 }
 
 
-void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
+void UI_Preferences::bind_key_callback(Fl_Widget *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
@@ -1184,21 +1184,27 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 
 void UI_Preferences::sort_key_callback(Fl_Widget *w, void *data)
 {
-	UI_Preferences *prefs = (UI_Preferences *)data;
-	UI_TableBrowser *table = (UI_TableBrowser *)w;
+	auto prefs = static_cast<UI_Preferences *>(data);
+	auto table = static_cast<UI_TableBrowser *>(w);
 
 	int col = table->GetSortColumn();
 	bool ascending = table->GetSortAscending();
-	
+
 	// Map column index to sort mode
 	char new_sort_mode = 'k';
 	switch (col)
 	{
-		case 0: new_sort_mode = 'k'; break;  // KEY column
-		case 1: new_sort_mode = 'c'; break;  // MODE column  
-		case 2: new_sort_mode = 'f'; break;  // FUNCTION column
+		case 0:
+			new_sort_mode = 'k';
+			break;  // KEY column
+		case 1:
+			new_sort_mode = 'c';
+			break;  // MODE column
+		case 2:
+			new_sort_mode = 'f';
+			break;  // FUNCTION column
 	}
-	
+
 	prefs->key_sort_mode = new_sort_mode;
 	prefs->key_sort_rev = !ascending;
 
