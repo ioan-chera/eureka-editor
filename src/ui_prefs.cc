@@ -852,9 +852,8 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_list = new UI_TableBrowser(20, 87, 442, 336);
+		{ key_list = new UI_TableBrowser(20, 87, 442, 336, nullptr);
 		  key_list->column_widths(key_col_widths);
-		  key_list->column_char('\t');
 		  
 		  // Set column headers
 		  std::vector<std::string> headers = {"KEY", "MODE", "FUNCTION"};

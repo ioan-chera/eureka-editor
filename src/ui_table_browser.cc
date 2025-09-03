@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2025 Andrew Apted
+//  Copyright (C) 2025 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -30,18 +30,10 @@
 #include <algorithm>
 #include <sstream>
 
+static const char column_separator = '\t';
+
 UI_TableBrowser::UI_TableBrowser(int X, int Y, int W, int H, const char *label) :
-	Fl_Table(X, Y, W, H, label),
-	selected_row(0),
-	sort_column(0),
-	sort_ascending(true),
-	column_separator('\t'),
-	sort_callback(nullptr),
-	sort_callback_data(nullptr),
-	rebind_callback(nullptr),
-	rebind_callback_data(nullptr),
-	selection_callback(nullptr),
-	selection_callback_data(nullptr)
+	Fl_Table(X, Y, W, H, label)
 {
 	// Enable column headers and resizing
 	col_header(1);
@@ -61,10 +53,6 @@ UI_TableBrowser::UI_TableBrowser(int X, int Y, int W, int H, const char *label) 
 	column_widths(default_col_widths.data());
 }
 
-UI_TableBrowser::~UI_TableBrowser()
-{
-}
-
 void UI_TableBrowser::clear()
 {
 	data_rows.clear();
@@ -75,7 +63,8 @@ void UI_TableBrowser::clear()
 
 void UI_TableBrowser::add(const char *text)
 {
-	if (!text) return;
+	if (!text)
+		return;
 	
 	data_rows.push_back(std::string(text));
 	rows((int)data_rows.size());
@@ -174,13 +163,12 @@ void UI_TableBrowser::SetSelectionCallback(void (*cb)(Fl_Widget *w, void *data),
 	selection_callback_data = data;
 }
 
-void UI_TableBrowser::ParseRowData(const std::string &row_text, std::vector<std::string> &columns)
-{
-	columns.clear();
-	
+static std::vector<std::string> ParseRowData(const std::string &row_text)
+{	
 	if (row_text.empty())
-		return;
+		return {};
 		
+	std::vector<std::string> columns;
 	std::string current_col;
 	bool in_color_code = false;
 	
@@ -216,18 +204,20 @@ void UI_TableBrowser::ParseRowData(const std::string &row_text, std::vector<std:
 	// Add the last column
 	if (!current_col.empty() || !columns.empty())
 		columns.push_back(current_col);
+
+	return columns;
 }
 
-void UI_TableBrowser::DrawCellText(const std::string &text, int X, int Y, int W, int H, bool selected, bool header)
+void UI_TableBrowser::DrawCellText(const std::string &text, int X, int Y, int W, int H, unsigned flags) const
 {
 	// Set colors
-	if (header)
+	if (flags & DCT_HEADER)
 	{
 		fl_color(FL_GRAY);
 		fl_rectf(X, Y, W, H);
 		fl_color(FL_BLACK);
 	}
-	else if (selected)
+	else if (flags & DCT_SELECTED)
 	{
 		fl_color(selection_color());
 		fl_rectf(X, Y, W, H);
@@ -249,7 +239,7 @@ void UI_TableBrowser::DrawCellText(const std::string &text, int X, int Y, int W,
 	
 	// Handle color codes in text
 	std::string display_text = text;
-	Fl_Color text_color = selected ? FL_WHITE : FL_BLACK;
+	Fl_Color text_color = flags & DCT_SELECTED ? FL_WHITE : FL_BLACK;
 	
 	// Simple color code parsing - strip @C codes but use the color
 	if (text.length() >= 3 && text[0] == '@' && text[1] == 'C' && isdigit(text[2]))
@@ -257,10 +247,18 @@ void UI_TableBrowser::DrawCellText(const std::string &text, int X, int Y, int W,
 		int color_index = text[2] - '0';
 		switch (color_index)
 		{
-			case 1: text_color = selected ? FL_WHITE : FL_RED; break;
-			case 2: text_color = selected ? FL_WHITE : FL_DARK_GREEN; break;
-			case 3: text_color = selected ? FL_WHITE : FL_BLUE; break;
-			default: text_color = selected ? FL_WHITE : FL_BLACK; break;
+			case 1:
+				text_color = flags & DCT_SELECTED ? FL_CYAN : FL_RED;
+				break;
+			case 2:
+				text_color = flags & DCT_SELECTED ? FL_MAGENTA : FL_DARK_GREEN;
+				break;
+			case 3:
+				text_color = flags & DCT_SELECTED ? FL_YELLOW : FL_BLUE;
+				break;
+			default:
+				text_color = flags & DCT_SELECTED ? FL_WHITE : FL_BLACK;
+				break;
 		}
 		
 		size_t space_pos = text.find(' ', 3);
@@ -270,10 +268,10 @@ void UI_TableBrowser::DrawCellText(const std::string &text, int X, int Y, int W,
 			display_text = text.substr(3);
 	}
 	
-	fl_color(header ? FL_BLACK : text_color);
+	fl_color(flags & DCT_HEADER ? FL_BLACK : text_color);
 	
 	// Set font
-	if (header)
+	if (flags & DCT_HEADER)
 		fl_font(FL_HELVETICA_BOLD, FL_NORMAL_SIZE);
 	else
 		fl_font(FL_HELVETICA, FL_NORMAL_SIZE);
@@ -293,34 +291,23 @@ void UI_TableBrowser::draw_cell(TableContext context, int R, int C, int X, int Y
 			break;
 			
 		case CONTEXT_COL_HEADER:
-		{
 			if (C < (int)column_headers.size())
-			{
-				DrawCellText(column_headers[C], X, Y, W, H, false, true);
-			}
+				DrawCellText(column_headers[C], X, Y, W, H, DCT_HEADER);
 			break;
-		}
 		
 		case CONTEXT_CELL:
-		{
 			if (R >= 0 && R < (int)data_rows.size())
 			{
-				std::vector<std::string> columns;
-				ParseRowData(data_rows[R], columns);
+				std::vector<std::string> columns = ParseRowData(data_rows[R]);
 				
 				bool is_selected = (R + 1 == selected_row);
 				
 				if (C < (int)columns.size())
-				{
-					DrawCellText(columns[C], X, Y, W, H, is_selected, false);
-				}
+					DrawCellText(columns[C], X, Y, W, H, is_selected ? DCT_SELECTED : 0);
 				else
-				{
-					DrawCellText("", X, Y, W, H, is_selected, false);
-				}
+					DrawCellText("", X, Y, W, H, is_selected ? DCT_SELECTED : 0);
 			}
 			break;
-		}
 		
 		case CONTEXT_TABLE:
 			fl_color(FL_WHITE);
@@ -339,7 +326,6 @@ int UI_TableBrowser::handle(int event)
 	switch (event)
 	{
 		case FL_PUSH:
-		{
 			if (Fl::event_clicks() == 1) // Double-click
 			{
 				TableContext context = callback_context();
@@ -356,8 +342,11 @@ int UI_TableBrowser::handle(int event)
 				else if (context == CONTEXT_COL_HEADER)
 				{
 					// Double-click on header - auto-fit column
-					AutoFitColumn(C);
-					return 1;
+
+					// FIXME: this isn't useful, as it is triggered after sorting due to first click.
+
+					// AutoFitColumn(C);
+					// return 1;
 				}
 			}
 			else if (Fl::event_clicks() == 0) // Single click
@@ -387,7 +376,6 @@ int UI_TableBrowser::handle(int event)
 				}
 			}
 			break;
-		}
 		
 		case FL_KEYDOWN:
 		{
@@ -453,8 +441,7 @@ void UI_TableBrowser::AutoFitColumn(int col)
 	// Check data widths
 	for (const std::string &row_text : data_rows)
 	{
-		std::vector<std::string> columns;
-		ParseRowData(row_text, columns);
+		std::vector<std::string> columns = ParseRowData(row_text);
 		
 		if (col < (int)columns.size())
 		{

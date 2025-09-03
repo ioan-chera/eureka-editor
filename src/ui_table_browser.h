@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2025 Andrew Apted
+//  Copyright (C) 2025 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -28,45 +28,50 @@
 class UI_TableBrowser : public Fl_Table
 {
 private:
+	enum
+	{
+		DCT_SELECTED = 1,
+		DCT_HEADER = 2,
+	};
+
+	void DrawCellText(const std::string &text, int X, int Y, int W, int H, unsigned flags) const;
+
 	std::vector<std::string> data_rows;
 	std::vector<std::string> column_headers;
 	std::vector<int> default_col_widths;
 	
-	int selected_row;
-	int sort_column;
-	bool sort_ascending;
-	
-	char column_separator;
-	
+	int selected_row = 0;
+	int sort_column = 0;
+	bool sort_ascending = true;
+		
 	// Callback for header clicks (sorting)
-	void (*sort_callback)(Fl_Widget *w, void *data);
-	void *sort_callback_data;
+	void (*sort_callback)(Fl_Widget *w, void *data) = nullptr;
+	void *sort_callback_data = nullptr;
 	
 	// Callback for double-click on first column
-	void (*rebind_callback)(Fl_Widget *w, void *data);
-	void *rebind_callback_data;
+	void (*rebind_callback)(Fl_Widget *w, void *data) = nullptr;
+	void *rebind_callback_data = nullptr;
 	
 	// Callback for selection change
-	void (*selection_callback)(Fl_Widget *w, void *data);
-	void *selection_callback_data;
+	void (*selection_callback)(Fl_Widget *w, void *data) = nullptr;
+	void *selection_callback_data = nullptr;
 	
 protected:
-	void draw_cell(TableContext context, int R, int C, int X, int Y, int W, int H) FL_OVERRIDE;
-	int handle(int event) FL_OVERRIDE;
-	
-	void ParseRowData(const std::string &row_text, std::vector<std::string> &columns);
-	void DrawCellText(const std::string &text, int X, int Y, int W, int H, bool selected = false, bool header = false);
+	void draw_cell(TableContext context, int R, int C, int X, int Y, int W, int H) override;
+	int handle(int event) override;
 	
 public:
-	UI_TableBrowser(int X, int Y, int W, int H, const char *label = 0);
-	virtual ~UI_TableBrowser();
+	UI_TableBrowser(int X, int Y, int W, int H, const char *label);
 	
 	// Interface compatible with Fl_Hold_Browser
 	void clear() override;
 	void add(const char *text);
 	void text(int line, const char *new_text);
 	void remove(int line);
-	int size() const { return (int)data_rows.size(); }
+	int size() const
+	{
+		return (int)data_rows.size();
+	}
 	
 	// Selection methods
 	int value() const { return selected_row; }
@@ -75,7 +80,6 @@ public:
 	const char *text(int line) const;
 	
 	// Column management
-	void column_char(char sep) { column_separator = sep; }
 	void column_widths(const int *widths);
 	void SetColumnHeaders(const std::vector<std::string> &headers);
 	
