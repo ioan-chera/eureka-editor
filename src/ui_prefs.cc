@@ -853,18 +853,19 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		}
 
 		{ key_list = new UI_TableBrowser(20, 87, 442, 336, nullptr);
-		  key_list->column_widths(key_col_widths);
-		  
-		  // Set column headers
-		  std::vector<std::string> headers = {"KEY", "MODE", "FUNCTION"};
-		  key_list->SetColumnHeaders(headers);
-		  
-		  // Set callbacks
-		  key_list->SetSortCallback((void (*)(Fl_Widget*, void*))sort_key_callback, this);
-		  key_list->SetRebindCallback((void (*)(Fl_Widget*, void*))bind_key_callback, this);
+			key_list->column_widths(key_col_widths);
+			
+			// Set column headers
+			std::vector<std::string> headers = {"KEY", "MODE", "FUNCTION"};
+			key_list->SetColumnHeaders(headers);
+			
+			// Set callbacks
+			key_list->SetSortCallback((void (*)(Fl_Widget*, void*))sort_key_callback, this);
+			key_list->SetRebindCallback((void (*)(Fl_Widget*, void*))bind_key_callback, this);
+			key_list->end();
 		}
 		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
-		  key_add->callback((Fl_Callback*)edit_key_callback, this);
+			key_add->callback((Fl_Callback*)edit_key_callback, this);
 		}
 		{ key_copy = new Fl_Button(480, 195, 85, 30, "&Copy");
 		  key_copy->callback((Fl_Callback*)edit_key_callback, this);
