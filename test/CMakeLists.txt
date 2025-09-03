@@ -97,6 +97,7 @@ add_executable(
     w_texture_test.cpp
     w_wad_test.cpp
     WadDataTest.cpp
+UITableBrowserTest.cpp
     stub/osxcalls_stub.cpp
 )
 target_link_libraries(test_general PRIVATE testutils eurekasrc)
