@@ -332,14 +332,14 @@ int UI_TableBrowser::handle(int event)
 				int R = callback_row();
 				int C = callback_col();
 				
-				if (context == CONTEXT_CELL && C == 0 && rebind_callback)
+				if (context & CONTEXT_CELL && C == 0 && rebind_callback)
 				{
 					// Double-click on first column - trigger rebind
 					select(R + 1);
 					rebind_callback(this, rebind_callback_data);
 					return 1;
 				}
-				else if (context == CONTEXT_COL_HEADER)
+				else if (context & CONTEXT_COL_HEADER)
 				{
 					// Double-click on header - auto-fit column
 
@@ -355,12 +355,12 @@ int UI_TableBrowser::handle(int event)
 				int R = callback_row();
 				int C = callback_col();
 				
-				if (context == CONTEXT_CELL)
+				if (context & CONTEXT_CELL)
 				{
 					select(R + 1);
 					return 1;
 				}
-				else if (context == CONTEXT_COL_HEADER && sort_callback)
+				else if (context & CONTEXT_COL_HEADER && sort_callback)
 				{
 					// Click on column header - sort
 					if (sort_column == C)
