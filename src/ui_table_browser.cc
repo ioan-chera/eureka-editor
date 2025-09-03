@@ -362,17 +362,30 @@ int UI_TableBrowser::handle(int event)
 				}
 				else if (context & CONTEXT_COL_HEADER && sort_callback)
 				{
-					// Click on column header - sort
-					if (sort_column == C)
-						sort_ascending = !sort_ascending;
-					else
+					// BUG: clicking outside the header, such as on the scroll bar, will sometimes appear as if clicking on 
+					// first column's header
+					if (C >= 0 && C < cols() && C < (int)column_headers.size())
 					{
-						sort_column = C;
-						sort_ascending = true;
+						// Additional bounds check: ensure click is within the column header area
+						int hx, hy, hw, hh;
+						int result = find_cell(CONTEXT_COL_HEADER, 0, C, hx, hy, hw, hh);
+						if (result == 0 && 
+							Fl::event_x() >= hx && Fl::event_x() < hx + hw &&
+							Fl::event_y() >= hy && Fl::event_y() < hy + hh)
+						{
+							// Click on valid column header - sort
+							if (sort_column == C)
+								sort_ascending = !sort_ascending;
+							else
+							{
+								sort_column = C;
+								sort_ascending = true;
+							}
+							
+							sort_callback(this, sort_callback_data);
+							return 1;
+						}
 					}
-					
-					sort_callback(this, sort_callback_data);
-					return 1;
 				}
 			}
 			break;
