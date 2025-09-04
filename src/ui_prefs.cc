@@ -592,9 +592,6 @@ private:
 	char key_sort_mode;
 	bool key_sort_rev;
 
-	// normally zero (not waiting for a key)
-	int awaiting_line;
-
 	// dynamic column widths for key bindings browser
 	int key_col_widths[4];
 	static constexpr int default_key_col_widths[4] = {125, 75, 205, 0};
@@ -609,6 +606,8 @@ private:
 	static void  del_key_callback(Fl_Button *w, void *data);
 
 	static void reset_callback(Fl_Button *w, void *data);
+
+	static void sortCallback(int column, bool reverse, void *ctx);
 
 public:
 	UI_Preferences(const opt_desc_t *options);
@@ -657,7 +656,7 @@ public:
 
 	/* Keys Tab */
 
-	UI_SortTable *key_list;
+	UI_KeyBindingsTable *key_list;
 
 	Fl_Button *key_add;
 	Fl_Button *key_copy;
@@ -736,12 +735,20 @@ public:
 
 #define R_SPACES  "  "
 
+void UI_Preferences::sortCallback(int column, bool reverse, void *ctx)
+{
+	auto prefs = static_cast<UI_Preferences *>(ctx);
+	const char codes[] = "kcf";
+	prefs->key_sort_mode = codes[column];
+	prefs->key_sort_rev = reverse;
+	prefs->LoadKeys();
+}
 
 UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), want_discard(false),
 	  key_sort_mode('k'), key_sort_rev(false),
-	  awaiting_line(-1), options(options)
+	  options(options)
 {
 	// Initialize dynamic column widths with defaults
 	memcpy(key_col_widths, default_key_col_widths, sizeof(key_col_widths));
@@ -850,7 +857,7 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_list = new UI_SortTable(20, 87, 442, 336, {"Key", "Mode", "Function"});
+		{ key_list = new UI_KeyBindingsTable(20, 87, 442, 336, sortCallback, this);
 
 		}
 		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
@@ -1156,19 +1163,10 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 
 	prefs->EnsureKeyVisible(line);
 
-
-	int bind_idx = line;
-
 	// show we're ready to accept a new key
-
-	std::array<std::string, 3> cells = keys::cellsForBinding(global::pref_binds[bind_idx], true /* changing_key */);
-
-	prefs->key_list->setRowText(line, cells);
-	prefs->key_list->selection_color(FL_YELLOW);
+	prefs->key_list->setChallenge(line);
 
 	Fl::focus(prefs);
-
-	prefs->awaiting_line = line;
 }
 
 
@@ -1644,11 +1642,7 @@ void UI_Preferences::LoadKeys()
 	M_SortBindings(key_sort_mode, key_sort_rev);
 	M_DetectConflictingBinds();
 
-	std::vector<std::array<std::string, 3>> cells;
-	cells.reserve(M_NumBindings());
-	for(int i = 0; i < M_NumBindings(); i++)
-		cells.push_back(keys::cellsForBinding(global::pref_binds[i]));
-	key_list->setData(cells);
+	key_list->reload();
 
 	key_list->selectRowAtIndex(0);
 }
@@ -1658,11 +1652,7 @@ void UI_Preferences::ReloadKeys()
 {
 	M_DetectConflictingBinds();
 
-	std::vector<std::array<std::string, 3>> cells;
-	cells.reserve(M_NumBindings());
-	for(int i = 0; i < M_NumBindings(); i++)
-		cells.push_back(keys::cellsForBinding(global::pref_binds[i]));
-	key_list->setData(cells);
+	key_list->reload();
 }
 
 
@@ -1681,23 +1671,20 @@ void UI_Preferences::EnsureKeyVisible(int line)
 
 void UI_Preferences::ClearWaiting()
 {
-	if (awaiting_line > 0)
+	if (key_list->getChallenged() >= 0)
 	{
 		// restore the text line
+		key_list->clearChallenge();
 		ReloadKeys();
 
 		Fl::focus(key_list);
 	}
-
-	awaiting_line = -1;
-
-	key_list->selection_color(FL_SELECTION_COLOR);
 }
 
 
 void UI_Preferences::SetBinding(keycode_t key)
 {
-	int bind_idx = awaiting_line;
+	int bind_idx = key_list->getChallenged();
 
 	M_ChangeBindingKey(bind_idx, key);
 
@@ -1707,7 +1694,7 @@ void UI_Preferences::SetBinding(keycode_t key)
 
 int UI_Preferences::handle(int event)
 {
-	if (awaiting_line >= 0)
+	if (key_list->getChallenged() >= 0)
 	{
 		// escape key cancels
 		if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)

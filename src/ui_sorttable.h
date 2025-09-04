@@ -24,40 +24,51 @@
 
 #include "FL/Fl_Table_Row.H"
 
+#include "m_strings.h"
+
 #include <array>
 #include <string>
 #include <vector>
 
-enum
-{
-    NUM_COLS = 3,   // currently hardcoded
-};
-
-class UI_SortTable : public Fl_Table_Row
+class UI_KeyBindingsTable : public Fl_Table_Row
 {
 public:
-    UI_SortTable(int X, int Y, int W, int H, const std::array<const char *, NUM_COLS> &headings);
-    void setData(const std::vector<std::array<std::string, NUM_COLS>> &newData);
-    void setData(std::vector<std::array<std::string, NUM_COLS>> &&newData);
+    UI_KeyBindingsTable(int X, int Y, int W, int H, void (*sortCallback)(int column, bool reverse, void*), void *sortContext);
     int getSelectedIndex() const;
     void selectRowAtIndex(int index)
     {
         select_row(index, 1);
     }
-    void setRowText(int row, const std::array<std::string, NUM_COLS> &data);
+    void setChallenge(int index);
+    int getChallenged() const
+    {
+        return challengedIndex;
+    }
+    void clearChallenge();
+    void reload();
+
+    void (*sortCallback)(int column, bool reverse, void*) = nullptr;
+    void *sortContext = nullptr;
 
 protected:
     void draw_cell(TableContext context, int R = 0, int C = 0, int X = 0, int Y = 0, int W = 0,
         int H = 0) override;
 private:
+    struct CacheRow
+    {
+        SString cols[3];
+        bool is_duplicate;
+    };
+
     static void eventCallback(Fl_Widget *w, void *data);
     void eventCallback2();
     void autoWidth(int pad);
     void drawSortArrow(int X, int Y, int W, int H);
     void sortColumn(int column, bool reverse);
+    void rebuildCache();
 
-    const std::array<const char *, NUM_COLS> headings;
-    std::vector<std::array<std::string, NUM_COLS>> data;
+    bool challengedIndex = -1;
     bool sortReverse = false;
     int lastSortedColumn = -1;
+    std::vector<CacheRow> cache;
 };

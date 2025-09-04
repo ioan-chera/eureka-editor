@@ -375,7 +375,7 @@ KeyContext M_ParseKeyContext(const SString &str)
 	return KeyContext::none;
 }
 
-static const char * M_KeyContextString(KeyContext context)
+const char * M_KeyContextString(KeyContext context)
 {
 	switch (context)
 	{
@@ -821,8 +821,6 @@ SString stringForFunc(const key_binding_t &bind)
 
 std::array<std::string, 3> cellsForBinding(const key_binding_t& bind, bool changing_key)
 {
-	char buffer[256];
-
 	// we prefer the UI to say "3D view" instead of "render"
 	const char *ctx_name = M_KeyContextString(bind.context);
 	if (y_stricmp(ctx_name, "render") == 0)
