@@ -29,6 +29,7 @@
 
 #include "ui_window.h"
 #include "ui_prefs.h"
+#include "ui_sorttable.h"
 
 #include <FL/Fl_Color_Chooser.H>
 #include <FL/fl_draw.H>
@@ -603,7 +604,6 @@ private:
 	static void  close_callback(Fl_Widget *w, void *data);
 	static void  color_callback(Fl_Button *w, void *data);
 
-	static void sort_key_callback(Fl_Button *w, void *data);
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
@@ -630,7 +630,6 @@ public:
 	void SetBinding(keycode_t key);
 
 	void EnsureKeyVisible(int line);
-	void AdjustKeyColumnWidths();
 
 public:
 	Fl_Tabs *tabs;
@@ -658,11 +657,7 @@ public:
 
 	/* Keys Tab */
 
-	Fl_Hold_Browser *key_list;
-
-	Fl_Button *key_group;
-	Fl_Button *key_key;
-	Fl_Button *key_func;
+	UI_SortTable *key_list;
 
 	Fl_Button *key_add;
 	Fl_Button *key_copy;
@@ -746,7 +741,7 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), want_discard(false),
 	  key_sort_mode('k'), key_sort_rev(false),
-	  awaiting_line(0), options(options)
+	  awaiting_line(-1), options(options)
 {
 	// Initialize dynamic column widths with defaults
 	memcpy(key_col_widths, default_key_col_widths, sizeof(key_col_widths));
@@ -855,25 +850,8 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_key = new Fl_Button(25, 87, 125, 25, "KEY");
-		  key_key->color((Fl_Color)231);
-		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_key->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_group = new Fl_Button(155, 87, 75, 25, "MODE");
-		  key_group->color((Fl_Color)231);
-		  key_group->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_group->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_func = new Fl_Button(235, 87, 205, 25, "FUNCTION");
-		  key_func->color((Fl_Color)231);
-		  key_func->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_func->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_list = new Fl_Hold_Browser(20, 115, 442, 308);
-		  key_list->has_scrollbar(Fl_Browser_::VERTICAL);
-		  key_list->column_widths(key_col_widths);
-		  key_list->column_char('\t');
+		{ key_list = new UI_SortTable(20, 87, 442, 336, {"Key", "Mode", "Function"});
+
 		}
 		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
 		  key_add->callback((Fl_Callback*)edit_key_callback, this);
@@ -1168,8 +1146,9 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	int line = prefs->key_list->value();
-	if (line < 1)
+	int line = prefs->key_list->getSelectedIndex();
+	// TODO: verify index
+	if (line < 0)
 	{
 		fl_beep();
 		return;
@@ -1178,57 +1157,18 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 	prefs->EnsureKeyVisible(line);
 
 
-	int bind_idx = line - 1;
+	int bind_idx = line;
 
 	// show we're ready to accept a new key
 
-	SString str = keys::stringForBinding(global::pref_binds[bind_idx], true /* changing_key */);
+	std::array<std::string, 3> cells = keys::cellsForBinding(global::pref_binds[bind_idx], true /* changing_key */);
 
-	prefs->key_list->text(line, str.c_str());
+	prefs->key_list->setRowText(line, cells);
 	prefs->key_list->selection_color(FL_YELLOW);
 
 	Fl::focus(prefs);
 
 	prefs->awaiting_line = line;
-}
-
-
-void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
-{
-	UI_Preferences *prefs = (UI_Preferences *)data;
-
-	if (w == prefs->key_group)
-	{
-		if (prefs->key_sort_mode != 'c')
-		{
-			prefs->key_sort_mode  = 'c';
-			prefs->key_sort_rev = false;
-		}
-		else
-			prefs->key_sort_rev = !prefs->key_sort_rev;
-	}
-	else if (w == prefs->key_key)
-	{
-		if (prefs->key_sort_mode != 'k')
-		{
-			prefs->key_sort_mode  = 'k';
-			prefs->key_sort_rev = false;
-		}
-		else
-			prefs->key_sort_rev = !prefs->key_sort_rev;
-	}
-	else if (w == prefs->key_func)
-	{
-		if (prefs->key_sort_mode != 'f')
-		{
-			prefs->key_sort_mode  = 'f';
-			prefs->key_sort_rev = false;
-		}
-		else
-			prefs->key_sort_rev = !prefs->key_sort_rev;
-	}
-
-	prefs->LoadKeys();
 }
 
 
@@ -1250,8 +1190,8 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	if (! is_add)
 	{
-		int line = prefs->key_list->value();
-		if (line < 1)
+		int line = prefs->key_list->getSelectedIndex();
+		if (line < 0)
 		{
 			fl_beep();
 			return;
@@ -1259,7 +1199,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 		prefs->EnsureKeyVisible(line);
 
-		bind_idx = line - 1;
+		bind_idx = line;
 		SYS_ASSERT(bind_idx >= 0);
 
 		M_GetBindingInfo(bind_idx, &new_key, &new_context);
@@ -1301,12 +1241,12 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	{
 		// expand the browser size with a dummy line
 		// [ the ReloadKeys() below will grab the correct text ]
-		prefs->key_list->add("");
+		//prefs->key_list->add("");
 
 		SYS_ASSERT(bind_idx >= 0);
-		int line = 1 + bind_idx;
+		int line = bind_idx;
 
-		prefs->key_list->select(line);
+		prefs->key_list->selectRowAtIndex(line);
 		prefs->EnsureKeyVisible(line);
 	}
 
@@ -1321,21 +1261,21 @@ void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	int line = prefs->key_list->value();
-	if (line < 1)
+	int line = prefs->key_list->getSelectedIndex();
+	if (line < 0)
 	{
 		fl_beep();
 		return;
 	}
 
-	M_DeleteLocalBinding(line - 1);
+	M_DeleteLocalBinding(line);
 
-	prefs->key_list->remove(line);
+	//prefs->key_list->remove(line);
 	prefs->ReloadKeys();
 
-	if (line <= prefs->key_list->size())
+	if (line < (int)global::pref_binds.size())
 	{
-		prefs->key_list->select(line);
+		prefs->key_list->selectRowAtIndex(line);
 
 		Fl::focus(prefs->key_list);
 	}
@@ -1704,19 +1644,13 @@ void UI_Preferences::LoadKeys()
 	M_SortBindings(key_sort_mode, key_sort_rev);
 	M_DetectConflictingBinds();
 
-	// Adjust column widths before populating the list
-	AdjustKeyColumnWidths();
+	std::vector<std::array<std::string, 3>> cells;
+	cells.reserve(M_NumBindings());
+	for(int i = 0; i < M_NumBindings(); i++)
+		cells.push_back(keys::cellsForBinding(global::pref_binds[i]));
+	key_list->setData(cells);
 
-	key_list->clear();
-
-	for (int i = 0 ; i < M_NumBindings() ; i++)
-	{
-		SString str = keys::stringForBinding(global::pref_binds[i]);
-
-		key_list->add(str.c_str());
-	}
-
-	key_list->select(1);
+	key_list->selectRowAtIndex(0);
 }
 
 
@@ -1724,23 +1658,23 @@ void UI_Preferences::ReloadKeys()
 {
 	M_DetectConflictingBinds();
 
-	// Adjust column widths before reloading
-	AdjustKeyColumnWidths();
-
-	for (int i = 0 ; i < M_NumBindings() ; i++)
-	{
-		SString str = keys::stringForBinding(global::pref_binds[i]);
-
-		key_list->text(i + 1, str.c_str());
-	}
+	std::vector<std::array<std::string, 3>> cells;
+	cells.reserve(M_NumBindings());
+	for(int i = 0; i < M_NumBindings(); i++)
+		cells.push_back(keys::cellsForBinding(global::pref_binds[i]));
+	key_list->setData(cells);
 }
 
 
 void UI_Preferences::EnsureKeyVisible(int line)
 {
-	if (! key_list->displayed(line))
+	int r1, r2, c1, c2;
+	key_list->visible_cells(r1, r2, c1, c2);
+	if(line < r1 || line > r2)
 	{
-		key_list->middleline(line);
+		int visibleRows = r2 - r1 + 1;
+		int newTopRow = line - visibleRows / 2;
+		key_list->top_row(newTopRow);
 	}
 }
 
@@ -1755,7 +1689,7 @@ void UI_Preferences::ClearWaiting()
 		Fl::focus(key_list);
 	}
 
-	awaiting_line = 0;
+	awaiting_line = -1;
 
 	key_list->selection_color(FL_SELECTION_COLOR);
 }
@@ -1763,7 +1697,7 @@ void UI_Preferences::ClearWaiting()
 
 void UI_Preferences::SetBinding(keycode_t key)
 {
-	int bind_idx = awaiting_line - 1;
+	int bind_idx = awaiting_line;
 
 	M_ChangeBindingKey(bind_idx, key);
 
@@ -1773,7 +1707,7 @@ void UI_Preferences::SetBinding(keycode_t key)
 
 int UI_Preferences::handle(int event)
 {
-	if (awaiting_line > 0)
+	if (awaiting_line >= 0)
 	{
 		// escape key cancels
 		if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)
@@ -1798,94 +1732,6 @@ int UI_Preferences::handle(int event)
 
 	return Fl_Double_Window::handle(event);
 }
-
-
-void UI_Preferences::AdjustKeyColumnWidths()
-{
-	// Calculate the maximum width needed for the first column (KEY)
-	int max_key_width = default_key_col_widths[0]; // Start with default minimum
-
-	// Use FLTK's text measuring capabilities
-	fl_font(FL_HELVETICA, FL_NORMAL_SIZE);
-
-	for (int i = 0; i < M_NumBindings(); i++)
-	{
-		SString str = keys::stringForBinding(global::pref_binds[i]);
-		// Extract just the key portion (first column) from the tab-separated string
-		size_t tab_pos = str.find('\t');
-		if (tab_pos != std::string::npos)
-		{
-			// Create a temporary string with just the key portion
-			size_t key_len = tab_pos;
-			SString key_str = str.substr(0, key_len);
-
-			// Strip any color codes (starting with @)
-			if(key_str.length() >= 3 && key_str[0] == '@' && key_str[1] == 'C' && isdigit(key_str[2]))
-			{
-				if(key_str.length() >= 4 && key_str[3] == ' ')
-					key_str = key_str.substr(4);
-				else
-					key_str = key_str.substr(3);
-			}
-
-			// Measure the text width and add some padding
-			int text_width = (int)round(fl_width(key_str.c_str())) + 10; // 10 pixels padding
-			if (text_width > max_key_width)
-				max_key_width = text_width;
-		}
-	}
-
-	// Only adjust if we need more width than default
-	if (max_key_width > default_key_col_widths[0])
-	{
-		// Calculate the difference
-		int width_diff = max_key_width - default_key_col_widths[0];
-
-		// Adjust the first column width
-		key_col_widths[0] = max_key_width;
-
-		// Reduce other columns proportionally to maintain total width
-		// Reduce MODE column by 1/3 of the difference, FUNCTION by 2/3
-		int mode_reduction = width_diff / 3;
-		int func_reduction = width_diff - mode_reduction;
-
-		key_col_widths[1] = default_key_col_widths[1] - mode_reduction;
-		key_col_widths[2] = default_key_col_widths[2] - func_reduction;
-
-		// Ensure minimum widths
-		if (key_col_widths[1] < 50)
-			key_col_widths[1] = 50;
-		if (key_col_widths[2] < 100)
-			key_col_widths[2] = 100;
-
-		// Update header button widths to match
-		key_key->size(key_col_widths[0], key_key->h());
-		key_group->size(key_col_widths[1], key_group->h());
-		key_group->position(key_key->x() + key_col_widths[0] + 5, key_group->y());
-		key_func->size(key_col_widths[2], key_func->h());
-		key_func->position(key_group->x() + key_col_widths[1] + 5, key_func->y());
-	}
-	else
-	{
-		// Restore default widths
-		for (int i = 0; i < 4; i++) {
-			key_col_widths[i] = default_key_col_widths[i];
-		}
-
-		// Restore default header button positions and sizes
-		key_key->size(default_key_col_widths[0], key_key->h());
-		key_key->position(25, key_key->y());
-		key_group->size(default_key_col_widths[1], key_group->h());
-		key_group->position(155, key_group->y());
-		key_func->size(default_key_col_widths[2], key_func->h());
-		key_func->position(235, key_func->y());
-	}
-
-	// Update the browser's column widths
-	key_list->column_widths(key_col_widths);
-	redraw();
-}
-
 
 //------------------------------------------------------------------------
 

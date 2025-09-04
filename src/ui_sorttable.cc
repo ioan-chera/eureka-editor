@@ -33,7 +33,17 @@ UI_SortTable::UI_SortTable(int X, int Y, int W, int H,
     headings(headings)
 {
     cols(NUM_COLS);
+    col_header(1);
+    col_resize(1);
+    row_header(0);
+	row_resize(0);
+    when(FL_WHEN_RELEASE);
+    selection_color(FL_SELECTION_COLOR);
+    row_height_all(18);
+    color(FL_WHITE);
+    type(SELECT_SINGLE);
     end();
+
     callback(eventCallback, this);
 }
 
@@ -49,6 +59,22 @@ void UI_SortTable::setData(std::vector<std::array<std::string, NUM_COLS>> &&newD
     data = std::move(newData);
     rows((int)data.size());
     autoWidth(AUTO_FIT_PADDING);
+}
+
+int UI_SortTable::getSelectedIndex() const
+{
+    for(int i = 0; i < const_cast<UI_SortTable *>(this)->rows(); i++)
+        if(const_cast<UI_SortTable *>(this)->row_selected(i))
+            return i;
+    return -1;
+}
+
+void UI_SortTable::setRowText(int row, const std::array<std::string, NUM_COLS> &data)
+{
+    if(row < 0 || row >= (int)this->data.size())
+        return;
+    this->data[row] = data;
+    redraw();
 }
 
 void UI_SortTable::draw_cell(TableContext context, int R, int C, int X, int Y, int W, int H)

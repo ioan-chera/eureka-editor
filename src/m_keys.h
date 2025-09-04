@@ -25,6 +25,8 @@
 #include "objid.h"
 #include "FL/Enumerations.H"
 
+#include <array>
+
 class Instance;
 struct editor_command_t;
 struct key_binding_t;
@@ -131,7 +133,7 @@ void M_DetectConflictingBinds();
 namespace keys
 {
 SString stringForFunc(const key_binding_t &bind);
-SString stringForBinding(const key_binding_t& bind, bool changing_key = false);
+std::array<std::string, 3> cellsForBinding(const key_binding_t& bind, bool changing_key = false);
 }
 
 void M_GetBindingInfo(int index, keycode_t *key, KeyContext *context);

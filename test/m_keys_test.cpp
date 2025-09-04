@@ -18,6 +18,8 @@
 #include "m_keys.h"
 #include "gtest/gtest.h"
 
+#include <array>
+
 struct KeyMapping
 {
 	keycode_t code;
@@ -105,10 +107,11 @@ TEST(MKeys, StringForBindingCheckModName)
 	for(const KeyMapping &mapping : testKeyCombos)
 	{
 		bind.key = mapping.code;
-		SString string = keys::stringForBinding(bind);
+		std::array<std::string, 3> cells = keys::cellsForBinding(bind);
 
-		SString expected = SString(mapping.dashString) + "\tbrowser\tCommandName";
-		ASSERT_EQ(expected, string);
+		ASSERT_EQ(cells[0], mapping.dashString);
+		ASSERT_EQ(cells[1], "browser");
+		ASSERT_EQ(cells[2], "CommandName");
 	}
 }
 

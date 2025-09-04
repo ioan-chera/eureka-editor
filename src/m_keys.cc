@@ -819,7 +819,7 @@ SString stringForFunc(const key_binding_t &bind)
 	return buffer;
 }
 
-SString stringForBinding(const key_binding_t& bind, bool changing_key)
+std::array<std::string, 3> cellsForBinding(const key_binding_t& bind, bool changing_key)
 {
 	char buffer[256];
 
@@ -850,15 +850,15 @@ SString stringForBinding(const key_binding_t& bind, bool changing_key)
 		return str;
 	};
 
-	snprintf(buffer, sizeof(buffer), "%s%s\t%s%s\t%s%s",
-		         bind.is_duplicate ? "@C1" : "",
-		         separateDigitFromColorMarker(bind.is_duplicate, key_str).c_str(),
-		         bind.is_duplicate ? "@C1" : "",
-		         separateDigitFromColorMarker(bind.is_duplicate, ctx_name).c_str(),
-		         bind.is_duplicate ? "@C1" : "",
-		         separateDigitFromColorMarker(bind.is_duplicate, stringForFunc(bind)).c_str());
+	std::array<std::string, 3> result;
+	result[0] = (bind.is_duplicate ? "@C1" : "") +
+	            separateDigitFromColorMarker(bind.is_duplicate, key_str).get();
+	result[1] = (bind.is_duplicate ? "@C1" : "") +
+	            separateDigitFromColorMarker(bind.is_duplicate, ctx_name).get();
+	result[2] = (bind.is_duplicate ? "@C1" : "") +
+				separateDigitFromColorMarker(bind.is_duplicate, stringForFunc(bind)).get();
 
-	return buffer;
+	return result;
 }
 }
 

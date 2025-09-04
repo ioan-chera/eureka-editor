@@ -39,6 +39,12 @@ public:
     UI_SortTable(int X, int Y, int W, int H, const std::array<const char *, NUM_COLS> &headings);
     void setData(const std::vector<std::array<std::string, NUM_COLS>> &newData);
     void setData(std::vector<std::array<std::string, NUM_COLS>> &&newData);
+    int getSelectedIndex() const;
+    void selectRowAtIndex(int index)
+    {
+        select_row(index, 1);
+    }
+    void setRowText(int row, const std::array<std::string, NUM_COLS> &data);
 
 protected:
     void draw_cell(TableContext context, int R = 0, int C = 0, int X = 0, int Y = 0, int W = 0,
