@@ -530,19 +530,19 @@ static Fl_Menu_Item menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 
-		{ "&New Project   ",   FL_COMMAND + 'n', FCAL file_do_new_project },
-		{ "&Manage Project  ", FL_COMMAND + 'm', FCAL file_do_manage_project },
+		{ "&New Project   ",   0, FCAL file_do_new_project },
+		{ "&Manage Project  ", 0, FCAL file_do_manage_project },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
+		{ "&Open Map",  0, FCAL file_do_open },
 		{ M_GIVEN_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 		{ M_RECENT_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 
-		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
-		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
+		{ "&Save Map",    0, FCAL file_do_save },
+		{ "&Export Map",  0, FCAL file_do_export },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -553,34 +553,34 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
+		{ "&Quit",             0, FCAL file_do_quit },
 		{ 0 },
 
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Undo",   FL_COMMAND + 'z',  FCAL edit_do_undo },
-		{ "&Redo",   FL_COMMAND + 'y',  FCAL edit_do_redo },
+		{ "&Undo",   0,  FCAL edit_do_undo },
+		{ "&Redo",   0,  FCAL edit_do_redo },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Cu&t",     FL_COMMAND + 'x', FCAL edit_do_cut },
-		{ "&Copy",    FL_COMMAND + 'c', FCAL edit_do_copy },
-		{ "&Paste",   FL_COMMAND + 'v', FCAL edit_do_paste },
-		{ "&Delete",  FL_Delete,        FCAL edit_do_delete },
+		{ "Cu&t",     0, FCAL edit_do_cut },
+		{ "&Copy",    0, FCAL edit_do_copy },
+		{ "&Paste",   0, FCAL edit_do_paste },
+		{ "&Delete",  0,        FCAL edit_do_delete },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Select &All",       FL_COMMAND + 'a', FCAL edit_do_select_all },
-		{ "Unselect All",      FL_COMMAND + 'u', FCAL edit_do_unselect_all },
-		{ "&Invert Selection", FL_COMMAND + 'i', FCAL edit_do_invert_sel },
-		{ "&Last Selection",   FL_COMMAND + 'l', FCAL edit_do_last_sel },
+		{ "Select &All",       0, FCAL edit_do_select_all },
+		{ "Unselect All",      0, FCAL edit_do_unselect_all },
+		{ "&Invert Selection", 0, FCAL edit_do_invert_sel },
+		{ "&Last Selection",   0, FCAL edit_do_last_sel },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Operation Menu",   FL_F+1, FCAL edit_do_op_menu },
-		{ "&Move Objects...",  FL_F+2, FCAL edit_do_move },
-		{ "&Scale Objects...", FL_F+3, FCAL edit_do_scale },
-		{ "Rotate Objects...", FL_F+4, FCAL edit_do_rotate },
+		{ "&Operation Menu",   0, FCAL edit_do_op_menu },
+		{ "&Move Objects...",  0, FCAL edit_do_move },
+		{ "&Scale Objects...", 0, FCAL edit_do_scale },
+		{ "Rotate Objects...", 0, FCAL edit_do_rotate },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -593,9 +593,9 @@ static Fl_Menu_Item menu_items[] =
 		// Note: FL_Tab cannot be used as a shortcut here, as it
 		//       invokes FLTK's hard-coded navigation stuff.
 
-		{ "Toggle S&prites",     FL_F+10, FCAL view_do_sprites },
-		{ "Toggle &Gamma",       FL_F+11, FCAL view_do_gamma },
-		{ "Toggle Object Nums",  FL_F+12, FCAL view_do_object_nums },
+		{ "Toggle S&prites",     0, FCAL view_do_sprites },
+		{ "Toggle &Gamma",       0, FCAL view_do_gamma },
+		{ "Toggle Object Nums",  0, FCAL view_do_object_nums },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -606,22 +606,22 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL view_do_default_props },
+		{ "&Default Props  ",  0, FCAL view_do_default_props },
 		{ "Toggle &3D View",  0, FCAL view_do_toggle_3d },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Find / Replace",   FL_COMMAND + 'f', FCAL view_do_find },
-		{ "Find &Next",        FL_COMMAND + 'g', FCAL view_do_next },
+		{ "&Find / Replace",   0, FCAL view_do_find },
+		{ "Find &Next",        0, FCAL view_do_next },
 		{ "Go to &Camera",     0, FCAL view_do_camera_pos },
 		{ "&Jump to Objects",  0, FCAL view_do_jump },
 		{ 0 },
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Textures",     FL_F+5, FCAL browser_do_textures },
-		{ "&Flats",        FL_F+6, FCAL browser_do_flats },
-		{ "Thin&gs",       FL_F+7, FCAL browser_do_things },
+		{ "&Textures",     0, FCAL browser_do_textures },
+		{ "&Flats",        0, FCAL browser_do_flats },
+		{ "Thin&gs",       0, FCAL browser_do_things },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -642,7 +642,7 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Check", 0, 0, 0, FL_SUBMENU },
 
-		{ "&ALL",           FL_F+9, FCAL checks_do_all },
+		{ "&ALL",           0, FCAL checks_do_all },
 		{ "&Major stuff  ",      0, FCAL checks_do_major },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -661,19 +661,19 @@ static Fl_Menu_Item menu_items[] =
 	{ "&Tools", 0, 0, 0, FL_SUBMENU },
 
 #ifndef __APPLE__	// for macOS it will be in the app menu
-		{ "&Preferences",        FL_COMMAND + 'p', FCAL tools_do_preferences },
+		{ "&Preferences",        0, FCAL tools_do_preferences },
 #endif
 		{ "&View Logs",          0,  FCAL tools_do_view_logs },
 		{ "&Recalc Sectors",     0,  FCAL tools_do_recalc_sectors },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
+		{ "&Test in Game",       0, FCAL tools_do_test_map },
 		{ "&Change Test Settings...",       0, FCAL tools_do_change_test_settings },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER | FL_MENU_INACTIVE },
 
-		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes },
+		{ "&Build All Nodes  ",  0, FCAL tools_do_build_nodes },
 		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
 		{ "&Add BEHAVIOR Lump  ", 0, FCAL tools_do_add_behavior },
 		{ 0 },
@@ -1011,7 +1011,7 @@ Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData)
 #ifdef __APPLE__
 	static const Fl_Menu_Item macPreferencesItem[] = {
 		{
-			"&Preferences\u2026", FL_COMMAND + ',', FCAL tools_do_preferences
+			"&Preferences\u2026", 0, FCAL tools_do_preferences
 		},
 		{0}
 	};
