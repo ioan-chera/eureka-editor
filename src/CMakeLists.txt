@@ -131,6 +131,8 @@ set(source_ui
     ui_hyper.h
     ui_infobar.cc
     ui_infobar.h
+    ui_keybindingstable.cc
+    ui_keybindingstable.h
     ui_linedef.cc
     ui_linedef.h
     ui_menu.cc

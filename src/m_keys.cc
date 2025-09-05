@@ -375,7 +375,7 @@ KeyContext M_ParseKeyContext(const SString &str)
 	return KeyContext::none;
 }
 
-static const char * M_KeyContextString(KeyContext context)
+const char * M_KeyContextString(KeyContext context)
 {
 	switch (context)
 	{
@@ -718,7 +718,7 @@ public:
 	inline bool operator() (const key_binding_t& k1, const key_binding_t& k2) const
 	{
 		if (column == 'c' && k1.context != k2.context)
-			return k1.context > k2.context;
+			return k1.context < k2.context;
 
 		if (column != 'f' && k1.key != k2.key)
 			return M_KeyCmp(k1.key, k2.key) < 0;
@@ -819,10 +819,8 @@ SString stringForFunc(const key_binding_t &bind)
 	return buffer;
 }
 
-SString stringForBinding(const key_binding_t& bind, bool changing_key)
+std::array<std::string, 3> cellsForBinding(const key_binding_t& bind, bool changing_key)
 {
-	char buffer[256];
-
 	// we prefer the UI to say "3D view" instead of "render"
 	const char *ctx_name = M_KeyContextString(bind.context);
 	if (y_stricmp(ctx_name, "render") == 0)
@@ -850,15 +848,15 @@ SString stringForBinding(const key_binding_t& bind, bool changing_key)
 		return str;
 	};
 
-	snprintf(buffer, sizeof(buffer), "%s%s\t%s%s\t%s%s",
-		         bind.is_duplicate ? "@C1" : "",
-		         separateDigitFromColorMarker(bind.is_duplicate, key_str).c_str(),
-		         bind.is_duplicate ? "@C1" : "",
-		         separateDigitFromColorMarker(bind.is_duplicate, ctx_name).c_str(),
-		         bind.is_duplicate ? "@C1" : "",
-		         separateDigitFromColorMarker(bind.is_duplicate, stringForFunc(bind)).c_str());
+	std::array<std::string, 3> result;
+	result[0] = (bind.is_duplicate ? "@C1" : "") +
+	            separateDigitFromColorMarker(bind.is_duplicate, key_str).get();
+	result[1] = (bind.is_duplicate ? "@C1" : "") +
+	            separateDigitFromColorMarker(bind.is_duplicate, ctx_name).get();
+	result[2] = (bind.is_duplicate ? "@C1" : "") +
+				separateDigitFromColorMarker(bind.is_duplicate, stringForFunc(bind)).get();
 
-	return buffer;
+	return result;
 }
 }
 
