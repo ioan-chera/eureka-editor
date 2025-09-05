@@ -30,6 +30,153 @@ static const Fl_Fontsize ROW_FONTSIZE = 16;
 static const int AUTO_FIT_PADDING = 20;
 static const char *HEADINGS[3] = { "Key", "Mode", "Function" };
 
+#ifdef __APPLE__
+static SString formatKeyForMac(const SString &key)
+{
+    SString result = key;
+    
+    // Replace CMD- with ⌘
+    size_t pos = result.find("CMD-");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 4);
+        result.insert(pos, "⌘");
+        pos = result.find("CMD-", pos + 1);
+    }
+    
+    // Replace META- with ⌃
+    pos = result.find("META-");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 5);
+        result.insert(pos, "⌃");
+        pos = result.find("META-", pos + 1);
+    }
+    
+    // Replace ALT- with ⌥
+    pos = result.find("ALT-");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 4);
+        result.insert(pos, "⌥");
+        pos = result.find("ALT-", pos + 1);
+    }
+    
+    // Replace SHIFT- with ⇧
+    pos = result.find("SHIFT-");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 6);
+        result.insert(pos, "⇧");
+        pos = result.find("SHIFT-", pos + 1);
+    }
+    
+    // Replace PGUP with ⇞
+    pos = result.find("PGUP");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 4);
+        result.insert(pos, "⇞");
+        pos = result.find("PGUP", pos + 1);
+    }
+    
+    // Replace PGDN with ⇟
+    pos = result.find("PGDN");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 4);
+        result.insert(pos, "⇟");
+        pos = result.find("PGDN", pos + 1);
+    }
+    
+    // Replace SPACE with ␣
+    pos = result.find("SPACE");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 5);
+        result.insert(pos, "␣");
+        pos = result.find("SPACE", pos + 1);
+    }
+    
+    // Replace TAB with ⇥
+    pos = result.find("TAB");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 3);
+        result.insert(pos, "⇥");
+        pos = result.find("TAB", pos + 1);
+    }
+    
+    // Replace LEFT with ←
+    pos = result.find("LEFT");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 4);
+        result.insert(pos, "←");
+        pos = result.find("LEFT", pos + 1);
+    }
+    
+    // Replace RIGHT with →
+    pos = result.find("RIGHT");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 5);
+        result.insert(pos, "→");
+        pos = result.find("RIGHT", pos + 1);
+    }
+    
+    // Replace UP with ↑ (after PGUP replacement, avoid WHEEL_UP)
+    pos = result.find("UP");
+    while (pos != SString::npos) 
+    {
+        // Check if this is part of WHEEL_UP
+        if (pos >= 6 && result.substr(pos - 6, 8) == "WHEEL_UP")
+        {
+            pos = result.find("UP", pos + 2);
+            continue;
+        }
+        result.erase(pos, 2);
+        result.insert(pos, "↑");
+        pos = result.find("UP", pos + 1);
+    }
+    
+    // Replace DOWN with ↓ (avoid WHEEL_DOWN)
+    pos = result.find("DOWN");
+    while (pos != SString::npos) 
+    {
+        // Check if this is part of WHEEL_DOWN
+        if (pos >= 6 && result.substr(pos - 6, 10) == "WHEEL_DOWN")
+        {
+            pos = result.find("DOWN", pos + 4);
+            continue;
+        }
+        result.erase(pos, 4);
+        result.insert(pos, "↓");
+        pos = result.find("DOWN", pos + 1);
+    }
+    
+    // Replace DEL with ⌫
+    pos = result.find("DEL");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 3);
+        result.insert(pos, "⌦");
+        pos = result.find("DEL", pos + 1);
+    }
+    
+    // Replace BS with ⌦
+    pos = result.find("BS");
+    while (pos != SString::npos) 
+    {
+        result.erase(pos, 2);
+        result.insert(pos, "⌫");
+        pos = result.find("BS", pos + 1);
+    }
+    
+    return result;
+}
+#endif
+
 UI_KeyBindingsTable::UI_KeyBindingsTable(int X, int Y, int W, int H, void (*sortCallback)(int col, bool rev, void*), void *sortContext) : Fl_Table_Row(X, Y, W, H, nullptr), sortCallback(sortCallback), sortContext(sortContext)
 {
     cols(3);
@@ -209,7 +356,11 @@ void UI_KeyBindingsTable::rebuildCache()
     {
         const key_binding_t &binding = global::pref_binds[i];
         CacheRow cacheRow = {};
+#ifdef __APPLE__
+        cacheRow.cols[0] = formatKeyForMac(keys::toString(binding.key));
+#else
         cacheRow.cols[0] = keys::toString(binding.key);
+#endif
         cacheRow.cols[1] = M_KeyContextString(binding.context);
         if(cacheRow.cols[1].noCaseEqual("render"))
             cacheRow.cols[1] = "3D view";
