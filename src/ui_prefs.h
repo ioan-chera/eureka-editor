@@ -21,6 +21,15 @@
 #ifndef __EUREKA_UI_PREFS_H__
 #define __EUREKA_UI_PREFS_H__
 
+namespace prefsdlg
+{
+	// Attempt to handle Undo/Redo while Preferences dialog is active.
+	// Returns true if handled by the dialog (i.e., dialog is active
+	// and an undo/redo step was executed), false otherwise.
+	bool TryUndo();
+	bool TryRedo();
+}
+
 #endif  /* __EUREKA_UI_PREFS_H__ */
 
 //--- editor settings ---

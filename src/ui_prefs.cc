@@ -26,9 +26,12 @@
 #include "m_parse.h"
 
 #include <algorithm>
+#include <vector>
 
 #include "ui_window.h"
 #include "ui_prefs.h"
+#include "ui_menu.h"
+#include "m_keys.h"
 #include "ui_keybindingstable.h"
 
 #include <FL/Fl_Color_Chooser.H>
@@ -42,6 +45,15 @@
 
 
 static int last_active_tab = 0;
+
+// Active preferences dialog pointer used to route Undo/Redo
+static class UI_Preferences *s_active_prefs = nullptr;
+
+namespace prefsdlg
+{
+	bool TryUndo();
+	bool TryRedo();
+}
 
 
 class UI_EditKey : public UI_Escapable_Window
@@ -589,6 +601,106 @@ private:
 	bool want_quit;
 	bool want_discard;
 
+	// Simple snapshot-based undo/redo for key bindings within the dialog
+	struct Snapshot
+	{
+		std::vector<key_binding_t> before;
+		std::vector<key_binding_t> after;
+		SString desc;
+	};
+
+	std::vector<Snapshot> undo_stack_;
+	std::vector<Snapshot> redo_stack_;
+
+	static bool sameBinding(const key_binding_t &a, const key_binding_t &b)
+	{
+		if(a.key != b.key) return false;
+		if(a.context != b.context) return false;
+		if(a.cmd != b.cmd) return false;
+		for(int i = 0; i < MAX_EXEC_PARAM; ++i)
+			if(a.param[i] != b.param[i])
+				return false;
+		return true;
+	}
+
+	static bool sameBindingList(const std::vector<key_binding_t> &a,
+							  const std::vector<key_binding_t> &b)
+	{
+		if(a.size() != b.size())
+			return false;
+		for(size_t i = 0; i < a.size(); ++i)
+			if(!sameBinding(a[i], b[i]))
+				return false;
+		return true;
+	}
+
+	void updateMenuUndoRedo()
+	{
+		if(!gInstance || !gInstance->main_win)
+			return;
+		Fl_Sys_Menu_Bar *bar = gInstance->main_win->menu_bar;
+		if(!bar)
+			return;
+		menu::setUndoDetail(bar, undo_stack_.empty() ? "" : undo_stack_.back().desc);
+		menu::setRedoDetail(bar, redo_stack_.empty() ? "" : redo_stack_.back().desc);
+	}
+
+	struct ChangeGuard
+	{
+		UI_Preferences *prefs;
+		std::vector<key_binding_t> before;
+		const char *desc;
+		ChangeGuard(UI_Preferences *p, const char *d)
+			: prefs(p), before(global::pref_binds), desc(d) {}
+		void commit()
+		{
+			std::vector<key_binding_t> after = global::pref_binds;
+			if(!prefs)
+				return;
+			// Only push a snapshot if something actually changed
+			if(!sameBindingList(before, after))
+			{
+				Snapshot s;
+				s.before = std::move(before);
+				s.after = std::move(after);
+				s.desc = desc;
+				prefs->undo_stack_.push_back(std::move(s));
+				prefs->redo_stack_.clear();
+				prefs->updateMenuUndoRedo();
+			}
+		}
+	};
+public:
+	bool doUndo()
+	{
+		if(undo_stack_.empty())
+			return false;
+		Snapshot s = std::move(undo_stack_.back());
+		undo_stack_.pop_back();
+		// Apply previous state
+		global::pref_binds = s.before;
+		redo_stack_.push_back(std::move(s));
+		ReloadKeys();
+		redraw();
+		updateMenuUndoRedo();
+		return true;
+	}
+
+	bool doRedo()
+	{
+		if(redo_stack_.empty())
+			return false;
+		Snapshot s = std::move(redo_stack_.back());
+		redo_stack_.pop_back();
+		// Re-apply state
+		global::pref_binds = s.after;
+		undo_stack_.push_back(std::move(s));
+		ReloadKeys();
+		redraw();
+		updateMenuUndoRedo();
+		return true;
+	}
+private:	
 	char key_sort_mode;
 	bool key_sort_rev;
 
@@ -1214,6 +1326,8 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	if (was_ok)
 	{
 		// assume we can set it, since the dialog validated it
+		ChangeGuard guard(prefs,
+			is_add ? "Add Key Binding" : (is_copy ? "Copy Key Binding" : "Edit Key Binding"));
 
 		if (is_add || is_copy)
 		{
@@ -1228,6 +1342,8 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 		{
 			M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
 		}
+
+		guard.commit();
 	}
 
 	delete dialog;
@@ -1266,7 +1382,11 @@ void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-	M_DeleteLocalBinding(line);
+	{
+		ChangeGuard guard(prefs, "Delete Key Binding");
+		M_DeleteLocalBinding(line);
+		guard.commit();
+	}
 
 	//prefs->key_list->remove(line);
 	prefs->ReloadKeys();
@@ -1301,8 +1421,9 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 
 	if (is_keys)
 	{
+		ChangeGuard guard(prefs, "Reset Key Bindings");
 		M_CopyBindings(true /* from_defaults */);
-
+		guard.commit();
 		prefs->LoadKeys();
 	}
 	else
@@ -1331,6 +1452,12 @@ void UI_Preferences::Run()
 
 	set_modal();
 
+	// Hook as the active preferences dialog so Undo/Redo are routed here
+	s_active_prefs = this;
+	// Ensure fresh undo/redo stacks for this session
+	undo_stack_.clear();
+	redo_stack_.clear();
+
 	show();
 
 	while (! want_quit)
@@ -1343,6 +1470,9 @@ void UI_Preferences::Run()
 	if (want_discard)
 	{
 		gLog.printf("Preferences: discarded changes\n");
+		undo_stack_.clear();
+		redo_stack_.clear();
+		s_active_prefs = nullptr;
 		return;
 	}
 
@@ -1354,6 +1484,11 @@ void UI_Preferences::Run()
 
 	M_ApplyBindings();
 	M_SaveBindings();
+
+	// Clear after saving and unhook
+	undo_stack_.clear();
+	redo_stack_.clear();
+	s_active_prefs = nullptr;
 }
 
 
@@ -1686,7 +1821,9 @@ void UI_Preferences::SetBinding(keycode_t key)
 {
 	int bind_idx = key_list->getChallenged();
 
+	ChangeGuard guard(this, "Re-bind Key");
 	M_ChangeBindingKey(bind_idx, key);
+	guard.commit();
 
 	ClearWaiting();
 }
@@ -1730,6 +1867,22 @@ void Instance::CMD_Preferences()
 	dialog->Run();
 
 	delete dialog;
+}
+
+namespace prefsdlg
+{
+	bool TryUndo()
+	{
+		if(!s_active_prefs)
+			return false;
+		return s_active_prefs->doUndo();
+	}
+	bool TryRedo()
+	{
+		if(!s_active_prefs)
+			return false;
+		return s_active_prefs->doRedo();
+	}
 }
 
 

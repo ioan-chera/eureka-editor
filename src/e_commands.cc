@@ -161,6 +161,10 @@ void Instance::CMD_Quit()
 
 void Instance::CMD_Undo()
 {
+	// Route to Preferences dialog if active
+	if (prefsdlg::TryUndo())
+		return;
+
 	if (! level.basis.undo())
 	{
 		Beep("No operation to undo");
@@ -174,6 +178,10 @@ void Instance::CMD_Undo()
 
 void Instance::CMD_Redo()
 {
+	// Route to Preferences dialog if active
+	if (prefsdlg::TryRedo())
+		return;
+
 	if (! level.basis.redo())
 	{
 		Beep("No operation to redo");
