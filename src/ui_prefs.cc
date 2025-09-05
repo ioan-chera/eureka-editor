@@ -29,7 +29,7 @@
 
 #include "ui_window.h"
 #include "ui_prefs.h"
-#include "ui_sorttable.h"
+#include "ui_keybindingstable.h"
 
 #include <FL/Fl_Color_Chooser.H>
 #include <FL/fl_draw.H>

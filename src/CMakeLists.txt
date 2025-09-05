@@ -131,6 +131,8 @@ set(source_ui
     ui_hyper.h
     ui_infobar.cc
     ui_infobar.h
+    ui_keybindingstable.cc
+    ui_keybindingstable.h
     ui_linedef.cc
     ui_linedef.h
     ui_menu.cc
@@ -153,8 +155,6 @@ set(source_ui
     ui_sector.h
     ui_sidedef.cc
     ui_sidedef.h
-    ui_sorttable.cc
-    ui_sorttable.h
     ui_thing.cc
     ui_thing.h
     ui_tile.cc

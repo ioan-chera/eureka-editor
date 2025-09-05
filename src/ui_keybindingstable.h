@@ -18,9 +18,8 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EUREKA_UI_SORTTABLE_H__
-#define __EUREKA_UI_SORTTABLE_H__
-#endif
+#ifndef __EUREKA_UI_KEYBINDINGSTABLE_H__
+#define __EUREKA_UI_KEYBINDINGSTABLE_H__
 
 #include "FL/Fl_Table_Row.H"
 
@@ -67,8 +66,10 @@ private:
     void sortColumn(int column, bool reverse);
     void rebuildCache();
 
-    bool challengedIndex = -1;
+    int challengedIndex = -1;
     bool sortReverse = false;
     int lastSortedColumn = -1;
     std::vector<CacheRow> cache;
 };
+
+#endif

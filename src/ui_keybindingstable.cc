@@ -18,7 +18,7 @@
 //
 //------------------------------------------------------------------------
 
-#include "ui_sorttable.h"
+#include "ui_keybindingstable.h"
 #include "m_keys.h"
 
 #include "FL/fl_draw.H"
@@ -104,7 +104,7 @@ void UI_KeyBindingsTable::draw_cell(TableContext context, int R, int C, int X, i
         fl_color(bgcolor);
         fl_rectf(X, Y, W, H);
         fl_font(ROW_FONTFACE, ROW_FONTSIZE);
-        fl_color(cache[R].is_duplicate ? FL_RED : FL_BLACK);
+        fl_color(cache[R].is_duplicate ? FL_RED : row_selected(R) && selection_color() == FL_SELECTION_COLOR ? FL_WHITE : FL_BLACK);
         if(C == 0 && challengedIndex == R)
             fl_draw("<?>", X + 2, Y, W, H, FL_ALIGN_LEFT);
         else

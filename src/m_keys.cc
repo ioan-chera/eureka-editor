@@ -718,7 +718,7 @@ public:
 	inline bool operator() (const key_binding_t& k1, const key_binding_t& k2) const
 	{
 		if (column == 'c' && k1.context != k2.context)
-			return k1.context > k2.context;
+			return k1.context < k2.context;
 
 		if (column != 'f' && k1.key != k2.key)
 			return M_KeyCmp(k1.key, k2.key) < 0;
