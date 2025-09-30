@@ -668,6 +668,8 @@ private:
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
+	static void undo_key_callback(Fl_Button *w, void *data);
+	static void redo_key_callback(Fl_Button *w, void *data);
 
 	static void reset_callback(Fl_Button *w, void *data);
 
@@ -726,6 +728,8 @@ public:
 	Fl_Button *key_copy;
 	Fl_Button *key_edit;
 	Fl_Button *key_delete;
+	Fl_Button *key_undo;
+	Fl_Button *key_redo;
 	Fl_Button *key_rebind;
 
 	/* Edit Tab */
@@ -919,6 +923,15 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		{ Fl_Box* o = new Fl_Box(20, 45, 355, 30, "Key Bindings");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+
+		{ key_undo = new Fl_Button(395, 50, 30, 30, "↶");
+		  key_undo->callback((Fl_Callback*)undo_key_callback, this);
+		  key_undo->tooltip("Undo key binding change");
+		}
+		{ key_redo = new Fl_Button(432, 50, 30, 30, "↷");
+		  key_redo->callback((Fl_Callback*)redo_key_callback, this);
+		  key_redo->tooltip("Redo key binding change");
 		}
 
 		{ key_list = new UI_KeyBindingsTable(20, 87, 442, 336, sortCallback, this);
@@ -1348,6 +1361,28 @@ void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 		prefs->key_list->selectRowAtIndex(line);
 
 		Fl::focus(prefs->key_list);
+	}
+}
+
+
+void UI_Preferences::undo_key_callback(Fl_Button *w, void *data)
+{
+	UI_Preferences *prefs = (UI_Preferences *)data;
+
+	if (!prefs->doUndo())
+	{
+		fl_beep();
+	}
+}
+
+
+void UI_Preferences::redo_key_callback(Fl_Button *w, void *data)
+{
+	UI_Preferences *prefs = (UI_Preferences *)data;
+
+	if (!prefs->doRedo())
+	{
+		fl_beep();
 	}
 }
 
