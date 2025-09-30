@@ -162,7 +162,7 @@ void Instance::CMD_Quit()
 void Instance::CMD_Undo()
 {
 	// Route to Preferences dialog if active
-	if (prefsdlg::TryUndo())
+	if (prefsdlg::TryUndo(preferencesDialog))
 		return;
 
 	if (! level.basis.undo())
@@ -179,7 +179,7 @@ void Instance::CMD_Undo()
 void Instance::CMD_Redo()
 {
 	// Route to Preferences dialog if active
-	if (prefsdlg::TryRedo())
+	if (prefsdlg::TryRedo(preferencesDialog))
 		return;
 
 	if (! level.basis.redo())

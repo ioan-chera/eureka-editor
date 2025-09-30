@@ -40,6 +40,7 @@
 class Fl_RGB_Image;
 class Lump_c;
 class UI_NodeDialog;
+class UI_Preferences;
 class UI_ProjectSetup;
 struct BadCount;
 struct NewDocument;
@@ -540,6 +541,9 @@ public:	// will be private when we encapsulate everything
 	grid::State grid{ *this };
 	Render_View_t r_view{ *this };
 	sector_info_cache_c sector_info_cache{ *this };
+
+private:
+    UI_Preferences *preferencesDialog = nullptr;
 };
 
 extern Instance *gInstance;	// for now we run with one instance, will have more for the MDI.

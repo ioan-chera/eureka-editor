@@ -46,16 +46,6 @@
 
 static int last_active_tab = 0;
 
-// Active preferences dialog pointer used to route Undo/Redo
-static class UI_Preferences *s_active_prefs = nullptr;
-
-namespace prefsdlg
-{
-	bool TryUndo();
-	bool TryRedo();
-}
-
-
 class UI_EditKey : public UI_Escapable_Window
 {
 private:
@@ -1452,8 +1442,6 @@ void UI_Preferences::Run()
 
 	set_modal();
 
-	// Hook as the active preferences dialog so Undo/Redo are routed here
-	s_active_prefs = this;
 	// Ensure fresh undo/redo stacks for this session
 	undo_stack_.clear();
 	redo_stack_.clear();
@@ -1472,7 +1460,6 @@ void UI_Preferences::Run()
 		gLog.printf("Preferences: discarded changes\n");
 		undo_stack_.clear();
 		redo_stack_.clear();
-		s_active_prefs = nullptr;
 		return;
 	}
 
@@ -1488,7 +1475,6 @@ void UI_Preferences::Run()
 	// Clear after saving and unhook
 	undo_stack_.clear();
 	redo_stack_.clear();
-	s_active_prefs = nullptr;
 }
 
 
@@ -1862,26 +1848,25 @@ int UI_Preferences::handle(int event)
 
 void Instance::CMD_Preferences()
 {
-	UI_Preferences * dialog = new UI_Preferences(options);
-
-	dialog->Run();
-
-	delete dialog;
+    UI_Preferences preferences(options);
+    preferencesDialog = &preferences;
+    AutoCleanup _([this](){ preferencesDialog = nullptr; });
+	preferences.Run();
 }
 
 namespace prefsdlg
 {
-	bool TryUndo()
+	bool TryUndo(UI_Preferences *preferences)
 	{
-		if(!s_active_prefs)
+		if(!preferences)
 			return false;
-		return s_active_prefs->doUndo();
+		return preferences->doUndo();
 	}
-	bool TryRedo()
+	bool TryRedo(UI_Preferences *preferences)
 	{
-		if(!s_active_prefs)
+		if(!preferences)
 			return false;
-		return s_active_prefs->doRedo();
+		return preferences->doRedo();
 	}
 }
 
