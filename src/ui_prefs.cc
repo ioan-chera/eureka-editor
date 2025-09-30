@@ -621,6 +621,7 @@ private:
 			s.after = std::move(after);
 			prefs->undo_stack_.push_back(std::move(s));
 			prefs->redo_stack_.clear();
+			prefs->updateUndoRedoButtons();
 		}
 	};
 public:
@@ -635,6 +636,7 @@ public:
 		global::pref_binds = s.before;
 		redo_stack_.push_back(std::move(s));
 		ReloadKeys();
+		updateUndoRedoButtons();
 		redraw();
 		return true;
 	}
@@ -649,6 +651,7 @@ public:
 		global::pref_binds = s.after;
 		undo_stack_.push_back(std::move(s));
 		ReloadKeys();
+		updateUndoRedoButtons();
 		redraw();
 		return true;
 	}
@@ -695,6 +698,19 @@ public:
 	void SetBinding(keycode_t key);
 
 	void EnsureKeyVisible(int line);
+
+private:
+	void updateUndoRedoButtons()
+	{
+		if(undo_stack_.empty())
+			key_undo->deactivate();
+		else
+			key_undo->activate();
+		if(redo_stack_.empty())
+			key_redo->deactivate();
+		else
+			key_redo->activate();
+	}
 
 public:
 	Fl_Tabs *tabs;
@@ -1442,6 +1458,7 @@ void UI_Preferences::Run()
 	// Ensure fresh undo/redo stacks for this session
 	undo_stack_.clear();
 	redo_stack_.clear();
+	updateUndoRedoButtons();
 
 	show();
 
