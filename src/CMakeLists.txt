@@ -146,7 +146,6 @@ set(source_ui
     ui_pic.cc
     ui_pic.h
     ui_prefs.cc
-    ui_prefs.h
     ui_replace.cc
     ui_replace.h
     ui_scroll.cc

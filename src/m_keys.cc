@@ -1328,5 +1328,19 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
 	return *code < UINT_MAX;
 }
 
+bool key_binding_t::sameAs(const key_binding_t &other) const noexcept
+{
+	if(this->key != other.key)
+		return false;
+	if(this->context != other.context)
+		return false;
+	if(this->cmd != other.cmd)
+		return false;
+	for(int i = 0; i < MAX_EXEC_PARAM; ++i)
+		if(this->param[i] != other.param[i])
+			return false;
+	return true;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

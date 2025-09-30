@@ -29,7 +29,6 @@
 #include <vector>
 
 #include "ui_window.h"
-#include "ui_prefs.h"
 #include "ui_menu.h"
 #include "m_keys.h"
 #include "ui_keybindingstable.h"
@@ -596,71 +595,36 @@ private:
 	{
 		std::vector<key_binding_t> before;
 		std::vector<key_binding_t> after;
-		SString desc;
 	};
 
 	std::vector<Snapshot> undo_stack_;
 	std::vector<Snapshot> redo_stack_;
 
-	static bool sameBinding(const key_binding_t &a, const key_binding_t &b)
-	{
-		if(a.key != b.key) return false;
-		if(a.context != b.context) return false;
-		if(a.cmd != b.cmd) return false;
-		for(int i = 0; i < MAX_EXEC_PARAM; ++i)
-			if(a.param[i] != b.param[i])
-				return false;
-		return true;
-	}
-
-	static bool sameBindingList(const std::vector<key_binding_t> &a,
-							  const std::vector<key_binding_t> &b)
-	{
-		if(a.size() != b.size())
-			return false;
-		for(size_t i = 0; i < a.size(); ++i)
-			if(!sameBinding(a[i], b[i]))
-				return false;
-		return true;
-	}
-
-	void updateMenuUndoRedo()
-	{
-		if(!gInstance || !gInstance->main_win)
-			return;
-		Fl_Sys_Menu_Bar *bar = gInstance->main_win->menu_bar;
-		if(!bar)
-			return;
-		menu::setUndoDetail(bar, undo_stack_.empty() ? "" : undo_stack_.back().desc);
-		menu::setRedoDetail(bar, redo_stack_.empty() ? "" : redo_stack_.back().desc);
-	}
-
 	struct ChangeGuard
 	{
-		UI_Preferences *prefs;
-		std::vector<key_binding_t> before;
-		const char *desc;
-		ChangeGuard(UI_Preferences *p, const char *d)
-			: prefs(p), before(global::pref_binds), desc(d) {}
+		UI_Preferences *const prefs;
+		const std::vector<key_binding_t> before;
+
+		ChangeGuard(UI_Preferences *p, const char *d) : prefs(p), before(global::pref_binds)
+		{
+		}
+
 		void commit()
 		{
 			std::vector<key_binding_t> after = global::pref_binds;
-			if(!prefs)
-				return;
 			// Only push a snapshot if something actually changed
-			if(!sameBindingList(before, after))
-			{
-				Snapshot s;
-				s.before = std::move(before);
-				s.after = std::move(after);
-				s.desc = desc;
-				prefs->undo_stack_.push_back(std::move(s));
-				prefs->redo_stack_.clear();
-				prefs->updateMenuUndoRedo();
-			}
+			if(before == after)
+				return;
+			
+			Snapshot s;
+			s.before = std::move(before);
+			s.after = std::move(after);
+			prefs->undo_stack_.push_back(std::move(s));
+			prefs->redo_stack_.clear();
 		}
 	};
 public:
+
 	bool doUndo()
 	{
 		if(undo_stack_.empty())
@@ -672,7 +636,6 @@ public:
 		redo_stack_.push_back(std::move(s));
 		ReloadKeys();
 		redraw();
-		updateMenuUndoRedo();
 		return true;
 	}
 
@@ -687,7 +650,6 @@ public:
 		undo_stack_.push_back(std::move(s));
 		ReloadKeys();
 		redraw();
-		updateMenuUndoRedo();
 		return true;
 	}
 private:	
@@ -1853,23 +1815,6 @@ void Instance::CMD_Preferences()
     AutoCleanup _([this](){ preferencesDialog = nullptr; });
 	preferences.Run();
 }
-
-namespace prefsdlg
-{
-	bool TryUndo(UI_Preferences *preferences)
-	{
-		if(!preferences)
-			return false;
-		return preferences->doUndo();
-	}
-	bool TryRedo(UI_Preferences *preferences)
-	{
-		if(!preferences)
-			return false;
-		return preferences->doRedo();
-	}
-}
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

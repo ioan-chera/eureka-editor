@@ -23,15 +23,6 @@
 
 class UI_Preferences;
 
-namespace prefsdlg
-{
-	// Attempt to handle Undo/Redo while Preferences dialog is active.
-	// Returns true if handled by the dialog (i.e., dialog is active
-	// and an undo/redo step was executed), false otherwise.
-	bool TryUndo(UI_Preferences *preferences);
-	bool TryRedo(UI_Preferences *preferences);
-}
-
 #endif  /* __EUREKA_UI_PREFS_H__ */
 
 //--- editor settings ---

@@ -192,6 +192,12 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
 
 struct key_binding_t
 {
+	bool sameAs(const key_binding_t &other) const noexcept;
+	bool operator==(const key_binding_t &other) const noexcept
+	{
+		return sameAs(other);
+	}
+
 	keycode_t key;
 
 	KeyContext context;
