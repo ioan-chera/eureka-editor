@@ -40,7 +40,6 @@
 class Fl_RGB_Image;
 class Lump_c;
 class UI_NodeDialog;
-class UI_Preferences;
 class UI_ProjectSetup;
 struct BadCount;
 struct NewDocument;

@@ -45,6 +45,7 @@
 
 static int last_active_tab = 0;
 
+
 class UI_EditKey : public UI_Escapable_Window
 {
 private:
@@ -605,7 +606,7 @@ private:
 		UI_Preferences *const prefs;
 		const std::vector<key_binding_t> before;
 
-		ChangeGuard(UI_Preferences *p, const char *d) : prefs(p), before(global::pref_binds)
+		ChangeGuard(UI_Preferences *p) : prefs(p), before(global::pref_binds)
 		{
 		}
 
@@ -624,7 +625,6 @@ private:
 			prefs->updateUndoRedoButtons();
 		}
 	};
-public:
 
 	bool doUndo()
 	{
@@ -655,7 +655,7 @@ public:
 		redraw();
 		return true;
 	}
-private:	
+
 	char key_sort_mode;
 	bool key_sort_rev;
 
@@ -1307,8 +1307,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	if (was_ok)
 	{
 		// assume we can set it, since the dialog validated it
-		ChangeGuard guard(prefs,
-			is_add ? "Add Key Binding" : (is_copy ? "Copy Key Binding" : "Edit Key Binding"));
+		ChangeGuard guard(prefs);
 
 		if (is_add || is_copy)
 		{
@@ -1364,7 +1363,7 @@ void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 	}
 
 	{
-		ChangeGuard guard(prefs, "Delete Key Binding");
+		ChangeGuard guard(prefs);
 		M_DeleteLocalBinding(line);
 		guard.commit();
 	}
@@ -1424,7 +1423,7 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 
 	if (is_keys)
 	{
-		ChangeGuard guard(prefs, "Reset Key Bindings");
+		ChangeGuard guard(prefs);
 		M_CopyBindings(true /* from_defaults */);
 		guard.commit();
 		prefs->LoadKeys();
@@ -1821,7 +1820,7 @@ void UI_Preferences::SetBinding(keycode_t key)
 {
 	int bind_idx = key_list->getChallenged();
 
-	ChangeGuard guard(this, "Re-bind Key");
+	ChangeGuard guard(this);
 	M_ChangeBindingKey(bind_idx, key);
 	guard.commit();
 
