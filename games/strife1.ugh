@@ -402,6 +402,16 @@ sector 18 "Carry Player by tag"
 
 include "doom_groups"
 
+lineflag "upper unpeg"  0x0008
+lineflag "lower unpeg"  0x0010
+lineflag "jump over"    0x0200
+lineflag ""             0x0800 pair 0
+lineflag "translucency" 0x1000 pair 1
+lineflag "impassable"   0x0001
+lineflag "block mons"   0x0002
+lineflag "sound block"  0x0040
+lineflag "block flyers" 0x0400
+
 linegroup j "Split Door"
 
 

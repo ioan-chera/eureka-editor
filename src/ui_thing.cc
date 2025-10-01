@@ -801,9 +801,6 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 		this->remove(button.button.get());
 	flagButtons.clear();
 
-
-	gLog.printf("%s: %zu flags\n", __func__, config.thing_flags.size());
-
 	int Y = y() + optionStartY;
 	if(!config.thing_flags.empty())
 	{

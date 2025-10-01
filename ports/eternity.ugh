@@ -36,7 +36,7 @@ else
 endif
 
 if $ALLOW_BOOM is 1
-  include "mbf"
+  include "mbf21"
 endif
 
 if $MAP_FORMAT is DOOM
@@ -346,6 +346,8 @@ thing 14063 s nv 16 NULL "EE: Ambience 63"
 thing 14064 s nv 16 NULL "EE: Ambience 64"
 thing 14065 s nv 16 NULL "EE: Ambience Ex"
 
+#---- LINEDEF FLAGS -----------------
+lineflag "3D MidTex"     0x0400
 
 #---- HEXEN-STYLE SPECIALS ----------
 

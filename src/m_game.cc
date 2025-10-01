@@ -298,6 +298,10 @@ static void ParseClearKeywords(ConfigData &config, const char ** argv, int argc,
 		{
 			config.thing_flags.clear();
 		}
+		else if (y_stricmp(argv[0], "lineflags") == 0)
+		{
+			config.line_flags.clear();
+		}
 		else if (y_stricmp(argv[0], "textures") == 0)
 		{
 			config.texture_groups.clear();
@@ -709,6 +713,39 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			}
 		if(!found)
 			config.thing_flags.push_back(flag);
+	}
+
+	else if(y_stricmp(argv[0], "lineflag") == 0)
+	{
+		if(nargs < 2)
+			pst->fail(bad_arg_count_fail, argv[0], 2);
+
+		lineflag_t flag = {};
+		flag.label = argv[1];
+		flag.value = (int)strtol(argv[2], nullptr, 0);
+		flag.pairIndex = -1;
+		// Optional: pair <index>
+		if(nargs >= 4 && !y_stricmp(argv[3], "pair"))
+		{
+			flag.pairIndex = atoi(argv[4]);
+			if(flag.pairIndex < -1)
+				flag.pairIndex = -1;
+			if(flag.pairIndex > 1)
+				flag.pairIndex = 1;
+		}
+
+		bool foundExisting = false;
+		for(lineflag_t &existingflag : config.line_flags)
+		{
+			if(existingflag.value == flag.value)
+			{
+				existingflag = flag;
+				foundExisting = true;
+			}
+		}
+
+		if(!foundExisting)
+			config.line_flags.push_back(flag);
 	}
 
 	else if (y_stricmp(argv[0], "thing") == 0)

@@ -59,6 +59,8 @@ thing 5002 - nv  20 NULL  "BOOM: Point puller"
 
 #---- BOOM LINETYPES ----------
 
+lineflag "pass thru" 0x0200
+
 # Modify the manual doors to support light_tag
 line  31 d "D1 Open and stay open"  :tag
 line   1 d "DR Open door"   :tag

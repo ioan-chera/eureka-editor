@@ -37,6 +37,8 @@
 #include "w_rawdef.h"
 #include "w_rawdef.h"
 
+#include <algorithm>
+
 
 #define MLF_ALL_AUTOMAP  \
 	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
@@ -94,6 +96,8 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
+	const int Y0 = Y;
+	const int X0 = X;
 
 	X += INSET_LEFT;
 	Y += INSET_TOP;
@@ -131,8 +135,8 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	actkind = new Fl_Choice(type->x(), Y, SPAC_WIDTH, TYPE_INPUT_HEIGHT);
 	// this order must match the SPAC_XXX constants
-	actkind->add("W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??");
-	actkind->value(12);
+	actkind->add("W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|S1+|SR+|??");
+	actkind->value(14);
 	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
 	actkind->deactivate();
 	actkind->hide();
@@ -178,50 +182,12 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	Y += flags->h() - 1;
 
-	static const int FW = 110;
+	// Remember where to place dynamic linedef flags
+	flagsStartX = X - X0;
+	flagsStartY = Y - Y0;
+	flagsAreaW = W;
 
-	auto addCheckBox = [this, &X, &Y, &W](bool right, const char *text, int flag)
-	{
-		auto check = new Fl_Check_Button(X + (right ? W - 120 : 28), Y + 2, FW, 20, text);
-		check->labelsize(12);
-		check->callback(flags_callback, new line_flag_CB_data_c(this, flag));
-		return check;
-	};
-
-	f_upper = addCheckBox(false, "upper unpeg", MLF_UpperUnpegged);
-	f_walk = addCheckBox(true, "impassable", MLF_Blocking);
-
-	Y += 19;
-
-	f_lower = addCheckBox(false, "lower unpeg", MLF_LowerUnpegged);
-	f_mons = addCheckBox(true, "block mons", MLF_BlockMonsters);
-
-	Y += 19;
-
-	f_passthru = addCheckBox(false, "pass thru", MLF_Boom_PassThru);
-	f_passthru->hide();
-
-	f_jumpover = addCheckBox(false, "jump over", MLF_Strife_JumpOver);
-	f_jumpover->hide();
-
-	f_sound = addCheckBox(true, "sound block", MLF_SoundBlock);
-
-	Y += 19;
-
-	f_3dmidtex = addCheckBox(true, "3D MidTex", MLF_Eternity_3DMidTex);
-	f_3dmidtex->hide();
-
-	f_trans1 = addCheckBox(false, "", MLF_Strife_Translucent1);
-	f_trans1->hide();
-
-	f_trans2 = new Fl_Check_Button(X+44, Y+2, FW, 20, "translucency");
-	f_trans2->labelsize(12);
-	f_trans2->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent2));
-	f_trans2->hide();
-
-	f_flyers = addCheckBox(true, "block flyers", MLF_Strife_BlockFloaters);
-	f_flyers->hide();
-
+	// Leave space; dynamic flags will be created in UpdateGameInfo and side boxes moved accordingly
 	Y += 29;
 
 
@@ -826,7 +792,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			FlagsFromInt(0);
 
-			actkind->value(12);  // show as "??"
+			actkind->value(14);  // show as "??"
 			actkind->deactivate();
 		}
 	}
@@ -872,7 +838,7 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 		new_act |= (lineflags & MLF_Repeatable) ? 1 : 0;
 
 		// show "??" for unknown values
-		if (new_act > 12) new_act = 12;
+		if (new_act > 14) new_act = 14;
 
 		actkind->value(new_act);
 	}
@@ -886,19 +852,12 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 	else
 		f_automap->value(0);
 
-	f_upper   ->value((lineflags & MLF_UpperUnpegged) ? 1 : 0);
-	f_lower   ->value((lineflags & MLF_LowerUnpegged) ? 1 : 0);
-	f_passthru->value((lineflags & MLF_Boom_PassThru) ? 1 : 0);
-	f_3dmidtex->value((lineflags & MLF_Eternity_3DMidTex) ? 1 : 0);
-
-	f_jumpover->value((lineflags & MLF_Strife_JumpOver)   ? 1 : 0);
-	f_trans1  ->value((lineflags & MLF_Strife_Translucent1) ? 1 : 0);
-	f_trans2  ->value((lineflags & MLF_Strife_Translucent2) ? 1 : 0);
-
-	f_walk  ->value((lineflags & MLF_Blocking)      ? 1 : 0);
-	f_mons  ->value((lineflags & MLF_BlockMonsters) ? 1 : 0);
-	f_sound ->value((lineflags & MLF_SoundBlock)    ? 1 : 0);
-	f_flyers->value((lineflags & MLF_Strife_BlockFloaters) ? 1 : 0);
+	// Set dynamic line flag buttons
+	for(const auto &btn : flagButtons)
+	{
+		if(btn.button)
+			btn.button->value((lineflags & btn.info->value) ? 1 : 0);
+	}
 }
 
 
@@ -914,42 +873,19 @@ int UI_LineBox::CalcFlags() const
 		case 3: /* Secret    */ lineflags |= MLF_Secret; break;
 	}
 
-	if (f_upper->value())    lineflags |= MLF_UpperUnpegged;
-	if (f_lower->value())    lineflags |= MLF_LowerUnpegged;
-
-	if (f_walk->value())  lineflags |= MLF_Blocking;
-	if (f_mons->value())  lineflags |= MLF_BlockMonsters;
-	if (f_sound->value()) lineflags |= MLF_SoundBlock;
-
+	// Activation for non-DOOM formats
 	if (inst.loaded.levelFormat != MapFormat::doom)
 	{
 		int actval = actkind->value();
-		if (actval >= 12) actval = 0;
-
+		if (actval >= 14) actval = 0;
 		lineflags |= (actval << 9);
 	}
-	else
+
+	// Apply dynamic flags
+	for(const auto &btn : flagButtons)
 	{
-		if (inst.conf.features.pass_through && f_passthru->value())
-			lineflags |= MLF_Boom_PassThru;
-
-		if (inst.conf.features.midtex_3d && f_3dmidtex->value())
-			lineflags |= MLF_Eternity_3DMidTex;
-
-		if (inst.conf.features.strife_flags)
-		{
-			if (f_jumpover->value())
-				lineflags |= MLF_Strife_JumpOver;
-
-			if (f_flyers->value())
-				lineflags |= MLF_Strife_BlockFloaters;
-
-			if (f_trans1->value())
-				lineflags |= MLF_Strife_Translucent1;
-
-			if (f_trans2->value())
-				lineflags |= MLF_Strife_Translucent2;
-		}
+		if(btn.button && btn.button->value())
+			lineflags |= btn.info->value;
 	}
 
 	return lineflags;
@@ -1005,9 +941,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 		actkind->show();
 		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
-
-		f_passthru->hide();
-		f_3dmidtex->hide();
 	}
 	else
 	{
@@ -1017,37 +950,109 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		actkind->hide();
 		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 
-		if (config.features.pass_through)
-			f_passthru->show();
-		else
-			f_passthru->hide();
-
-		if (config.features.midtex_3d)
-			f_3dmidtex->show();
-		else
-			f_3dmidtex->hide();
-
-		if (config.features.strife_flags)
-		{
-			f_jumpover->show();
-			f_flyers->show();
-			f_trans1->show();
-			f_trans2->show();
-		}
-		else
-		{
-			f_jumpover->hide();
-			f_flyers->hide();
-			f_trans1->hide();
-			f_trans2->hide();
-		}
-
 		if (config.features.gen_types)
 			gen->show();
 		else
 			gen->hide();
 	}
 
+	// Recreate dynamic linedef flags from configuration
+	for(const auto &btn : flagButtons)
+		this->remove(btn.button.get());
+	flagButtons.clear();
+
+	int Y = y() + flagsStartY;
+	if(!config.line_flags.empty())
+	{
+		// Build slots from sequential flags, supporting optional pairing (pairIndex 0/1)
+		struct Slot
+		{
+			const lineflag_t *a = nullptr;
+			const lineflag_t *b = nullptr;
+		};
+		std::vector<Slot> slots;
+		slots.reserve(config.line_flags.size());
+		for(size_t i = 0; i < config.line_flags.size(); ++i)
+		{
+			const lineflag_t *f = &config.line_flags[i];
+			if(f->pairIndex == 0 && i + 1 < config.line_flags.size() && config.line_flags[i + 1].pairIndex == 1)
+			{
+				Slot s;
+				s.a = f;
+				s.b = &config.line_flags[i + 1];
+				slots.push_back(s);
+				++i; // consume the pair
+			}
+			else
+			{
+				Slot s;
+				if(f->pairIndex == 1)
+					s.b = f;
+				else
+					s.a = f;
+				slots.push_back(s);
+			}
+		}
+
+		const int FW = 110;
+		const int leftX = x() + flagsStartX + 28;
+		const int rightX = x() + flagsStartX + flagsAreaW - 120;
+		const int rowH = 19;
+
+		const int total = (int)slots.size();
+		const int leftCount = (total + 1) / 2; // ceil to make columns as even as possible
+
+		int yLeft = Y;
+		int yRight = Y;
+
+		begin();
+		for(int idx = 0; idx < total; ++idx)
+		{
+			const Slot &s = slots[idx];
+			const bool onLeft = idx < leftCount;
+			const int baseX = onLeft ? leftX : rightX;
+			int &curY = onLeft ? yLeft : yRight;
+
+			if(s.a)
+			{
+				LineFlagButton fb;
+				fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
+				fb.button->labelsize(12);
+				fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->value);
+				fb.button->callback(flags_callback, fb.data.get());
+				fb.info = s.a;
+				flagButtons.push_back(std::move(fb));
+			}
+			if(s.b)
+			{
+				LineFlagButton fb2;
+				fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
+				fb2.button->labelsize(12);
+				fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->value);
+				fb2.button->callback(flags_callback, fb2.data.get());
+				fb2.info = s.b;
+				flagButtons.push_back(std::move(fb2));
+			}
+			curY += rowH;
+		}
+		end();
+
+		Y = (yLeft > yRight ? yLeft : yRight) + 29;
+	}
+	else
+	{
+		// keep some spacing if no flags defined
+		Y += 29;
+	}
+
+	// Reposition side boxes under the generated flags
+	front->Fl_Widget::position(front->x(), Y);
+	Y += front->h() + 14;
+	back->Fl_Widget::position(back->x(), Y);
+	front->redraw();
+	back->redraw();
+
+	// Show Hexen/UDMF args when needed
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		if (loaded.levelFormat != MapFormat::doom)

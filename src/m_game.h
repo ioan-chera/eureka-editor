@@ -139,6 +139,19 @@ struct thingflag_t
 	int value;
 };
 
+// New: lineflag <label> <value> [pair <index>]
+// This describes a linedef flag checkbox in the linedef panel.
+// - label is the UI text (can be empty)
+// - value is the bit mask to toggle in LineDef::flags
+// - optional "pair <index>" allows two small checkboxes to share the same slot
+//   (index 0 is the left-small one, index 1 is the right-small one)
+struct lineflag_t
+{
+	SString label;
+	int value = 0;
+	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot
+};
+
 
 enum thingdef_flags_e
 {
@@ -349,7 +362,7 @@ enum class ParsePurpose
 };
 
 //
-// Exception throwable by M_ParseDefinitionFile. Meant to be caught by parties 
+// Exception throwable by M_ParseDefinitionFile. Meant to be caught by parties
 // who don't want the app to terminate suddenly.
 //
 class ParseException : public std::runtime_error
@@ -382,9 +395,10 @@ struct ConfigData
 	std::map<char, thinggroup_t> thing_groups;
 	std::map<int, thingtype_t> thing_types;
 	std::vector<thingflag_t> thing_flags;
+	std::vector<lineflag_t> line_flags; // New: linedef UI flags
 
 	int num_gen_linetypes = 0;
-	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
+	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {}; // BOOM Generalized Lines
 
 	const thingtype_t &getThingType(int type) const;
 	const linetype_t &getLineType(int type) const;

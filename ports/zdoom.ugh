@@ -37,7 +37,8 @@ else
 endif
 
 if $ALLOW_BOOM is 1
-  include "mbf"
+  include "mbf21"
+  lineflag "3D MidTex" 0x0400
 endif
 
 if $MAP_FORMAT not DOOM
@@ -67,6 +68,18 @@ if $MAP_FORMAT not DOOM
   thingflag 5 0 stand   off 0x4000
   thingflag 5 1 shadow  off 0x0800
   thingflag 5 2 alt-vis off 0x1000
+
+  clear lineflags
+  lineflag "two sided"   0x0004
+  lineflag "upper unpeg" 0x0008
+  lineflag "lower unpeg" 0x0010
+  lineflag "impassable"  0x0001
+  lineflag "block mons"  0x0002
+  lineflag "sound block" 0x0040
+
+  lineflag "mons activate" 0x2000
+  lineflag "block players" 0x4000
+  lineflag "block all"     0x8000
 endif
 
 map_formats DOOM HEXEN UDMF

@@ -24,6 +24,13 @@
 #
 #------------------------------------------------------------------------
 
+lineflag "two sided"   0x0004
+lineflag "upper unpeg" 0x0008
+lineflag "lower unpeg" 0x0010
+lineflag "impassable"  0x0001
+lineflag "block mons"  0x0002
+lineflag "sound block" 0x0040
+
 #
 #	Definition of linedef types
 #

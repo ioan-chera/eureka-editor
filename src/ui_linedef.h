@@ -26,6 +26,7 @@
 
 class UI_DynIntInput;
 struct LoadingData;
+struct lineflag_t; // forward declaration
 
 class UI_LineBox : public MapItemBox
 {
@@ -47,19 +48,17 @@ private:
 	// Flags
 	Fl_Choice *f_automap;
 
-	Fl_Check_Button *f_upper;
-	Fl_Check_Button *f_lower;
-	Fl_Check_Button *f_passthru;
-	Fl_Check_Button *f_3dmidtex;  // Eternity
-
-	Fl_Check_Button *f_jumpover;  //
-	Fl_Check_Button *f_trans1;    // Strife
-	Fl_Check_Button *f_trans2;    //
-
-	Fl_Check_Button *f_walk;
-	Fl_Check_Button *f_mons;
-	Fl_Check_Button *f_sound;
-	Fl_Check_Button *f_flyers;    // Strife
+	// Dynamic linedef flags (configured via .ugh)
+	struct LineFlagButton
+	{
+		std::unique_ptr<Fl_Check_Button> button;
+		std::unique_ptr<class line_flag_CB_data_c> data;
+		const struct lineflag_t *info;
+	};
+	std::vector<LineFlagButton> flagButtons;
+	int flagsStartX = 0;
+	int flagsStartY = 0;
+	int flagsAreaW = 0;
 
 public:
 	UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr);
