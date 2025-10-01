@@ -191,7 +191,7 @@ std::vector<std::string> TestMapFixture::getResultLines() const
 
 	std::ifstream input;
 	input.open(outputPath);
-	if(input.is_open())
+	if(!input.is_open())
 	{
 		// Wait more if it fails at first, just in case
 		std::this_thread::sleep_for(std::chrono::seconds(2));
