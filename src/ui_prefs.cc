@@ -1862,10 +1862,7 @@ int UI_Preferences::handle(int event)
 
 void Instance::CMD_Preferences()
 {
-    UI_Preferences preferences(options);
-    preferencesDialog = &preferences;
-    AutoCleanup _([this](){ preferencesDialog = nullptr; });
-	preferences.Run();
+    UI_Preferences(options).Run();
 }
 
 //--- editor settings ---
