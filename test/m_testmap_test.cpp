@@ -222,7 +222,18 @@ std::vector<std::string> TestMapFixture::getResultLines() const
 std::vector<std::string> TestMapFixture::testMapAndGetLines()
 {
 	// Now run
-	inst.CMD_TestMap();
+    try
+    {
+        inst.CMD_TestMap();
+    }
+    catch(const std::exception &e)
+    {
+        // Add some delay to make sure we pass Windows failures
+        if(strstr(e.what(), "being used by another process"))
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        // Retry
+        inst.CMD_TestMap();
+    }
 	mDeleteList.push(outputPath);
 	mDeleteList.push(finishMarkPath);
 
