@@ -135,8 +135,8 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	actkind = new Fl_Choice(type->x(), Y, SPAC_WIDTH, TYPE_INPUT_HEIGHT);
 	// this order must match the SPAC_XXX constants
-	actkind->add("W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|S1+|SR+|??");
-	actkind->value(14);
+	actkind->add(getActivationMenuString());
+	actkind->value(getActivationCount());
 	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
 	actkind->deactivate();
 	actkind->hide();
@@ -376,6 +376,17 @@ void UI_LineBox::checkSidesDirtyFields()
 {
 	front->checkDirtyFields();
 	back->checkDirtyFields();
+}
+
+int UI_LineBox::getActivationCount() const
+{
+	return inst.conf.features.player_use_passthru_activation ? 14 : 12;
+}
+const char *UI_LineBox::getActivationMenuString() const
+{
+	return inst.conf.features.player_use_passthru_activation ?
+		"W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|S1+|SR+|??" :
+		"W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??";
 }
 
 void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
@@ -792,7 +803,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			FlagsFromInt(0);
 
-			actkind->value(14);  // show as "??"
+			actkind->value(getActivationCount());  // show as "??"
 			actkind->deactivate();
 		}
 	}
@@ -838,7 +849,8 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 		new_act |= (lineflags & MLF_Repeatable) ? 1 : 0;
 
 		// show "??" for unknown values
-		if (new_act > 14) new_act = 14;
+		int count = getActivationCount();
+		if (new_act > count) new_act = count;
 
 		actkind->value(new_act);
 	}
@@ -877,7 +889,8 @@ int UI_LineBox::CalcFlags() const
 	if (inst.loaded.levelFormat != MapFormat::doom)
 	{
 		int actval = actkind->value();
-		if (actval >= 14) actval = 0;
+		if (actval >= getActivationCount())
+			actval = 0;
 		lineflags |= (actval << 9);
 	}
 
@@ -938,6 +951,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		tag->hide();
 		length->hide();
 		gen->hide();
+
+		actkind->clear();
+		actkind->add(getActivationMenuString());
 
 		actkind->show();
 		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());

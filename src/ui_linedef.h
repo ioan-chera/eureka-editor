@@ -86,6 +86,9 @@ public:
 	}
 
 private:
+	int getActivationCount() const;
+	const char *getActivationMenuString() const;
+
 	void CalcLength();
 
 	int  CalcFlags() const;

@@ -260,6 +260,9 @@ struct port_features_t
 	int extra_floors;		// bitmask: +1 EDGE, +2 Legacy, +4 for ZDoom in Hexen format
 	int slopes;				// bitmask: +1 EDGE, +2 Eternity, +4 Odamex,
 							//          +8 for ZDoom in Hexen format, +16 ZDoom things
+
+	// for Hexen format, allows the extra 2 player-use-passthru activations
+	int player_use_passthru_activation;
 };
 
 //

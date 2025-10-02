@@ -29,6 +29,7 @@
 if $MAP_FORMAT not DOOM
   set $ALLOW_BOOM 0
   set $HEXEN_SPECIALS 1
+  feature player_use_passthru_activation 1
 else
   # Strife ZDoom in Doom format doesn't inherit the BOOM features.
   if $GAME_NAME not strife1

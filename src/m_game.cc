@@ -360,6 +360,7 @@ static const FeatureMapping skFeatureMappings[] =
 	MAPPING(neg_patch_offsets),
 	MAPPING(extra_floors),
 	MAPPING(slopes),
+	MAPPING(player_use_passthru_activation),
 #undef MAPPING
 };
 
