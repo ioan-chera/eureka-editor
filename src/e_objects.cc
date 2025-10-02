@@ -758,8 +758,7 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID,
 
 	v2double_t splitPoint;
 	int splitLine = -1;
-	obj = hover::findSplitLine(inst.level, inst.loaded.levelFormat, inst.edit, inst.grid,
-							   splitPoint, dest, vertexID);
+	obj = inst.findSplitLine(splitPoint, dest, vertexID);
 	if(obj.valid())
 	{
 		const auto& L = inst.level.linedefs[obj.num];
@@ -799,7 +798,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto T = doc.things[*it];
+				const auto &T = doc.things[*it];
 
 				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
 				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
@@ -833,7 +832,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 			// apply the Z delta first
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto S = doc.sectors[*it];
+				const auto &S = doc.sectors[*it];
 
 				op.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta.z);
 				op.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta.z);

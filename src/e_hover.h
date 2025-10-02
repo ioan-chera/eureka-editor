@@ -53,9 +53,6 @@ struct v2double_t;
 
 namespace hover
 {
-Objid findSplitLine(const Document &doc, MapFormat format, const Editor_State_t &edit,
-					const grid::State &grid, v2double_t &out_pos, const v2double_t &ptr,
-					int ignore_vert);
 Objid findSplitLineForDangler(const Document &doc, MapFormat format,
 							  const grid::State &grid, int v_num);
 int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side);

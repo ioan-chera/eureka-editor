@@ -446,27 +446,25 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const gr
 //
 // Finds a split line
 //
-Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_State_t &edit,
-						   const grid::State &grid, v2double_t &out_pos, const v2double_t &ptr,
-						   int ignore_vert)
+Objid Instance::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignore_vert) const
 {
 	out_pos = {};
 
-	Objid out = getNearestSplitLine(doc, format, grid, ptr, ignore_vert);
+	Objid out = getNearestSplitLine(level, loaded.levelFormat, grid, ptr, ignore_vert);
 
 	if(!out.valid())
 		return Objid();
 
-	const auto L = doc.linedefs[out.num];
+	const auto &L = level.linedefs[out.num];
 
-	v2double_t v1 = doc.getStart(*L).xy();
-	v2double_t v2 = doc.getEnd(*L).xy();
+	v2double_t v1 = level.getStart(*L).xy();
+	v2double_t v2 = level.getEnd(*L).xy();
 
 	double len = (v2 - v1).hypot();
 
 	if(grid.getRatio() > 0 && edit.action == EditorAction::drawLine)
 	{
-		const auto V = doc.vertices[edit.drawLine.from.num];
+		const auto &V = level.vertices[edit.drawLine.from.num];
 
 		// convert ratio into a vector, use it to intersect the linedef
 		v2double_t ppos1 = V->xy();
@@ -500,7 +498,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 		out_pos = v2double_t(grid.ForceSnap(ptr));
 
 		// snapped onto an end point?
-		if(doc.touchesCoord(*L, FFixedPoint(out_pos.x), FFixedPoint(out_pos.y)))
+		if(level.touchesCoord(*L, FFixedPoint(out_pos.x), FFixedPoint(out_pos.y)))
 			return Objid();
 
 		// require snap coordinate be not TOO FAR from the line
@@ -514,7 +512,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 		// in FREE mode, ensure split point is directly on the linedef
 		out_pos = ptr;
 
-		linemod::moveCoordOntoLinedef(doc, out.num, out_pos);
+		linemod::moveCoordOntoLinedef(level, out.num, out_pos);
 	}
 
 	// always ensure result is along the linedef (not off the ends)
@@ -1006,7 +1004,7 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const gr
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
-		const auto L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if(L->start == ignore_vert || L->end == ignore_vert)
 			continue;

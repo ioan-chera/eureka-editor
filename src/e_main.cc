@@ -234,9 +234,7 @@ static void UpdateSplitLine(Instance &inst, const v2double_t &map)
 		inst.edit.pointer_in_window &&
 	    inst.edit.highlight.is_nil())
 	{
-		inst.edit.split_line = hover::findSplitLine(inst.level, inst.loaded.levelFormat, inst.edit,
-													inst.grid, inst.edit.split, map,
-													inst.edit.dragged.num);
+		inst.edit.split_line = inst.findSplitLine(inst.edit.split, map, inst.edit.dragged.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)

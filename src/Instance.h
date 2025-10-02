@@ -200,6 +200,9 @@ public:
 	void R3D_WHEEL_Move();
 	void Transform_Update();
 
+	// E_HOVER
+	Objid findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignore_vert) const;
+
 	// E_LINEDEF
 	bool LD_RailHeights(int &z1, int &z2, const LineDef *L, const SideDef *sd,
 		const Sector *front, const Sector *back) const;
