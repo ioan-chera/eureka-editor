@@ -27,8 +27,46 @@
 #include <unistd.h>
 #endif
 
+#include <thread>
+#include <chrono>
+
 // Linux: mkdtemp
 // Windows: GetTempPath
+
+//
+// Helper function to remove a file/directory with retry logic for Windows
+//
+static bool removeWithRetry(const fs::path& path, int maxRetries = 5)
+{
+	for (int attempt = 0; attempt < maxRetries; ++attempt)
+	{
+		std::error_code ec;
+		bool removed = fs::remove(path, ec);
+		
+		if (removed || !ec)
+		{
+			return true;
+		}
+		
+#ifdef _WIN32
+		// On Windows, check if it's a "file in use" error
+		if (ec.value() == ERROR_SHARING_VIOLATION || ec.value() == ERROR_ACCESS_DENIED)
+		{
+			if (attempt < maxRetries - 1)
+			{
+				// Wait a bit before retrying (exponential backoff)
+				std::this_thread::sleep_for(std::chrono::milliseconds(50 * (1 << attempt)));
+				continue;
+			}
+		}
+#endif
+		
+		// If we get here, either it's not a retryable error or we've exhausted retries
+		return false;
+	}
+	
+	return false;
+}
 
 void TempDirContext::SetUp()
 {
@@ -62,10 +100,10 @@ void TempDirContext::TearDown()
 		while(!mDeleteList.empty())
 		{
 			// Don't assert fatally, so we get the change to delete what we can.
-			fs::remove(mDeleteList.top());
+			ASSERT_TRUE(removeWithRetry(mDeleteList.top()));
 			mDeleteList.pop();
 		}
-		fs::remove(mTempDir);
+		ASSERT_TRUE(removeWithRetry(mTempDir));
 	}
 }
 
