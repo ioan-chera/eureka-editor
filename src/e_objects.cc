@@ -740,7 +740,7 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID,
 
 	v2double_t dest = vertex.xy() + delta;
 
-	Objid obj = hover::getNearbyObject(ObjType::vertices, inst.level, inst.conf, inst.grid, dest);
+	Objid obj = inst.getNearbyObject(ObjType::vertices, dest);
 	if(obj.valid() && obj.num != vertexID && !movingGroup.get(obj.num))
 	{
 		// Vertex merging

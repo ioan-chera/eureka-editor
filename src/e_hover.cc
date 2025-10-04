@@ -315,22 +315,21 @@ static Objid getNearestLinedef(const Document &doc, const grid::State &grid, con
 //  coordinates.  When several objects are close, the smallest
 //  is chosen.
 //
-Objid hover::getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
-							 const grid::State &grid, const v2double_t &pos)
+Objid Instance::getNearbyObject(ObjType type, const v2double_t &pos) const
 {
 	switch(type)
 	{
 	case ObjType::things:
-		return getNearestThing(doc, config, grid, pos);
+		return getNearestThing(level, conf, grid, pos);
 
 	case ObjType::vertices:
-		return getNearestVertex(doc, grid, pos);
+		return getNearestVertex(level, grid, pos);
 
 	case ObjType::linedefs:
-		return getNearestLinedef(doc, grid, pos);
+		return getNearestLinedef(level, grid, pos);
 
 	case ObjType::sectors:
-		return getNearestSector(doc, pos);
+		return hover::getNearestSector(level, pos);
 
 	default:
 		BugError("Hover::getNearbyObject: bad objtype %d\n", (int)type);

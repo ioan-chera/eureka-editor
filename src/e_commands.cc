@@ -667,7 +667,7 @@ void Instance::ACT_Click_release()
 		if (edit.render3d)
 			near_obj = edit.highlight;
 		else
-			near_obj = hover::getNearbyObject(edit.mode, level, conf, grid, edit.map.xy);
+			near_obj = getNearbyObject(edit.mode, edit.map.xy);
 
 		if (near_obj.num == click_obj.num)
 			edit.Selection_Toggle(click_obj);
@@ -760,7 +760,7 @@ void Instance::CMD_ACT_Click()
 	}
 
 	// find the object under the pointer.
-	edit.clicked = hover::getNearbyObject(edit.mode, level, conf, grid, edit.map.xy);
+	edit.clicked = getNearbyObject(edit.mode, edit.map.xy);
 
 	// clicking on an empty space starts a new selection box
 	if (edit.click_check_select && edit.clicked.is_nil())

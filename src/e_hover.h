@@ -56,8 +56,6 @@ namespace hover
 Objid findSplitLineForDangler(const Document &doc, MapFormat format,
 							  const grid::State &grid, int v_num);
 int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side);
-Objid getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
-					  const grid::State &grid, const v2double_t &pos);
 Objid getNearestSector(const Document &doc, const v2double_t &pos);
 bool isPointOutsideOfMap(const Document &doc, const v2double_t &v);
 }

@@ -202,6 +202,7 @@ public:
 
 	// E_HOVER
 	Objid findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignore_vert) const;
+    Objid getNearbyObject(ObjType type, const v2double_t &pos) const;
 
 	// E_LINEDEF
 	bool LD_RailHeights(int &z1, int &z2, const LineDef *L, const SideDef *sd,
