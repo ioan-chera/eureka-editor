@@ -307,7 +307,6 @@ public:
 
 static Objid getNearestThing(const Document &doc, const ConfigData &config,
 							 const grid::State &grid, const v2double_t &pos);
-static Objid getNearestVertex(const Document &doc, const grid::State &grid, const v2double_t &pos);
 static Objid getNearestLinedef(const Document &doc, const grid::State &grid, const v2double_t &pos);
 
 //
@@ -323,7 +322,7 @@ Objid Instance::getNearbyObject(ObjType type, const v2double_t &pos) const
 		return getNearestThing(level, conf, grid, pos);
 
 	case ObjType::vertices:
-		return getNearestVertex(level, grid, pos);
+		return getNearestVertex(pos);
 
 	case ObjType::linedefs:
 		return getNearestLinedef(level, grid, pos);
@@ -801,7 +800,7 @@ static Objid getNearestThing(const Document &doc, const ConfigData &config,
 //
 // determine which vertex is under the pointer
 //
-static Objid getNearestVertex(const Document &doc, const grid::State &grid, const v2double_t &pos)
+Objid Instance::getNearestVertex(const v2double_t &pos) const
 {
 	const int screen_pix = vertex_radius(grid.getScale());
 
@@ -817,9 +816,9 @@ static Objid getNearestVertex(const Document &doc, const grid::State &grid, cons
 	int    best = -1;
 	double best_dist = 9e9;
 
-	for(int n = 0; n < doc.numVertices(); n++)
+	for(int n = 0; n < level.numVertices(); n++)
 	{
-		v2double_t vpos = doc.vertices[n]->xy();
+		v2double_t vpos = level.vertices[n]->xy();
 
 		// filter out vertices that are outside the search bbox
 		if(!vpos.inbounds(lpos, hpos))
