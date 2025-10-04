@@ -336,6 +336,7 @@ UI_Browser_Box::UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const
 	search->align(FL_ALIGN_LEFT);
 	search->callback(search_callback, this);
 	search->when(FL_WHEN_CHANGED);
+	search->tooltip("Wildcards accepted");
 
 	add(search);
 
@@ -866,6 +867,7 @@ void UI_Browser_Box::Populate_Sprites()
 											  kind, info.group,
 		                                      pic_w, pic_h, pic);
 
+		item->copy_tooltip(info.desc.c_str());
 		pic->callback(Browser_Item::thing_callback, item);
 
 		scroll->Add(item);
