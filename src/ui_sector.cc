@@ -61,6 +61,8 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
+	const int Y0 = Y;
+	const int X0 = X;
 
 	X += 6;
 	Y += 6;
@@ -208,27 +210,13 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 
 	// generalized sector stuff
 
-	bm_title = new Fl_Box(FL_NO_BOX, X+10, Y, 100, 24, "Boom flags:");
+	bm_title = new Fl_Box(FL_NO_BOX, X+10, Y, 100, 24, "Sector flags:");
 	bm_title->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
 	Y += 28;
 
-	bm_damage = new Fl_Choice(X+W - 95, Y, 80, 24, "Damage: ");
-	bm_damage->add("NONE|5 hp|10 hp|20 hp");
-	bm_damage->value(0);
-	bm_damage->callback(type_callback, this);
-
-	bm_secret = new Fl_Check_Button(X+28, Y, 94, 20, "Secret");
-	bm_secret->labelsize(12);
-	bm_secret->callback(type_callback, this);
-
-	bm_friction = new Fl_Check_Button(X+28, Y+20, 94, 20, "Friction");
-	bm_friction->labelsize(12);
-	bm_friction->callback(type_callback, this);
-
-	bm_wind = new Fl_Check_Button(X+28, Y+40, 94, 20, "Wind");
-	bm_wind->labelsize(12);
-	bm_wind->callback(type_callback, this);
+	genStartX = X - X0;
+	genStartY = Y - Y0;
 
 	mFixUp.loadFields({ type, light, tag, ceil_h, floor_h, c_tex, f_tex, headroom });
 
@@ -425,7 +413,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	int mask  = 65535;
 	int value = atoi(box->type->value());
 
-	int gen_mask = (box->inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 : 31;
+	int gen_mask = box->basicSectorMask;
 
 	// when generalize sectors active, typing a low value (which does
 	// not touch any bitflags) should just update the TYPE part, and
@@ -437,42 +425,31 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		// update the WHOLE sector type.  If generalized sectors are
 		// active, then the panel will reinterpret the typed value.
 	}
-	else if (box->inst.conf.features.gen_sectors != GenSectorFamily::none)
+	else if (!box->inst.conf.gen_sectors.empty())
 	{
 		// Boom and ZDoom generalized sectors
 
 		mask = 0;
-
-		if (w == box->bm_damage)
+		for(const SectorFlagButton &button : box->bm_buttons)
 		{
-			mask  = BoomSF_DamageMask;
-			value = box->bm_damage->value() << 5;
-		}
-		else if (w == box->bm_secret)
-		{
-			mask  = BoomSF_Secret;
-			value = box->bm_secret->value() << 7;
-		}
-		else if (w == box->bm_friction)
-		{
-			mask  = BoomSF_Friction;
-			value = box->bm_friction->value() << 8;
-		}
-		else if (w == box->bm_wind)
-		{
-			mask  = BoomSF_Wind;
-			value = box->bm_wind->value() << 9;
+			if(w == button.button.get())
+			{
+				mask = button.info->value;
+				value = button.button->value() ? mask : 0;
+				break;
+			}
+			if(w == button.choice.get())
+			{
+				int idx = button.choice->value();
+				mask = button.info->value;
+				value = button.info->options[idx].value;
+				break;
+			}
 		}
 
 		if (mask == 0)
 		{
 			mask = gen_mask;
-		}
-		else if (box->inst.conf.features.gen_sectors == GenSectorFamily::zdoom)
-		{
-			// for ZDoom in Hexen mode, shift up 3 bits
-			mask  <<= 3;
-			value <<= 3;
 		}
 	}
 
@@ -515,9 +492,9 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 	// when generalize sectors in effect, the name should just
 	// show the TYPE part of the sector type.
 
-	if (box->inst.conf.features.gen_sectors != GenSectorFamily::none)
+	if (!box->inst.conf.gen_sectors.empty())
 	{
-		int gen_mask = (box->inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 : 31;
+		int gen_mask = box->basicSectorMask;
 
 		value &= gen_mask;
 	}
@@ -537,10 +514,7 @@ void UI_SectorBox::SetSectorType(int new_type)
 	auto buffer = SString(new_type);
 	mFixUp.setInputValue(type, buffer.c_str());	// was updated by this
 
-	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-			   (inst.conf.features.gen_sectors == GenSectorFamily::boom) ? 31  : 65535;
-
-	InstallSectorType(mask, new_type);
+	InstallSectorType(basicSectorMask, new_type);
 }
 
 
@@ -719,32 +693,40 @@ void UI_SectorBox::UpdateField(int field)
 
 	if (field < 0 || field == Sector::F_TYPE)
 	{
-		bm_damage->value(0);
-		bm_secret->value(0);
-		bm_friction->value(0);
-		bm_wind->value(0);
+		for(const SectorFlagButton &button : bm_buttons)
+		{
+			if(button.button)
+				button.button->value(0);
+			else if(button.choice)
+				button.choice->value(0);
+		}
 
 		if (inst.level.isSector(obj))
 		{
 			int value = sector->type;
-			int mask  = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-						(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+			int mask  = basicSectorMask;
 
 			mFixUp.setInputValue(type, SString(value & mask).c_str());
 
 			const sectortype_t &info = inst.M_GetSectorType(value & mask);
 			desc->value(info.desc.c_str());
 
-			if (inst.conf.features.gen_sectors != GenSectorFamily::none)
+			for(const SectorFlagButton &button : bm_buttons)
 			{
-				if (inst.conf.features.gen_sectors == GenSectorFamily::zdoom)
-					value >>= 3;
-
-				bm_damage->value((value >> 5) & 3);
-				bm_secret->value((value >> 7) & 1);
-
-				bm_friction->value((value >> 8) & 1);
-				bm_wind    ->value((value >> 9) & 1);
+				if(button.button)
+					button.button->value((value & button.info->value) ? 1 : 0);
+				else if(button.choice)
+				{
+					int masked = value & button.info->value;
+					for(size_t i = 0; i < button.info->options.size(); ++i)
+					{
+						if(masked == button.info->options[i].value)
+						{
+							button.choice->value((int)i);
+							break;
+						}
+					}
+				}
 			}
 		}
 		else
@@ -939,29 +921,52 @@ void UI_SectorBox::UpdateTotal(const Document &doc) noexcept
 
 void UI_SectorBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
-	if (config.features.gen_sectors != GenSectorFamily::none)
+	for(const SectorFlagButton &button : bm_buttons)
 	{
-		if (config.features.gen_sectors == GenSectorFamily::zdoom)
-			bm_title->label("ZDoom flags:");
+		if(button.button)
+			this->remove(button.button.get());
+		else if(button.choice)
+			this->remove(button.choice.get());
+	}
+	bm_buttons.clear();
+
+	int Y = y() + genStartY;
+	int X = x() + genStartX;
+	int Ycheck = Y;
+	int Ychoice = Y;
+	begin();
+	for(const gensector_t &gensec : config.gen_sectors)
+	{
+		SectorFlagButton button = {};
+		if(gensec.options.empty())
+		{
+			// Simple flag
+			button.button = std::make_unique<Fl_Check_Button>(X + 28, Ycheck, 94, 20, "");
+			button.button->copy_label(gensec.label.c_str());
+			button.button->labelsize(12);
+			button.button->callback(type_callback, this);
+			Ycheck += 20;
+		}
 		else
-			bm_title->label("Boom flags:");
-
-		bm_title->show();
-
-		bm_damage->show();
-		bm_secret->show();
-		bm_friction->show();
-		bm_wind->show();
+		{
+			// Choice
+			button.choice = std::make_unique<Fl_Choice>(X + w() - 95, Ychoice, 80, 24, "");
+			button.choice->copy_label((gensec.label + ": ").c_str());
+			for(const gensector_t::option_t &opt : gensec.options)
+				button.choice->add(opt.label.c_str(), 0, nullptr);
+			button.choice->value(0);
+			button.choice->callback(type_callback, this);
+			Ychoice += 24;
+		}
+		button.info = &gensec;
+		bm_buttons.push_back(std::move(button));
 	}
-	else
-	{
+	end();
+	if(config.gen_sectors.empty())
 		bm_title->hide();
-
-		bm_damage->hide();
-		bm_secret->hide();
-		bm_friction->hide();
-		bm_wind->hide();
-	}
+	else
+		bm_title->show();
+	basicSectorMask = M_CalcSectorTypeMask(config);
 
 	UpdateField();
 

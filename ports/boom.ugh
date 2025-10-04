@@ -227,3 +227,9 @@ line 267 t "WR BOOM: Teleport Line /mon /silent /keepdir"  :line_id
 
 include "gen_types"
 
+#---- GENERALIZED SECTORTYPES --------
+
+gensector 128 Secret
+gensector 256 Friction
+gensector 512 Wind
+gensector 96 Damage 0 NONE 32 "5 hp" 64 "10 hp" 96 "20 hp"

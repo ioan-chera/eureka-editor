@@ -643,4 +643,7 @@ line 382 - "-- EE: Attach ceil to ctrl"     :line_id
 line 383 - "-- EE: Mirror floor to ctrl"    :line_id
 line 384 - "-- EE: Mirror ceil to ctrl"     :line_id
 
+gensector 1024 "Mute all sounds"
+gensector 2048 "Mute mechanical sounds"
+
 endif

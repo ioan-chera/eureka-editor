@@ -749,6 +749,52 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			config.line_flags.push_back(flag);
 	}
 
+	else if(y_stricmp(argv[0], "gensector") == 0)
+	{
+		if(nargs < 2)
+			pst->fail(bad_arg_count_fail, argv[0], 2);
+
+		gensector_t gensec = {};
+		gensec.value = (int)strtol(argv[1], nullptr, 0);
+		gensec.label = argv[2];
+
+		if(nargs >= 4)
+		{
+			for(int i = 3; i < nargs; i += 2)
+			{
+				if(i + 1 > nargs)
+					break;
+				gensector_t::option_t opt = {};
+				opt.value = (int)strtol(argv[i], nullptr, 0);
+				opt.label = argv[i + 1];
+				gensec.options.push_back(opt);
+			}
+		}
+
+		if(gensec.options.empty())
+		{
+			// Simple flag. Overwrite by value
+			for(gensector_t &existing : config.gen_sectors)
+				if(existing.options.empty() && existing.value == gensec.value)
+				{
+					existing = gensec;
+					return;
+				}
+		}
+		else
+		{
+			// Bit mask menu. Overwrite by label
+			for(gensector_t &existing : config.gen_sectors)
+				if(!existing.options.empty() && existing.label.noCaseEqual(gensec.label))
+				{
+					existing = gensec;
+					return;
+				}
+		}
+		config.gen_sectors.push_back(gensec);
+
+	}
+
 	else if (y_stricmp(argv[0], "thing") == 0)
 	{
 		if (nargs < 6)
@@ -1293,6 +1339,41 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 		return (1 << static_cast<int>(MapFormat::hexen));
 
 	return (1 << static_cast<int>(MapFormat::doom));
+}
+
+
+int M_CalcSectorTypeMask(const ConfigData &config)
+{
+	int mask = 0;
+	for(const gensector_t &gensec : config.gen_sectors)
+		mask |= gensec.value;
+	if(!mask)
+		return 65535;
+	int res = 0;
+	while(mask > 0 && !(mask & 1))
+	{
+		mask >>= 1;
+		res <<= 1;
+		res += 1;
+	}
+	return res;
+}
+
+
+int M_CalcMaxSectorType(const ConfigData &config)
+{
+	int max = 32;
+	for(const gensector_t &gensec : config.gen_sectors)
+		if(gensec.value > max)
+			max = gensec.value;
+	int res = 0;
+	while(max > 0)
+	{
+		max /= 2;
+		res <<= 1;
+		res += 1;
+	}
+	return res;
 }
 
 

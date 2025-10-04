@@ -860,8 +860,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 
 		case What_sectorsByType: // Sectors by Type
 		{
-			int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-						(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+			int mask = M_CalcSectorTypeMask(inst.conf);
 
 			const sectortype_t & info = inst.M_GetSectorType(type_num & mask);
 			desc->value(info.desc.c_str());
@@ -1561,8 +1560,7 @@ bool UI_FindAndReplace::Match_SectorType(int idx)
 {
 	const auto sector = inst.level.sectors[idx];
 
-	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-				(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+	int mask = M_CalcSectorTypeMask(inst.conf);
 
 	if (! find_numbers->get(sector->type & mask))
 		return false;
@@ -1777,8 +1775,7 @@ void UI_FindAndReplace::Replace_LineType(EditOperation &op, int idx)
 
 void UI_FindAndReplace::Replace_SectorType(EditOperation &op, int idx)
 {
-	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-				(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+	int mask = M_CalcSectorTypeMask(inst.conf);
 
 	int old_type = inst.level.sectors[idx]->type;
 	int new_type = atoi(rep_value->value());

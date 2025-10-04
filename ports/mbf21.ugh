@@ -30,3 +30,6 @@ lineflag "block players"   0x2000
 line 1024 a "-- MBF21: Scroll X/Y offsets /tag"   :line_id
 line 1025 a "-- MBF21: Scroll X/Y offsets /disp"  :line_id
 line 1026 a "-- MBF21: Scroll X/Y offsets /accel" :line_id
+
+gensector 8192 "Kill ground monsters"
+gensector 4192 Damage 0 NONE 32 "5 hp" 64 "10 hp" 96 "20 hp" 4096 kill 4128 "kill +" 4160 "kill-exit" 4192 "kill-secret"

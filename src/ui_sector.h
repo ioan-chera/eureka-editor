@@ -25,6 +25,14 @@
 #include "ui_panelinput.h"
 
 class UI_DynIntInput;
+struct gensector_t;
+
+struct SectorFlagButton
+{
+	std::unique_ptr<Fl_Check_Button> button;
+	std::unique_ptr<Fl_Choice> choice;
+	const gensector_t *info;
+};
 
 class UI_SectorBox : public MapItemBox
 {
@@ -63,11 +71,10 @@ public:
 	// Boom generalized sectors
 
 	Fl_Box    * bm_title;
-	Fl_Choice * bm_damage;
 
-	Fl_Check_Button * bm_secret;
-	Fl_Check_Button * bm_friction;
-	Fl_Check_Button * bm_wind;
+	std::vector<SectorFlagButton> bm_buttons;
+	int genStartX = 0, genStartY = 0;
+	int basicSectorMask = 65535;
 
 public:
 	UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);

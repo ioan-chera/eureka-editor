@@ -152,6 +152,20 @@ struct lineflag_t
 	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot
 };
 
+struct gensector_t
+{
+	struct option_t
+	{
+		SString label;
+		int value;
+	};
+
+	SString label;
+	int value;
+
+	std::vector<option_t> options;
+};
+
 
 enum thingdef_flags_e
 {
@@ -399,6 +413,7 @@ struct ConfigData
 	std::map<int, thingtype_t> thing_types;
 	std::vector<thingflag_t> thing_flags;
 	std::vector<lineflag_t> line_flags; // New: linedef UI flags
+	std::vector<gensector_t> gen_sectors; // generalized sector types
 
 	int num_gen_linetypes = 0;
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {}; // BOOM Generalized Lines
@@ -452,6 +467,9 @@ SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char 
 SString M_GetBaseGame(const SString &game) noexcept(false);
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
+
+int M_CalcSectorTypeMask(const ConfigData &config);
+int M_CalcMaxSectorType(const ConfigData &config);
 
 bool is_null_tex(const SString &tex);		// the "-" texture
 bool is_special_tex(const SString &tex);	// begins with "#"

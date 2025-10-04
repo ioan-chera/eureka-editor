@@ -566,6 +566,11 @@ sector 242 "ZD: Htic Carry W 25"
 sector 243 "ZD: Htic Carry W 30"
 sector 244 "ZD: Htic Carry W 35"
 
+gensector 1024 Secret
+gensector 2048 Friction
+gensector 4096 Wind
+gensector 768 Damage 0 NONE 256 "5 hp" 512 "10 hp" 768 "20 hp"
+
 else
 
 #
