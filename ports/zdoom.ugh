@@ -523,9 +523,48 @@ sector 78 "ZD: Open after 5 min"
 sector 84 "ZD: Scroll_E /damage"
 sector 87 "ZD: Outside"
 
+sector 79 "ZD: Low friction"
+
 sector 195 "ZD: Hidden"
 sector 196 "ZD: Healing"
 sector 200 "ZD: Sky2"
+
+sector 89 "GZD: GLSector_NoSkyDraw"
+sector 90 "GZD: GLSector_Skybox"
+
+sector 105 "ZD: Strife Hellslime"
+sector 115 "ZD: Instant Death"
+sector 116 "ZD: Strife Super Hellslime"
+
+sector 118 "ZD: Strife Tag Current"
+
+sector 197 "ZD: Outdoor Lightning"
+
+sector 2 "ZD: Use Sky 2"
+
+sector 225 "ZD: Htic Carry E 05"
+sector 226 "ZD: Htic Carry E 10"
+sector 227 "ZD: Htic Carry E 25"
+sector 228 "ZD: Htic Carry E 30"
+sector 229 "ZD: Htic Carry E 35"
+
+sector 230 "ZD: Htic Carry N 05"
+sector 231 "ZD: Htic Carry N 10"
+sector 232 "ZD: Htic Carry N 25"
+sector 233 "ZD: Htic Carry N 30"
+sector 234 "ZD: Htic Carry N 35"
+
+sector 235 "ZD: Htic Carry S 05"
+sector 236 "ZD: Htic Carry S 10"
+sector 237 "ZD: Htic Carry S 25"
+sector 238 "ZD: Htic Carry S 30"
+sector 239 "ZD: Htic Carry S 35"
+
+sector 240 "ZD: Htic Carry W 05"
+sector 241 "ZD: Htic Carry W 10"
+sector 242 "ZD: Htic Carry W 25"
+sector 243 "ZD: Htic Carry W 30"
+sector 244 "ZD: Htic Carry W 35"
 
 else
 
