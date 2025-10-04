@@ -239,6 +239,10 @@ public:
 	void UpdateHighlight();
 	void ZoomWholeMap();
 
+	// E_OBJECTS
+	void doMoveVertex(EditOperation &op, const int vertexID, const v2double_t &delta, int &deletedVertexID,
+					  const selection_c &movingGroup) const;
+
 	// E_PATH
 	void GoToErrors();
 	void GoToObject(const Objid &objid);
