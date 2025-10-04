@@ -60,7 +60,8 @@ namespace ajbsp
 
 
 // smallest distance between two points before being considered equal
-#define DIST_EPSILON  (1.0 / 1024.0)
+// (using common geometric epsilon from e_basis.h)
+#define DIST_EPSILON  GEOM_EPSILON
 
 
 static int current_seg_index;

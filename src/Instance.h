@@ -201,7 +201,7 @@ public:
 	void Transform_Update();
 
 	// E_HOVER
-	Objid findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignore_vert) const;
+	Objid findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignore_vert, bool exactPoint) const;
     Objid getNearbyObject(ObjType type, const v2double_t &pos) const;
 	Objid getNearestVertex(const v2double_t &pos) const;
 
@@ -240,8 +240,8 @@ public:
 	void ZoomWholeMap();
 
 	// E_OBJECTS
-	void doMoveVertex(EditOperation &op, const int vertexID, const v2double_t &delta, int &deletedVertexID,
-					  const selection_c &movingGroup) const;
+	void moveVertexInGroup(EditOperation &op, const int vertexID, const v2double_t &delta, int &deletedVertexID,
+						   const selection_c &movingGroup) const;
 
 	// E_PATH
 	void GoToErrors();

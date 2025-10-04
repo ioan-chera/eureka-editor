@@ -82,6 +82,22 @@ FFixedPoint MakeValidCoord(MapFormat format, double x)
 }
 
 
+bool CoordsMatch(MapFormat format, const v2double_t &v1, const v2double_t &v2)
+{
+	FFixedPoint fx1 = MakeValidCoord(format, v1.x);
+	FFixedPoint fy1 = MakeValidCoord(format, v1.y);
+	FFixedPoint fx2 = MakeValidCoord(format, v2.x);
+	FFixedPoint fy2 = MakeValidCoord(format, v2.y);
+
+	// Threshold in fixed-point units: kFracUnit / GEOM_EPSILON_DIVIDER
+	// For kFracUnit=4096 and GEOM_EPSILON_DIVIDER=1024, this gives threshold of 4
+	constexpr int threshold = kFracUnit / GEOM_EPSILON_DIVIDER;
+
+	return abs(fx1.raw() - fx2.raw()) <= threshold &&
+	       abs(fy1.raw() - fy2.raw()) <= threshold;
+}
+
+
 //------------------------------------------------------------------------
 
 //------------------------------------------------------------------------

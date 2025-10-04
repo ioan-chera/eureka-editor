@@ -444,7 +444,7 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const gr
 //
 // Finds a split line
 //
-Objid Instance::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignore_vert) const
+Objid Instance::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignore_vert, bool exactPoint) const
 {
 	out_pos = {};
 
@@ -460,7 +460,7 @@ Objid Instance::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ig
 
 	double len = (v2 - v1).hypot();
 
-	if(grid.getRatio() > 0 && edit.action == EditorAction::drawLine)
+	if(!exactPoint && grid.getRatio() > 0 && edit.action == EditorAction::drawLine)
 	{
 		const auto &V = level.vertices[edit.drawLine.from.num];
 
@@ -487,7 +487,7 @@ Objid Instance::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ig
 
 		out_pos = v1 + (v2 - v1) * c;
 	}
-	else if(grid.snaps())
+	else if(!exactPoint && grid.snaps())
 	{
 		// don't highlight the line if the new vertex would snap onto
 		// the same coordinate as the start or end of the linedef.

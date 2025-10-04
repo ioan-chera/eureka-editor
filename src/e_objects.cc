@@ -30,6 +30,7 @@
 
 #include <algorithm>
 
+#include "e_basis.h"
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_main.h"
@@ -730,25 +731,30 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 }
 
 //
-// Move a single vertex, without depending on the user interface highlighting
+// Move a vertex as part of dragging multiple ones, or more complex geometry
+// Unlike dragging a single vertex, user doesn't get any stitching visual feedback or choice, so don't try to pull from
+// nearby, but untouched linedefs, to split them.
 //
-void Instance::doMoveVertex(EditOperation &op, const int vertexID, const v2double_t &delta, int &deletedVertexID,
-							const selection_c &movingGroup) const
+void Instance::moveVertexInGroup(EditOperation &op, const int vertexID, const v2double_t &delta, int &deletedVertexID,
+								 const selection_c &movingGroup) const
 {
 	const Vertex &vertex = *level.vertices[vertexID];
 	deletedVertexID = -1;
 
 	v2double_t dest = vertex.xy() + delta;
 
-	Objid obj = getNearbyObject(ObjType::vertices, dest);
-	if(obj.valid() && obj.num != vertexID && !movingGroup.get(obj.num))
+	// When moving multiple vertices, we don't get the hovering highlight to decide whether to snap a nearby vertex or
+	// not, so only merge if really overlapping
+	int vertexIDToMerge = level.vertmod.findExact(MakeValidCoord(loaded.levelFormat, dest.x),
+												  MakeValidCoord(loaded.levelFormat, dest.y));
+	if(vertexIDToMerge >= 0 && vertexIDToMerge != vertexID && !movingGroup.get(vertexIDToMerge))
 	{
 		// Vertex merging
 		// TODO: messaging
 		selection_c del_list;
 
 		selection_c verts(ObjType::vertices);
-		verts.set(obj.num);
+		verts.set(vertexIDToMerge);
 		verts.set(vertexID);
 		level.vertmod.mergeList(op, verts, &del_list);
 
@@ -758,8 +764,8 @@ void Instance::doMoveVertex(EditOperation &op, const int vertexID, const v2doubl
 
 	v2double_t splitPoint;
 	int splitLine = -1;
-	obj = findSplitLine(splitPoint, dest, vertexID);
-	if(obj.valid())
+	Objid obj = findSplitLine(splitPoint, dest, vertexID, true);	// exact point, don't snap
+	if(obj.valid() && CoordsMatch(loaded.levelFormat, dest, splitPoint))
 	{
 		const auto& L = level.linedefs[obj.num];
 		assert(L);
@@ -814,7 +820,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 			for(auto it = sel.begin(); it != sel.end(); ++it)
 			{
 				int deletedVertex = -1;
-				inst.doMoveVertex(op, *it, delta.xy, deletedVertex, movingGroup);
+				inst.moveVertexInGroup(op, *it, delta.xy, deletedVertex, movingGroup);
 				if (deletedVertex >= 0 && deletedVertex < list.max_obj())
 					for (auto jt = it + 1; jt != sel.end(); ++jt)
 						if (*jt > deletedVertex)

@@ -78,7 +78,14 @@ enum class LumpType : byte
 
 // E_BASIS
 
+// Geometric epsilon divider (used for BSP building, coordinate matching, etc.)
+constexpr int GEOM_EPSILON_DIVIDER = 1024;
+
+// Distance epsilon for geometric comparisons
+constexpr double GEOM_EPSILON = 1.0 / GEOM_EPSILON_DIVIDER;
+
 FFixedPoint MakeValidCoord(MapFormat format, double x);
+bool CoordsMatch(MapFormat format, const v2double_t &v1, const v2double_t &v2);
 
 //
 // Editor command manager, handles undo/redo

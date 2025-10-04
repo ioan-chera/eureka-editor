@@ -17,6 +17,8 @@
 #include "gtest/gtest.h"
 #include "Document.h"
 #include "Instance.h"
+#include "e_basis.h"
+#include "m_vector.h"
 
 class BasisLumpChangeFixture : public ::testing::TestWithParam<LumpType>
 {
@@ -147,5 +149,69 @@ TEST_F(BasisChangeStatusFixture, ManualRedoActionClearsMadeChanges)
 
 	changeHeader({4});
 	EXPECT_TRUE(doc.hasChanges());
+}
+
+TEST(CoordsMatchTest, DoomFormatExactMatch)
+{
+	// In DOOM format, coordinates are rounded to integers
+	EXPECT_TRUE(CoordsMatch(MapFormat::doom, v2double_t{100.0, 200.0}, v2double_t{100.0, 200.0}));
+	EXPECT_TRUE(CoordsMatch(MapFormat::doom, v2double_t{100.3, 200.7}, v2double_t{100.0, 201.0}));
+	EXPECT_TRUE(CoordsMatch(MapFormat::doom, v2double_t{100.4, 200.4}, v2double_t{100.0, 200.0}));
+}
+
+TEST(CoordsMatchTest, DoomFormatNoMatch)
+{
+	// Different integers should not match
+	EXPECT_FALSE(CoordsMatch(MapFormat::doom, v2double_t{100.0, 200.0}, v2double_t{101.0, 200.0}));
+	EXPECT_FALSE(CoordsMatch(MapFormat::doom, v2double_t{100.0, 200.0}, v2double_t{100.0, 201.0}));
+	EXPECT_FALSE(CoordsMatch(MapFormat::doom, v2double_t{100.6, 200.0}, v2double_t{100.0, 200.0}));
+}
+
+TEST(CoordsMatchTest, HexenFormatExactMatch)
+{
+	// Hexen format also rounds to integers
+	EXPECT_TRUE(CoordsMatch(MapFormat::hexen, v2double_t{100.0, 200.0}, v2double_t{100.0, 200.0}));
+	EXPECT_TRUE(CoordsMatch(MapFormat::hexen, v2double_t{100.3, 200.7}, v2double_t{100.0, 201.0}));
+}
+
+TEST(CoordsMatchTest, HexenFormatNoMatch)
+{
+	EXPECT_FALSE(CoordsMatch(MapFormat::hexen, v2double_t{100.0, 200.0}, v2double_t{100.7, 200.0}));
+	EXPECT_FALSE(CoordsMatch(MapFormat::hexen, v2double_t{100.0, 200.0}, v2double_t{100.0, 201.0}));
+}
+
+TEST(CoordsMatchTest, UdmfFormatWithinThreshold)
+{
+	// UDMF uses threshold of kFracUnit / GEOM_EPSILON_DIVIDER
+	// With kFracUnit=4096 and GEOM_EPSILON_DIVIDER=1024, threshold = 4 fixed-point units
+	// 4 / 4096 = 0.0009765625 in floating point
+	constexpr double threshold = 1.0 / 1024.0;
+
+	EXPECT_TRUE(CoordsMatch(MapFormat::udmf, v2double_t{100.0, 200.0}, v2double_t{100.0, 200.0}));
+	EXPECT_TRUE(CoordsMatch(MapFormat::udmf, v2double_t{100.0005, 200.0005}, v2double_t{100.0, 200.0}));
+	EXPECT_TRUE(CoordsMatch(MapFormat::udmf, v2double_t{100.0, 200.0}, v2double_t{100.0 + threshold * 0.5, 200.0}));
+}
+
+TEST(CoordsMatchTest, UdmfFormatBeyondThreshold)
+{
+	// Values beyond threshold should not match
+	constexpr double threshold = 1.0 / 1024.0;
+
+	EXPECT_FALSE(CoordsMatch(MapFormat::udmf, v2double_t{100.0, 200.0}, v2double_t{100.0 + threshold * 2, 200.0}));
+	EXPECT_FALSE(CoordsMatch(MapFormat::udmf, v2double_t{100.0, 200.0}, v2double_t{100.0, 200.0 + threshold * 2}));
+	EXPECT_FALSE(CoordsMatch(MapFormat::udmf, v2double_t{100.0, 200.0}, v2double_t{100.01, 200.0}));
+}
+
+TEST(CoordsMatchTest, UdmfFormatEdgeCases)
+{
+	// Test exactly at threshold boundary
+	constexpr double threshold = 1.0 / 1024.0;
+
+	// Should match at exactly the threshold (<=)
+	EXPECT_TRUE(CoordsMatch(MapFormat::udmf, v2double_t{100.0, 200.0}, v2double_t{100.0 + threshold, 200.0}));
+	EXPECT_TRUE(CoordsMatch(MapFormat::udmf, v2double_t{100.0, 200.0}, v2double_t{100.0, 200.0 + threshold}));
+
+	// Should not match just beyond threshold
+	EXPECT_FALSE(CoordsMatch(MapFormat::udmf, v2double_t{100.0, 200.0}, v2double_t{100.0 + threshold * 1.2, 200.0}));
 }
 

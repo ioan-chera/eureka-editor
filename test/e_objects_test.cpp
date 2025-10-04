@@ -947,3 +947,148 @@ TEST_F(EObjectsFixture, InsertThingWithDefaultFlags)
 	ASSERT_EQ(inst.level.things.size(), 1);
 	ASSERT_EQ(inst.level.things[0]->options, 36);
 }
+
+//
+// Test that findSplitLine with exactPoint=true uses the exact point,
+// not grid-snapped or ratio-locked positions.
+//
+TEST_F(EObjectsFixture, FindSplitLineExactPoint)
+{
+	Document &doc = inst.level;
+	inst.loaded.levelFormat = MapFormat::udmf;
+
+	// Set up a horizontal linedef from (0, 100) to (200, 100)
+	auto v1 = std::make_unique<Vertex>();
+	v1->SetRawXY(inst.loaded.levelFormat, v2double_t{0.0, 100.0});
+	doc.vertices.push_back(std::move(v1));
+
+	auto v2 = std::make_unique<Vertex>();
+	v2->SetRawXY(inst.loaded.levelFormat, v2double_t{200.0, 100.0});
+	doc.vertices.push_back(std::move(v2));
+
+	auto line = std::make_shared<LineDef>();
+	line->start = 0;
+	line->end = 1;
+	doc.linedefs.push_back(std::move(line));
+
+	// Create a vertex that we'll use to test ignore_vert
+	auto v3 = std::make_unique<Vertex>();
+	v3->SetRawXY(inst.loaded.levelFormat, v2double_t{300.0, 300.0});
+	doc.vertices.push_back(std::move(v3));
+
+	// Set up grid with snapping enabled - grid step of 32 units
+	inst.grid.ForceStep(32);
+	inst.grid.SetSnap(true);
+
+	// Test point that is off-grid: (87.5, 100.0)
+	// With grid snapping, this would snap to (96, 100) or (64, 100)
+	// With exactPoint=true, it should use the exact point (87.5, 100.0)
+	v2double_t testPoint{87.5, 100.0};
+	v2double_t outPos;
+
+	// Call with exactPoint=true
+	Objid result = inst.findSplitLine(outPos, testPoint, -1, true);
+
+	// Should find the linedef
+	ASSERT_TRUE(result.valid());
+	EXPECT_EQ(result.num, 0);
+
+	// The out_pos should be the exact point projected onto the line
+	// Since the line is horizontal at y=100, the point should be at (87.5, 100.0)
+	EXPECT_NEAR(outPos.x, 87.5, 0.01);
+	EXPECT_NEAR(outPos.y, 100.0, 0.01);
+
+	// Now test with exactPoint=false and grid snapping
+	// This should snap to grid (either 64 or 96, depending on rounding)
+	result = inst.findSplitLine(outPos, testPoint, -1, false);
+
+	// Should still find the linedef
+	ASSERT_TRUE(result.valid());
+	EXPECT_EQ(result.num, 0);
+
+	// The out_pos should be grid-snapped
+	// 87.5 rounds to 96 (nearest multiple of 32 is either 64 or 96, but 96 is closer to 88)
+	// Actually, let's check it's different from the exact point
+	EXPECT_TRUE(fabs(outPos.x - 87.5) > 0.1 || fabs(outPos.y - 100.0) > 0.1);
+
+	// Test ignore_vert parameter
+	// Add v3 to one of the linedef endpoints
+	doc.linedefs[0]->start = 2;  // Now linedef is from v3 (300, 300) to v2 (200, 100)
+
+	// With ignore_vert=-1, should find the linedef
+	result = inst.findSplitLine(outPos, v2double_t{250.0, 200.0}, -1, true);
+	EXPECT_TRUE(result.valid());
+
+	// With ignore_vert=2 (v3's index), should NOT find the linedef
+	// because it touches the ignored vertex
+	result = inst.findSplitLine(outPos, v2double_t{250.0, 200.0}, 2, true);
+	EXPECT_FALSE(result.valid()) << "Should not find linedef when it touches ignore_vert";
+}
+
+//
+// Test that findSplitLine with exactPoint=true bypasses ratio-lock
+// when grid.getRatio() > 0 && edit.action == EditorAction::drawLine
+//
+TEST_F(EObjectsFixture, FindSplitLineExactPointWithRatioLock)
+{
+	Document &doc = inst.level;
+	inst.loaded.levelFormat = MapFormat::udmf;
+
+	// Set up a horizontal linedef from (0, 100) to (200, 100)
+	auto v1 = std::make_unique<Vertex>();
+	v1->SetRawXY(inst.loaded.levelFormat, v2double_t{0.0, 100.0});
+	doc.vertices.push_back(std::move(v1));
+
+	auto v2 = std::make_unique<Vertex>();
+	v2->SetRawXY(inst.loaded.levelFormat, v2double_t{200.0, 100.0});
+	doc.vertices.push_back(std::move(v2));
+
+	auto line = std::make_shared<LineDef>();
+	line->start = 0;
+	line->end = 1;
+	doc.linedefs.push_back(std::move(line));
+
+	// Create a starting vertex for drawing (this will be edit.drawLine.from)
+	auto vStart = std::make_unique<Vertex>();
+	vStart->SetRawXY(inst.loaded.levelFormat, v2double_t{50.0, 50.0});
+	doc.vertices.push_back(std::move(vStart));
+
+	// Enable ratio lock (e.g., 1:1 or 2:1 ratio)
+	inst.grid.configureRatio(1, false);  // 1:1 ratio
+	ASSERT_GT(inst.grid.getRatio(), 0);
+
+	// Set up drawing mode
+	inst.edit.action = EditorAction::drawLine;
+	inst.edit.drawLine.from = Objid(ObjType::vertices, 2);  // vertex index 2 (vStart)
+
+	// Test point on the horizontal line
+	// With ratio-lock enabled and drawing from (50, 50), the intersection
+	// with the horizontal line would be ratio-constrained
+	v2double_t testPoint{120.0, 100.0};
+	v2double_t outPos;
+
+	// Call with exactPoint=true - should use exact intersection
+	Objid result = inst.findSplitLine(outPos, testPoint, -1, true);
+
+	// Should find the linedef
+	ASSERT_TRUE(result.valid());
+	EXPECT_EQ(result.num, 0);
+
+	// The out_pos should be the exact point projected onto the line
+	// Since exactPoint=true, it bypasses ratio-lock
+	EXPECT_NEAR(outPos.x, 120.0, 0.01);
+	EXPECT_NEAR(outPos.y, 100.0, 0.01);
+
+	// Now test with exactPoint=false - should apply ratio-lock
+	result = inst.findSplitLine(outPos, testPoint, -1, false);
+
+	// Should still find the linedef
+	ASSERT_TRUE(result.valid());
+	EXPECT_EQ(result.num, 0);
+
+	// With ratio-lock from (50, 50), the intersection point will be different
+	// The exact calculation depends on RatioSnapXY, but it should differ from exact point
+	// when ratio-lock is applied
+	bool ratioLockApplied = (fabs(outPos.x - 120.0) > 0.1) || (fabs(outPos.y - 100.0) > 0.1);
+	EXPECT_TRUE(ratioLockApplied) << "Ratio-lock should have modified the position from exact point";
+}
