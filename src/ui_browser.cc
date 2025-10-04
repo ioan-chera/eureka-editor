@@ -56,7 +56,7 @@ enum sort_method_e
 };
 
 
-bool Texture_MatchPattern(const char *tex, const char *pattern)
+static bool Texture_MatchPattern(const char *tex, const char *pattern)
 {
 	// Note: an empty pattern matches NOTHING
 
@@ -576,6 +576,13 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 	if (isGraphicsMode(kind))
 		return Texture_MatchPattern(item->real_name.c_str(), pattern);
 
+	// For things in sprite/pic mode, search both sprite name (desc) and thing description (real_name)
+	if (kind == BrowserMode::things && pic_mode)
+	{
+		return Texture_MatchPattern(item->desc.c_str(), pattern) ||
+		       Texture_MatchPattern(item->real_name.c_str(), pattern);
+	}
+
 	return Texture_MatchPattern(item->desc.c_str(), pattern);
 }
 
@@ -832,10 +839,17 @@ void UI_Browser_Box::Populate_Sprites()
 		if (y_stricmp(info.sprite.c_str(), "NULL") == 0)
 			continue;
 
-		if (alpha->value() == 0)
+		SString fullName;	// This will contain the information not shown on the GUI, for searching
+		if(alpha->value() == 0)
+		{
 			snprintf(full_desc, sizeof(full_desc), "%d", TI->first);
+			fullName = SString::printf("%s %s", info.sprite.c_str(), info.desc.c_str());
+		}
 		else
+		{
 			snprintf(full_desc, sizeof(full_desc), "%s", info.sprite.c_str());
+			fullName = SString::printf("%d %s", TI->first, info.desc.c_str());
+		}
 
 		int pic_w = 64;
 		int pic_h = 72;
@@ -848,7 +862,7 @@ void UI_Browser_Box::Populate_Sprites()
 		pic->GetSprite(TI->first, FL_BLACK);
 
 		Browser_Item *item = new Browser_Item(inst, cx, cy, item_w, item_h,
-		                                      full_desc, "", TI->first,
+		                                      full_desc, fullName, TI->first,
 											  kind, info.group,
 		                                      pic_w, pic_h, pic);
 
