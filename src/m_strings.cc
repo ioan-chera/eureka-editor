@@ -529,6 +529,29 @@ FILE* UTF8_fopen(const char* filename, const char* mode)
 	std::wstring wideMode = UTF8ToWide(mode);
 	return _wfopen(wideFilename.c_str(), wideMode.c_str());
 }
+
+//
+// Unicode-safe getenv wrapper for Windows
+//
+const char* UTF8_getenv(const char* varname)
+{
+	// Static storage for the converted result
+	// Note: This is not thread-safe, but matches getenv() semantics
+	static std::string utf8Result;
+
+	std::wstring wideVarname = UTF8ToWide(varname);
+	const wchar_t* wideValue = _wgetenv(wideVarname.c_str());
+
+	if (!wideValue)
+	{
+		return nullptr;
+	}
+
+	// Convert wide string result to UTF-8
+	utf8Result = WideToUTF8(wideValue).get();
+
+	return utf8Result.c_str();
+}
 #endif
 
 //--- editor settings ---

@@ -201,7 +201,8 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 #ifdef WIN32
 	else
 	{
-		MessageBox(NULL, buffer.c_str(), "Eureka : Error",
+		std::wstring wideBuffer = UTF8ToWide(buffer.c_str());
+		MessageBoxW(NULL, wideBuffer.c_str(), L"Eureka : Error",
 		           MB_ICONEXCLAMATION | MB_OK |
 				   MB_SYSTEMMODAL | MB_SETFOREGROUND);
 	}
