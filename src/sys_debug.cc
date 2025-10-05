@@ -40,7 +40,7 @@ extern void LogViewer_AddLine(const char *str);
 //
 bool Log::openFile(const fs::path &filename)
 {
-	log_fp = fopen(filename.u8string().c_str(), "w+");
+	log_fp = UTF8_fopen(filename.u8string().c_str(), "w+");
 
 	if (! log_fp)
 		return false;

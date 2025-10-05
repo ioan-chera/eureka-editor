@@ -787,8 +787,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	if(!HasExtension(filename.get()))
 		filename += ".txt";
 
-	// TODO: #55
-    std::ofstream os(filename.c_str(), std::ios::trunc);
+    std::ofstream os(fs::u8path(filename.c_str()), std::ios::trunc);
 
 	if (! os.is_open())
 	{

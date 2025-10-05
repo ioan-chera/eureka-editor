@@ -503,18 +503,18 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 static bool LoadBindingsFromPath(const SString &path, bool required)
 {
-	SString filename = path + "/bindings.cfg";
+    fs::path filename = fs::u8path(path.get()) / "bindings.cfg";
 
-	std::ifstream fp(filename.c_str());
+	std::ifstream fp(filename);
 	if(!fp.is_open())
 	{
 		if (! required)
 			return false;
 
-		ThrowException("Missing key bindings file:\n\n%s\n", filename.c_str());
+		ThrowException("Missing key bindings file:\n\n%s\n", filename.u8string().c_str());
 	}
 
-	gLog.printf("Reading key bindings from: %s\n", filename.c_str());
+	gLog.printf("Reading key bindings from: %s\n", filename.u8string().c_str());
 
 	while (! fp.eof())
 	{
@@ -607,19 +607,19 @@ void M_LoadBindings()
 
 void M_SaveBindings()
 {
-	SString filename = (global::home_dir / "bindings.cfg").u8string();
+	fs::path filename = global::home_dir / "bindings.cfg";
 
-	std::ofstream os(filename.get(), std::ios::trunc);
+	std::ofstream os(filename, std::ios::trunc);
 	if (! os.is_open())
 	{
-		gLog.printf("Failed to save key bindings to: %s\n", filename.c_str());
+		gLog.printf("Failed to save key bindings to: %s\n", filename.u8string().c_str());
 
 		DLG_Notify("Warning: failed to save key bindings\n"
-		           "(filename: %s)", filename.c_str());
+		           "(filename: %s)", filename.u8string().c_str());
 		return;
 	}
 
-	gLog.printf("Writing key bindings to: %s\n", filename.c_str());
+	gLog.printf("Writing key bindings to: %s\n", filename.u8string().c_str());
 
 	os << "# Eureka key bindings (local)\n";
 	os << "# vi:ts=16:noexpandtab\n\n";

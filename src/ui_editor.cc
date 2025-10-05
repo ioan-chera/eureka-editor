@@ -686,7 +686,7 @@ void UI_TextEditor::ExportToFile()
 	const char *filename = chooser.filename();
 
 	// open file in binary mode (we handle CR/LF ourselves)
-	FILE * fp = fopen(filename, "wb");
+	FILE * fp = UTF8_fopen(filename, "wb");
 
 	if (fp == NULL)
 	{

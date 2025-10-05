@@ -190,8 +190,7 @@ std::shared_ptr<Wad_file> Wad_file::Open(const fs::path &filename,
 	FILE *fp = NULL;
 
 retry:
-	// TODO: #55 unicode
-	fp = fopen(filename.u8string().c_str(), (mode == WadOpenMode::read ? "rb" : "r+b"));
+	fp = UTF8_fopen(filename.u8string().c_str(), (mode == WadOpenMode::read ? "rb" : "r+b"));
 
 	if (! fp)
 	{
@@ -218,8 +217,7 @@ retry:
 std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
 {
 	gLog.printf("Opening WAD file: %s\n", filename.u8string().c_str());
-	// TODO: #55 unicode
-	FILE *fp = fopen(filename.u8string().c_str(), "rb");
+	FILE *fp = UTF8_fopen(filename.u8string().c_str(), "rb");
 	if(!fp)
 	{
 		gLog.printf("Open failed: %s\n", GetErrorMessage(errno).c_str());

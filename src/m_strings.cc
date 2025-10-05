@@ -519,6 +519,16 @@ std::wstring UTF8ToWide(const char* text)
 	delete[] buffer;
 	return result;
 }
+
+//
+// Unicode-safe fopen wrapper for Windows
+//
+FILE* UTF8_fopen(const char* filename, const char* mode)
+{
+	std::wstring wideFilename = UTF8ToWide(filename);
+	std::wstring wideMode = UTF8ToWide(mode);
+	return _wfopen(wideFilename.c_str(), wideMode.c_str());
+}
 #endif
 
 //--- editor settings ---
