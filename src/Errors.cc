@@ -93,16 +93,24 @@ SString GetWindowsErrorMessage(DWORD error)
 	{
 		return "The operation completed successfully.";
 	}
-	LPSTR messageBuffer = nullptr;
-	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | 
-		FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), 
-		(LPSTR)&messageBuffer, 0, nullptr);
+	LPWSTR messageBuffer = nullptr;
+	size_t size = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPWSTR)&messageBuffer, 0, nullptr);
 	if (!size)
 	{
 		return SString::printf("(failed getting error message from %lu, reason of this failure having code %lu)", (unsigned long)error, (unsigned long)GetLastError());
 	}
 
-	SString result(messageBuffer, (int)size);
+	// Convert wide string to UTF-8
+	int utf8Length = WideCharToMultiByte(CP_UTF8, 0, messageBuffer, (int)size, nullptr, 0, nullptr, nullptr);
+	std::string utf8Result;
+	if (utf8Length > 0)
+	{
+		utf8Result.resize(utf8Length);
+		WideCharToMultiByte(CP_UTF8, 0, messageBuffer, (int)size, &utf8Result[0], utf8Length, nullptr, nullptr);
+	}
+	SString result(utf8Result);
 
 	LocalFree(messageBuffer);
 	result.trimTrailingSpaces();

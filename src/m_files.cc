@@ -484,7 +484,7 @@ static fs::path SearchForIWAD(const fs::path &home_dir, const SString &game)
 
 	// 2. look in $DOOMWADPATH
 
-	const char *doomwadpath = getenv("DOOMWADPATH");
+	const char *doomwadpath = UTF8_getenv("DOOMWADPATH");
 	if (doomwadpath)
 	{
 		std::vector<fs::path> paths = parseDoomWadPathEnvVar(doomwadpath);
@@ -498,7 +498,7 @@ static fs::path SearchForIWAD(const fs::path &home_dir, const SString &game)
 
 	// 3. look in $DOOMWADDIR
 
-	const char *doomwaddir = getenv("DOOMWADDIR");
+	const char *doomwaddir = UTF8_getenv("DOOMWADDIR");
 	if (doomwaddir)
 	{
 		path = SearchDirForIWAD(fs::u8path(doomwaddir), game);

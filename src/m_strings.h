@@ -496,9 +496,13 @@ std::wstring UTF8ToWide(const char* text);
 
 // Unicode-safe fopen wrapper for Windows
 FILE* UTF8_fopen(const char* filename, const char* mode);
+
+// Unicode-safe getenv wrapper for Windows
+const char* UTF8_getenv(const char* varname);
 #else
 // On non-Windows platforms, UTF-8 is the standard encoding
 #define UTF8_fopen fopen
+#define UTF8_getenv getenv
 #endif
 
 #endif  /* __EUREKA_M_STRINGS_H__ */
