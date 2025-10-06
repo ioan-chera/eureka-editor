@@ -34,6 +34,11 @@ class crc32_c;
 class Instance;
 struct BadCount;
 
+static const byte EMPTY_ACS_BINARY[] =
+{
+	0x41, 0x43, 0x53, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 //
 // The document associated with a file. All stuff will go here
 //
@@ -67,8 +72,9 @@ public:
 	SectorModule secmod;
 	ObjectsModule objects;
 
-	explicit Document(Instance &inst) : inst(inst), basis(*this), checks(*this), hover(*this),
-	linemod(*this), vertmod(*this), secmod(*this), objects(*this)
+	explicit Document(Instance &inst) : inst(inst),
+	behaviorData(EMPTY_ACS_BINARY, EMPTY_ACS_BINARY + sizeof(EMPTY_ACS_BINARY)), basis(*this),
+	checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this)
 	{
 	}
 
