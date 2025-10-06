@@ -94,10 +94,10 @@ private:
 	int  CalcFlags() const;
 	void FlagsFromInt(int flags);
 
-	void CB_Copy(int parts);
-	void CB_Paste(int parts, StringID new_tex);
+	void CB_Copy(int uiparts);
+	void CB_Paste(int uiparts, StringID new_tex);
 
-	void SetTexture(const char *tex_name, int e_state, int parts);
+	void SetTexture(const char *tex_name, int e_state, int uiparts);
 	void SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e_state, int parts);
 	void SetLineType(int new_type);
 

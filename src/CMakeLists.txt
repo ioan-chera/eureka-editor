@@ -253,10 +253,12 @@ if(USE_SYSTEM_FLTK)
 else()
     message(STATUS "Using fetch-content FLTK for portability.")
     include(FetchContent)
+
     FetchContent_Declare(
         FLTK
         GIT_REPOSITORY https://github.com/fltk/fltk.git
         GIT_TAG release-1.4.4
+        EXCLUDE_FROM_ALL
     )
     FetchContent_MakeAvailable(FLTK)
 endif()

@@ -272,6 +272,8 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 			if (parts & PART_RT_UPPER)
 				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+            if (parts & PART_RT_RAIL)
+                op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
 
 			return;
 		}
@@ -389,7 +391,7 @@ const char *UI_LineBox::getActivationMenuString() const
 		"W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??";
 }
 
-void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
+void UI_LineBox::SetTexture(const char *tex_name, int e_state, int uiparts)
 {
 	StringID new_tex = BA_InternaliseString(tex_name);
 
@@ -400,7 +402,15 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 
 	if (! inst.edit.Selected->empty())
 	{
-		mFixUp.checkDirtyFields();
+        // WARNING: translate uiparts to be valid for a one-sided line
+        if(inst.level.isLinedef(obj) && inst.level.linedefs[obj]->OneSided())
+        {
+            uiparts = (uiparts & PART_RT_UPPER) |
+                      (uiparts & PART_RT_LOWER ? PART_RT_RAIL : 0) |
+                      (uiparts & PART_RT_RAIL ? PART_RT_LOWER : 0);
+        }
+
+        mFixUp.checkDirtyFields();
 		checkSidesDirtyFields();
 
 		EditOperation op(inst.level.basis);
@@ -412,8 +422,8 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 
 			// only use parts explicitly selected in 3D view when no
 			// parts in the linedef panel are selected.
-			if (! (parts == 0 && p2 > 1))
-				p2 = parts;
+			if (! (uiparts == 0 && p2 > 1))
+				p2 = uiparts;
 
 			SetTexOnLine(op, *it, new_tex, e_state, p2);
 		}
@@ -444,7 +454,7 @@ void UI_LineBox::SetLineType(int new_type)
 }
 
 
-void UI_LineBox::CB_Copy(int parts)
+void UI_LineBox::CB_Copy(int uiparts)
 {
 	// determine which sidedef texture to grab from
 	const char *name = NULL;
@@ -460,7 +470,7 @@ void UI_LineBox::CB_Copy(int parts)
 		{
 			int try_part = PART_RT_LOWER << (b + pass * 4);
 
-			if ((parts & try_part) == 0)
+			if ((uiparts & try_part) == 0)
 				continue;
 
 			const char *b_name = (b == 0) ? SD->l_tex->value() :
@@ -484,7 +494,7 @@ void UI_LineBox::CB_Copy(int parts)
 }
 
 
-void UI_LineBox::CB_Paste(int parts, StringID new_tex)
+void UI_LineBox::CB_Paste(int uiparts, StringID new_tex)
 {
 	// iterate over selected linedefs
 	if (inst.edit.Selected->empty())
@@ -507,24 +517,18 @@ void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 				if (sd < 0)
 					continue;
 
-				int parts2 = pass ? (parts >> 4) : parts;
+				int uiparts2 = pass ? (uiparts >> 4) : uiparts;
 
-				if (L->TwoSided())
-				{
-					if (parts2 & PART_RT_LOWER)
-						op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
+                // WARNING: different meaning of lower/railing between
+                // UI panel and elsewhere. Here we know it's UI
+                if (uiparts2 & PART_RT_LOWER)
+                    op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
 
-					if (parts2 & PART_RT_UPPER)
-						op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
+                if (uiparts2 & PART_RT_UPPER)
+                    op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
 
-					if (parts2 & PART_RT_RAIL)
-						op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
-				}
-				else  // one-sided line
-				{
-					if (parts2 & PART_RT_LOWER)
-						op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
-				}
+                if (uiparts2 & PART_RT_RAIL)
+                    op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 			}
 		}
 	}
@@ -541,30 +545,30 @@ bool UI_LineBox::ClipboardOp(EditCommand op)
 	if (obj < 0)
 		return false;
 
-	int parts = front->GetSelectedPics() | (back->GetSelectedPics() << 4);
+	int uiparts = front->GetSelectedPics() | (back->GetSelectedPics() << 4);
 
-	if (parts == 0)
-		parts = front->GetHighlightedPics() | (back->GetHighlightedPics() << 4);
+	if (uiparts == 0)
+		uiparts = front->GetHighlightedPics() | (back->GetHighlightedPics() << 4);
 
-	if (parts == 0)
+	if (uiparts == 0)
 		return false;
 
 	switch (op)
 	{
 		case EditCommand::copy:
-			CB_Copy(parts);
+			CB_Copy(uiparts);
 			break;
 
 		case EditCommand::paste:
-			CB_Paste(parts, Texboard_GetTexNum(inst.conf));
+			CB_Paste(uiparts, Texboard_GetTexNum(inst.conf));
 			break;
 
 		case EditCommand::cut:	// Cut
-			CB_Paste(parts, BA_InternaliseString(inst.conf.default_wall_tex));
+			CB_Paste(uiparts, BA_InternaliseString(inst.conf.default_wall_tex));
 			break;
 
 		case EditCommand::del: // Delete
-			CB_Paste(parts, BA_InternaliseString("-"));
+			CB_Paste(uiparts, BA_InternaliseString("-"));
 			break;
 	}
 
@@ -580,9 +584,9 @@ void UI_LineBox::BrowsedItem(BrowserMode kind, int number, const char *name, int
 		int  back_pics =  back->GetSelectedPics();
 
 		// this can be zero, invoking special behavior (based on mouse button)
-		int parts = front_pics | (back_pics << 4);
+		int uiparts = front_pics | (back_pics << 4);
 
-		SetTexture(name, e_state, parts);
+		SetTexture(name, e_state, uiparts);
 	}
 	else if (kind == BrowserMode::lineTypes)
 	{

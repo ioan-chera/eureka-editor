@@ -223,9 +223,9 @@ void Document::clear()
 	linedefs.clear();
 
 	headerData.clear();
-	behaviorData.clear();
+	behaviorData.assign(EMPTY_ACS_BINARY, EMPTY_ACS_BINARY + sizeof(EMPTY_ACS_BINARY));
 	scriptsData.clear();
-	
+
 	basis.clear();
 
 	// TODO: other modules

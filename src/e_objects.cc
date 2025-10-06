@@ -298,6 +298,19 @@ bool ObjectsModule::checkClosedLoop(EditOperation &op, int new_ld, int v1, int v
 
 	if (left.sec != right.sec)
 	{
+		// PROBLEM: this can happen if user draws a clockwise loop adjoining a vertex from a
+        // surrounding room. Both loops will be interior, but the inner one wouldn't have a sector
+        // resulting in void. Add one there.
+		if (right.sec < 0 && left.sec >= 0)
+		{
+            // Can't get neighboring sector, so just use the valid one as model.
+			int new_sec = sectorNew(op, left.sec, -1, -1);
+			right.loop.AssignSector(op, new_sec, flip);
+			left.loop.AssignSector(op, left.sec, flip);
+			return true;
+		}
+
+		// Both sides have sectors, assign them
 		if (right.sec >= 0) right.loop.AssignSector(op, right.sec, flip);
 		if ( left.sec >= 0)  left.loop.AssignSector(op,  left.sec, flip);
 
