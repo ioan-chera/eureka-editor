@@ -245,13 +245,13 @@ private:
 
 	void Decode(KeyContext ctx, const char *str)
 	{
-		while (isspace(*str))
+		while (safe_isspace(*str))
 			str++;
 
 		char func_buf[100];
 		unsigned int pos = 0;
 
-		while (*str && ! (isspace(*str) || *str == ':' || *str == '/') &&
+		while (*str && ! (safe_isspace(*str) || *str == ':' || *str == '/') &&
 			   pos + 4 < sizeof(func_buf))
 		{
 			func_buf[pos++] = *str++;
@@ -268,7 +268,7 @@ private:
 		if (*str == ':')
 			str++;
 
-		while (isspace(*str))
+		while (safe_isspace(*str))
 			str++;
 
 		params->value(str);
@@ -409,16 +409,16 @@ private:
 	void ReplaceKeyword(const char *new_word)
 	{
 		// delete existing keyword, if any
-		if (isalnum(params->value()[0]))
+		if (safe_isalnum(params->value()[0]))
 		{
 			const char *str = params->value();
 
 			int len = 0;
 
-			while (str[len] && (isalnum(str[len]) || str[len] == '_'))
+			while (str[len] && (safe_isalnum(str[len]) || str[len] == '_'))
 				len++;
 
-			while (str[len] && isspace(str[len]))
+			while (str[len] && safe_isspace(str[len]))
 				len++;
 
 			params->replace(0, len, NULL);
@@ -442,7 +442,7 @@ private:
 			int a = (int)(pos - str);
 			int b = a + (int)strlen(new_flag);
 
-			while (str[b] && isspace(str[b]))
+			while (str[b] && safe_isspace(str[b]))
 				b++;
 
 			params->replace(a, b, NULL);
@@ -453,7 +453,7 @@ private:
 		// append the flag, adding a space if necessary
 		int a = params->size();
 
-		if (a > 0 && !isspace(str[a-1]))
+		if (a > 0 && !safe_isspace(str[a-1]))
 		{
 			params->replace(a, a, " ");
 			a += 1;

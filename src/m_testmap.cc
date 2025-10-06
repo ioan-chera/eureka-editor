@@ -357,7 +357,7 @@ static void CalcWarpString(const SString& levelName, std::vector<SString> &args)
 	//         ZDOOM too, but different syntax: +map MAP03
 
 	// most common syntax is "MAP##" or "MAP###"
-	if (levelName.length() >= 4 && levelName.noCaseStartsWith("MAP") && isdigit(levelName[3]))
+	if (levelName.length() >= 4 && levelName.noCaseStartsWith("MAP") && safe_isdigit(levelName[3]))
 	{
 		long number = strtol(levelName.c_str() + 3, nullptr, 10);
 		args.push_back("-warp");
@@ -367,8 +367,8 @@ static void CalcWarpString(const SString& levelName, std::vector<SString> &args)
 
 	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
 	// a pair of numbers after -warp
-	if (levelName.length() >= 4 && !isdigit(levelName[0]) && isdigit(levelName[1]) &&
-		!isdigit(levelName[2]) && isdigit(levelName[3]))
+	if (levelName.length() >= 4 && !safe_isdigit(levelName[0]) && safe_isdigit(levelName[1]) &&
+		!safe_isdigit(levelName[2]) && safe_isdigit(levelName[3]))
 	{
 		args.push_back("-warp");
 		args.push_back(SString::printf("%c", levelName[1]));

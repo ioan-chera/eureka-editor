@@ -20,6 +20,7 @@
 
 #include "Errors.h"
 #include "m_strings.h"
+#include "safe_ctype.h"
 #include "sys_debug.h"
 #include <assert.h>
 #include <stdarg.h>
@@ -36,8 +37,8 @@ int y_stricmp(const char *s1, const char *s2) noexcept
 {
 	for (;;)
 	{
-		if (tolower(*s1) != tolower(*s2))
-			return (int)(unsigned char)(tolower(*s1)) - (int)(unsigned char)(tolower(*s2));
+		if (safe_tolower(*s1) != safe_tolower(*s2))
+			return (int)(unsigned char)(safe_tolower(*s1)) - (int)(unsigned char)(safe_tolower(*s2));
 
 		if (*s1 && *s2)
 		{
@@ -60,8 +61,8 @@ int y_strnicmp(const char *s1, const char *s2, size_t len) noexcept
 
 	while (len-- > 0)
 	{
-		if (tolower(*s1) != tolower(*s2))
-			return (int)(unsigned char)(tolower(*s1)) - (int)(unsigned char)(tolower(*s2));
+		if (safe_tolower(*s1) != safe_tolower(*s2))
+			return (int)(unsigned char)(safe_tolower(*s1)) - (int)(unsigned char)(safe_tolower(*s2));
 
 		if (*s1 && *s2)
 		{
@@ -84,7 +85,7 @@ void y_strupr(char *str)
 {
 	for ( ; *str ; str++)
 	{
-		*str = static_cast<char>(toupper(*str));
+		*str = static_cast<char>(safe_toupper(*str));
 	}
 }
 
@@ -96,7 +97,7 @@ void y_strlowr(char *str)
 {
 	for ( ; *str ; str++)
 	{
-		*str = static_cast<char>(tolower(*str));
+		*str = static_cast<char>(safe_tolower(*str));
 	}
 }
 
@@ -294,7 +295,7 @@ void SString::trimLeadingSpaces()
 {
 	size_t i = 0;
 	for(i = 0; i < length(); ++i)
-		if(!isspace(data[i]))
+		if(!safe_isspace(data[i]))
 			break;
 	if(i)
 		erase(0, i);
@@ -305,7 +306,7 @@ void SString::trimLeadingSpaces()
 //
 void SString::trimTrailingSpaces()
 {
-	while(good() && isspace(data.back()))
+	while(good() && safe_isspace(data.back()))
 		data.pop_back();
 }
 
@@ -325,7 +326,7 @@ SString SString::asTitle() const
 {
 	SString result(*this);
 	if(result.good())
-		result[0] = static_cast<char>(toupper(result[0]));
+		result[0] = static_cast<char>(safe_toupper(result[0]));
 	return result;
 }
 
@@ -336,7 +337,7 @@ SString SString::asLower() const
 {
 	SString result(*this);
 	for(char &c : result)
-		c = static_cast<char>(tolower(c));
+		c = static_cast<char>(safe_tolower(c));
 	return result;
 }
 
@@ -347,7 +348,7 @@ SString SString::asUpper() const
 {
 	SString result(*this);
 	for(char &c : result)
-		c = static_cast<char>(toupper(c));
+		c = static_cast<char>(safe_toupper(c));
 	return result;
 }
 
@@ -360,7 +361,7 @@ SString SString::getTidy(const char *badChars) const
 	buf.reserve(length() + 2);
 
 	for(const char &c : *this)
-		if(isprint(c) && (!badChars || !strchr(badChars, c)))
+		if(safe_isprint(c) && (!badChars || !strchr(badChars, c)))
 			buf.push_back(c);
 
 	return buf;
@@ -373,7 +374,7 @@ size_t SString::findSpace() const
 {
 	for(size_t i = 0; i < length(); ++i)
 	{
-		if(isspace(data[i]))
+		if(safe_isspace(data[i]))
 			return i;
 	}
 	return std::string::npos;
@@ -383,7 +384,7 @@ size_t SString::findDigit() const
 {
 	for(size_t i = 0; i < length(); ++i)
 	{
-		if(isdigit(data[i]))
+		if(safe_isdigit(data[i]))
 			return i;
 	}
 	return std::string::npos;
@@ -426,7 +427,7 @@ SString SString::spaceEscape(bool backslash) const
 		return "\"\"";
 	bool needsQuotes = false;
 	for(char c : data)
-		if(isspace(c) || c == '"' || c == '#')
+		if(safe_isspace(c) || c == '"' || c == '#')
 		{
 			needsQuotes = true;
 			break;

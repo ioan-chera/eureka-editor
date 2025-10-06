@@ -136,7 +136,7 @@ public:
 
 			str = endptr;
 
-			while (isspace(*str))
+			while (safe_isspace(*str))
 				str++;
 
 			// check for range
@@ -144,7 +144,7 @@ public:
 			{
 				str += (*str == '-') ? 1 : 2;
 
-				while (isspace(*str))
+				while (safe_isspace(*str))
 					str++;
 
 				high = (int)strtol(str, &endptr, 0 /* allow hex */);
@@ -158,7 +158,7 @@ public:
 				if (high < low)
 					return false;
 
-				while (isspace(*str))
+				while (safe_isspace(*str))
 					str++;
 			}
 
@@ -1143,7 +1143,7 @@ bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
 	const char *str = inp->value();
 
 	// nothing but whitespace?  --> no need
-	while (isspace(*str))
+	while (safe_isspace(*str))
 		str++;
 
 	if (str[0] == 0)
@@ -1152,7 +1152,7 @@ bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
 	// ends with a punctuation symbol?  --> no need
 	int p = (int)strlen(str) - 1;
 
-	while (p >= 0 && isspace(str[p]))
+	while (p >= 0 && safe_isspace(str[p]))
 		p--;
 
 	if (p >= 0)
@@ -1160,7 +1160,7 @@ bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
 		if (str[p] == '_') return true;
 		if (str[p] == '*') return true;
 
-		if (ispunct(str[p]))
+		if (safe_ispunct(str[p]))
 			return false;
 	}
 

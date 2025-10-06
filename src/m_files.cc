@@ -584,7 +584,7 @@ fs::path Instance::M_PickDefaultIWAD() const
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
 
-	if (!loaded.levelName.empty() && toupper(loaded.levelName[0]) == 'E')
+	if (!loaded.levelName.empty() && safe_toupper(loaded.levelName[0]) == 'E')
 	{
 		default_game = "doom";
 	}
@@ -597,7 +597,7 @@ fs::path Instance::M_PickDefaultIWAD() const
 			idx = wad.master.editWad()->LevelHeader(idx);
 			const SString &name = wad.master.editWad()->GetLump(idx)->Name();
 
-			if (toupper(name[0]) == 'E')
+			if (safe_toupper(name[0]) == 'E')
 				default_game = "doom";
 		}
 	}
@@ -875,7 +875,7 @@ static void backup_scan_file(const fs::path &name, int flags, void *priv_dat)
 	if (flags & SCAN_F_IsDir)
 		return;
 
-	if (! isdigit(name.u8string()[0]))
+	if (! safe_isdigit(name.u8string()[0]))
 		return;
 
 	int num = atoi(name.u8string());

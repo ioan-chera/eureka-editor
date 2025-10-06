@@ -63,7 +63,7 @@ public:
 
 		char ch = text[0];
 
-		return isalpha(ch) || ch == '_';
+		return safe_isalpha(ch) || ch == '_';
 	}
 
 	bool IsString() const
@@ -278,14 +278,14 @@ public:
 			}
 
 			// is it a identifier or number?
-			if (isalnum(ch) || ch == '_' || ch == '-' || ch == '+')
+			if (safe_isalnum(ch) || ch == '_' || ch == '-' || ch == '+')
 			{
 				b_pos++;
 
 				while (b_pos < b_size)
 				{
 					char ch = buffer[b_pos];
-					if (isalnum(ch) || ch == '_' || ch == '-' || ch == '+' || ch == '.')
+					if (safe_isalnum(ch) || ch == '_' || ch == '-' || ch == '+' || ch == '.')
 					{
 						b_pos++;
 						continue;

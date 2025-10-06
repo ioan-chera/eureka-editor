@@ -44,11 +44,11 @@ bool ValidateMapName(const char *p)
 	if (len == 0 || len > 8)
 		return false;
 
-	if (! isalpha(*p))
+	if (! safe_isalpha(*p))
 		return false;
 
 	for ( ; *p ; p++)
-		if (! (isalnum(*p) || *p == '_'))
+		if (! (safe_isalnum(*p) || *p == '_'))
 			return false;
 
 	return true;
@@ -438,7 +438,7 @@ static bool DifferentEpisode(const char *A, const char *B)
 		return true;
 
 	// handle ExMx
-	if (toupper(A[0]) == 'E')
+	if (safe_toupper(A[0]) == 'E')
 	{
 		return A[1] != B[1];
 	}

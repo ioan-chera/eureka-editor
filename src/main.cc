@@ -513,7 +513,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	if (!inst.loaded.levelName.empty())
 	{
-		if (! isdigit(inst.loaded.levelName[0]))
+		if (! safe_isdigit(inst.loaded.levelName[0]))
 			return inst.loaded.levelName.asUpper();
 
 		level_number = atoi(inst.loaded.levelName);
@@ -793,7 +793,7 @@ bool Document::Main_ConfirmQuit(const char *action) const
 	// string for the yes choice.
 	if (secondButton.size() >= 2)
 	{
-		secondButton[1] = static_cast<char>(toupper(secondButton[1]));
+		secondButton[1] = static_cast<char>(safe_toupper(secondButton[1]));
 		size_t pos = secondButton.find(' ');
 		if (pos != SString::npos)
 			secondButton.erase(pos, SString::npos);

@@ -20,6 +20,7 @@
 
 #include "Errors.h"
 #include "lib_file.h"
+#include "safe_ctype.h"
 #include "sys_debug.h"
 
 #ifdef WIN32
@@ -325,7 +326,7 @@ int ScanDirectory(const fs::path &path, const std::function<void(const fs::path 
 			}
 			fs::path entry_name = dir_entry.path().filename();
 			SString entry_string = entry_name.u8string();
-			if(entry_string.length() >= 2 && entry_string[0] == '.' && isalnum(entry_string[1]))
+			if(entry_string.length() >= 2 && entry_string[0] == '.' && safe_isalnum(entry_string[1]))
 			{
 				flags |= SCAN_F_Hidden;
 			}

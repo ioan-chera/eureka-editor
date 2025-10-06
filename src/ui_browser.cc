@@ -562,8 +562,8 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 		if (cat == '^')
 			return (item->recent_idx >= 0);
 
-		if (! (cat == tolower(item->category) ||
-			   (cat == 'X' && isupper(item->category))))
+		if (! (cat == safe_tolower(item->category) ||
+			   (cat == 'X' && safe_isupper(item->category))))
 			return false;
 	}
 
@@ -644,14 +644,14 @@ static int SortCmp(const Browser_Item *A, const Browser_Item *B, sort_method_e m
 	// Alphabetical in LINEDEF mode, skip trigger type (SR etc)
 	if (method == SOM_AlphaSkip)
 	{
-		while (isspace(*sa)) sa++;
-		while (isspace(*sb)) sb++;
+		while (safe_isspace(*sa)) sa++;
+		while (safe_isspace(*sb)) sb++;
 
 		if (sa[0] && sa[1] && sa[2] == ' ')
-			while (! isspace(*sa)) sa++;
+			while (! safe_isspace(*sa)) sa++;
 
 		if (sb[0] && sb[1] && sb[2] == ' ')
-			while (! isspace(*sb)) sb++;
+			while (! safe_isspace(*sb)) sb++;
 	}
 
 	return strcmp(sa, sb);
@@ -1899,7 +1899,7 @@ bool UI_Browser_Box::ParseUser(const std::vector<SString> &tokens)
 void UI_Browser_Box::WriteUser(std::ostream &os)
 {
 	char cat = cat_letters[category->value()];
-	if(isprint(cat))
+	if(safe_isprint(cat))
 		os << "browser " << browserModeToChar(kind) << " cat " << cat << '\n';
 	if(alpha)
 		os << "browser " << browserModeToChar(kind) << " sort " << static_cast<int>(1 - alpha->value()) << '\n';

@@ -22,6 +22,7 @@
 
 #include "Errors.h"
 #include "m_strings.h"
+#include "safe_ctype.h"
 #include "sys_debug.h"
 
 //
@@ -61,7 +62,7 @@ int M_ParseLine(const SString &cline, std::vector<SString> &tokens,
 			if (ch == 0 || ch == '\n')
 				break;
 
-			if (isspace(ch))
+			if (safe_isspace(ch))
 				continue;
 
 			nexttoken = false;
@@ -91,7 +92,7 @@ int M_ParseLine(const SString &cline, std::vector<SString> &tokens,
 		{
 			// end of line
 		}
-		else if (! in_string && isspace(ch))
+		else if (! in_string && safe_isspace(ch))
 		{
 			// end of token
 		}
@@ -129,7 +130,7 @@ bool TokenWordParse::getNext(SString &word)
 		switch(mState)
 		{
 		case State::open:
-			if(isspace(c))
+			if(safe_isspace(c))
 				continue;
 			if(c == '"')
 			{
@@ -145,7 +146,7 @@ bool TokenWordParse::getNext(SString &word)
 			item.push_back(c);
 			continue;
 		case State::singleWord:
-			if(isspace(c))
+			if(safe_isspace(c))
 			{
 				mState = State::open;
 				++mPos;

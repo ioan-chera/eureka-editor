@@ -58,7 +58,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <ctype.h>
+#include "safe_ctype.h"
 #include <limits.h>
 #include <errno.h>
 #include <math.h>

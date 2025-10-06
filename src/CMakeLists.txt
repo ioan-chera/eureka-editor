@@ -213,6 +213,8 @@ add_library(
     m_vector.cc
     m_vector.h
     PrintfMacros.h
+    safe_ctype.cc
+    safe_ctype.h
     SafeOutFile.cc
     SafeOutFile.h
     sys_debug.cc

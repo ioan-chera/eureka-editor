@@ -121,7 +121,7 @@ static bool ValidLumpToEdit(const SString &p)
 
 	// check for bad characters [ p is *invalid* afterwards ]
 	for (const char &c : p)
-		if (! (isalnum(c) || c == '_'))
+		if (! (safe_isalnum(c) || c == '_'))
 			return false;
 
 	return true;

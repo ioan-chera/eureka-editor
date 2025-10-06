@@ -29,7 +29,7 @@
 
 #include "PrintfMacros.h"
 
-#include <ctype.h>
+#include "safe_ctype.h"
 #include <functional>
 #include <stdarg.h>
 #include <stdlib.h>

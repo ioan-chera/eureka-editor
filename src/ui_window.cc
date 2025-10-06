@@ -364,7 +364,7 @@ void UI_MainWindow::UpdateTitle(char want_prefix)
 
 	char got_prefix = label()[0];
 
-	if (! ispunct(got_prefix))
+	if (! safe_ispunct(got_prefix))
 		got_prefix = 0;
 
 	if (got_prefix == want_prefix)

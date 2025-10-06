@@ -971,8 +971,8 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 			if(!ignore)
 				**ptr = argv[0];
 			// support two numeric values after -warp
-			if (o->flags & OptFlag_warp && isdigit(argv[0][0]) &&
-				argc > 1 && isdigit(argv[1][0]))
+			if (o->flags & OptFlag_warp && safe_isdigit(argv[0][0]) &&
+				argc > 1 && safe_isdigit(argv[1][0]))
 			{
 				if (! ignore)
 				{

@@ -4039,7 +4039,7 @@ static bool is_switch_tex(const SString &tex)
 	// most Hexen switches, but misses a lot in Strife.
 
 	return (tex[0] == 'S') && (tex[1] == 'W') &&
-			(tex[2] == '_' || isdigit(tex[2]));
+			(tex[2] == '_' || safe_isdigit(tex[2]));
 }
 
 

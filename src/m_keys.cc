@@ -251,15 +251,15 @@ keycode_t M_ParseKeyString(const SString &mstr)
 
 	// convert uppercase letter --> lowercase + EMOD_SHIFT
 	if (str.length() == 1 && str[0] >= 'A' && str[0] <= 'Z')
-		return key | EMOD_SHIFT | (unsigned char) tolower(str[0]);
+		return key | EMOD_SHIFT | (unsigned char) safe_tolower(str[0]);
 
-	if (str.length() == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
+	if (str.length() == 1 && str[0] > 32 && str[0] < 127 && safe_isprint(str[0]))
 		return key | (unsigned char) str[0];
 
-	if (str.noCaseStartsWith("F") && isdigit(str[1]))
+	if (str.noCaseStartsWith("F") && safe_isdigit(str[1]))
 		return key | (FL_F + atoi(str.c_str() + 1));
 
-	if (str.noCaseStartsWith("MOUSE") && isdigit(str[5]))
+	if (str.noCaseStartsWith("MOUSE") && safe_isdigit(str[5]))
 		return key | (FL_Button + atoi(str.c_str() + 5));
 
 	// find name in mapping table
@@ -278,7 +278,7 @@ keycode_t M_ParseKeyString(const SString &mstr)
 
 static SString BareKeyName(keycode_t key)
 {
-	if(key < 127 && key > 32 && isprint(key) && key != '"')
+	if(key < 127 && key > 32 && safe_isprint(key) && key != '"')
 		return SString(static_cast<char>(key));
 	if(FL_F < key && key <= FL_F_Last)
 		return SString::printf("F%d", key - FL_F);
@@ -321,9 +321,9 @@ SString toString(keycode_t key)
 	// convert SHIFT + letter --> uppercase letter
 	if ((key & EMOD_ALL_MASK) == EMOD_SHIFT &&
 		(key & FL_KEY_MASK)  <  127 &&
-		isalpha(key & FL_KEY_MASK))
+		safe_isalpha(key & FL_KEY_MASK))
 	{
-		return SString::printf("%c", toupper(key & FL_KEY_MASK));
+		return SString::printf("%c", safe_toupper(key & FL_KEY_MASK));
 	}
 
 	return SString::printf("%s%s", ModName_Dash(key).c_str(),
@@ -830,9 +830,9 @@ std::array<std::string, 3> cellsForBinding(const key_binding_t& bind, bool chang
 	keycode_t tempk = bind.key;
 	if ((tempk & EMOD_ALL_MASK) == EMOD_SHIFT &&
 		(tempk & FL_KEY_MASK)  <  127 &&
-		isalpha(tempk & FL_KEY_MASK))
+		safe_isalpha(tempk & FL_KEY_MASK))
 	{
-		tempk = toupper(tempk & FL_KEY_MASK);
+		tempk = safe_toupper(tempk & FL_KEY_MASK);
 	}
 
 	SString key_str = changing_key ? SString("<?>") : toString(tempk);
@@ -842,7 +842,7 @@ std::array<std::string, 3> cellsForBinding(const key_binding_t& bind, bool chang
 		if (!enabled || str.empty())
 			return str;
 
-		if(isdigit(str[0]))
+		if(safe_isdigit(str[0]))
 			return " " + str;
 
 		return str;

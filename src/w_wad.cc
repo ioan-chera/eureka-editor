@@ -858,10 +858,10 @@ static bool IsDummyMarker(const SString &name) noexcept
 	if (name.length() < 3)
 		return false;
 
-	if (! strchr("SF", toupper(name[0])))
+	if (! strchr("SF", safe_toupper(name[0])))
 		return false;
 
-	if (! isdigit(name[1]))
+	if (! safe_isdigit(name[1]))
 		return false;
 
 	if (y_stricmp(name.c_str()+2, "_START") == 0 ||
