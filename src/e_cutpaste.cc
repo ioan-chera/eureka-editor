@@ -339,10 +339,15 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 		SideDef &SD = clip_board->sides.back();
 
 		// adjust sector references, if needed
-		if (is_sectors && list.get(SD.sector))
+		if (is_sectors)
 		{
-			SYS_ASSERT(sector_map.find(SD.sector) != sector_map.end());
-			SD.sector = -1 - sector_map[SD.sector];
+			if(list.get(SD.sector))
+			{
+				SYS_ASSERT(sector_map.find(SD.sector) != sector_map.end());
+				SD.sector = -1 - sector_map[SD.sector];
+			}
+			else
+				SD.sector = INVALID_SECTOR;
 		}
 	}
 
