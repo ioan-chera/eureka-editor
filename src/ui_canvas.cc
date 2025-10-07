@@ -1660,19 +1660,19 @@ v2double_t UI_Canvas::GetMidpoint(const ObjType objtype, const int objnum)
 	
 	if (objtype == ObjType::sectors)
 	{
-		for (const LineDef *sLineDef : inst.level.linedefs)
+		for (const std::shared_ptr<LineDef> &sLineDef : inst.level.linedefs)
 		{
-			if (!sLineDef->TouchesSector(objnum, inst.level))
+			if (!inst.level.touchesSector(*sLineDef, objnum))
 				continue;
-				
-			if (sLineDef->Start(inst.level)->x() < minX)
-				minX = sLineDef->Start(inst.level)->x();
-			if (sLineDef->Start(inst.level)->x() > maxX)
-				maxX = sLineDef->Start(inst.level)->x();
-			if (sLineDef->Start(inst.level)->y() < minY)
-				minY = sLineDef->Start(inst.level)->y();
-			if (sLineDef->Start(inst.level)->y() > maxY)
-				maxY = sLineDef->Start(inst.level)->y();
+
+			if (inst.level.getStart(*sLineDef).x() < minX)
+				minX = inst.level.getStart(*sLineDef).x();
+			if (inst.level.getStart(*sLineDef).x() > maxX)
+				maxX = inst.level.getStart(*sLineDef).x();
+			if (inst.level.getStart(*sLineDef).y() < minY)
+				minY = inst.level.getStart(*sLineDef).y();
+			if (inst.level.getStart(*sLineDef).y() > maxY)
+				maxY = inst.level.getStart(*sLineDef).y();
 		}
 	}
 	else if (objtype == ObjType::things)
@@ -1682,13 +1682,13 @@ v2double_t UI_Canvas::GetMidpoint(const ObjType objtype, const int objnum)
 	}
 	else if (objtype == ObjType::linedefs)
 	{
-		const LineDef *lineDef = inst.level.linedefs[objnum];
+		const std::shared_ptr<LineDef> &lineDef = inst.level.linedefs[objnum];
 
 		// For linedefs the bounding box is just the vertexes on either end.
-		minX = std::min(lineDef->Start(inst.level)->x(), lineDef->End(inst.level)->x());
-		maxX = std::max(lineDef->Start(inst.level)->x(), lineDef->End(inst.level)->x());
-		minY = std::min(lineDef->Start(inst.level)->y(), lineDef->End(inst.level)->y());
-		maxY = std::max(lineDef->Start(inst.level)->y(), lineDef->End(inst.level)->y());
+		minX = std::min(inst.level.getStart(*lineDef).x(), inst.level.getEnd(*lineDef).x());
+		maxX = std::max(inst.level.getStart(*lineDef).x(), inst.level.getEnd(*lineDef).x());
+		minY = std::min(inst.level.getStart(*lineDef).y(), inst.level.getEnd(*lineDef).y());
+		maxY = std::max(inst.level.getStart(*lineDef).y(), inst.level.getEnd(*lineDef).y());
 	}
 
 	// The midpoint in the middlle of the min and max determined.
