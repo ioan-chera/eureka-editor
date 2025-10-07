@@ -182,6 +182,7 @@ public:
 	bool isSelfRef(const LineDef &line) const;
 	bool isHorizontal(const LineDef &line) const;
 	bool isVertical(const LineDef &line) const;
+	v2double_t GetMidpoint(const ObjType objtype, const int objnum) const;
 
 	void LoadHeader(int loading_level, const Wad_file &load_wad);
 	void LoadThings(int loading_level, const Wad_file *load_wad);

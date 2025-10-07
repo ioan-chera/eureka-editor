@@ -2430,5 +2430,49 @@ bool getSpecialTagInfo(ObjType objtype, int objnum, int special, const void *obj
     return true;
 }
 
+v2double_t Document::GetMidpoint(const ObjType objtype, const int objnum) const
+{
+	double minX =  1000000.0;
+	double maxX = -1000000.0;
+	double minY =  1000000.0;
+	double maxY = -1000000.0;
+
+	if (objtype == ObjType::sectors)
+	{
+		for (const std::shared_ptr<LineDef> &sLineDef : linedefs)
+		{
+			if (!touchesSector(*sLineDef, objnum))
+				continue;
+
+			if (getStart(*sLineDef).x() < minX)
+				minX = getStart(*sLineDef).x();
+			if (getStart(*sLineDef).x() > maxX)
+				maxX = getStart(*sLineDef).x();
+			if (getStart(*sLineDef).y() < minY)
+				minY = getStart(*sLineDef).y();
+			if (getStart(*sLineDef).y() > maxY)
+				maxY = getStart(*sLineDef).y();
+		}
+	}
+	else if (objtype == ObjType::things)
+	{
+		// There is nothing to calculate for things.
+		return things[objnum]->xy();
+	}
+	else if (objtype == ObjType::linedefs)
+	{
+		const std::shared_ptr<LineDef> &lineDef = linedefs[objnum];
+
+		// For linedefs the bounding box is just the vertexes on either end.
+		minX = std::min(getStart(*lineDef).x(), getEnd(*lineDef).x());
+		maxX = std::max(getStart(*lineDef).x(), getEnd(*lineDef).x());
+		minY = std::min(getStart(*lineDef).y(), getEnd(*lineDef).y());
+		maxY = std::max(getStart(*lineDef).y(), getEnd(*lineDef).y());
+	}
+
+	// The midpoint in the middlle of the min and max determined.
+	return {(minX + maxX) / 2.0, (minY + maxY) / 2.0};
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

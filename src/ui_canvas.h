@@ -102,7 +102,6 @@ public:
 	void DrawHighlight(ObjType objtype, int objnum,
 	                   bool skip_lines = false, double dx=0, double dy=0);
 	void DrawHighlightTransform(ObjType objtype, int objnum);
-	v2double_t GetMidpoint(const ObjType objtype, const int objnum);
 	void DrawConnection(const ObjType objtypeCause , const int objnumCause,
 						const ObjType objtypeEffect, const int objnumEffect);
 	void DrawTagged(ObjType objtype, int objnum);
