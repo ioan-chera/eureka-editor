@@ -30,13 +30,19 @@
 #include "DocumentModule.h"
 #include "m_vector.h"
 #include "objid.h"
+#include "tl/optional.hpp"
+#include <memory>
 #include <vector>
+
+namespace grid
+{
+class State;
+}
 
 class bitvec_c;
 class crossing_state_c;
 class EditOperation;
 class fastopp_node_c;
-class Grid_State_c;
 class LineDef;
 class Objid;
 enum class MapFormat;
@@ -47,17 +53,56 @@ struct v2double_t;
 
 namespace hover
 {
-Objid findSplitLine(const Document &doc, MapFormat format, const Editor_State_t &edit,
-					const Grid_State_c &grid, v2double_t &out_pos, const v2double_t &ptr,
-					int ignore_vert);
 Objid findSplitLineForDangler(const Document &doc, MapFormat format,
-							  const Grid_State_c &grid, int v_num);
+							  const grid::State &grid, int v_num);
 int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side);
-Objid getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
-					  const Grid_State_c &grid, const v2double_t &pos);
 Objid getNearestSector(const Document &doc, const v2double_t &pos);
 bool isPointOutsideOfMap(const Document &doc, const v2double_t &v);
 }
+
+struct opp_test_state_t;
+class fastopp_node_c
+{
+public:
+	int lo, hi;   // coordinate range
+	int mid;
+
+	std::unique_ptr<fastopp_node_c> lo_child;
+	std::unique_ptr<fastopp_node_c> hi_child;
+
+	std::vector<int> lines;
+
+	const Document &doc;
+
+public:
+	fastopp_node_c(int _low, int _high, const Document &doc) :
+		lo(_low), hi(_high), mid((_low + _high) / 2), doc(doc)
+	{
+		Subdivide();
+	}
+
+private:
+	void Subdivide();
+
+public:
+	/* horizontal tree */
+	void AddLine_X(int ld, int x1, int x2);
+	void AddLine_X(int ld);
+
+	/* vertical tree */
+	void AddLine_Y(int ld, int y1, int y2);
+	void AddLine_Y(int ld);
+
+	void Process(opp_test_state_t& test, double coord) const;
+};
+
+struct FastOppositeTree
+{
+	explicit FastOppositeTree(Instance &inst);
+	
+	tl::optional<fastopp_node_c> m_fastopp_X_tree;
+	tl::optional<fastopp_node_c> m_fastopp_Y_tree;
+};
 
 //
 // The hover module
@@ -69,10 +114,8 @@ public:
 	{
 	}
 
-	int getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const;
-	int getOppositeSector(int ld, Side ld_side) const;
-	void fastOpposite_begin();
-	void fastOpposite_finish();
+	int getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines, FastOppositeTree *tree) const;
+	int getOppositeSector(int ld, Side ld_side, FastOppositeTree *tree) const;
 
 	void findCrossingPoints(crossing_state_c &cross,
 		v2double_t p1, int possible_v1,
@@ -80,9 +123,6 @@ public:
 
 private:
 	void findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, int possible_v1, const v2double_t &pos2, int possible_v2) const;
-
-	fastopp_node_c *m_fastopp_X_tree = nullptr;
-	fastopp_node_c *m_fastopp_Y_tree = nullptr;
 };
 
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line

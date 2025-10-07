@@ -81,15 +81,24 @@ static void file_do_delete(Fl_Widget *w, void * data)
 
 static void file_do_load_given(Fl_Widget *w, void *data)
 {
-	const char *filename = (const char *) data;
+	auto filename = static_cast<const fs::path *>(data);
+	assert(filename);
 
-	int given_idx = M_FindGivenFile(filename);
+	int given_idx = M_FindGivenFile(*filename);
 
 	// TODO: think up the right instance to get this
 	if (given_idx >= 0)
-		gInstance.last_given_file = given_idx;
+		gInstance->last_given_file = given_idx;
 
-	OpenFileMap(filename);
+	try
+	{
+		OpenFileMap(*filename);
+	}
+	catch (const std::runtime_error& e)
+	{
+		gLog.printf("%s\n", e.what());
+		DLG_ShowError(false, "Cannot load %s: %s", filename->u8string().c_str(), e.what());
+	}
 }
 
 static void file_do_load_recent(Fl_Widget *w, void *data)
@@ -365,7 +374,7 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 static void tools_do_preferences(Fl_Widget *w, void * data)
 {
 	// FIXME: this uses the global instance because it's also used globally on Mac
-	gInstance.ExecuteCommand("PreferenceDialog");
+	gInstance->ExecuteCommand("PreferenceDialog");
 }
 
 static void tools_do_build_nodes(Fl_Widget *w, void * data)
@@ -376,6 +385,11 @@ static void tools_do_build_nodes(Fl_Widget *w, void * data)
 static void tools_do_test_map(Fl_Widget *w, void * data)
 {
 	static_cast<Instance *>(data)->ExecuteCommand("TestMap");
+}
+
+static void tools_do_change_test_settings(Fl_Widget* w, void* data)
+{
+	static_cast<Instance *>(data)->ExecuteCommand("ChangeTestSettings");
 }
 
 static void tools_do_lump_editor(Fl_Widget *w, void * data)
@@ -491,6 +505,7 @@ static std::unordered_map<void(*)(Fl_Widget *, void *), MenuCommand> s_menu_comm
 	{tools_do_preferences, {"PreferenceDialog"} },
 	{tools_do_build_nodes, {"BuildAllNodes"} },
 	{tools_do_test_map, {"TestMap"} },
+	{tools_do_change_test_settings, {"ChangeTestSettings"}},
 	{tools_do_lump_editor, {"EditLump"} },
 	{tools_do_add_behavior, {"AddBehavior"} },
 	{tools_do_view_logs, {"LogViewer"} },
@@ -515,19 +530,19 @@ static Fl_Menu_Item menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 
-		{ "&New Project   ",   FL_COMMAND + 'n', FCAL file_do_new_project },
-		{ "&Manage Project  ", FL_COMMAND + 'm', FCAL file_do_manage_project },
+		{ "&New Project   ",   0, FCAL file_do_new_project },
+		{ "&Manage Project  ", 0, FCAL file_do_manage_project },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Open Map",  FL_COMMAND + 'o', FCAL file_do_open },
+		{ "&Open Map",  0, FCAL file_do_open },
 		{ M_GIVEN_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 		{ M_RECENT_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
 
-		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
-		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
+		{ "&Save Map",    0, FCAL file_do_save },
+		{ "&Export Map",  0, FCAL file_do_export },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -538,34 +553,34 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Quit",             FL_COMMAND + 'q', FCAL file_do_quit },
+		{ "&Quit",             0, FCAL file_do_quit },
 		{ 0 },
 
 	{ "&Edit", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Undo",   FL_COMMAND + 'z',  FCAL edit_do_undo },
-		{ "&Redo",   FL_COMMAND + 'y',  FCAL edit_do_redo },
+		{ "&Undo",   0,  FCAL edit_do_undo },
+		{ "&Redo",   0,  FCAL edit_do_redo },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Cu&t",     FL_COMMAND + 'x', FCAL edit_do_cut },
-		{ "&Copy",    FL_COMMAND + 'c', FCAL edit_do_copy },
-		{ "&Paste",   FL_COMMAND + 'v', FCAL edit_do_paste },
-		{ "&Delete",  FL_Delete,        FCAL edit_do_delete },
+		{ "Cu&t",     0, FCAL edit_do_cut },
+		{ "&Copy",    0, FCAL edit_do_copy },
+		{ "&Paste",   0, FCAL edit_do_paste },
+		{ "&Delete",  0,        FCAL edit_do_delete },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "Select &All",       FL_COMMAND + 'a', FCAL edit_do_select_all },
-		{ "Unselect All",      FL_COMMAND + 'u', FCAL edit_do_unselect_all },
-		{ "&Invert Selection", FL_COMMAND + 'i', FCAL edit_do_invert_sel },
-		{ "&Last Selection",   FL_COMMAND + 'l', FCAL edit_do_last_sel },
+		{ "Select &All",       0, FCAL edit_do_select_all },
+		{ "Unselect All",      0, FCAL edit_do_unselect_all },
+		{ "&Invert Selection", 0, FCAL edit_do_invert_sel },
+		{ "&Last Selection",   0, FCAL edit_do_last_sel },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Operation Menu",   FL_F+1, FCAL edit_do_op_menu },
-		{ "&Move Objects...",  FL_F+2, FCAL edit_do_move },
-		{ "&Scale Objects...", FL_F+3, FCAL edit_do_scale },
-		{ "Rotate Objects...", FL_F+4, FCAL edit_do_rotate },
+		{ "&Operation Menu",   0, FCAL edit_do_op_menu },
+		{ "&Move Objects...",  0, FCAL edit_do_move },
+		{ "&Scale Objects...", 0, FCAL edit_do_scale },
+		{ "Rotate Objects...", 0, FCAL edit_do_rotate },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -578,9 +593,9 @@ static Fl_Menu_Item menu_items[] =
 		// Note: FL_Tab cannot be used as a shortcut here, as it
 		//       invokes FLTK's hard-coded navigation stuff.
 
-		{ "Toggle S&prites",     FL_F+10, FCAL view_do_sprites },
-		{ "Toggle &Gamma",       FL_F+11, FCAL view_do_gamma },
-		{ "Toggle Object Nums",  FL_F+12, FCAL view_do_object_nums },
+		{ "Toggle S&prites",     0, FCAL view_do_sprites },
+		{ "Toggle &Gamma",       0, FCAL view_do_gamma },
+		{ "Toggle Object Nums",  0, FCAL view_do_object_nums },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -591,22 +606,22 @@ static Fl_Menu_Item menu_items[] =
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL view_do_default_props },
+		{ "&Default Props  ",  0, FCAL view_do_default_props },
 		{ "Toggle &3D View",  0, FCAL view_do_toggle_3d },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Find / Replace",   FL_COMMAND + 'f', FCAL view_do_find },
-		{ "Find &Next",        FL_COMMAND + 'g', FCAL view_do_next },
+		{ "&Find / Replace",   0, FCAL view_do_find },
+		{ "Find &Next",        0, FCAL view_do_next },
 		{ "Go to &Camera",     0, FCAL view_do_camera_pos },
 		{ "&Jump to Objects",  0, FCAL view_do_jump },
 		{ 0 },
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },
 
-		{ "&Textures",     FL_F+5, FCAL browser_do_textures },
-		{ "&Flats",        FL_F+6, FCAL browser_do_flats },
-		{ "Thin&gs",       FL_F+7, FCAL browser_do_things },
+		{ "&Textures",     0, FCAL browser_do_textures },
+		{ "&Flats",        0, FCAL browser_do_flats },
+		{ "Thin&gs",       0, FCAL browser_do_things },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -627,7 +642,7 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Check", 0, 0, 0, FL_SUBMENU },
 
-		{ "&ALL",           FL_F+9, FCAL checks_do_all },
+		{ "&ALL",           0, FCAL checks_do_all },
 		{ "&Major stuff  ",      0, FCAL checks_do_major },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
@@ -646,15 +661,19 @@ static Fl_Menu_Item menu_items[] =
 	{ "&Tools", 0, 0, 0, FL_SUBMENU },
 
 #ifndef __APPLE__	// for macOS it will be in the app menu
-		{ "&Preferences",        FL_COMMAND + 'p', FCAL tools_do_preferences },
+		{ "&Preferences",        0, FCAL tools_do_preferences },
 #endif
 		{ "&View Logs",          0,  FCAL tools_do_view_logs },
 		{ "&Recalc Sectors",     0,  FCAL tools_do_recalc_sectors },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
-		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
-		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes },
+		{ "&Test in Game",       0, FCAL tools_do_test_map },
+		{ "&Change Test Settings...",       0, FCAL tools_do_change_test_settings },
+
+		{ "", 0, 0, 0, FL_MENU_DIVIDER | FL_MENU_INACTIVE },
+
+		{ "&Build All Nodes  ",  0, FCAL tools_do_build_nodes },
 		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
 		{ "&Add BEHAVIOR Lump  ", 0, FCAL tools_do_add_behavior },
 		{ 0 },
@@ -710,7 +729,8 @@ static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
 // make for nicer looking menus in Windows/Linux, but are not
 // needed for the MacOS system menu bar.
 //
-void Menu_PackForMac(Fl_Menu_Item *src)
+#ifdef __APPLE__
+static void Menu_PackForMac(Fl_Menu_Item *src)
 {
 	int depth = 0;
 
@@ -747,7 +767,7 @@ void Menu_PackForMac(Fl_Menu_Item *src)
 		*dest++ = *src++;
 	}
 }
-
+#endif
 
 static int Menu_FindItem(const Fl_Menu_Item *items, const char *text)
 {
@@ -824,7 +844,7 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 		Menu_AddItem(pos, short_name.c_str(),
 					 FCAL file_do_load_given,
-					 (void *)global::Pwad_list[k].u8string().c_str(), 0);
+					 &global::Pwad_list[k], 0);
 	}
 
 	for ( ; menu_pos < total ; menu_pos++)
@@ -836,7 +856,7 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback *cb)
 {
-	int count = global::recent.files.getSize();
+	int count = global::recent.getFiles().getSize();
 
 	if (count < 1)
 		return items;
@@ -862,9 +882,9 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		SString name = global::recent.files.Format(k);
+		SString name = global::recent.getFiles().Format(k);
 
-		void *data = global::recent.files.getData(k);
+		auto data = new RecentMap(global::recent.getFiles().Lookup(k));
 
 		Menu_AddItem(pos, name.c_str(), cb, data, 0);
 	}
@@ -875,8 +895,89 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 	return new_array;
 }
 
+namespace menu
+{
 
-Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
+static int locateMenuItem(const Fl_Sys_Menu_Bar &bar, Fl_Callback_p callback)
+{
+	int menuSize = bar.size();
+	const Fl_Menu_Item *items = bar.menu();
+	
+	for(int i = 0; i < menuSize; ++i)
+	{
+		const Fl_Menu_Item &item = items[i];
+		if(item.callback() == callback)
+			return i;
+	}
+	return -1;
+}
+
+void setTestMapDetail(Fl_Sys_Menu_Bar *bar, const SString &text)
+{
+	if(!bar)
+		return;
+	int index = locateMenuItem(*bar, tools_do_test_map);
+
+	if(index < 0)
+		return;
+	
+	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> testMapDetailStorage;
+
+	if(text.good())
+		testMapDetailStorage[bar] = SString::printf("&Test in Game (%s)", text.c_str());
+	else
+		testMapDetailStorage[bar] = "&Test in Game";
+	
+	bar->replace(index, testMapDetailStorage[bar].c_str());
+}
+
+void setUndoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb)
+{
+	if(!bar)
+		return;
+	int index = locateMenuItem(*bar, edit_do_undo);
+	if(index < 0)
+		return;
+	
+	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> undoDetailStorage;
+	
+	bool enable = verb.good();
+	if(enable)
+		undoDetailStorage[bar] = SString("&Undo ") + verb;
+	else
+		undoDetailStorage[bar] = "&Undo";
+	bar->replace(index, undoDetailStorage[bar].c_str());
+	int mode = bar->mode(index);
+	if(enable)
+		bar->mode(index, mode & ~FL_MENU_INACTIVE);
+	else
+		bar->mode(index, mode | FL_MENU_INACTIVE);
+}
+
+void setRedoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb)
+{
+	if(!bar)
+		return;
+	int index = locateMenuItem(*bar, edit_do_redo);
+	if(index < 0)
+		return;
+	
+	static std::unordered_map<const Fl_Sys_Menu_Bar *, SString> redoDetailStorage;
+	
+	bool enable = verb.good();
+	if(enable)
+		redoDetailStorage[bar] = SString("&Redo ") + verb;
+	else
+		redoDetailStorage[bar] = "&Redo";
+	bar->replace(index, redoDetailStorage[bar].c_str());
+	int mode = bar->mode(index);
+	if(enable)
+		bar->mode(index, mode & ~FL_MENU_INACTIVE);
+	else
+		bar->mode(index, mode | FL_MENU_INACTIVE);
+}
+
+Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
 
@@ -900,15 +1001,17 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 	int total = items[0].size();
 	for(int i = 0; i < total; ++i)
 		if(items[i].text && items[i].callback_ && !items[i].user_data_)
-			items[i].user_data_ = this;
+			items[i].user_data_ = userData;
 
 	bar->menu(items);
+	setUndoDetail(bar, "");
+	setRedoDetail(bar, "");
 
 	// for macOS, the preferences shall be in the app menu
 #ifdef __APPLE__
 	static const Fl_Menu_Item macPreferencesItem[] = {
 		{
-			"&Preferences\u2026", FL_COMMAND + ',', FCAL tools_do_preferences
+			"&Preferences\u2026", 0, FCAL tools_do_preferences
 		},
 		{0}
 	};
@@ -921,16 +1024,14 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 //
 // Update all the menu shortcut displays after all_bindings got updated
 //
-void updateMenuBindings()
+void updateBindings(Fl_Sys_Menu_Bar *bar)
 {
 	// If window not made yet, it will call this itself
-	if(!gInstance.main_win || !gInstance.main_win->menu_bar)
+	if(!bar)
 		return;
-
-	Fl_Sys_Menu_Bar *bar = gInstance.main_win->menu_bar;
 	int menuSize = bar->size();
 	const Fl_Menu_Item *items = bar->menu();
-
+	
 	for(int i = 0; i < menuSize; ++i)
 	{
 		auto it = s_menu_command_map.find(items[i].callback());
@@ -940,7 +1041,7 @@ void updateMenuBindings()
 		keycode_t code;
 		if(!findKeyCodeForCommandName(command.command, command.param, &code))
 			continue;
-
+		
 		// Convert Eureka code to FLTK code
 		if(code & EMOD_COMMAND)
 			code = (code & ~EMOD_COMMAND) | FL_COMMAND;
@@ -948,11 +1049,11 @@ void updateMenuBindings()
 			code = (code & ~EMOD_META) | FL_META;
 		if(code & EMOD_ALT)
 			code = (code & ~EMOD_ALT) | FL_ALT;
-
+		
 		bar->shortcut(i, code);
 	}
 }
-
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

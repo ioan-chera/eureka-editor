@@ -37,6 +37,8 @@
 #include "w_rawdef.h"
 #include "w_rawdef.h"
 
+#include <algorithm>
+
 
 #define MLF_ALL_AUTOMAP  \
 	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
@@ -48,8 +50,6 @@ enum
 	INSET_RIGHT = 6,
 	INSET_BOTTOM = 5,
 
-	NOMBRE_INSET = 6,
-	NOMBRE_HEIGHT = 28,
 	SPACING_BELOW_NOMBRE = 4,
 
 	TYPE_INPUT_X = 58,
@@ -92,10 +92,12 @@ public:
 // UI_LineBox Constructor
 //
 UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label), inst(inst)
+    MapItemBox(inst, X, Y, W, H, label)
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
+	const int Y0 = Y;
+	const int X0 = X;
 
 	X += INSET_LEFT;
 	Y += INSET_TOP;
@@ -133,8 +135,8 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	actkind = new Fl_Choice(type->x(), Y, SPAC_WIDTH, TYPE_INPUT_HEIGHT);
 	// this order must match the SPAC_XXX constants
-	actkind->add("W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??");
-	actkind->value(12);
+	actkind->add(getActivationMenuString());
+	actkind->value(getActivationCount());
 	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
 	actkind->deactivate();
 	actkind->hide();
@@ -180,50 +182,12 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	Y += flags->h() - 1;
 
-	static const int FW = 110;
+	// Remember where to place dynamic linedef flags
+	flagsStartX = X - X0;
+	flagsStartY = Y - Y0;
+	flagsAreaW = W;
 
-	auto addCheckBox = [this, &X, &Y, &W](bool right, const char *text, int flag)
-	{
-		auto check = new Fl_Check_Button(X + (right ? W - 120 : 28), Y + 2, FW, 20, text);
-		check->labelsize(12);
-		check->callback(flags_callback, new line_flag_CB_data_c(this, flag));
-		return check;
-	};
-
-	f_upper = addCheckBox(false, "upper unpeg", MLF_UpperUnpegged);
-	f_walk = addCheckBox(true, "impassable", MLF_Blocking);
-
-	Y += 19;
-
-	f_lower = addCheckBox(false, "lower unpeg", MLF_LowerUnpegged);
-	f_mons = addCheckBox(true, "block mons", MLF_BlockMonsters);
-
-	Y += 19;
-
-	f_passthru = addCheckBox(false, "pass thru", MLF_Boom_PassThru);
-	f_passthru->hide();
-
-	f_jumpover = addCheckBox(false, "jump over", MLF_Strife_JumpOver);
-	f_jumpover->hide();
-
-	f_sound = addCheckBox(true, "sound block", MLF_SoundBlock);
-
-	Y += 19;
-
-	f_3dmidtex = addCheckBox(true, "3D MidTex", MLF_Eternity_3DMidTex);
-	f_3dmidtex->hide();
-
-	f_trans1 = addCheckBox(false, "", MLF_Strife_Translucent1);
-	f_trans1->hide();
-
-	f_trans2 = new Fl_Check_Button(X+44, Y+2, FW, 20, "translucency");
-	f_trans2->labelsize(12);
-	f_trans2->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent2));
-	f_trans2->hide();
-
-	f_flyers = addCheckBox(true, "block flyers", MLF_Strife_BlockFloaters);
-	f_flyers->hide();
-
+	// Leave space; dynamic flags will be created in UpdateGameInfo and side boxes moved accordingly
 	Y += 29;
 
 
@@ -256,7 +220,7 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			op.changeLinedef(*it, LineDef::F_TYPE, new_type);
 		}
@@ -285,7 +249,7 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 	}
 	else
 	{
-		const linetype_t &info = box->inst.M_GetLineType(new_type);
+		const linetype_t &info = box->inst.conf.getLineType(new_type);
 		box->desc->value(info.desc.c_str());
 	}
 
@@ -297,38 +261,40 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 {
 	bool opposite = (e_state & FL_SHIFT);
 
-	LineDef *L = inst.level.linedefs[ld];
+	const auto L = inst.level.linedefs[ld];
 
 	// handle the selected texture boxes
 	if (parts != 0)
 	{
 		if (L->OneSided())
 		{
-			if (parts & PART_RT_RAIL) 
+			if (parts & PART_RT_LOWER)
 				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
-			if (parts & PART_RT_UPPER) 
+			if (parts & PART_RT_UPPER)
 				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+            if (parts & PART_RT_RAIL)
+                op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
 
 			return;
 		}
 
-		if (L->Right(inst.level))
+		if (inst.level.getRight(*L))
 		{
-			if (parts & PART_RT_LOWER) 
+			if (parts & PART_RT_LOWER)
 				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_RT_UPPER) 
+			if (parts & PART_RT_UPPER)
 				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_RT_RAIL)  
+			if (parts & PART_RT_RAIL)
 				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
-		if (L->Left(inst.level))
+		if (inst.level.getLeft(*L))
 		{
-			if (parts & PART_LF_LOWER) 
+			if (parts & PART_LF_LOWER)
 				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_LF_UPPER) 
+			if (parts & PART_LF_UPPER)
 				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_LF_RAIL)  
+			if (parts & PART_LF_RAIL)
 				op.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex);
 		}
 		return;
@@ -342,8 +308,8 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 
 		// convenience: set lower unpeg on first change
 		if (! (L->flags & MLF_LowerUnpegged)  &&
-		    is_null_tex(L->Right(inst.level)->MidTex()) &&
-		    is_null_tex(L-> Left(inst.level)->MidTex()) )
+		    is_null_tex(inst.level.getRight(*L)->MidTex()) &&
+		    is_null_tex(inst.level.getLeft(*L)->MidTex()) )
 		{
 			op.changeLinedef(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
 		}
@@ -372,7 +338,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 	if (e_state & FL_BUTTON3)
 	{
 		// back ceiling is higher?
-		if (L->Left(inst.level)->SecRef(inst.level)->ceilh > L->Right(inst.level)->SecRef(inst.level)->ceilh)
+		if (inst.level.getSector(*inst.level.getLeft(*L)).ceilh > inst.level.getSector(*inst.level.getRight(*L)).ceilh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
@@ -384,13 +350,13 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 	else
 	{
 		// back floor is lower?
-		if (L->Left(inst.level)->SecRef(inst.level)->floorh < L->Right(inst.level)->SecRef(inst.level)->floorh)
+		if (inst.level.getSector(*inst.level.getLeft(*L)).floorh < inst.level.getSector(*inst.level.getRight(*L)).floorh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		SideDef *S = inst.level.sidedefs[sd1];
+		const auto S = inst.level.sidedefs[sd1];
 
 		// change BOTH upper and lower when they are the same
 		// (which is great for windows).
@@ -414,7 +380,18 @@ void UI_LineBox::checkSidesDirtyFields()
 	back->checkDirtyFields();
 }
 
-void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
+int UI_LineBox::getActivationCount() const
+{
+	return inst.conf.features.player_use_passthru_activation ? 14 : 12;
+}
+const char *UI_LineBox::getActivationMenuString() const
+{
+	return inst.conf.features.player_use_passthru_activation ?
+		"W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|S1+|SR+|??" :
+		"W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??";
+}
+
+void UI_LineBox::SetTexture(const char *tex_name, int e_state, int uiparts)
 {
 	StringID new_tex = BA_InternaliseString(tex_name);
 
@@ -425,20 +402,28 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 
 	if (! inst.edit.Selected->empty())
 	{
-		mFixUp.checkDirtyFields();
+        // WARNING: translate uiparts to be valid for a one-sided line
+        if(inst.level.isLinedef(obj) && inst.level.linedefs[obj]->OneSided())
+        {
+            uiparts = (uiparts & PART_RT_UPPER) |
+                      (uiparts & PART_RT_LOWER ? PART_RT_RAIL : 0) |
+                      (uiparts & PART_RT_RAIL ? PART_RT_LOWER : 0);
+        }
+
+        mFixUp.checkDirtyFields();
 		checkSidesDirtyFields();
 
 		EditOperation op(inst.level.basis);
 		op.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int p2 = inst.edit.Selected->get_ext(*it);
 
 			// only use parts explicitly selected in 3D view when no
 			// parts in the linedef panel are selected.
-			if (! (parts == 0 && p2 > 1))
-				p2 = parts;
+			if (! (uiparts == 0 && p2 > 1))
+				p2 = uiparts;
 
 			SetTexOnLine(op, *it, new_tex, e_state, p2);
 		}
@@ -469,7 +454,7 @@ void UI_LineBox::SetLineType(int new_type)
 }
 
 
-void UI_LineBox::CB_Copy(int parts)
+void UI_LineBox::CB_Copy(int uiparts)
 {
 	// determine which sidedef texture to grab from
 	const char *name = NULL;
@@ -485,7 +470,7 @@ void UI_LineBox::CB_Copy(int parts)
 		{
 			int try_part = PART_RT_LOWER << (b + pass * 4);
 
-			if ((parts & try_part) == 0)
+			if ((uiparts & try_part) == 0)
 				continue;
 
 			const char *b_name = (b == 0) ? SD->l_tex->value() :
@@ -509,7 +494,7 @@ void UI_LineBox::CB_Copy(int parts)
 }
 
 
-void UI_LineBox::CB_Paste(int parts, StringID new_tex)
+void UI_LineBox::CB_Paste(int uiparts, StringID new_tex)
 {
 	// iterate over selected linedefs
 	if (inst.edit.Selected->empty())
@@ -522,9 +507,9 @@ void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 		EditOperation op(inst.level.basis);
 		op.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = inst.level.linedefs[*it];
+			const auto L = inst.level.linedefs[*it];
 
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
@@ -532,24 +517,18 @@ void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 				if (sd < 0)
 					continue;
 
-				int parts2 = pass ? (parts >> 4) : parts;
+				int uiparts2 = pass ? (uiparts >> 4) : uiparts;
 
-				if (L->TwoSided())
-				{
-					if (parts2 & PART_RT_LOWER)
-						op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
+                // WARNING: different meaning of lower/railing between
+                // UI panel and elsewhere. Here we know it's UI
+                if (uiparts2 & PART_RT_LOWER)
+                    op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
 
-					if (parts2 & PART_RT_UPPER)
-						op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
+                if (uiparts2 & PART_RT_UPPER)
+                    op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
 
-					if (parts2 & PART_RT_RAIL)
-						op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
-				}
-				else  // one-sided line
-				{
-					if (parts2 & PART_RT_LOWER)
-						op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
-				}
+                if (uiparts2 & PART_RT_RAIL)
+                    op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 			}
 		}
 	}
@@ -566,30 +545,30 @@ bool UI_LineBox::ClipboardOp(EditCommand op)
 	if (obj < 0)
 		return false;
 
-	int parts = front->GetSelectedPics() | (back->GetSelectedPics() << 4);
+	int uiparts = front->GetSelectedPics() | (back->GetSelectedPics() << 4);
 
-	if (parts == 0)
-		parts = front->GetHighlightedPics() | (back->GetHighlightedPics() << 4);
+	if (uiparts == 0)
+		uiparts = front->GetHighlightedPics() | (back->GetHighlightedPics() << 4);
 
-	if (parts == 0)
+	if (uiparts == 0)
 		return false;
 
 	switch (op)
 	{
 		case EditCommand::copy:
-			CB_Copy(parts);
+			CB_Copy(uiparts);
 			break;
 
 		case EditCommand::paste:
-			CB_Paste(parts, Texboard_GetTexNum(inst.conf));
+			CB_Paste(uiparts, Texboard_GetTexNum(inst.conf));
 			break;
 
 		case EditCommand::cut:	// Cut
-			CB_Paste(parts, BA_InternaliseString(inst.conf.default_wall_tex));
+			CB_Paste(uiparts, BA_InternaliseString(inst.conf.default_wall_tex));
 			break;
 
 		case EditCommand::del: // Delete
-			CB_Paste(parts, BA_InternaliseString("-"));
+			CB_Paste(uiparts, BA_InternaliseString("-"));
 			break;
 	}
 
@@ -605,9 +584,9 @@ void UI_LineBox::BrowsedItem(BrowserMode kind, int number, const char *name, int
 		int  back_pics =  back->GetSelectedPics();
 
 		// this can be zero, invoking special behavior (based on mouse button)
-		int parts = front_pics | (back_pics << 4);
+		int uiparts = front_pics | (back_pics << 4);
 
-		SetTexture(name, e_state, parts);
+		SetTexture(name, e_state, uiparts);
 	}
 	else if (kind == BrowserMode::lineTypes)
 	{
@@ -644,9 +623,9 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = box->inst.level.linedefs[*it];
+			const auto L = box->inst.level.linedefs[*it];
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
@@ -672,7 +651,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
 			op.changeLinedef(*it, static_cast<byte>(LineDef::F_TAG + arg_idx),
                                                 new_value);
@@ -714,26 +693,6 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_LineBox::SetObj(int _index, int _count)
-{
-	if (obj == _index && count == _count)
-		return;
-
-	obj   = _index;
-	count = _count;
-
-	which->SetIndex(obj);
-	which->SetSelected(count);
-
-	UpdateField();
-
-	if (obj < 0)
-		UnselectPics();
-
-	redraw();
-}
-
-
 void UI_LineBox::UpdateField(int field)
 {
 	if (field < 0 || field == LineDef::F_START || field == LineDef::F_END)
@@ -755,11 +714,11 @@ void UI_LineBox::UpdateField(int field)
 
 		if (inst.level.isLinedef(obj))
 		{
-			const LineDef *L = inst.level.linedefs[obj];
+			const auto L = inst.level.linedefs[obj];
 
 			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
 
-			const linetype_t &info = inst.M_GetLineType(L->type);
+			const linetype_t &info = inst.conf.getLineType(L->type);
 
 			if (inst.loaded.levelFormat != MapFormat::doom)
 			{
@@ -789,10 +748,10 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (inst.level.isLinedef(obj))
 		{
-			const LineDef *L = inst.level.linedefs[obj];
+			const auto L = inst.level.linedefs[obj];
 
-			int right_mask = SolidMask(L, Side::right);
-			int  left_mask = SolidMask(L, Side::left);
+			int right_mask = SolidMask(L.get(), Side::right);
+			int  left_mask = SolidMask(L.get(), Side::left);
 
 			front->SetObj(L->right, right_mask, L->TwoSided());
 			 back->SetObj(L->left,   left_mask, L->TwoSided());
@@ -820,7 +779,7 @@ void UI_LineBox::UpdateField(int field)
 			}
 			else
 			{
-				const linetype_t &info = inst.M_GetLineType(type_num);
+				const linetype_t &info = inst.conf.getLineType(type_num);
 				desc->value(info.desc.c_str());
 			}
 
@@ -848,7 +807,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			FlagsFromInt(0);
 
-			actkind->value(12);  // show as "??"
+			actkind->value(getActivationCount());  // show as "??"
 			actkind->deactivate();
 		}
 	}
@@ -875,7 +834,7 @@ void UI_LineBox::CalcLength()
 
 	int n = obj;
 
-	float len_f = static_cast<float>(inst.level.linedefs[n]->CalcLength(inst.level));
+	float len_f = static_cast<float>(inst.level.calcLength(*inst.level.linedefs[n]));
 
 	char buffer[128];
 	snprintf(buffer, sizeof(buffer), "%1.0f", len_f);
@@ -894,7 +853,8 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 		new_act |= (lineflags & MLF_Repeatable) ? 1 : 0;
 
 		// show "??" for unknown values
-		if (new_act > 12) new_act = 12;
+		int count = getActivationCount();
+		if (new_act > count) new_act = count;
 
 		actkind->value(new_act);
 	}
@@ -908,19 +868,12 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 	else
 		f_automap->value(0);
 
-	f_upper   ->value((lineflags & MLF_UpperUnpegged) ? 1 : 0);
-	f_lower   ->value((lineflags & MLF_LowerUnpegged) ? 1 : 0);
-	f_passthru->value((lineflags & MLF_Boom_PassThru) ? 1 : 0);
-	f_3dmidtex->value((lineflags & MLF_Eternity_3DMidTex) ? 1 : 0);
-
-	f_jumpover->value((lineflags & MLF_Strife_JumpOver)   ? 1 : 0);
-	f_trans1  ->value((lineflags & MLF_Strife_Translucent1) ? 1 : 0);
-	f_trans2  ->value((lineflags & MLF_Strife_Translucent2) ? 1 : 0);
-
-	f_walk  ->value((lineflags & MLF_Blocking)      ? 1 : 0);
-	f_mons  ->value((lineflags & MLF_BlockMonsters) ? 1 : 0);
-	f_sound ->value((lineflags & MLF_SoundBlock)    ? 1 : 0);
-	f_flyers->value((lineflags & MLF_Strife_BlockFloaters) ? 1 : 0);
+	// Set dynamic line flag buttons
+	for(const auto &btn : flagButtons)
+	{
+		if(btn.button)
+			btn.button->value((lineflags & btn.info->value) ? 1 : 0);
+	}
 }
 
 
@@ -936,51 +889,29 @@ int UI_LineBox::CalcFlags() const
 		case 3: /* Secret    */ lineflags |= MLF_Secret; break;
 	}
 
-	if (f_upper->value())    lineflags |= MLF_UpperUnpegged;
-	if (f_lower->value())    lineflags |= MLF_LowerUnpegged;
-
-	if (f_walk->value())  lineflags |= MLF_Blocking;
-	if (f_mons->value())  lineflags |= MLF_BlockMonsters;
-	if (f_sound->value()) lineflags |= MLF_SoundBlock;
-
+	// Activation for non-DOOM formats
 	if (inst.loaded.levelFormat != MapFormat::doom)
 	{
 		int actval = actkind->value();
-		if (actval >= 12) actval = 0;
-
+		if (actval >= getActivationCount())
+			actval = 0;
 		lineflags |= (actval << 9);
 	}
-	else
+
+	// Apply dynamic flags
+	for(const auto &btn : flagButtons)
 	{
-		if (inst.conf.features.pass_through && f_passthru->value())
-			lineflags |= MLF_Boom_PassThru;
-
-		if (inst.conf.features.midtex_3d && f_3dmidtex->value())
-			lineflags |= MLF_Eternity_3DMidTex;
-
-		if (inst.conf.features.strife_flags)
-		{
-			if (f_jumpover->value())
-				lineflags |= MLF_Strife_JumpOver;
-
-			if (f_flyers->value())
-				lineflags |= MLF_Strife_BlockFloaters;
-
-			if (f_trans1->value())
-				lineflags |= MLF_Strife_Translucent1;
-
-			if (f_trans2->value())
-				lineflags |= MLF_Strife_Translucent2;
-		}
+		if(btn.button && btn.button->value())
+			lineflags |= btn.info->value;
 	}
 
 	return lineflags;
 }
 
 
-void UI_LineBox::UpdateTotal()
+void UI_LineBox::UpdateTotal(const Document &doc) noexcept
 {
-	which->SetTotal(inst.level.numLinedefs());
+	which->SetTotal(doc.numLinedefs());
 }
 
 
@@ -994,8 +925,8 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 	if (L->left < 0 || L->right < 0)
 		return SOLID_MID;
 
-	Sector *right = L->Right(inst.level)->SecRef(inst.level);
-	Sector * left = L->Left (inst.level)->SecRef(inst.level);
+	const Sector *right = &inst.level.getSector(*inst.level.getRight(*L));
+	const Sector * left = &inst.level.getSector(*inst.level.getLeft(*L));
 
 	if (side == Side::left)
 		std::swap(left, right);
@@ -1015,21 +946,21 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 }
 
 
-void UI_LineBox::UpdateGameInfo()
+void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
 	choose->label("Choose");
 
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	if (loaded.levelFormat != MapFormat::doom)
 	{
 		tag->hide();
 		length->hide();
 		gen->hide();
 
+		actkind->clear();
+		actkind->add(getActivationMenuString());
+
 		actkind->show();
 		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
-
-		f_passthru->hide();
-		f_3dmidtex->hide();
 	}
 	else
 	{
@@ -1039,40 +970,112 @@ void UI_LineBox::UpdateGameInfo()
 		actkind->hide();
 		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 
-		if (inst.conf.features.pass_through)
-			f_passthru->show();
-		else
-			f_passthru->hide();
-
-		if (inst.conf.features.midtex_3d)
-			f_3dmidtex->show();
-		else
-			f_3dmidtex->hide();
-
-		if (inst.conf.features.strife_flags)
-		{
-			f_jumpover->show();
-			f_flyers->show();
-			f_trans1->show();
-			f_trans2->show();
-		}
-		else
-		{
-			f_jumpover->hide();
-			f_flyers->hide();
-			f_trans1->hide();
-			f_trans2->hide();
-		}
-
-		if (inst.conf.features.gen_types)
+		if (config.features.gen_types)
 			gen->show();
 		else
 			gen->hide();
 	}
 
+	// Recreate dynamic linedef flags from configuration
+	for(const auto &btn : flagButtons)
+		this->remove(btn.button.get());
+	flagButtons.clear();
+
+	int Y = y() + flagsStartY;
+	if(!config.line_flags.empty())
+	{
+		// Build slots from sequential flags, supporting optional pairing (pairIndex 0/1)
+		struct Slot
+		{
+			const lineflag_t *a = nullptr;
+			const lineflag_t *b = nullptr;
+		};
+		std::vector<Slot> slots;
+		slots.reserve(config.line_flags.size());
+		for(size_t i = 0; i < config.line_flags.size(); ++i)
+		{
+			const lineflag_t *f = &config.line_flags[i];
+			if(f->pairIndex == 0 && i + 1 < config.line_flags.size() && config.line_flags[i + 1].pairIndex == 1)
+			{
+				Slot s;
+				s.a = f;
+				s.b = &config.line_flags[i + 1];
+				slots.push_back(s);
+				++i; // consume the pair
+			}
+			else
+			{
+				Slot s;
+				if(f->pairIndex == 1)
+					s.b = f;
+				else
+					s.a = f;
+				slots.push_back(s);
+			}
+		}
+
+		const int FW = 110;
+		const int leftX = x() + flagsStartX + 28;
+		const int rightX = x() + flagsStartX + flagsAreaW - 120;
+		const int rowH = 19;
+
+		const int total = (int)slots.size();
+		const int leftCount = (total + 1) / 2; // ceil to make columns as even as possible
+
+		int yLeft = Y;
+		int yRight = Y;
+
+		begin();
+		for(int idx = 0; idx < total; ++idx)
+		{
+			const Slot &s = slots[idx];
+			const bool onLeft = idx < leftCount;
+			const int baseX = onLeft ? leftX : rightX;
+			int &curY = onLeft ? yLeft : yRight;
+
+			if(s.a)
+			{
+				LineFlagButton fb;
+				fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
+				fb.button->labelsize(12);
+				fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->value);
+				fb.button->callback(flags_callback, fb.data.get());
+				fb.info = s.a;
+				flagButtons.push_back(std::move(fb));
+			}
+			if(s.b)
+			{
+				LineFlagButton fb2;
+				fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
+				fb2.button->labelsize(12);
+				fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->value);
+				fb2.button->callback(flags_callback, fb2.data.get());
+				fb2.info = s.b;
+				flagButtons.push_back(std::move(fb2));
+			}
+			curY += rowH;
+		}
+		end();
+
+		Y = (yLeft > yRight ? yLeft : yRight) + 29;
+	}
+	else
+	{
+		// keep some spacing if no flags defined
+		Y += 29;
+	}
+
+	// Reposition side boxes under the generated flags
+	front->Fl_Widget::position(front->x(), Y);
+	Y += front->h() + 14;
+	back->Fl_Widget::position(back->x(), Y);
+	front->redraw();
+	back->redraw();
+
+	// Show Hexen/UDMF args when needed
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		if (inst.loaded.levelFormat != MapFormat::doom)
+		if (loaded.levelFormat != MapFormat::doom)
 			args[a]->show();
 		else
 			args[a]->hide();

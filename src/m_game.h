@@ -29,6 +29,7 @@
 
 #include "im_color.h"
 #include "m_strings.h"
+#include <initializer_list>
 #include <map>
 #include <unordered_map>
 
@@ -117,6 +118,52 @@ struct thingtype_t
 	SString sprite;  // name of sprite (frame and rot are optional)
 	rgb_color_t color;   // RGB color (from group)
 	SString args[5]; // args used when spawned (Hexen)
+};
+
+
+// thingflag <row> <column> <label> <off/on> <value>
+// This is the thing flag as it would appear in the thing panel as a checkbox
+struct thingflag_t
+{
+	enum class DefaultMode
+	{
+		off,
+		on,
+		onOpposite
+	};
+
+	int row;
+	int column;
+	SString label;
+	DefaultMode defaultSet;
+	int value;
+};
+
+// New: lineflag <label> <value> [pair <index>]
+// This describes a linedef flag checkbox in the linedef panel.
+// - label is the UI text (can be empty)
+// - value is the bit mask to toggle in LineDef::flags
+// - optional "pair <index>" allows two small checkboxes to share the same slot
+//   (index 0 is the left-small one, index 1 is the right-small one)
+struct lineflag_t
+{
+	SString label;
+	int value = 0;
+	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot
+};
+
+struct gensector_t
+{
+	struct option_t
+	{
+		SString label;
+		int value;
+	};
+
+	SString label;
+	int value;
+
+	std::vector<option_t> options;
 };
 
 
@@ -213,6 +260,7 @@ struct port_features_t
 	int strife_flags;	// Strife flags
 
 	int medusa_fixed;	// the Medusa Effect has been fixed (cannot occur)
+	int tuttifrutti_fixed;	// the tutti-frutti effect has been fixed (Boom and modern ZDoom)
 	int lax_sprites;	// sprites can be found outside of S_START..S_END
 	int mix_textures_flats;	// allow mixing textures and flats (adv. ports)
 	int neg_patch_offsets;	// honors negative patch offsets in textures (ZDoom)
@@ -226,6 +274,9 @@ struct port_features_t
 	int extra_floors;		// bitmask: +1 EDGE, +2 Legacy, +4 for ZDoom in Hexen format
 	int slopes;				// bitmask: +1 EDGE, +2 Eternity, +4 Odamex,
 							//          +8 for ZDoom in Hexen format, +16 ZDoom things
+
+	// for Hexen format, allows the extra 2 player-use-passthru activations
+	int player_use_passthru_activation;
 };
 
 //
@@ -313,9 +364,10 @@ struct generalized_linetype_t
 static const char GAMES_DIR[] = "games";
 static const char PORTS_DIR[] = "ports";
 
-bool M_CanLoadDefinitions(const fs::path &folder, const SString &name);
+bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &old_home_dir,
+		const fs::path &install_dir, const fs::path &folder, const SString &name);
 void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
-					   const SString &folder, const SString &name,
+					   const fs::path &folder, const SString &name,
 					   ConfigData &config) noexcept(false);
 
 enum class ParsePurpose
@@ -327,7 +379,7 @@ enum class ParsePurpose
 };
 
 //
-// Exception throwable by M_ParseDefinitionFile. Meant to be caught by parties 
+// Exception throwable by M_ParseDefinitionFile. Meant to be caught by parties
 // who don't want the app to terminate suddenly.
 //
 class ParseException : public std::runtime_error
@@ -359,11 +411,15 @@ struct ConfigData
 	std::map<char, texturegroup_t> texture_groups;
 	std::map<char, thinggroup_t> thing_groups;
 	std::map<int, thingtype_t> thing_types;
+	std::vector<thingflag_t> thing_flags;
+	std::vector<lineflag_t> line_flags; // New: linedef UI flags
+	std::vector<gensector_t> gen_sectors; // generalized sector types
 
 	int num_gen_linetypes = 0;
-	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
+	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {}; // BOOM Generalized Lines
 
-	void clearExceptDefaults();
+	const thingtype_t &getThingType(int type) const;
+	const linetype_t &getLineType(int type) const;
 };
 
 //
@@ -394,13 +450,14 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   ParsePurpose purpose,
 						   ParseTarget target,
 						   const fs::path &filename,
-						   const SString &folder = NULL,
-						   const SString &prettyname = NULL,
+						   const fs::path &folder = "",
+						   const fs::path &prettyname = "",
                            int include_level = 0);
 
 const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false);
 
-std::vector<SString> M_CollectKnownDefs(const char *folder);
+std::vector<SString> M_CollectKnownDefs(const std::initializer_list<fs::path> &dirList,
+										const fs::path &folder);
 
 bool M_CheckPortSupportsGame(const SString &base_game,
 							 const SString &port) noexcept(false);
@@ -409,13 +466,13 @@ SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char 
 
 SString M_GetBaseGame(const SString &game) noexcept(false);
 
-map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
-										  const char *port);
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
+
+int M_CalcSectorTypeMask(const ConfigData &config);
+int M_CalcMaxSectorType(const ConfigData &config);
 
 bool is_null_tex(const SString &tex);		// the "-" texture
 bool is_special_tex(const SString &tex);	// begins with "#"
-
-const thingtype_t &M_GetThingType(const ConfigData &config, int type);
 
 #endif  /* __EUREKA_M_GAME_H__ */
 

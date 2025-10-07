@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr√© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Rapha√´l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -45,8 +45,11 @@
 #include "Thing.h"
 #include "Vertex.h"
 #include "w_rawdef.h"
+#include "WadData.h"
 
 #include "ui_window.h"
+
+#include <algorithm>
 
 // config items
 int config::default_edit_mode = 3;  // Vertices
@@ -68,22 +71,22 @@ void Instance::zoom_fit()
 	v2double_t zoom = { 1, 1 };
 	v2int_t ScrMax = { main_win->canvas->w(), main_win->canvas->h() };
 
-	if (Map_bound1.x < Map_bound2.x)
-		zoom.x = ScrMax.x / (Map_bound2.x - Map_bound1.x);
+	if (level.Map_bound1.x < level.Map_bound2.x)
+		zoom.x = ScrMax.x / (level.Map_bound2.x - level.Map_bound1.x);
 
-	if (Map_bound1.y < Map_bound2.y)
-		zoom.y = ScrMax.y / (Map_bound2.y - Map_bound1.y);
+	if (level.Map_bound1.y < level.Map_bound2.y)
+		zoom.y = ScrMax.y / (level.Map_bound2.y - level.Map_bound1.y);
 
 	grid.NearestScale(std::min(zoom.x, zoom.y));
 
-	grid.MoveTo((Map_bound1 + Map_bound2) / 2);
+	grid.MoveTo((level.Map_bound1 + level.Map_bound2) / 2);
 }
 
 
 void Instance::ZoomWholeMap()
 {
-	if (MadeChanges)
-		CalculateLevelBounds();
+	if (level.hasChanges())
+		level.CalculateLevelBounds();
 
 	zoom_fit();
 
@@ -93,18 +96,18 @@ void Instance::ZoomWholeMap()
 
 void Instance::RedrawMap()
 {
-	if (!main_win)
-		return;
-
 	UpdateHighlight();
 
-	main_win->scroll->UpdateRenderMode();
-	main_win->info_bar->UpdateSecRend();
-	main_win->status_bar->redraw();
-	main_win->canvas->redraw();
+	if(main_win)
+	{
+		main_win->scroll->UpdateRenderMode();
+		main_win->info_bar->UpdateSecRend();
+		main_win->status_bar->redraw();
+		main_win->canvas->redraw();
+	}
 }
 
-static int Selection_FirstLine(const Document &doc, selection_c *list);
+static int Selection_FirstLine(const Document &doc, const selection_c &list);
 
 static void UpdatePanel(const Instance &inst)
 {
@@ -138,30 +141,33 @@ static void UpdatePanel(const Instance &inst)
 	{
 		// in linedef mode, we prefer showing a two-sided linedef
 		if (inst.edit.mode == ObjType::linedefs && obj_count > 1)
-			obj_idx = Selection_FirstLine(inst.level, inst.edit.Selected);
+			obj_idx = Selection_FirstLine(inst.level, *inst.edit.Selected);
 		else
 			obj_idx = inst.edit.Selected->find_first();
 	}
 
-	switch (inst.edit.mode)
+	if(inst.main_win)
 	{
-		case ObjType::things:
-			inst.main_win->thing_box->SetObj(obj_idx, obj_count);
-			break;
+		switch (inst.edit.mode)
+		{
+			case ObjType::things:
+				inst.main_win->thing_box->SetObj(obj_idx, obj_count);
+				break;
 
-		case ObjType::linedefs:
-			inst.main_win->line_box->SetObj(obj_idx, obj_count);
-			break;
+			case ObjType::linedefs:
+				inst.main_win->line_box->SetObj(obj_idx, obj_count);
+				break;
 
-		case ObjType::sectors:
-			inst.main_win->sec_box->SetObj(obj_idx, obj_count);
-			break;
+			case ObjType::sectors:
+				inst.main_win->sec_box->SetObj(obj_idx, obj_count);
+				break;
 
-		case ObjType::vertices:
-			inst.main_win->vert_box->SetObj(obj_idx, obj_count);
-			break;
+			case ObjType::vertices:
+				inst.main_win->vert_box->SetObj(obj_idx, obj_count);
+				break;
 
-		default: break;
+			default: break;
+		}
 	}
 }
 
@@ -171,11 +177,11 @@ void Instance::UpdateDrawLine()
 	if (edit.action != EditorAction::drawLine || edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex *V = level.vertices[edit.drawLine.from.num];
+	const auto V = level.vertices[edit.drawLine.from.num];
 
 	v2double_t newpos = edit.map.xy;
 
-	if (grid.ratio > 0)
+	if (grid.getRatio() > 0)
 	{
 		grid.RatioSnapXY(newpos, V->xy());
 	}
@@ -195,7 +201,7 @@ void Instance::UpdateDrawLine()
 	edit.drawLine.to = newpos;
 
 	// when drawing mode, highlight a vertex at the snap position
-	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
+	if (grid.snaps() && edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
 		int near_vert = level.vertmod.findExact(FFixedPoint(newpos.x), FFixedPoint(newpos.y));
 		if (near_vert >= 0)
@@ -228,16 +234,15 @@ static void UpdateSplitLine(Instance &inst, const v2double_t &map)
 		inst.edit.pointer_in_window &&
 	    inst.edit.highlight.is_nil())
 	{
-		inst.edit.split_line = hover::findSplitLine(inst.level, inst.loaded.levelFormat, inst.edit,
-													inst.grid, inst.edit.split, map,
-													inst.edit.dragged.num);
+		inst.edit.split_line = inst.findSplitLine(inst.edit.split, map, inst.edit.dragged.num, false);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
 	}
 
 done:
-	inst.main_win->canvas->UpdateHighlight();
+	if(inst.main_win)
+		inst.main_win->canvas->UpdateHighlight();
 }
 
 
@@ -257,7 +262,7 @@ void Instance::UpdateHighlight()
 	if (edit.pointer_in_window &&
 	    (edit.action != EditorAction::drag || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
 	{
-		edit.highlight = hover::getNearbyObject(edit.mode, level, conf, grid, edit.map.xy);
+		edit.highlight = getNearbyObject(edit.mode, edit.map.xy);
 
 		// guarantee that we cannot drag a vertex onto itself
 		if (edit.action == EditorAction::drag && edit.dragged.valid() &&
@@ -268,11 +273,11 @@ void Instance::UpdateHighlight()
 
 		// if drawing a line and ratio lock is ON, only highlight a
 		// vertex if it is *exactly* the right ratio.
-		if (grid.ratio > 0 && edit.action == EditorAction::drawLine &&
+		if (grid.getRatio() > 0 && edit.action == EditorAction::drawLine &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
-			const Vertex *V = level.vertices[edit.highlight.num];
-			const Vertex *S = level.vertices[edit.drawLine.from.num];
+			const auto V = level.vertices[edit.highlight.num];
+			const auto S = level.vertices[edit.drawLine.from.num];
 
 			v2double_t vpos = V->xy();
 
@@ -289,8 +294,11 @@ void Instance::UpdateHighlight()
 	UpdateSplitLine(*this, edit.map.xy);
 	UpdateDrawLine();
 
-	main_win->canvas->UpdateHighlight();
-	main_win->canvas->CheckGridSnap();
+	if(main_win)
+	{
+		main_win->canvas->UpdateHighlight();
+		main_win->canvas->CheckGridSnap();
+	}
 
 	UpdatePanel(*this);
 }
@@ -345,11 +353,10 @@ void Instance::Editor_ChangeMode(char mode_char)
 		main_win->NewEditMode(edit.mode);
 
 		// convert the selection
-		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode, true /* extended */);
+		selection_c prev_sel = *edit.Selected;
+		edit.Selected.emplace(edit.mode, true /* extended */);
 
-		ConvertSelection(level, *prev_sel, *edit.Selected);
-		delete prev_sel;
+		ConvertSelection(level, prev_sel, *edit.Selected);
 	}
 	else if (main_win->isSpecialPanelShown())
 	{
@@ -370,23 +377,23 @@ void Instance::Editor_ChangeMode(char mode_char)
 //------------------------------------------------------------------------
 
 
-static void UpdateLevelBounds(Instance &inst, int start_vert)
+void Document::UpdateLevelBounds(int start_vert) noexcept
 {
-	for(int i = start_vert; i < inst.level.numVertices(); i++)
+	for(int i = start_vert; i < numVertices(); i++)
 	{
-		const Vertex * V = inst.level.vertices[i];
+		const auto V = vertices[i];
 
-		if (V->x() < inst.Map_bound1.x) inst.Map_bound1.x = V->x();
-		if (V->y() < inst.Map_bound1.y) inst.Map_bound1.y = V->y();
+		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
+		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
 
-		if (V->x() > inst.Map_bound2.x) inst.Map_bound2.x = V->x();
-		if (V->y() > inst.Map_bound2.y) inst.Map_bound2.y = V->y();
+		if (V->x() > Map_bound2.x) Map_bound2.x = V->x();
+		if (V->y() > Map_bound2.y) Map_bound2.y = V->y();
 	}
 }
 
-void Instance::CalculateLevelBounds()
+void Document::CalculateLevelBounds() noexcept
 {
-	if (level.numVertices() == 0)
+	if (numVertices() == 0)
 	{
 		Map_bound1.x = Map_bound2.x = 0;
 		Map_bound1.y = Map_bound2.y = 0;
@@ -396,7 +403,7 @@ void Instance::CalculateLevelBounds()
 	Map_bound1.x = 32767; Map_bound2.x = -32767;
 	Map_bound1.y = 32767; Map_bound2.y = -32767;
 
-	UpdateLevelBounds(*this, 0);
+	UpdateLevelBounds(0);
 }
 
 
@@ -440,13 +447,13 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const Vertex * V = level.vertices[objnum];
+		const auto V = level.vertices[objnum];
 
-		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
-		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
+		if (V->x() < level.Map_bound1.x) level.Map_bound1.x = V->x();
+		if (V->y() < level.Map_bound1.y) level.Map_bound1.y = V->y();
 
-		if (V->x() > Map_bound2.x) Map_bound2.x = V->x();
-		if (V->y() > Map_bound2.y) Map_bound2.y = V->y();
+		if (V->x() > level.Map_bound2.x) level.Map_bound2.x = V->x();
+		if (V->y() > level.Map_bound2.y) level.Map_bound2.y = V->y();
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();
@@ -466,11 +473,11 @@ void Instance::MapStuff_NotifyEnd()
 {
 	if (recalc_map_bounds || moved_vertex_count > 10)  // TODO: CONFIG
 	{
-		CalculateLevelBounds();
+		level.CalculateLevelBounds();
 	}
 	else if (new_vertex_minimum >= 0)
 	{
-		UpdateLevelBounds(*this, new_vertex_minimum);
+		level.UpdateLevelBounds(new_vertex_minimum);
 	}
 }
 
@@ -496,7 +503,7 @@ void Instance::ObjectBox_NotifyInsert(ObjType type, int objnum)
 	if (type != edit.mode)
 		return;
 
-	if (objnum > main_win->GetPanelObjNum())
+	if (main_win && objnum > main_win->GetPanelObjNum())
 		return;
 
 	invalidated_panel_obj = true;
@@ -510,7 +517,7 @@ void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
 	if (type != edit.mode)
 		return;
 
-	if (objnum > main_win->GetPanelObjNum())
+	if (main_win && objnum > main_win->GetPanelObjNum())
 		return;
 
 	invalidated_panel_obj = true;
@@ -519,7 +526,7 @@ void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
 
 void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
 {
-	if (type != edit.mode)
+	if (type != edit.mode || !main_win)
 		return;
 
 	if (objnum != main_win->GetPanelObjNum())
@@ -531,8 +538,10 @@ void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
 
 void Instance::ObjectBox_NotifyEnd() const
 {
+	if(!main_win)
+		return;
 	if (invalidated_totals)
-		main_win->UpdateTotals();
+		main_win->UpdateTotals(level);
 
 	if (invalidated_panel_obj)
 	{
@@ -561,7 +570,7 @@ void Instance::Selection_NotifyBegin()
 
 void Instance::Selection_NotifyInsert(ObjType type, int objnum)
 {
-	if (type == edit.Selected->what_type() &&
+	if (edit.Selected && type == edit.Selected->what_type() &&
 		objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
@@ -577,7 +586,7 @@ void Instance::Selection_NotifyInsert(ObjType type, int objnum)
 
 void Instance::Selection_NotifyDelete(ObjType type, int objnum)
 {
-	if (objnum <= edit.Selected->max_obj())
+	if (edit.Selected && objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
 	}
@@ -639,7 +648,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int t = 0 ; t < doc.numThings() ; t++)
 		{
-			const Thing *T = doc.things[t];
+			const auto T = doc.things[t];
 
 			Objid obj = hover::getNearestSector(doc, T->xy());
 
@@ -656,10 +665,10 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const LineDef *L = doc.linedefs[l];
+			const auto L = doc.linedefs[l];
 
-			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
-				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
+			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
+				 (doc.getLeft(*L)  && src.get(doc.getLeft(*L)->sector)) )
 			{
 				dest.set(l);
 			}
@@ -670,10 +679,10 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	if (src.what_type() == ObjType::sectors && dest.what_type() == ObjType::vertices)
 	{
-		for (const LineDef *L : doc.linedefs)
+		for (const auto &L : doc.linedefs)
 		{
-			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
-				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
+			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
+				 (doc.getLeft(*L)  && src.get(doc.getLeft(*L)->sector)) )
 			{
 				dest.set(L->start);
 				dest.set(L->end);
@@ -687,10 +696,10 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = doc.linedefs[*it];
+			const auto L = doc.linedefs[*it];
 
-			if (L->Right(doc)) dest.set(L->right);
-			if (L->Left(doc))  dest.set(L->left);
+			if (doc.getRight(*L)) dest.set(L->right);
+			if (doc.getLeft(*L))  dest.set(L->left);
 		}
 		return;
 	}
@@ -699,7 +708,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int n = 0 ; n < doc.numSidedefs(); n++)
 		{
-			const SideDef * SD = doc.sidedefs[n];
+			const auto SD = doc.sidedefs[n];
 
 			if (src.get(SD->sector))
 				dest.set(n);
@@ -712,7 +721,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = doc.linedefs[*it];
+			const auto L = doc.linedefs[*it];
 
 			dest.set(L->start);
 			dest.set(L->end);
@@ -726,7 +735,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		// select all linedefs that have both ends selected
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const LineDef *L = doc.linedefs[l];
+			const auto L = doc.linedefs[l];
 
 			if (src.get(L->start) && src.get(L->end))
 			{
@@ -750,17 +759,17 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	for (l = 0 ; l < doc.numLinedefs() ; l++)
 	{
-		const LineDef *L = doc.linedefs[l];
+		const auto L = doc.linedefs[l];
 
-		if (L->Right(doc)) dest.set(L->Right(doc)->sector);
-		if (L->Left(doc))  dest.set(L->Left(doc)->sector);
+		if (doc.getRight(*L)) dest.set(doc.getRight(*L)->sector);
+		if (doc.getLeft(*L))  dest.set(doc.getLeft(*L)->sector);
 	}
 
 	// step 2: unselect any sectors if a component is not selected
 
 	for (l = 0 ; l < doc.numLinedefs(); l++)
 	{
-		const LineDef *L = doc.linedefs[l];
+		const auto L = doc.linedefs[l];
 
 		if (src.what_type() == ObjType::vertices)
 		{
@@ -773,8 +782,8 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 				continue;
 		}
 
-		if (L->Right(doc)) dest.clear(L->Right(doc)->sector);
-		if (L->Left(doc))  dest.clear(L->Left(doc)->sector);
+		if (doc.getRight(*L)) dest.clear(doc.getRight(*L)->sector);
+		if (doc.getLeft(*L))  dest.clear(doc.getLeft(*L)->sector);
 	}
 }
 
@@ -786,18 +795,18 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 //
 // NOTE: this is slow, as it may need to search the whole list.
 //
-static int Selection_FirstLine(const Document &doc, selection_c *list)
+static int Selection_FirstLine(const Document &doc, const selection_c &list)
 {
 	for (sel_iter_c it(list); ! it.done(); it.next())
 	{
-		const LineDef *L = doc.linedefs[*it];
+		const auto L = doc.linedefs[*it];
 
 		if (L->TwoSided())
 			return *it;
 	}
 
 	// return first entry (a one-sided line)
-	return list->find_first();
+	return list.find_first();
 }
 
 
@@ -837,7 +846,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::things:
 			for (int n = 0 ; n < doc.numThings() ; n++)
 			{
-				const Thing *T = doc.things[n];
+				const auto T = doc.things[n];
 
 				v2double_t tpos = T->xy();
 
@@ -849,7 +858,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::vertices:
 			for (int n = 0 ; n < doc.numVertices(); n++)
 			{
-				const Vertex *V = doc.vertices[n];
+				const auto V = doc.vertices[n];
 
 				v2double_t vpos = V->xy();
 
@@ -861,11 +870,11 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::linedefs:
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const LineDef *L = doc.linedefs[n];
+				const auto L = doc.linedefs[n];
 
 				/* the two ends of the line must be in the box */
-				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
-				   L->End(doc)->xy().inbounds(pos1, pos2))
+				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
+				   doc.getEnd(*L).xy().inbounds(pos1, pos2))
 				{
 					list->toggle(n);
 				}
@@ -879,14 +888,14 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const LineDef *L = doc.linedefs[n];
+				const auto L = doc.linedefs[n];
 
 				// Get the numbers of the sectors on both sides of the linedef
-				int s1 = L->Right(doc) ? L->Right(doc)->sector : -1;
-				int s2 = L->Left(doc) ? L->Left(doc) ->sector : -1;
+				int s1 = doc.getRight(*L) ? doc.getRight(*L)->sector : -1;
+				int s2 = doc.getLeft(*L) ? doc.getLeft(*L) ->sector : -1;
 
-				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
-				   L->End(doc)->xy().inbounds(pos1, pos2))
+				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
+				   doc.getEnd(*L).xy().inbounds(pos1, pos2))
 				{
 					if (s1 >= 0) in_sectors.set(s1);
 					if (s2 >= 0) in_sectors.set(s2);
@@ -911,10 +920,9 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 
 
-void Instance::Selection_InvalidateLast()
+void Instance::Selection_InvalidateLast() noexcept
 {
-	delete last_Sel;
-	last_Sel = NULL;
+	last_Sel.reset();
 }
 
 
@@ -928,10 +936,8 @@ void Instance::Selection_Push()
 
 	// OK copy it
 
-	if (last_Sel)
-		delete last_Sel;
 
-	last_Sel = new selection_c(edit.Selected->what_type(), true);
+	last_Sel.emplace(edit.Selected->what_type(), true);
 
 	last_Sel->merge(*edit.Selected);
 }
@@ -952,7 +958,6 @@ void Instance::Selection_Clear(bool no_save)
 
 	RedrawMap();
 }
-
 
 void Editor_State_t::Selection_AddHighlighted()
 {
@@ -1038,7 +1043,7 @@ void Instance::CMD_LastSelection()
 		main_win->NewEditMode(edit.mode);
 	}
 
-	std::swap(last_Sel, edit.Selected);
+	last_Sel.swap(edit.Selected);
 
 	// ensure everything is kosher
 	Selection_Validate(*this);
@@ -1171,7 +1176,7 @@ void Recently_used::WriteUser(std::ostream &os, char letter) const
 void Instance::RecUsed_WriteUser(std::ostream &os) const
 {
 	os << "\nrecent_used clear\n";
-	
+
 	recent_textures.WriteUser(os, 'T');
 	recent_flats.WriteUser(os, 'F');
 	recent_things.WriteUser(os, 'O');
@@ -1238,14 +1243,14 @@ void Instance::Editor_Init()
 
 	edit.render3d = false;
 
-	Editor_DefaultState();
+	edit.defaultState();
 
 	Nav_Clear();
 
 	edit.pointer_in_window = false;
 	edit.map = { 0, 0, -1 };
 
-	edit.Selected = new selection_c(edit.mode, true /* extended */);
+	edit.Selected.emplace(edit.mode, true /* extended */);
 
 	edit.highlight.clear();
 	edit.split_line.clear();
@@ -1253,27 +1258,27 @@ void Instance::Editor_Init()
 
 	grid.Init();
 
-	MadeChanges = false;
+	level.markSaved();
 
 	  Editor_RegisterCommands();
 	Render3D_RegisterCommands();
 }
 
 
-void Instance::Editor_DefaultState()
+void Editor_State_t::defaultState()
 {
-	edit.action = EditorAction::nothing;
-	edit.sticky_mod = 0;
-	edit.is_panning = false;
+	action = EditorAction::nothing;
+	sticky_mod = 0;
+	is_panning = false;
 
-	edit.dragged.clear();
-	edit.drawLine.from.clear();
+	dragged.clear();
+	drawLine.from.clear();
 
-	edit.error_mode = false;
-	edit.show_object_numbers = false;
+	error_mode = false;
+	show_object_numbers = false;
 
-	edit.sector_render_mode = config::sector_render_default;
-	edit. thing_render_mode =  config::thing_render_default;
+	sector_render_mode = config::sector_render_default;
+	 thing_render_mode =  config::thing_render_default;
 }
 
 

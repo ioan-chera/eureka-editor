@@ -24,14 +24,10 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
 #include "Instance.h"
-#include "main.h"
 
 #include "im_color.h"
-#include "im_img.h"  // TRANS_PIXEL
 #include "m_config.h"
-#include "w_wad.h"
 
 
 // config item
@@ -39,51 +35,51 @@ int config::usegamma = 2;
 
 int config::panel_gamma = 2;
 
-void Palette::updateGamma()
+bool Palette::updateGamma(int usegamma, int panel_gamma)
 {
+	if(usegamma < 0 || panel_gamma < 0 || usegamma >= (int)lengthof(gammatable) ||
+	   panel_gamma >= (int)lengthof(gammatable))
+	{
+		return false;
+	}
 	for (int c = 0 ; c < 256 ; c++)
 	{
 		byte r = raw_palette[c][0];
 		byte g = raw_palette[c][1];
 		byte b = raw_palette[c][2];
 
-		byte r2 = static_cast<byte>(gammatable[config::usegamma][r]);
-		byte g2 = static_cast<byte>(gammatable[config::usegamma][g]);
-		byte b2 = static_cast<byte>(gammatable[config::usegamma][b]);
+		byte r2 = static_cast<byte>(gammatable[usegamma][r]);
+		byte g2 = static_cast<byte>(gammatable[usegamma][g]);
+		byte b2 = static_cast<byte>(gammatable[usegamma][b]);
 
-		palette[c] = fl_rgb_color(r2, g2, b2);
+		palette[c] = rgbMake(r2, g2, b2);
 
-		r2 = static_cast<byte>(gammatable[config::panel_gamma][r]);
-		g2 = static_cast<byte>(gammatable[config::panel_gamma][g]);
-		b2 = static_cast<byte>(gammatable[config::panel_gamma][b]);
+		r2 = static_cast<byte>(gammatable[panel_gamma][r]);
+		g2 = static_cast<byte>(gammatable[panel_gamma][g]);
+		b2 = static_cast<byte>(gammatable[panel_gamma][b]);
 
-		palette_medium[c] = fl_rgb_color(r2, g2, b2);
+		palette_medium[c] = rgbMake(r2, g2, b2);
 	}
 
 	for (int d = 0 ; d < 32 ; d++)
 	{
 		int i = d * 255 / 31;
 
-		rgb555_gamma [d] = static_cast<byte>(gammatable[config::usegamma][i]);
-		rgb555_medium[d] = static_cast<byte>(gammatable[config::panel_gamma][i]);
+		rgb555_gamma [d] = static_cast<byte>(gammatable[usegamma][i]);
+		rgb555_medium[d] = static_cast<byte>(gammatable[panel_gamma][i]);
 	}
+	return true;
 }
 
-void Palette::loadPalette(Lump_c *lump)
+bool Palette::loadPalette(const Lump_c &lump, int usegamma, int panel_gamma)
 {
-	if (! lump)
-	{
-		ThrowException("PLAYPAL lump not found.\n");
-		return;
-	}
-
-	lump->Seek();
-	if (! lump->Read(raw_palette, sizeof(raw_palette)))
+	if(lump.getData().size() < sizeof(raw_palette))
 	{
 		gLog.printf("PLAYPAL: read error\n");
-		return;
+		return false;
 	}
-
+	memcpy(raw_palette, lump.getData().data(), sizeof(raw_palette));
+	
 	// find the colour closest to TRANS_PIXEL
 	byte tr = raw_palette[TRANS_PIXEL][0];
 	byte tg = raw_palette[TRANS_PIXEL][1];
@@ -91,22 +87,26 @@ void Palette::loadPalette(Lump_c *lump)
 
 	trans_replace = findPaletteColor(tr, tg, tb);
 
-	updateGamma();
+	if(!updateGamma(usegamma, panel_gamma))
+		return false;
 
 	createBrightMap();
+
+	return true;
 }
 
 
-void Palette::loadColormap(Lump_c *lump)
+void Palette::loadColormap(const Lump_c *lump)
 {
 	if (! lump)
 	{
 		ThrowException("COLORMAP lump not found.\n");
 		return;
 	}
+	
+	LumpInputStream stream(*lump);
 
-	lump->Seek();
-	if (! lump->Read(raw_colormap, sizeof(raw_colormap)))
+	if (! stream.read(raw_colormap, sizeof(raw_colormap)))
 	{
 		gLog.printf("COLORMAP: read error\n");
 		return;
@@ -142,7 +142,7 @@ rgb_color_t DarkerColor(rgb_color_t col)
 }
 
 
-rgb_color_t LighterColor(rgb_color_t col)
+static rgb_color_t LighterColor(rgb_color_t col)
 {
 	int r = RGB_RED(col);
 	int g = RGB_GREEN(col);
@@ -152,7 +152,7 @@ rgb_color_t LighterColor(rgb_color_t col)
 	g = g * 13 / 16 + 48;
 	b = b * 13 / 16 + 48;
 
-	return fl_rgb_color(static_cast<uchar>(r), static_cast<uchar>(g), static_cast<uchar>(b));
+	return rgbMake(r, g, b);
 }
 
 
@@ -191,7 +191,7 @@ void Palette::createBrightMap()
 		byte g = raw_palette[c][1];
 		byte b = raw_palette[c][2];
 
-		rgb_color_t col = LighterColor(fl_rgb_color(r, g, b));
+		rgb_color_t col = LighterColor(rgbMake(r, g, b));
 
 		r = RGB_RED(col);
 		g = RGB_GREEN(col);
@@ -247,7 +247,7 @@ rgb_color_t SectorLightColor(int light)
 	if (config::usegamma > 0)
 		lt = gammatable[config::usegamma][lt];
 
-	return RGB_MAKE(lt, lt, lt);
+	return rgbMake(lt, lt, lt);
 }
 
 

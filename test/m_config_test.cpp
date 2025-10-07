@@ -32,21 +32,23 @@ namespace fs = ghc::filesystem;
 //
 static const opt_desc_t kEnd =
 {
-	nullptr, nullptr, OptType::end, 0, nullptr, nullptr, nullptr
+	nullptr, nullptr, 0, nullptr, nullptr, nullptr
 };
 
 //
 // Returns an opt_desc_t using only the fields we need for config file
 //
-static opt_desc_t configOption(const char *long_name, OptType opt_type, unsigned flags,
-							   void *data_ptr)
+template<typename T>
+static opt_desc_t configOption(const char *long_name, unsigned flags,
+							   T *data_ptr)
 {
-	return {long_name, nullptr, opt_type, flags, nullptr, nullptr, data_ptr};
+	return {long_name, nullptr, flags, nullptr, nullptr, data_ptr};
 }
-static opt_desc_t configOption(const char *long_name, const char *shortname, OptType opt_type, unsigned flags,
-							   void *data_ptr)
+template<typename T>
+static opt_desc_t configOption(const char *long_name, const char *shortname, unsigned flags,
+							   T *data_ptr)
 {
-	return {long_name, shortname, opt_type, flags, nullptr, nullptr, data_ptr};
+	return {long_name, shortname, flags, nullptr, nullptr, data_ptr};
 }
 
 //
@@ -76,7 +78,7 @@ protected:
 		bool begin_maximized = false;
 		SString default_port;
 		SString loadedLevelName;
-		SString config_file;
+		fs::path config_file;
 
 		bool show_version = false;
 		std::vector<SString> loadedResourceList;
@@ -111,36 +113,36 @@ void MConfig::SetUp()
 {
 	TempDirContext::SetUp();
 
-	add(configOption("auto_load_recent", OptType::boolean, OptFlag_preference,
+	add(configOption("auto_load_recent", OptFlag_preference,
 					 &config.auto_load_recent));
-	add(configOption("backup_max_files", OptType::integer, OptFlag_preference,
+	add(configOption("backup_max_files", OptFlag_preference,
 					 &config.backup_max_files));
-	add(configOption("begin_maximized", OptType::boolean, OptFlag_preference,
+	add(configOption("begin_maximized", OptFlag_preference,
 					 &config.begin_maximized));
-	add(configOption("bsp_gl_nodes", OptType::boolean, OptFlag_preference, &config.bsp_gl_nodes));
-	add(configOption("bsp_on_save", OptType::boolean, OptFlag_preference, &config.bsp_on_save));
-	add(configOption("config", OptType::string, OptFlag_pass1 | OptFlag_helpNewline,
+	add(configOption("bsp_gl_nodes", OptFlag_preference, &config.bsp_gl_nodes));
+	add(configOption("bsp_on_save", OptFlag_preference, &config.bsp_on_save));
+	add(configOption("config", OptFlag_pass1 | OptFlag_helpNewline,
 					 &config.config_file));
-	add(configOption("default_gamma", OptType::integer, OptFlag_preference, &config.usegamma));
-	add(configOption("default_port", OptType::string, OptFlag_preference, &config.default_port));
-	add(configOption("dotty_axis_col", OptType::color, OptFlag_preference, &config.dotty_axis_col));
-	add(configOption("file", "f", OptType::pathList, 0, &config.Pwad_list));
-	add(configOption("grid_snap_indicator", OptType::boolean, OptFlag_preference,
+	add(configOption("default_gamma", OptFlag_preference, &config.usegamma));
+	add(configOption("default_port", OptFlag_preference, &config.default_port));
+	add(configOption("dotty_axis_col", OptFlag_preference, &config.dotty_axis_col));
+	add(configOption("file", "f", 0, &config.Pwad_list));
+	add(configOption("grid_snap_indicator", OptFlag_preference,
 					 &config.grid_snap_indicator));
-	add(configOption("help", OptType::boolean, OptFlag_pass1, &config.show_help));
-	add(configOption("home", OptType::string, OptFlag_pass1, &config.home_dir));
-	add(configOption("iwad", OptType::string, 0, &config.loadedIwadName));
-	add(configOption("leave_offsets_alone", OptType::boolean, OptFlag_preference,
+	add(configOption("help", OptFlag_pass1, &config.show_help));
+	add(configOption("home", OptFlag_pass1, &config.home_dir));
+	add(configOption("iwad", 0, &config.loadedIwadName));
+	add(configOption("leave_offsets_alone", OptFlag_preference,
 					 &config.leave_offsets_alone));
-	add(configOption("merge", "m", OptType::stringList, 0, &config.loadedResourceList));
-	add(configOption("quiet", "q", OptType::boolean, OptFlag_pass1, &config.Quiet));
-	add(configOption("udmftest", OptType::boolean, OptFlag_hide, &config.udmf_testing));
-	add(configOption("version", "v", OptType::boolean, OptFlag_pass1, &config.show_version));
-	add(configOption("warp", OptType::string, OptFlag_warp | OptFlag_helpNewline,
+	add(configOption("merge", "m", 0, &config.loadedResourceList));
+	add(configOption("quiet", "q", OptFlag_pass1, &config.Quiet));
+	add(configOption("udmftest", OptFlag_hide, &config.udmf_testing));
+	add(configOption("version", "v", OptFlag_pass1, &config.show_version));
+	add(configOption("warp", OptFlag_warp | OptFlag_helpNewline,
 					 &config.loadedLevelName));
 	// Path type
-	add(configOption("path", OptType::pathList, OptFlag_preference, &config.paths));
-	add(configOption("onepath", OptType::path, OptFlag_preference, &config.onepath));
+	add(configOption("path", OptFlag_preference, &config.paths));
+	add(configOption("onepath", OptFlag_preference, &config.onepath));
 }
 
 //
@@ -224,7 +226,7 @@ TEST_F(MConfig, MParseConfigFile)
 
 	ASSERT_FALSE(config.bsp_gl_nodes);
 
-	ASSERT_EQ(config.dotty_axis_col, RGB_MAKE(123, 45, 67));
+	ASSERT_EQ(config.dotty_axis_col, rgbMake(123, 45, 67));
 
 	ASSERT_FALSE(config.grid_snap_indicator);
 
@@ -288,23 +290,23 @@ TEST_F(MConfig, MWriteConfig)
     config.begin_maximized = true;
     config.backup_max_files = 777;
     config.default_port = "Doom \\ # Legacy    ";
-    config.dotty_axis_col = RGB_MAKE(99, 90, 80);
+    config.dotty_axis_col = rgbMake(99, 90, 80);
 
     config.udmf_testing = true;    // this one shall not be saved
     config.loadedLevelName = "NEW LEVEL";
     config.Pwad_list = { "file1", "file2 file3" };
 
-    config.config_file = getChildPath("configx.cfg").u8string();  // pick any name
+    config.config_file = getChildPath("configx.cfg");  // pick any name
 
     ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
-    mDeleteList.push(config.config_file.get());
+    mDeleteList.push(config.config_file);
 
     // Now unset them
     config.auto_load_recent = false;
     config.begin_maximized = false;
     config.backup_max_files = 30;
     config.default_port = "vanilla";
-    config.dotty_axis_col = RGB_MAKE(0, 128, 255);
+    config.dotty_axis_col = rgbMake(0, 128, 255);
 
     config.udmf_testing = false;
     config.loadedLevelName.clear();
@@ -312,13 +314,13 @@ TEST_F(MConfig, MWriteConfig)
 
     // Now read config back
 
-    ASSERT_EQ(M_ParseConfigFile(fs::u8path(config.config_file.get()), options().data()), 0);
+    ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
 
     ASSERT_TRUE(config.auto_load_recent);
     ASSERT_TRUE(config.begin_maximized);
     ASSERT_EQ(config.backup_max_files, 777);
     ASSERT_EQ(config.default_port, "Doom \\ # Legacy    ");
-    ASSERT_EQ(config.dotty_axis_col, RGB_MAKE(99, 90, 80));
+    ASSERT_EQ(config.dotty_axis_col, rgbMake(99, 90, 80));
 
     ASSERT_FALSE(config.udmf_testing); // still false
     ASSERT_TRUE(config.loadedLevelName.empty());
@@ -340,14 +342,14 @@ TEST_F(MConfig, MWriteConfigPathList)
 	};
 	config.onepath = "bi\"g\"/dog";
 
-	config.config_file = getChildPath("configx.cfg").u8string();  // pick any name
+	config.config_file = getChildPath("configx.cfg");  // pick any name
 	ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
-	mDeleteList.push(config.config_file.get());
+	mDeleteList.push(config.config_file);
 
 	config.paths.clear();
 
 	// Now read config back
-	ASSERT_EQ(M_ParseConfigFile(fs::u8path(config.config_file.get()), options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
 	ASSERT_EQ(config.paths.size(), 9);
 	ASSERT_EQ(config.paths[0], fs::path(""));
 	ASSERT_EQ(config.paths[1], fs::path("."));
@@ -630,14 +632,11 @@ TEST_F(MConfig, InstanceMLoadUserState)
 	ASSERT_EQ(sUnitTokens["grid"][4], "grid_low");
 	ASSERT_EQ(sUnitTokens["grid"][5], "grid_key");
 	// Keep in mind the last value gets called too
-	ASSERT_EQ(sUnitTokens["props"].size(), 4);
+	ASSERT_EQ(sUnitTokens["props"].size(), 3);
 	ASSERT_EQ(sUnitTokens["props"][0], "props_props");
 	ASSERT_EQ(sUnitTokens["props"][1], "props_properties");
 	ASSERT_EQ(sUnitTokens["props"][2], "props_");
 	ASSERT_EQ(sUnitTokens.size(), 6);	// only these got stuff
-
-	ASSERT_EQ(sUnitTokens["props"].size(), 4);	// check it got called
-	ASSERT_EQ(sUnitTokens["props"][3], "LoadValues");
 
 	global::cache_dir.clear();
 	sUnitTokens.clear();
@@ -692,32 +691,31 @@ static const int LINFO_Length = 1;
 int  config::grid_style;  // 0 = squares, 1 = dotty
 int config::gui_scheme    = 1;  // gtk+
 bool config::bsp_on_save    = true;
-int config::panel_gamma = 2;
 bool config::bsp_force_v5        = false;
 bool config::bsp_gl_nodes        = true;
 bool config::bsp_warnings    = false;
 SString config::default_port = "vanilla";
 int config::gui_color_set = 1;  // bright
-rgb_color_t config::gui_custom_bg = RGB_MAKE(0xCC, 0xD5, 0xDD);
-rgb_color_t config::gui_custom_ig = RGB_MAKE(255, 255, 255);
-rgb_color_t config::gui_custom_fg = RGB_MAKE(0, 0, 0);
+rgb_color_t config::gui_custom_bg = rgbMake(0xCC, 0xD5, 0xDD);
+rgb_color_t config::gui_custom_ig = rgbMake(255, 255, 255);
+rgb_color_t config::gui_custom_fg = rgbMake(0, 0, 0);
 bool config::swap_sidedefs = false;
 bool config::bsp_compressed        = false;
-rgb_color_t config::dotty_axis_col  = RGB_MAKE(0, 128, 255);
+rgb_color_t config::dotty_axis_col  = rgbMake(0, 128, 255);
 int  config::grid_ratio_low  = 1;  // (low must be > 0)
 bool config::begin_maximized  = false;
 bool config::bsp_force_zdoom    = false;
-rgb_color_t config::dotty_major_col = RGB_MAKE(0, 0, 238);
-rgb_color_t config::dotty_minor_col = RGB_MAKE(0, 0, 187);
-rgb_color_t config::dotty_point_col = RGB_MAKE(0, 0, 255);
+rgb_color_t config::dotty_major_col = rgbMake(0, 0, 238);
+rgb_color_t config::dotty_minor_col = rgbMake(0, 0, 187);
+rgb_color_t config::dotty_point_col = rgbMake(0, 0, 255);
 int  config::grid_ratio_high = 3;  // custom ratio (high must be >= low)
 bool config::map_scroll_bars  = true;
 int  config::new_sector_size = 128;
-rgb_color_t config::normal_axis_col  = RGB_MAKE(0, 128, 255);
-rgb_color_t config::normal_main_col  = RGB_MAKE(0, 0, 238);
-rgb_color_t config::normal_flat_col  = RGB_MAKE(60, 60, 120);
+rgb_color_t config::normal_axis_col  = rgbMake(0, 128, 255);
+rgb_color_t config::normal_main_col  = rgbMake(0, 0, 238);
+rgb_color_t config::normal_flat_col  = rgbMake(60, 60, 120);
 int  config::render_far_clip = 32768;
-rgb_color_t config::transparent_col = RGB_MAKE(0, 255, 255);
+rgb_color_t config::transparent_col = rgbMake(0, 255, 255);
 bool config::auto_load_recent = false;
 int config::backup_max_files = 30;
 int config::backup_max_space = 60;  // MB
@@ -728,12 +726,12 @@ int config::floor_bump_small  = 1;
 int config::light_bump_small  = 4;
 int config::light_bump_medium = 16;
 int config::light_bump_large  = 64;
-rgb_color_t config::normal_small_col = RGB_MAKE(60, 60, 120);
+rgb_color_t config::normal_small_col = rgbMake(60, 60, 120);
 bool config::browser_small_tex = false;
 int config::default_edit_mode = 3;  // Vertices
 int  config::grid_default_size = 64;
 bool config::grid_default_snap = false;
-int  config::grid_default_mode = 0;  // off
+bool config::grid_default_mode = false;
 bool config::render_high_detail    = false;
 bool config::browser_combine_tex = false;
 bool config::grid_snap_indicator = true;
@@ -751,16 +749,15 @@ bool config::grid_hide_in_free_mode = false;
 bool config::sidedef_add_del_buttons = false;
 bool config::same_mode_clears_selection = false;
 bool config::bsp_fast        = false;
-int config::usegamma = 2;
 fs::path global::config_file;
 fs::path global::install_dir;
-int global::show_version  = 0;
-bool global::udmf_testing = false;
+bool global::show_version;
 fs::path global::home_dir;
+fs::path global::old_linux_home_and_cache_dir;
 fs::path global::log_file;
 std::vector<fs::path> global::Pwad_list;
 fs::path global::cache_dir;
-int global::show_help     = 0;
+bool global::show_help;
 
 Instance gInstance;
 
@@ -773,7 +770,7 @@ bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	return true;
 }
 
-void Grid_State_c::Init()
+void grid::State::Init()
 {
 	sUnitTokens["default"].push_back("gridInit");
 }
@@ -787,18 +784,9 @@ bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	return true;
 }
 
-void Props_LoadValues(const Instance &inst)
+void UI_DefaultProps::LoadValues()
 {
 	sUnitTokens["props"].push_back("LoadValues");
-}
-
-//
-// Parse color mockup
-//
-rgb_color_t ParseColor(const SString &cstr)
-{
-    // Use some independent example
-    return (rgb_color_t)strtol(cstr.c_str(), nullptr, 16) << 8;
 }
 
 void Instance::ZoomWholeMap()
@@ -806,7 +794,7 @@ void Instance::ZoomWholeMap()
 	sUnitTokens["default"].push_back("zoomWholeMap");
 }
 
-bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
+bool grid::State::parseUser(const std::vector<SString> &tokens)
 {
 	if(tokens.empty() || tokens[0] != "grid")
 		return false;
@@ -847,7 +835,7 @@ bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 	return true;
 }
 
-void Instance::Editor_DefaultState()
+void Editor_State_t::defaultState()
 {
 	sUnitTokens["default"].push_back("editorDefaultState");
 }
@@ -856,7 +844,7 @@ void Document::getLevelChecksum(crc32_c &crc) const
 {
 }
 
-void Instance::Grid_WriteUser(std::ostream &os) const
+void grid::State::writeUser(std::ostream &os) const
 {
 	sUnitTokens["WriteUser"].push_back("grid");
 }
@@ -891,5 +879,44 @@ DocumentModule::DocumentModule(Document &doc) : inst(doc.inst), doc(doc)
 }
 
 void Basis::EditUnit::destroy()
+{
+}
+
+
+// UI_NodeDialog
+UI_NodeDialog::UI_NodeDialog() : Fl_Double_Window(100, 100)
+{
+}
+
+int UI_NodeDialog::handle(int event)
+{
+	return 0;
+}
+
+void UI_Canvas::PointerPos(bool in_event)
+{
+}
+
+void UI_InfoBar::SetScale(double new_scale)
+{
+}
+
+void UI_InfoBar::SetGrid(int new_step)
+{
+}
+
+void UI_InfoBar::UpdateSnap()
+{
+}
+
+void UI_InfoBar::UpdateRatio()
+{
+}
+
+void UI_CanvasScroll::AdjustPos()
+{
+}
+
+void Instance::RedrawMap()
 {
 }

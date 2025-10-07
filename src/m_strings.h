@@ -199,6 +199,11 @@ public:
 		return data.find(c, pos);
 	}
 
+	size_t find(const char *c, size_t pos) const
+	{
+		return data.find(c ? c : "", pos);
+	}
+
 	size_t find_first_of(const char *s, size_t pos = 0) const
 	{
 		return data.find_first_of(s ? s : "", pos);
@@ -363,7 +368,7 @@ public:
 	size_t findSpace() const;
 	size_t findDigit() const;
 
-	SString spaceEscape() const;
+	SString spaceEscape(bool backslash = false) const;
 
 private:
 	std::string data;
@@ -438,7 +443,7 @@ public:
 	explicit StringID(int num) : num(num)
 	{
 	}
-	int get() const
+	int get() const noexcept
 	{
 		return num;
 	}
@@ -458,7 +463,7 @@ public:
 	{
 		return num >= 0;
 	}
-	bool isInvalid() const
+	bool isInvalid() const noexcept
 	{
 		return num < 0;
 	}
@@ -479,7 +484,7 @@ class StringTable
 {
 public:
 	StringID add(const SString &str);
-	SString get(StringID offset) const;
+	SString get(StringID offset) const noexcept;
 private:
 	// Must start with an empty string, so get(0) gets "".
 	std::vector<SString> mStrings = { "" };	
@@ -487,6 +492,17 @@ private:
 
 #ifdef _WIN32
 SString WideToUTF8(const wchar_t *text);
+std::wstring UTF8ToWide(const char* text);
+
+// Unicode-safe fopen wrapper for Windows
+FILE* UTF8_fopen(const char* filename, const char* mode);
+
+// Unicode-safe getenv wrapper for Windows
+const char* UTF8_getenv(const char* varname);
+#else
+// On non-Windows platforms, UTF-8 is the standard encoding
+#define UTF8_fopen fopen
+#define UTF8_getenv getenv
 #endif
 
 #endif  /* __EUREKA_M_STRINGS_H__ */

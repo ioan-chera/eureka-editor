@@ -53,6 +53,16 @@ color unknown_thing  172
 
 #---- THING TYPES ---------------
 
+thingflag 0 0 easy    on  0x001
+thingflag 1 0 medium  on  0x002
+thingflag 2 0 hard    on  0x004
+thingflag 2 1 coop/dm off 0x010
+thingflag 1 2 shadow  off 0x100
+thingflag 2 2 alt-vis off 0x200
+thingflag 4 0 ambush  off 0x020
+thingflag 4 1 friend  off 0x040
+thingflag 5 0 stand   off 0x008
+
 thinggroup p 4F4 "Player"
 thinggroup m F00 "Monster"
 thinggroup w FA0 "Weapon"
@@ -371,19 +381,19 @@ sector  0 "NOTHING"
 sector  1 "Light Blinks Randomly"
 sector  2 "Light Flashes 2 Hz"
 sector  3 "Light Flashes 1 Hz"
-sector  4 "Damage 20% / Flashes"
-sector  5 "Damage 10%"
+sector  4 "Damage 5% / Flashes"
+sector  5 "+2 nukagecount"
 sector  7 "Damage 5%"
 sector  8 "Light Oscillates"
 sector  9 "Secret Area"
 
 sector 10 "Close after 30 sec"
 sector 11 "End level / damage"
-sector 12 "Flashes 1 Hz sync"
-sector 13 "Flashes 2 Hz sync"
+sector 12 "Flashes 2 Hz sync"
+sector 13 "Flashes 1 Hz sync"
 sector 14 "Open after 5 minute"
 sector 15 "Instant Death!"
-sector 16 "Damage 20%"
+sector 16 "+4 nukagecount"
 sector 17 "Light Flickering"
 sector 18 "Carry Player by tag"
 
@@ -391,6 +401,16 @@ sector 18 "Carry Player by tag"
 #---- LINE TYPES ---------------
 
 include "doom_groups"
+
+lineflag "upper unpeg"  0x0008
+lineflag "lower unpeg"  0x0010
+lineflag "jump over"    0x0200
+lineflag ""             0x0800 pair 0
+lineflag "translucency" 0x1000 pair 1
+lineflag "impassable"   0x0001
+lineflag "block mons"   0x0002
+lineflag "sound block"  0x0040
+lineflag "block flyers" 0x0400
 
 linegroup j "Split Door"
 

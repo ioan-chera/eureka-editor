@@ -48,6 +48,11 @@ enum class macOSDirType
    
 fs::path OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir);
 
+void OSX_SetWindowRepresentedFile(void *window, const char *filename, const char *title);
+
+// Marks the NSWindow as edited or not, showing the unsaved indicator on macOS.
+void OSX_SetWindowDocumentEdited(void *window, bool edited);
+
 #endif /* defined(__Eureka_Doom_Editor__OSXCalls__) */
 
 #endif

@@ -29,6 +29,10 @@ supported_games doom doom2
 
 #---- LINE TYPES ----------
 
+lineflag "translucent" 0x0400
+lineflag "shoot-block" 0x0800
+lineflag "sight-block" 0x1000
+
 linegroup x "XDoom"
 
 line 300 x "SR XDOOM: Sliding door"

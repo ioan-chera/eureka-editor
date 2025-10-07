@@ -160,7 +160,7 @@ TEST(LibFile, Escape)
 
 TEST_F(LibFileTempDir, FileExists)
 {
-	fs::path path = getChildPath("hello");
+	fs::path path = getSubPath("hello");
 	ASSERT_FALSE(FileExists(path));
 	std::ofstream os(path);
 	ASSERT_TRUE(os.is_open());
@@ -181,7 +181,7 @@ TEST_F(LibFileTempDir, FileExists)
 
 TEST_F(LibFileTempDir, FileDelete)
 {
-	fs::path path = getChildPath("file");
+	fs::path path = getSubPath("file");
 	ASSERT_FALSE(FileDelete(path));	// can't delete what is not there
 
 	std::ofstream os(path);
@@ -199,14 +199,23 @@ TEST_F(LibFileTempDir, FileDelete)
 
 TEST_F(LibFileTempDir, FileMakeDir)
 {
-	fs::path path = getChildPath("dir");
+	fs::path path = getSubPath("dir");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
 	// Disallow overwriting
 	ASSERT_FALSE(FileMakeDir(path));
 	// Disallow inexistent intermediary paths
-	ASSERT_FALSE(FileMakeDir(getChildPath(fs::path("dir2") / "dir3")));
+	ASSERT_FALSE(FileMakeDir(getSubPath(fs::path("dir2") / "dir3")));
 
+}
+
+TEST_F(LibFileTempDir, FileMakeDirs)
+{
+	fs::path path = getSubPath("dir1/dir2/dir3");
+	ASSERT_TRUE(FileMakeDirs(path));
+	mDeleteList.push(getSubPath("dir1"));
+	mDeleteList.push(getSubPath("dir1/dir2"));
+	mDeleteList.push(getSubPath("dir1/dir2/dir3"));
 }
 
 TEST_F(LibFileTempDir, FileLoad)
@@ -217,7 +226,7 @@ TEST_F(LibFileTempDir, FileLoad)
 	for(int i = 0; i < 40000; ++i)
 		randomData.push_back(static_cast<char>(rand() & 0xff));
 
-	fs::path path = getChildPath("file");
+	fs::path path = getSubPath("file");
 	std::ofstream os(path, std::ios::binary);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path);
@@ -232,7 +241,7 @@ TEST_F(LibFileTempDir, FileLoad)
 	// Mustn't read dirs
 	ASSERT_FALSE(FileLoad(mTempDir, result));
 	// Mustn't read inexistent files
-	ASSERT_FALSE(FileLoad(getChildPath("file2"), result));
+	ASSERT_FALSE(FileLoad(getSubPath("file2"), result));
 #ifndef _WIN32
 	// Mustn't read special files
 	ASSERT_FALSE(FileLoad("/dev/null", result));
@@ -243,7 +252,7 @@ TEST_F(LibFileTempDir, FileLoad)
 TEST_F(LibFileTempDir, ScanDirectory)
 {
 	// 1. Add a file, a "hidden" file, a folder and a "hidden" folder
-	fs::path path = getChildPath("file");
+	fs::path path = getSubPath("file");
 	std::ofstream os(path);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path);
@@ -252,24 +261,24 @@ TEST_F(LibFileTempDir, ScanDirectory)
 
 	fs::path filePath = path;
 
-	path = getChildPath(".file");
+	path = getSubPath(".file");
 	os.open(path);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path);
 	os << "shadow";
 	os.close();
 
-	path = getChildPath("dir");
+	path = getSubPath("dir");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	path = getChildPath(".dir");
+	path = getSubPath(".dir");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
 
 	fs::path dotDirPath = path;
 
 	// Also nest another file, to check it doesn't get listed
-	path = getChildPath(fs::path("dir") / "file2");
+	path = getSubPath(fs::path("dir") / "file2");
 	os.open(path);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path);
@@ -298,7 +307,7 @@ TEST_F(LibFileTempDir, ScanDirectory)
 		});
 	ASSERT_EQ(result, SCAN_ERR_NotDir);
 
-	result = ScanDirectory(getChildPath("illegal"), [](const fs::path &name, int flags)
+	result = ScanDirectory(getSubPath("illegal"), [](const fs::path &name, int flags)
 		{
 			ASSERT_FALSE(true);	// should not get here
 		});

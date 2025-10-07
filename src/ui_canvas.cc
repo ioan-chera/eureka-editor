@@ -84,15 +84,15 @@ bool shift_pressed   = false;
 bool control_pressed = false;
 
 // config items
-rgb_color_t config::dotty_axis_col  = RGB_MAKE(0, 128, 255);
-rgb_color_t config::dotty_major_col = RGB_MAKE(0, 0, 238);
-rgb_color_t config::dotty_minor_col = RGB_MAKE(0, 0, 187);
-rgb_color_t config::dotty_point_col = RGB_MAKE(0, 0, 255);
+rgb_color_t config::dotty_axis_col  = rgbMake(0, 128, 255);
+rgb_color_t config::dotty_major_col = rgbMake(0, 0, 238);
+rgb_color_t config::dotty_minor_col = rgbMake(0, 0, 187);
+rgb_color_t config::dotty_point_col = rgbMake(0, 0, 255);
 
-rgb_color_t config::normal_axis_col  = RGB_MAKE(0, 128, 255);
-rgb_color_t config::normal_main_col  = RGB_MAKE(0, 0, 238);
-rgb_color_t config::normal_flat_col  = RGB_MAKE(60, 60, 120);
-rgb_color_t config::normal_small_col = RGB_MAKE(60, 60, 120);
+rgb_color_t config::normal_axis_col  = rgbMake(0, 128, 255);
+rgb_color_t config::normal_main_col  = rgbMake(0, 0, 238);
+rgb_color_t config::normal_flat_col  = rgbMake(60, 60, 120);
+rgb_color_t config::normal_small_col = rgbMake(60, 60, 120);
 
 int config::highlight_line_info = (int)LINFO_Length;
 
@@ -170,7 +170,7 @@ void UI_Canvas::draw()
 
 	if (inst.edit.render3d)
 	{
-		Render3D_Draw(inst, x(), y(), w(), h());
+		Render3D_Draw(inst, x(), y(), w(), h(), pixel_w(), pixel_h());
 		return;
 	}
 
@@ -196,12 +196,8 @@ void UI_Canvas::draw()
 	// setup projection matrix for 2D drawing
 
 	// Note: this crud is a workaround for retina displays on MacOS
-	Fl::use_high_res_GL(true);
-	int pix = iround(inst.main_win->canvas->pixels_per_unit());
-	Fl::use_high_res_GL(false);
-
 	glLoadIdentity();
-	glViewport(0, 0, w() * pix, h() * pix);
+	glViewport(0, 0, pixel_w(), pixel_h());
 	glOrtho(0, w(), 0, h(), -1, 1);
 #endif
 
@@ -211,7 +207,7 @@ void UI_Canvas::draw()
 	RenderThickness(1);
 
 	// default font (for showing object numbers)
-	int font_size = (inst.grid.Scale < 0.9) ? 14 : 19;
+	int font_size = (inst.grid.getScale() < 0.9) ? 14 : 19;
 	RenderFontSize(font_size);
 
 	DrawEverything();
@@ -304,20 +300,20 @@ int UI_Canvas::NORMALY(int len, double dx, double dy)
 
 #ifdef NO_OPENGL
 // convert screen coordinates to map coordinates
-inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig.x + (sx - w() / 2 - x()) / inst.grid.Scale; }
-inline double UI_Canvas::MAPY(int sy) const { return inst.grid.orig.y + (h() / 2 - sy + y()) / inst.grid.Scale; }
+inline double UI_Canvas::MAPX(int sx) const { return inst.grid.getOrig().x + (sx - w() / 2 - x()) / inst.grid.getScale(); }
+inline double UI_Canvas::MAPY(int sy) const { return inst.grid.getOrig().y + (h() / 2 - sy + y()) / inst.grid.getScale(); }
 
 // convert map coordinates to screen coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + iround((mx - inst.grid.orig.x) * inst.grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + iround((inst.grid.orig.y - my) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + iround((mx - inst.grid.getOrig().x) * inst.grid.getScale())); }
+inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + iround((inst.grid.getOrig().y - my) * inst.grid.getScale())); }
 #else
 // convert GL coordinates to map coordinates
-inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig.x + (sx - w() / 2) / inst.grid.Scale; }
-inline double UI_Canvas::MAPY(int sy) const { return inst.grid.orig.y + (sy - h() / 2) / inst.grid.Scale; }
+inline double UI_Canvas::MAPX(int sx) const { return inst.grid.getOrig().x + (sx - w() / 2) / inst.grid.getScale(); }
+inline double UI_Canvas::MAPY(int sy) const { return inst.grid.getOrig().y + (sy - h() / 2) / inst.grid.getScale(); }
 
 // convert map coordinates to GL coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + iround((mx - inst.grid.orig.x) * inst.grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + iround((my - inst.grid.orig.y) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + iround((mx - inst.grid.getOrig().x) * inst.grid.getScale())); }
+inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + iround((my - inst.grid.getOrig().y) * inst.grid.getScale())); }
 #endif
 
 void UI_Canvas::PointerPos(bool in_event)
@@ -389,7 +385,7 @@ void UI_Canvas::DrawEverything()
 
 	DrawMap();
 
-	DrawSelection(inst.edit.Selected);
+	DrawSelection(&*inst.edit.Selected);
 
 	if (inst.edit.action == EditorAction::drag && !inst.edit.dragged.valid() && inst.edit.drag_lines != NULL)
 		DrawSelection(inst.edit.drag_lines);
@@ -419,10 +415,10 @@ void UI_Canvas::DrawEverything()
 		RenderThickness(1);
 
 		// when ratio lock is on, want to see the new line
-		if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 && inst.edit.drag_other_vert >= 0)
+		if (inst.edit.mode == ObjType::vertices && inst.grid.getRatio() > 0 && inst.edit.drag_other_vert >= 0)
 		{
-			const Vertex *v0 = inst.level.vertices[inst.edit.drag_other_vert];
-			const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
+			const auto v0 = inst.level.vertices[inst.edit.drag_other_vert];
+			const auto v1 = inst.level.vertices[inst.edit.dragged.num];
 
 			RenderColor(RED);
 			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + delta.x, v1->y() + delta.y);
@@ -450,8 +446,8 @@ void UI_Canvas::DrawEverything()
 
 		if (inst.edit.mode == ObjType::linedefs && !inst.edit.show_object_numbers)
 		{
-			const LineDef *L = inst.level.linedefs[inst.edit.highlight.num];
-			DrawLineInfo(L->Start(inst.level)->x(), L->Start(inst.level)->y(), L->End(inst.level)->x(), L->End(inst.level)->y(), false);
+			const auto L = inst.level.linedefs[inst.edit.highlight.num];
+			DrawLineInfo(inst.level.getStart(*L).x(), inst.level.getStart(*L).y(), inst.level.getEnd(*L).x(), inst.level.getEnd(*L).y(), false);
 		}
 
 		RenderThickness(1);
@@ -480,7 +476,7 @@ void UI_Canvas::DrawMap()
 	}
 
 	// draw the grid first since it's in the background
-	if (inst.grid.shown)
+	if (inst.grid.isShown())
 	{
 		if (config::grid_style == 0)
 			DrawGrid_Normal();
@@ -496,7 +492,7 @@ void UI_Canvas::DrawMap()
 	if (inst.edit.mode != ObjType::things)
 		DrawThings();
 
-	if (inst.grid.snap && config::grid_snap_indicator)
+	if (inst.grid.snaps() && config::grid_snap_indicator)
 		DrawSnapPoint();
 
 	DrawLinedefs();
@@ -525,7 +521,7 @@ void UI_Canvas::DrawMap()
 //
 void UI_Canvas::DrawGrid_Normal()
 {
-	float pixels_1 = static_cast<float>(inst.grid.step * inst.grid.Scale);
+	float pixels_1 = static_cast<float>(inst.grid.getStep() * inst.grid.getScale());
 
 	if (pixels_1 < 1.6)
 	{
@@ -539,9 +535,9 @@ void UI_Canvas::DrawGrid_Normal()
 
 	int flat_step = 64;
 
-	float pixels_2 = static_cast<float>(flat_step * inst.grid.Scale);
+	float pixels_2 = static_cast<float>(flat_step * inst.grid.getScale());
 
-	Fl_Color flat_col = (inst.grid.step < 64) ? config::normal_main_col : config::normal_flat_col;
+	Fl_Color flat_col = (inst.grid.getStep() < 64) ? config::normal_main_col : config::normal_flat_col;
 
 	if (pixels_2 < 2.2)
 		flat_col = DarkerColor(flat_col);
@@ -566,9 +562,9 @@ void UI_Canvas::DrawGrid_Normal()
 	}
 
 
-	Fl_Color main_col = (inst.grid.step < 64) ? config::normal_small_col : config::normal_main_col;
+	Fl_Color main_col = (inst.grid.getStep() < 64) ? config::normal_small_col : config::normal_main_col;
 
-	float pixels_3 = static_cast<float>(inst.grid.step * inst.grid.Scale);
+	float pixels_3 = static_cast<float>(inst.grid.getStep() * inst.grid.getScale());
 
 	if (pixels_3 < 4.2)
 		main_col = DarkerColor(main_col);
@@ -576,16 +572,16 @@ void UI_Canvas::DrawGrid_Normal()
 	RenderColor(main_col);
 
 	{
-		int gx = static_cast<int>(floor(map_lx / inst.grid.step) * inst.grid.step);
+		int gx = static_cast<int>(floor(map_lx / inst.grid.getStep()) * inst.grid.getStep());
 
-		for (; gx <= map_hx; gx += inst.grid.step)
-			if ((inst.grid.step >= 64 || (gx & 63) != 0) && (gx != 0))
+		for (; gx <= map_hx; gx += inst.grid.getStep())
+			if ((inst.grid.getStep() >= 64 || (gx & 63) != 0) && (gx != 0))
 				DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = static_cast<int>(floor(map_ly / inst.grid.step) * inst.grid.step);
+		int gy = static_cast<int>(floor(map_ly / inst.grid.getStep()) * inst.grid.getStep());
 
-		for (; gy <= map_hy; gy += inst.grid.step)
-			if ((inst.grid.step >= 64 || (gy & 63) != 0) && (gy != 0))
+		for (; gy <= map_hy; gy += inst.grid.getStep())
+			if ((inst.grid.getStep() >= 64 || (gy & 63) != 0) && (gy != 0))
 				DrawMapLine(map_lx, gy, map_hx, gy);
 	}
 
@@ -596,11 +592,11 @@ void UI_Canvas::DrawGrid_Normal()
 
 void UI_Canvas::DrawGrid_Dotty()
 {
-	int grid_step_1 = 1 * inst.grid.step;    // Map units between dots
+	int grid_step_1 = 1 * inst.grid.getStep();    // Map units between dots
 	int grid_step_2 = 8 * grid_step_1;  // Map units between dim lines
 	int grid_step_3 = 8 * grid_step_2;  // Map units between bright lines
 
-	float pixels_1 = static_cast<float>(inst.grid.step * inst.grid.Scale);
+	float pixels_1 = static_cast<float>(inst.grid.getStep() * inst.grid.getScale());
 
 
 	if (pixels_1 < 1.6)
@@ -683,11 +679,11 @@ void UI_Canvas::DrawMapBounds()
 {
 	RenderColor(FL_RED);
 
-	DrawMapLine(inst.Map_bound1.x, inst.Map_bound1.y, inst.Map_bound2.x, inst.Map_bound1.y);
-	DrawMapLine(inst.Map_bound1.x, inst.Map_bound2.y, inst.Map_bound2.x, inst.Map_bound2.y);
+	DrawMapLine(inst.level.Map_bound1.x, inst.level.Map_bound1.y, inst.level.Map_bound2.x, inst.level.Map_bound1.y);
+	DrawMapLine(inst.level.Map_bound1.x, inst.level.Map_bound2.y, inst.level.Map_bound2.x, inst.level.Map_bound2.y);
 
-	DrawMapLine(inst.Map_bound1.x, inst.Map_bound1.y, inst.Map_bound1.x, inst.Map_bound2.y);
-	DrawMapLine(inst.Map_bound2.x, inst.Map_bound1.y, inst.Map_bound2.x, inst.Map_bound2.y);
+	DrawMapLine(inst.level.Map_bound1.x, inst.level.Map_bound1.y, inst.level.Map_bound1.x, inst.level.Map_bound2.y);
+	DrawMapLine(inst.level.Map_bound2.x, inst.level.Map_bound1.y, inst.level.Map_bound2.x, inst.level.Map_bound2.y);
 }
 
 
@@ -732,11 +728,11 @@ void UI_Canvas::DrawVertex(double map_x, double map_y, int r)
 
 void UI_Canvas::DrawVertices()
 {
-	const int r = vertex_radius(inst.grid.Scale);
+	const int r = vertex_radius(inst.grid.getScale());
 
 	RenderColor(FL_GREEN);
 
-	for (const Vertex *vertex : inst.level.vertices)
+	for (const auto &vertex : inst.level.vertices)
 	{
 		double x = vertex->x();
 		double y = vertex->y();
@@ -773,17 +769,17 @@ void UI_Canvas::DrawLinedefs()
 {
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto L = inst.level.linedefs[n];
 
-		double x1 = L->Start(inst.level)->x();
-		double y1 = L->Start(inst.level)->y();
-		double x2 = L->End  (inst.level)->x();
-		double y2 = L->End  (inst.level)->y();
+		double x1 = inst.level.getStart(*L).x();
+		double y1 = inst.level.getStart(*L).y();
+		double x2 = inst.level.getEnd(*L).x();
+		double y2 = inst.level.getEnd(*L).y();
 
 		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
 
-		bool one_sided = (! L->Left(inst.level));
+		bool one_sided = (! inst.level.getLeft(*L));
 
 		Fl_Color col = LIGHTGREY;
 
@@ -821,7 +817,7 @@ void UI_Canvas::DrawLinedefs()
 			{
 				if (inst.edit.error_mode)
 					col = LIGHTGREY;
-				else if (! L->Right(inst.level)) // no first sidedef?
+				else if (! inst.level.getRight(*L)) // no first sidedef?
 					col = RED;
 				else if (L->type != 0)
 				{
@@ -930,10 +926,10 @@ void UI_Canvas::DrawLinedefs()
 	{
 		for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 		{
-			double x1 = inst.level.linedefs[n]->Start(inst.level)->x();
-			double y1 = inst.level.linedefs[n]->Start(inst.level)->y();
-			double x2 = inst.level.linedefs[n]->End  (inst.level)->x();
-			double y2 = inst.level.linedefs[n]->End  (inst.level)->y();
+			double x1 = inst.level.getStart(*inst.level.linedefs[n]).x();
+			double y1 = inst.level.getStart(*inst.level.linedefs[n]).y();
+			double x2 = inst.level.getEnd(*inst.level.linedefs[n]).x();
+			double y2 = inst.level.getEnd(*inst.level.linedefs[n]).y();
 
 			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				continue;
@@ -980,7 +976,7 @@ void UI_Canvas::DrawThings()
 	else if (inst.edit.error_mode)
 		RenderColor(LIGHTGREY);
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -988,7 +984,7 @@ void UI_Canvas::DrawThings()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
+		const thingtype_t &info = inst.conf.getThingType(thing->type);
 
 		if (inst.edit.mode == ObjType::things && !inst.edit.error_mode)
 		{
@@ -1012,7 +1008,7 @@ void UI_Canvas::DrawThings()
 			if (! Vis(x, y, MAX_RADIUS))
 				continue;
 
-			const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[n]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[n]->type);
 
 			x += info.radius + 8;
 			y += info.radius + 8;
@@ -1031,7 +1027,7 @@ void UI_Canvas::DrawThingBodies()
 	if (inst.edit.error_mode)
 		return;
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -1039,7 +1035,7 @@ void UI_Canvas::DrawThingBodies()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
+		const thingtype_t &info = inst.conf.getThingType(thing->type);
 
 		Fl_Color col = (Fl_Color)info.color;
 		RenderColor(DarkerColor(DarkerColor(col)));
@@ -1055,6 +1051,37 @@ void UI_Canvas::DrawThingBodies()
 	}
 }
 
+static int calcThingRotation(int angle)
+{
+	// 1: south,     247.5:292.5
+	// 2: southwest, 202.5:247.5
+	// 3: west,      157.5:202.5
+	// 4: northwest, 112.5:157.5
+	// 5: north,      67.5:112.5
+	// 6: northeast,  22.5: 67.5
+	// 7: east,      -22.5: 22.5
+	// 8: southeast, -67.5:-22.5 or rather 292.5 : 337.5
+	while(angle < 0)
+		angle += 360;
+	while(angle > 360)
+		angle -= 360;
+	if(angle >= 338 || angle < 23)
+		return 7;
+	if(angle < 68)
+		return 6;
+	if(angle < 113)
+		return 5;
+	if(angle < 158)
+		return 4;
+	if(angle < 203)
+		return 3;
+	if(angle < 248)
+		return 2;
+	if(angle < 293)
+		return 1;
+	// if(angle < 338)
+	return 8;
+}
 
 void UI_Canvas::DrawThingSprites()
 {
@@ -1065,7 +1092,7 @@ void UI_Canvas::DrawThingSprites()
 	glAlphaFunc(GL_GREATER, 0.5);
 #endif
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -1073,21 +1100,21 @@ void UI_Canvas::DrawThingSprites()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
+		const thingtype_t &info = inst.conf.getThingType(thing->type);
 		float scale = info.scale;
 
-		Img_c *sprite = inst.wad.W_GetSprite(inst.conf, thing->type);
+		Img_c *sprite = inst.wad.getMutableSprite(inst.conf, thing->type, inst.loaded, calcThingRotation(thing->angle));
 
 		if (! sprite)
 		{
-			sprite = inst.wad.images.IM_UnknownSprite(inst.conf);
+			sprite = &inst.wad.images.IM_UnknownSprite(inst.conf);
 			scale = 0.66f;
 		}
 
 		int sx = SCREENX(x);
 		int sy = SCREENY(y);
 
-		RenderSprite(sx, sy, static_cast<float>(scale * inst.grid.Scale), sprite);
+		RenderSprite(sx, sy, static_cast<float>(scale * inst.grid.getScale()), sprite);
 	}
 
 #ifndef NO_OPENGL
@@ -1215,12 +1242,12 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, Side side, in
 	int sy = (y1 + y2) / 2;
 
 	// normally draw line numbers on back of line
-	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.Scale, 1.0));
+	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.getScale(), 1.0));
 
 	// for sectors, draw closer and on sector side
 	if (side != Side::neither)
 	{
-		want_len = static_cast<int>(2 + 12 * clamp(0.25, inst.grid.Scale, 1.0));
+		want_len = static_cast<int>(2 + 12 * clamp(0.25, inst.grid.getScale(), 1.0));
 
 		if (side == Side::left)
 			want_len = -want_len;
@@ -1277,7 +1304,7 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 	}
 
 	// back of line is best place, no knob getting in the way
-	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.Scale, 1.0));
+	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.getScale(), 1.0));
 
 	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
 	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
@@ -1353,7 +1380,7 @@ void UI_Canvas::DrawNumber(int x, int y, int num)
 
 void UI_Canvas::CheckGridSnap()
 {
-	if (!inst.grid.snap || !config::grid_snap_indicator)
+	if (!inst.grid.snaps() || !config::grid_snap_indicator)
 		return;
 
 	double new_snap_x = inst.grid.SnapX(inst.edit.map.x);
@@ -1420,7 +1447,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[objnum]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[objnum]->type);
 
 			int r = info.radius;
 
@@ -1435,10 +1462,10 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::linedefs:
 		{
-			double x1 = dx + inst.level.linedefs[objnum]->Start(inst.level)->x();
-			double y1 = dy + inst.level.linedefs[objnum]->Start(inst.level)->y();
-			double x2 = dx + inst.level.linedefs[objnum]->End  (inst.level)->x();
-			double y2 = dy + inst.level.linedefs[objnum]->End  (inst.level)->y();
+			double x1 = dx + inst.level.getStart(*inst.level.linedefs[objnum]).x();
+			double y1 = dy + inst.level.getStart(*inst.level.linedefs[objnum]).y();
+			double x2 = dx + inst.level.getEnd(*inst.level.linedefs[objnum]).x();
+			double y2 = dy + inst.level.getEnd(*inst.level.linedefs[objnum]).y();
 
 			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				break;
@@ -1452,7 +1479,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 			double x = dx + inst.level.vertices[objnum]->x();
 			double y = dy + inst.level.vertices[objnum]->y();
 
-			int vert_r = vertex_radius(inst.grid.Scale);
+			int vert_r = vertex_radius(inst.grid.getScale());
 
 			if (! Vis(x, y, vert_r))
 				break;
@@ -1475,9 +1502,9 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::sectors:
 		{
-			for (const LineDef *L : inst.level.linedefs)
+			for (const auto &L : inst.level.linedefs)
 			{
-				if (! L->TouchesSector(objnum, inst.level))
+				if (! inst.level.touchesSector(*L, objnum))
 					continue;
 
 				bool reverse = false;
@@ -1485,8 +1512,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 				// skip lines if both sides are in the selection
 				if (skip_lines && L->TwoSided())
 				{
-					int sec1 = L->Right(inst.level)->sector;
-					int sec2 = L->Left (inst.level)->sector;
+					int sec1 = inst.level.getRight(*L)->sector;
+					int sec2 = inst.level.getLeft(*L)->sector;
 
 					if ((sec1 == objnum || inst.edit.Selected->get(sec1)) &&
 					    (sec2 == objnum || inst.edit.Selected->get(sec2)))
@@ -1496,10 +1523,10 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 						reverse = true;
 				}
 
-				double x1 = dx + L->Start(inst.level)->x();
-				double y1 = dy + L->Start(inst.level)->y();
-				double x2 = dx + L->End  (inst.level)->x();
-				double y2 = dy + L->End  (inst.level)->y();
+				double x1 = dx + inst.level.getStart(*L).x();
+				double y1 = dy + inst.level.getStart(*L).y();
+				double x2 = dx + inst.level.getEnd(*L).x();
+				double y2 = dy + inst.level.getEnd(*L).y();
 
 				if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 					continue;
@@ -1540,7 +1567,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[objnum]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[objnum]->type);
 
 			int r = info.radius;
 
@@ -1553,7 +1580,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 			double x = inst.level.vertices[objnum]->x();
 			double y = inst.level.vertices[objnum]->y();
 
-			int vert_r = vertex_radius(inst.grid.Scale);
+			int vert_r = vertex_radius(inst.grid.getScale());
 
 			inst.edit.trans_param.Apply(&x, &y);
 
@@ -1578,10 +1605,10 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::linedefs:
 		{
-			double x1 = inst.level.linedefs[objnum]->Start(inst.level)->x();
-			double y1 = inst.level.linedefs[objnum]->Start(inst.level)->y();
-			double x2 = inst.level.linedefs[objnum]->End  (inst.level)->x();
-			double y2 = inst.level.linedefs[objnum]->End  (inst.level)->y();
+			double x1 = inst.level.getStart(*inst.level.linedefs[objnum]).x();
+			double y1 = inst.level.getStart(*inst.level.linedefs[objnum]).y();
+			double x2 = inst.level.getEnd(*inst.level.linedefs[objnum]).x();
+			double y2 = inst.level.getEnd(*inst.level.linedefs[objnum]).y();
 
 			inst.edit.trans_param.Apply(&x1, &y1);
 			inst.edit.trans_param.Apply(&x2, &y2);
@@ -1595,15 +1622,15 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::sectors:
 		{
-			for (const LineDef *linedef : inst.level.linedefs)
+			for (const auto &linedef : inst.level.linedefs)
 			{
-				if (!linedef->TouchesSector(objnum, inst.level))
+				if (! inst.level.touchesSector(*linedef, objnum))
 					continue;
 
-				double x1 = linedef->Start(inst.level)->x();
-				double y1 = linedef->Start(inst.level)->y();
-				double x2 = linedef->End  (inst.level)->x();
-				double y2 = linedef->End  (inst.level)->y();
+				double x1 = inst.level.getStart(*linedef).x();
+				double y1 = inst.level.getStart(*linedef).y();
+				double x2 = inst.level.getEnd(*linedef).x();
+				double y2 = inst.level.getEnd(*linedef).y();
 
 				inst.edit.trans_param.Apply(&x1, &y1);
 				inst.edit.trans_param.Apply(&x2, &y2);
@@ -1782,10 +1809,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         {
             if(objtype == ObjType::linedefs && m == objnum)
                 continue;
-            const LineDef *line = inst.level.linedefs[m];
+            const auto line = inst.level.linedefs[m];
             assert(line);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, line, inst.conf, info))
+            if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, line.get(), inst.conf, info))
                 continue;
 
             for(int i = 0; i < info.*numtags; ++i)
@@ -1804,10 +1831,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         {
             if(objtype == ObjType::things && m == objnum)
                 continue;
-            const Thing *thing = inst.level.things[m];
+            const auto thing = inst.level.things[m];
             assert(thing);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing, inst.conf, info))
+            if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing.get(), inst.conf, info))
                 continue;
 
             for(int i = 0; i < info.*numtags; ++i)
@@ -1824,10 +1851,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 
 	if (objtype == ObjType::linedefs)
     {
-        const LineDef *line = inst.level.linedefs[objnum];
+        const auto line = inst.level.linedefs[objnum];
         assert(line);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, line->type, line, inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, info))
             highlightTaggedItems(info);
         if(inst.loaded.levelFormat == MapFormat::doom)
         {
@@ -1837,7 +1864,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         else
         {
             SpecialTagInfo linfo;
-            if(!getSpecialTagInfo(objtype, objnum, line->type, line, inst.conf, linfo))
+            if(!getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, linfo))
                 return;
             // TODO: also UDMF line ID
             if(inst.loaded.levelFormat == MapFormat::hexen && linfo.selflineid > 0)
@@ -1849,10 +1876,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     }
     else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
     {
-        const Thing *thing = inst.level.things[objnum];
+        const auto thing = inst.level.things[objnum];
         assert(thing);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, thing->special, thing, inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, thing->special, thing.get(), inst.conf, info))
             highlightTaggedItems(info);
         highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids,
 			objtype, objnum);
@@ -1873,12 +1900,12 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 {
 	// color and line thickness have been set by caller
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
-		double x1 = dx + L->Start(inst.level)->x();
-		double y1 = dy + L->Start(inst.level)->y();
-		double x2 = dx + L->End  (inst.level)->x();
-		double y2 = dy + L->End  (inst.level)->y();
+		double x1 = dx + inst.level.getStart(*L).x();
+		double y1 = dy + inst.level.getStart(*L).y();
+		double x2 = dx + inst.level.getEnd(*L).x();
+		double y2 = dy + inst.level.getEnd(*L).y();
 
 		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
@@ -1889,8 +1916,8 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 		int sec1 = -1;
 		int sec2 = -1;
 
-		if (L->right >= 0) sec1 = L->Right(inst.level)->sector;
-		if (L->left  >= 0) sec2 = L->Left(inst.level) ->sector;
+		if (L->right >= 0) sec1 = inst.level.getRight(*L)->sector;
+		if (L->left  >= 0) sec2 = inst.level.getLeft(*L) ->sector;
 
 		bool touches1 = (sec1 >= 0) && list->get(sec1);
 		bool touches2 = (sec2 >= 0) && list->get(sec2);
@@ -2024,7 +2051,7 @@ void UI_Canvas::DrawSplitPoint(const v2double_t &map_pos)
 	int sx = SCREENX(map_pos.x);
 	int sy = SCREENY(map_pos.y);
 
-	int size = (inst.grid.Scale >= 5.0) ? 9 : (inst.grid.Scale >= 1.0) ? 7 : 5;
+	int size = (inst.grid.getScale() >= 5.0) ? 9 : (inst.grid.getScale() >= 1.0) ? 7 : 5;
 
 	// color set by caller
 
@@ -2154,7 +2181,7 @@ void UI_Canvas::DrawCamera()
 	float mx = static_cast<float>(map_pos.x);
 	float my = static_cast<float>(map_pos.y);
 
-	float r = static_cast<float>(40.0 / sqrt(inst.grid.Scale));
+	float r = static_cast<float>(40.0 / sqrt(inst.grid.getScale()));
 
 	float dx = static_cast<float>(r * cos(angle * M_PI / 180.0));
 	float dy = static_cast<float>(r * sin(angle * M_PI / 180.0));
@@ -2223,7 +2250,7 @@ void UI_Canvas::DrawCurrentLine()
 	if (inst.edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex * V = inst.level.vertices[inst.edit.drawLine.from.num];
+	const auto V = inst.level.vertices[inst.edit.drawLine.from.num];
 
 	v2double_t newpos = inst.edit.drawLine.to;
 
@@ -2231,13 +2258,13 @@ void UI_Canvas::DrawCurrentLine()
 	if (! (inst.edit.highlight.valid() || inst.edit.split_line.valid()))
 	{
 		RenderColor(FL_GREEN);
-		DrawVertex(newpos.x, newpos.y, vertex_radius(inst.grid.Scale));
+		DrawVertex(newpos.x, newpos.y, vertex_radius(inst.grid.getScale()));
 	}
 
 	RenderColor(RED);
 	DrawKnobbyLine(V->x(), V->y(), newpos.x, newpos.y);
 
-	DrawLineInfo(V->x(), V->y(), newpos.x, newpos.y, inst.grid.ratio > 0);
+	DrawLineInfo(V->x(), V->y(), newpos.x, newpos.y, inst.grid.getRatio() > 0);
 
 	// draw all the crossing points
 	crossing_state_c cross(inst);
@@ -2302,7 +2329,7 @@ v2double_t UI_Canvas::DragDelta()
 {
 	v2double_t result = inst.edit.drag_cur.xy - inst.edit.drag_start.xy;
 
-	v2double_t pixel_dpos = result * inst.grid.Scale;
+	v2double_t pixel_dpos = result * inst.grid.getScale();
 
 	// check that we have moved far enough from the start position,
 	// giving the user the option to select the original place.
@@ -2312,11 +2339,11 @@ v2double_t UI_Canvas::DragDelta()
 	}
 
 	// handle ratio-lock of a single dragged vertex
-	if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 &&
+	if (inst.edit.mode == ObjType::vertices && inst.grid.getRatio() > 0 &&
 		inst.edit.dragged.num >= 0 && inst.edit.drag_other_vert >= 0)
 	{
-		const Vertex *v0 = inst.level.vertices[inst.edit.drag_other_vert];
-		const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
+		const auto v0 = inst.level.vertices[inst.edit.drag_other_vert];
+		const auto v1 = inst.level.vertices[inst.edit.dragged.num];
 
 		v2double_t newpos = inst.edit.drag_cur.xy;
 
@@ -2325,7 +2352,7 @@ v2double_t UI_Canvas::DragDelta()
 		return newpos - v1->xy();
 	}
 
-	if (inst.grid.ratio > 0)
+	if (inst.grid.getRatio() > 0)
 	{
 		v2double_t newpos = inst.edit.drag_cur.xy;
 
@@ -2334,7 +2361,7 @@ v2double_t UI_Canvas::DragDelta()
 		return newpos - inst.edit.drag_start.xy;
 	}
 
-	if (inst.grid.snap)
+	if (inst.grid.snaps())
 	{
 		v2double_t focus = inst.edit.drag_focus.xy + result;
 
@@ -2402,14 +2429,27 @@ void UI_Canvas::RenderSector(int num)
 		}
 		else
 		{
-			img = inst.wad.images.W_GetFlat(inst.conf, tex_name);
+			img = inst.wad.images.getMutableFlat(inst.conf, tex_name);
 
 			if (! img)
 			{
-				img = inst.wad.images.IM_UnknownTex(inst.conf);
+				img = &inst.wad.images.getMutableUnknownTexture(inst.conf);
 			}
 		}
 	}
+
+	int img_w = 0;
+	int img_h = 0;
+	if(img)
+	{
+		img_w = img->width();
+		img_h = img->height();
+	}
+	if(!img_w)
+		img_w = 64;
+	if(!img_h)
+		img_h = 64;
+
 
 #ifdef NO_OPENGL
 	int tw = img ? img->width()  : 1;
@@ -2487,8 +2527,8 @@ void UI_Canvas::RenderSector(int num)
 			int x = sx1;
 			int span_w = sx2 - sx1 + 1;
 
-			u8_t *dest = rgb_buf + ((x - rgb_x) + (y - rgb_y) * rgb_w) * 3;
-			u8_t *dest_end = dest + span_w * 3;
+			uint8_t *dest = rgb_buf + ((x - rgb_x) + (y - rgb_y) * rgb_w) * 3;
+			uint8_t *dest_end = dest + span_w * 3;
 
 			// the logic here for non-64x64 textures matches the software
 			// 3D renderer, but is different than ZDoom (which scales them).
@@ -2508,9 +2548,9 @@ void UI_Canvas::RenderSector(int num)
 
 					inst.wad.palette.decodePixel(pix, dest[0], dest[1], dest[2]);
 
-					dest[0] = (u8_t)(((int)dest[0] * r) >> 16);
-					dest[1] = (u8_t)(((int)dest[1] * g) >> 16);
-					dest[2] = (u8_t)(((int)dest[2] * b) >> 16);
+					dest[0] = (uint8_t)(((int)dest[0] * r) >> 16);
+					dest[1] = (uint8_t)(((int)dest[1] * g) >> 16);
+					dest[2] = (uint8_t)(((int)dest[2] * b) >> 16);
 				}
 			}
 			else  // fullbright version
@@ -2562,10 +2602,7 @@ void UI_Canvas::RenderSector(int num)
 
 			if (img)
 			{
-				// this logic follows ZDoom, which scales large flats to
-				// occupy a 64x64 unit area.  I presume wall textures are
-				// handled similarily....
-				glTexCoord2f(poly->mx[p] / 64.0f, poly->my[p] / 64.0f);
+				glTexCoord2f(poly->mx[p] / img_w, poly->my[p] / img_h);
 			}
 
 			glVertex2i(sx, sy);
@@ -2901,14 +2938,14 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 
 	if (cur_font < 17)
 	{
-		font_img  = inst.wad.images.IM_DigitFont_11x14();
+		font_img  = &inst.wad.images.IM_DigitFont_11x14();
 		font_cw   = 11;
 		font_ch   = 14;
 		font_step = font_cw - 2;
 	}
 	else
 	{
-		font_img  = inst.wad.images.IM_DigitFont_14x19();
+		font_img  = &inst.wad.images.IM_DigitFont_14x19();
 		font_cw   = 14;
 		font_ch   = 19;
 		font_step = font_cw - 2;

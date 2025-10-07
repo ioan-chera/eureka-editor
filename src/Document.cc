@@ -86,7 +86,7 @@ static void ChecksumSideDef(crc32_c &crc, const SideDef *S, const Document &doc)
 	crc += S->MidTex();
 	crc += S->UpperTex();
 
-	ChecksumSector(crc, S->SecRef(doc));
+	ChecksumSector(crc, &doc.getSector(*S));
 }
 
 static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
@@ -95,14 +95,14 @@ static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
 	crc += L->type;
 	crc += L->tag;
 
-	ChecksumVertex(crc, L->Start(doc));
-	ChecksumVertex(crc, L->End(doc));
+	ChecksumVertex(crc, &doc.getStart(*L));
+	ChecksumVertex(crc, &doc.getEnd(*L));
 
-	if(L->Right(doc))
-		ChecksumSideDef(crc, L->Right(doc), doc);
+	if(doc.getRight(*L))
+		ChecksumSideDef(crc, doc.getRight(*L), doc);
 
-	if(L->Left(doc))
-		ChecksumSideDef(crc, L->Left(doc), doc);
+	if(doc.getLeft(*L))
+		ChecksumSideDef(crc, doc.getLeft(*L), doc);
 }
 
 //
@@ -118,8 +118,116 @@ void Document::getLevelChecksum(crc32_c &crc) const
 	int i;
 
 	for(i = 0; i < numThings(); i++)
-		ChecksumThing(crc, things[i]);
+		ChecksumThing(crc, things[i].get());
 
 	for(i = 0; i < numLinedefs(); i++)
-		ChecksumLineDef(crc, linedefs[i], *this);
+		ChecksumLineDef(crc, linedefs[i].get(), *this);
+}
+
+const Sector &Document::getSector(const SideDef &side) const
+{
+	return *sectors[side.sector];
+}
+
+int Document::getSectorID(const LineDef &line, Side side) const
+{
+	switch(side)
+	{
+	case Side::left:
+		return getLeft(line) ? getLeft(line)->sector : -1;
+
+	case Side::right:
+		return getRight(line) ? getRight(line)->sector : -1;
+
+	default:
+		return -1;
+	}
+}
+
+const Sector *Document::getSector(const LineDef &line, Side side) const
+{
+	int sid = getSectorID(line, side);
+	if(isSector(sid))
+		return sectors[sid].get();
+	return nullptr;
+}
+
+const Vertex &Document::getStart(const LineDef &line) const
+{
+	return *vertices[line.start];
+}
+
+const Vertex &Document::getEnd(const LineDef &line) const
+{
+	return *vertices[line.end];
+}
+
+const SideDef *Document::getRight(const LineDef &line) const
+{
+	return line.right >= 0 ? sidedefs[line.right].get() : nullptr;
+}
+
+const SideDef *Document::getLeft(const LineDef &line) const
+{
+	return line.left >= 0 ? sidedefs[line.left].get() : nullptr;
+}
+
+double Document::calcLength(const LineDef &line) const
+{
+	double dx = getStart(line).x() - getEnd(line).x();
+	double dy = getStart(line).y() - getEnd(line).y();
+	return hypot(dx, dy);
+}
+
+bool Document::touchesCoord(const LineDef &line, FFixedPoint tx, FFixedPoint ty) const
+{
+	return getStart(line).Matches(tx, ty) || getEnd(line).Matches(tx, ty);
+}
+
+bool Document::touchesSector(const LineDef &line, int secNum) const
+{
+	if(line.right >= 0 && sidedefs[line.right]->sector == secNum)
+		return true;
+	if(line.left >= 0 && sidedefs[line.left]->sector == secNum)
+		return true;
+	return false;
+}
+
+bool Document::isZeroLength(const LineDef &line) const
+{
+	return (getStart(line).raw_x == getEnd(line).raw_x) && (getStart(line).raw_y == getEnd(line).raw_y);
+}
+
+bool Document::isSelfRef(const LineDef &line) const
+{
+	return (line.left >= 0) && (line.right >= 0) &&
+		sidedefs[line.left]->sector == sidedefs[line.right]->sector;
+}
+
+bool Document::isHorizontal(const LineDef &line) const
+{
+	return (getStart(line).raw_y == getEnd(line).raw_y);
+}
+
+bool Document::isVertical(const LineDef &line) const
+{
+	return (getStart(line).raw_x == getEnd(line).raw_x);
+}
+
+void Document::clear()
+{
+	things.clear();
+	vertices.clear();
+	sectors.clear();
+	sidedefs.clear();
+	linedefs.clear();
+
+	headerData.clear();
+	behaviorData.assign(EMPTY_ACS_BINARY, EMPTY_ACS_BINARY + sizeof(EMPTY_ACS_BINARY));
+	scriptsData.clear();
+
+	basis.clear();
+
+	// TODO: other modules
+	Clipboard_ClearLocals();
 }

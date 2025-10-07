@@ -25,16 +25,18 @@
 #include "ui_panelinput.h"
 
 class UI_DynIntInput;
+struct gensector_t;
 
-class UI_SectorBox : public Fl_Group
+struct SectorFlagButton
 {
-private:
-	int obj = -1;
-	int count = 0;
+	std::unique_ptr<Fl_Check_Button> button;
+	std::unique_ptr<Fl_Choice> choice;
+	const gensector_t *info;
+};
 
+class UI_SectorBox : public MapItemBox
+{
 public:
-	UI_Nombre *which;
-
 	UI_DynInput   *type;
 	Fl_Output    *desc;
 	Fl_Button    *choose;
@@ -69,38 +71,28 @@ public:
 	// Boom generalized sectors
 
 	Fl_Box    * bm_title;
-	Fl_Choice * bm_damage;
 
-	Fl_Check_Button * bm_secret;
-	Fl_Check_Button * bm_friction;
-	Fl_Check_Button * bm_wind;
-
-private:
-	Instance &inst;
-	PanelFieldFixUp mFixUp;
+	std::vector<SectorFlagButton> bm_buttons;
+	int genStartX = 0, genStartY = 0;
+	int basicSectorMask = 65535;
 
 public:
 	UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
-	virtual ~UI_SectorBox();
 
 public:
-	void SetObj(int _index, int _count);
-
-	int GetObj() const { return obj; }
-
 	// call this if the thing was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1);
+	void UpdateField(int field = -1) override;
 
-	void UpdateTotal();
+	void UpdateTotal(const Document &doc) noexcept override;
 
-	void UpdateGameInfo();
+	void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) override;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
-	void UnselectPics();
+	void UnselectPics() override;
 
 private:
 	void CB_Copy(int parts);

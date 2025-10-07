@@ -32,28 +32,22 @@ struct Vertex
 
 	enum { F_X, F_Y };
 
-	inline double x() const
+	inline double x() const noexcept
 	{
 		return static_cast<double>(raw_x);
 	}
-	inline double y() const
+	inline double y() const noexcept
 	{
 		return static_cast<double>(raw_y);
 	}
-	inline v2double_t xy() const
+	inline v2double_t xy() const noexcept
 	{
 		return { x(), y() };
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(MapFormat format, double x)
-	{
-		raw_x = MakeValidCoord(format, x);
-	}
-	void SetRawY(MapFormat format, double y)
-	{
-		raw_y = MakeValidCoord(format, y);
-	}
+	void SetRawX(MapFormat format, double x);
+	void SetRawY(MapFormat format, double y);
 
 	void SetRawXY(MapFormat format, const v2double_t &pos)
 	{

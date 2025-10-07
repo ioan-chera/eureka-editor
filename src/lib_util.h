@@ -29,7 +29,8 @@
 
 #include "PrintfMacros.h"
 
-#include <ctype.h>
+#include "safe_ctype.h"
+#include <functional>
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -38,6 +39,21 @@
 
 class SString;
 struct v2double_t;
+
+class AutoCleanup
+{
+public:
+    explicit AutoCleanup(const std::function<void()> &func) : func(func)
+    {
+    }
+
+    ~AutoCleanup()
+    {
+        func();
+    }
+private:
+    std::function<void()> func;
+};
 
 void CheckTypeSizes();
 

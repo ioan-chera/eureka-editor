@@ -47,50 +47,6 @@ bool config::bsp_compressed		= false;
 #define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
 
 
-class UI_NodeDialog : public Fl_Double_Window
-{
-public:
-	Fl_Browser *browser;
-
-	Fl_Progress *progress;
-
-	Fl_Button * button;
-
-	int cur_prog = -1;
-	char prog_label[64];
-
-	bool finished = false;
-
-	bool want_cancel = false;
-	bool want_close = false;
-
-public:
-	UI_NodeDialog();
-	virtual ~UI_NodeDialog()
-	{
-	}
-
-	/* FLTK method */
-	int handle(int event);
-
-public:
-	void SetProg(int perc);
-
-	void Print(const char *str);
-
-	void Finish_OK();
-	void Finish_Cancel();
-	void Finish_Error();
-
-	bool WantCancel() const { return want_cancel; }
-	bool WantClose()  const { return want_close;  }
-
-private:
-	static void  close_callback(Fl_Widget *, void *);
-	static void button_callback(Fl_Widget *, void *);
-};
-
-
 //
 //  Callbacks
 //
@@ -270,7 +226,7 @@ static const char *build_ErrorString(build_result_e ret)
 }
 
 
-void Instance::GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const
+void Instance::GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...)
 {
 	va_list args;
 
@@ -313,7 +269,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 
 	SYS_ASSERT(1 <= info->factor && info->factor <= 32);
 
-	int num_levels = wad.master.edit_wad->LevelCount();
+	int num_levels = wad.master.editWad()->LevelCount();
 	SYS_ASSERT(num_levels > 0);
 
 	GB_PrintMsg("\n");
@@ -326,9 +282,17 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
-		LoadLevelNum(wad.master.edit_wad.get(), n);
+		try
+		{
+			NewDocument newdoc = openDocument(loaded, *wad.master.editWad(), n);
 
-		ret = AJBSP_BuildLevel(info, n, *this);
+			ret = AJBSP_BuildLevel(info, n, *this, newdoc.doc, newdoc.loading, *wad.master.editWad());
+		}
+		catch(const std::runtime_error &e)
+		{
+			GB_PrintMsg("Failed building nodes for level %d: %s\n", n, e.what());
+			continue;
+		}
 
 		// don't fail on maps with overflows
 		// [ Note that 'total_failed_maps' keeps a tally of these ]
@@ -346,6 +310,16 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 		{
 			nb_info->cancelled = true;
 		}
+	}
+
+	try
+	{
+		wad.master.editWad()->writeToDisk();
+	}
+	catch(const std::runtime_error &e)
+	{
+		GB_PrintMsg("ERROR: could not save %s: %s\n", wad.master.editWad()->PathName().u8string().c_str(), e.what());
+		ret = BUILD_BadFile;
 	}
 
 	if (ret == BUILD_OK)
@@ -376,62 +350,57 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 }
 
 
-void Instance::BuildNodesAfterSave(int lev_idx)
+void Instance::BuildNodesAfterSave(int lev_idx, const LoadingData& loading, Wad_file &wad)
 {
-	nodeialog = NULL;
+	nodeialog.reset();
 
-	nb_info = new nodebuildinfo_t;
+	nodebuildinfo_t nb_info;
 
-	PrepareInfo(nb_info);
+	PrepareInfo(&nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx, *this);
+	build_result_e ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this, level, loading, wad);
 
 	// TODO : maybe print # of serious/minor warnings
 
 	if (ret != BUILD_OK)
 		gLog.printf("NODES FAILED TO FAILED.\n");
-
-	delete nb_info;
 }
 
 
 void Instance::CMD_BuildAllNodes()
 {
-	if (!wad.master.edit_wad)
+
+	if (!wad.master.editWad())
 	{
 		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
 		return;
 	}
 
-	if (wad.master.edit_wad->IsReadOnly())
+	if (wad.master.editWad()->IsReadOnly())
 	{
 		DLG_Notify("Cannot build nodes on a read-only file.");
 		return;
 	}
 
-	if (MadeChanges)
+	if (level.hasChanges())
 	{
 		if (DLG_Confirm({ "Cancel", "&Save" },
-		                "You have unsaved changes, do you want to save them now "
-						"and then build all the nodes?") <= 0)
+			"You have unsaved changes, do you want to save them now "
+			"and then build all the nodes?") <= 0)
 		{
 			return;
 		}
 
-		inhibit_node_build = true;
-
-		bool save_result = M_SaveMap();
-
-		inhibit_node_build = false;
+		bool save_result = M_SaveMap(true);
 
 		// user cancelled the save?
-		if (! save_result)
+		if (!save_result)
 			return;
 	}
 
 
 	// this probably cannot happen, but check anyway
-	if (wad.master.edit_wad->LevelCount() == 0)
+	if (wad.master.editWad()->LevelCount() == 0)
 	{
 		DLG_Notify("Cannot build nodes: no levels found!");
 		return;
@@ -449,7 +418,7 @@ void Instance::CMD_BuildAllNodes()
 	edit.highlight.clear();
 
 
-	nodeialog = new UI_NodeDialog();
+	nodeialog.emplace();
 
 	nodeialog->set_modal();
 	nodeialog->show();
@@ -457,18 +426,18 @@ void Instance::CMD_BuildAllNodes()
 	Fl::check();
 
 
-	nb_info = new nodebuildinfo_t;
+	nodebuildinfo_t nb_info;
 
-	PrepareInfo(nb_info);
+	PrepareInfo(&nb_info);
 
-	build_result_e ret = BuildAllNodes(nb_info);
+	build_result_e ret = BuildAllNodes(&nb_info);
 
 	if (ret == BUILD_OK)
 	{
 		nodeialog->Finish_OK();
 		Status_Set("Built nodes OK");
 	}
-	else if (nb_info->cancelled)
+	else if (nb_info.cancelled)
 	{
 		nodeialog->Finish_Cancel();
 		Status_Set("Cancelled building nodes");
@@ -484,13 +453,7 @@ void Instance::CMD_BuildAllNodes()
 		Fl::wait(0.2);
 	}
 
-	delete nb_info; nb_info = NULL;
-	delete nodeialog;  nodeialog = NULL;
-
-
-	// reload the previous level
-	// TODO: improve this to NOT mean reloading the level
-	LoadLevel(wad.master.edit_wad.get(), CurLevel);
+	nodeialog.reset();
 }
 
 

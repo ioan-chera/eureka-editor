@@ -19,7 +19,9 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
-#include "main.h"
+#include "lib_file.h"
+#include "safe_ctype.h"
+#include "sys_debug.h"
 
 #ifdef WIN32
 #include <io.h>
@@ -254,6 +256,19 @@ bool FileMakeDir(const fs::path &dir_name)
 	}
 }
 
+bool FileMakeDirs(const fs::path &dir_name)
+{
+	try
+	{
+		return fs::create_directories(dir_name);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Error creating directories down to %s: %s\n", dir_name.u8string().c_str(), e.what());
+		return false;
+	}
+}
+
 bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data)
 {
 	try
@@ -311,7 +326,7 @@ int ScanDirectory(const fs::path &path, const std::function<void(const fs::path 
 			}
 			fs::path entry_name = dir_entry.path().filename();
 			SString entry_string = entry_name.u8string();
-			if(entry_string.length() >= 2 && entry_string[0] == '.' && isalnum(entry_string[1]))
+			if(entry_string.length() >= 2 && entry_string[0] == '.' && safe_isalnum(entry_string[1]))
 			{
 				flags |= SCAN_F_Hidden;
 			}
@@ -342,7 +357,7 @@ int ScanDirectory(const fs::path &path, directory_iter_f func, void *priv_dat)
 
 //------------------------------------------------------------------------
 
-SString GetExecutablePath(const char *argv0)
+fs::path GetExecutablePath(const char *argv0)
 {
 	SString path;
 
@@ -355,7 +370,7 @@ SString GetExecutablePath(const char *argv0)
 		{
 			SString retpath = WideToUTF8(wpath);
 			FilenameStripBase(retpath);
-			return retpath;
+			return fs::u8path(retpath.get());
 		}
 	}
 
@@ -371,7 +386,7 @@ SString GetExecutablePath(const char *argv0)
 		if (access(rawpath, 0) == 0)  // sanity check
 		{
 			FilenameStripBase(rawpath);
-			return rawpath;
+			return fs::u8path(rawpath);
 		}
 	}
 
@@ -394,7 +409,7 @@ SString GetExecutablePath(const char *argv0)
 	{
 		// FIXME: will this be _inside_ the .app folder???
 		FilenameStripBase(rawpath);
-		return rawpath;
+		return fs::u8path(rawpath);
 	}
 #endif
 
@@ -406,7 +421,7 @@ SString GetExecutablePath(const char *argv0)
 #endif
 
 	FilenameStripBase(path);
-	return path;
+	return fs::u8path(path.get());
 }
 
 //

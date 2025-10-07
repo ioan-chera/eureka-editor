@@ -1,0 +1,58 @@
+name: Build for macOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  #
+  # Nightly build helper
+  # https://stackoverflow.com/a/67527144
+  # https://docs.github.com/en/actions/use-cases-and-examples/deploying/installing-an-apple-certificate-on-macos-runners-for-xcode-development
+  # https://github.com/marketplace/actions/code-sign-action
+  # https://github.com/marketplace/actions/codesign-and-notarize
+  #
+  build-with-signing:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Generate project
+        run: cmake -B build
+      - name: Build
+        run: |
+          cmake --build build --config Release --parallel
+          ls -al
+          echo "CURDIR"
+          pwd
+          echo "BUILD DIR"
+          ls -al build
+      # TODO: install app store connect API key (see the apple-code-signing link above)
+      - name: Sign and notarize the bundle
+        uses: ioan-chera/action-macos-sign-notarize@v1.3
+        with:
+          certificate: ${{ secrets.MACOS_BUILD_CERTIFICATE_BASE64 }}
+          certificate-password: ${{ secrets.MACOS_P12_PASSWORD }}
+          username: ${{ secrets.MACOS_NOTARY_USER }}
+          password: ${{ secrets.MACOS_NOTARY_PASSWORD }}
+          entitlements-path: osx/EurekaApp/eureka.entitlements
+          apple-team-id: ${{ secrets.MACOS_TEAM_ID }}
+          app-path: build/Eureka Doom Editor.app
+      # TODO: test
+      # TODO: archive
+      - name: Stage files for DMG
+        run: |
+          DMG_ROOT="dmg_temp"
+          VOL_NAME="Eureka Doom Editor"
+          OUTPUT="Eureka-Doom-Editor.dmg"
+          mkdir "$DMG_ROOT"
+          cp -R build/Eureka\ Doom\ Editor.app "$DMG_ROOT/"
+          cp AUTHORS.md GPL.txt README.txt TODO.txt "$DMG_ROOT/"
+          echo "Contents staged in $DMG_ROOT, will build $OUTPUT"
+      - name: Create compressed DMG
+        run: |
+          hdiutil create -volname "Eureka Doom Editor" -srcfolder dmg_temp -ov -format UDZO "Eureka-Doom-Editor.dmg"
+      - name: Publish
+        uses: actions/upload-artifact@v4
+        with:
+          name: EurekaEditor-macOS
+          path: Eureka-Doom-Editor.dmg

@@ -40,6 +40,8 @@
 
 #define MAX_RADIUS  128
 
+class Instance;
+
 
 /*
  *  angle_to_direction - convert angle to direction (0-7)

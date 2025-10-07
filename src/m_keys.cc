@@ -213,49 +213,53 @@ keycode_t M_ParseKeyString(const SString &mstr)
 	// for EMOD_COMMAND, accept both CMD and CTRL prefixes
 
 	SString str = mstr;
-
-	if (str.noCaseStartsWith("CMD-"))
+	SString before;
+	do
 	{
-		key |= EMOD_COMMAND;
-		str.erase(0, 4);
-	}
-	else if (str.noCaseStartsWith("CTRL-"))
-	{
-		key |= EMOD_COMMAND;
-		str.erase(0, 5);
-	}
-	else if (str.noCaseStartsWith("META-"))
-	{
-		key |= EMOD_META;
-		str.erase(0, 5);
-	}
-	else if (str.noCaseStartsWith("ALT-"))
-	{
-		key |= EMOD_ALT;
-		str.erase(0, 4);
-	}
-	else if (str.noCaseStartsWith("SHIFT-"))
-	{
-		key |= EMOD_SHIFT;
-		str.erase(0, 6);
-	}
-	else if (str.noCaseStartsWith("LAX-"))
-	{
-		key |= MOD_LAX_SHIFTCTRL;
-		str.erase(0, 4);
-	}
+		before = str;
+		if (str.noCaseStartsWith("CMD-"))
+		{
+			key |= EMOD_COMMAND;
+			str.erase(0, 4);
+		}
+		if (str.noCaseStartsWith("CTRL-"))
+		{
+			key |= EMOD_COMMAND;
+			str.erase(0, 5);
+		}
+		if (str.noCaseStartsWith("META-"))
+		{
+			key |= EMOD_META;
+			str.erase(0, 5);
+		}
+		if (str.noCaseStartsWith("ALT-"))
+		{
+			key |= EMOD_ALT;
+			str.erase(0, 4);
+		}
+		if (str.noCaseStartsWith("SHIFT-"))
+		{
+			key |= EMOD_SHIFT;
+			str.erase(0, 6);
+		}
+		if (str.noCaseStartsWith("LAX-"))
+		{
+			key |= MOD_LAX_SHIFTCTRL;
+			str.erase(0, 4);
+		}
+	} while (str != before);
 
 	// convert uppercase letter --> lowercase + EMOD_SHIFT
 	if (str.length() == 1 && str[0] >= 'A' && str[0] <= 'Z')
-		return EMOD_SHIFT | (unsigned char) tolower(str[0]);
+		return key | EMOD_SHIFT | (unsigned char) safe_tolower(str[0]);
 
-	if (str.length() == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
+	if (str.length() == 1 && str[0] > 32 && str[0] < 127 && safe_isprint(str[0]))
 		return key | (unsigned char) str[0];
 
-	if (str.noCaseStartsWith("F") && isdigit(str[1]))
+	if (str.noCaseStartsWith("F") && safe_isdigit(str[1]))
 		return key | (FL_F + atoi(str.c_str() + 1));
 
-	if (str.noCaseStartsWith("MOUSE") && isdigit(str[5]))
+	if (str.noCaseStartsWith("MOUSE") && safe_isdigit(str[5]))
 		return key | (FL_Button + atoi(str.c_str() + 5));
 
 	// find name in mapping table
@@ -274,7 +278,7 @@ keycode_t M_ParseKeyString(const SString &mstr)
 
 static SString BareKeyName(keycode_t key)
 {
-	if(key < 127 && key > 32 && isprint(key) && key != '"')
+	if(key < 127 && key > 32 && safe_isprint(key) && key != '"')
 		return SString(static_cast<char>(key));
 	if(FL_F < key && key <= FL_F_Last)
 		return SString::printf("F%d", key - FL_F);
@@ -292,54 +296,40 @@ static SString BareKeyName(keycode_t key)
 }
 
 
-static const char *ModName_Dash(keycode_t mod)
+static SString ModName_Dash(keycode_t mod)
 {
+	SString result;
 #ifdef __APPLE__
-	if (mod & EMOD_COMMAND) return "CMD-";
+	if (mod & EMOD_COMMAND) result += "CMD-";
 #else
-	if (mod & EMOD_COMMAND) return "CTRL-";
+	if (mod & EMOD_COMMAND) result += "CTRL-";
 #endif
-	if (mod & EMOD_META)    return "META-";
-	if (mod & EMOD_ALT)     return "ALT-";
-	if (mod & EMOD_SHIFT)   return "SHIFT-";
+	if (mod & EMOD_META)    result += "META-";
+	if (mod & EMOD_ALT)     result += "ALT-";
+	if (mod & EMOD_SHIFT)   result += "SHIFT-";
 
-	if (mod & MOD_LAX_SHIFTCTRL) return "LAX-";
+	if (mod & MOD_LAX_SHIFTCTRL) result += "LAX-";
 
-	return "";
+	return result;
 }
 
 
-static const char *ModName_Space(keycode_t mod)
+namespace keys
 {
-#ifdef __APPLE__
-	if (mod & EMOD_COMMAND) return "CMD ";
-#else
-	if (mod & EMOD_COMMAND) return "CTRL ";
-#endif
-	if (mod & EMOD_META)    return "META ";
-	if (mod & EMOD_ALT)     return "ALT ";
-	if (mod & EMOD_SHIFT)   return "SHIFT ";
-
-	if (mod & MOD_LAX_SHIFTCTRL) return "LAX ";
-
-	return "";
-}
-
-
-SString M_KeyToString(keycode_t key)
+SString toString(keycode_t key)
 {
 	// convert SHIFT + letter --> uppercase letter
 	if ((key & EMOD_ALL_MASK) == EMOD_SHIFT &&
 		(key & FL_KEY_MASK)  <  127 &&
-		isalpha(key & FL_KEY_MASK))
+		safe_isalpha(key & FL_KEY_MASK))
 	{
-        return SString::printf("%c", toupper(key & FL_KEY_MASK));
+		return SString::printf("%c", safe_toupper(key & FL_KEY_MASK));
 	}
 
-    return SString::printf("%s%s", ModName_Dash(key),
-                           BareKeyName(key & FL_KEY_MASK).c_str());
+	return SString::printf("%s%s", ModName_Dash(key).c_str(),
+						   BareKeyName(key & FL_KEY_MASK).c_str());
 }
-
+}
 
 int M_KeyCmp(keycode_t A, keycode_t B)
 {
@@ -406,20 +396,6 @@ const char * M_KeyContextString(KeyContext context)
 
 
 //------------------------------------------------------------------------
-
-struct key_binding_t
-{
-	keycode_t key;
-
-	KeyContext context;
-
-	const editor_command_t *cmd;
-
-	SString param[MAX_EXEC_PARAM];
-
-	// this field ONLY used by M_DetectConflictingBinds()
-	bool is_duplicate;
-};
 
 namespace global
 {
@@ -527,18 +503,18 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 static bool LoadBindingsFromPath(const SString &path, bool required)
 {
-	SString filename = path + "/bindings.cfg";
+    fs::path filename = fs::u8path(path.get()) / "bindings.cfg";
 
-	std::ifstream fp(filename.c_str());
+	std::ifstream fp(filename);
 	if(!fp.is_open())
 	{
 		if (! required)
 			return false;
 
-		ThrowException("Missing key bindings file:\n\n%s\n", filename.c_str());
+		ThrowException("Missing key bindings file:\n\n%s\n", filename.u8string().c_str());
 	}
 
-	gLog.printf("Reading key bindings from: %s\n", filename.c_str());
+	gLog.printf("Reading key bindings from: %s\n", filename.u8string().c_str());
 
 	while (! fp.eof())
 	{
@@ -615,27 +591,35 @@ void M_LoadBindings()
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();
 
-	LoadBindingsFromPath(global::home_dir.u8string(), false);
+	if(!LoadBindingsFromPath(global::home_dir.u8string(), false) &&
+			!global::old_linux_home_and_cache_dir.empty())
+	{
+		gLog.printf("%s/bindings.cfg not found. Loading bindings from old path %s/bindings.cfg\n",
+				global::home_dir.u8string().c_str(),
+				global::old_linux_home_and_cache_dir.u8string().c_str());
+		LoadBindingsFromPath(global::old_linux_home_and_cache_dir.u8string(), false);
+	}
 
-	updateMenuBindings();
+	if(gInstance->main_win)
+		menu::updateBindings(gInstance->main_win->menu_bar);
 }
 
 
 void M_SaveBindings()
 {
-	SString filename = (global::home_dir / "bindings.cfg").u8string();
+	fs::path filename = global::home_dir / "bindings.cfg";
 
-	std::ofstream os(filename.get(), std::ios::trunc);
+	std::ofstream os(filename, std::ios::trunc);
 	if (! os.is_open())
 	{
-		gLog.printf("Failed to save key bindings to: %s\n", filename.c_str());
+		gLog.printf("Failed to save key bindings to: %s\n", filename.u8string().c_str());
 
 		DLG_Notify("Warning: failed to save key bindings\n"
-		           "(filename: %s)", filename.c_str());
+		           "(filename: %s)", filename.u8string().c_str());
 		return;
 	}
 
-	gLog.printf("Writing key bindings to: %s\n", filename.c_str());
+	gLog.printf("Writing key bindings to: %s\n", filename.u8string().c_str());
 
 	os << "# Eureka key bindings (local)\n";
 	os << "# vi:ts=16:noexpandtab\n\n";
@@ -653,7 +637,7 @@ void M_SaveBindings()
 			if (BindingExists(global::install_binds, bind, true /* full match */))
 				continue;
 
-			os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
+			os << M_KeyContextString(bind.context) << '\t' << keys::toString(bind.key) << '\t' <<
 				bind.cmd->name;
 
 			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
@@ -677,7 +661,7 @@ void M_SaveBindings()
 
 			if (! BindingExists(global::all_bindings, bind, false /* full match */))
 			{
-				os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
+				os << M_KeyContextString(bind.context) << '\t' << keys::toString(bind.key) << '\t' <<
 					"UNBOUND" << '\n';
 				count++;
 			}
@@ -697,7 +681,7 @@ namespace global
 {
 	// local copy of the bindings
 	// these only become live after M_ApplyBindings()
-	static std::vector<key_binding_t> pref_binds;
+	std::vector<key_binding_t> pref_binds;
 }
 
 void M_CopyBindings(bool from_defaults)
@@ -711,7 +695,8 @@ void M_ApplyBindings()
 {
     global::all_bindings = global::pref_binds;
 
-	updateMenuBindings();
+	if(gInstance->main_win)
+		menu::updateBindings(gInstance->main_win->menu_bar);
 }
 
 
@@ -733,7 +718,7 @@ public:
 	inline bool operator() (const key_binding_t& k1, const key_binding_t& k2) const
 	{
 		if (column == 'c' && k1.context != k2.context)
-			return k1.context > k2.context;
+			return k1.context < k2.context;
 
 		if (column != 'f' && k1.key != k2.key)
 			return M_KeyCmp(k1.key, k2.key) < 0;
@@ -805,14 +790,12 @@ void M_DetectConflictingBinds()
 	}
 }
 
-
-SString M_StringForFunc(int index)
+namespace keys
+{
+SString stringForFunc(const key_binding_t &bind)
 {
 	SString buffer;
 	buffer.reserve(2048);
-
-	SYS_ASSERT(index >= 0 && index < static_cast<int>(global::pref_binds.size()));
-	const key_binding_t& bind = global::pref_binds[index];
 
 	SYS_ASSERT(!!bind.cmd);
 	buffer = bind.cmd->name;
@@ -836,15 +819,8 @@ SString M_StringForFunc(int index)
 	return buffer;
 }
 
-
-const char * M_StringForBinding(int index, bool changing_key)
+std::array<std::string, 3> cellsForBinding(const key_binding_t& bind, bool changing_key)
 {
-	SYS_ASSERT(index < (int)global::pref_binds.size());
-
-	const key_binding_t& bind = global::pref_binds[index];
-
-	static char buffer[600];
-
 	// we prefer the UI to say "3D view" instead of "render"
 	const char *ctx_name = M_KeyContextString(bind.context);
 	if (y_stricmp(ctx_name, "render") == 0)
@@ -854,21 +830,35 @@ const char * M_StringForBinding(int index, bool changing_key)
 	keycode_t tempk = bind.key;
 	if ((tempk & EMOD_ALL_MASK) == EMOD_SHIFT &&
 		(tempk & FL_KEY_MASK)  <  127 &&
-		isalpha(tempk & FL_KEY_MASK))
+		safe_isalpha(tempk & FL_KEY_MASK))
 	{
-		tempk = toupper(tempk & FL_KEY_MASK);
+		tempk = safe_toupper(tempk & FL_KEY_MASK);
 	}
 
-	snprintf(buffer, sizeof(buffer), "%s%6.6s%-10.10s %-9.9s %.32s",
-			bind.is_duplicate ? "@C1" : "",
-			changing_key ? "<?"     : ModName_Space(tempk),
-			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
-			ctx_name,
-			 M_StringForFunc(index).c_str() );
+	SString key_str = changing_key ? SString("<?>") : toString(tempk);
 
-	return buffer;
+	auto separateDigitFromColorMarker = [](bool enabled, const SString &str) -> SString
+	{
+		if (!enabled || str.empty())
+			return str;
+
+		if(safe_isdigit(str[0]))
+			return " " + str;
+
+		return str;
+	};
+
+	std::array<std::string, 3> result;
+	result[0] = (bind.is_duplicate ? "@C1" : "") +
+	            separateDigitFromColorMarker(bind.is_duplicate, key_str).get();
+	result[1] = (bind.is_duplicate ? "@C1" : "") +
+	            separateDigitFromColorMarker(bind.is_duplicate, ctx_name).get();
+	result[2] = (bind.is_duplicate ? "@C1" : "") +
+				separateDigitFromColorMarker(bind.is_duplicate, stringForFunc(bind)).get();
+
+	return result;
 }
-
+}
 
 void M_GetBindingInfo(int index, keycode_t *key, KeyContext *context)
 {
@@ -1011,12 +1001,10 @@ keycode_t M_TranslateKey(int key, int state)
 	if (key == '\t') key = FL_Tab;
 	if (key == '\b') key = FL_BackSpace;
 
-	// modifier logic -- only allow a single one
-
-	     if (state & EMOD_COMMAND) key |= EMOD_COMMAND;
-	else if (state & EMOD_META)    key |= EMOD_META;
-	else if (state & EMOD_ALT)     key |= EMOD_ALT;
-	else if (state & EMOD_SHIFT)   key |= EMOD_SHIFT;
+	if (state & EMOD_COMMAND) key |= EMOD_COMMAND;
+	if (state & EMOD_META)    key |= EMOD_META;
+	if (state & EMOD_ALT)     key |= EMOD_ALT;
+	if (state & EMOD_SHIFT)   key |= EMOD_SHIFT;
 
 	return key;
 }
@@ -1026,9 +1014,9 @@ int M_KeyToShortcut(keycode_t key)
 {
 	int shortcut = key & FL_KEY_MASK;
 
-	     if (key & EMOD_COMMAND) shortcut |= EMOD_COMMAND;
-	else if (key & EMOD_ALT)     shortcut |= EMOD_ALT;
-	else if (key & EMOD_SHIFT)   shortcut |= EMOD_SHIFT;
+	if (key & EMOD_COMMAND) shortcut |= EMOD_COMMAND;
+	if (key & EMOD_ALT)     shortcut |= EMOD_ALT;
+	if (key & EMOD_SHIFT)   shortcut |= EMOD_SHIFT;
 
 	return shortcut;
 }
@@ -1304,7 +1292,7 @@ static bool canShowUpOnMenu(keycode_t code)
 //
 // Finds key code for given command name
 //
-bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM], 
+bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM],
 							   keycode_t *code)
 {
     assert(!!code);
@@ -1313,7 +1301,7 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
 	{
 		if(y_stricmp(binding.cmd->name, command))
 			continue;
-		
+
 		bool skip = false;
 		for(int i = 0; i < MAX_EXEC_PARAM; ++i)
 		{
@@ -1338,6 +1326,20 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
         // character with no shortcut keys
 	}
 	return *code < UINT_MAX;
+}
+
+bool key_binding_t::sameAs(const key_binding_t &other) const noexcept
+{
+	if(this->key != other.key)
+		return false;
+	if(this->context != other.context)
+		return false;
+	if(this->cmd != other.cmd)
+		return false;
+	for(int i = 0; i < MAX_EXEC_PARAM; ++i)
+		if(this->param[i] != other.param[i])
+			return false;
+	return true;
 }
 
 //--- editor settings ---

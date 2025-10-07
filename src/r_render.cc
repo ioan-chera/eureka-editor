@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -50,9 +50,8 @@
 #include "ui_window.h"
 #include "Vertex.h"
 
-
 // config items
-rgb_color_t config::transparent_col = RGB_MAKE(0, 255, 255);
+rgb_color_t config::transparent_col = rgbMake(0, 255, 255);
 
 bool config::render_high_detail    = false;
 bool config::render_lock_gravity   = false;
@@ -83,10 +82,10 @@ namespace thing_sec_cache
 		invalid_high = std::max(invalid_high, th);
 	}
 
-	void InvalidateAll(const Document &doc)
+	void InvalidateAll(const Document &doc, bool upcomingDelete)
 	{
 		invalid_low  = 0;
-		invalid_high = doc.numThings() - 1;
+		invalid_high = doc.numThings() - (upcomingDelete ? 2 : 1);
 	}
 
 	void Update(Instance &inst);
@@ -194,15 +193,15 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 }
 
 
-static Thing *FindPlayer(const Document &doc, int typenum)
+static const Thing *FindPlayer(const Document &doc, int typenum)
 {
 	// need to search backwards (to handle Voodoo dolls properly)
 
 	for ( int i = doc.numThings()-1 ; i >= 0 ; i--)
 		if (doc.things[i]->type == typenum)
-			return doc.things[i];
+			return doc.things[i].get();
 
-	return NULL;  // not found
+	return nullptr;  // not found
 }
 
 
@@ -217,7 +216,7 @@ namespace thing_sec_cache
 		if (inst.level.numThings() != (int)inst.r_view.thing_sectors.size())
 		{
 			inst.r_view.thing_sectors.resize(inst.level.numThings());
-			thing_sec_cache::InvalidateAll(inst.level);
+			thing_sec_cache::InvalidateAll(inst.level, false);
 		}
 
 		// nothing changed?
@@ -249,7 +248,7 @@ void Render3D_NotifyInsert(ObjType type, int objnum)
 void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
 {
 	if (type == ObjType::things || type == ObjType::sectors)
-		thing_sec_cache::InvalidateAll(doc);
+		thing_sec_cache::InvalidateAll(doc, true);
 }
 
 void Render3D_NotifyChange(ObjType type, int objnum, int field)
@@ -266,6 +265,28 @@ void Render3D_NotifyEnd(Instance &inst)
 	thing_sec_cache::Update(inst);
 }
 
+int Render3D_CalcRotation(double viewAngle_rad, int thingAngle_deg)
+{
+	// thingAngle(deg) - viewAngle(deg)
+	
+	// 1: front. 45 degrees around 180 difference.  157d30': 202d30'
+	// 2: front-left                                112d30': 157d30'
+	// 3: left                                       67d30': 112d30'
+	// 4: back-left                                  22d30':  67d30'
+	// 5: back                                      -22d30':  22d30'
+	// 6: back-right                                -67d30': -22d30'
+	// 7: right                                    -112d30': -67d30'
+	// 8: front-right.                             -157d30':-112d30'
+	
+	double thingAngle_rad = M_PI / 180.0 * thingAngle_deg;
+	double angleDelta_rad = thingAngle_rad - viewAngle_rad;
+	while(angleDelta_rad > 202.5 * M_PI / 180.0)
+		angleDelta_rad -= 2 * M_PI;
+	while(angleDelta_rad < -157.5 * M_PI / 180.0)
+		angleDelta_rad += 2 * M_PI;
+	
+	return clamp((int)floor((202.5 * M_PI / 180.0 - angleDelta_rad) / (M_PI / 4.0) + 1.0), 1, 8);
+}
 
 //------------------------------------------------------------------------
 
@@ -353,19 +374,19 @@ private:
 		switch (type)
 		{
 			case ObjType::things:
-				return reinterpret_cast<int*>(inst.level.things[objnum]);
+				return reinterpret_cast<int*>(inst.level.things[objnum].get());
 
 			case ObjType::vertices:
-				return reinterpret_cast<int *>(inst.level.vertices[objnum]);
+				return reinterpret_cast<int *>(inst.level.vertices[objnum].get());
 
 			case ObjType::sectors:
-				return reinterpret_cast<int *>(inst.level.sectors[objnum]);
+				return reinterpret_cast<int *>(inst.level.sectors[objnum].get());
 
 			case ObjType::sidedefs:
-				return reinterpret_cast<int *>(inst.level.sidedefs[objnum]);
+				return reinterpret_cast<int *>(inst.level.sidedefs[objnum].get());
 
 			case ObjType::linedefs:
-				return reinterpret_cast<int *>(inst.level.linedefs[objnum]);
+				return reinterpret_cast<int *>(inst.level.linedefs[objnum].get());
 
 			default:
 				BugError("SaveBucket with bad mode\n");
@@ -389,12 +410,12 @@ private:
 
 static void AdjustOfs_UpdateBBox(Instance &inst, int ld_num)
 {
-	const LineDef *L = inst.level.linedefs[ld_num];
+	const auto L = inst.level.linedefs[ld_num];
 
-	float lx1 = static_cast<float>(L->Start(inst.level)->x());
-	float ly1 = static_cast<float>(L->Start(inst.level)->y());
-	float lx2 = static_cast<float>(L->End(inst.level)->x());
-	float ly2 = static_cast<float>(L->End(inst.level)->y());
+	float lx1 = static_cast<float>(inst.level.getStart(*L).x());
+	float ly1 = static_cast<float>(inst.level.getStart(*L).y());
+	float lx2 = static_cast<float>(inst.level.getEnd(*L).x());
+	float ly2 = static_cast<float>(inst.level.getEnd(*L).y());
 
 	if (lx1 > lx2) std::swap(lx1, lx2);
 	if (ly1 > ly2) std::swap(ly1, ly2);
@@ -432,7 +453,7 @@ static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
 	if (! inst.edit.adjust_bucket)
 		return;
 
-	const LineDef *L = inst.level.linedefs[ld_num];
+	const auto L = inst.level.linedefs[ld_num];
 
 	// ignore invalid sides (sanity check)
 	int sd_num = (part & PART_LF_ALL) ? L->left : L->right;
@@ -462,7 +483,7 @@ static void AdjustOfs_Begin(Instance &inst)
 	// find the sidedefs to adjust
 	if (! inst.edit.Selected->empty())
 	{
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int ld_num = *it;
 			byte parts = inst.edit.Selected->get_ext(ld_num);
@@ -598,7 +619,7 @@ static void AdjustOfs_RenderPost(const Instance &inst)
 
 //------------------------------------------------------------------------
 
-void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
+void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh, int pixel_w, int pixel_h)
 {
 	inst.r_view.PrepareToRender(ow, oh);
 
@@ -607,7 +628,7 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 #ifdef NO_OPENGL
 	inst.SW_RenderWorld(ox, oy, ow, oh);
 #else
-	RGL_RenderWorld(inst, ox, oy, ow, oh);
+	RGL_RenderWorld(inst, ox, oy, pixel_w, pixel_h);
 #endif
 
 	AdjustOfs_RenderPost(inst);
@@ -649,7 +670,7 @@ static bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 
 void Instance::Render3D_Setup()
 {
-	thing_sec_cache::InvalidateAll(level);
+	thing_sec_cache::InvalidateAll(level, false);
 	r_view.thing_sectors.resize(0);
 
 	if (! r_view.p_type)
@@ -658,7 +679,7 @@ void Instance::Render3D_Setup()
 		r_view.px = 99999;
 	}
 
-	Thing *player = FindPlayer(level, r_view.p_type);
+	const Thing *player = FindPlayer(level, r_view.p_type);
 
 	if (! player)
 	{
@@ -823,7 +844,7 @@ void Render3D_DragSectors(Instance &inst)
 	}
 	else
 	{
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int parts = inst.edit.Selected->get_ext(*it);
 			parts &= ~1;
@@ -899,7 +920,7 @@ static void DragThings_Update(Instance &inst)
 	}
 #endif
 
-	const Thing *T = inst.level.things[inst.edit.drag_thing_num];
+	const auto T = inst.level.things[inst.edit.drag_thing_num];
 
 	float old_x = static_cast<float>(T->x());
 	float old_y = static_cast<float>(T->y());
@@ -922,7 +943,7 @@ static void DragThings_Update(Instance &inst)
 	Objid old_sec = hover::getNearestSector(inst.level, { old_x, old_y });
 
 	Objid new_sec = hover::getNearestSector(inst.level, { new_x, new_y });
-	
+
 	if (old_sec.valid() && new_sec.valid())
 	{
 		float old_z = static_cast<float>(inst.level.sectors[old_sec.num]->floorh);
@@ -1091,7 +1112,7 @@ void Instance::Render3D_Navigate()
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // things are selected and they have different types.
-int Instance::GrabSelectedThing() 
+int Instance::GrabSelectedThing()
 {
 	int result = -1;
 
@@ -1107,9 +1128,9 @@ int Instance::GrabSelectedThing()
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const Thing *T = level.things[*it];
+			const auto T = level.things[*it];
 			if (result >= 0 && T->type != result)
 			{
 				Beep("multiple thing types");
@@ -1142,7 +1163,7 @@ void Instance::StoreSelectedThing(int new_type)
 		EditOperation op(level.basis);
 		op.setMessageForSelection("pasted type of", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			op.changeThing(*it, Thing::F_TYPE, new_type);
 		}
@@ -1181,18 +1202,18 @@ StringID Instance::GrabSelectedFlat()
 			return StringID(-1);
 		}
 
-		const Sector *S = level.sectors[edit.highlight.num];
+		const auto S = level.sectors[edit.highlight.num];
 
-		result = SEC_GrabFlat(S, edit.highlight.parts);
+		result = SEC_GrabFlat(S.get(), edit.highlight.parts);
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = level.sectors[*it];
+			const auto S = level.sectors[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			StringID tex = SEC_GrabFlat(S, parts & ~1);
+			StringID tex = SEC_GrabFlat(S.get(), parts & ~1);
 
 			if (result.isValid() && tex != result)
 			{
@@ -1224,7 +1245,7 @@ void Instance::StoreSelectedFlat(StringID new_tex)
 		EditOperation op(level.basis);
 		op.setMessageForSelection("pasted flat to", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			byte parts = edit.Selected->get_ext(*it);
 
@@ -1259,7 +1280,7 @@ void Instance::StoreDefaultedFlats()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("defaulted flat in", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
 			byte parts = edit.Selected->get_ext(*it);
 
@@ -1284,32 +1305,32 @@ StringID Instance::LD_GrabTex(const LineDef *L, int part) const
 		return BA_InternaliseString(conf.default_wall_tex);
 
 	if (L->OneSided())
-		return L->Right(level)->mid_tex;
+		return level.getRight(*L)->mid_tex;
 
-	if (part & PART_RT_LOWER) return L->Right(level)->lower_tex;
-	if (part & PART_RT_UPPER) return L->Right(level)->upper_tex;
+	if (part & PART_RT_LOWER) return level.getRight(*L)->lower_tex;
+	if (part & PART_RT_UPPER) return level.getRight(*L)->upper_tex;
 
-	if (part & PART_LF_LOWER) return L->Left(level)->lower_tex;
-	if (part & PART_LF_UPPER) return L->Left(level)->upper_tex;
+	if (part & PART_LF_LOWER) return level.getLeft(*L)->lower_tex;
+	if (part & PART_LF_UPPER) return level.getLeft(*L)->upper_tex;
 
-	if (part & PART_RT_RAIL)  return L->Right(level)->mid_tex;
-	if (part & PART_LF_RAIL)  return L->Left(level) ->mid_tex;
+	if (part & PART_RT_RAIL)  return level.getRight(*L)->mid_tex;
+	if (part & PART_LF_RAIL)  return level.getLeft(*L) ->mid_tex;
 
 	// pick something reasonable for a simply selected line
-	if (L->Left(level)->SecRef(level)->floorh > L->Right(level)->SecRef(level)->floorh)
-		return L->Right(level)->lower_tex;
+	if (level.getSector(*level.getLeft(*L)).floorh > level.getSector(*level.getRight(*L)).floorh)
+		return level.getRight(*L)->lower_tex;
 
-	if (L->Left(level)->SecRef(level)->ceilh < L->Right(level)->SecRef(level)->ceilh)
-		return L->Right(level)->upper_tex;
+	if (level.getSector(*level.getLeft(*L)).ceilh < level.getSector(*level.getRight(*L)).ceilh)
+		return level.getRight(*L)->upper_tex;
 
-	if (L->Left(level)->SecRef(level)->floorh < L->Right(level)->SecRef(level)->floorh)
-		return L->Left(level)->lower_tex;
+	if (level.getSector(*level.getLeft(*L)).floorh < level.getSector(*level.getRight(*L)).floorh)
+		return level.getLeft(*L)->lower_tex;
 
-	if (L->Left(level)->SecRef(level)->ceilh > L->Right(level)->SecRef(level)->ceilh)
-		return L->Left(level)->upper_tex;
+	if (level.getSector(*level.getLeft(*L)).ceilh > level.getSector(*level.getRight(*L)).ceilh)
+		return level.getLeft(*L)->upper_tex;
 
 	// emergency fallback
-	return L->Right(level)->lower_tex;
+	return level.getRight(*L)->lower_tex;
 }
 
 
@@ -1327,18 +1348,18 @@ StringID Instance::GrabSelectedTexture()
 			return StringID(-1);
 		}
 
-		const LineDef *L = level.linedefs[edit.highlight.num];
+		const auto L = level.linedefs[edit.highlight.num];
 
-		result = LD_GrabTex(L, edit.highlight.parts);
+		result = LD_GrabTex(L.get(), edit.highlight.parts);
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = level.linedefs[*it];
+			const auto L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			StringID tex = LD_GrabTex(L, parts & ~1);
+			StringID tex = LD_GrabTex(L.get(), parts & ~1);
 
 			if (result.isValid() && tex != result)
 			{
@@ -1370,9 +1391,9 @@ void Instance::StoreSelectedTexture(StringID new_tex)
 		EditOperation op(level.basis);
 		op.setMessageForSelection("pasted tex to", *edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = level.linedefs[*it];
+			const auto L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
 			if (L->NoSided())
@@ -1547,7 +1568,7 @@ bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 	{
 		config::usegamma = std::max(0, atoi(tokens[1])) % 5;
 
-		wad.palette.updateGamma();
+		wad.palette.updateGamma(config::usegamma, config::panel_gamma);
 		return true;
 	}
 
@@ -1694,7 +1715,7 @@ void Instance::navigation3DMove(float *editNav, nav_release_func_t func, bool fl
 	}
 
 	if(!edit.is_navigating)
-		Editor_ClearNav();
+		edit.clearNav();
 
 	*editNav = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1918,7 +1939,7 @@ void Instance::R3D_WHEEL_Move()
 
 		if (mod == EMOD_SHIFT)
 			speed /= 4.0f;
-		else if (mod == EMOD_COMMAND)
+		else if (mod == static_cast<keycode_t>(EMOD_COMMAND))
 			speed *= 4.0f;
 	}
 

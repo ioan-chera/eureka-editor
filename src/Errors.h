@@ -25,45 +25,19 @@
 #include <stdarg.h>
 #include <stdexcept>
 
-#define BugError  ThrowException
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
-//
-// Wad read exception
-//
-class WadReadException : public std::runtime_error
-{
-public:
-	WadReadException(const SString& msg) : std::runtime_error(msg.c_str())
-	{
-	}
-};
+#define BugError  ThrowLogicException
 
-//
-// Result with message in case of failure
-//
-struct ReportedResult
-{
-	bool success;
-	SString message;
-};
-
-//
-// Raises an exception with the given format
-//
-template<typename T>
-[[noreturn]] void raise(EUR_FORMAT_STRING(const char *format), ...)
-EUR_PRINTF(1, 2);
-
-template<typename T>
-[[noreturn]] void raise(EUR_FORMAT_STRING(const char *format), ...)
-{
-	va_list ap;
-	::va_start(ap, format);
-	SString text = SString::vprintf(format, ap);
-	::va_end(ap);
-	throw T(text);
-}
 
 [[noreturn]] void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
+[[noreturn]] void ThrowLogicException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
+
+#ifdef _WIN32
+SString GetShellExecuteErrorMessage(HINSTANCE result);
+SString GetWindowsErrorMessage(DWORD error);
+#endif
 
 #endif /* Errors_hpp */

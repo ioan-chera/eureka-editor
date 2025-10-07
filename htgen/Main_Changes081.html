@@ -1,0 +1,53 @@
+<div id='wikitext'>
+<h1>CHANGES IN Eureka 0.81 (r186)</h1>
+<p><em>(Changes are since the 0.74 version)</em>
+</p>
+<p class='vspace'>+  support a proper Unix-style installation
+</p>
+<p class='vspace'>+  made a proper web-site (using PmWiki)
+</p>
+<p class='vspace'>+  command to build nodes (via glBSP) and quit
+</p>
+<p class='vspace'>+  texture browser can be resized by dragging the edge
+</p>
+<p class='vspace'>-  log file is only created when <code>--log</code> is used
+<br  />-  the <code>--quiet</code> option (-q) suppresses output to stdout
+<br  />-  new <code>--debug</code> option (-d) enables debug messages
+<br  />-  allow long options to begin with '-' or '--'
+</p>
+<p class='vspace'>-  handle a pwad filename given without -file
+<br  />-  more lax finding of patch lumps for textures
+<br  />-  when no level is given, find first one in PWAD or IWAD
+<br  />-  support plain numbers with <code>-warp</code>
+</p>
+<p class='vspace'>-  look for iwads in the <code>~/.eureka/iwads</code> directory
+<br  />-  when searching for iwads, look for more names (e.g. "doom.wad")
+<br  />-  if <code>-iwad</code> parameter is a bare name, look in iwad search path
+<br  />-  if <code>-iwad</code> parameter has no extension, add ".wad"
+</p>
+<p class='vspace'>-  using SPACE on a single selected vertex will unselect it
+<br  />-  closing a simple vertex loop always makes a new sector inside it
+<br  />-  can now split a line when one of its vertices is selected
+</p>
+<p class='vspace'>+  new 'm' command for merging sectors
+<br  />+  new 'c' command to copy sector/thing/line properties
+</p>
+<p class='vspace'>-  added 'same_mode_clears_selection' config var (emulates Yadex behavior)
+</p>
+<p class='vspace'>-  3D view: support strafing with ALT or META key
+</p>
+<p class='vspace'>-  initial support for Odamex
+</p>
+<p class='vspace'>-  DOOM: fixed line types 33 and 34 (red and yellow locked doors)
+<br  />-  DOOM: restored the 'Computer Map' pickup
+<br  />-  DOOM: fixed "SW2xxx" textures not having the right category
+</p>
+<p class='vspace'>-  EDGE: added slope line types
+<br  />-  EDGE: added some missing things (jetpack, green keys, dog, stealth mons)
+<br  />-  EDGE: fleshed out sector types
+<br  />-  EDGE: fleshed out line types (hub exits, sliding doors, RTS)
+</p>
+<p class='vspace'>-  TNT: assigned the new textures into categories (e.g. "Crates")
+<br  />-  PLUTONIA: assigned the new textures into categories
+</p>
+</div>

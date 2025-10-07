@@ -31,7 +31,7 @@ class TempDirContext : public ::testing::Test
 protected:
 	void SetUp() override;
 	void TearDown() override;
-	fs::path getChildPath(const fs::path &path) const;
+	fs::path getSubPath(const fs::path &path) const;
 
 	fs::path mTempDir;
 	std::stack<fs::path> mDeleteList;

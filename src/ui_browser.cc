@@ -56,7 +56,7 @@ enum sort_method_e
 };
 
 
-bool Texture_MatchPattern(const char *tex, const char *pattern)
+static bool Texture_MatchPattern(const char *tex, const char *pattern)
 {
 	// Note: an empty pattern matches NOTHING
 
@@ -336,6 +336,7 @@ UI_Browser_Box::UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const
 	search->align(FL_ALIGN_LEFT);
 	search->callback(search_callback, this);
 	search->when(FL_WHEN_CHANGED);
+	search->tooltip("Wildcards accepted");
 
 	add(search);
 
@@ -561,8 +562,8 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 		if (cat == '^')
 			return (item->recent_idx >= 0);
 
-		if (! (cat == tolower(item->category) ||
-			   (cat == 'X' && isupper(item->category))))
+		if (! (cat == safe_tolower(item->category) ||
+			   (cat == 'X' && safe_isupper(item->category))))
 			return false;
 	}
 
@@ -575,6 +576,13 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 
 	if (isGraphicsMode(kind))
 		return Texture_MatchPattern(item->real_name.c_str(), pattern);
+
+	// For things in sprite/pic mode, search both sprite name (desc) and thing description (real_name)
+	if (kind == BrowserMode::things && pic_mode)
+	{
+		return Texture_MatchPattern(item->desc.c_str(), pattern) ||
+		       Texture_MatchPattern(item->real_name.c_str(), pattern);
+	}
 
 	return Texture_MatchPattern(item->desc.c_str(), pattern);
 }
@@ -636,14 +644,14 @@ static int SortCmp(const Browser_Item *A, const Browser_Item *B, sort_method_e m
 	// Alphabetical in LINEDEF mode, skip trigger type (SR etc)
 	if (method == SOM_AlphaSkip)
 	{
-		while (isspace(*sa)) sa++;
-		while (isspace(*sb)) sb++;
+		while (safe_isspace(*sa)) sa++;
+		while (safe_isspace(*sb)) sb++;
 
 		if (sa[0] && sa[1] && sa[2] == ' ')
-			while (! isspace(*sa)) sa++;
+			while (! safe_isspace(*sa)) sa++;
 
 		if (sb[0] && sb[1] && sb[2] == ' ')
-			while (! isspace(*sb)) sb++;
+			while (! safe_isspace(*sb)) sb++;
 	}
 
 	return strcmp(sa, sb);
@@ -728,7 +736,7 @@ SString TidyLineDesc(const char *name)
 }
 
 
-void UI_Browser_Box::Populate_Images(BrowserMode imkind, const std::map<SString, Img_c *> & img_list)
+void UI_Browser_Box::Populate_Images(BrowserMode imkind, const std::map<SString, Img_c> & img_list)
 {
 	/* Note: the side-by-side packing is done in Filter() method */
 
@@ -738,7 +746,7 @@ void UI_Browser_Box::Populate_Images(BrowserMode imkind, const std::map<SString,
 	scroll->resize_horiz(false);
 	scroll->Line_size(98);
 
-	std::map<SString, Img_c *>::const_iterator TI;
+	std::map<SString, Img_c>::const_iterator TI;
 
 	int cx = scroll->x() + SBAR_W;
 	int cy = scroll->y();
@@ -749,24 +757,24 @@ void UI_Browser_Box::Populate_Images(BrowserMode imkind, const std::map<SString,
 	{
 		const SString &name = TI->first;
 
-		Img_c *image = TI->second;
+		const Img_c &image = TI->second;
 
 		if ((false)) /* NO PICS */
 			snprintf(full_desc, sizeof(full_desc), "%-8s : %3dx%d", name.c_str(),
-					 image->width(), image->height());
+					 image.width(), image.height());
 		else
 			snprintf(full_desc, sizeof(full_desc), "%-8s", name.c_str());
 
-		int pic_w = (kind == BrowserMode::flats || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
-		int pic_h = (kind == BrowserMode::flats) ? 64 : std::min(128, std::max(4, image->height()));
+		int pic_w = (kind == BrowserMode::flats || image.width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
+		int pic_h = (kind == BrowserMode::flats) ? 64 : std::min(128, std::max(4, image.height()));
 
 		if (config::browser_small_tex && imkind == BrowserMode::textures)
 		{
 			pic_w = 64;
-			pic_h = std::min(64, std::max(4, image->height()));
+			pic_h = std::min(64, std::max(4, image.height()));
 		}
 
-		if (image->width() >= 256 && image->height() == 128)
+		if (image.width() >= 256 && image.height() == 128)
 		{
 			pic_w = 128;
 			pic_h = 64;
@@ -832,10 +840,17 @@ void UI_Browser_Box::Populate_Sprites()
 		if (y_stricmp(info.sprite.c_str(), "NULL") == 0)
 			continue;
 
-		if (alpha->value() == 0)
+		SString fullName;	// This will contain the information not shown on the GUI, for searching
+		if(alpha->value() == 0)
+		{
 			snprintf(full_desc, sizeof(full_desc), "%d", TI->first);
+			fullName = SString::printf("%s %s", info.sprite.c_str(), info.desc.c_str());
+		}
 		else
+		{
 			snprintf(full_desc, sizeof(full_desc), "%s", info.sprite.c_str());
+			fullName = SString::printf("%d %s", TI->first, info.desc.c_str());
+		}
 
 		int pic_w = 64;
 		int pic_h = 72;
@@ -848,10 +863,11 @@ void UI_Browser_Box::Populate_Sprites()
 		pic->GetSprite(TI->first, FL_BLACK);
 
 		Browser_Item *item = new Browser_Item(inst, cx, cy, item_w, item_h,
-		                                      full_desc, "", TI->first,
+		                                      full_desc, fullName, TI->first,
 											  kind, info.group,
 		                                      pic_w, pic_h, pic);
 
+		item->copy_tooltip(info.desc.c_str());
 		pic->callback(Browser_Item::thing_callback, item);
 
 		scroll->Add(item);
@@ -1182,21 +1198,21 @@ void UI_Browser_Box::ToggleRecent(bool force_recent)
 class UI_Generalized_Item : public Fl_Choice
 {
 public:
-	const generalized_field_t * field;
+	const generalized_field_t field;
 
 public:
 	UI_Generalized_Item(int X, int Y, int W, int H,
 						const generalized_field_t *_field) :
 		Fl_Choice(X, Y, W, H, ""),
-		field(_field)
+		field(*_field)
 	{
 		char label_buf[256];
 
-		snprintf(label_buf, sizeof(label_buf), "%s: ", field->name.c_str());
+		snprintf(label_buf, sizeof(label_buf), "%s: ", field.name.c_str());
 
 		copy_label(label_buf);
 
-		for (const auto &keyword : field->keywords)
+		for (const auto &keyword : field.keywords)
 		{
 			add(keyword.c_str());
 		}
@@ -1209,17 +1225,17 @@ public:
 
 	int Compute() const
 	{
-		return (value() << field->shift) & field->mask;
+		return (value() << field.shift) & field.mask;
 	}
 
 	void Decode(int line_type)
 	{
-		value((line_type & field->mask) >> field->shift);
+		value((line_type & field.mask) >> field.shift);
 	}
 
 	void Reset()
 	{
-		int def_val = clamp(0, field->default_val, static_cast<int>(field->keywords.size()) - 1);
+		int def_val = clamp(0, field.default_val, static_cast<int>(field.keywords.size()) - 1);
 
 		value(def_val);
 	}
@@ -1883,7 +1899,7 @@ bool UI_Browser_Box::ParseUser(const std::vector<SString> &tokens)
 void UI_Browser_Box::WriteUser(std::ostream &os)
 {
 	char cat = cat_letters[category->value()];
-	if(isprint(cat))
+	if(safe_isprint(cat))
 		os << "browser " << browserModeToChar(kind) << " cat " << cat << '\n';
 	if(alpha)
 		os << "browser " << browserModeToChar(kind) << " sort " << static_cast<int>(1 - alpha->value()) << '\n';

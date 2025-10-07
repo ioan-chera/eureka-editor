@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -64,7 +64,7 @@ static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, i
 		g = (g * map) >> 5;
 		b = (b * map) >> 5;
 
-		return static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
+		return pixelMakeRGB(r, g, b);
 	}
 	else
 	{
@@ -87,7 +87,7 @@ public:
 	// heights for the surface (h1 is below h2)
 	int h1, h2, tex_h;
 
-	Img_c *img;
+	const Img_c *img;
 	img_pixel_t col;  /* used when no image */
 
 	enum
@@ -110,7 +110,7 @@ public:
 	~DrawSurf()
 	{ }
 
-	void FindFlat(const SString & fname, Sector *sec)
+	void FindFlat(const SString & fname)
 	{
 		fullbright = false;
 
@@ -127,7 +127,7 @@ public:
 
 			if (! img)
 			{
-				img = inst.wad.images.IM_UnknownFlat(inst.conf);
+				img = &inst.wad.images.IM_UnknownFlat(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -149,13 +149,13 @@ public:
 		{
 			if (is_null_tex(tname))
 			{
-				img = inst.wad.images.IM_MissingTex(inst.conf);
+				img = &inst.wad.images.IM_MissingTex(inst.conf);
 				fullbright = config::render_missing_bright;
 				return;
 			}
 			else if (is_special_tex(tname))
 			{
-				img = inst.wad.images.IM_SpecialTex(inst.wad.palette);
+				img = &inst.wad.images.IM_SpecialTex(inst.wad.palette);
 				return;
 			}
 
@@ -163,7 +163,7 @@ public:
 
 			if (! img)
 			{
-				img = inst.wad.images.IM_UnknownTex(inst.conf);
+				img = &inst.wad.images.IM_UnknownTex(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -190,7 +190,7 @@ public:
 
 	LineDef *ld;
 	SideDef *sd;
-	Sector *sec;
+	const Sector *sec;
 
 	// which side this wall faces (SIDE_LEFT or SIDE_RIGHT)
 	// for sprites: a copy of the thinginfo flags
@@ -270,10 +270,10 @@ public:
 				int ax = static_cast<int>(inst.level.vertices[A_other]->x());
 				int ay = static_cast<int>(inst.level.vertices[A_other]->y());
 
-				int bx1 = static_cast<int>(B->ld->Start(inst.level)->x());
-				int by1 = static_cast<int>(B->ld->Start(inst.level)->y());
-				int bx2 = static_cast<int>(B->ld->End(inst.level)->x());
-				int by2 = static_cast<int>(B->ld->End(inst.level)->y());
+				int bx1 = static_cast<int>(inst.level.getStart(*B->ld).x());
+				int by1 = static_cast<int>(inst.level.getStart(*B->ld).y());
+				int bx2 = static_cast<int>(inst.level.getEnd(*B->ld).x());
+				int by2 = static_cast<int>(inst.level.getEnd(*B->ld).y());
 
 				int cx = (int)inst.r_view.x;  // camera
 				int cy = (int)inst.r_view.y;
@@ -287,8 +287,8 @@ public:
 		else if (A->th >= 0 && B->th >= 0)
 		{
 			// prevent two things at same location from flickering
-			const Thing *const TA = inst.level.things[A->th];
-			const Thing *const TB = inst.level.things[B->th];
+			const auto TA = inst.level.things[A->th];
+			const auto TB = inst.level.things[B->th];
 
 			if (TA->raw_x == TB->raw_x && TA->raw_y == TB->raw_y)
 				return A->th > B->th;
@@ -339,7 +339,7 @@ public:
 
 	/* methods */
 
-	Sector *Boom242Sector(Sector *real, Sector *temp, const Sector *dummy)
+	const Sector *Boom242Sector(const Sector *real, Sector *temp, const Sector *dummy)
 	{
 		*temp = *real;
 
@@ -374,12 +374,12 @@ public:
 
 	void ComputeWallSurface()
 	{
-		Sector *front = sec;
-		Sector *back  = NULL;
+		const Sector *front = sec;
+		const Sector *back  = NULL;
 
-		SideDef *back_sd = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
+		SideDef *back_sd = (side == Side::left) ? inst.level.getRight(*ld) : inst.level.getLeft(*ld);
 		if (back_sd)
-			back = inst.level.sectors[back_sd->sector];
+			back = inst.level.sectors[back_sd->sector].get();
 
 		// support for BOOM's 242 "transfer heights" line type
 		Sector temp_front;
@@ -388,8 +388,8 @@ public:
 		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sd->sector);
 		if (exfloor->heightsec >= 0)
 		{
-			const Sector *dummy = inst.level.sectors[exfloor->heightsec];
-			front = Boom242Sector(front, &temp_front, dummy);
+			const auto dummy = inst.level.sectors[exfloor->heightsec];
+			front = Boom242Sector(front, &temp_front, dummy.get());
 		}
 
 		if (back != NULL)
@@ -397,8 +397,8 @@ public:
 			exfloor = inst.Subdiv_3DFloorsForSector(back_sd->sector);
 			if (exfloor->heightsec >= 0)
 			{
-				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
-				back = Boom242Sector(back, &temp_back, dummy);
+				const auto dummy = inst.level.sectors[exfloor->heightsec];
+				back = Boom242Sector(back, &temp_back, dummy.get());
 			}
 		}
 
@@ -414,7 +414,7 @@ public:
 			ceil.tex_h = ceil.h1;
 			ceil.y_clip = DrawSurf::SOLID_ABOVE;
 
-			ceil.FindFlat(front->CeilTex(), front);
+			ceil.FindFlat(front->CeilTex());
 		}
 
 		if (front->floorh < inst.r_view.z && ! self_ref)
@@ -425,7 +425,7 @@ public:
 			floor.tex_h = floor.h2;
 			floor.y_clip = DrawSurf::SOLID_BELOW;
 
-			floor.FindFlat(front->FloorTex(), front);
+			floor.FindFlat(front->FloorTex());
 		}
 
 		if (! back)
@@ -498,7 +498,7 @@ public:
 			return;
 
 		front = sec;
-		back  = inst.level.sectors[back_sd->sector];
+		back  = inst.level.sectors[back_sd->sector].get();
 
 		int c_h = std::min(front->ceilh,  back->ceilh);
 		int f_h = std::max(front->floorh, back->floorh);
@@ -717,18 +717,18 @@ public:
 
 	void AddLine(int ld_index)
 	{
-		LineDef *ld = inst.level.linedefs[ld_index];
+		const auto ld = inst.level.linedefs[ld_index];
 
 		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
 			return;
 
-		if (! ld->Right(inst.level))
+		if (! inst.level.getRight(*ld))
 			return;
 
-		float x1 = static_cast<float>(ld->Start(inst.level)->x() - inst.r_view.x);
-		float y1 = static_cast<float>(ld->Start(inst.level)->y() - inst.r_view.y);
-		float x2 = static_cast<float>(ld->End(inst.level)->x() - inst.r_view.x);
-		float y2 = static_cast<float>(ld->End(inst.level)->y() - inst.r_view.y);
+		float x1 = static_cast<float>(inst.level.getStart(*ld).x() - inst.r_view.x);
+		float y1 = static_cast<float>(inst.level.getStart(*ld).y() - inst.r_view.y);
+		float x2 = static_cast<float>(inst.level.getEnd(*ld).x() - inst.r_view.x);
+		float y2 = static_cast<float>(inst.level.getEnd(*ld).y() - inst.r_view.y);
 
 		float tx1 = static_cast<float>(x1 * inst.r_view.Sin - y1 * inst.r_view.Cos);
 		float ty1 = static_cast<float>(x1 * inst.r_view.Cos + y1 * inst.r_view.Sin);
@@ -752,7 +752,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		SideDef *sd = (side == Side::left) ? ld->Left(inst.level) : ld->Right(inst.level);
+		SideDef *sd = (side == Side::left) ? inst.level.getLeft(*ld) : inst.level.getRight(*ld);
 
 		if (! sd)
 			return;
@@ -835,20 +835,20 @@ public:
 		DrawWall *dw = new DrawWall(inst);
 
 		dw->th = -1;
-		dw->ld = ld;
+		dw->ld = ld.get();
 		dw->ld_index = ld_index;
 
 		dw->sd = sd;
-		dw->sec = sd->SecRef(inst.level);
+		dw->sec = &inst.level.getSector(*sd);
 		dw->side = side;
 		dw->thingFlags = 0;
 
 		dw->wall_light = dw->sec->light;
 
 		// add "fake constrast" for axis-aligned walls
-		if (ld->IsVertical(inst.level))
+		if (inst.level.isVertical(*ld))
 			dw->wall_light += 16;
-		else if (ld->IsHorizontal(inst.level))
+		else if (inst.level.isHorizontal(*ld))
 			dw->wall_light -= 16;
 
 		dw->delta_ang = angle1 + XToAngle(sx1) - normal;
@@ -870,9 +870,9 @@ public:
 
 	void AddThing(int th_index)
 	{
-		Thing *th = inst.level.things[th_index];
+		const auto th = inst.level.things[th_index];
 
-		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
+		const thingtype_t &info = inst.conf.getThingType(th->type);
 
 		float x = static_cast<float>(th->x() - inst.r_view.x);
 		float y = static_cast<float>(th->y() - inst.r_view.y);
@@ -888,10 +888,10 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *sprite = inst.wad.W_GetSprite(inst.conf, th->type);
+		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type, inst.loaded, Render3D_CalcRotation(inst.r_view.angle, th->angle));
 		if (! sprite)
 		{
-			sprite = inst.wad.images.IM_UnknownSprite(inst.conf);
+			sprite = &inst.wad.images.IM_UnknownSprite(inst.conf);
 			is_unknown = true;
 			scale = 0.33f;
 		}
@@ -925,8 +925,8 @@ public:
 			sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(thsec);
 			if (inst.level.isSector(exfloor->heightsec))
 			{
-				const Sector *real  = inst.level.sectors[thsec];
-				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
+				const auto real  = inst.level.sectors[thsec];
+				const auto dummy = inst.level.sectors[exfloor->heightsec];
 
 				if (dummy->floorh > real->floorh &&
 					inst.r_view.z > dummy->floorh &&
@@ -1037,22 +1037,22 @@ public:
 
 		if (dw->ld->TwoSided())
 		{
-			const Sector *front = dw->ld->Right(inst.level)->SecRef(inst.level);
-			const Sector *back  = dw->ld-> Left(inst.level)->SecRef(inst.level);
+			const Sector &front = inst.level.getSector(*inst.level.getRight(*dw->ld));
+			const Sector &back  = inst.level.getSector(*inst.level.getLeft(*dw->ld));
 
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
-				z1 = std::min(front->floorh, back->floorh);
-				z2 = std::max(front->floorh, back->floorh);
+				z1 = std::min(front.floorh, back.floorh);
+				z2 = std::max(front.floorh, back.floorh);
 			}
 			else if (part & (PART_RT_UPPER | PART_LF_UPPER))
 			{
-				z1 = std::min(front->ceilh, back->ceilh);
-				z2 = std::max(front->ceilh, back->ceilh);
+				z1 = std::min(front.ceilh, back.ceilh);
+				z2 = std::max(front.ceilh, back.ceilh);
 			}
 			else
 			{
-				if (! inst.LD_RailHeights(z1, z2, dw->ld, dw->sd, front, back))
+				if (! inst.LD_RailHeights(z1, z2, dw->ld, dw->sd, &front, &back))
 					return;
 			}
 		}
@@ -1061,8 +1061,8 @@ public:
 			if (0 == (part & (PART_RT_LOWER | PART_LF_LOWER)))
 				return;
 
-			z1 = dw->sd->SecRef(inst.level)->floorh;
-			z2 = dw->sd->SecRef(inst.level)->ceilh;
+			z1 = inst.level.getSector(*dw->sd).floorh;
+			z2 = inst.level.getSector(*dw->sd).ceilh;
 		}
 
 		int x1 = dw->sx1;
@@ -1146,7 +1146,7 @@ public:
 
 	void HighlightSectorBit(const DrawWall *dw, int sec_index, int part)
 	{
-		const Sector *S = inst.level.sectors[sec_index];
+		const auto S = inst.level.sectors[sec_index];
 
 		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 
@@ -1190,7 +1190,7 @@ public:
 
 			if (sec_index >= 0)
 			{
-				if (! dw->ld->TouchesSector(sec_index, inst.level))
+				if (! inst.level.touchesSector(*dw->ld, sec_index))
 					continue;
 
 				// Note: hl_color already set by caller
@@ -1208,8 +1208,8 @@ public:
 
 			for (int what_side = 0 ; what_side < 2 ; what_side++)
 			{
-				const SideDef *sd_front = dw->ld->Right(inst.level);
-				const SideDef *sd_back  = dw->ld->Left(inst.level);
+				const SideDef *sd_front = inst.level.getRight(*dw->ld);
+				const SideDef *sd_back  = inst.level.getLeft(*dw->ld);
 
 				if (sd_front && sd_back && sd_front == sd_back)
 					break;
@@ -1283,7 +1283,7 @@ public:
 				float dy = static_cast<float>(inst.edit.drag_cur.y - inst.edit.drag_start.y);
 				float dz = static_cast<float>(inst.edit.drag_cur.z - inst.edit.drag_start.z);
 
-				const Thing *T = inst.level.things[dw->th];
+				const auto T = inst.level.things[dw->th];
 
 				float x = static_cast<float>(T->x() + dx - inst.r_view.x);
 				float y = static_cast<float>(T->y() + dy - inst.r_view.y);
@@ -1294,7 +1294,7 @@ public:
 				if (ty < 1) ty = 1;
 
 				float scale   = dw->normal;
-				Img_c *sprite = dw->ceil.img;
+				const Img_c *sprite = dw->ceil.img;
 
 				float tx1 = static_cast<float>(tx - sprite->width() * scale / 2.0);
 				float tx2 = static_cast<float>(tx + sprite->width() * scale / 2.0);
@@ -1409,7 +1409,7 @@ public:
 			if (! dw)
 				continue;
 
-			int one_sided = dw->ld && ! dw->ld->Left(inst.level);
+			int one_sided = dw->ld && ! inst.level.getLeft(*dw->ld);
 			int vis_count = dw->sx2 - dw->sx1 + 1;
 
 			for (int x = dw->sx1 ; x <= dw->sx2 ; x++)
@@ -2048,12 +2048,12 @@ public:
 
 static void BlitHires(const Instance &inst, int ox, int oy, int ow, int oh)
 {
-	u8_t *line_rgb = new u8_t[inst.r_view.screen_w * 3];
+	uint8_t *line_rgb = new uint8_t[inst.r_view.screen_w * 3];
 
 	for (int ry = 0 ; ry < inst.r_view.screen_h ; ry++)
 	{
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + inst.r_view.screen_w * 3;
+		uint8_t *dest = line_rgb;
+		uint8_t *dest_end = line_rgb + inst.r_view.screen_w * 3;
 
 		const img_pixel_t *src = inst.r_view.screen + ry * inst.r_view.screen_w;
 
@@ -2071,14 +2071,14 @@ static void BlitHires(const Instance &inst, int ox, int oy, int ow, int oh)
 static void BlitLores(const Instance &inst, int ox, int oy, int ow, int oh)
 {
 	// if destination width is odd, we store an extra pixel here
-	u8_t *line_rgb = new u8_t[(ow + 1) * 3];
+	uint8_t *line_rgb = new uint8_t[(ow + 1) * 3];
 
 	for (int ry = 0 ; ry < inst.r_view.screen_h ; ry++)
 	{
 		const img_pixel_t *src = inst.r_view.screen + ry * inst.r_view.screen_w;
 
-		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + ow * 3;
+		uint8_t *dest = line_rgb;
+		uint8_t *dest_end = line_rgb + ow * 3;
 
 		for (; dest < dest_end ; dest += 6, src++)
 		{

@@ -34,11 +34,6 @@ TEST(MStrings, YStricmp)
 	ASSERT_EQ(y_stricmp("", ""), 0);
 }
 
-TEST(MStringsDeath, StringNew)
-{
-	ASSERT_DEATH(Fatal([]{ StringNew(-1); }), "Assertion");
-}
-
 TEST(MStrings, StringDup)
 {
 	const char original[] = "Michael";
@@ -317,6 +312,7 @@ TEST(SString, Escape)
 	ASSERT_EQ(SString("OneWord").spaceEscape(), "OneWord");
 	ASSERT_EQ(SString("One Word").spaceEscape(), "\"One Word\"");
 	ASSERT_EQ(SString("One\"Word").spaceEscape(), "\"One\"\"Word\"");
+	ASSERT_EQ(SString("One\"Word").spaceEscape(true), "\"One\\\"Word\"");
 	ASSERT_EQ(SString("One \"Ripper\" Word").spaceEscape(), "\"One \"\"Ripper\"\" Word\"");
 	ASSERT_EQ(SString("").spaceEscape(), "\"\"");
 

@@ -38,15 +38,15 @@ TEST_F(SysDebugTempDir, LifeCycle)
 
     Log log;
 
-    fs::path path = getChildPath("log.txt");
+    fs::path path = getSubPath("log.txt");
     log.printf("Test message\n");
     log.printf("Here it goes\n");
     log.debugPrintf("No text\n");
-    ASSERT_TRUE(log.openFile(path.u8string()));
+    ASSERT_TRUE(log.openFile(path));
     mDeleteList.push(path);
     log.printf("One more message\n");
 
-    fs::path savedPath = getChildPath("log2.txt");
+    fs::path savedPath = getSubPath("log2.txt");
     std::ofstream os(savedPath, std::ios::trunc);
     ASSERT_TRUE(os.is_open());
     mDeleteList.push(savedPath);
@@ -138,7 +138,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     os.close();
 
 
-    log.openFile(path.u8string());
+    log.openFile(path);
     log.debugPrintf("Debug writeout\n");
     log.printf("Extra stuff four\n");
     log.debugPrintf("Debug\nwriteout2\n");

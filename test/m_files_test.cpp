@@ -44,17 +44,17 @@ protected:
 TEST_F(EurekaLumpFixture, WriteEurekaLump)
 {
 	static const char wadpathbase[] = "first/wad.wad";
-	fs::path wadpath(getChildPath(wadpathbase));
+	fs::path wadpath(getSubPath(wadpathbase));
 	// Set up a nested directory WAD so we can test relative paths to resources
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(wadpath.u8string(), WadOpenMode::write);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(wadpath, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
 	loaded.gameName = "Mood";	// just pick two random names
 	loaded.portName = "Voom";
-	loaded.resourceList.push_back(getChildPath(fs::path("first") / "res.png"));	// same path
-	loaded.resourceList.push_back(getChildPath(fs::path("first") / "deep" / "call.txt"));	// child path
-	loaded.resourceList.push_back(getChildPath("upper.txt"));		// upper path
-	loaded.resourceList.push_back(getChildPath(fs::path("second") / "music.mid"));	// sibling path
+	loaded.resourceList.push_back(getSubPath(fs::path("first") / "res.png"));	// same path
+	loaded.resourceList.push_back(getSubPath(fs::path("first") / "deep" / "call.txt"));	// child path
+	loaded.resourceList.push_back(getSubPath("upper.txt"));		// upper path
+	loaded.resourceList.push_back(getSubPath(fs::path("second") / "music.mid"));	// sibling path
 
 	// In case of Windows, also check different drive letter
 	fs::path wadpathobj = fs::path(wadpath.c_str());
@@ -69,16 +69,17 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 		loaded.resourceList.push_back(otherpath);
 	}
 
-	loaded.writeEurekaLump(wad.get());
+	loaded.writeEurekaLump(*wad.get());
 
 	Lump_c *lump = wad->FindLump(EUREKA_LUMP);
 	ASSERT_TRUE(lump);
 
 	// Now read the data
 	// Expected content is:
-	SString expected = 
+	SString expected =
 		"# Eureka project info\n"
 		"game Mood\n"
+		"testing_command_line \"\"\n"
 		"port Voom\n"
 		"resource res.png\n"
 		"resource deep/call.txt\n"
@@ -91,22 +92,20 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 		expected += otherdriveletter;
 		expected += ":/other/path\n";
 	}
-	SString content(static_cast<const char *>(lump->getData()), lump->Length());
+	SString content(reinterpret_cast<const char *>(lump->getData().data()), lump->Length());
 	ASSERT_EQ(content, expected);
 
 	// Now make a change: remove port and resources, see that the lump is updated (not deleted).
 	// Add a couple of lumps before and after before doing it, to see how it gets updated alone.
 	wad->InsertPoint(0);
-	Lump_c *beforelump = wad->AddLump("BEFORE");
-	ASSERT_TRUE(beforelump);
+	wad->AddLump("BEFORE");
 	wad->InsertPoint();
-	Lump_c *lastlump = wad->AddLump("LAST");
-	ASSERT_TRUE(lastlump);
+	wad->AddLump("LAST");
 	ASSERT_EQ(wad->NumLumps(), 3);
 
 	loaded.portName.clear();
 	loaded.resourceList.clear();
-	loaded.writeEurekaLump(wad.get());
+	loaded.writeEurekaLump(*wad.get());
 
 	// Check we still have 3 lumps
 	ASSERT_EQ(wad->NumLumps(), 3);
@@ -117,9 +116,10 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	static const char expected2[] = {
 		"# Eureka project info\n"
 		"game Mood\n"
+		"testing_command_line \"\"\n"
 	};
 	lump = wad->GetLump(2);
-	content = SString(static_cast<const char *>(lump->getData()), lump->Length());
+	content = SString(reinterpret_cast<const char *>(lump->getData().data()), lump->Length());
 	ASSERT_EQ(content, expected2);
 }
 
@@ -139,6 +139,9 @@ protected:
 
 	std::shared_ptr<Wad_file> wad;
 	LoadingData loading;
+
+	fs::path home_dir, old_home_dir, install_dir;
+	RecentKnowledge recent;
 };
 
 //
@@ -148,7 +151,7 @@ void ParseEurekaLumpFixture::SetUp()
 {
 	TempDirContext::SetUp();
 
-	wad = Wad_file::Open(getChildPath("wad.wad").u8string(), WadOpenMode::write);
+	wad = Wad_file::Open(getSubPath("wad.wad"), WadOpenMode::write);
 	ASSERT_TRUE(wad);
 }
 
@@ -157,9 +160,6 @@ void ParseEurekaLumpFixture::SetUp()
 //
 void ParseEurekaLumpFixture::TearDown()
 {
-	global::home_dir.clear();
-	global::install_dir.clear();
-	global::recent.known_iwads.clear();
 	DLG_Notify_Override = nullptr;
 	DLG_Confirm_Override = nullptr;
 
@@ -200,9 +200,9 @@ void ParseEurekaLumpFixture::assertEmptyLoading() const
 //
 void ParseEurekaLumpFixture::prepareHomeDir()
 {
-	global::home_dir = getChildPath("home");
-	ASSERT_TRUE(FileMakeDir(global::home_dir));
-	mDeleteList.push(global::home_dir);
+	home_dir = getSubPath("home");
+	ASSERT_TRUE(FileMakeDir(home_dir));
+	mDeleteList.push(home_dir);
 }
 
 //
@@ -210,7 +210,7 @@ void ParseEurekaLumpFixture::prepareHomeDir()
 //
 fs::path ParseEurekaLumpFixture::makeGamesDir()
 {
-	fs::path gamesDir = global::home_dir / "games";
+	fs::path gamesDir = home_dir / "games";
 	EXPECT_TRUE(FileMakeDir(gamesDir));
 	mDeleteList.push(gamesDir);
 	return gamesDir;
@@ -231,31 +231,28 @@ void ParseEurekaLumpFixture::makeGame(const fs::path &gamesDir, const char *ughN
 TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 {
 	// Safe on empty wad
-	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	assertEmptyLoading();
 
 	// Safe on wad with some lumps
-	Lump_c *lump1 = wad->AddLump("LUMP1");
-	ASSERT_TRUE(lump1);
-	lump1->Printf("Data 1");
+	Lump_c &lump1 = wad->AddLump("LUMP1");
+	lump1.Printf("Data 1");
 
-	Lump_c *lump2 = wad->AddLump("LUMP2");
-	ASSERT_TRUE(lump2);
-	lump2->Printf("Data 2");
+	Lump_c &lump2 = wad->AddLump("LUMP2");
+	lump2.Printf("Data 2");
 
 	ASSERT_EQ(wad->NumLumps(), 2);
 
-	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	assertEmptyLoading();
 }
 
 TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 {
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
-	ASSERT_TRUE(eureka);
-	eureka->Printf("game emag\n");	// have a game name there
-	eureka->Printf("invalid syntax here\n");
-	eureka->Printf("port trop\n");	// add something else to check how we go
+	Lump_c &eureka = wad->AddLump(EUREKA_LUMP);
+	eureka.Printf("game emag\n");	// have a game name there
+	eureka.Printf("invalid syntax here\n");
+	eureka.Printf("port trop\n");	// add something else to check how we go
 
 	// Situation 1: home, install dir unset
 	// Prerequisite: set the DLG_Confirm override
@@ -277,7 +274,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	};
 
 	// Decide to keep trying, but nothing to get
-	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_TRUE(gameWarning);
@@ -286,7 +283,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 	// Situation 2: same, but with cancelling
 	decision = 1;
-	ASSERT_FALSE(loading.parseEurekaLump(wad.get()));
+	ASSERT_FALSE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 
 	// Situation 3: add home dir
 	prepareHomeDir();
@@ -295,7 +292,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	// but no emag.ugh: same problem
 	decision = 0;	// no ignore
 	gameWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_TRUE(gameWarning);
@@ -306,7 +303,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	makeGame(gamesDir, "emag.ugh");
 
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
@@ -314,12 +311,12 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	ASSERT_TRUE(portWarning);
 
 	// Situation 5: now add the IWAD
-	fs::path iwadPath = getChildPath("emag.wad");
-	M_AddKnownIWAD(iwadPath, global::recent.known_iwads);	// NOTE: no need to add file
+	fs::path iwadPath = getSubPath("emag.wad");
+	recent.addIWAD(iwadPath);	// NOTE: no need to add file
 
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
@@ -327,17 +324,17 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	ASSERT_TRUE(portWarning);
 
 	// Situation 6: now remove the home dir to see it won't be found
-	fs::path goodHomeDir = global::home_dir;
-	global::home_dir.clear();
+	fs::path goodHomeDir = home_dir;
+	home_dir.clear();
 	decision = 1;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_FALSE(loading.parseEurekaLump(wad.get()));
+	ASSERT_FALSE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 
 	// Situation 7: set the install dir instead
-	global::install_dir = goodHomeDir;
+	install_dir = goodHomeDir;
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
@@ -345,8 +342,8 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	ASSERT_TRUE(portWarning);
 
 	// Situation 8: add port
-	global::home_dir = global::install_dir;
-	fs::path portsDir = global::home_dir / "ports";
+	home_dir = install_dir;
+	fs::path portsDir = home_dir / "ports";
 	ASSERT_TRUE(FileMakeDir(portsDir));
 	mDeleteList.push(portsDir);
 	fs::path tropPath = portsDir / "trop.ugh";
@@ -356,7 +353,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	mDeleteList.push(tropPath);
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get()));
 	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_EQ(loading.portName, "trop");
 	ASSERT_FALSE(gameWarning);
@@ -366,20 +363,19 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 TEST_F(ParseEurekaLumpFixture, TryResources)
 {
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
-	ASSERT_TRUE(eureka);
-	eureka->Printf("game doom\n");
-	eureka->Printf("resource samepath.wad\n");
-	eureka->Printf("resource samepath.wad\n");	// repeat so we check we don't add it again
-	eureka->Printf("resource bogus/subpath.wad\n");
-	eureka->Printf("resource iwadpath.wad\n");
-	eureka->Printf("resource nopath.wad\n");
-	eureka->Printf("resource %s\n", getChildPath(fs::path("abs") / "abspath.wad").u8string().c_str());
-	eureka->Printf("resource \n");	// add something else to check how we go
+	Lump_c &eureka = wad->AddLump(EUREKA_LUMP);
+	eureka.Printf("game doom\n");
+	eureka.Printf("resource samepath.wad\n");
+	eureka.Printf("resource samepath.wad\n");	// repeat so we check we don't add it again
+	eureka.Printf("resource bogus/subpath.wad\n");
+	eureka.Printf("resource iwadpath.wad\n");
+	eureka.Printf("resource nopath.wad\n");
+	eureka.Printf("resource %s\n", getSubPath(fs::path("abs") / "abspath.wad").u8string().c_str());
+	eureka.Printf("resource \n");	// add something else to check how we go
 
 	auto makesubfile = [this](const char *path)
 	{
-		fs::path filepath = getChildPath(path);
+		fs::path filepath = getSubPath(path);
 		FILE *f = fopen(filepath.u8string().c_str(), "wb");
 		ASSERT_TRUE(f);
 		fclose(f);
@@ -390,10 +386,10 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	makesubfile("subpath.wad");
 
 	// Prepare the IWAD
-	fs::path path = getChildPath("iwad");
+	fs::path path = getSubPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	M_AddKnownIWAD(getChildPath(fs::path("iwad") / "doom.wad"), global::recent.known_iwads);
+	recent.addIWAD(getSubPath(fs::path("iwad") / "doom.wad"));
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
@@ -403,7 +399,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	makesubfile("iwad/iwadpath.wad");
 
 	// And add the absolute subpath
-	path = getChildPath("abs");
+	path = getSubPath("abs");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
 	makesubfile("abs/abspath.wad");
@@ -417,7 +413,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 		errmsg = SString::vprintf(message, ap);
 	};
 
-	loading.parseEurekaLump(wad.get());
+	loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get());
 
 	// Check that the sole error message we get is about nopath.wad
 	ASSERT_EQ(errorcount, 1);
@@ -428,37 +424,36 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	const auto &res = loading.resourceList;
 
 	// Now check we have the resources, with their correct paths
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("samepath.wad")), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("subpath.wad")), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("iwad") / "iwadpath.wad")), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("abs") / "abspath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getSubPath("samepath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getSubPath("subpath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getSubPath(fs::path("iwad") / "iwadpath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getSubPath(fs::path("abs") / "abspath.wad")), res.end());
 }
 
 TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 {
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
-	ASSERT_TRUE(eureka);
-	eureka->Printf("game doom\n");
-	eureka->Printf("resource samename.wad\n");
-	eureka->Printf("resource sub/SameName.Wad\n");	// repeat so we check we don't add it again
-	eureka->Printf("resource othername.wad\n");
+	Lump_c &eureka = wad->AddLump(EUREKA_LUMP);
+	eureka.Printf("game doom\n");
+	eureka.Printf("resource samename.wad\n");
+	eureka.Printf("resource sub/SameName.Wad\n");	// repeat so we check we don't add it again
+	eureka.Printf("resource othername.wad\n");
 
 	// Make the files
 	std::ofstream stream;
-	fs::path path = getChildPath("samename.wad");
+	fs::path path = getSubPath("samename.wad");
 	stream.open(path);
 	ASSERT_TRUE(stream.is_open());
 	stream.close();
 	mDeleteList.push(path);
-	path = getChildPath("sub");
+	path = getSubPath("sub");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	path = getChildPath("sub/SameName.Wad");
+	path = getSubPath("sub/SameName.Wad");
 	stream.open(path);
 	ASSERT_TRUE(stream.is_open());
 	stream.close();
 	mDeleteList.push(path);
-	path = getChildPath("othername.wad");
+	path = getSubPath("othername.wad");
 	stream.open(path);
 	ASSERT_TRUE(stream.is_open());
 	stream.close();
@@ -466,41 +461,40 @@ TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 	stream.close();
 
 	// Prepare the IWAD
-	path = getChildPath("iwad");
+	path = getSubPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	M_AddKnownIWAD(getChildPath("iwad/doom.wad"), global::recent.known_iwads);
+	recent.addIWAD(getSubPath("iwad/doom.wad"));
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
 	makeGame(makeGamesDir(), "doom.ugh");
 
-	loading.parseEurekaLump(wad.get());
+	loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get());
 	ASSERT_EQ(loading.resourceList.size(), 2);
-	ASSERT_EQ(loading.resourceList[0], getChildPath("samename.wad"));	// not the second one too
-	ASSERT_EQ(loading.resourceList[1], getChildPath("othername.wad"));
+	ASSERT_EQ(loading.resourceList[0], getSubPath("samename.wad"));	// not the second one too
+	ASSERT_EQ(loading.resourceList[1], getSubPath("othername.wad"));
 }
 
 TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 {
 	// Re-create wad to be from a subpath
-	ASSERT_TRUE(FileMakeDir(getChildPath("sub")));
-	mDeleteList.push(getChildPath("sub"));
-	wad = Wad_file::Open(getChildPath(fs::path("sub") / "wad.wad").u8string(), WadOpenMode::write);
+	ASSERT_TRUE(FileMakeDir(getSubPath("sub")));
+	mDeleteList.push(getSubPath("sub"));
+	wad = Wad_file::Open(getSubPath(fs::path("sub") / "wad.wad"), WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
 	// Create a parent path resource
-	FILE *f = fopen(getChildPath("res.wad").u8string().c_str(), "wb");
+	FILE *f = fopen(getSubPath("res.wad").u8string().c_str(), "wb");
 	ASSERT_TRUE(f);
 	fclose(f);
-	mDeleteList.push(getChildPath("res.wad"));
+	mDeleteList.push(getSubPath("res.wad"));
 
 	// Prepare the lump
-	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
-	ASSERT_TRUE(eureka);
+	Lump_c &eureka = wad->AddLump(EUREKA_LUMP);
 
 	// Try to use just path: won't be found
-	eureka->Printf("resource res.wad\n");
+	eureka.Printf("resource res.wad\n");
 
 	int errorcount = 0;
 	DLG_Notify_Override = [&errorcount](const char *message, va_list ap)
@@ -508,19 +502,19 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 		++errorcount;
 	};
 
-	loading.parseEurekaLump(wad.get());
+	loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get());
 
 	ASSERT_EQ(errorcount, 1);
 	ASSERT_TRUE(loading.resourceList.empty());
 
 	// Now change content and add a relative path
-	eureka->clearData();
-	eureka->Printf("resource ../res.wad\n");
-	loading.parseEurekaLump(wad.get());
+	eureka.clearData();
+	eureka.Printf("resource ../res.wad\n");
+	loading.parseEurekaLump(home_dir, old_home_dir, install_dir, recent, wad.get());
 
 	ASSERT_EQ(errorcount, 1);
 	ASSERT_EQ(loading.resourceList.size(), 1);
-	ASSERT_EQ(loading.resourceList[0], getChildPath("res.wad"));
+	ASSERT_EQ(loading.resourceList[0], getSubPath("res.wad"));
 }
 
 // Recent files
@@ -548,35 +542,32 @@ TEST(RecentFiles, InsertAndLookup)
 	// Size must be 3
 	ASSERT_EQ(files.getSize(), 4);	// Five made it
 
-	fs::path file;
-	SString map;
+	RecentMap recentMap;
 
-	files.Lookup(0, &file, &map);
-	ASSERT_EQ(file, "Doo.wad");
-	ASSERT_EQ(map, "MAP03");
+	recentMap = files.Lookup(0);
+	ASSERT_EQ(recentMap.file, "Doo.wad");
+	ASSERT_EQ(recentMap.map, "MAP03");
 
-	files.Lookup(1, &file, &map);
-	ASSERT_EQ(file, "Other/Jack.wad");
-	ASSERT_EQ(map, "H5M6");
+	recentMap = files.Lookup(1);
+	ASSERT_EQ(recentMap.file, "Other/Jack.wad");
+	ASSERT_EQ(recentMap.map, "H5M6");
 
-	files.Lookup(2, &file, &map);
-	ASSERT_EQ(file, "SomeOther.wad");
-	ASSERT_EQ(map, "E4M4");
+	recentMap = files.Lookup(2);
+	ASSERT_EQ(recentMap.file, "SomeOther.wad");
+	ASSERT_EQ(recentMap.map, "E4M4");
 
-	files.Lookup(3, &file, &map);
-	ASSERT_EQ(file, "Wad1.wad");
-	ASSERT_EQ(map, "MAP01");
+	recentMap = files.Lookup(3);
+	ASSERT_EQ(recentMap.file, "Wad1.wad");
+	ASSERT_EQ(recentMap.map, "MAP01");
 
 	// See one format
 	SString text = files.Format(1);
 	ASSERT_EQ(text, "  &2:  Jack.wad");
 
 	// Get one data
-	recent_file_data_c *vdata = files.getData(1);
-	ASSERT_TRUE(vdata);
-	ASSERT_EQ(vdata->file, "Other/Jack.wad");
-	ASSERT_EQ(vdata->map, "H5M6");
-	delete vdata;
+	RecentMap vdata = files.Lookup(1);
+	ASSERT_EQ(vdata.file, "Other/Jack.wad");
+	ASSERT_EQ(vdata.map, "H5M6");
 
 	// Test clearing it
 	files.clear();
@@ -595,13 +586,11 @@ TEST(RecentFiles, InsertPastCap)
 	ASSERT_EQ(files.getSize(), MAX_RECENT);
 
 	// Check that the latest recent are there
-	fs::path file;
-	SString map;
 	for(int i = 0; i < MAX_RECENT; ++i)
 	{
-		files.Lookup(i, &file, &map);
-		ASSERT_EQ(SString(file.generic_u8string()), SString::printf("sub/Wad%d.wad", MAX_RECENT + 3 - i - 1));
-		ASSERT_EQ(map, SString::printf("MAP%d", MAX_RECENT + 3 - i - 1));
+		RecentMap recentMap = files.Lookup(i);
+		ASSERT_EQ(SString(recentMap.file.generic_u8string()), SString::printf("sub/Wad%d.wad", MAX_RECENT + 3 - i - 1));
+		ASSERT_EQ(recentMap.map, SString::printf("MAP%d", MAX_RECENT + 3 - i - 1));
 	}
 
 	// Test formatting when larger than 9
@@ -620,6 +609,8 @@ TEST(RecentFiles, InsertPastCap)
 
 class RecentFilesFixture : public TempDirContext
 {
+protected:
+	void testLoadRecent(const fs::path &homePath, const fs::path &oldHomePath, const fs::path &miscPath);
 };
 
 TEST_F(RecentFilesFixture, WriteFile)
@@ -632,7 +623,7 @@ TEST_F(RecentFilesFixture, WriteFile)
 	files.insert("Oth er/Jack.wad", "H5M6");	// will override previous map
 	files.insert("Doo.wad", "MAP03");	// this will override second map
 
-	fs::path datapath = getChildPath("data.ini");
+	fs::path datapath = getSubPath("data.ini");
 
 	std::ofstream os(datapath);
 	ASSERT_TRUE(os.is_open());
@@ -644,7 +635,7 @@ TEST_F(RecentFilesFixture, WriteFile)
 
 	std::ifstream stream(datapath);
 	ASSERT_TRUE(stream.is_open());
-	
+
 	std::string keyword, map, file;
 	stream >> keyword >> map >> file;
 	ASSERT_EQ(keyword, "recent");
@@ -668,14 +659,14 @@ TEST_F(RecentFilesFixture, WriteFile)
 	stream.close();
 }
 
-TEST_F(RecentFilesFixture, MLoadRecent)
+void RecentFilesFixture::testLoadRecent(const fs::path &homePath, const fs::path &oldHomePath,
+		const fs::path &miscPath)
 {
-	fs::path home_dir = mTempDir;
+	fs::path home_dir = homePath;
+	fs::path old_home_dir = oldHomePath;
 	RecentKnowledge recent;
 
-	// TODO: write the files
-	// TODO: write the necessary IWADs
-	fs::path path = getChildPath("misc.cfg");
+	fs::path path = miscPath;
 	std::ofstream stream(path);
 	ASSERT_TRUE(stream.is_open());
 	mDeleteList.push(path);
@@ -686,12 +677,12 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	stream << "  # comment after line" << std::endl;	// ignore comment after space
 
 
-	fs::path hticPath = getChildPath("htic.wad");
-	fs::path doom3Path = getChildPath("doom3.wad");
-	fs::path freedoomPath = getChildPath("freedoom.wad");
-	fs::path deletedPath = getChildPath("deleted.wad");
-	fs::path badPath = getChildPath("bad.wad");
-	fs::path hereticPath = getChildPath("here tic.wad");
+	fs::path hticPath = getSubPath("htic.wad");
+	fs::path doom3Path = getSubPath("doom3.wad");
+	fs::path freedoomPath = getSubPath("freedoom.wad");
+	fs::path deletedPath = getSubPath("deleted.wad");
+	fs::path badPath = getSubPath("bad.wad");
+	fs::path hereticPath = getSubPath("here tic.wad");
 
 	stream << "recent MAP02 " << escape(doom3Path) << " # recent" << std::endl;
 	stream << "recent H5M6 " << std::endl;	// malformed
@@ -700,7 +691,7 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	stream << "recent \"E3 M5\" " << escape(hticPath) << std::endl;
 	stream << "recent E7M7 " << escape(deletedPath) << std::endl;	// missing wad
 	stream << "recent MAP03 " << escape(doom3Path) << std::endl;	// should overwrite the other Doom3 wad recent
-	
+
 	stream << "known_iwad heretic " << escape(hticPath) << std::endl;
 	stream << "known_iwad mood " << std::endl;	// malformed
 	stream << "known_iwad \"doom \"\"3\"\"\" " << escape(doom3Path) << std::endl;
@@ -708,7 +699,7 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	stream << "known_iwad inexistent " << escape(deletedPath) << std::endl;	// file not found
 	stream << "known_iwad malformed " << escape(badPath) << std::endl;	// bad file (both cases should be "invalid"
 	stream << "known_iwad heretic " << escape(hereticPath) << std::endl;	// overwrite
-	
+
 	stream << "port_path boom |/home/jillson/boom.wad" << std::endl;
 	stream << "port_path zdoom |/home/jillson/zdoom.wad" << std::endl;
 	stream << "port_path goom /home/jillson/goom.wad" << std::endl;	// malformed
@@ -728,47 +719,64 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 		wadstream.close();
 	}
 
-	recent.load(home_dir);
+	recent.load(home_dir, old_home_dir);
 
 	// Check the recent files
-	ASSERT_EQ(recent.files.getSize(), 3);
-	SString map;
+	ASSERT_EQ(recent.getFiles().getSize(), 3);
+	RecentMap recentMap;
 
-	recent.files.Lookup(0, &path, &map);
-	ASSERT_EQ(path, doom3Path);
-	ASSERT_EQ(map, "MAP03");
+	recentMap = recent.getFiles().Lookup(0);
+	ASSERT_EQ(recentMap.file, doom3Path);
+	ASSERT_EQ(recentMap.map, "MAP03");
 
-	recent.files.Lookup(1, &path, &map);
-	ASSERT_EQ(path, hticPath);
-	ASSERT_EQ(map, "E3 M5");
+	recentMap = recent.getFiles().Lookup(1);
+	ASSERT_EQ(recentMap.file, hticPath);
+	ASSERT_EQ(recentMap.map, "E3 M5");
 
-	recent.files.Lookup(2, &path, &map);
-	ASSERT_EQ(path, hereticPath);
-	ASSERT_EQ(map, "E3M5");
+	recentMap = recent.getFiles().Lookup(2);
+	ASSERT_EQ(recentMap.file, hereticPath);
+	ASSERT_EQ(recentMap.map, "E3M5");
 
 	// Check the known IWADs map
-	ASSERT_EQ(recent.known_iwads.size(), 2);
-	ASSERT_EQ(recent.known_iwads["heretic"], hereticPath);
-	ASSERT_EQ(recent.known_iwads["doom \"3\""], doom3Path);
+	ASSERT_TRUE(recent.queryIWAD("heretic"));
+	ASSERT_EQ(*recent.queryIWAD("heretic"), hereticPath);
+	ASSERT_TRUE(recent.queryIWAD("doom \"3\""));
+	ASSERT_EQ(*recent.queryIWAD("doom \"3\""), doom3Path);
 
 	// Check the port paths
-	ASSERT_EQ(recent.port_paths.size(), 2);
-	ASSERT_EQ(recent.port_paths["zdoom"].exe_filename, "/home/jackson/zdoom.wad");
-	ASSERT_EQ(recent.port_paths["boom"].exe_filename, "/home/jillson/boom.wad");
+	ASSERT_TRUE(recent.queryPortPath("zdoom"));
+	ASSERT_EQ(*recent.queryPortPath("zdoom"), "/home/jackson/zdoom.wad");
+	ASSERT_TRUE(recent.queryPortPath("boom"));
+	ASSERT_EQ(*recent.queryPortPath("boom"), "/home/jillson/boom.wad");
+}
+
+TEST_F(RecentFilesFixture, MLoadRecent)
+{
+	testLoadRecent(mTempDir, fs::path(), getSubPath("misc.cfg"));
+}
+
+TEST_F(RecentFilesFixture, MLoadRecentOldPath)
+{
+	fs::path home_dir = mTempDir;
+	fs::path old_home_dir = getSubPath("old");
+	ASSERT_TRUE(FileMakeDir(old_home_dir));
+	mDeleteList.push(old_home_dir);
+
+	testLoadRecent(home_dir, old_home_dir, old_home_dir / "misc.cfg");
 }
 
 TEST_F(RecentFilesFixture, MSaveRecent)
 {
 	RecentKnowledge recent;
-	recent.files.insert("file1", "map1");
-	recent.files.insert("file2", "map 2");
-	recent.files.insert("file1/file 4", "map #");
+	recent.addRecent("file1", "map1", mTempDir);
+	recent.addRecent("file2", "map 2", mTempDir);
+	recent.addRecent("file1/file 4", "map #", mTempDir);
 
-	recent.known_iwads["doom1"] = "path/doom1.wad";
-	recent.known_iwads["doom#"] = "path/doom 2.wad";
+	recent.addIWAD("path/doom1.wad");
+	recent.addIWAD("path/doom #.wad");
 
-	recent.port_paths["foom"].exe_filename = "port/foom.exe";
-	recent.port_paths["joom generation"].exe_filename = "port/joom generation.exe";
+	recent.setPortPath("foom", "port/foom.exe");
+	recent.setPortPath("joom generation", "port/joom generation.exe");
 
 	recent.save(mTempDir);
 	mDeleteList.push(mTempDir / "misc.cfg");
@@ -780,10 +788,10 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	SString line;
 	RecentFiles_c readRecentFiles;
 	std::map<SString, fs::path> readKnownIwads;
-	std::map<SString, port_path_info_t> readPortPaths;
+	std::map<SString, fs::path> readPortPaths;
 	while(M_ReadTextLine(line, is))
 	{
-		TokenWordParse parse(line);
+		TokenWordParse parse(line, true);
 		SString keyword;
 		if(!parse.getNext(keyword))
 			continue;
@@ -803,7 +811,14 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 		}
 		if(keyword == "port_path")
 		{
-			readPortPaths[name].exe_filename = path;
+			ASSERT_EQ(path.u8string()[0], '|');
+			if(path == "|")
+			{
+				ASSERT_TRUE(parse.getNext(path));
+				readPortPaths[name] = path;
+			}
+			else
+				readPortPaths[name] = fs::u8path(path.u8string().substr(1));
 			continue;
 		}
 	}
@@ -811,17 +826,21 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	ASSERT_EQ(readRecentFiles.getSize(), 3);
 	for(int i = 0; i < readRecentFiles.getSize(); ++i)
 	{
-		SString myMap, readMap;
-		fs::path myPath, readPath;
-		recent.files.Lookup(i, &myPath, &myMap);
-		readRecentFiles.Lookup(i, &readPath, &readMap);
-		ASSERT_EQ(myMap, readMap);
-		ASSERT_EQ(myPath, readPath);
+		SString readMap;
+		fs::path readPath;
+		RecentMap myRecentMap = recent.getFiles().Lookup(i);
+		RecentMap readRecentMap = readRecentFiles.Lookup(i);
+		ASSERT_EQ(myRecentMap.map, readRecentMap.map);
+		ASSERT_EQ(myRecentMap.file, readRecentMap.file);
 	}
-	ASSERT_EQ(recent.known_iwads, readKnownIwads);
-	ASSERT_EQ(recent.port_paths.size(), readPortPaths.size());
-	for(const auto &item : recent.port_paths)
+	for(const auto &item : readKnownIwads)
 	{
-		ASSERT_EQ(recent.port_paths[item.first].exe_filename, item.second.exe_filename);
+		ASSERT_TRUE(recent.queryIWAD(item.first));
+		ASSERT_EQ(*recent.queryIWAD(item.first), item.second);
+	}
+	for(const auto &item : readPortPaths)
+	{
+		ASSERT_TRUE(recent.queryPortPath(item.first));
+		ASSERT_EQ(*recent.queryPortPath(item.first), item.second);
 	}
 }

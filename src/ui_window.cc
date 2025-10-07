@@ -23,9 +23,14 @@
 
 #include "e_main.h"
 #include "m_config.h"
+#include "m_testmap.h"
 #include "r_render.h"
 #include "ui_window.h"
 #include "w_wad.h"
+
+#ifdef __APPLE__
+#include "OSXCalls.h"
+#endif
 
 #ifndef WIN32
 #include <unistd.h>
@@ -62,8 +67,9 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 
 	/* ---- Menu bar ---- */
 	{
-		menu_bar = mInstance.Menu_Create(0, 0, w()-3 - panel_W, 31);
+		menu_bar = menu::create(0, 0, w()-3 - panel_W, 31, &mInstance);
 		add(menu_bar);
+		testmap::updateMenuName(menu_bar, inst.loaded);
 
 #ifndef __APPLE__
 		cy += menu_bar->h();
@@ -121,6 +127,11 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	find_box = new UI_FindAndReplace(inst, w() - panel_W, BY, panel_W, BH);
 	find_box->hide();
 	add(find_box);
+	
+	mapItemBoxes[0] = thing_box;
+	mapItemBoxes[1] = line_box;
+	mapItemBoxes[2] = sec_box;
+	mapItemBoxes[3] = vert_box;
 }
 
 
@@ -165,7 +176,7 @@ void UI_MainWindow::NewEditMode(ObjType mode)
 }
 
 
-void UI_MainWindow::SetCursor(Fl_Cursor shape)
+void UI_MainWindow::SetCursor(Fl_Cursor shape) noexcept
 {
 	if (shape == cursor_shape)
 		return;
@@ -265,12 +276,10 @@ void UI_MainWindow::ShowFindAndReplace()
 }
 
 
-void UI_MainWindow::UpdateTotals()
+void UI_MainWindow::UpdateTotals(const Document &doc) noexcept
 {
-	thing_box->UpdateTotal();
-	 line_box->UpdateTotal();
-	  sec_box->UpdateTotal();
-	 vert_box->UpdateTotal();
+	for(MapItemBox *box : mapItemBoxes)
+		box->UpdateTotal(doc);
 }
 
 
@@ -291,17 +300,9 @@ int UI_MainWindow::GetPanelObjNum() const
 
 void UI_MainWindow::InvalidatePanelObj()
 {
-	if (thing_box->visible())
-		thing_box->SetObj(-1, 0);
-
-	if (line_box->visible())
-		line_box->SetObj(-1, 0);
-
-	if (sec_box->visible())
-		sec_box->SetObj(-1, 0);
-
-	if (vert_box->visible())
-		vert_box->SetObj(-1, 0);
+	for(MapItemBox *box : mapItemBoxes)
+		if(box->visible())
+			box->SetObj(-1, 0);
 }
 
 void UI_MainWindow::UpdatePanelObj()
@@ -325,10 +326,8 @@ void UI_MainWindow::UpdatePanelObj()
 
 void UI_MainWindow::UnselectPics()
 {
-	 line_box->UnselectPics();
-	  sec_box->UnselectPics();
-	thing_box->UnselectPics();
-	props_box->UnselectPics();
+	for(MapItemBox *box : mapItemBoxes)
+		box->UnselectPics();
 }
 
 
@@ -350,6 +349,11 @@ void UI_MainWindow::SetTitle(const SString &wad_namem, const SString &map_name,
 	}
 
 	copy_label(title_buf);
+
+#ifdef __APPLE__
+    OSX_SetWindowRepresentedFile((void*)fl_xid(this), wad_namem.good() ? wad_namem.c_str() : nullptr, title_buf);
+    OSX_SetWindowDocumentEdited((void*)fl_xid(this), false);
+#endif
 }
 
 
@@ -360,7 +364,7 @@ void UI_MainWindow::UpdateTitle(char want_prefix)
 
 	char got_prefix = label()[0];
 
-	if (! ispunct(got_prefix))
+	if (! safe_ispunct(got_prefix))
 		got_prefix = 0;
 
 	if (got_prefix == want_prefix)
@@ -378,6 +382,10 @@ void UI_MainWindow::UpdateTitle(char want_prefix)
 	title_buf.insert(title_buf.length(), src);
 
 	copy_label(title_buf.c_str());
+
+#ifdef __APPLE__
+	OSX_SetWindowDocumentEdited((void*)fl_xid(this), want_prefix != 0);
+#endif
 }
 
 
@@ -507,11 +515,10 @@ void UI_MainWindow::Delay(int steps)
 }
 
 
-void UI_MainWindow::UpdateGameInfo()
+void UI_MainWindow::UpdateGameInfo(const LoadingData &loading, const ConfigData &config)
 {
-	thing_box->UpdateGameInfo();
-	 line_box->UpdateGameInfo();
-	  sec_box->UpdateGameInfo();
+	for(MapItemBox *box : mapItemBoxes)
+		box->UpdateGameInfo(loading, config);
 }
 
 
@@ -756,7 +763,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	chooser.title("Pick file to save to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.filter("Text files\t*.txt");
-	chooser.directory(viewer->inst.Main_FileOpFolder().c_str());
+	chooser.directory(viewer->inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{
@@ -780,8 +787,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	if(!HasExtension(filename.get()))
 		filename += ".txt";
 
-	// TODO: #55
-    std::ofstream os(filename.c_str(), std::ios::trunc);
+    std::ofstream os(fs::u8path(filename.c_str()), std::ios::trunc);
 
 	if (! os.is_open())
 	{

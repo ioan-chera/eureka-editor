@@ -25,15 +25,12 @@
 #include "ui_panelinput.h"
 
 class UI_DynIntInput;
+struct LoadingData;
+struct lineflag_t; // forward declaration
 
-class UI_LineBox : public Fl_Group
+class UI_LineBox : public MapItemBox
 {
 private:
-	int obj = -1;
-	int count = 0;
-
-	UI_Nombre *which;
-
 	UI_DynInput  *type;
 	Fl_Button    *choose;
 	Fl_Button    *gen;
@@ -51,46 +48,37 @@ private:
 	// Flags
 	Fl_Choice *f_automap;
 
-	Fl_Check_Button *f_upper;
-	Fl_Check_Button *f_lower;
-	Fl_Check_Button *f_passthru;
-	Fl_Check_Button *f_3dmidtex;  // Eternity
-
-	Fl_Check_Button *f_jumpover;  //
-	Fl_Check_Button *f_trans1;    // Strife
-	Fl_Check_Button *f_trans2;    //
-
-	Fl_Check_Button *f_walk;
-	Fl_Check_Button *f_mons;
-	Fl_Check_Button *f_sound;
-	Fl_Check_Button *f_flyers;    // Strife
-
-	Instance &inst;
-	PanelFieldFixUp mFixUp;
+	// Dynamic linedef flags (configured via .ugh)
+	struct LineFlagButton
+	{
+		std::unique_ptr<Fl_Check_Button> button;
+		std::unique_ptr<class line_flag_CB_data_c> data;
+		const struct lineflag_t *info;
+	};
+	std::vector<LineFlagButton> flagButtons;
+	int flagsStartX = 0;
+	int flagsStartY = 0;
+	int flagsAreaW = 0;
 
 public:
 	UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr);
 
-	void SetObj(int _index, int _count);
-
-	int GetObj() const { return obj; }
-
 	// call this if the linedef was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1);
+	void UpdateField(int field = -1) override;
 
 	// call this is the linedef's sides were externally modified.
 	void UpdateSides();
 
-	void UpdateTotal();
+	void UpdateTotal(const Document &doc) noexcept override;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
-	void UnselectPics();
+	void UnselectPics() override;
 
-	void UpdateGameInfo();
+	void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) override;
 
 	void checkDirtyFields()
 	{
@@ -98,15 +86,18 @@ public:
 	}
 
 private:
+	int getActivationCount() const;
+	const char *getActivationMenuString() const;
+
 	void CalcLength();
 
 	int  CalcFlags() const;
 	void FlagsFromInt(int flags);
 
-	void CB_Copy(int parts);
-	void CB_Paste(int parts, StringID new_tex);
+	void CB_Copy(int uiparts);
+	void CB_Paste(int uiparts, StringID new_tex);
 
-	void SetTexture(const char *tex_name, int e_state, int parts);
+	void SetTexture(const char *tex_name, int e_state, int uiparts);
 	void SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e_state, int parts);
 	void SetLineType(int new_type);
 

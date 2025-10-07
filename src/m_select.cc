@@ -40,21 +40,11 @@ selection_c::selection_c(ObjType type, bool extended) : type(type)
 {
 	if(extended)
 	{
-		ext_size = INITIAL_EXTENDED_SIZE;
-		this->extended = new byte[ext_size];
-
-		memset(this->extended, 0, ext_size);
+		this->extended.emplace(INITIAL_EXTENDED_SIZE);
 	}
 }
 
-selection_c::~selection_c()
-{
-	delete bv;
-	delete[] extended;
-}
-
-
-void selection_c::change_type(ObjType new_type)
+void selection_c::change_type(ObjType new_type) noexcept
 {
 	type = new_type;
 
@@ -62,7 +52,7 @@ void selection_c::change_type(ObjType new_type)
 }
 
 
-bool selection_c::empty() const
+bool selection_c::empty() const noexcept
 {
 	return count == 0;
 }
@@ -74,7 +64,7 @@ int selection_c::count_obj() const
 }
 
 
-bool selection_c::get(int n) const
+bool selection_c::get(int n) const noexcept
 {
 	if (extended)
 		return get_ext(n) != 0;
@@ -123,7 +113,7 @@ void selection_c::set(int n)
 }
 
 
-void selection_c::clear(int n)
+void selection_c::clear(int n) noexcept
 {
 	if (extended)
 	{
@@ -131,7 +121,7 @@ void selection_c::clear(int n)
 			return;
 
 		// n should be safe to access directly, due to above check
-		extended[n] = 0;
+		(*extended)[n] = 0;
 		count--;
 	}
 	else if (bv)
@@ -181,7 +171,7 @@ void selection_c::toggle(int n)
 }
 
 
-void selection_c::clear_all()
+void selection_c::clear_all() noexcept
 {
 	count = 0;
 	maxobj = -1;
@@ -189,25 +179,21 @@ void selection_c::clear_all()
 
 	if (extended)
 	{
-		memset(extended, 0, (size_t)ext_size);
+		std::fill(extended->begin(), extended->end(), 0);
 	}
-	else if (bv)
-	{
-		delete bv;
-		bv = NULL;
-	}
+	bv.reset();
 }
 
 
-byte selection_c::get_ext(int n) const
+byte selection_c::get_ext(int n) const noexcept
 {
 	if (! extended)
 		return get(n) ? 255 : 0;
 
-	if (n >= ext_size)
+	if (n >= (int)extended->size())
 		return 0;
 
-	return extended[n];
+	return (*extended)[n];
 }
 
 
@@ -230,15 +216,15 @@ void selection_c::set_ext(int n, byte value)
 		first_obj = n;
 
 	// need to resize the array?
-	while (n >= ext_size)
+	while (n >= (int)extended->size())
 	{
-		ResizeExtended(ext_size * 2);
+		ResizeExtended((int)extended->size() * 2);
 	}
 
-	if (extended[n] == 0)
+	if ((*extended)[n] == 0)
 		count++;
 
-	extended[n] = value;
+	(*extended)[n] = value;
 }
 
 
@@ -342,7 +328,7 @@ void selection_c::ConvertToBitvec()
 	if (size < maxobj+1)
 		size = maxobj+1;
 
-	bv = new bitvec_c(size);
+	bv.emplace(size);
 
 	for (int i = 0 ; i < count ; i++)
 	{
@@ -351,14 +337,14 @@ void selection_c::ConvertToBitvec()
 }
 
 
-void selection_c::RecomputeMaxObj()
+void selection_c::RecomputeMaxObj() noexcept
 {
 	maxobj = -1;
 
 	if (extended)
 	{
 		// search backwards so we can early out
-		for (int i = ext_size-1 ; i >= 0 ; i--)
+		for (int i = (int)extended->size() - 1; i >= 0; i--)
 		{
 			if (get_ext(i))
 			{
@@ -394,19 +380,7 @@ void selection_c::ResizeExtended(int new_size)
 {
 	SYS_ASSERT(new_size > 0);
 
-	byte *d = new byte[new_size];
-
-	// copy existing values
-	memcpy(d, extended, (size_t)std::min(ext_size, new_size));
-
-	// clear values at top end
-	if (new_size > ext_size)
-		memset(d+ext_size, 0, (size_t)(new_size - ext_size));
-
-	delete[] extended;
-
-	extended = d;
-	ext_size = new_size;
+	extended->resize(new_size);
 }
 
 
@@ -445,6 +419,19 @@ int selection_c::find_second() const
 	return it.done() ? -1 : *it;
 }
 
+//
+// Converts selection to array list.
+//
+std::vector<int> selection_c::asArray() const
+{
+	std::vector<int> result;
+	result.reserve(count_obj());
+	for(sel_iter_c it(this); !it.done(); it.next())
+	{
+		result.push_back(*it);
+	}
+	return result;
+}
 
 //------------------------------------------------------------------------
 //  ITERATOR STUFF
@@ -478,7 +465,7 @@ bool sel_iter_c::done() const
 	SYS_ASSERT(sel);
 
 	if (sel->extended)
-		return (pos >= sel->ext_size);
+		return (pos >= (int)sel->extended->size());
 	else if (sel->bv)
 		return (pos >= sel->bv->size());
 	else
@@ -505,7 +492,7 @@ void sel_iter_c::next()
 
 	if (sel->extended)
 	{
-		while (pos < sel->ext_size && sel->extended[pos] == 0)
+		while (pos < (int)sel->extended->size() && (*sel->extended)[pos] == 0)
 			pos++;
 	}
 	else if (sel->bv)

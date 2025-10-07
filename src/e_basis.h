@@ -28,11 +28,14 @@
 #define __EUREKA_E_BASIS_H__
 
 #include "DocumentModule.h"
+#include "LineDef.h"
 #include "m_strings.h"
 #include "objid.h"
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
+#include <memory>
 #include <stack>
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
@@ -66,9 +69,23 @@ namespace global
 
 // See objid.h for obj_type_e (OBJ_THINGS etc)
 
+enum class LumpType : byte
+{
+	header,
+	behavior,
+	scripts
+};
+
 // E_BASIS
 
+// Geometric epsilon divider (used for BSP building, coordinate matching, etc.)
+constexpr int GEOM_EPSILON_DIVIDER = 1024;
+
+// Distance epsilon for geometric comparisons
+constexpr double GEOM_EPSILON = 1.0 / GEOM_EPSILON_DIVIDER;
+
 FFixedPoint MakeValidCoord(MapFormat format, double x);
+bool CoordsMatch(MapFormat format, const v2double_t &v1, const v2double_t &v2);
 
 //
 // Editor command manager, handles undo/redo
@@ -82,7 +99,22 @@ public:
 
 	bool undo();
 	bool redo();
-	void clearAll();
+	void clear();
+	void setSavedStack()
+	{
+		mSavedStack = mUndoHistory;
+	}
+
+	
+	Basis &operator = (Basis &&other) noexcept
+	{
+		mCurrentGroup = std::move(other.mCurrentGroup);
+		mUndoHistory = std::move(other.mUndoHistory);
+		mRedoFuture = std::move(other.mRedoFuture);
+		mSavedStack = std::move(other.mSavedStack);
+		mDidMakeChanges = other.mDidMakeChanges;
+		return *this;
+	}
 
 private:
 	//
@@ -93,7 +125,8 @@ private:
 		none,	// initial state (invalid)
 		change,
 		insert,
-		del
+		del,
+		lump_change
 	};
 
 	//
@@ -105,36 +138,59 @@ private:
 		ObjType objtype = ObjType::things;
 		byte field = 0;
 		int objnum = 0;
-		union
-		{
-			int *ptr = nullptr;
-			Thing *thing;
-			Vertex *vertex;
-			Sector *sector;
-			SideDef *sidedef;
-			LineDef *linedef;
-		};
+		std::shared_ptr<Thing> thing;
+		std::shared_ptr<Vertex> vertex;
+		std::shared_ptr<Sector> sector;
+		std::shared_ptr<SideDef> sidedef;
+		std::shared_ptr<LineDef> linedef;
 		int value = 0;
+		
+		// For lump changes
+		LumpType lumptype = LumpType::header;
+		std::vector<byte> lumpData;
 
 		void apply(Basis &basis);
 		void destroy();
 
+		bool operator == (const EditUnit &other) const
+		{
+			return action == other.action
+				&& objtype == other.objtype
+				&& field == other.field
+				&& objnum == other.objnum
+				&& thing == other.thing
+				&& vertex == other.vertex
+				&& sector == other.sector
+				&& sidedef == other.sidedef
+				&& linedef == other.linedef
+				&& value == other.value
+				&& lumptype == other.lumptype
+				&& lumpData == other.lumpData;
+		}
+
+		bool operator != (const EditUnit &other) const
+		{
+			return !(*this == other);
+		}
+
 	private:
 		void rawChange(Basis &basis);
 
-		void *rawDelete(Basis &basis) const;
-		Thing *rawDeleteThing(Document &doc) const;
-		Vertex *rawDeleteVertex(Document &doc) const;
-		Sector *rawDeleteSector(Document &doc) const;
-		SideDef *rawDeleteSidedef(Document &doc) const;
-		LineDef *rawDeleteLinedef(Document &doc) const;
+		void rawDelete(Basis &basis);
+		std::shared_ptr<Thing> rawDeleteThing(Document &doc) const;
+		std::shared_ptr<Vertex> rawDeleteVertex(Document &doc) const;
+		std::shared_ptr<Sector> rawDeleteSector(Document &doc) const;
+		std::shared_ptr<SideDef> rawDeleteSidedef(Document &doc) const;
+		std::shared_ptr<LineDef> rawDeleteLinedef(Document &doc) const;
 
-		void rawInsert(Basis &basis) const;
-		void rawInsertThing(Document &doc) const;
-		void rawInsertVertex(Document &doc) const;
-		void rawInsertSector(Document &doc) const;
-		void rawInsertSidedef(Document &doc) const;
-		void rawInsertLinedef(Document &doc) const;
+		void rawInsert(Basis &basis);
+		void rawInsertThing(Document &doc);
+		void rawInsertVertex(Document &doc);
+		void rawInsertSector(Document &doc);
+		void rawInsertSidedef(Document &doc);
+		void rawInsertLinedef(Document &doc);
+
+		void rawChangeLump(Basis &basis);
 
 		void deleteFinally();
 	};
@@ -154,10 +210,9 @@ private:
 			for(auto it = mOps.rbegin(); it != mOps.rend(); ++it)
 				it->destroy();
 		}
-		
-		// Ensure we only use move semantics
-		UndoGroup(const UndoGroup &other) = delete;
-		UndoGroup &operator = (const UndoGroup &other) = delete;
+
+		UndoGroup(const UndoGroup &other) = default;
+		UndoGroup &operator = (const UndoGroup &other) = default;
 
 		//
 		// Move constructor takes same semantics as operator
@@ -168,8 +223,21 @@ private:
 		}
 		UndoGroup &operator = (UndoGroup &&other) noexcept;
 
+		bool operator != (const UndoGroup &other) const
+		{
+			return mOps != other.mOps
+				|| mMessage != other.mMessage
+				|| mMenuName != other.mMenuName
+				|| mDir != other.mDir;
+		}
+
+		bool operator == (const UndoGroup &other) const
+		{
+			return !(*this != other);
+		}
+
 		void reset();
-		
+
 		//
 		// Mark if active and ready to use
 		//
@@ -194,7 +262,7 @@ private:
 			return mOps.empty();
 		}
 
-		void addApply(const EditUnit &op, Basis &basis);
+		void addApply(EditUnit &&op, Basis &basis);
 
 		//
 		// End current action
@@ -215,16 +283,27 @@ private:
 		}
 
 		//
-		// Put the message 
+		// Put the message
 		//
 		void setMessage(const SString &message)
 		{
 			mMessage = message;
 		}
+		
+		void setMenuName(const SString &menuName)
+		{
+			mMenuName = menuName;
+		}
+		
+		const SString &getMenuName() const
+		{
+			return mMenuName;
+		}
 
 	private:
 		std::vector<EditUnit> mOps;
 		SString mMessage = DEFAULT_UNDO_GROUP_MESSAGE;
+		SString mMenuName;
 		int mDir = 0;	// dir must be +1 or -1 if active
 	};
 
@@ -242,6 +321,7 @@ private:
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeLinedef(int line, byte field, int value);
+	void changeLump(LumpType lumpType, std::vector<byte> &&newData);
 	void del(ObjType type, int objnum);
 	void end();
 	void abort(bool keepChanges);
@@ -251,8 +331,10 @@ private:
 
 	UndoGroup mCurrentGroup;
 	// FIXME: use a better data type here
-	std::stack<UndoGroup> mUndoHistory;
+	std::vector<UndoGroup> mUndoHistory;
 	std::stack<UndoGroup> mRedoFuture;
+
+	std::vector<UndoGroup> mSavedStack;
 
 	bool mDidMakeChanges = false;
 };
@@ -329,6 +411,11 @@ public:
 		return basis.changeLinedef(line, field, value);
 	}
 
+	void changeLump(LumpType lumpType, std::vector<byte> &&newData)
+	{
+		basis.changeLump(lumpType, std::move(newData));
+	}
+
 	void del(ObjType type, int objnum)
 	{
 		basis.del(type, objnum);
@@ -357,7 +444,7 @@ const char *NameForObjectType(ObjType type, bool plural = false);
 StringID BA_InternaliseString(const SString &str);
 
 // get the string from the basis string table.
-SString BA_GetString(StringID offset);
+SString BA_GetString(StringID offset) noexcept;
 
 #endif  /* __EUREKA_E_BASIS_H__ */
 

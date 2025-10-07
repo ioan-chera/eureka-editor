@@ -95,7 +95,7 @@ void Render3D_RegisterCommands();
 void Render3D_Enable(Instance &inst, bool _enable);
 
 // this is basically the FLTK draw() method
-void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh);
+void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh, int pixel_w, int pixel_h);
 
 // perform a query to see what the mouse pointer is over.
 // returns true if something was hit, false otherwise.
@@ -113,6 +113,7 @@ void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum);
 void Render3D_NotifyChange(ObjType type, int objnum, int field);
 void Render3D_NotifyEnd(Instance &inst);
 
+int Render3D_CalcRotation(double viewAngle_rad, int thingAngle_deg);
 
 /* API for rendering a scene (etc) */
 

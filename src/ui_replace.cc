@@ -136,7 +136,7 @@ public:
 
 			str = endptr;
 
-			while (isspace(*str))
+			while (safe_isspace(*str))
 				str++;
 
 			// check for range
@@ -144,7 +144,7 @@ public:
 			{
 				str += (*str == '-') ? 1 : 2;
 
-				while (isspace(*str))
+				while (safe_isspace(*str))
 					str++;
 
 				high = (int)strtol(str, &endptr, 0 /* allow hex */);
@@ -158,7 +158,7 @@ public:
 				if (high < low)
 					return false;
 
-				while (isspace(*str))
+				while (safe_isspace(*str))
 					str++;
 			}
 
@@ -845,7 +845,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 	{
 		case What_things: // Things
 		{
-			const thingtype_t &info = M_GetThingType(inst.conf, type_num);
+			const thingtype_t &info = inst.conf.getThingType(type_num);
 			desc->value(info.desc.c_str());
 			 pic->GetSprite(type_num, FL_DARK2);
 			break;
@@ -853,15 +853,14 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 
 		case What_linesByType: // Lines by Type
 		{
-			const linetype_t &info = inst.M_GetLineType(type_num);
+			const linetype_t &info = inst.conf.getLineType(type_num);
 			desc->value(info.desc.c_str());
 			break;
 		}
 
 		case What_sectorsByType: // Sectors by Type
 		{
-			int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-						(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+			int mask = M_CalcSectorTypeMask(inst.conf);
 
 			const sectortype_t & info = inst.M_GetSectorType(type_num & mask);
 			desc->value(info.desc.c_str());
@@ -1144,7 +1143,7 @@ bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
 	const char *str = inp->value();
 
 	// nothing but whitespace?  --> no need
-	while (isspace(*str))
+	while (safe_isspace(*str))
 		str++;
 
 	if (str[0] == 0)
@@ -1153,7 +1152,7 @@ bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
 	// ends with a punctuation symbol?  --> no need
 	int p = (int)strlen(str) - 1;
 
-	while (p >= 0 && isspace(str[p]))
+	while (p >= 0 && safe_isspace(str[p]))
 		p--;
 
 	if (p >= 0)
@@ -1161,7 +1160,7 @@ bool UI_FindAndReplace::NeedSeparator(Fl_Input *inp) const
 		if (str[p] == '_') return true;
 		if (str[p] == '*') return true;
 
-		if (ispunct(str[p]))
+		if (safe_ispunct(str[p]))
 			return false;
 	}
 
@@ -1460,7 +1459,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 bool UI_FindAndReplace::Match_Thing(int idx)
 {
-	const Thing *T = inst.level.things[idx];
+	const auto T = inst.level.things[idx];
 
 	if (! find_numbers->get(T->type))
 		return false;
@@ -1478,16 +1477,16 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 
 bool UI_FindAndReplace::Match_LineDef(int idx)
 {
-	const LineDef *L = inst.level.linedefs[idx];
+	const auto L = inst.level.linedefs[idx];
 
-	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
+	if (! Filter_Tag(L->tag) || ! Filter_Sides(L.get()))
 		return false;
 
 	const char *pattern = find_match->value();
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		const SideDef *SD = (pass == 0) ? L->Right(inst.level) : L->Left(inst.level);
+		const SideDef *SD = (pass == 0) ? inst.level.getRight(*L) : inst.level.getLeft(*L);
 
 		if (! SD)
 			continue;
@@ -1521,7 +1520,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 bool UI_FindAndReplace::Match_Sector(int idx)
 {
-	const Sector *sector = inst.level.sectors[idx];
+	const auto sector = inst.level.sectors[idx];
 
 	if (! Filter_Tag(sector->tag))
 		return false;
@@ -1545,12 +1544,12 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 
 bool UI_FindAndReplace::Match_LineType(int idx)
 {
-	const LineDef *L = inst.level.linedefs[idx];
+	const auto L = inst.level.linedefs[idx];
 
 	if (! find_numbers->get(L->type))
 		return false;
 
-	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
+	if (! Filter_Tag(L->tag) || ! Filter_Sides(L.get()))
 		return false;
 
 	return true;
@@ -1559,10 +1558,9 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 
 bool UI_FindAndReplace::Match_SectorType(int idx)
 {
-	const Sector *sector = inst.level.sectors[idx];
+	const auto sector = inst.level.sectors[idx];
 
-	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-				(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+	int mask = M_CalcSectorTypeMask(inst.conf);
 
 	if (! find_numbers->get(sector->type & mask))
 		return false;
@@ -1707,7 +1705,7 @@ void UI_FindAndReplace::Replace_Thing(EditOperation &op, int idx)
 
 void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new_tex)
 {
-	const LineDef *L = inst.level.linedefs[idx];
+	const auto L = inst.level.linedefs[idx];
 
 	const char *pattern = find_match->value();
 
@@ -1715,7 +1713,7 @@ void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new
 	{
 		int sd_num = (pass == 0) ? L->right : L->left;
 
-		const SideDef *SD = (pass == 0) ? L->Right(inst.level) : L->Left(inst.level);
+		const SideDef *SD = (pass == 0) ? inst.level.getRight(*L) : inst.level.getLeft(*L);
 
 		if (! SD)
 			continue;
@@ -1750,7 +1748,7 @@ void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new
 
 void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, StringID new_tex)
 {
-	const Sector *sector = inst.level.sectors[idx];
+	const auto sector = inst.level.sectors[idx];
 
 	const char *pattern = find_match->value();
 
@@ -1777,8 +1775,7 @@ void UI_FindAndReplace::Replace_LineType(EditOperation &op, int idx)
 
 void UI_FindAndReplace::Replace_SectorType(EditOperation &op, int idx)
 {
-	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-				(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+	int mask = M_CalcSectorTypeMask(inst.conf);
 
 	int old_type = inst.level.sectors[idx]->type;
 	int new_type = atoi(rep_value->value());

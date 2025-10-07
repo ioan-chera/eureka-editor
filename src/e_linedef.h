@@ -27,9 +27,19 @@
 #ifndef __EUREKA_E_LINEDEF_H__
 #define __EUREKA_E_LINEDEF_H__
 
+#include "Side.h"
 #include "DocumentModule.h"
+#include "sys_type.h"
+#include <vector>
 
+class EditOperation;
+class FFixedPoint;
+class LineDef;
+class Objid;
 class selection_c;
+class SString;
+struct v2double_t;
+struct SideDef;
 
 namespace linemod
 {
@@ -40,6 +50,14 @@ class LinedefModule : public DocumentModule
 {
 	friend class Instance;
 public:
+	enum class Part
+	{
+		unspecified,
+		upper,
+		rail,
+		lower
+	};
+
 	LinedefModule(Document &doc) : DocumentModule(doc)
 	{
 	}
@@ -60,6 +78,8 @@ public:
 	double angleBetweenLines(int A, int B, int C) const;
 
 private:
+
+
 	void flipLine_verts(EditOperation &op, int ld) const;
 	void flipLine_sides(EditOperation &op, int ld) const;
 	void flipLinedef_safe(EditOperation &op, int ld) const;
@@ -80,8 +100,8 @@ private:
 						   const Objid& cur, int align_flags) const;
 	int scoreAdjoiner(const Objid &adj, const Objid &cur, int align_flags) const;
 	int scoreTextureMatch(const Objid &adj, const Objid &cur) const;
-	void partCalcExtent(const Objid &obj, char part, int *z1, int *z2) const;
-	bool partIsVisible(const Objid& obj, char part) const;
+	void partCalcExtent(const Objid &obj, Part part, int *z1, int *z2) const;
+	bool partIsVisible(const Objid& obj, Part part) const;
 
 	int calcReferenceH(const Objid& obj) const;
 

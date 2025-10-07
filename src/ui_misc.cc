@@ -30,8 +30,7 @@
 #include <assert.h>
 
 UI_MoveDialog::UI_MoveDialog(Instance &inst, bool want_dz) :
-	UI_Escapable_Window(360, 205, "Move Objects"),
-	want_close(false), inst(inst)
+	UI_Escapable_Window(360, 205, "Move Objects"), inst(inst)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the offset to move objects:");
 	title->labelsize(16);
@@ -69,9 +68,6 @@ UI_MoveDialog::UI_MoveDialog(Instance &inst, bool want_dz) :
 	callback(close_callback, this);
 }
 
-
-UI_MoveDialog::~UI_MoveDialog()
-{ }
 
 
 void UI_MoveDialog::Run()
@@ -114,7 +110,7 @@ void UI_MoveDialog::ok_callback(Fl_Widget *w, void *data)
 
 UI_ScaleDialog::UI_ScaleDialog(Instance &inst) :
 	UI_Escapable_Window(360, 270, "Scale Objects"),
-	want_close(false), inst(inst)
+	inst(inst)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the scale amount:");
 	title->labelsize(16);
@@ -167,11 +163,6 @@ UI_ScaleDialog::UI_ScaleDialog(Instance &inst) :
 	resizable(NULL);
 
 	callback(close_callback, this);
-}
-
-
-UI_ScaleDialog::~UI_ScaleDialog()
-{
 }
 
 

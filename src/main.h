@@ -30,11 +30,7 @@
 
 #define EUREKA_TITLE  "Eureka DOOM Editor"
 
-#ifdef BUILT_VIA_CMAKE
 #include "version.h"
-#else
-#define EUREKA_VERSION "2.0.0"
-#endif
 
 #define EUREKA_LUMP  "__EUREKA"
 
@@ -62,7 +58,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <ctype.h>
+#include "safe_ctype.h"
 #include <limits.h>
 #include <errno.h>
 #include <math.h>
@@ -129,6 +125,8 @@ namespace global
 	extern fs::path install_dir;  // install dir (e.g. /usr/share/eureka)
 	extern fs::path home_dir;      // home dir (e.g. $HOME/.eureka)
 	extern fs::path cache_dir;    // for caches and backups, can be same as home_dir
+
+	extern fs::path old_linux_home_and_cache_dir;
 }
 
 namespace global
@@ -144,10 +142,16 @@ namespace global
 
 namespace global
 {
-	extern int   show_help;		// Print usage message and exit.
-	extern int   show_version;	// Print version info and exit.
+	extern bool   show_help;		// Print usage message and exit.
+	extern bool   show_version;	// Print version info and exit.
 }
 
+
+struct LoadingData;
+struct NewResources;
+struct WadData;
+
+NewResources loadResources(const LoadingData& loading, const WadData& waddata) noexcept(false);
 
 /*
  *  Various global functions

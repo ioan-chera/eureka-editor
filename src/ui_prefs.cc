@@ -26,11 +26,15 @@
 #include "m_parse.h"
 
 #include <algorithm>
+#include <vector>
 
 #include "ui_window.h"
-#include "ui_prefs.h"
+#include "ui_menu.h"
+#include "m_keys.h"
+#include "ui_keybindingstable.h"
 
 #include <FL/Fl_Color_Chooser.H>
+#include <FL/fl_draw.H>
 
 
 #define PREF_WINDOW_W  600
@@ -109,7 +113,7 @@ private:
 				FinishGrab();
 
 				if (key)
-					key_name->value(M_KeyToString(key).c_str());
+					key_name->value(keys::toString(key).c_str());
 
 				// if previous key was invalid, need to re-enable OK button
 				validate_callback(this, this);
@@ -128,7 +132,7 @@ private:
 					FinishGrab();
 
 					key = new_key;
-					key_name->value(M_KeyToString(key).c_str());
+					key_name->value(keys::toString(key).c_str());
 
 					// if previous key was invalid, need to re-enable OK button
 					validate_callback(this, this);
@@ -241,13 +245,13 @@ private:
 
 	void Decode(KeyContext ctx, const char *str)
 	{
-		while (isspace(*str))
+		while (safe_isspace(*str))
 			str++;
 
 		char func_buf[100];
 		unsigned int pos = 0;
 
-		while (*str && ! (isspace(*str) || *str == ':' || *str == '/') &&
+		while (*str && ! (safe_isspace(*str) || *str == ':' || *str == '/') &&
 			   pos + 4 < sizeof(func_buf))
 		{
 			func_buf[pos++] = *str++;
@@ -264,7 +268,7 @@ private:
 		if (*str == ':')
 			str++;
 
-		while (isspace(*str))
+		while (safe_isspace(*str))
 			str++;
 
 		params->value(str);
@@ -405,16 +409,16 @@ private:
 	void ReplaceKeyword(const char *new_word)
 	{
 		// delete existing keyword, if any
-		if (isalnum(params->value()[0]))
+		if (safe_isalnum(params->value()[0]))
 		{
 			const char *str = params->value();
 
 			int len = 0;
 
-			while (str[len] && (isalnum(str[len]) || str[len] == '_'))
+			while (str[len] && (safe_isalnum(str[len]) || str[len] == '_'))
 				len++;
 
-			while (str[len] && isspace(str[len]))
+			while (str[len] && safe_isspace(str[len]))
 				len++;
 
 			params->replace(0, len, NULL);
@@ -438,7 +442,7 @@ private:
 			int a = (int)(pos - str);
 			int b = a + (int)strlen(new_flag);
 
-			while (str[b] && isspace(str[b]))
+			while (str[b] && safe_isspace(str[b]))
 				b++;
 
 			params->replace(a, b, NULL);
@@ -449,7 +453,7 @@ private:
 		// append the flag, adding a space if necessary
 		int a = params->size();
 
-		if (a > 0 && !isspace(str[a-1]))
+		if (a > 0 && !safe_isspace(str[a-1]))
 		{
 			params->replace(a, a, " ");
 			a += 1;
@@ -491,7 +495,7 @@ public:
 		key_name->callback((Fl_Callback*)validate_callback, this);
 
 		if (key)
-			key_name->value(M_KeyToString(key).c_str());
+			key_name->value(keys::toString(key).c_str());
 
 		grab_but = new Fl_Button(255, 25, 90, 25, "Re-bind");
 		grab_but->callback((Fl_Callback*)grab_key_callback, this);
@@ -587,23 +591,92 @@ private:
 	bool want_quit;
 	bool want_discard;
 
+	// Simple snapshot-based undo/redo for key bindings within the dialog
+	struct Snapshot
+	{
+		std::vector<key_binding_t> before;
+		std::vector<key_binding_t> after;
+	};
+
+	std::vector<Snapshot> undo_stack_;
+	std::vector<Snapshot> redo_stack_;
+
+	struct ChangeGuard
+	{
+		UI_Preferences *const prefs;
+		const std::vector<key_binding_t> before;
+
+		ChangeGuard(UI_Preferences *p) : prefs(p), before(global::pref_binds)
+		{
+		}
+
+		void commit()
+		{
+			std::vector<key_binding_t> after = global::pref_binds;
+			// Only push a snapshot if something actually changed
+			if(before == after)
+				return;
+			
+			Snapshot s;
+			s.before = std::move(before);
+			s.after = std::move(after);
+			prefs->undo_stack_.push_back(std::move(s));
+			prefs->redo_stack_.clear();
+			prefs->updateUndoRedoButtons();
+		}
+	};
+
+	bool doUndo()
+	{
+		if(undo_stack_.empty())
+			return false;
+		Snapshot s = std::move(undo_stack_.back());
+		undo_stack_.pop_back();
+		// Apply previous state
+		global::pref_binds = s.before;
+		redo_stack_.push_back(std::move(s));
+		ReloadKeys();
+		updateUndoRedoButtons();
+		redraw();
+		return true;
+	}
+
+	bool doRedo()
+	{
+		if(redo_stack_.empty())
+			return false;
+		Snapshot s = std::move(redo_stack_.back());
+		redo_stack_.pop_back();
+		// Re-apply state
+		global::pref_binds = s.after;
+		undo_stack_.push_back(std::move(s));
+		ReloadKeys();
+		updateUndoRedoButtons();
+		redraw();
+		return true;
+	}
+
 	char key_sort_mode;
 	bool key_sort_rev;
 
-	// normally zero (not waiting for a key)
-	int awaiting_line;
+	// dynamic column widths for key bindings browser
+	int key_col_widths[4];
+	static constexpr int default_key_col_widths[4] = {125, 75, 205, 0};
 
 	const opt_desc_t *const options;
 
 	static void  close_callback(Fl_Widget *w, void *data);
 	static void  color_callback(Fl_Button *w, void *data);
 
-	static void sort_key_callback(Fl_Button *w, void *data);
 	static void bind_key_callback(Fl_Button *w, void *data);
 	static void edit_key_callback(Fl_Button *w, void *data);
 	static void  del_key_callback(Fl_Button *w, void *data);
+	static void undo_key_callback(Fl_Button *w, void *data);
+	static void redo_key_callback(Fl_Button *w, void *data);
 
 	static void reset_callback(Fl_Button *w, void *data);
+
+	static void sortCallback(int column, bool reverse, void *ctx);
 
 public:
 	UI_Preferences(const opt_desc_t *options);
@@ -625,6 +698,19 @@ public:
 	void SetBinding(keycode_t key);
 
 	void EnsureKeyVisible(int line);
+
+private:
+	void updateUndoRedoButtons()
+	{
+		if(undo_stack_.empty())
+			key_undo->deactivate();
+		else
+			key_undo->activate();
+		if(redo_stack_.empty())
+			key_redo->deactivate();
+		else
+			key_redo->activate();
+	}
 
 public:
 	Fl_Tabs *tabs;
@@ -652,16 +738,14 @@ public:
 
 	/* Keys Tab */
 
-	Fl_Hold_Browser *key_list;
-
-	Fl_Button *key_group;
-	Fl_Button *key_key;
-	Fl_Button *key_func;
+	UI_KeyBindingsTable *key_list;
 
 	Fl_Button *key_add;
 	Fl_Button *key_copy;
 	Fl_Button *key_edit;
 	Fl_Button *key_delete;
+	Fl_Button *key_undo;
+	Fl_Button *key_redo;
 	Fl_Button *key_rebind;
 
 	/* Edit Tab */
@@ -735,13 +819,24 @@ public:
 
 #define R_SPACES  "  "
 
+void UI_Preferences::sortCallback(int column, bool reverse, void *ctx)
+{
+	auto prefs = static_cast<UI_Preferences *>(ctx);
+	const char codes[] = "kcf";
+	prefs->key_sort_mode = codes[column];
+	prefs->key_sort_rev = reverse;
+	prefs->LoadKeys();
+}
 
 UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), want_discard(false),
 	  key_sort_mode('k'), key_sort_rev(false),
-	  awaiting_line(0), options(options)
+	  options(options)
 {
+	// Initialize dynamic column widths with defaults
+	memcpy(key_col_widths, default_key_col_widths, sizeof(key_col_widths));
+
 	if (config::gui_color_set == 2)
 		color(fl_gray_ramp(4));
 	else
@@ -846,24 +941,17 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
 
-		{ key_key = new Fl_Button(25, 87, 125, 25, "KEY");
-		  key_key->color((Fl_Color)231);
-		  key_key->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_key->callback((Fl_Callback*)sort_key_callback, this);
+		{ key_undo = new Fl_Button(395, 50, 30, 30, "↶");
+		  key_undo->callback((Fl_Callback*)undo_key_callback, this);
+		  key_undo->tooltip("Undo key binding change");
 		}
-		{ key_group = new Fl_Button(155, 87, 75, 25, "MODE");
-		  key_group->color((Fl_Color)231);
-		  key_group->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_group->callback((Fl_Callback*)sort_key_callback, this);
+		{ key_redo = new Fl_Button(432, 50, 30, 30, "↷");
+		  key_redo->callback((Fl_Callback*)redo_key_callback, this);
+		  key_redo->tooltip("Redo key binding change");
 		}
-		{ key_func = new Fl_Button(235, 87, 205, 25, "FUNCTION");
-		  key_func->color((Fl_Color)231);
-		  key_func->align(Fl_Align(FL_ALIGN_INSIDE));
-		  key_func->callback((Fl_Callback*)sort_key_callback, this);
-		}
-		{ key_list = new Fl_Hold_Browser(20, 115, 442, 308);
-		  key_list->textfont(FL_COURIER);
-		  key_list->has_scrollbar(Fl_Browser_::VERTICAL);
+
+		{ key_list = new UI_KeyBindingsTable(20, 87, 442, 336, sortCallback, this);
+
 		}
 		{ key_add = new Fl_Button(480, 155, 85, 30, "&Add");
 		  key_add->callback((Fl_Callback*)edit_key_callback, this);
@@ -1158,8 +1246,9 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	int line = prefs->key_list->value();
-	if (line < 1)
+	int line = prefs->key_list->getSelectedIndex();
+	// TODO: verify index
+	if (line < 0)
 	{
 		fl_beep();
 		return;
@@ -1167,59 +1256,10 @@ void UI_Preferences::bind_key_callback(Fl_Button *w, void *data)
 
 	prefs->EnsureKeyVisible(line);
 
-
-	int bind_idx = line - 1;
-
 	// show we're ready to accept a new key
-
-	const char *str = M_StringForBinding(bind_idx, true /* changing_key */);
-	SYS_ASSERT(str);
-
-	prefs->key_list->text(line, str);
-	prefs->key_list->selection_color(FL_YELLOW);
+	prefs->key_list->setChallenge(line);
 
 	Fl::focus(prefs);
-
-	prefs->awaiting_line = line;
-}
-
-
-void UI_Preferences::sort_key_callback(Fl_Button *w, void *data)
-{
-	UI_Preferences *prefs = (UI_Preferences *)data;
-
-	if (w == prefs->key_group)
-	{
-		if (prefs->key_sort_mode != 'c')
-		{
-			prefs->key_sort_mode  = 'c';
-			prefs->key_sort_rev = false;
-		}
-		else
-			prefs->key_sort_rev = !prefs->key_sort_rev;
-	}
-	else if (w == prefs->key_key)
-	{
-		if (prefs->key_sort_mode != 'k')
-		{
-			prefs->key_sort_mode  = 'k';
-			prefs->key_sort_rev = false;
-		}
-		else
-			prefs->key_sort_rev = !prefs->key_sort_rev;
-	}
-	else if (w == prefs->key_func)
-	{
-		if (prefs->key_sort_mode != 'f')
-		{
-			prefs->key_sort_mode  = 'f';
-			prefs->key_sort_rev = false;
-		}
-		else
-			prefs->key_sort_rev = !prefs->key_sort_rev;
-	}
-
-	prefs->LoadKeys();
 }
 
 
@@ -1241,8 +1281,8 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	if (! is_add)
 	{
-		int line = prefs->key_list->value();
-		if (line < 1)
+		int line = prefs->key_list->getSelectedIndex();
+		if (line < 0)
 		{
 			fl_beep();
 			return;
@@ -1250,11 +1290,11 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 		prefs->EnsureKeyVisible(line);
 
-		bind_idx = line - 1;
+		bind_idx = line;
 		SYS_ASSERT(bind_idx >= 0);
 
 		M_GetBindingInfo(bind_idx, &new_key, &new_context);
-		new_func = M_StringForFunc(bind_idx);
+		new_func = keys::stringForFunc(global::pref_binds[bind_idx]);
 	}
 
 
@@ -1267,6 +1307,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	if (was_ok)
 	{
 		// assume we can set it, since the dialog validated it
+		ChangeGuard guard(prefs);
 
 		if (is_add || is_copy)
 		{
@@ -1281,6 +1322,8 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 		{
 			M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
 		}
+
+		guard.commit();
 	}
 
 	delete dialog;
@@ -1292,12 +1335,12 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 	{
 		// expand the browser size with a dummy line
 		// [ the ReloadKeys() below will grab the correct text ]
-		prefs->key_list->add("");
+		//prefs->key_list->add("");
 
 		SYS_ASSERT(bind_idx >= 0);
-		int line = 1 + bind_idx;
+		int line = bind_idx;
 
-		prefs->key_list->select(line);
+		prefs->key_list->selectRowAtIndex(line);
 		prefs->EnsureKeyVisible(line);
 	}
 
@@ -1312,23 +1355,49 @@ void UI_Preferences::del_key_callback(Fl_Button *w, void *data)
 {
 	UI_Preferences *prefs = (UI_Preferences *)data;
 
-	int line = prefs->key_list->value();
-	if (line < 1)
+	int line = prefs->key_list->getSelectedIndex();
+	if (line < 0)
 	{
 		fl_beep();
 		return;
 	}
 
-	M_DeleteLocalBinding(line - 1);
+	{
+		ChangeGuard guard(prefs);
+		M_DeleteLocalBinding(line);
+		guard.commit();
+	}
 
-	prefs->key_list->remove(line);
+	//prefs->key_list->remove(line);
 	prefs->ReloadKeys();
 
-	if (line <= prefs->key_list->size())
+	if (line < (int)global::pref_binds.size())
 	{
-		prefs->key_list->select(line);
+		prefs->key_list->selectRowAtIndex(line);
 
 		Fl::focus(prefs->key_list);
+	}
+}
+
+
+void UI_Preferences::undo_key_callback(Fl_Button *w, void *data)
+{
+	UI_Preferences *prefs = (UI_Preferences *)data;
+
+	if (!prefs->doUndo())
+	{
+		fl_beep();
+	}
+}
+
+
+void UI_Preferences::redo_key_callback(Fl_Button *w, void *data)
+{
+	UI_Preferences *prefs = (UI_Preferences *)data;
+
+	if (!prefs->doRedo())
+	{
+		fl_beep();
 	}
 }
 
@@ -1354,8 +1423,9 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 
 	if (is_keys)
 	{
+		ChangeGuard guard(prefs);
 		M_CopyBindings(true /* from_defaults */);
-
+		guard.commit();
 		prefs->LoadKeys();
 	}
 	else
@@ -1384,6 +1454,11 @@ void UI_Preferences::Run()
 
 	set_modal();
 
+	// Ensure fresh undo/redo stacks for this session
+	undo_stack_.clear();
+	redo_stack_.clear();
+	updateUndoRedoButtons();
+
 	show();
 
 	while (! want_quit)
@@ -1396,6 +1471,8 @@ void UI_Preferences::Run()
 	if (want_discard)
 	{
 		gLog.printf("Preferences: discarded changes\n");
+		undo_stack_.clear();
+		redo_stack_.clear();
 		return;
 	}
 
@@ -1403,10 +1480,14 @@ void UI_Preferences::Run()
 	if(global::config_file.empty())
 		DLG_ShowError(false, "Configuration file not initialized.");
 	else
-		M_WriteConfigFile(global::config_file.u8string(), options);
+		M_WriteConfigFile(global::config_file, options);
 
 	M_ApplyBindings();
 	M_SaveBindings();
+
+	// Clear after saving and unhook
+	undo_stack_.clear();
+	redo_stack_.clear();
 }
 
 
@@ -1479,11 +1560,8 @@ void UI_Preferences::LoadValues()
 	if (config::grid_style < 0 || config::grid_style > 1)
 		config::grid_style = 1;
 
-	if (config::grid_default_mode < 0 || config::grid_default_mode > 1)
-		config::grid_default_mode = 1;
-
 	grid_cur_style->value(config::grid_style);
-	grid_enabled->value(config::grid_default_mode);
+	grid_enabled->value(config::grid_default_mode ? 1 : 0);
 	grid_snap->value(config::grid_default_snap ? 1 : 0);
 	grid_size->value(GridSizeToChoice(config::grid_default_size));
 	grid_hide_free ->value(config::grid_hide_in_free_mode ? 1 : 0);
@@ -1581,7 +1659,7 @@ void UI_Preferences::SaveValues()
 		Fl::foreground(0, 0, 0);
 
 		// TODO: update for ALL windows
-		gInstance.main_win->redraw();
+		gInstance->main_win->redraw();
 	}
 	else if (config::gui_color_set == 2)
 	{
@@ -1593,7 +1671,7 @@ void UI_Preferences::SaveValues()
 						RGB_BLUE(config::gui_custom_fg));
 
 		// TODO: update for ALL windows
-		gInstance.main_win->redraw();
+		gInstance->main_win->redraw();
 	}
 
 	/* General Tab */
@@ -1626,7 +1704,7 @@ void UI_Preferences::SaveValues()
 		config::browser_combine_tex = new_combo;
 
 		// TODO: update for ALL windows
-		gInstance.main_win->browser->Populate();
+		gInstance->main_win->browser->Populate();
 	}
 
 	// decode the user ratio
@@ -1639,12 +1717,12 @@ void UI_Preferences::SaveValues()
 		std::swap(config::grid_ratio_low, config::grid_ratio_high);
 
 	// TODO: update for ALL windows
-	gInstance.main_win->info_bar->UpdateRatio();
+	gInstance->main_win->info_bar->UpdateRatio();
 
 	/* Grid Tab */
 
 	config::grid_style        = grid_cur_style->value();
-	config::grid_default_mode = grid_enabled->value();
+	config::grid_default_mode = !!grid_enabled->value();
 	config::grid_default_snap = grid_snap->value() ? true : false;
 	config::grid_default_size = atoi(grid_size->mvalue()->text);
 	config::grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
@@ -1698,17 +1776,9 @@ void UI_Preferences::LoadKeys()
 	M_SortBindings(key_sort_mode, key_sort_rev);
 	M_DetectConflictingBinds();
 
-	key_list->clear();
+	key_list->reload();
 
-	for (int i = 0 ; i < M_NumBindings() ; i++)
-	{
-		const char *str = M_StringForBinding(i);
-		SYS_ASSERT(str);
-
-		key_list->add(str);
-	}
-
-	key_list->select(1);
+	key_list->selectRowAtIndex(0);
 }
 
 
@@ -1716,45 +1786,43 @@ void UI_Preferences::ReloadKeys()
 {
 	M_DetectConflictingBinds();
 
-	for (int i = 0 ; i < M_NumBindings() ; i++)
-	{
-		const char *str = M_StringForBinding(i);
-
-		key_list->text(i + 1, str);
-	}
+	key_list->reload();
 }
 
 
 void UI_Preferences::EnsureKeyVisible(int line)
 {
-	if (! key_list->displayed(line))
+	int r1, r2, c1, c2;
+	key_list->visible_cells(r1, r2, c1, c2);
+	if(line < r1 || line > r2)
 	{
-		key_list->middleline(line);
+		int visibleRows = r2 - r1 + 1;
+		int newTopRow = line - visibleRows / 2;
+		key_list->top_row(newTopRow);
 	}
 }
 
 
 void UI_Preferences::ClearWaiting()
 {
-	if (awaiting_line > 0)
+	if (key_list->getChallenged() >= 0)
 	{
 		// restore the text line
+		key_list->clearChallenge();
 		ReloadKeys();
 
 		Fl::focus(key_list);
 	}
-
-	awaiting_line = 0;
-
-	key_list->selection_color(FL_SELECTION_COLOR);
 }
 
 
 void UI_Preferences::SetBinding(keycode_t key)
 {
-	int bind_idx = awaiting_line - 1;
+	int bind_idx = key_list->getChallenged();
 
+	ChangeGuard guard(this);
 	M_ChangeBindingKey(bind_idx, key);
+	guard.commit();
 
 	ClearWaiting();
 }
@@ -1762,7 +1830,7 @@ void UI_Preferences::SetBinding(keycode_t key)
 
 int UI_Preferences::handle(int event)
 {
-	if (awaiting_line > 0)
+	if (key_list->getChallenged() >= 0)
 	{
 		// escape key cancels
 		if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)
@@ -1788,19 +1856,13 @@ int UI_Preferences::handle(int event)
 	return Fl_Double_Window::handle(event);
 }
 
-
 //------------------------------------------------------------------------
 
 
 void Instance::CMD_Preferences()
 {
-	UI_Preferences * dialog = new UI_Preferences(options);
-
-	dialog->Run();
-
-	delete dialog;
+    UI_Preferences(options).Run();
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

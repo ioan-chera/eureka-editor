@@ -48,8 +48,8 @@ struct Sector
 		F_CEIL_TEX = 3,
 	};
 
-	SString FloorTex() const;
-	SString CeilTex() const;
+	SString FloorTex() const noexcept;
+	SString CeilTex() const noexcept;
 
 	int HeadRoom() const
 	{

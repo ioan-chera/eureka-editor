@@ -45,6 +45,8 @@
 
 #include "FL/Fl_Sys_Menu_Bar.H"
 
+#include <assert.h>
+
 #define WINDOW_BG  FL_DARK3
 
 #define MIN_BROWSER_W	250
@@ -79,16 +81,20 @@ public:
 	UI_SectorBox *sec_box;
 	UI_VertexBox *vert_box;
 
-	UI_DefaultProps   *props_box;
 	UI_FindAndReplace *find_box;
 
 private:
+	
+	UI_DefaultProps   *props_box;
+	
 	// active cursor
 	Fl_Cursor cursor_shape;
 
 	// remember window size/position after going fullscreen.
 	// the 'last_w' and 'last_h' fields are zero when not fullscreen
 	// int last_x = 0, last_y = 0, last_w = 0, last_h = 0;
+	
+	MapItemBox *mapItemBoxes[4] = {};
 
 public:
 	explicit UI_MainWindow(Instance &inst);
@@ -97,6 +103,12 @@ public:
 	// FLTK methods
 	int handle(int event);
 	void draw();
+	
+	void propsLoadValues()
+	{
+		assert(props_box);
+		props_box->LoadValues();
+	}
 
 public:
 	void SetTitle(const SString &wad_name, const SString &map_name, bool read_only);
@@ -111,7 +123,7 @@ public:
 	// this is a wrapper around the FLTK cursor() method which
 	// prevents the possibly expensive call when the shape hasn't
 	// changed.
-	void SetCursor(Fl_Cursor shape);
+	void SetCursor(Fl_Cursor shape) noexcept;
 
 	// show or hide the Browser panel.
 	// kind is NUL or '-' to hide, '/' to toggle, 'T' for textures, 'F' flats,
@@ -121,7 +133,7 @@ public:
 	void ShowDefaultProps();
 	void ShowFindAndReplace();
 
-	void UpdateTotals();
+	void UpdateTotals(const Document &doc) noexcept;
 
 	int GetPanelObjNum() const;
 
@@ -150,7 +162,7 @@ public:
 
 	// this is called when game_info changes (in Main_LoadResources)
 	// and can enable / disable stuff in the panels.
-	void UpdateGameInfo();
+	void UpdateGameInfo(const LoadingData &loading, const ConfigData &config);
 
 private:
 	static void quit_callback(Fl_Widget *w, void *data);

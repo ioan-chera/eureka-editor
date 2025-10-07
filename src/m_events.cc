@@ -46,7 +46,7 @@ void Instance::ClearStickyMod()
 	edit.sticky_mod = 0;
 }
 
-void Instance::Editor_ClearAction()
+void Instance::Editor_ClearAction() noexcept
 {
 	switch (edit.action)
 	{
@@ -93,7 +93,7 @@ void Instance::Editor_SetAction(EditorAction  new_action)
 
 void Instance::Editor_Zoom(int delta, v2int_t mid)
 {
-    float S1 = static_cast<float>(grid.Scale);
+    float S1 = static_cast<float>(grid.getScale());
 
     grid.AdjustScale(delta);
 
@@ -132,7 +132,7 @@ void Instance::Editor_ScrollMap(int mode, v2int_t dpos, keycode_t mod)
 	}
 	else
 	{
-		float speed = static_cast<float>(edit.panning_speed / grid.Scale);
+		float speed = static_cast<float>(edit.panning_speed / grid.getScale());
 
 		v2double_t delta = {
 			((double) -dpos.x * speed),
@@ -141,12 +141,6 @@ void Instance::Editor_ScrollMap(int mode, v2int_t dpos, keycode_t mod)
 
 		grid.Scroll(delta);
 	}
-}
-
-
-void Instance::Editor_ClearNav()
-{
-	edit.nav = {};
 }
 
 
@@ -183,7 +177,7 @@ void Instance::Navigate2D()
 
 void Instance::Nav_Clear()
 {
-	Editor_ClearNav();
+	edit.clearNav();
 
 	memset(nav_actives, 0, sizeof(nav_actives));
 
@@ -601,7 +595,7 @@ int Instance::EV_RawKey(int event)
 		return 1;
 
 #if 0  // DEBUG
-	fprintf(stderr, "Key code: 0x%08x : %s\n", key, M_KeyToString(key).c_str());
+	fprintf(stderr, "Key code: 0x%08x : %s\n", key, keys::toString(key).c_str());
 #endif
 
 	// keyboard propagation logic
@@ -847,7 +841,15 @@ bool Instance::M_ParseOperationFile()
 	// look in user's $HOME directory first
 	fs::path filename = global::home_dir / "operations.cfg";
 
+	// Try from old dir if given
 	LineFile file(filename);
+	if(!file.isOpen() && !global::old_linux_home_and_cache_dir.empty())
+	{
+		gLog.printf("%s not found. Trying from old Linux path %s/operations.cfg\n", filename.u8string().c_str(),
+				global::old_linux_home_and_cache_dir.u8string().c_str());
+		filename = global::old_linux_home_and_cache_dir / "operations.cfg";
+		file.open(filename);
+	}
 
 	// otherwise load it from the installation directory
 	if (! file.isOpen())

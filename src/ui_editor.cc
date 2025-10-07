@@ -345,7 +345,7 @@ static const Fl_Menu_Item ted_menu_items[] =
 
 //------------------------------------------------------------------------
 
-UI_TextEditor::UI_TextEditor(Instance &inst) :
+UI_TextEditor::UI_TextEditor(const Instance &inst) :
 	Fl_Double_Window(600, 400, ""),
 	want_close(false), want_save(false),
 	is_new(true), read_only(false), has_changes(false), inst(inst)
@@ -450,9 +450,14 @@ void UI_TextEditor::text_modified_callback(int, int nInserted, int nDeleted, int
 }
 
 
-bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
+bool UI_TextEditor::LoadLump(const Wad_file *wad, const SString &lump_name)
 {
-	Lump_c * lump = wad->FindLump(lump_name);
+	if(!wad)
+	{
+		DLG_Notify("Cannot load lump; no WAD has been loaded.");
+		return false;
+	}
+	const Lump_c * lump = wad->FindLump(lump_name);
 
 	// if the lump does not exist, we will create it
 	if (! lump)
@@ -470,11 +475,11 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 
 	gLog.printf("Reading '%s' text lump\n", lump_name.c_str());
 
-	lump->Seek();
+	LumpInputStream stream(*lump);
 
 	SString line;
 
-	while (lump->GetLine(line))
+	while (stream.readLine(line))
 	{
 		line.trimTrailingSpaces();
 
@@ -487,7 +492,7 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 	return true;
 }
 
-void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
+void UI_TextEditor::LoadMemory(const std::vector<byte> &buf)
 {
 	// this code is slow, but simple
 
@@ -512,13 +517,17 @@ void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
 
 void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 {
+	if(!wad)
+	{
+		return;
+	}
 	gLog.printf("Writing '%s' text lump\n", lump_name.c_str());
 
 	int oldie = wad->FindLumpNum(lump_name);
 	if (oldie >= 0)
 		wad->RemoveLumps(oldie, 1);
 
-	Lump_c *lump = wad->AddLump(lump_name);
+	Lump_c &lump = wad->AddLump(lump_name);
 
 	int len = tbuf->length();
 
@@ -531,10 +540,17 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 		if (ch == 0 || ch == '\r')
 			continue;
 
-		lump->Write(&ch, 1);
+		lump.Write(&ch, 1);
 	}
 
-	wad->writeToDisk();
+	try
+	{
+		wad->writeToDisk();
+	}
+	catch(const std::runtime_error &e)
+	{
+		DLG_ShowError(false, "Failed saving lump %s: %s", lump_name.c_str(), e.what());
+	}
 }
 
 void UI_TextEditor::SaveMemory(std::vector<byte> &buf)
@@ -590,7 +606,7 @@ void UI_TextEditor::InsertFile()
 
 	chooser.title("Pick file to insert");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-	chooser.directory(inst.Main_FileOpFolder().c_str());
+	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{
@@ -650,7 +666,7 @@ void UI_TextEditor::ExportToFile()
 	chooser.title("Pick file to export to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM);
-	chooser.directory(inst.Main_FileOpFolder().c_str());
+	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{
@@ -670,7 +686,7 @@ void UI_TextEditor::ExportToFile()
 	const char *filename = chooser.filename();
 
 	// open file in binary mode (we handle CR/LF ourselves)
-	FILE * fp = fopen(filename, "wb");
+	FILE * fp = UTF8_fopen(filename, "wb");
 
 	if (fp == NULL)
 	{

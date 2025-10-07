@@ -27,15 +27,33 @@
 
 class Sticker;
 class UI_DynIntInput;
+class UI_ThingBox;
+struct thingflag_t;
 
-class UI_ThingBox : public Fl_Group
+class thing_opt_CB_data_c
+{
+public:
+	UI_ThingBox *parent;
+
+	int mask;
+
+public:
+	thing_opt_CB_data_c(UI_ThingBox *_parent, int _mask) :
+		parent(_parent), mask(_mask)
+	{ }
+
+};
+
+struct FlagButton
+{
+	std::unique_ptr<Fl_Check_Button> button;
+	std::unique_ptr<thing_opt_CB_data_c> data;
+	const thingflag_t *info;
+};
+
+class UI_ThingBox : public MapItemBox
 {
 private:
-	int obj;
-	int count;
-
-	UI_Nombre *which;
-
 	UI_DynInput  *type;
 	Fl_Output    *desc;
 	Fl_Button    *choose;
@@ -53,29 +71,11 @@ private:
 	UI_DynIntInput *pos_y;
 	UI_DynIntInput *pos_z;
 
-	// Options
-	Fl_Check_Button *o_easy;
-	Fl_Check_Button *o_medium;
-	Fl_Check_Button *o_hard;
+	UI_DynIntInput *flagBox;
+	Fl_Color flagBoxDefaultColor;
 
-	Fl_Check_Button *o_sp;
-	Fl_Check_Button *o_coop;
-	Fl_Check_Button *o_dm;
-	Fl_Check_Button *o_vanilla_dm;
-
-	Fl_Check_Button *o_fight;   //
-	Fl_Check_Button *o_cleric;  // Hexen
-	Fl_Check_Button *o_mage;    //
-
-	Fl_Check_Button *o_ambush;
-	Fl_Check_Button *o_friend;   // Boom / MBF / Strife
-	Fl_Check_Button *o_dormant;  // Hexen
-
-	Fl_Check_Button *o_sf_shadow;  //
-	Fl_Check_Button *o_sf_altvis;  //
-	Fl_Check_Button *o_sf_stand;   // Strife
-	Fl_Check_Button *o_sf_ambush;  //
-	Fl_Check_Button *o_sf_friend;  //
+	std::vector<FlagButton> flagButtons;
+	int optionStartX, optionStartY;
 
 	UI_Pic *sprite;
 
@@ -85,30 +85,22 @@ private:
 	Fl_Output    *spec_desc;
 	UI_DynIntInput *args[5];
 
-	Instance &inst;
-	PanelFieldFixUp mFixUp;
-
 public:
 	UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
-	virtual ~UI_ThingBox();
 
 public:
-	void SetObj(int _index, int _count);
-
-	int GetObj() const { return obj; }
-
 	// call this if the thing was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1);
+	void UpdateField(int field = -1) override;
 
-	void UpdateTotal();
+	void UpdateTotal(const Document &doc) noexcept override;
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
-	void UpdateGameInfo();
-	void UnselectPics();
+	void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) override;
+	void UnselectPics() override;
 
 private:
 	void SetThingType(int new_type);
@@ -127,6 +119,7 @@ private:
 	static void dyntype_callback(Fl_Widget *, void *);
 
 	static void  angle_callback(Fl_Widget *w, void *data);
+	static void  flags_callback(Fl_Widget *w, void *data);
 	static void    tid_callback(Fl_Widget *w, void *data);
 	static void option_callback(Fl_Widget *w, void *data);
 	static void button_callback(Fl_Widget *w, void *data);

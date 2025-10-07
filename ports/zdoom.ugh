@@ -29,13 +29,59 @@
 if $MAP_FORMAT not DOOM
   set $ALLOW_BOOM 0
   set $HEXEN_SPECIALS 1
+  feature player_use_passthru_activation 1
+else
+  # Strife ZDoom in Doom format doesn't inherit the BOOM features.
+  if $GAME_NAME not strife1
+    set $ALLOW_BOOM 1
+  endif
 endif
 
 if $ALLOW_BOOM is 1
-  include "mbf"
-  feature friend_flag 0
+  include "mbf21"
+  lineflag "3D MidTex" 0x0400
 endif
 
+if $MAP_FORMAT not DOOM
+  # Need to clear from base game, since ZDoom has its full common set of flags
+  clear thingflags
+  thingflag 0 0 easy    on  0x0001
+  thingflag 1 0 medium  on  0x0002
+  thingflag 2 0 hard    on  0x0004
+  thingflag 0 1 sp      on  0x0100
+  thingflag 1 1 coop    on  0x0200
+  thingflag 2 1 dm      on  0x0400
+
+  if $GAME_NAME is hexen
+    thingflag 0 2 Fighter on  0x0020
+    thingflag 1 2 Cleric  on  0x0040
+    thingflag 2 2 Mage    on  0x0080
+  else
+    thingflag 0 2 class1  on  0x0020
+    thingflag 1 2 class2  on  0x0040
+    thingflag 2 2 class3  on  0x0080
+  endif
+
+  thingflag 4 0 ambush  off 0x0008
+  thingflag 4 1 friend  off 0x2000
+  thingflag 4 2 dormant off 0x0010
+
+  thingflag 5 0 stand   off 0x4000
+  thingflag 5 1 shadow  off 0x0800
+  thingflag 5 2 alt-vis off 0x1000
+
+  clear lineflags
+  lineflag "two sided"   0x0004
+  lineflag "upper unpeg" 0x0008
+  lineflag "lower unpeg" 0x0010
+  lineflag "impassable"  0x0001
+  lineflag "block mons"  0x0002
+  lineflag "sound block" 0x0040
+
+  lineflag "mons activate" 0x2000
+  lineflag "block players" 0x4000
+  lineflag "block all"     0x8000
+endif
 
 map_formats DOOM HEXEN UDMF
 
@@ -45,6 +91,7 @@ udmf_namespace ZDoom
 
 feature tx_start 1
 feature medusa_fixed 1
+feature tuttifrutti_fixed 1
 feature lax_sprites 1
 feature mix_textures_flats 1
 feature neg_patch_offsets 1
@@ -476,9 +523,53 @@ sector 78 "ZD: Open after 5 min"
 sector 84 "ZD: Scroll_E /damage"
 sector 87 "ZD: Outside"
 
+sector 79 "ZD: Low friction"
+
 sector 195 "ZD: Hidden"
 sector 196 "ZD: Healing"
 sector 200 "ZD: Sky2"
+
+sector 89 "GZD: GLSector_NoSkyDraw"
+sector 90 "GZD: GLSector_Skybox"
+
+sector 105 "ZD: Strife Hellslime"
+sector 115 "ZD: Instant Death"
+sector 116 "ZD: Strife Super Hellslime"
+
+sector 118 "ZD: Strife Tag Current"
+
+sector 197 "ZD: Outdoor Lightning"
+
+sector 2 "ZD: Use Sky 2"
+
+sector 225 "ZD: Htic Carry E 05"
+sector 226 "ZD: Htic Carry E 10"
+sector 227 "ZD: Htic Carry E 25"
+sector 228 "ZD: Htic Carry E 30"
+sector 229 "ZD: Htic Carry E 35"
+
+sector 230 "ZD: Htic Carry N 05"
+sector 231 "ZD: Htic Carry N 10"
+sector 232 "ZD: Htic Carry N 25"
+sector 233 "ZD: Htic Carry N 30"
+sector 234 "ZD: Htic Carry N 35"
+
+sector 235 "ZD: Htic Carry S 05"
+sector 236 "ZD: Htic Carry S 10"
+sector 237 "ZD: Htic Carry S 25"
+sector 238 "ZD: Htic Carry S 30"
+sector 239 "ZD: Htic Carry S 35"
+
+sector 240 "ZD: Htic Carry W 05"
+sector 241 "ZD: Htic Carry W 10"
+sector 242 "ZD: Htic Carry W 25"
+sector 243 "ZD: Htic Carry W 30"
+sector 244 "ZD: Htic Carry W 35"
+
+gensector 1024 Secret
+gensector 2048 Friction
+gensector 4096 Wind
+gensector 768 Damage 0 NONE 256 "5 hp" 512 "10 hp" 768 "20 hp"
 
 else
 

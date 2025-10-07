@@ -31,16 +31,21 @@
 if $MAP_FORMAT not DOOM
   set $ALLOW_BOOM 0
   set $HEXEN_SPECIALS 1
+else
+  set $ALLOW_BOOM 1
 endif
 
 if $ALLOW_BOOM is 1
-  include "mbf"
+  include "mbf21"
 endif
 
+if $MAP_FORMAT is DOOM
+  thingflag 4 2 dormant off 0x200
+endif
 
 map_formats DOOM UDMF
 
-supported_games doom doom2 heretic hexen strife
+supported_games doom doom2 heretic
 
 udmf_namespace Eternity
 
@@ -48,9 +53,6 @@ feature 3d_midtex 1
 feature tx_start 1
 feature mix_textures_flats 1
 feature slopes 10
-
-#TODO:  thing flag 512 "Dormant" - like in Hexen
-
 
 #---- ETERNITY THINGS ------------------
 
@@ -344,6 +346,8 @@ thing 14063 s nv 16 NULL "EE: Ambience 63"
 thing 14064 s nv 16 NULL "EE: Ambience 64"
 thing 14065 s nv 16 NULL "EE: Ambience Ex"
 
+#---- LINEDEF FLAGS -----------------
+lineflag "3D MidTex"     0x0400
 
 #---- HEXEN-STYLE SPECIALS ----------
 
@@ -638,5 +642,8 @@ line 381 - "-- EE: Attach floor to ctrl"    :line_id
 line 382 - "-- EE: Attach ceil to ctrl"     :line_id
 line 383 - "-- EE: Mirror floor to ctrl"    :line_id
 line 384 - "-- EE: Mirror ceil to ctrl"     :line_id
+
+gensector 1024 "Mute all sounds"
+gensector 2048 "Mute mechanical sounds"
 
 endif

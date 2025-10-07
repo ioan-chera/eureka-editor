@@ -272,6 +272,7 @@ void DLG_ShowError(bool fatal, EUR_FORMAT_STRING(const char *msg), ...)
 	SString linkURL;
 	ParseHyperLink(dialog_buffer, linkTitle, linkURL);
 
+	gLog.printf("Error: %s\n", dialog_buffer.c_str());
 	DialogShowAndRun(MessageBoxIcon::exclamation, dialog_buffer, fatal ?
 					 "Eureka - Fatal Error" : "Eureka - Error", linkTitle,
 					 linkURL);

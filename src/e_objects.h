@@ -29,6 +29,7 @@
 
 #include "DocumentModule.h"
 #include "m_vector.h"
+#include "objid.h"
 
 class EditOperation;
 class selection_c;
@@ -72,6 +73,8 @@ public:
 		double pos_x, double pos_y, double pos_z) const;
 	void rotate3(double deg, double pos_x, double pos_y) const;
 
+	int findLineBetweenLineAndVertex(int lineID, int vertID) const;
+	void splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID, const v2double_t &delta, selection_c *delResultList) const;
 
 private:
 	void insertSector() const;
@@ -106,8 +109,6 @@ private:
 	void quantizeVertices(EditOperation &op, selection_c &list) const;
 	bool spotInUse(ObjType obj_type, int x, int y) const;
 
-	int findLineBetweenLineAndVertex(int lineID, int vertID) const;
-	void splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID, const v2double_t &delta) const;
 };
 
 

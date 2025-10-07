@@ -58,6 +58,13 @@ color unknown_thing  173
 
 #---- THING TYPES ---------------
 
+thingflag 0 0 easy    on  0x01
+thingflag 1 0 medium  on  0x02
+thingflag 2 0 hard    on  0x04
+thingflag 2 1 dm/coop off 0x10
+
+thingflag 4 0 ambush  off 0x08
+
 thinggroup p 4F4 "Player"
 thinggroup m F00 "Monster"
 thinggroup w FA0 "Weapon"
@@ -183,6 +190,12 @@ thing 41 s nv 20 NULL "Env: Waterfall"
 
 include "doom_groups"
 
+lineflag "two sided"   0x0004
+lineflag "upper unpeg" 0x0008
+lineflag "lower unpeg" 0x0010
+lineflag "impassable"  0x0001
+lineflag "block mons"  0x0002
+lineflag "sound block" 0x0040
 
 line 0 - "-- NOTHING"
 
@@ -330,18 +343,26 @@ sector  4 "Damage: Lava Flow"
 sector  5 "Damage: Lava (Light)"
 sector 16 "Damage: Lava (Heavy)"
 
+sector 20 "Scroll: East (slowest)"
 sector 21 "Scroll: East (slow)"
 sector 22 "Scroll: East (normal)"
 sector 23 "Scroll: East (fast)"
+sector 24 "Scroll: East (fastest)"
+sector 25 "Scroll: North (slowest)"
 sector 26 "Scroll: North (slow)"
 sector 27 "Scroll: North (normal)"
 sector 28 "Scroll: North (fast)"
+sector 29 "Scroll: North (fastest)"
+sector 30 "Scroll: South (slowest)"
 sector 31 "Scroll: South (slow)"
 sector 32 "Scroll: South (normal)"
 sector 33 "Scroll: South (fast)"
+sector 34 "Scroll: South (fastest)"
+sector 35 "Scroll: West (slowest)"
 sector 36 "Scroll: West (slow)"
 sector 37 "Scroll: West (normal)"
 sector 38 "Scroll: West (fast)"
+sector 39 "Scroll: West (fastest)"
 
 sector 40 "Wind: East (weak)"
 sector 41 "Wind: East (normal)"

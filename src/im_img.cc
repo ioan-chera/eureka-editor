@@ -30,6 +30,7 @@
 
 #include "im_img.h"
 #include "m_game.h"
+#include "tl/optional.hpp"
 
 #ifndef NO_OPENGL
 // need this for GL_UNSIGNED_INT_8_8_8_8_REV
@@ -40,7 +41,7 @@
 #endif
 #endif
 
-#define DIGIT_FONT_COLOR   RGB_MAKE(68, 221, 255)
+#define DIGIT_FONT_COLOR   rgbMake(68, 221, 255)
 
 
 rgb_color_t Palette::pixelToRGB(img_pixel_t p) const
@@ -51,7 +52,7 @@ rgb_color_t Palette::pixelToRGB(img_pixel_t p) const
 		byte g = static_cast<byte>(IMG_PIXEL_GREEN(p) << 3);
 		byte b = static_cast<byte>(IMG_PIXEL_BLUE(p)  << 3);
 
-		return RGB_MAKE(r, g, b);
+		return rgbMake(r, g, b);
 	}
 	else
 	{
@@ -59,7 +60,7 @@ rgb_color_t Palette::pixelToRGB(img_pixel_t p) const
 		byte g = raw_palette[p][1];
 		byte b = raw_palette[p][2];
 
-		return RGB_MAKE(r, g, b);
+		return rgbMake(r, g, b);
 	}
 }
 
@@ -69,25 +70,16 @@ rgb_color_t Palette::pixelToRGB(img_pixel_t p) const
 Img_c::Img_c(int width, int height, bool _dummy)
 {
 	resize(width, height);
+	setSpriteOffset(width / 2, height);
 }
-
-
-//
-// destructor
-//
-Img_c::~Img_c()
-{
-	delete []pixels;
-}
-
 
 //
 //  return a const pointer on the buffer.
 //  if the image is null, return a NULL pointer.
 //
-const img_pixel_t *Img_c::buf() const
+const img_pixel_t *Img_c::buf() const noexcept
 {
-	return pixels;
+	return pixels.data();
 }
 
 
@@ -97,7 +89,7 @@ const img_pixel_t *Img_c::buf() const
 //
 img_pixel_t *Img_c::wbuf()
 {
-	return pixels;
+	return pixels.data();
 }
 
 
@@ -106,14 +98,11 @@ img_pixel_t *Img_c::wbuf()
 //
 void Img_c::clear()
 {
-	if (pixels)
-	{
-		img_pixel_t *dest = pixels;
-		img_pixel_t *dest_end = dest + (w * h);
+	img_pixel_t *dest = pixels.data();
+	img_pixel_t *dest_end = dest + (w * h);
 
-		for ( ; dest < dest_end ; dest++)
-			*dest = TRANS_PIXEL;
-	}
+	for ( ; dest < dest_end ; dest++)
+		*dest = TRANS_PIXEL;
 }
 
 
@@ -127,11 +116,7 @@ void Img_c::resize(int new_width, int new_height)
 		return;
 
 	// unallocate old buffer
-	if (pixels)
-	{
-		delete[] pixels;
-		pixels = NULL;
-	}
+	pixels.clear();
 
 	// Is it a null image ?
 	if (new_width == 0 || new_height == 0)
@@ -144,19 +129,19 @@ void Img_c::resize(int new_width, int new_height)
 	w = new_width;
 	h = new_height;
 
-	pixels = new img_pixel_t[w * h + 10];  // Some slack
+	pixels.resize(w * h + 10);  // Some slack
 
 	clear();
 }
 
 
-void Img_c::compose(Img_c *other, int x, int y)
+void Img_c::compose(const Img_c &other, int x, int y)
 {
 	int W = width();
 	int H = height();
 
-	int OW = other->width();
-	int OH = other->height();
+	int OW = other.width();
+	int OH = other.height();
 
 	for (int oy = 0 ; oy < OH ; oy++)
 	{
@@ -164,7 +149,7 @@ void Img_c::compose(Img_c *other, int x, int y)
 		if (iy < 0 || iy >= H)
 			continue;
 
-		const img_pixel_t *src = other->buf() + oy * OW;
+		const img_pixel_t *src = other.buf() + oy * OW;
 		img_pixel_t *dest = wbuf() + iy * W;
 
 		for (int ox = 0 ; ox < OW ; ox++, src++)
@@ -179,13 +164,26 @@ void Img_c::compose(Img_c *other, int x, int y)
 	}
 }
 
+void Img_c::flipHorizontally()
+{
+	assert((int)pixels.size() >= w * h);
+	for(int y = 0; y < h; ++y)
+		for(int x = 0; x < w / 2; ++x)
+		{
+			assert(y * w + x >= 0 && y * w + x < (int)pixels.size());
+			assert(y * w + w - x - 1 >= 0 && y * w + w - x - 1 < (int)pixels.size());
+			std::swap(pixels[y * w + x], pixels[y * w + w - x - 1]);
+		}
+}
 
 //
 // make a game image look vaguely like a spectre
 //
-Img_c * Img_c::spectrify(const ConfigData &config) const
+Img_c Img_c::spectrify(const ConfigData &config) const
 {
-	Img_c *omg = new Img_c(width(), height());
+	Img_c omg(width(), height());
+	omg.spriteOffsetX = spriteOffsetX;
+	omg.spriteOffsetY = spriteOffsetY;
 
 	int invis_start = config.miscInfo.invis_colors[0];
 	int invis_len   = config.miscInfo.invis_colors[1] - invis_start + 1;
@@ -198,56 +196,19 @@ Img_c * Img_c::spectrify(const ConfigData &config) const
 
 	const img_pixel_t *src = buf();
 
-	img_pixel_t *dest = omg->wbuf();
+	img_pixel_t *dest = omg.wbuf();
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
 	{
+		assert(y * W + x >= 0 && y * W + x < (int)pixels.size());
 		img_pixel_t pix = src[y * W + x];
 
 		if (pix != TRANS_PIXEL)
 			pix = static_cast<img_pixel_t>(invis_start + (rand() >> 4) % invis_len);
 
+		assert(y * W + x >= 0 && y * W + x < (int)omg.pixels.size());
 		dest[y * W + x] = pix;
-	}
-
-	return omg;
-}
-
-
-//
-//  scale a game image, returning a new one.
-//
-//  the implementation is very simplistic and not optimized.
-//
-//  andrewj: turned into a method, but untested...
-//
-Img_c * Img_c::scale_img(double scale) const
-{
-	int iwidth  = width();
-	int owidth  = (int) (width()  * scale + 0.5);
-	int oheight = (int) (height() * scale + 0.5);
-
-	Img_c *omg = new Img_c(owidth, oheight);
-
-	const img_pixel_t *const ibuf = buf();
-	img_pixel_t       *const obuf = omg->wbuf();
-
-	if (true)
-	{
-		img_pixel_t *orow = obuf;
-		int *ix = new int[owidth];
-		for (int ox = 0; ox < owidth; ox++)
-			ix[ox] = (int) (ox / scale);
-		const int *const ix_end = ix + owidth;
-		for (int oy = 0; oy < oheight; oy++)
-		{
-			int iy = (int) (oy / scale);
-			const img_pixel_t *const irow = ibuf + iwidth * iy;
-			for (const int *i = ix; i < ix_end; i++)
-				*orow++ = irow[*i];
-		}
-		delete[] ix;
 	}
 
 	return omg;
@@ -260,19 +221,21 @@ Img_c * Img_c::scale_img(double scale) const
 //
 // TODO : make it work with RGB pixels (find nearest in palette).
 //
-Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
+Img_c Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 {
 	SYS_ASSERT( src1 <=  src2);
 	SYS_ASSERT(targ1 <= targ2);
 
-	Img_c *omg = new Img_c(width(), height());
+	Img_c omg(width(), height());
+	omg.spriteOffsetX = spriteOffsetX;
+	omg.spriteOffsetY = spriteOffsetY;
 
 	int W = width();
 	int H = height();
 
 	const img_pixel_t *src = buf();
 
-	img_pixel_t *dest = omg->wbuf();
+	img_pixel_t *dest = omg.wbuf();
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -308,32 +271,6 @@ bool Img_c::has_transparent() const
 	}
 
 	return false;
-}
-
-
-void Img_c::test_make_RGB(const WadData &wad)
-{
-	int W = width();
-	int H = height();
-
-	img_pixel_t *src = wbuf();
-
-	for (int y = 0 ; y < H ; y++)
-	for (int x = 0 ; x < W ; x++)
-	{
-		img_pixel_t pix = src[y * W + x];
-
-		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
-		{
-			const rgb_color_t col = wad.palette.pixelToRGB(pix);
-
-			byte r = RGB_RED(col)   >> 3;
-			byte g = RGB_GREEN(col) >> 3;
-			byte b = RGB_BLUE(col)  >> 3;
-
-			src[y * W + x] = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
-		}
-	}
 }
 
 
@@ -458,7 +395,7 @@ void ImageSet::IM_ResetDummyTextures()
 }
 
 
-void ImageSet::IM_UnloadDummyTextures() const
+void ImageSet::IM_UnloadDummyTextures()
 {
 	bool can_delete = false;
 
@@ -527,11 +464,11 @@ static const byte missing_graphic[16 * 16] =
 };
 
 
-static Img_c * IM_CreateDummyTex(const byte *data, int bg, int fg)
+static Img_c IM_CreateDummyTex(const byte *data, int bg, int fg)
 {
-	Img_c *omg = new Img_c(64, 64, true);
+	Img_c omg(64, 64, true);
 
-	img_pixel_t *obuf = omg->wbuf();
+	img_pixel_t *obuf = omg.wbuf();
 
 	for (int y = 0 ; y < 64 ; y++)
 	for (int x = 0 ; x < 64 ; x++)
@@ -544,70 +481,63 @@ static Img_c * IM_CreateDummyTex(const byte *data, int bg, int fg)
 }
 
 
-Img_c *ImageSet::IM_MissingTex(const ConfigData &config)
+const Img_c &ImageSet::IM_MissingTex(const ConfigData &config)
 {
 	if (!missing_tex_image || missing_tex_color != config.miscInfo.missing_color)
 	{
 		missing_tex_color = config.miscInfo.missing_color;
 
-		delete missing_tex_image;
-
 		missing_tex_image = IM_CreateDummyTex(missing_graphic, missing_tex_color, 0);
 	}
 
-	return missing_tex_image;
+	return missing_tex_image.value();
 }
 
 
-Img_c *ImageSet::IM_UnknownTex(const ConfigData &config)
+const Img_c &ImageSet::IM_UnknownTex(const ConfigData &config)
 {
 	if (!unknown_tex_image || unknown_tex_color != config.miscInfo.unknown_tex)
 	{
 		unknown_tex_color = config.miscInfo.unknown_tex;
 
-		delete unknown_tex_image;
-
 		unknown_tex_image = IM_CreateDummyTex(unknown_graphic, unknown_tex_color, 0);
 	}
 
-	return unknown_tex_image;
+	return unknown_tex_image.value();
 }
 
 
-Img_c *ImageSet::IM_SpecialTex(const Palette &palette)
+const Img_c &ImageSet::IM_SpecialTex(const Palette &palette)
 {
 	if (special_tex_color < 0)
 	{
 		special_tex_color = palette.findPaletteColor(192, 0, 192);
 
-		delete special_tex_image;
-		special_tex_image = NULL;
+		special_tex_image.reset();
 	}
 
 	if (!special_tex_image)
 		special_tex_image = IM_CreateDummyTex(unknown_graphic, special_tex_color,
 			palette.findPaletteColor(255, 255, 255));
 
-	return special_tex_image;
+	return special_tex_image.value();
 }
 
 
-Img_c *ImageSet::IM_UnknownFlat(const ConfigData &config)
+const Img_c &ImageSet::IM_UnknownFlat(const ConfigData &config)
 {
 	if (!unknown_flat_image || unknown_flat_color != config.miscInfo.unknown_flat)
 	{
 		unknown_flat_color = config.miscInfo.unknown_flat;
 
-		delete unknown_flat_image;
-
 		unknown_flat_image = IM_CreateDummyTex(unknown_graphic, unknown_flat_color, 0);
 	}
 
-	return unknown_flat_image;
+	return unknown_flat_image.value();
 }
 
 
-Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
+Img_c &ImageSet::IM_UnknownSprite(const ConfigData &config)
 {
 	int unk_col = config.miscInfo.unknown_thing;
 	if (unk_col == 0)
@@ -617,9 +547,7 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 	{
 		unknown_sprite_color = unk_col;
 
-		delete unknown_sprite_image;
-
-		unknown_sprite_image = new Img_c(64, 64, true);
+		unknown_sprite_image = Img_c(64, 64, true);
 
 		img_pixel_t *obuf = unknown_sprite_image->wbuf();
 
@@ -631,21 +559,27 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 		}
 	}
 
-	return unknown_sprite_image;
+	return unknown_sprite_image.value();
 }
 
 
-static Img_c * IM_CreateFromText(const Palette &pal, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
+Img_c Img_c::createFromText(const Palette &pal, int W, int H,
+											 const char * const*text, const rgb_color_t *palette,
+											 int pal_size)
 {
-	Img_c *result = new Img_c(W, H);
+	Img_c result(W, H);
 
-	result->clear();
+	result.clear();
 
 	// translate colors to current palette
-	byte *conv_palette = new byte[pal_size];
+	std::vector<byte> conv_palette;
+	conv_palette.reserve(pal_size);
 
 	for (int c = 0 ; c < pal_size ; c++)
-		conv_palette[c] = pal.findPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+	{
+		conv_palette.push_back(pal.findPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]),
+													RGB_BLUE(palette[c])));
+	}
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -658,22 +592,20 @@ static Img_c * IM_CreateFromText(const Palette &pal, int W, int H, const char * 
 		if (ch < 'a' || ch >= 'a' + pal_size)
 			BugError("Bad character (dec #%d) in built-in image.\n", ch);
 
-		result->wbuf() [y * W + x] = conv_palette[ch - 'a'];
+		result.wbuf() [y * W + x] = conv_palette[ch - 'a'];
 	}
-
-	delete[] conv_palette;
 
 	return result;
 }
 
 
-static Img_c * IM_CreateFont(int W, int H, const char *const *text,
+static Img_c IM_CreateFont(int W, int H, const char *const *text,
 							 const int *intensities, int ity_size,
 							 rgb_color_t color)
 {
-	Img_c *result = new Img_c(W, H);
+	Img_c result(W, H);
 
-	result->clear();
+	result.clear();
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -692,31 +624,31 @@ static Img_c * IM_CreateFont(int W, int H, const char *const *text,
 		int g = (RGB_GREEN(color) * ity) >> 11;
 		int b = (RGB_BLUE(color)  * ity) >> 11;
 
-		result->wbuf() [y * W + x] = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
+		result.wbuf() [y * W + x] = pixelMakeRGB(r, g, b);
 	}
 
 	return result;
 }
 
 
-Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src)
+tl::optional<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src)
 {
-	int W  = src->w();
-	int H  = src->h();
-	int D  = src->d();
-	int LD = src->ld();
+	int W  = src.w();
+	int H  = src.h();
+	int D  = src.d();
+	int LD = src.ld();
 
 	LD += W;
 
-	const byte * data = (const byte *) src->array;
+	auto data = static_cast<const byte *>(src.array);
 
 	if (! data)
-		return NULL;
+		return {};
 
 	if (! (D == 3 || D == 4))
-		return NULL;
+		return {};
 
-	Img_c *img = new Img_c(W, H);
+	Img_c img(W, H);
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -735,21 +667,21 @@ Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src)
 			// TODO : a preference to palettize it
 			// dest_pix = W_FindPaletteColor(r, g, b);
 
-			dest_pix = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r >> 3, g >> 3, b >> 3));
+			dest_pix = pixelMakeRGB(r >> 3, g >> 3, b >> 3);
 		}
 
-		img->wbuf() [ y * W + x ] = dest_pix;
+		img.wbuf() [ y * W + x ] = dest_pix;
 	}
 
 	return img;
 }
 
 
-Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
+Img_c IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
 {
-	Img_c *img = new Img_c(W, H);
+	Img_c img(W, H);
 
-	img_pixel_t *dest = img->wbuf();
+	img_pixel_t *dest = img.wbuf();
 
 	for (int i = W * H ; i > 0 ; i--, data++, dest++)
 	{
@@ -759,7 +691,7 @@ Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
 			byte g = RGB_GREEN(*data) >> 3;
 			byte b = RGB_BLUE( *data) >> 3;
 
-			*dest = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
+			*dest = pixelMakeRGB(r, g, b);
 		}
 		else
 		{
@@ -989,64 +921,62 @@ static const char *const dog_image_text[] =
 };
 
 
-Img_c *IM_CreateDogSprite(const Palette &pal)
+Img_c Img_c::createDogSprite(const Palette &pal)
 {
-	return IM_CreateFromText(pal, 44, 26, dog_image_text, dog_palette, 7);
+	return createFromText(pal, 44, 26, dog_image_text, dog_palette, 7);
 }
 
 
 //------------------------------------------------------------------------
 
-Img_c *IM_CreateLightSprite(const Palette &palette)
+Img_c Img_c::createLightSprite(const Palette &palette)
 {
-	int W = 11;
-	int H = 11;
+	static const int W = 11;
+	static const int H = 11;
 
-	Img_c *result = new Img_c(W, H);
+	Img_c result(W, H);
 
-	result->clear();
+	result.clear();
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
 	{
 		byte pix = TRANS_PIXEL;
 
-		if (true) // x > 0 && x < W-1 && y > 0 && y < H-1)
-		{
-			float dx = (W - 2*x) / (float)W;
-			float dy = (H - 2*y) / (float)H;
+		float dx = (W - 2*x) / (float)W;
+		float dy = (H - 2*y) / (float)H;
 
-			float dist = sqrt((dx) * (dx) + (dy) * (dy));
+		float dist = sqrt((dx) * (dx) + (dy) * (dy));
 
-			float ity = 1.0f / (dist + 0.5f) / (dist + 0.5f);
+		float ity = 1.0f / (dist + 0.5f) / (dist + 0.5f);
 
-			if (ity < 0.5)
-				continue;
+		if (ity < 0.5)
+			continue;
 
-			ity = (ity - 0.4f) / (1.0f - 0.4f);
+		ity = (ity - 0.4f) / (1.0f - 0.4f);
 
-			int r = static_cast<int>(255 * ity);
-			int g = static_cast<int>(235 * ity);
-			int b = static_cast<int>(90  * ity);
+		int r = static_cast<int>(255 * ity);
+		int g = static_cast<int>(235 * ity);
+		int b = static_cast<int>(90  * ity);
 
-			pix = palette.findPaletteColor(r, g, b);
-		}
+		pix = palette.findPaletteColor(r, g, b);
 
-		result->wbuf() [ y * W + x ] = pix;
+		result.wbuf() [ y * W + x ] = pix;
 	}
 
 	return result;
 }
 
 
-Img_c *IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b)
+Img_c Img_c::createMapSpotSprite(const Palette &pal, int base_r, int base_g,
+												  int base_b)
 {
 	int W = 32;
 	int H = 32;
 
-	Img_c *result = new Img_c(W, H);
+	Img_c result(W, H);
 
-	result->clear();
+	result.clear();
 
 	for (int y = 4 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -1071,7 +1001,7 @@ Img_c *IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int ba
 			pix = pal.findPaletteColor(r, g, b);
 		}
 
-		result->wbuf() [ y * W + x ] = pix;
+		result.wbuf() [ y * W + x ] = pix;
 	}
 
 	return result;
@@ -1134,7 +1064,7 @@ static const char *const digit_14x19_text[] =
 };
 
 
-Img_c *ImageSet::IM_DigitFont_11x14()
+Img_c &ImageSet::IM_DigitFont_11x14()
 {
 	if (!digit_font_11x14)
 	{
@@ -1142,10 +1072,10 @@ Img_c *ImageSet::IM_DigitFont_11x14()
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return digit_font_11x14;
+	return digit_font_11x14.value();
 }
 
-Img_c *ImageSet::IM_DigitFont_14x19()
+Img_c &ImageSet::IM_DigitFont_14x19()
 {
 	if (!digit_font_14x19)
 	{
@@ -1153,7 +1083,7 @@ Img_c *ImageSet::IM_DigitFont_14x19()
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return digit_font_14x19;
+	return digit_font_14x19.value();
 }
 
 // this one applies the current gamma.
@@ -1178,7 +1108,7 @@ void Palette::decodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const
 
 // this applies a constant gamma.
 // for textures/flats/things in the browser and panels.
-void Palette::decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const
+void Palette::decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const noexcept
 {
 	if(p & IS_RGB_PIXEL)
 	{

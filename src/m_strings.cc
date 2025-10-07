@@ -20,6 +20,7 @@
 
 #include "Errors.h"
 #include "m_strings.h"
+#include "safe_ctype.h"
 #include "sys_debug.h"
 #include <assert.h>
 #include <stdarg.h>
@@ -36,8 +37,8 @@ int y_stricmp(const char *s1, const char *s2) noexcept
 {
 	for (;;)
 	{
-		if (tolower(*s1) != tolower(*s2))
-			return (int)(unsigned char)(tolower(*s1)) - (int)(unsigned char)(tolower(*s2));
+		if (safe_tolower(*s1) != safe_tolower(*s2))
+			return (int)(unsigned char)(safe_tolower(*s1)) - (int)(unsigned char)(safe_tolower(*s2));
 
 		if (*s1 && *s2)
 		{
@@ -60,8 +61,8 @@ int y_strnicmp(const char *s1, const char *s2, size_t len) noexcept
 
 	while (len-- > 0)
 	{
-		if (tolower(*s1) != tolower(*s2))
-			return (int)(unsigned char)(tolower(*s1)) - (int)(unsigned char)(tolower(*s2));
+		if (safe_tolower(*s1) != safe_tolower(*s2))
+			return (int)(unsigned char)(safe_tolower(*s1)) - (int)(unsigned char)(safe_tolower(*s2));
 
 		if (*s1 && *s2)
 		{
@@ -84,7 +85,7 @@ void y_strupr(char *str)
 {
 	for ( ; *str ; str++)
 	{
-		*str = static_cast<char>(toupper(*str));
+		*str = static_cast<char>(safe_toupper(*str));
 	}
 }
 
@@ -96,7 +97,7 @@ void y_strlowr(char *str)
 {
 	for ( ; *str ; str++)
 	{
-		*str = static_cast<char>(tolower(*str));
+		*str = static_cast<char>(safe_tolower(*str));
 	}
 }
 
@@ -208,7 +209,7 @@ SString SString::vprintf(const char *format, va_list ap)
 	// Algorithm: keep doubling the allocated buffer size
 	// until the output fits. Based on code by Darren Salt.
 
-	char *buf = NULL;
+	std::vector<char> buf;
 	int buf_size = 128;
 
 	for (;;)
@@ -217,19 +218,16 @@ SString SString::vprintf(const char *format, va_list ap)
 
 		buf_size *= 2;
 
-		buf = (char*)realloc(buf, buf_size);
-		if (!buf)
-			ThrowException("Out of memory (formatting string)\n");
+		buf.resize(buf_size);
 
-		out_len = vsnprintf(buf, buf_size, format, ap);
+		out_len = vsnprintf(buf.data(), buf_size, format, ap);
 
 		// old versions of vsnprintf() simply return -1 when
 		// the output doesn't fit.
 		if (out_len < 0 || out_len >= buf_size)
 			continue;
 
-		SString result(buf);
-		free(buf);
+		SString result(buf.data());
 		return result;
 	}
 }
@@ -297,7 +295,7 @@ void SString::trimLeadingSpaces()
 {
 	size_t i = 0;
 	for(i = 0; i < length(); ++i)
-		if(!isspace(data[i]))
+		if(!safe_isspace(data[i]))
 			break;
 	if(i)
 		erase(0, i);
@@ -308,7 +306,7 @@ void SString::trimLeadingSpaces()
 //
 void SString::trimTrailingSpaces()
 {
-	while(good() && isspace(data.back()))
+	while(good() && safe_isspace(data.back()))
 		data.pop_back();
 }
 
@@ -328,7 +326,7 @@ SString SString::asTitle() const
 {
 	SString result(*this);
 	if(result.good())
-		result[0] = static_cast<char>(toupper(result[0]));
+		result[0] = static_cast<char>(safe_toupper(result[0]));
 	return result;
 }
 
@@ -339,7 +337,7 @@ SString SString::asLower() const
 {
 	SString result(*this);
 	for(char &c : result)
-		c = static_cast<char>(tolower(c));
+		c = static_cast<char>(safe_tolower(c));
 	return result;
 }
 
@@ -350,7 +348,7 @@ SString SString::asUpper() const
 {
 	SString result(*this);
 	for(char &c : result)
-		c = static_cast<char>(toupper(c));
+		c = static_cast<char>(safe_toupper(c));
 	return result;
 }
 
@@ -363,7 +361,7 @@ SString SString::getTidy(const char *badChars) const
 	buf.reserve(length() + 2);
 
 	for(const char &c : *this)
-		if(isprint(c) && (!badChars || !strchr(badChars, c)))
+		if(safe_isprint(c) && (!badChars || !strchr(badChars, c)))
 			buf.push_back(c);
 
 	return buf;
@@ -376,7 +374,7 @@ size_t SString::findSpace() const
 {
 	for(size_t i = 0; i < length(); ++i)
 	{
-		if(isspace(data[i]))
+		if(safe_isspace(data[i]))
 			return i;
 	}
 	return std::string::npos;
@@ -386,7 +384,7 @@ size_t SString::findDigit() const
 {
 	for(size_t i = 0; i < length(); ++i)
 	{
-		if(isdigit(data[i]))
+		if(safe_isdigit(data[i]))
 			return i;
 	}
 	return std::string::npos;
@@ -411,7 +409,7 @@ StringID StringTable::add(const SString &text)
 //
 // Get a text (handle it robustly)
 //
-SString StringTable::get(StringID offset) const
+SString StringTable::get(StringID offset) const noexcept
 {
 	// this should never happen
 	// [ but handle it gracefully, for the sake of robustness ]
@@ -423,13 +421,13 @@ SString StringTable::get(StringID offset) const
 //
 // If string has spaces, surrounds it in double quotes. If there are any quotes, it doubles them (MS-DOS convention)
 //
-SString SString::spaceEscape() const
+SString SString::spaceEscape(bool backslash) const
 {
 	if(empty())
 		return "\"\"";
 	bool needsQuotes = false;
 	for(char c : data)
-		if(isspace(c) || c == '"' || c == '#')
+		if(safe_isspace(c) || c == '"' || c == '#')
 		{
 			needsQuotes = true;
 			break;
@@ -440,7 +438,7 @@ SString SString::spaceEscape() const
 	{
 		size_t pos = std::string::npos;
 		while((pos = result.data.find('"', pos == std::string::npos ? 0 : pos + 2)) != std::string::npos)
-			result.data.insert(result.data.begin() + pos, '"');
+			result.data.insert(result.data.begin() + pos, backslash ? '\\' : '"');
 		return "\"" + result + "\"";
 	}
 	return result;
@@ -483,6 +481,77 @@ SString WideToUTF8(const wchar_t *text)
 	SString result = buffer;
 	delete[] buffer;
 	return result;
+}
+
+//
+// Fail safe so we avoid failures
+//
+static std::wstring FailSafeUTF8ToWide(const char* text)
+{
+	size_t len = strlen(text);
+	std::wstring result;
+	result.reserve(len);
+	for (size_t i = 0; i < len; ++i)
+	{
+		result.push_back(static_cast<wchar_t>(text[i]));
+	}
+	return result;
+}
+
+//
+// Converts UTF8 characters to wide. Mainly for Windows
+//
+std::wstring UTF8ToWide(const char* text)
+{
+	wchar_t* buffer;
+	int n = MultiByteToWideChar(CP_UTF8, 0, text, -1, nullptr, 0);
+	if (!n)
+	{
+		return FailSafeUTF8ToWide(text);
+	}
+	buffer = new wchar_t[n];
+	n = MultiByteToWideChar(CP_UTF8, 0, text, -1, buffer, n);
+	if (!n)
+	{
+		delete[] buffer;
+		return FailSafeUTF8ToWide(text);
+	}
+	std::wstring result = buffer;
+	delete[] buffer;
+	return result;
+}
+
+//
+// Unicode-safe fopen wrapper for Windows
+//
+FILE* UTF8_fopen(const char* filename, const char* mode)
+{
+	std::wstring wideFilename = UTF8ToWide(filename);
+	std::wstring wideMode = UTF8ToWide(mode);
+	return _wfopen(wideFilename.c_str(), wideMode.c_str());
+}
+
+//
+// Unicode-safe getenv wrapper for Windows
+//
+const char* UTF8_getenv(const char* varname)
+{
+	// Static storage for the converted result
+	// Note: This is not thread-safe, but matches getenv() semantics
+	static std::string utf8Result;
+
+	std::wstring wideVarname = UTF8ToWide(varname);
+	const wchar_t* wideValue = _wgetenv(wideVarname.c_str());
+
+	if (!wideValue)
+	{
+		return nullptr;
+	}
+
+	// Convert wide string result to UTF-8
+	utf8Result = WideToUTF8(wideValue).get();
+
+	return utf8Result.c_str();
 }
 #endif
 

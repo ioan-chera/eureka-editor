@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2021 Ioan Chera
+//  Copyright (C) 2024 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -15,197 +15,215 @@
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-
 #include "m_keys.h"
-#include "testUtils/TempDirContext.hpp"
-#include "Instance.h"
+#include "gtest/gtest.h"
 
-#ifdef __APPLE__
-#define CMD "CMD"
-#else
-#define CMD "CTRL"
-#endif
+#include <array>
 
-void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
+struct KeyMapping
 {
-}
-
-static int sUpdates;
-void updateMenuBindings()
-{
-    ++sUpdates;
-}
-
-void Instance::Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const
-{
-}
-
-//========================================================================
-
-//
-// Fixture
-//
-class MKeys : public TempDirContext
-{
-protected:
-    void SetUp() override
-    {
-        TempDirContext::SetUp();
-        static bool loaded;
-        if(!loaded)
-        {
-            static editor_command_t commands[] =
-            {
-                { "BR_ClearSearch", "Browser", nullptr },
-                { "BR_Scroll", "Browser", nullptr },
-                { "3D_NAV_Left", NULL, nullptr },
-                { "3D_NAV_Right", NULL, nullptr },
-                { "LIN_SelectPath", NULL, nullptr },
-                { "GivenFile",  "File", nullptr },
-                { "Insert",    "Edit", nullptr },
-                { "Delete",    "Edit", nullptr },
-                { "Mirror",    "General", nullptr },
-            };
-            M_RegisterCommandList(commands);
-            loaded = true;
-        }
-        global::home_dir = mTempDir;
-        global::install_dir = getChildPath("install");
-        ASSERT_TRUE(FileMakeDir(global::install_dir));
-        mDeleteList.push(global::install_dir);
-
-        writeBindingsFile();
-        M_LoadBindings();
-        --sUpdates; // don't increment it here
-    }
-
-    void TearDown() override
-    {
-        global::config_file.clear();
-        global::install_dir.clear();
-        global::home_dir.clear();
-        sUpdates = 0;   // reset it to 0
-        TempDirContext::TearDown();
-    }
-private:
-    void writeBindingsFile();
+	keycode_t code;
+	const char *dashString;
 };
 
-//
-// Write the bindings file
-//
-void MKeys::writeBindingsFile()
+// NOTE: keep the old names in the dashed names for backward compatibility
+static const KeyMapping testKeyCombos[] =
 {
-    FILE *f = fopen((global::install_dir / "bindings.cfg").u8string().c_str(), "wt");
-    ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::install_dir / "bindings.cfg");
+	{EMOD_SHIFT | 'k', "K"},
+	{static_cast<keycode_t>(EMOD_COMMAND) | 'j',
+#ifdef __APPLE__
+	        "CMD-j"
+#else
+	        "CTRL-j"
+#endif
+	},
+	{static_cast<keycode_t>(EMOD_META) | 'm',
+#ifdef __APPLE__
+	        "META-m"
+#else
+	        "META-m"
+#endif
+	},
+	{EMOD_ALT | 'a', "ALT-a"},
+	{EMOD_ALT | (FL_Button + 3), "ALT-MOUSE3"},
+	{EMOD_ALT | FL_Volume_Down, "ALT-VOL_DOWN"},
+	{EMOD_SHIFT | '5', "SHIFT-5"},
+	{EMOD_SHIFT | '"', "SHIFT-DBLQUOTE"},
+	{EMOD_SHIFT | (FL_F + 4), "SHIFT-F4"},
+	{FL_SCROLL_LOCK | 's', "LAX-s"},
 
-    fprintf(f, "browser    CMD-k    BR_ClearSearch\n");
-    fprintf(f, "browser    PGUP    BR_Scroll    -3\n");
-    fprintf(f, "browser    PGDN    BR_Scroll    +3\n");
-    fprintf(f, "render    ALT-LEFT    3D_NAV_Left    384\n");
-    fprintf(f, "render    ALT-RIGHT    3D_NAV_Right    384\n");
-    fprintf(f, "line    E    LIN_SelectPath    /sametex\n");
-    fprintf(f, "general    META-n    GivenFile    next\n");
-    fprintf(f, "general    CMD-SPACE    Insert    /nofill\n");
+};
 
-    int n = fclose(f);
-    ASSERT_EQ(n, 0);
+// TODO: use this array in tests
 
-    f = fopen((global::home_dir / "bindings.cfg").u8string().c_str(), "wt");
-    ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::home_dir / "bindings.cfg");
-
-    fprintf(f, "general SHIFT-DEL    Delete    /keep\n");
-    fprintf(f, "general    SHIFT-BS    Delete    /keep\n");
-    fprintf(f, "general    CMD-k    Mirror    horiz\n");
-
-    n = fclose(f);
-    ASSERT_EQ(n, 0);
+TEST(MKeys, KeyToString)
+{
+	for(const KeyMapping &mapping : testKeyCombos)
+	{
+		keycode_t key = mapping.code;
+		ASSERT_EQ(keys::toString(key), mapping.dashString);
+	}
 }
 
-TEST_F(MKeys, MKeyToString)
+TEST(MKeys, StringForFunc)
 {
-    ASSERT_EQ(M_KeyToString(EMOD_COMMAND | 'a'), CMD "-a");
-    ASSERT_EQ(M_KeyToString(EMOD_SHIFT | 'a'), "A");
-    ASSERT_EQ(M_KeyToString(EMOD_SHIFT | FL_Page_Up), "SHIFT-PGUP");
-    ASSERT_EQ(M_KeyToString(EMOD_META | FL_Page_Down), "META-PGDN");
+	key_binding_t bind = {};
+	editor_command_t command = {"CommandName"};
+	bind.cmd = &command;
+
+
+	// No params
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName");
+
+	bind.param[0] = "parm1";
+
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1");
+
+	bind.param[1] = "other";
+
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 other");
+
+	bind.param[2] = "thing";
+
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 other thing");
+
+	bind.param[1].clear();
+
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1");
+
+	bind.param[1] = "aaaaabbbbbcccccdddddeeeeefffffggggg";
+
+	ASSERT_EQ(keys::stringForFunc(bind), "CommandName: parm1 aaaaabbbbbcccccdddddeeeeefffff thing");
 }
 
-TEST_F(MKeys, MIsKeyBound)
+TEST(MKeys, StringForBindingCheckModName)
 {
-    ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KeyContext::browser));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::browser));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::general));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | 'e', KeyContext::line));
-    ASSERT_FALSE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::render));
+	key_binding_t bind = {};
+	editor_command_t command = {"CommandName"};
+	bind.cmd = &command;
+
+	bind.context = KeyContext::browser;
+
+	for(const KeyMapping &mapping : testKeyCombos)
+	{
+		bind.key = mapping.code;
+		std::array<std::string, 3> cells = keys::cellsForBinding(bind);
+
+		ASSERT_EQ(cells[0], mapping.dashString);
+		ASSERT_EQ(cells[1], "browser");
+		ASSERT_EQ(cells[2], "CommandName");
+	}
 }
 
-TEST_F(MKeys, MRemoveBindingAndSave)
+TEST(MKeys, ParseKeyString)
 {
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
-    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KeyContext::vertex);
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
-    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KeyContext::general);
-    ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
-    M_RemoveBinding(EMOD_ALT | FL_Left, KeyContext::render);
-    ASSERT_FALSE(M_IsKeyBound(EMOD_ALT | FL_Left, KeyContext::render));
-    M_SaveBindings();
+	ASSERT_EQ(M_ParseKeyString("a"), static_cast<keycode_t>('a'));
+	ASSERT_EQ(M_ParseKeyString("z"), static_cast<keycode_t>('z'));
+	ASSERT_EQ(M_ParseKeyString("0"), static_cast<keycode_t>('0'));
+	ASSERT_EQ(M_ParseKeyString("9"), static_cast<keycode_t>('9'));
+	ASSERT_EQ(M_ParseKeyString("!"), static_cast<keycode_t>('!'));
+	ASSERT_EQ(M_ParseKeyString(";"), static_cast<keycode_t>(';'));
 
-    M_LoadBindings();
+	ASSERT_EQ(M_ParseKeyString("A"), static_cast<keycode_t>(EMOD_SHIFT | 'a'));
+	ASSERT_EQ(M_ParseKeyString("Z"), static_cast<keycode_t>(EMOD_SHIFT | 'z'));
 
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::browser));
-    ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KeyContext::browser));
-    ASSERT_TRUE(M_IsKeyBound(FL_Page_Down, KeyContext::browser));
-    ASSERT_FALSE(M_IsKeyBound(EMOD_ALT | FL_Left, KeyContext::render));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_ALT | FL_Right, KeyContext::render));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | 'e', KeyContext::line));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_META | 'n', KeyContext::general));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | ' ', KeyContext::general));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_Delete, KeyContext::general));
-    ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::general));
+	ASSERT_EQ(M_ParseKeyString("CMD-a"), static_cast<keycode_t>(EMOD_COMMAND | 'a'));
+	ASSERT_EQ(M_ParseKeyString("CTRL-b"), static_cast<keycode_t>(EMOD_COMMAND | 'b'));
+	ASSERT_EQ(M_ParseKeyString("META-c"), static_cast<keycode_t>(EMOD_META | 'c'));
+	ASSERT_EQ(M_ParseKeyString("ALT-d"), static_cast<keycode_t>(EMOD_ALT | 'd'));
+	ASSERT_EQ(M_ParseKeyString("SHIFT-e"), static_cast<keycode_t>(EMOD_SHIFT | 'e'));
+	ASSERT_EQ(M_ParseKeyString("LAX-f"), static_cast<keycode_t>(FL_SCROLL_LOCK | 'f'));
 
-}
+	ASSERT_EQ(M_ParseKeyString("cmd-a"), static_cast<keycode_t>(EMOD_COMMAND | 'a'));
+	ASSERT_EQ(M_ParseKeyString("Ctrl-B"), static_cast<keycode_t>(EMOD_COMMAND | EMOD_SHIFT | 'b'));
+	ASSERT_EQ(M_ParseKeyString("meta-C"), static_cast<keycode_t>(EMOD_META | EMOD_SHIFT | 'c'));
+	ASSERT_EQ(M_ParseKeyString("Alt-D"), static_cast<keycode_t>(EMOD_ALT | EMOD_SHIFT | 'd'));
+	ASSERT_EQ(M_ParseKeyString("shift-E"), static_cast<keycode_t>(EMOD_SHIFT | EMOD_SHIFT | 'e'));
+	ASSERT_EQ(M_ParseKeyString("lax-F"), static_cast<keycode_t>(FL_SCROLL_LOCK | EMOD_SHIFT | 'f'));
 
-TEST_F(MKeys, FindKeyCodeForCommandName)
-{
-    const char *params[MAX_EXEC_PARAM] = {};
-    keycode_t code = 0;
+	ASSERT_EQ(M_ParseKeyString("CMD-ALT-g"), static_cast<keycode_t>(EMOD_COMMAND | EMOD_ALT | 'g'));
+	ASSERT_EQ(M_ParseKeyString("SHIFT-CTRL-h"), static_cast<keycode_t>(EMOD_SHIFT | EMOD_COMMAND | 'h'));
+	ASSERT_EQ(M_ParseKeyString("META-SHIFT-i"), static_cast<keycode_t>(EMOD_META | EMOD_SHIFT | 'i'));
+	ASSERT_EQ(M_ParseKeyString("ALT-SHIFT-LAX-j"), static_cast<keycode_t>(EMOD_ALT | EMOD_SHIFT | FL_SCROLL_LOCK | 'j'));
 
-    params[0] = "-3";
-    ASSERT_TRUE(findKeyCodeForCommandName("BR_Scroll", params, &code));
-    ASSERT_EQ(code, FL_Page_Up);
+	ASSERT_EQ(M_ParseKeyString("F1"), static_cast<keycode_t>(FL_F + 1));
+	ASSERT_EQ(M_ParseKeyString("F12"), static_cast<keycode_t>(FL_F + 12));
+	ASSERT_EQ(M_ParseKeyString("f3"), static_cast<keycode_t>(FL_F + 3));
+	ASSERT_EQ(M_ParseKeyString("SHIFT-F5"), static_cast<keycode_t>(EMOD_SHIFT | (FL_F + 5)));
+	ASSERT_EQ(M_ParseKeyString("CMD-f10"), static_cast<keycode_t>(EMOD_COMMAND | (FL_F + 10)));
 
-    params[0] = "+3";
-    ASSERT_TRUE(findKeyCodeForCommandName("BR_Scroll", params, &code));
-    ASSERT_EQ(code, FL_Page_Down);
+	ASSERT_EQ(M_ParseKeyString("MOUSE1"), static_cast<keycode_t>(FL_Button + 1));
+	ASSERT_EQ(M_ParseKeyString("MOUSE3"), static_cast<keycode_t>(FL_Button + 3));
+	ASSERT_EQ(M_ParseKeyString("mouse5"), static_cast<keycode_t>(FL_Button + 5));
+	ASSERT_EQ(M_ParseKeyString("ALT-MOUSE2"), static_cast<keycode_t>(EMOD_ALT | (FL_Button + 2)));
 
-    params[0] = nullptr;
-    ASSERT_FALSE(findKeyCodeForCommandName("Mirror", params, &code));
-    params[0] = "horiz";
-    ASSERT_TRUE(findKeyCodeForCommandName("Mirror", params, &code));
-    ASSERT_EQ(code, EMOD_COMMAND | 'k');
-}
+	ASSERT_EQ(M_ParseKeyString("SPACE"), static_cast<keycode_t>(' '));
+	ASSERT_EQ(M_ParseKeyString("space"), static_cast<keycode_t>(' '));
+	ASSERT_EQ(M_ParseKeyString("SPC"), static_cast<keycode_t>(' '));
+	ASSERT_EQ(M_ParseKeyString("DBLQUOTE"), static_cast<keycode_t>('"'));
+	ASSERT_EQ(M_ParseKeyString("BS"), static_cast<keycode_t>(FL_BackSpace));
+	ASSERT_EQ(M_ParseKeyString("TAB"), static_cast<keycode_t>(FL_Tab));
+	ASSERT_EQ(M_ParseKeyString("tab"), static_cast<keycode_t>(FL_Tab));
+	ASSERT_EQ(M_ParseKeyString("ENTER"), static_cast<keycode_t>(FL_Enter));
+	ASSERT_EQ(M_ParseKeyString("ESC"), static_cast<keycode_t>(FL_Escape));
+	ASSERT_EQ(M_ParseKeyString("LEFT"), static_cast<keycode_t>(FL_Left));
+	ASSERT_EQ(M_ParseKeyString("UP"), static_cast<keycode_t>(FL_Up));
+	ASSERT_EQ(M_ParseKeyString("RIGHT"), static_cast<keycode_t>(FL_Right));
+	ASSERT_EQ(M_ParseKeyString("DOWN"), static_cast<keycode_t>(FL_Down));
+	ASSERT_EQ(M_ParseKeyString("PGUP"), static_cast<keycode_t>(FL_Page_Up));
+	ASSERT_EQ(M_ParseKeyString("PGDN"), static_cast<keycode_t>(FL_Page_Down));
+	ASSERT_EQ(M_ParseKeyString("HOME"), static_cast<keycode_t>(FL_Home));
+	ASSERT_EQ(M_ParseKeyString("END"), static_cast<keycode_t>(FL_End));
+	ASSERT_EQ(M_ParseKeyString("INS"), static_cast<keycode_t>(FL_Insert));
+	ASSERT_EQ(M_ParseKeyString("DEL"), static_cast<keycode_t>(FL_Delete));
+	ASSERT_EQ(M_ParseKeyString("VOL_DOWN"), static_cast<keycode_t>(FL_Volume_Down));
+	ASSERT_EQ(M_ParseKeyString("WHEEL_UP"), static_cast<keycode_t>(0xEF91));
+	ASSERT_EQ(M_ParseKeyString("WHEEL_DOWN"), static_cast<keycode_t>(0xEF92));
 
-TEST_F(MKeys, UpdateMenuBindingsCall)
-{
-    ASSERT_EQ(sUpdates, 0);
-    M_LoadBindings();
-    ASSERT_EQ(sUpdates, 1);
+	ASSERT_EQ(M_ParseKeyString("KP_5"), static_cast<keycode_t>(FL_KP + '5'));
+	ASSERT_EQ(M_ParseKeyString("kp_9"), static_cast<keycode_t>(FL_KP + '9'));
+	ASSERT_EQ(M_ParseKeyString("KP_Enter"), static_cast<keycode_t>(FL_KP_Enter));
 
-    // Restore
-    M_CopyBindings();
-    ASSERT_EQ(sUpdates, 1);
-    M_ChangeBindingKey(0, 'a');
-    ASSERT_EQ(sUpdates, 1);
+	ASSERT_EQ(M_ParseKeyString("0x41"), static_cast<keycode_t>(0x41));
+	ASSERT_EQ(M_ParseKeyString("0xFF"), static_cast<keycode_t>(0xFF));
+	ASSERT_EQ(M_ParseKeyString("0x1234"), static_cast<keycode_t>(0x1234));
+	ASSERT_EQ(M_ParseKeyString("0x0"), static_cast<keycode_t>(0x0));
+	ASSERT_EQ(M_ParseKeyString("0xabcd"), static_cast<keycode_t>(0xabcd));
 
-    M_ApplyBindings();
-    ASSERT_EQ(sUpdates, 2);
+	ASSERT_EQ(M_ParseKeyString(""), 0);
+	ASSERT_EQ(M_ParseKeyString("invalid"), 0);
+	ASSERT_EQ(M_ParseKeyString("NONEXISTENT"), 0);
+	ASSERT_EQ(M_ParseKeyString("F"), static_cast<keycode_t>(EMOD_SHIFT | 'f'));
+	ASSERT_EQ(M_ParseKeyString("MOUSE"), 0);
+	ASSERT_EQ(M_ParseKeyString("KP_"), 0);
+	ASSERT_EQ(M_ParseKeyString("0x"), 0);
+	ASSERT_EQ(M_ParseKeyString("CMD-"), 0);
+	ASSERT_EQ(M_ParseKeyString("SHIFT-"), 0);
 
-    const char *params[MAX_EXEC_PARAM] = {};
-    keycode_t code = 0;
-    ASSERT_TRUE(findKeyCodeForCommandName("BR_ClearSearch", params, &code));
-    ASSERT_EQ(code, 'a');
-    ASSERT_EQ(sUpdates, 2);
+	ASSERT_EQ(M_ParseKeyString("~"), static_cast<keycode_t>('~'));
+	ASSERT_EQ(M_ParseKeyString("@"), static_cast<keycode_t>('@'));
+	ASSERT_EQ(M_ParseKeyString("#"), static_cast<keycode_t>('#'));
+	ASSERT_EQ(M_ParseKeyString("$"), static_cast<keycode_t>('$'));
+	ASSERT_EQ(M_ParseKeyString("%"), static_cast<keycode_t>('%'));
+	ASSERT_EQ(M_ParseKeyString("^"), static_cast<keycode_t>('^'));
+	ASSERT_EQ(M_ParseKeyString("&"), static_cast<keycode_t>('&'));
+	ASSERT_EQ(M_ParseKeyString("*"), static_cast<keycode_t>('*'));
+	ASSERT_EQ(M_ParseKeyString("("), static_cast<keycode_t>('('));
+	ASSERT_EQ(M_ParseKeyString(")"), static_cast<keycode_t>(')'));
+	ASSERT_EQ(M_ParseKeyString("-"), static_cast<keycode_t>('-'));
+	ASSERT_EQ(M_ParseKeyString("CMD--"), static_cast<keycode_t>(EMOD_COMMAND | '-'));
+	ASSERT_EQ(M_ParseKeyString("ALT-SHIFT-META-CMD--"), static_cast<keycode_t>(EMOD_COMMAND | EMOD_ALT | EMOD_META | EMOD_SHIFT | '-'));
+	ASSERT_EQ(M_ParseKeyString("_"), static_cast<keycode_t>('_'));
+	ASSERT_EQ(M_ParseKeyString("="), static_cast<keycode_t>('='));
+	ASSERT_EQ(M_ParseKeyString("+"), static_cast<keycode_t>('+'));
+	ASSERT_EQ(M_ParseKeyString("["), static_cast<keycode_t>('['));
+	ASSERT_EQ(M_ParseKeyString("]"), static_cast<keycode_t>(']'));
+	ASSERT_EQ(M_ParseKeyString("\\"), static_cast<keycode_t>('\\'));
+	ASSERT_EQ(M_ParseKeyString("|"), static_cast<keycode_t>('|'));
+	ASSERT_EQ(M_ParseKeyString(","), static_cast<keycode_t>(','));
+	ASSERT_EQ(M_ParseKeyString("."), static_cast<keycode_t>('.'));
+	ASSERT_EQ(M_ParseKeyString("/"), static_cast<keycode_t>('/'));
+	ASSERT_EQ(M_ParseKeyString("?"), static_cast<keycode_t>('?'));
+	ASSERT_EQ(M_ParseKeyString("'"), static_cast<keycode_t>('\''));
+	ASSERT_EQ(M_ParseKeyString("`"), static_cast<keycode_t>('`'));
 }

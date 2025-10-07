@@ -1,0 +1,39 @@
+<div id='wikitext'>
+<div class='vspace'></div><h1>CHANGES IN Eureka 0.74</h1>
+<p><em>(Changes are since the 0.72 version)</em>
+</p>
+<p class='vspace'>+  show the current WAD and map in the window title bar.
+</p>
+<p class='vspace'>+  clipboard persists when changing maps, so you can copy-n-paste from one map/wad to another map/wad.
+</p>
+<p class='vspace'>+  various user state (grid settings, camera, editing mode, etc..) persists when a map is saved, and is restored when the same map is loaded again.
+</p>
+<p class='vspace'>+  improved SECTOR insertion:
+<br  />(a) copy properties from a selected sector, or try a neighboring sector if no selection.  Use default value as last resort.
+<br  />(b) if CTRL is pressed, new area BECOMES the same sector as one selected.
+</p>
+<p class='vspace'>+  new 'Sort' setting in Thing/Line/Sector type browsers.
+</p>
+<p class='vspace'>+  new 'ADD' and 'DEL' sidedef buttons in the LineDef panel.
+</p>
+<p class='vspace'>+  new -port option to select the source port.  Defaults to boom.  Other values currently supported are: vanilla, edge.
+</p>
+<p class='vspace'>-  fixed problem where you could seemingly close a line loop, but due to grid snapping the vertex was merely placed on top of the existing one and it did not actually close the loop.
+</p>
+<p class='vspace'>-  fixed bug where closing a line-loop around an existing shape did not apply the new sector to the outside of that shape.
+</p>
+<p class='vspace'>-  new outside-of-map sectors now occupy a single grid square.
+</p>
+<p class='vspace'>-  File/New does not ask for map slot unless there's a current PWAD, since that will be asked on the File/Save (== File/Export).
+</p>
+<p class='vspace'>-  File/Export asks for the map slot <em>after</em> the filename.
+</p>
+<p class='vspace'>-  dynamic rotating (CTRL + middle button) no longer scales.
+</p>
+<p class='vspace'>-  dragging/scaling/rotating vertices will draw the lines too.
+</p>
+<p class='vspace'>-  fixed display of a certain flat (CEIL4_1 IIRC) showing bright cyan in parts that should be black (palette color #247).
+</p>
+<p class='vspace'>-  better looking About box.
+</p>
+</div>

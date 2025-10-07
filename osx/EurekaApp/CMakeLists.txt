@@ -15,5 +15,4 @@ target_include_directories(eurekamac INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 # Need to silence OpenGL deprecation warnings (they tell us what we know and can't fix)
 target_compile_definitions(eurekamac PUBLIC
     "GL_SILENCE_DEPRECATION"
-    "main=main_ORIGINAL"
 )

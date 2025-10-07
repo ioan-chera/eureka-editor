@@ -207,9 +207,9 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 			EditOperation op(box->inst.level.basis);
 			op.setMessageForSelection("edited texture on", *box->inst.edit.Selected);
 
-			for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 			{
-				const LineDef *L = box->inst.level.linedefs[*it];
+				const auto L = box->inst.level.linedefs[*it];
 
 				int sd = box->is_front ? L->right : L->left;
 
@@ -293,9 +293,9 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			box->inst.level.sectors[new_sec]->SetDefaults(box->inst.conf);
 		}
 
-		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = box->inst.level.linedefs[*it];
+			const auto L = box->inst.level.linedefs[*it];
 
 			int sd    = box->is_front ? L->right : L->left;
 			int other = box->is_front ? L->left : L->right;
@@ -305,7 +305,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 				continue;
 
 			// determine what sector to use
-			int new_sec = box->inst.level.hover.getOppositeSector(*it, box->is_front ? Side::right : Side::left);
+			int new_sec = box->inst.level.hover.getOppositeSector(*it, box->is_front ? Side::right : Side::left, nullptr);
 
 			if (new_sec < 0)
 				new_sec = box->inst.level.numSectors() - 1;
@@ -347,9 +347,9 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 	{
 		EditOperation op(box->inst.level.basis);
 
-		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = box->inst.level.linedefs[*it];
+			const auto L = box->inst.level.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
@@ -386,9 +386,9 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 		else
 			op.setMessageForSelection("edited Y offset on", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = box->inst.level.linedefs[*it];
+			const auto L = box->inst.level.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
@@ -418,9 +418,9 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited sector-ref on", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = box->inst.level.linedefs[*it];
+			const auto L = box->inst.level.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
@@ -463,7 +463,7 @@ void UI_SideBox::UpdateField()
 {
 	if (inst.level.isSidedef(obj))
 	{
-		const SideDef *sd = inst.level.sidedefs[obj];
+		const auto sd = inst.level.sidedefs[obj];
 
 		mFixUp.setInputValue(x_ofs, SString(sd->x_offset).c_str());
 		mFixUp.setInputValue(y_ofs, SString(sd->y_offset).c_str());

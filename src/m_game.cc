@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr√© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,11 +20,12 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Rapha√´l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
 #include "Instance.h"
+#include "m_parse.h"
 #include "m_streams.h"
 #include <assert.h>
 
@@ -68,7 +69,7 @@ public:
 
 	// the line parsed into tokens
 	int    argc = 0;
-	char * argv[MAX_TOKENS] = {};
+	const char * argv[MAX_TOKENS] = {};
 
 	// state for handling if/else/endif
 	std::vector<parsing_cond_state_t> cond_stack;
@@ -76,7 +77,7 @@ public:
 	// BOOM generalized linedef stuff
 	int current_gen_line = -1;
 
-	explicit parser_state_c(const SString &filename) : fname(filename)
+	explicit parser_state_c(const fs::path &filename) : fname(filename)
 	{
 	}
 
@@ -89,9 +90,9 @@ public:
 		return false;
 	}
 
-	const char *file() const
+	const fs::path &file() const
 	{
-		return fname.c_str();
+		return fname;
 	}
 
 	bool readLine(LineFile &file)
@@ -113,7 +114,7 @@ public:
 
 private:
 	// filename for error messages (lacks the directory)
-	SString fname = nullptr;
+	const fs::path fname;
 
 	// buffer containing the raw line
 	SString readstring;
@@ -121,8 +122,7 @@ private:
 	// current line number
 	int lineno = 0;
 
-	// buffer storing the tokens
-	char tokenbuf[512] = {};
+	std::vector<SString> args;
 };
 
 void PortInfo_c::AddSupportedGame(const SString &game)
@@ -140,40 +140,13 @@ bool PortInfo_c::SupportsGame(const SString &game) const
 	return false;
 }
 
-//
-//  this is called each time the full set of definitions
-//  (game, port, resource files) are loaded.
-//
-void ConfigData::clearExceptDefaults()
-{
-	// Free all definitions
-	line_groups.clear();
-	line_types.clear();
-	sector_types.clear();
-
-	thing_groups.clear();
-	thing_types.clear();
-
-	texture_groups.clear();
-	texture_categories.clear();
-	flat_categories.clear();
-
-	miscInfo = misc_info_t();
-
-	features = {};
-
-	// reset generalized types
-	for(generalized_linetype_t &type : gen_linetypes)
-		type = {};
-	num_gen_linetypes = 0;
-}
 
 //
 // Called only from Main_LoadResources
 //
-void LoadingData::prepareConfigVariables()
+std::unordered_map<SString, SString> LoadingData::prepareConfigVariables() const
 {
-	parse_vars.clear();
+	std::unordered_map<SString, SString> parse_vars;
 
 	switch (levelFormat)
 	{
@@ -202,7 +175,8 @@ void LoadingData::prepareConfigVariables()
 	{
 		parse_vars["$GAME_NAME"] = gameName;
 
-		if (M_CanLoadDefinitions(GAMES_DIR, gameName))
+		if (M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
+				global::install_dir, GAMES_DIR, gameName))
 		{
 			SString base_game = M_GetBaseGame(gameName);
 			parse_vars["$BASE_GAME"] = base_game;
@@ -213,6 +187,7 @@ void LoadingData::prepareConfigVariables()
 	{
 		parse_vars["$PORT_NAME"] = portName;
 	}
+	return parse_vars;
 }
 
 
@@ -233,7 +208,7 @@ static short ParseThingdefFlags(const char *s)
 }
 
 
-static void ParseColorDef(ConfigData &config, char ** argv, int argc)
+static void ParseColorDef(ConfigData &config, const char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "sky") == 0)
 	{
@@ -277,7 +252,7 @@ static void ParseColorDef(ConfigData &config, char ** argv, int argc)
 }
 
 
-static map_format_bitset_t ParseMapFormats(parser_state_c *pst, char ** argv,
+static map_format_bitset_t ParseMapFormats(parser_state_c *pst, const char ** argv,
 										   int argc)
 {
 	map_format_bitset_t result = 0;
@@ -301,7 +276,7 @@ static map_format_bitset_t ParseMapFormats(parser_state_c *pst, char ** argv,
 }
 
 
-static void ParseClearKeywords(ConfigData &config, char ** argv, int argc, parser_state_c *pst)
+static void ParseClearKeywords(ConfigData &config, const char ** argv, int argc, parser_state_c *pst)
 {
 	for ( ; argc > 0 ; argv++, argc--)
 	{
@@ -318,6 +293,14 @@ static void ParseClearKeywords(ConfigData &config, char ** argv, int argc, parse
 		{
 			config.thing_groups.clear();
 			config.thing_types.clear();
+		}
+		else if (y_stricmp(argv[0], "thingflags") == 0)
+		{
+			config.thing_flags.clear();
+		}
+		else if (y_stricmp(argv[0], "lineflags") == 0)
+		{
+			config.line_flags.clear();
 		}
 		else if (y_stricmp(argv[0], "textures") == 0)
 		{
@@ -369,6 +352,7 @@ static const FeatureMapping skFeatureMappings[] =
 	{ "3d_midtex", &port_features_t::midtex_3d },
 	MAPPING(strife_flags),
 	MAPPING(medusa_fixed),
+	MAPPING(tuttifrutti_fixed),
 	MAPPING(lax_sprites),
 	MAPPING(no_need_players),
 	{ "tag_666", &port_features_t::tag_666raw },
@@ -376,13 +360,14 @@ static const FeatureMapping skFeatureMappings[] =
 	MAPPING(neg_patch_offsets),
 	MAPPING(extra_floors),
 	MAPPING(slopes),
+	MAPPING(player_use_passthru_activation),
 #undef MAPPING
 };
 
 //
 // Parses features
 //
-static void ParseFeatureDef(ConfigData &config, char **argv, int argc)
+static void ParseFeatureDef(ConfigData &config, const char **argv, int argc)
 {
 	bool found = false;
 	for(const FeatureMapping &mapping : skFeatureMappings)
@@ -406,10 +391,12 @@ static void ParseFeatureDef(ConfigData &config, char **argv, int argc)
 // Both strings are required
 // Returns "" if not found.
 //
-static fs::path FindDefinitionFile(const fs::path &folder, const SString &name)
+static tl::optional<fs::path> FindDefinitionFile(const fs::path &home_dir,
+		const fs::path &old_home_dir, const fs::path &install_dir, const fs::path &folder,
+		const SString &name)
 {
 	SYS_ASSERT(!folder.empty() && name.good());
-	const fs::path lookupDirs[] = { global::home_dir, global::install_dir };
+	const fs::path lookupDirs[] = { home_dir, old_home_dir, install_dir };
 	for (const fs::path &base_dir : lookupDirs)
 	{
 		if (base_dir.empty())
@@ -423,15 +410,17 @@ static fs::path FindDefinitionFile(const fs::path &folder, const SString &name)
 			return filename;
 	}
 
-	return "";
+	return {};
 }
 
 
-bool M_CanLoadDefinitions(const fs::path &folder, const SString &name)
+bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &old_home_dir,
+		const fs::path &install_dir, const fs::path &folder, const SString &name)
 {
-	fs::path filename = FindDefinitionFile(folder, name);
+	tl::optional<fs::path> filename = FindDefinitionFile(home_dir, old_home_dir, install_dir,
+			folder, name);
 
-	return !filename.empty();
+	return filename.has_value();
 }
 
 //
@@ -454,25 +443,26 @@ bool linetype_t::isPolyObjectSpecial() const
 //           "ports" + "edge"
 //
 void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
-					   const SString &folder, const SString &name,
+					   const fs::path &folder, const SString &name,
 					   ConfigData &config) noexcept(false)
 {
 	// this is for error messages & debugging
-	SString prettyname = folder + "/" + name + ".ugh";
+	fs::path prettyname = folder / fs::u8path((name + ".ugh").get());
 
-	gLog.printf("Loading Definitions : %s\n", prettyname.c_str());
+	gLog.printf("Loading Definitions : %s\n", prettyname.u8string().c_str());
 
-	fs::path filename = FindDefinitionFile(fs::u8path(folder.get()), name);
+	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+			global::old_linux_home_and_cache_dir, global::install_dir, folder, name);
 
-	if (filename.empty())
+	if (!filename)
 	{
 		throw ParseException(SString::printf("Cannot find definition file: %s",
-											 prettyname.c_str()));
+											 prettyname.u8string().c_str()));
 	}
 
-	gLog.debugPrintf("  found at: %s\n", filename.u8string().c_str());
+	gLog.debugPrintf("  found at: %s\n", filename->u8string().c_str());
 
-	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename,
+	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, *filename,
 						  folder, prettyname);
 }
 
@@ -488,7 +478,7 @@ void parser_state_c::fail(EUR_FORMAT_STRING(const char *format), ...) const
 	SString ss = SString::vprintf(format, ap);
 	va_end(ap);
 
-	SString prefix = SString::printf("%s(%d): ", file(), line());
+	SString prefix = SString::printf("%s(%d): ", file().u8string().c_str(), line());
 	throw ParseException(prefix + ss);
 }
 
@@ -500,63 +490,19 @@ void parser_state_c::tokenize()
 	// break the line into whitespace-separated tokens.
 	// whitespace can be enclosed in double quotes.
 
-	size_t srcpos = 0;
-	char		*dest = tokenbuf;
-
-	bool		in_token = false;
-	bool		quoted   = false;
-
+	TokenWordParse parse(readstring, true);
+	SString word;
+	args.clear();
 	argc = 0;
-
-	for ( ; ; srcpos++)
+	while(parse.getNext(word))
 	{
-		char srcc = readstring[srcpos];
-		if (srcc == 0 || srcc == '\n')
-		{
-			if (in_token)
-				*dest = 0;
-			break;
-		}
-
-		if (srcc == '"')
-		{
-			quoted = !quoted;
-			continue;
-		}
-
-		// found a comment?   [ we allow # in the middle of a token ]
-		if (srcc == '#' && !in_token && !quoted)
-			break;
-
-		// beginning a new token?
-		if (!in_token && (quoted || !isspace(srcc)))
-		{
-			if(argc >= MAX_TOKENS)
-				fail("more than %d tokens on the line", MAX_TOKENS);
-
-			in_token = true;
-
-			argv[argc++] = dest;
-
-			*dest++ = srcc;
-			continue;
-		}
-
-		// whitespace will end a token (unless quoted)
-		if (isspace(srcc) && in_token && !quoted)
-		{
-			in_token = false;
-			*dest++  = 0;
-			continue;
-		}
-
-		// normal token character?
-		if (in_token)
-			*dest++ = srcc;
+		if(args.size() >= MAX_TOKENS)
+			fail("more than %d tokens on the line", MAX_TOKENS);
+		args.push_back(word);
 	}
-
-	if (quoted)
-		fail("unmatched double quote");
+	argc = (int)args.size();
+	for(int i = 0; i < argc; ++i)
+		argv[i] = args[i].c_str();	// safe if we lock the std::vector
 }
 
 //
@@ -596,7 +542,7 @@ static bool parseArg(const char *text, SpecialArg &arg)
 
 static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 {
-	char **argv  = pst->argv;
+	const char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
 
 
@@ -703,7 +649,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.line_groups.find( info.group) == config.line_groups.end())
 		{
 			gLog.printf("%s(%d): unknown line group '%c'\n",
-					  pst->file(), pst->line(),  info.group);
+					  pst->file().u8string().c_str(), pst->line(),  info.group);
 		}
 		else
 			config.line_types[number] = info;
@@ -737,6 +683,118 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		config.thing_groups[tg.group] = tg;
 	}
 
+	else if(y_stricmp(argv[0], "thingflag") == 0)
+	{
+		if(nargs != 5)
+			pst->fail(bad_arg_count_fail, argv[0], 5);
+
+		thingflag_t flag = {};
+		flag.row = atoi(argv[1]);
+		flag.column = atoi(argv[2]);
+		flag.label = argv[3];
+		if(!y_stricmp(argv[4], "off"))
+			flag.defaultSet = thingflag_t::DefaultMode::off;
+		else if(!y_stricmp(argv[4], "on"))
+			flag.defaultSet = thingflag_t::DefaultMode::on;
+		else if(!y_stricmp(argv[4], "on-opposite"))
+			flag.defaultSet = thingflag_t::DefaultMode::onOpposite;
+		else
+			pst->fail("invalid default setting \"%s\", expected off, on or on-opposite", argv[4]);
+		flag.value = (int)strtol(argv[5], nullptr, 0);
+
+		// Check if we already have one in the same location, and replace it if so (needed for
+		// ports like BOOM which overwrite vanilla flags)
+		bool found = false;
+		for(thingflag_t &existingflag : config.thing_flags)
+			if(existingflag.row == flag.row && existingflag.column == flag.column)
+			{
+				existingflag = flag;
+				found = true;
+				break;
+			}
+		if(!found)
+			config.thing_flags.push_back(flag);
+	}
+
+	else if(y_stricmp(argv[0], "lineflag") == 0)
+	{
+		if(nargs < 2)
+			pst->fail(bad_arg_count_fail, argv[0], 2);
+
+		lineflag_t flag = {};
+		flag.label = argv[1];
+		flag.value = (int)strtol(argv[2], nullptr, 0);
+		flag.pairIndex = -1;
+		// Optional: pair <index>
+		if(nargs >= 4 && !y_stricmp(argv[3], "pair"))
+		{
+			flag.pairIndex = atoi(argv[4]);
+			if(flag.pairIndex < -1)
+				flag.pairIndex = -1;
+			if(flag.pairIndex > 1)
+				flag.pairIndex = 1;
+		}
+
+		bool foundExisting = false;
+		for(lineflag_t &existingflag : config.line_flags)
+		{
+			if(existingflag.value == flag.value)
+			{
+				existingflag = flag;
+				foundExisting = true;
+			}
+		}
+
+		if(!foundExisting)
+			config.line_flags.push_back(flag);
+	}
+
+	else if(y_stricmp(argv[0], "gensector") == 0)
+	{
+		if(nargs < 2)
+			pst->fail(bad_arg_count_fail, argv[0], 2);
+
+		gensector_t gensec = {};
+		gensec.value = (int)strtol(argv[1], nullptr, 0);
+		gensec.label = argv[2];
+
+		if(nargs >= 4)
+		{
+			for(int i = 3; i < nargs; i += 2)
+			{
+				if(i + 1 > nargs)
+					break;
+				gensector_t::option_t opt = {};
+				opt.value = (int)strtol(argv[i], nullptr, 0);
+				opt.label = argv[i + 1];
+				gensec.options.push_back(opt);
+			}
+		}
+
+		if(gensec.options.empty())
+		{
+			// Simple flag. Overwrite by value
+			for(gensector_t &existing : config.gen_sectors)
+				if(existing.options.empty() && existing.value == gensec.value)
+				{
+					existing = gensec;
+					return;
+				}
+		}
+		else
+		{
+			// Bit mask menu. Overwrite by label
+			for(gensector_t &existing : config.gen_sectors)
+				if(!existing.options.empty() && existing.label.noCaseEqual(gensec.label))
+				{
+					existing = gensec;
+					return;
+				}
+		}
+		config.gen_sectors.push_back(gensec);
+
+	}
+
 	else if (y_stricmp(argv[0], "thing") == 0)
 	{
 		if (nargs < 6)
@@ -763,7 +821,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.thing_groups.find(info.group) == config.thing_groups.end())
 		{
 			gLog.printf("%s(%d): unknown thing group '%c'\n",
-					  pst->file(), pst->line(), info.group);
+					  pst->file().u8string().c_str(), pst->line(), info.group);
 		}
 		else
 		{
@@ -797,7 +855,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
-					  pst->file(), pst->line(), group);
+					  pst->file().u8string().c_str(), pst->line(), group);
 		}
 		else
 			config.texture_categories[name] = group;
@@ -814,7 +872,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
-					  pst->file(), pst->line(), group);
+					  pst->file().u8string().c_str(), pst->line(), group);
 		}
 		else
 			config.flat_categories[name] = group;
@@ -898,7 +956,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 
 static void M_ParseGameInfoLine(parser_state_c *pst, GameInfo &loadingGame)
 {
-	char **argv  = pst->argv;
+	const char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
 
 	if (y_stricmp(argv[0], "map_formats") == 0 ||
@@ -920,7 +978,7 @@ static void M_ParseGameInfoLine(parser_state_c *pst, GameInfo &loadingGame)
 
 static void M_ParsePortInfoLine(parser_state_c *pst, PortInfo_c &port)
 {
-	char **argv  = pst->argv;
+	const char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
 
 	if (y_stricmp(argv[0], "base_game") == 0)
@@ -956,7 +1014,7 @@ static ParsingCondition M_ParseConditional(const std::unordered_map<SString, SSt
 {
 	// returns the result of the "IF" test, true or false.
 
-	char **argv  = pst->argv + 1;
+	const char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
 
 	bool op_is  = (nargs >= 3 && y_stricmp(argv[1], "is")  == 0);
@@ -968,9 +1026,10 @@ static ParsingCondition M_ParseConditional(const std::unordered_map<SString, SSt
 			pst->fail("expected variable in if statement");
 
 		// tokens are stored in pst->tokenbuf, so this is OK
-		y_strupr(argv[0]);
+		SString argvUpper = argv[0];
+		argvUpper = argvUpper.asUpper();
 
-		auto it = parse_vars.find(argv[0]);
+		auto it = parse_vars.find(argvUpper);
 		if(it != parse_vars.end())
 		{
 			const SString &var_value = it->second;
@@ -991,7 +1050,7 @@ static ParsingCondition M_ParseConditional(const std::unordered_map<SString, SSt
 
 static void M_ParseSetVar(std::unordered_map<SString, SString> &parse_vars, parser_state_c *pst)
 {
-	char **argv  = pst->argv + 1;
+	const char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
 
 	if (nargs != 2)
@@ -1000,10 +1059,9 @@ static void M_ParseSetVar(std::unordered_map<SString, SString> &parse_vars, pars
 	if (strlen(argv[0]) < 2 || argv[0][0] != '$')
 		pst->fail("variable name too short or lacks '$' prefix");
 
-	// tokens are stored in pst->tokenbuf, so this is OK
-	y_strupr(argv[0]);
+	SString argvUpper = SString(argv[0]).asUpper();
 
-	parse_vars[argv[0]] = argv[1];
+	parse_vars[argvUpper] = argv[1];
 }
 
 //
@@ -1017,19 +1075,19 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   const ParsePurpose purpose,
 						   ParseTarget target,
 						   const fs::path &filename,
-						   const SString &cfolder,
-						   const SString &cprettyname,
+						   const fs::path &cfolder,
+						   const fs::path &cprettyname,
 						   int include_level)
 {
 	SYS_ASSERT(!filename.empty());
 
-	SString folder = cfolder;
+	fs::path folder = cfolder;
 	if (folder.empty())
 		folder = "common";
 
-	SString prettyname = cprettyname;
+	fs::path prettyname = cprettyname;
 	if (prettyname.empty())
-		prettyname = filename.filename().u8string();
+		prettyname = filename.filename();
 
 	parser_state_c parser_state(prettyname);
 
@@ -1106,21 +1164,25 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 			if (include_level >= MAX_INCLUDE_LEVEL)
 				pst->fail("Too many includes (check for a loop)");
 
-			SString new_folder = folder;
-			fs::path new_name = FindDefinitionFile(fs::u8path(new_folder.get()), pst->argv[1]);
+			fs::path new_folder = folder;
+			tl::optional<fs::path> new_name = FindDefinitionFile(global::home_dir,
+					global::old_linux_home_and_cache_dir, global::install_dir, new_folder,
+					pst->argv[1]);
 
 			// if not found, check the common/ folder
-			if (new_name.empty() && folder != "common")
+			if (!new_name && folder != "common")
 			{
 				new_folder = "common";
-				new_name = FindDefinitionFile(fs::u8path(new_folder.get()), pst->argv[1]);
+				new_name = FindDefinitionFile(global::home_dir,
+						global::old_linux_home_and_cache_dir, global::install_dir, new_folder,
+						pst->argv[1]);
 			}
 
-			if (new_name.empty())
+			if (!new_name)
 				pst->fail("Cannot find include file: %s.ugh", pst->argv[1]);
 
-			M_ParseDefinitionFile(parse_vars, purpose, target, new_name, new_folder,
-								  NULL /* prettyname */,
+			M_ParseDefinitionFile(parse_vars, purpose, target, *new_name, new_folder,
+								  "" /* prettyname */,
 								  include_level + 1);
 			continue;
 		}
@@ -1157,13 +1219,14 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	if(it != global::sLoadedGameDefs.end())
 		return it->second;
 
-	fs::path filename = FindDefinitionFile(GAMES_DIR, game);
-	if(filename.empty())
+	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+			global::old_linux_home_and_cache_dir, global::install_dir, GAMES_DIR, game);
+	if(!filename)
 		return {};
 	GameInfo loadingGame = GameInfo(game);
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::gameInfo, &loadingGame,
-						  filename, "games", nullptr);
+						  *filename, "games", "");
 	if(loadingGame.baseGame.empty())
 		throw ParseException(SString::printf("Game definition for '%s' does "
 											 "not set base_game\n",
@@ -1182,15 +1245,16 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 	if (IT != global::loaded_port_defs.end())
 		return &IT->second;
 
-	fs::path filename = FindDefinitionFile(PORTS_DIR, port);
-	if (filename.empty())
+	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+			global::old_linux_home_and_cache_dir, global::install_dir, PORTS_DIR, port);
+	if (!filename)
 		return NULL;
 
 	global::loading_Port = PortInfo_c(port);
 
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::portInfo, &global::loading_Port,
-						  filename, "ports", NULL);
+						  *filename, "ports", "");
 
 	// default is to support both Doom and Doom2
 	if (global::loading_Port.supported_games.empty())
@@ -1209,12 +1273,10 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 //
 // Collect known definitions from folder
 //
-std::vector<SString> M_CollectKnownDefs(const char *folder)
+std::vector<SString> M_CollectKnownDefs(const std::initializer_list<fs::path> &dirList,
+										const fs::path &folder)
 {
-	SYS_ASSERT(!!folder);
-
 	std::vector<SString> temp_list;
-	SString path;
 
 	//	gLog.debugPrintf("M_CollectKnownDefs for: %d\n", folder);
 	auto scanner_add_file = [&temp_list](const fs::path &name, int flags)
@@ -1225,10 +1287,13 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 			return;
 		temp_list.push_back(ReplaceExtension(name, NULL).u8string());
 	};
-	path = (global::install_dir / folder).u8string();
-	ScanDirectory(fs::u8path(path.get()), scanner_add_file);
-	path = (global::home_dir / folder).u8string();
-	ScanDirectory(fs::u8path(path.get()), scanner_add_file);
+	for(const fs::path &parentPath : dirList)
+	{
+		if(parentPath.empty())
+			continue;
+		fs::path path = parentPath / folder;
+		ScanDirectory(path, scanner_add_file);
+	}
 
 	std::sort(temp_list.begin(), temp_list.end(), [](const SString &a, const SString &b)
 			  {
@@ -1263,8 +1328,7 @@ SString M_GetBaseGame(const SString &game) noexcept(false)
 }
 
 
-map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
-										  const char *port)
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 {
 	const PortInfo_c *pinfo = M_LoadPortInfo(port);
 	if (pinfo && pinfo->formats != 0)
@@ -1275,6 +1339,41 @@ map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
 		return (1 << static_cast<int>(MapFormat::hexen));
 
 	return (1 << static_cast<int>(MapFormat::doom));
+}
+
+
+int M_CalcSectorTypeMask(const ConfigData &config)
+{
+	int mask = 0;
+	for(const gensector_t &gensec : config.gen_sectors)
+		mask |= gensec.value;
+	if(!mask)
+		return 65535;
+	int res = 0;
+	while(mask > 0 && !(mask & 1))
+	{
+		mask >>= 1;
+		res <<= 1;
+		res += 1;
+	}
+	return res;
+}
+
+
+int M_CalcMaxSectorType(const ConfigData &config)
+{
+	int max = 32;
+	for(const gensector_t &gensec : config.gen_sectors)
+		if(gensec.value > max)
+			max = gensec.value;
+	int res = 0;
+	while(max > 0)
+	{
+		max /= 2;
+		res <<= 1;
+		res += 1;
+	}
+	return res;
 }
 
 
@@ -1308,7 +1407,8 @@ bool M_CheckPortSupportsGame(const SString &base_game,
 SString M_CollectPortsForMenu(const char *base_game,
 							  int *exist_val, const char *exist_name) noexcept(false)
 {
-	std::vector<SString> list = M_CollectKnownDefs("ports");
+	std::vector<SString> list = M_CollectKnownDefs({global::install_dir,
+			global::old_linux_home_and_cache_dir, global::home_dir}, "ports");
 
 	if (list.empty())
 		return "";
@@ -1384,16 +1484,16 @@ const sectortype_t &Instance::M_GetSectorType(int type) const
 }
 
 
-const linetype_t &Instance::M_GetLineType(int type) const
+const linetype_t &ConfigData::getLineType(int type) const
 {
 	std::map<int, linetype_t>::const_iterator LI;
 
-	LI = conf.line_types.find(type);
+	LI = line_types.find(type);
 
-	if (LI != conf.line_types.end())
+	if (LI != line_types.end())
 		return LI->second;
 
-	static linetype_t dummy_type =
+	static const linetype_t dummy_type =
 	{
 		0, "UNKNOWN TYPE"
 	};
@@ -1402,12 +1502,11 @@ const linetype_t &Instance::M_GetLineType(int type) const
 }
 
 
-const thingtype_t &M_GetThingType(const ConfigData &config, int type)
+const thingtype_t &ConfigData::getThingType(int type) const
 {
-	auto TI = config.thing_types.find(type);
-
-	if (TI != config.thing_types.end())
-		return TI->second;
+	const thingtype_t *existing = get(thing_types, type);
+	if(existing)
+		return *existing;
 
 	static thingtype_t dummy_type =
 	{

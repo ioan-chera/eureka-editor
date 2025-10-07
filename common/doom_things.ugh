@@ -26,6 +26,12 @@
 
 player_size 16 56 41
 
+thingflag 0 0 easy    on  0x01
+thingflag 1 0 medium  on  0x02
+thingflag 2 0 hard    on  0x04
+thingflag 2 1 dm/coop off 0x10
+thingflag 4 0 ambush  off 0x08
+
 #
 #	Definition of thing groups
 #	Format is : thinggroup <letter> <colour> <description>

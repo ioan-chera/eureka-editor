@@ -29,3 +29,9 @@ osx/Eureka-Tests/Eureka-Tests.xcodeproj/xcuserdata
 Debug/
 win/Eureka/Release/
 build2/
+src/main.aps
+htdocs-ORIGINAL/
+htdocs-OUTPUT/
+build-intel
+venv
+htdocs

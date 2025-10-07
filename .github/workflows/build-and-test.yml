@@ -1,0 +1,38 @@
+name: Build and test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04]
+        compiler: [{cc: "gcc", cxx: "g++"}, {cc: "clang", cxx: "clang++"}]
+        use-installed-deps: [OFF, ON]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install --fix-missing clang cmake libjpeg-dev libgl-dev libglu1-mesa-dev \
+            libpng-dev libxpm-dev libz-dev python3 libfltk1.3-dev libgtest-dev
+    - name: Generate project
+      run: |
+        export CC=$(which ${{ matrix.compiler.cc }})
+        export CXX=$(which ${{ matrix.compiler.cxx }})
+        mkdir build
+        cmake -Bbuild -DUSE_SYSTEM_FLTK=${{ matrix.use-installed-deps }} \
+                      -DUSE_SYSTEM_GOOGLE_TEST=${{ matrix.use-installed-deps }}
+    - name: Build
+      run: |
+        make -C build -j$(nproc)
+    - name: Test
+      run: |
+        ctest --test-dir build --output-on-failure --verbose

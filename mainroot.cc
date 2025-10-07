@@ -1,10 +1,11 @@
 //------------------------------------------------------------------------
-//  PREFERENCES DIALOG
+//  MAIN PROGRAM
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012 Andrew Apted
+//  Copyright (C) 2001-2020 Andrew Apted
+//  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -17,11 +18,16 @@
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
+//
+//  Based on Yadex which incorporated code from DEU 5.21 that was put
+//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//
+//------------------------------------------------------------------------
 
-#ifndef __EUREKA_UI_PREFS_H__
-#define __EUREKA_UI_PREFS_H__
+// Main entry point, not always used
+int main(int argc, char **argv)
+{
+    extern int EurekaMain(int argc, char *argv[]);
 
-#endif  /* __EUREKA_UI_PREFS_H__ */
-
-//--- editor settings ---
-// vi:ts=4:sw=4:noexpandtab
+    return EurekaMain(argc, argv);
+}

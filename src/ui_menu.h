@@ -21,7 +21,19 @@
 #ifndef __EUREKA_UI_MENU_H__
 #define __EUREKA_UI_MENU_H__
 
-void updateMenuBindings();
+#include "FL/Fl_Sys_Menu_Bar.H"
+
+class Fl_Menu_Bar;
+class SString;
+
+namespace menu
+{
+Fl_Sys_Menu_Bar *create(int x, int y, int w, int h, void *userData);
+void updateBindings(Fl_Sys_Menu_Bar *bar);
+void setTestMapDetail(Fl_Sys_Menu_Bar *bar, const SString &text);
+void setUndoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb);
+void setRedoDetail(Fl_Sys_Menu_Bar *bar, const SString &verb);
+}
 
 #endif  /* __EUREKA_UI_MENU_H__ */
 
