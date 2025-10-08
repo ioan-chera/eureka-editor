@@ -25,6 +25,7 @@
 #include "SideDef.h"
 #include "Thing.h"
 #include "Vertex.h"
+#include "w_rawdef.h"
 
 #define INVALID_SECTOR  (-999999)
 
@@ -351,6 +352,69 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 		}
 	}
 
+	// Second pass: for sidedefs with INVALID_SECTOR, pre-select the best texture
+	// for the opposite sidedef (which will remain after paste)
+	if (is_sectors)
+	{
+		for (sel_iter_c it(side_sel) ; !it.done() ; it.next())
+		{
+			SYS_ASSERT(side_map.find(*it) != side_map.end());
+			SideDef &SD = clip_board->sides[side_map[*it]];
+
+			if(SD.sector != INVALID_SECTOR)
+				continue;
+
+			// This sidedef will be removed when pasted. We need to pre-select
+			// the best texture for the OPPOSITE sidedef (which will remain).
+			// Find the linedef and opposite sidedef.
+			for (sel_iter_c ld_it(line_sel); !ld_it.done(); ld_it.next())
+			{
+				const auto &L = doc.linedefs[*ld_it];
+				int opposite_sd = -1;
+				Side opposite_side = Side::right;
+
+				if (L->right == *it && L->left >= 0)
+				{
+					opposite_sd = L->left;
+					opposite_side = Side::left;
+				}
+				else if (L->left == *it && L->right >= 0)
+				{
+					opposite_sd = L->right;
+					opposite_side = Side::right;
+				}
+
+				if(opposite_sd < 0)
+					continue;
+
+				// Get the opposite sidedef from the clipboard
+				SYS_ASSERT(side_map.find(opposite_sd) != side_map.end());
+				SideDef &opposite_SD = clip_board->sides[side_map[opposite_sd]];
+
+				bool has_lower = !is_null_tex(opposite_SD.LowerTex());
+				bool has_upper = !is_null_tex(opposite_SD.UpperTex());
+
+				if(!has_lower || !has_upper)
+					break;
+
+				// Check visibility of lower and upper textures from opposite side
+				Objid temp_obj(ObjType::linedefs, *ld_it);
+				temp_obj.parts = (opposite_side == Side::left) ? PART_LF_LOWER : PART_RT_LOWER;
+				bool lower_vis = doc.linemod.partIsVisible(temp_obj, LinedefModule::Part::lower);
+
+				temp_obj.parts = (opposite_side == Side::left) ? PART_LF_UPPER : PART_RT_UPPER;
+				bool upper_vis = doc.linemod.partIsVisible(temp_obj, LinedefModule::Part::upper);
+
+				// If lower is hidden but upper is visible, store upper as mid_tex
+				if (!lower_vis && upper_vis)
+					opposite_SD.mid_tex = opposite_SD.upper_tex;
+				else
+					opposite_SD.mid_tex = opposite_SD.lower_tex;
+				break;
+			}
+		}
+	}
+
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
 		clip_board->lines.push_back(*doc.linedefs[*it]);
@@ -549,8 +613,13 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 		}
 
 		// if the linedef lost a side, fix texturing
-		if (L->OneSided() && is_null_tex(op.doc.getRight(*L)->MidTex()))
-			op.doc.linemod.fixForLostSide(op, new_l);
+		if (L->OneSided())
+		{
+			L->flags &= ~MLF_TwoSided;
+			L->flags |= MLF_Blocking;
+			if (is_null_tex(op.doc.getRight(*L)->MidTex()))
+				op.doc.linemod.fixForLostSide(op, new_l);
+		}
 	}
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
@@ -1164,7 +1233,7 @@ void Instance::CMD_Delete()
 		{
 			if (DeleteVertex_MergeLineDefs(level, v_num))
 			{
-				
+
 				clearSelection();
 				RedrawMap();
 			}

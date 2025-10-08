@@ -31,6 +31,8 @@ protected:
 	void addArea();
 	void addSecondArea();
 
+	void moveMouse(const v2double_t &pos);
+
 	Instance inst;
 };
 
@@ -185,6 +187,12 @@ void ECutPasteFixture::addSecondArea()
 	line->right = 7;
 	line->left = -1;
 	inst.level.linedefs.push_back(std::shared_ptr<LineDef>(line));
+}
+
+void ECutPasteFixture::moveMouse(const v2double_t &pos)
+{
+	inst.edit.map.xy = pos;
+	inst.UpdateHighlight();
 }
 
 TEST_F(ECutPasteFixture, DeletingAllPlayersWillNotCrash)
@@ -527,9 +535,100 @@ TEST_F(ECutPasteFixture, LCDSevenSegmentEightLayoutUsingCommands)
 
 	for (v2double_t xy : coords)
 	{
-		inst.edit.map.xy = xy;
-		inst.UpdateHighlight();
+		moveMouse(xy);
 		inst.CMD_ObjectInsert();
-		// TODO
 	}
+
+	// Make right sector taller
+	inst.edit.mode = ObjType::sectors;
+	inst.Selection_Clear();
+	moveMouse({192, 64});
+	ASSERT_TRUE(inst.edit.highlight.valid());
+	ASSERT_EQ(inst.edit.highlight.type, ObjType::sectors);
+	const auto &sector = inst.level.sectors[inst.edit.highlight.num];
+	sector->floorh = 64;
+	sector->ceilh = 192;
+
+	// Put different textures on the middle line
+	inst.edit.mode = ObjType::linedefs;
+	inst.Selection_Clear();
+	moveMouse({128, 64});
+	ASSERT_TRUE(inst.edit.highlight.valid());
+	ASSERT_EQ(inst.edit.highlight.type, ObjType::linedefs);
+	auto linedef = inst.level.linedefs[inst.edit.highlight.num];
+	auto sidedef = inst.level.getRight(*linedef);
+	ASSERT_TRUE(sidedef);
+	sidedef->upper_tex = BA_InternaliseString("UPPER");
+	sidedef = inst.level.getLeft(*linedef);
+	ASSERT_TRUE(sidedef);
+	sidedef->lower_tex = BA_InternaliseString("LOWER");
+
+	// Do copy
+	inst.edit.mode = ObjType::sectors;
+	inst.Selection_Clear();
+	moveMouse({192, 64});
+	inst.CMD_Clipboard_Copy();
+
+	size_t linedefCountBeforePaste = inst.level.linedefs.size();
+	size_t sidedefCountBeforePaste = inst.level.sidedefs.size();
+
+	// Do paste
+	moveMouse({384, 64});
+	inst.CMD_Clipboard_Paste();
+
+	// We have a new sector
+	ASSERT_EQ(inst.level.sectors.size(), 3);
+
+	// Only four lines get added
+	ASSERT_EQ(inst.level.linedefs.size(), linedefCountBeforePaste + 4);
+
+	// More important: only four sidedefs
+	ASSERT_EQ(inst.level.sidedefs.size(), sidedefCountBeforePaste + 4);
+
+	// Now check the linedef
+	inst.edit.mode = ObjType::linedefs;
+	inst.Selection_Clear();
+	moveMouse({320, 64});
+	ASSERT_TRUE(inst.edit.highlight.valid());
+	ASSERT_EQ(inst.edit.highlight.type, ObjType::linedefs);
+	linedef = inst.level.linedefs[inst.edit.highlight.num];
+	ASSERT_TRUE(linedef->OneSided());
+	ASSERT_TRUE(linedef->flags & MLF_Blocking);
+	ASSERT_FALSE(linedef->flags & MLF_TwoSided);
+	sidedef = inst.level.getRight(*linedef);
+	ASSERT_TRUE(sidedef);
+	ASSERT_EQ(sidedef->MidTex(), "UPPER");
+
+	// Now paste the left sector
+	inst.edit.mode = ObjType::sectors;
+	inst.Selection_Clear();
+	moveMouse({64, 64});
+	inst.CMD_Clipboard_Copy();
+
+	linedefCountBeforePaste = inst.level.linedefs.size();
+	sidedefCountBeforePaste = inst.level.sidedefs.size();
+
+	// Paste to a clear area
+	moveMouse({384, 256});
+	inst.CMD_Clipboard_Paste();
+
+	// Only four lines get added
+	ASSERT_EQ(inst.level.linedefs.size(), linedefCountBeforePaste + 4);
+
+	// More important: only four sidedefs
+	ASSERT_EQ(inst.level.sidedefs.size(), sidedefCountBeforePaste + 4);
+
+	// Check the east linedef of the pasted sector
+	inst.edit.mode = ObjType::linedefs;
+	inst.Selection_Clear();
+	moveMouse({448, 256});
+	ASSERT_TRUE(inst.edit.highlight.valid());
+	ASSERT_EQ(inst.edit.highlight.type, ObjType::linedefs);
+	linedef = inst.level.linedefs[inst.edit.highlight.num];
+	ASSERT_TRUE(linedef->OneSided());
+	ASSERT_TRUE(linedef->flags & MLF_Blocking);
+	ASSERT_FALSE(linedef->flags & MLF_TwoSided);
+	sidedef = inst.level.getRight(*linedef);
+	ASSERT_TRUE(sidedef);
+	ASSERT_EQ(sidedef->MidTex(), "LOWER");
 }

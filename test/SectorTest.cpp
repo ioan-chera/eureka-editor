@@ -42,6 +42,11 @@ TEST(Sector, Texture)
 
 TEST(Sector, SetDefaults)
 {
+	// Save original global values
+	auto original_floor_h = global::default_floor_h;
+	auto original_ceil_h = global::default_ceil_h;
+	auto original_light_level = global::default_light_level;
+
 	ConfigData config;
 	config.default_floor_tex = "DEFFLOOR";
 	config.default_ceil_tex = "DEFCEIL";
@@ -58,4 +63,9 @@ TEST(Sector, SetDefaults)
 	ASSERT_EQ(sector.FloorTex(), "DEFFLOOR");
 	ASSERT_EQ(sector.CeilTex(), "DEFCEIL");
 	ASSERT_EQ(sector.light, 122);
+
+	// Restore original global values
+	global::default_floor_h = original_floor_h;
+	global::default_ceil_h = original_ceil_h;
+	global::default_light_level = original_light_level;
 }
