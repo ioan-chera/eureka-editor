@@ -38,14 +38,26 @@ Inside source files, the functions should be defined in the same order as they'r
 order is as such: inclusions, preprocessor macros, enum constants, structs and classes, global variables, local class
 method implementations, static functions (use the `static` keyword, do not use empty namespaces), then global functions.
 
+Avoid using `auto` for type inference, unless it's visible via casting or instantiation.
+
+Prefer early `return`, `break` or `continue` whenever possible, instead of nesting and indenting too many control flow statements.
+
 All files must have the GNU GPL copyright header. For new files, only add my name and the current year
 for the copyright.
 
 ## Building
 Always use cmake. If you want to unit test, the binary is test_general.
 
-## Doom editing guidelines
+## Unit tests
+Prefer using the Google Test ASSERT_* macros to the EXPECT_* ones, unless the current function is non-`void`.
 
+## Doom editing guidelines
 Coordinate axes are so: x to the right, y to the top. Most typical is for coordinates to be snapped to a grid of 8.
 A usual sector height is 128, but of course it can vary by multiples of 8. Player size is 40x40x56.
 Maximum walkable step height is 24.
+
+### Eureka-specific behavior
+Two-sided linedefs in Eureka always have both upper and lower textures set, even if the texture would not be visible in-game
+due to sector heights. This is an editor convenience feature.
+
+GRAY1 is a default texture that is automatically set for new sidedefs if they don't have any texture reference.
