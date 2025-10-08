@@ -77,6 +77,8 @@ public:
 
 	double angleBetweenLines(int A, int B, int C) const;
 
+	bool partIsVisible(const Objid& obj, Part part) const;
+
 private:
 
 
@@ -101,7 +103,6 @@ private:
 	int scoreAdjoiner(const Objid &adj, const Objid &cur, int align_flags) const;
 	int scoreTextureMatch(const Objid &adj, const Objid &cur) const;
 	void partCalcExtent(const Objid &obj, Part part, int *z1, int *z2) const;
-	bool partIsVisible(const Objid& obj, Part part) const;
 
 	int calcReferenceH(const Objid& obj) const;
 

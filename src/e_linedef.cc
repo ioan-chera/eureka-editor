@@ -1420,6 +1420,14 @@ void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 
 	StringID tex;
 
+	// If mid_tex is already set (pre-computed during copy/paste), use it
+	if (! is_null_tex(doc.getRight(*L)->MidTex()))
+	{
+		// Already has the correct texture pre-selected
+		return;
+	}
+
+	// Otherwise fall back to the old logic
 	if (! is_null_tex(doc.getRight(*L)->LowerTex()))
 		tex = doc.getRight(*L)->lower_tex;
 	else if (! is_null_tex(doc.getRight(*L)->UpperTex()))
