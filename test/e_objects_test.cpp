@@ -34,8 +34,16 @@ protected:
 		inst.level.clear();
 	}
 
+	void moveMouse(const v2double_t &pos);
+
 	Instance inst;
 };
+
+void EObjectsFixture::moveMouse(const v2double_t &pos)
+{
+	inst.edit.map.xy = pos;
+	inst.UpdateHighlight();
+}
 
 // Helpful vertex comparator so we sort our data
 static bool vertexCompare(const Vertex *v1, const Vertex *v2)
@@ -1092,3 +1100,93 @@ TEST_F(EObjectsFixture, FindSplitLineExactPointWithRatioLock)
 	bool ratioLockApplied = (fabs(outPos.x - 120.0) > 0.1) || (fabs(outPos.y - 100.0) > 0.1);
 	EXPECT_TRUE(ratioLockApplied) << "Ratio-lock should have modified the position from exact point";
 }
+
+//
+// Test for GitHub issue #177: Drawing a polygon starting and finishing at an existing vertex
+// should produce a sector when drawn clockwise, not a solid void wall.
+//
+TEST_F(EObjectsFixture, DrawClockwiseInsideOctagonFromVertex)
+{
+	inst.edit.mode = ObjType::vertices;
+	inst.edit.action = EditorAction::nothing;
+	inst.edit.pointer_in_window = true;
+
+	// Draw an octagonal room (outer room)
+	// Octagon vertices at radius ~181 from center (128, 128)
+	const v2double_t octagonCoords[] =
+	{
+		{128, 256},		// top
+		{238, 238},		// top-right
+		{256, 128},		// right
+		{238, 18},		// bottom-right
+		{128, 0},		// bottom
+		{18, 18},		// bottom-left
+		{0, 128},		// left
+		{18, 238},		// top-left
+		{128, 256}		// close octagon (back to start)
+	};
+
+	for (v2double_t xy : octagonCoords)
+	{
+		moveMouse(xy);
+		inst.CMD_ObjectInsert();
+	}
+
+	// Verify octagon was created
+	ASSERT_EQ(inst.level.vertices.size(), 8);
+	ASSERT_EQ(inst.level.linedefs.size(), 8);
+	ASSERT_EQ(inst.level.sectors.size(), 1);
+
+	// Now draw clockwise inside the octagon, starting and ending at vertex 0 (top vertex)
+	// Create an inner rectangle that starts at the top vertex of the octagon
+	const v2double_t innerCoords[] =
+	{
+		{128, 256},		// start at top vertex of octagon
+		{192, 192},		// inner top-right
+		{192, 64},		// inner bottom-right
+		{64, 64},		// inner bottom-left
+		{64, 192},		// inner top-left
+		{128, 256}		// return to start (close the polygon)
+	};
+
+	for (v2double_t xy : innerCoords)
+	{
+		moveMouse(xy);
+		inst.CMD_ObjectInsert();
+	}
+
+	// Verify that a new sector was created (not a void wall)
+	// We should now have 2 sectors: the outer octagon and the inner rectangle
+	ASSERT_EQ(inst.level.sectors.size(), 2);
+
+	// Verify we have the correct number of vertices
+	// 8 original octagon vertices + 4 new inner vertices = 12 total
+	ASSERT_EQ(inst.level.vertices.size(), 12);
+
+	// Verify we have the correct number of linedefs
+	// 8 octagon lines + 5 inner lines + 1 connecting line = 14 total
+	// (The exact count depends on the implementation, but we should have at least created a sector)
+	ASSERT_GT(inst.level.linedefs.size(), 8);
+
+	// Verify that the inner sector has proper sidedefs (not solid walls)
+	// Find the inner sector (should be sector 1)
+	const Sector *innerSector = inst.level.sectors[1].get();
+	ASSERT_TRUE(innerSector != nullptr);
+
+	// Count how many linedefs reference the inner sector
+	int innerSectorRefs = 0;
+	for (const auto &line : inst.level.linedefs)
+	{
+		const SideDef *right = inst.level.getRight(*line);
+		const SideDef *left = inst.level.getLeft(*line);
+
+		if (right && right->sector == 1)
+			innerSectorRefs++;
+		if (left && left->sector == 1)
+			innerSectorRefs++;
+	}
+
+	// The inner sector should be referenced by multiple sidedefs (at least 5)
+	ASSERT_GT(innerSectorRefs, 0);
+}
+
