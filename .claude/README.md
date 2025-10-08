@@ -43,3 +43,9 @@ for the copyright.
 
 ## Building
 Always use cmake. If you want to unit test, the binary is test_general.
+
+## Doom editing guidelines
+
+Coordinate axes are so: x to the right, y to the top. Most typical is for coordinates to be snapped to a grid of 8.
+A usual sector height is 128, but of course it can vary by multiples of 8. Player size is 40x40x56.
+Maximum walkable step height is 24.
