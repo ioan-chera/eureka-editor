@@ -522,7 +522,7 @@ TEST_F(ECutPasteFixture, LCDSevenSegmentEightLayoutUsingCommands)
 	// Draw bottom-left square: (0,0) -> (0,128) -> (128,128) -> (128,0) -> close
 	const v2double_t coords[] =
 	{
-		{0, 0}, {0, 128}, {128, 128}, {256, 128}, {256, 0}, {128, 0}, {128, 128}
+		{0, 0}, {0, 128}, {128, 128}, {256, 128}, {256, 0}, {128, 0}, {0, 0}, {128, 0}, {128, 128}
 	};
 
 	for (v2double_t xy : coords)
@@ -532,5 +532,4 @@ TEST_F(ECutPasteFixture, LCDSevenSegmentEightLayoutUsingCommands)
 		inst.CMD_ObjectInsert();
 		// TODO
 	}
-	puts("hel");
 }
