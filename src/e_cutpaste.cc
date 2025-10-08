@@ -751,7 +751,7 @@ void Instance::CMD_Clipboard_Cut()
 
 void Instance::CMD_Clipboard_Copy()
 {
-	if (main_win->ClipboardOp(EditCommand::copy))
+	if (main_win && main_win->ClipboardOp(EditCommand::copy))
 		return;
 
 	if (edit.render3d && edit.mode != ObjType::things)
@@ -770,7 +770,7 @@ void Instance::CMD_Clipboard_Copy()
 
 void Instance::CMD_Clipboard_Paste()
 {
-	if (main_win->ClipboardOp(EditCommand::paste))
+	if (main_win && main_win->ClipboardOp(EditCommand::paste))
 		return;
 
 	if (edit.render3d && edit.mode != ObjType::things)
