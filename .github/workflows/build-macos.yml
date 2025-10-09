@@ -47,6 +47,7 @@ jobs:
           mkdir "$DMG_ROOT"
           cp -R build/Eureka\ Doom\ Editor.app "$DMG_ROOT/"
           cp AUTHORS.md GPL.txt README.txt "$DMG_ROOT/"
+          ln -s /Applications "$DMG_ROOT/"
           echo "Contents staged in $DMG_ROOT, will build $OUTPUT"
       - name: Create compressed DMG
         run: |
