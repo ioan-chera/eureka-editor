@@ -47,6 +47,7 @@ James Le Cuirot
 Steven Elliott
 
   * Sprite fixes
+  * Tag activation indicators
 
 epg
 

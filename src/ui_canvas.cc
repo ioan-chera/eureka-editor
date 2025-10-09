@@ -1612,7 +1612,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
     //
     // Highlight tagged items now
     //
-    auto highlightTaggedItems = [this, thickLines](const SpecialTagInfo &info)
+    auto highlightTaggedItems = [this](const SpecialTagInfo &info)
     {
 		// TODO: Consider calling DrawConnection() in additional places after
 		// the DrawHighlight() call. For now only linedef and sector connections
@@ -1625,10 +1625,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                         if (inst.level.sectors[m]->tag == info.tags[i])
                         {
                             DrawHighlight(ObjType::sectors, m);
-							RenderThickness(1);
 							DrawConnection(info.type, info.objnum, ObjType::sectors, m);
-							if(thickLines)
-								RenderThickness(2);
                         }
         if(info.numtids)
             for(int m = 0; m < inst.level.numThings(); m++)
@@ -1638,7 +1635,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                         continue;   // don't highlight the trigger again
                     for(int i = 0; i < info.numtids; ++i)
                         if(inst.level.things[m]->tid == info.tids[i])
-                            DrawHighlight(ObjType::things, m);
+						{
+							DrawHighlight(ObjType::things, m);
+							DrawConnection(info.type, info.objnum, ObjType::things, m);
+						}
                 }
 
         if(info.numlineids)
@@ -1656,10 +1656,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                             if(line.tag == info.lineids[i])
                             {
                                 DrawHighlight(ObjType::linedefs, m);
-								RenderThickness(1);
 								DrawConnection(info.type, info.objnum, ObjType::linedefs, m);
-								if(thickLines)
-									RenderThickness(2);
                             }
                     }
                 }
@@ -1673,7 +1670,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                     }
                     for(int i = 0; i < info.numlineids; ++i)
                         if(linfo.selflineid == info.lineids[i])
-                            DrawHighlight(ObjType::linedefs, m);
+						{
+							DrawHighlight(ObjType::linedefs, m);
+							DrawConnection(info.type, info.objnum, ObjType::linedefs, m);
+						}
                 }
                 // TODO: also handle UDMF.
             }
@@ -1688,7 +1688,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                     continue;
                 for(int i = 0; i < info.numpo; ++i)
                     if(info.po[i] == thing.angle)
-                        DrawHighlight(ObjType::things, m);
+					{
+						DrawHighlight(ObjType::things, m);
+						DrawConnection(info.type, info.objnum, ObjType::things, m);
+					}
             }
     };
 
@@ -1716,7 +1719,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                 {
                     DrawHighlight(ObjType::linedefs, m);
 					RenderThickness(1);
+					RenderColor(LIGHTMAGENTA);
 					DrawConnection(objtypeCause, objnumCause, ObjType::linedefs, m);
+					RenderColor(LIGHTRED);
 					if(thickLines)
 						RenderThickness(2);
 
@@ -1740,7 +1745,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                 {
                     DrawHighlight(ObjType::things, m);
 					RenderThickness(1);
+					RenderColor(LIGHTMAGENTA);
 					DrawConnection(objtypeCause, objnumCause, ObjType::things, m);
+					RenderColor(LIGHTRED);
 					if(thickLines)
 						RenderThickness(2);
 
