@@ -13,11 +13,14 @@ jobs:
   #
   build-with-signing:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Generate project
-        run: cmake -B build
+        run: cmake -B build -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
       - name: Build
         run: |
           cmake --build build --config Release --parallel
@@ -43,7 +46,7 @@ jobs:
         run: |
           DMG_ROOT="dmg_temp"
           VOL_NAME="Eureka Doom Editor"
-          OUTPUT="Eureka-Doom-Editor.dmg"
+          OUTPUT="Eureka-Doom-Editor-${{ matrix.arch }}.dmg"
           mkdir "$DMG_ROOT"
           cp -R build/Eureka\ Doom\ Editor.app "$DMG_ROOT/"
           cp AUTHORS.md GPL.txt README.txt "$DMG_ROOT/"
@@ -51,9 +54,9 @@ jobs:
           echo "Contents staged in $DMG_ROOT, will build $OUTPUT"
       - name: Create compressed DMG
         run: |
-          hdiutil create -volname "Eureka Doom Editor" -srcfolder dmg_temp -ov -format UDZO "Eureka-Doom-Editor.dmg"
+          hdiutil create -volname "Eureka Doom Editor" -srcfolder dmg_temp -ov -format UDZO "Eureka-Doom-Editor-${{ matrix.arch }}.dmg"
       - name: Publish
         uses: actions/upload-artifact@v4
         with:
-          name: EurekaEditor-macOS
-          path: Eureka-Doom-Editor.dmg
+          name: EurekaEditor-macOS-${{ matrix.arch }}
+          path: Eureka-Doom-Editor-${{ matrix.arch }}.dmg
