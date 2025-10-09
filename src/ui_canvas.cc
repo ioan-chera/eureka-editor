@@ -377,15 +377,22 @@ void UI_Canvas::DrawEverything()
 		else
 			RenderColor(HI_COL);
 
-		if (inst.edit.highlight.type == ObjType::linedefs || inst.edit.highlight.type == ObjType::sectors)
+		bool thick;
+		if (inst.edit.highlight.type == ObjType::linedefs ||
+			inst.edit.highlight.type == ObjType::sectors)
+		{
 			RenderThickness(2);
+			thick = true;
+		}
+		else
+			thick = false;
 
 		DrawHighlight(inst.edit.highlight.type, inst.edit.highlight.num);
 
 		if (! inst.edit.error_mode)
 		{
 			RenderColor(LIGHTRED);
-			DrawTagged(inst.edit.highlight.type, inst.edit.highlight.num);
+			DrawTagged(inst.edit.highlight.type, inst.edit.highlight.num, thick);
 		}
 
 		if (inst.edit.mode == ObjType::linedefs && !inst.edit.show_object_numbers)
@@ -1587,12 +1594,16 @@ void UI_Canvas::DrawConnection(const ObjType objtypeCause , const int objnumCaus
 	const v2double_t midCause  = inst.level.GetMidpoint(objtypeCause,  objnumCause);
 	const v2double_t midEffect = inst.level.GetMidpoint(objtypeEffect, objnumEffect);
 
-	// TODO: Consider visibility testing prior to drawing this line.
+	if (!Vis(std::min(midCause.x, midEffect.x), std::min(midCause.y, midEffect.y),
+			 std::max(midCause.x, midEffect.x), std::max(midCause.y, midEffect.y)))
+	{
+		return;
+	}
 	DrawMapLine(midCause.x, midCause.y, midEffect.x, midEffect.y);
 }
 
 
-void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
+void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
 {
 	// color has been set by caller
 
@@ -1601,7 +1612,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     //
     // Highlight tagged items now
     //
-    auto highlightTaggedItems = [this](const SpecialTagInfo &info)
+    auto highlightTaggedItems = [this, thickLines](const SpecialTagInfo &info)
     {
 		// TODO: Consider calling DrawConnection() in additional places after
 		// the DrawHighlight() call. For now only linedef and sector connections
@@ -1614,8 +1625,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                         if (inst.level.sectors[m]->tag == info.tags[i])
                         {
                             DrawHighlight(ObjType::sectors, m);
-							DrawConnection(info.type, info.objnum,
-										  ObjType::sectors, m);
+							RenderThickness(1);
+							DrawConnection(info.type, info.objnum, ObjType::sectors, m);
+							if(thickLines)
+								RenderThickness(2);
                         }
         if(info.numtids)
             for(int m = 0; m < inst.level.numThings(); m++)
@@ -1643,8 +1656,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                             if(line.tag == info.lineids[i])
                             {
                                 DrawHighlight(ObjType::linedefs, m);
-								DrawConnection(info.type, info.objnum,
-											  ObjType::linedefs, m);
+								RenderThickness(1);
+								DrawConnection(info.type, info.objnum, ObjType::linedefs, m);
+								if(thickLines)
+									RenderThickness(2);
                             }
                     }
                 }
@@ -1680,9 +1695,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     //
     // Look for all the tagging things
     //
-    auto highlightTaggingTriggers = [this, objnum, objtype](int tag, int (SpecialTagInfo::*tags)[5],
-                                                            int SpecialTagInfo::*numtags,
-                                                            const ObjType objtypeCause, const int objnumCause)
+    auto highlightTaggingTriggers = [this, objnum, objtype, thickLines]
+		(int tag, int (SpecialTagInfo::*tags)[5], int SpecialTagInfo::*numtags,
+		 const ObjType objtypeCause, const int objnumCause)
     {
         if(tag <= 0)
             return;
@@ -1700,8 +1715,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                 if((info.*tags)[i] == tag)
                 {
                     DrawHighlight(ObjType::linedefs, m);
-					DrawConnection(objtypeCause, objnumCause,
-								  ObjType::linedefs, m);
+					RenderThickness(1);
+					DrawConnection(objtypeCause, objnumCause, ObjType::linedefs, m);
+					if(thickLines)
+						RenderThickness(2);
 
                     break;
                 }
@@ -1722,8 +1739,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                 if((info.*tags)[i] == tag)
                 {
                     DrawHighlight(ObjType::things, m);
-					DrawConnection(objtypeCause, objnumCause,
-								  ObjType::things, m);
+					RenderThickness(1);
+					DrawConnection(objtypeCause, objnumCause, ObjType::things, m);
+					if(thickLines)
+						RenderThickness(2);
 
                     break;
                 }
@@ -1735,7 +1754,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         const auto line = inst.level.linedefs[objnum];
         assert(line);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, info))
+		bool gotInfo = getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, info);
+        if(gotInfo)
             highlightTaggedItems(info);
         if(inst.loaded.levelFormat == MapFormat::doom)
         {
@@ -1744,13 +1764,12 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         }
         else
         {
-            SpecialTagInfo linfo;
-            if(!getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, linfo))
+            if(!gotInfo)
                 return;
             // TODO: also UDMF line ID
-            if(inst.loaded.levelFormat == MapFormat::hexen && linfo.selflineid > 0)
+            if(inst.loaded.levelFormat == MapFormat::hexen && info.selflineid > 0)
             {
-                highlightTaggingTriggers(linfo.selflineid, &SpecialTagInfo::lineids,
+                highlightTaggingTriggers(info.selflineid, &SpecialTagInfo::lineids,
                                          &SpecialTagInfo::numlineids, objtype, objnum);
             }
         }
@@ -1849,8 +1868,14 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	RenderColor(inst.edit.error_mode ? FL_RED : SEL_COL);
 
+	bool thick;
 	if (list->what_type() == ObjType::linedefs || list->what_type() == ObjType::sectors)
+	{
 		RenderThickness(2);
+		thick = true;
+	}
+	else
+		thick = false;
 
 	// special case when we have many sectors
 	if (list->what_type() == ObjType::sectors && list->count_obj() > MAX_STORE_SEL)
@@ -1871,7 +1896,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 		for (sel_iter_c it(list) ; !it.done() ; it.next())
 		{
-			DrawTagged(list->what_type(), *it);
+			DrawTagged(list->what_type(), *it, thick);
 		}
 	}
 

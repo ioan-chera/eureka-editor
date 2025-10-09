@@ -104,7 +104,7 @@ public:
 	void DrawHighlightTransform(ObjType objtype, int objnum);
 	void DrawConnection(const ObjType objtypeCause , const int objnumCause,
 						const ObjType objtypeEffect, const int objnumEffect);
-	void DrawTagged(ObjType objtype, int objnum);
+	void DrawTagged(ObjType objtype, int objnum, bool thickLines);
 
 	// returns true if ok, false if box was very small
 	bool SelboxGet(v2double_t &pos1, v2double_t &pos2);
