@@ -42,7 +42,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure -C Release --verbose
       - name: Archive
         run: |
-          Copy-Item AUTHORS.md,GPL.txt,README.txt,TODO.txt build\Release
+          Copy-Item AUTHORS.md,GPL.txt,README.txt build\Release
       - name: Publish
         uses: actions/upload-artifact@v4
         with:

@@ -34,6 +34,17 @@
 
 #define EUREKA_LUMP  "__EUREKA"
 
+#ifndef BUILD_DATE
+#define BUILD_DATE __DATE__
+#endif
+
+// Extract the year from __DATE__ (format: "Mmm dd yyyy")
+#define BUILD_YEAR_CH0 (__DATE__[7])
+#define BUILD_YEAR_CH1 (__DATE__[8])
+#define BUILD_YEAR_CH2 (__DATE__[9])
+#define BUILD_YEAR_CH3 (__DATE__[10])
+#define BUILD_YEAR {BUILD_YEAR_CH0, BUILD_YEAR_CH1, BUILD_YEAR_CH2, BUILD_YEAR_CH3, '\0'}
+
 
 /*
  *  Windows support

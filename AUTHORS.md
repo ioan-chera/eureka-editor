@@ -78,9 +78,9 @@ Eureka uses the [FLTK widget library](http://www.fltk.org).
 ```
   Eureka DOOM Editor
 
-  Copyright (C) 2014-2024 Ioan Chera
-  Copyright (C) 2001-2020 Andrew Apted, et al
-  Copyright (C) 1997-2003 Andre Majorel, et al
+  Copyright © 2014-2025 Ioan Chera
+  Copyright © 2001-2020 Andrew Apted, et al
+  Copyright © 1997-2003 Andre Majorel, et al
 
   Eureka is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published

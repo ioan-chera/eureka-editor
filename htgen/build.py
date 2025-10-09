@@ -32,11 +32,11 @@ legacy_content = (
     'Main_Changes2.0.0.html',
     'Main_Changes2.0.1.html',
     'Main_Changes2.0.2.html',
+    'Main_Changes2.1.0.html',
     'Main_Credits.html',
     'Main_Download.html',
     'Main_History.html',
     'Main_SVN_Logs.html',
-    'Main_TODO.html',
     'VisExp_Main.html',
 )
 
@@ -57,24 +57,15 @@ for item in legacy_content:
         item_data = f.read().replace('&nbsp;', ' ')
     item_soup = BeautifulSoup(item_data, 'html.parser')
 
-    if item == 'Main_TODO.html':
-        with open(os.path.join(cur_path, '..', 'TODO.txt')) as f:
-            todo_content = f.read()
-        item_soup.pre.string = todo_content
-    elif item == 'Main_Credits.html':
+    if item == 'Main_Credits.html':
         with open(os.path.join(cur_path, '..', 'AUTHORS.md')) as f:
             authors_content = f.read()
         item_soup.div.append(BeautifulSoup(markdown.markdown(authors_content, extensions=['fenced_code']), 'html.parser'))
-    elif item == 'Main_Changes2.0.0.html':
-        with open(os.path.join(cur_path, '..', 'changelogs', '2.0.0.md')) as f:
-            changes_content = f.read()
-        item_soup.div.append(BeautifulSoup(markdown.markdown(changes_content, extensions=['fenced_code']), 'html.parser'))
-    elif item == 'Main_Changes2.0.1.html':
-        with open(os.path.join(cur_path, '..', 'changelogs', '2.0.1.md')) as f:
-            changes_content = f.read()
-        item_soup.div.append(BeautifulSoup(markdown.markdown(changes_content, extensions=['fenced_code']), 'html.parser'))
-    elif item == 'Main_Changes2.0.2.html':
-        with open(os.path.join(cur_path, '..', 'changelogs', '2.0.2.md')) as f:
+    elif item.startswith('Main_Changes') and item.endswith('.html'):
+        # Extract version from filename (e.g., 'Main_Changes2.0.0.html' -> '2.0.0')
+        version = item[len('Main_Changes'):-len('.html')]
+        changelog_path = os.path.join(cur_path, '..', 'changelogs', f'{version}.md')
+        with open(changelog_path) as f:
             changes_content = f.read()
         item_soup.div.append(BeautifulSoup(markdown.markdown(changes_content, extensions=['fenced_code']), 'html.parser'))
 

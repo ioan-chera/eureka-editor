@@ -4,6 +4,8 @@ Eureka TODO / WISHLIST
 
 See also github.com/ioan-chera/eureka-editor list of issues.
 
+IOAN NOTE: this is only kept here for archival.
+
 
 Slightly Possible
 -----------------

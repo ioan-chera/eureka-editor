@@ -68,6 +68,9 @@ public:
 		if (! about_img)
 			LoadImage();
 
+		if (Text2.empty())
+			InitText2();
+
 		_instance = new UI_About(ABOUT_W, ABOUT_H, "About Eureka v" EUREKA_VERSION);
 
 		_instance->show();
@@ -84,8 +87,23 @@ private:
 	}
 
 	static const char *Text1;
-	static const char *Text2;
+	static std::string Text2;
 	static const char *URL;
+
+	static void InitText2()
+	{
+		const char buildYear[] = BUILD_YEAR;
+		Text2 = "Copyright © 2014-" + std::string(buildYear) + " Ioan Chera                \n"
+				"Copyright © 2001-2020 Andrew Apted, et al\n"
+				"Copyright © 1997-2003 André Majorel, et al\n"
+				"\n"
+				"This program is free software, and may be\n"
+				"distributed and modified under the terms of\n"
+				"the GNU General Public License\n"
+				"\n"
+				"There is ABSOLUTELY NO WARRANTY\n"
+				"Use at your OWN RISK";
+	}
 };
 
 
@@ -99,17 +117,7 @@ const char *UI_About::Text1 =
 	"It uses code from the Yadex editor";
 
 
-const char *UI_About::Text2 =
-	"Copyright (C) 2014-2024 Ioan Chera                \n"
-	"Copyright (C) 2001-2020 Andrew Apted, et al\n"
-	"Copyright (C) 1997-2003 André Majorel, et al\n"
-	"\n"
-	"This program is free software, and may be\n"
-	"distributed and modified under the terms of\n"
-	"the GNU General Public License\n"
-	"\n"
-	"There is ABSOLUTELY NO WARRANTY\n"
-	"Use at your OWN RISK";
+std::string UI_About::Text2;
 
 
 const char *UI_About::URL = "http://awwports.sf.net/eureka";
@@ -168,7 +176,7 @@ UI_About::UI_About(int W, int H, const char *label) :
 	cy += box->h();
 
 
-	box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 186, Text2);
+	box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 186, Text2.c_str());
 	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
 	box->labelfont(FL_HELVETICA);
 

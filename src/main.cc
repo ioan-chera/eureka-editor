@@ -1077,9 +1077,10 @@ void Instance::UpdateViewOnResources()
 
 static void ShowHelp()
 {
+	const char buildYear[] = BUILD_YEAR;
 	printf(	"\n"
-			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 The Eureka Team ***\n"
-			"\n");
+			"*** " EUREKA_TITLE " v" EUREKA_VERSION " © %s The Eureka Team ***\n"
+			"\n", buildYear);
 
 	printf(	"Eureka is free software, under the terms of the GNU General\n"
 			"Public License (GPL), and comes with ABSOLUTELY NO WARRANTY.\n"
@@ -1094,10 +1095,6 @@ static void ShowHelp()
 
 	fflush(stdout);
 }
-
-#ifndef BUILD_DATE
-#define BUILD_DATE __DATE__
-#endif
 
 static void ShowVersion()
 {
@@ -1216,9 +1213,9 @@ int EurekaMain(int argc, char *argv[])
 
 		init_progress = ProgressStatus::early;
 
-
+		const char buildYear[] = BUILD_YEAR;
 		gLog.printf("\n");
-		gLog.printf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 The Eureka Team ***\n");
+		gLog.printf("*** " EUREKA_TITLE " v" EUREKA_VERSION " © %s The Eureka Team ***\n", buildYear);
 		gLog.printf("\n");
 
 		// sanity checks type sizes (useful when porting)
