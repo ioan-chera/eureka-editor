@@ -61,3 +61,7 @@ Two-sided linedefs in Eureka always have both upper and lower textures set, even
 due to sector heights. This is an editor convenience feature.
 
 GRAY1 is a default texture that is automatically set for new sidedefs if they don't have any texture reference.
+
+## Documentation repository
+
+An accompanying repository with the documentation is at https://github.com/wesleywerner/eureka-docs.git, where I have write access. It contains ReStructured Text format documentation, which gets turned by an automatic script into a website when git-tagged.

@@ -10,11 +10,7 @@ out_path = os.path.join(cur_path, '..', 'htdocs-OUTPUT')
 os.makedirs(out_path, exist_ok=True)
 
 legacy_content = (
-    'Docs_CommandList.html',
     'Docs_Index.html',
-    'Docs_Invoking.html',
-    'Docs_Keys.html',
-    'Docs_KeySystem.html',
     'index.html',
     'Main_About.html',
     'Main_Changes072.html',
@@ -64,7 +60,7 @@ for item in legacy_content:
     elif item.startswith('Main_Changes') and item.endswith('.html'):
         # Extract version from filename (e.g., 'Main_Changes2.0.0.html' -> '2.0.0')
         version = item[len('Main_Changes'):-len('.html')]
-        changelog_path = os.path.join(cur_path, '..', 'changelogs', f'{version}.md')
+        changelog_path = os.path.join(cur_path, '..', 'changelogs', f'{version}{'.md' if '.' in version else '.txt'}')
         with open(changelog_path) as f:
             changes_content = f.read()
         item_soup.div.append(BeautifulSoup(markdown.markdown(changes_content, extensions=['fenced_code']), 'html.parser'))
