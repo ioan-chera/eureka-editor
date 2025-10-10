@@ -61,6 +61,10 @@ sink666
 
   * Eureka lump relative path fix
 
+Sean Baggaley
+
+  * Linux aarch64 build fix
+
 ## Earlier Work
 
 André Majorel created the [Yadex](http://www.teaser.fr/~amajorel/yadex/) editor. Eureka began as a fork of this editor, version 1.7.0 to be precise.
