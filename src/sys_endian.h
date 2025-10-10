@@ -37,6 +37,7 @@
     defined(__ia64__) || defined(__x86_64__)  ||     \
     defined(__alpha__) || defined(__alpha)  ||       \
     defined(__arm__) || defined(__SYMBIAN32__) ||    \
+    defined(__aarch64__) ||                          \
     (defined(__mips__) && defined(__MIPSEL__))
 #define UT_BYTEORDER   UT_LIL_ENDIAN
 #else
