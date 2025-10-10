@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version")
 
-project(eureka-editor VERSION 2.1.0)
+project(eureka-editor VERSION 2.1.1)
 
 # Why not use the latest C++
 set(CMAKE_CXX_STANDARD 17)
