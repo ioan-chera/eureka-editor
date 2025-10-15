@@ -749,6 +749,19 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			config.line_flags.push_back(flag);
 	}
 
+	else if(y_stricmp(argv[0], "udmf_lineflag") == 0)
+	{
+		if(nargs < 2)
+			pst->fail(bad_arg_count_fail, argv[0], 2);
+
+		udmf_lineflag_t flag{};
+		flag.label = argv[1];
+		flag.udmfKey = argv[2];
+		flag.internalFlag = 1 << (int)config.udmf_line_flags.size();
+
+		config.udmf_line_flags.push_back(flag);
+	}
+
 	else if(y_stricmp(argv[0], "gensector") == 0)
 	{
 		if(nargs < 2)

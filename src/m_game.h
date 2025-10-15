@@ -152,6 +152,13 @@ struct lineflag_t
 	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot
 };
 
+struct udmf_lineflag_t
+{
+	SString label;
+	SString udmfKey;
+	int internalFlag;
+};
+
 struct gensector_t
 {
 	struct option_t
@@ -412,7 +419,8 @@ struct ConfigData
 	std::map<char, thinggroup_t> thing_groups;
 	std::map<int, thingtype_t> thing_types;
 	std::vector<thingflag_t> thing_flags;
-	std::vector<lineflag_t> line_flags; // New: linedef UI flags
+	std::vector<lineflag_t> line_flags;
+	std::vector<udmf_lineflag_t> udmf_line_flags;
 	std::vector<gensector_t> gen_sectors; // generalized sector types
 
 	int num_gen_linetypes = 0;

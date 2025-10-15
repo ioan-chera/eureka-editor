@@ -245,6 +245,7 @@ udmf_lineflag "impassable"  blocking
 udmf_lineflag "block mons"  blockmonsters
 udmf_lineflag "sound block" blocksound
 udmf_lineflag "pass thru"   passthru
+feature udmf_lineparameters 0
 
 # dontdraw and mapped will be handled by the fixed dropdown
 
@@ -257,3 +258,4 @@ udmf_thingflag 1 1 sp     on  single
 udmf_thingflag 2 1 coop   on  coop
 udmf_thingflag 3 1 dm     on  dm
 udmf_thingflag 4 1 ambush off ambush
+feature udmf_thingspecials 0
