@@ -982,87 +982,112 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	flagButtons.clear();
 
 	int Y = y() + flagsStartY;
-	if(!config.line_flags.empty())
+	if(loaded.levelFormat == MapFormat::udmf)
 	{
-		// Build slots from sequential flags, supporting optional pairing (pairIndex 0/1)
-		struct Slot
+		if(config.udmf_line_flags.empty())
 		{
-			const lineflag_t *a = nullptr;
-			const lineflag_t *b = nullptr;
-		};
-		std::vector<Slot> slots;
-		slots.reserve(config.line_flags.size());
-		for(size_t i = 0; i < config.line_flags.size(); ++i)
-		{
-			const lineflag_t *f = &config.line_flags[i];
-			if(f->pairIndex == 0 && i + 1 < config.line_flags.size() && config.line_flags[i + 1].pairIndex == 1)
-			{
-				Slot s;
-				s.a = f;
-				s.b = &config.line_flags[i + 1];
-				slots.push_back(s);
-				++i; // consume the pair
-			}
-			else
-			{
-				Slot s;
-				if(f->pairIndex == 1)
-					s.b = f;
-				else
-					s.a = f;
-				slots.push_back(s);
-			}
+			// keep some spacing if no flags defined
+			Y += 29;
 		}
-
-		const int FW = 110;
-		const int leftX = x() + flagsStartX + 28;
-		const int rightX = x() + flagsStartX + flagsAreaW - 120;
-		const int rowH = 19;
-
-		const int total = (int)slots.size();
-		const int leftCount = (total + 1) / 2; // ceil to make columns as even as possible
-
-		int yLeft = Y;
-		int yRight = Y;
-
-		begin();
-		for(int idx = 0; idx < total; ++idx)
+		else
 		{
-			const Slot &s = slots[idx];
-			const bool onLeft = idx < leftCount;
-			const int baseX = onLeft ? leftX : rightX;
-			int &curY = onLeft ? yLeft : yRight;
+			const int FW = 110;
+			const int leftX = x() + flagsStartX + 28;
+			const int rightX = x() + flagsStartX + flagsAreaW - 120;
+			const int rowH = 19;
 
-			if(s.a)
-			{
-				LineFlagButton fb;
-				fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
-				fb.button->labelsize(12);
-				fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->value);
-				fb.button->callback(flags_callback, fb.data.get());
-				fb.info = s.a;
-				flagButtons.push_back(std::move(fb));
-			}
-			if(s.b)
-			{
-				LineFlagButton fb2;
-				fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
-				fb2.button->labelsize(12);
-				fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->value);
-				fb2.button->callback(flags_callback, fb2.data.get());
-				fb2.info = s.b;
-				flagButtons.push_back(std::move(fb2));
-			}
-			curY += rowH;
+			const int leftCount = ((int)config.udmf_line_flags.size() + 1) / 2;
+
+			int yLeft = Y;
+			int yRight = Y;
+
+			// TODO
 		}
-		end();
-
-		Y = (yLeft > yRight ? yLeft : yRight) + 29;
 	}
 	else
 	{
-		// keep some spacing if no flags defined
-		Y += 29;
+		if(!config.line_flags.empty())
+		{
+			// Build slots from sequential flags, supporting optional pairing (pairIndex 0/1)
+			struct Slot
+			{
+				const lineflag_t *a = nullptr;
+				const lineflag_t *b = nullptr;
+			};
+			std::vector<Slot> slots;
+			slots.reserve(config.line_flags.size());
+			for(size_t i = 0; i < config.line_flags.size(); ++i)
+			{
+				const lineflag_t *f = &config.line_flags[i];
+				if(f->pairIndex == 0 && i + 1 < config.line_flags.size() && config.line_flags[i + 1].pairIndex == 1)
+				{
+					Slot s;
+					s.a = f;
+					s.b = &config.line_flags[i + 1];
+					slots.push_back(s);
+					++i; // consume the pair
+				}
+				else
+				{
+					Slot s;
+					if(f->pairIndex == 1)
+						s.b = f;
+					else
+						s.a = f;
+					slots.push_back(s);
+				}
+			}
+
+			const int FW = 110;
+			const int leftX = x() + flagsStartX + 28;
+			const int rightX = x() + flagsStartX + flagsAreaW - 120;
+			const int rowH = 19;
+
+			const int total = (int)slots.size();
+			const int leftCount = (total + 1) / 2; // ceil to make columns as even as possible
+
+			int yLeft = Y;
+			int yRight = Y;
+
+			begin();
+			for(int idx = 0; idx < total; ++idx)
+			{
+				const Slot &s = slots[idx];
+				const bool onLeft = idx < leftCount;
+				const int baseX = onLeft ? leftX : rightX;
+				int &curY = onLeft ? yLeft : yRight;
+
+				if(s.a)
+				{
+					LineFlagButton fb;
+					fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
+					fb.button->labelsize(12);
+					fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->value);
+					fb.button->callback(flags_callback, fb.data.get());
+					fb.info = s.a;
+					flagButtons.push_back(std::move(fb));
+				}
+				if(s.b)
+				{
+					LineFlagButton fb2;
+					fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
+					fb2.button->labelsize(12);
+					fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->value);
+					fb2.button->callback(flags_callback, fb2.data.get());
+					fb2.info = s.b;
+					flagButtons.push_back(std::move(fb2));
+				}
+				curY += rowH;
+			}
+			end();
+
+			Y = (yLeft > yRight ? yLeft : yRight) + 29;
+		}
+		else
+		{
+			// keep some spacing if no flags defined
+			Y += 29;
+		}
 	}
 
 	// Reposition side boxes under the generated flags
