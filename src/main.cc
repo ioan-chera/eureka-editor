@@ -1023,6 +1023,36 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 		throw;
 	}
 
+	// Now set the hardcoded variables. Put the Eureka-sensitive flags to the proper UDMF places
+	auto adjustHardcodedUDMFFlags = [&newres](int doomFlag, const char *udmfFlag)
+	{
+		int doomFlagIndex = -1;
+		int udmfFlagIndex = -1;
+		std::vector<lineflag_t> &udmfflags = newres.config.udmf_line_flags;
+		for(int i = 0; i < (int)udmfflags.size(); ++i)
+		{
+			if(udmfflags[i].value == doomFlag)
+				doomFlagIndex = i;
+			if(udmfflags[i].udmfKey.noCaseEqual(udmfFlag))
+				udmfFlagIndex = i;
+		}
+		if(udmfFlagIndex != -1)
+		{
+			if(doomFlagIndex == -1)
+				udmfflags[udmfFlagIndex].value = doomFlag;
+			else if(doomFlagIndex != udmfFlagIndex)
+				std::swap(udmfflags[udmfFlagIndex].value, udmfflags[doomFlagIndex].value);
+		}
+	};
+
+	adjustHardcodedUDMFFlags(MLF_TwoSided, "twosided");
+	adjustHardcodedUDMFFlags(MLF_UpperUnpegged, "dontpegtop");
+	adjustHardcodedUDMFFlags(MLF_LowerUnpegged, "dontpegbottom");
+	adjustHardcodedUDMFFlags(MLF_Blocking, "blocking");
+	adjustHardcodedUDMFFlags(MLF_BlockMonsters, "blockmonsters");
+	adjustHardcodedUDMFFlags(MLF_SoundBlock, "blocksound");
+	adjustHardcodedUDMFFlags(MLF_Boom_PassThru, "passthru");
+
 	return newres;
 }
 
