@@ -863,12 +863,24 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 
 		tid->show();
 
-		spec_type  ->show();
-		spec_choose->show();
-		spec_desc  ->show();
+		if(loaded.levelFormat == MapFormat::hexen || config.features.udmf_thingspecials)
+		{
+			spec_type  ->show();
+			spec_choose->show();
+			spec_desc  ->show();
 
-		for (int a = 0 ; a < 5 ; a++)
-			args[a]->show();
+			for (int a = 0 ; a < 5 ; a++)
+				args[a]->show();
+		}
+		else
+		{
+			spec_type  ->hide();
+			spec_choose->hide();
+			spec_desc  ->hide();
+
+			for (int a = 0 ; a < 5 ; a++)
+				args[a]->hide();
+		}
 	}
 	else
 	{

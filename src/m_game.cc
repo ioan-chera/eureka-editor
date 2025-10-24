@@ -363,6 +363,7 @@ static const FeatureMapping skFeatureMappings[] =
 	MAPPING(player_use_passthru_activation),
 
 	MAPPING(udmf_lineparameters),
+	MAPPING(udmf_thingspecials),
 #undef MAPPING
 };
 
@@ -685,8 +686,9 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		config.thing_groups[tg.group] = tg;
 	}
 
-	else if(y_stricmp(argv[0], "thingflag") == 0)
+	else if(y_stricmp(argv[0], "thingflag") == 0 || y_stricmp(argv[0], "udmf_thingflag") == 0)
 	{
+		bool isUDMF = y_stricmp(argv[0], "udmf_thingflag") == 0;
 		if(nargs != 5)
 			pst->fail(bad_arg_count_fail, argv[0], 5);
 
@@ -702,7 +704,11 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			flag.defaultSet = thingflag_t::DefaultMode::onOpposite;
 		else
 			pst->fail("invalid default setting \"%s\", expected off, on or on-opposite", argv[4]);
-		flag.value = (int)strtol(argv[5], nullptr, 0);
+		if(isUDMF)
+			flag.udmfKey = argv[5];
+		else
+			flag.value = (int)strtol(argv[5], nullptr, 0);
+
 
 		// Check if we already have one in the same location, and replace it if so (needed for
 		// ports like BOOM which overwrite vanilla flags)
@@ -710,12 +716,18 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		for(thingflag_t &existingflag : config.thing_flags)
 			if(existingflag.row == flag.row && existingflag.column == flag.column)
 			{
+				if(isUDMF)
+					flag.value = existingflag.value;	// keep the internal value of the replaced
 				existingflag = flag;
 				found = true;
 				break;
 			}
 		if(!found)
+		{
+			if(isUDMF)
+				flag.value = 1 << (int)config.thing_flags.size();
 			config.thing_flags.push_back(flag);
+		}
 	}
 
 	else if(y_stricmp(argv[0], "lineflag") == 0)

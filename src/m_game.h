@@ -137,6 +137,7 @@ struct thingflag_t
 	SString label;
 	DefaultMode defaultSet;
 	int value;
+	SString udmfKey;
 };
 
 // New: lineflag <label> <value> [pair <index>]
@@ -279,8 +280,9 @@ struct port_features_t
 	// for Hexen format, allows the extra 2 player-use-passthru activations
 	int player_use_passthru_activation;
 
-	// for UDMF format, whether we use line parameters
+	// for UDMF format, whether we use line parameters or thing specials at all
 	int udmf_lineparameters;
+	int udmf_thingspecials;
 };
 
 //
