@@ -1631,19 +1631,42 @@ void UI_FindAndReplace::ComputeFlagMask()
 			options_value |= (flag);  \
 	}
 
-	FLAG_FROM_WIDGET(  o_easy, 1, MTF_Easy);
-	FLAG_FROM_WIDGET(o_medium, 1, MTF_Medium);
-	FLAG_FROM_WIDGET(  o_hard, 1, MTF_Hard);
-
-	if (inst.conf.features.coop_dm_flags)
+	if(inst.loaded.levelFormat == MapFormat::udmf)
 	{
-		FLAG_FROM_WIDGET(  o_sp, -1, MTF_Not_SP);
-		FLAG_FROM_WIDGET(o_coop, -1, MTF_Not_COOP);
-		FLAG_FROM_WIDGET(  o_dm, -1, MTF_Not_DM);
+		FLAG_FROM_WIDGET(  o_easy, 1, MTF_Easy | MTF_UDMF_Easiest);
 	}
-	else	// vanilla DOOM
+	else
 	{
-		FLAG_FROM_WIDGET(o_dm, 1, MTF_Not_SP);
+		FLAG_FROM_WIDGET(  o_easy, 1, MTF_Easy);
+	}
+	FLAG_FROM_WIDGET(o_medium, 1, MTF_Medium);
+	if(inst.loaded.levelFormat == MapFormat::udmf)
+	{
+		FLAG_FROM_WIDGET(  o_hard, 1, MTF_Hard | MTF_UDMF_Hardest);
+	}
+	else
+	{
+		FLAG_FROM_WIDGET(  o_hard, 1, MTF_Hard);
+	}
+
+	if(inst.loaded.levelFormat == MapFormat::doom)
+	{
+		if (inst.conf.features.coop_dm_flags)
+		{
+			FLAG_FROM_WIDGET(  o_sp, -1, MTF_Not_SP);
+			FLAG_FROM_WIDGET(o_coop, -1, MTF_Not_COOP);
+			FLAG_FROM_WIDGET(  o_dm, -1, MTF_Not_DM);
+		}
+		else	// vanilla DOOM
+		{
+			FLAG_FROM_WIDGET(o_dm, 1, MTF_Not_SP);
+		}
+	}
+	else
+	{
+		FLAG_FROM_WIDGET(  o_sp, 1, MTF_Hexen_SP);
+		FLAG_FROM_WIDGET(o_coop, 1, MTF_Hexen_COOP);
+		FLAG_FROM_WIDGET(  o_dm, 1, MTF_Hexen_DM);
 	}
 
 #undef FLAG_FROM_WIDGET

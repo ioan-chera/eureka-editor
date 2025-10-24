@@ -1534,6 +1534,11 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 			continue;
 
 		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		if(inst.loaded.levelFormat == MapFormat::udmf)
+		{
+			skills = T->options & (MTF_UDMF_Easiest | MTF_Easy | MTF_Medium | MTF_Hard |
+								   MTF_UDMF_Hardest);
+		}
 		int modes   = 1;
 		int classes = 1;
 
@@ -1589,11 +1594,20 @@ void Things_FixDuds(Instance &inst)
 		int new_options = T->options;
 
 		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		if(inst.loaded.levelFormat == MapFormat::udmf)
+		{
+			skills = T->options & (MTF_UDMF_Easiest | MTF_Easy | MTF_Medium | MTF_Hard |
+								   MTF_UDMF_Hardest);
+		}
 		int modes   = 1;
 		int classes = 1;
 
 		if (skills == 0)
+		{
 			new_options |= MTF_Easy | MTF_Medium | MTF_Hard;
+			if(inst.loaded.levelFormat == MapFormat::udmf)
+				new_options |= MTF_UDMF_Easiest | MTF_UDMF_Hardest;
+		}
 
 		if (inst.loaded.levelFormat != MapFormat::doom)
 		{

@@ -520,6 +520,13 @@ enum hexen_option_e
 	MTF_Hexen_DM		= 1024,
 };
 
+// Special flags for handling
+enum udmf_option_e
+{
+	MTF_UDMF_Easiest = 2048,
+	MTF_UDMF_Hardest = 4096,
+};
+
 
 enum strife_option_e
 {
