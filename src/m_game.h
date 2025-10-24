@@ -278,6 +278,9 @@ struct port_features_t
 
 	// for Hexen format, allows the extra 2 player-use-passthru activations
 	int player_use_passthru_activation;
+
+	// for UDMF format, whether we use line parameters
+	int udmf_lineparameters;
 };
 
 //

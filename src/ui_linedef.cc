@@ -950,7 +950,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 {
 	choose->label("Choose");
 
-	if (loaded.levelFormat != MapFormat::doom)
+	if (loaded.levelFormat == MapFormat::hexen)
 	{
 		tag->hide();
 		length->hide();
@@ -961,6 +961,27 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 		actkind->show();
 		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
+	}
+	else if(loaded.levelFormat == MapFormat::udmf)
+	{
+		if(config.features.udmf_lineparameters)
+		{
+			tag->hide();
+			length->hide();
+		}
+		else
+		{
+			tag->show();
+			length->show();
+		}
+
+		actkind->hide();	// UDMF uses the separate line flags for activation
+		desc->resize(type->x(), desc->y(), w()-78, desc->h());
+
+		if (config.features.gen_types)
+			gen->show();
+		else
+			gen->hide();
 	}
 	else
 	{
@@ -1080,8 +1101,11 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	// Show Hexen/UDMF args when needed
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		if (loaded.levelFormat != MapFormat::doom)
+		if (loaded.levelFormat == MapFormat::hexen ||
+			(loaded.levelFormat == MapFormat::udmf && config.features.udmf_lineparameters))
+		{
 			args[a]->show();
+		}
 		else
 			args[a]->hide();
 	}
