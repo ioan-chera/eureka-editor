@@ -148,15 +148,9 @@ struct thingflag_t
 struct lineflag_t
 {
 	SString label;
-	int value = 0;
+	SString udmfKey;	// only relevant under UDMF
+	int value = 0;		// actual flag for Doom, internal flag for UDMF
 	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot
-};
-
-struct udmf_lineflag_t
-{
-	SString label;
-	SString udmfKey;
-	int internalFlag;
 };
 
 struct gensector_t
@@ -420,7 +414,7 @@ struct ConfigData
 	std::map<int, thingtype_t> thing_types;
 	std::vector<thingflag_t> thing_flags;
 	std::vector<lineflag_t> line_flags;
-	std::vector<udmf_lineflag_t> udmf_line_flags;
+	std::vector<lineflag_t> udmf_line_flags;
 	std::vector<gensector_t> gen_sectors; // generalized sector types
 
 	int num_gen_linetypes = 0;
