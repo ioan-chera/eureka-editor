@@ -3019,6 +3019,8 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 			if (inst.edit.mode == ObjType::linedefs)
 			{
 				op.changeLinedef(*it, LineDef::F_TAG, new_tag);
+				if(inst.loaded.levelFormat != MapFormat::udmf)
+					op.changeLinedef(*it, LineDef::F_ARG1, new_tag);
 				changed = true;
 			}
 			else if (inst.edit.mode == ObjType::sectors)
@@ -3099,6 +3101,14 @@ static bool LD_tag_exists(int tag, const Document &doc)
 	return false;
 }
 
+static bool LD_arg1_exists(int arg1, const Document &doc)
+{
+	for (const auto &linedef : doc.linedefs)
+		if (linedef->arg1 == arg1)
+			return true;
+
+	return false;
+}
 
 static bool SEC_tag_exists(int tag, const Document &doc)
 {
@@ -3126,7 +3136,7 @@ static void Tags_FindUnmatchedSectors(selection_c& secs, const Instance &inst)
 		if (inst.conf.features.tag_666 != Tag666Rules::disabled && (tag == 666 || tag == 667))
 			continue;
 
-		if (! LD_tag_exists(tag, inst.level))
+		if (! LD_arg1_exists(tag, inst.level))
 			secs.set(s);
 	}
 }
@@ -3140,7 +3150,7 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc, 
 	{
 		const auto L = doc.linedefs[n];
 
-		if (L->tag <= 0)
+		if (L->arg1 <= 0)
 			continue;
 
 		if (L->type <= 0)
@@ -3207,7 +3217,7 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 		if (L->type <= 0)
 			continue;
 
-		if (L->tag > 0)
+		if (L->arg1 > 0)
 			continue;
 
 		// use type description to determine if a tag is needed
@@ -4633,7 +4643,10 @@ int findFreeTag(const Instance &inst, bool forsector)
 	};
 
 	for(int i = 0; i < doc.numLinedefs(); ++i)
+	{
 		addtag(doc.linedefs[i]->tag);
+		addtag(doc.linedefs[i]->arg1);
+	}
 	for(int i = 0; i < doc.numSectors(); ++i)
 		addtag(doc.sectors[i]->tag);
 

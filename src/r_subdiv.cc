@@ -220,25 +220,25 @@ void sector_info_cache_c::CheckBoom242(const LineDef *L)
 	else
 		return;
 
-	if (L->tag <= 0 || L->right < 0)
+	if (L->arg1 <= 0 || L->right < 0)
 		return;
 
 	int dummy_sec = inst.level.getRight(*L)->sector;
 
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (inst.level.sectors[n]->tag == L->tag)
+		if (inst.level.sectors[n]->tag == L->arg1)
 			infos[n].floors.heightsec = dummy_sec;
 	}
 }
 
 void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 {
-	if (L->tag <= 0 || L->right < 0)
+	if (L->arg1 <= 0 || L->right < 0)
 		return;
 
 	int flags = -1;
-	int sec_tag = L->tag;
+	int sec_tag = L->arg1;
 
 	// EDGE style
 	if (inst.loaded.levelFormat == MapFormat::doom && (inst.conf.features.extra_floors & 1))
@@ -364,7 +364,7 @@ void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 	if (inst.loaded.levelFormat != MapFormat::doom && (inst.conf.features.slopes & 8))
 	{
 		if (L->type == 181)
-			PlaneAlign(L, L->tag, L->arg2);
+			PlaneAlign(L, L->arg1, L->arg2);
 	}
 }
 
@@ -375,9 +375,9 @@ void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)
 	{
 		switch (L->type)
 		{
-		case 394: PlaneCopy(L, L->tag, 0, 0, 0, 0); break;
-		case 395: PlaneCopy(L, 0, L->tag, 0, 0, 0); break;
-		case 396: PlaneCopy(L, L->tag, L->tag, 0, 0, 0); break;
+		case 394: PlaneCopy(L, L->arg1, 0, 0, 0, 0); break;
+		case 395: PlaneCopy(L, 0, L->arg1, 0, 0, 0); break;
+		case 396: PlaneCopy(L, L->arg1, L->arg1, 0, 0, 0); break;
 		default: break;
 		}
 	}
@@ -386,7 +386,7 @@ void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)
 	if (inst.loaded.levelFormat != MapFormat::doom && (inst.conf.features.slopes & 8))
 	{
 		if (L->type == 118)
-			PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
+			PlaneCopy(L, L->arg1, L->arg2, L->arg3, L->arg4, L->arg5);
 	}
 }
 

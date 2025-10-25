@@ -772,7 +772,7 @@ void UI_Canvas::DrawLinedefs()
 					col = RED;
 				else if (L->type != 0)
 				{
-					if (L->tag != 0)
+					if (L->arg1 != 0)
 						col = LIGHTMAGENTA;
 					else
 						col = LIGHTGREEN;
@@ -1648,7 +1648,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                 if(info.type == ObjType::linedefs && info.objnum == m)
                     continue;   // don't highlight the trigger again
                 const LineDef &line = *inst.level.linedefs[m];
-                if(inst.loaded.levelFormat == MapFormat::doom)
+                if(inst.loaded.levelFormat == MapFormat::doom ||
+				   inst.loaded.levelFormat == MapFormat::udmf)
                 {
                     if(line.tag > 0)
                     {
@@ -1675,7 +1676,6 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
 							DrawConnection(info.type, info.objnum, ObjType::linedefs, m);
 						}
                 }
-                // TODO: also handle UDMF.
             }
         }
 
@@ -1764,7 +1764,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
 		bool gotInfo = getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, info);
         if(gotInfo)
             highlightTaggedItems(info);
-        if(inst.loaded.levelFormat == MapFormat::doom)
+        if(inst.loaded.levelFormat == MapFormat::doom || inst.loaded.levelFormat == MapFormat::udmf)
         {
             highlightTaggingTriggers(line->tag, &SpecialTagInfo::lineids,
                                      &SpecialTagInfo::numlineids, objtype, objnum);
@@ -1773,7 +1773,6 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
         {
             if(!gotInfo)
                 return;
-            // TODO: also UDMF line ID
             if(inst.loaded.levelFormat == MapFormat::hexen && info.selflineid > 0)
             {
                 highlightTaggingTriggers(info.selflineid, &SpecialTagInfo::lineids,

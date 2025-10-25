@@ -34,14 +34,14 @@ public:
 	int type = 0;
 	int tag = 0;
 
-	// Hexen stuff  [NOTE: tag is 'arg1']
+	int arg1 = 0;
 	int arg2 = 0;
 	int arg3 = 0;
 	int arg4 = 0;
 	int arg5 = 0;
 
 	enum { F_START, F_END, F_RIGHT, F_LEFT,
-		   F_FLAGS, F_TYPE, F_TAG,
+		   F_FLAGS, F_TYPE, F_TAG, F_ARG1,
 		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
@@ -78,7 +78,7 @@ public:
 
 	int Arg(int which /* 1..5 */) const
 	{
-		if (which == 1) return tag;
+		if (which == 1) return arg1;
 		if (which == 2) return arg2;
 		if (which == 3) return arg3;
 		if (which == 4) return arg4;
