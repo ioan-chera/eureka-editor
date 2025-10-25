@@ -804,7 +804,7 @@ void Wad_file::DetectLevels()
 		int part_count = 0;
 
 		// check for UDMF levels
-		if (global::udmf_testing && directory[k+1].lump->name.noCaseEqual("TEXTMAP"))
+		if (directory[k+1].lump->name.noCaseEqual("TEXTMAP"))
 		{
 			levels.push_back(k);
 			gLog.debugPrintf("Detected level : %s (UDMF)\n", directory[k].lump->name.c_str());

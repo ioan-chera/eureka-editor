@@ -971,7 +971,7 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	doc.LoadHeader(level, wad);
 	if(loading.levelFormat == MapFormat::udmf)
 	{
-		UDMF_LoadLevel(level, &wad, doc, loading, bad);
+		doc.UDMF_LoadLevel(level, &wad, loading, conf, bad);
 	}
 	else try
 	{

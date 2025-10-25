@@ -195,6 +195,10 @@ public:
 	void LoadBehavior(int loading_level, const Wad_file *load_wad);
 	void LoadScripts(int loading_level, const Wad_file *load_wad);
 
+
+	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, LoadingData &loading,
+						const ConfigData &config, BadCount &bad);
+
 	void RemoveUnusedVerticesAtEnd();
 
 	void CreateFallbackVertices();

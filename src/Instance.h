@@ -303,7 +303,6 @@ public:
 	bool M_PortSetupDialog(const SString& port, const SString& game, const tl::optional<SString> &commandLine);
 
 	// M_UDMF
-	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Document &doc, LoadingData &loading, BadCount &bad) const;
 	void UDMF_SaveLevel(const LoadingData &loading, Wad_file &wad) const;
 
 	// MAIN

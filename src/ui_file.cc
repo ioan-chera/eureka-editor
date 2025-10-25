@@ -941,7 +941,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 		entry_id++;
 	}
 
-	if (global::udmf_testing && (usable_formats & (1 << static_cast<int>(MapFormat::udmf))))
+	if (usable_formats & (1 << static_cast<int>(MapFormat::udmf)))
 	{
 		if (prev_fmt == MapFormat::udmf)
 			menu_value = entry_id;
