@@ -418,6 +418,7 @@ struct ConfigData
 	std::map<char, thinggroup_t> thing_groups;
 	std::map<int, thingtype_t> thing_types;
 	std::vector<thingflag_t> thing_flags;
+	std::vector<thingflag_t> udmf_thing_flags;
 	std::vector<lineflag_t> line_flags;
 	std::vector<lineflag_t> udmf_line_flags;
 	std::vector<gensector_t> gen_sectors; // generalized sector types

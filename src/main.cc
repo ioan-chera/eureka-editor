@@ -954,6 +954,28 @@ static void readPortInfo(std::unordered_map<SString, SString> &parseVars, Loadin
 	}
 }
 
+template<typename T>
+static void adjustHardcodedUDMFFlags(std::vector<T> &flaglist, int doomFlag, const char *udmfFlag)
+{
+	int doomFlagIndex = -1;
+	int udmfFlagIndex = -1;
+	std::vector<T> &udmfflags = flaglist;
+	for(int i = 0; i < (int)udmfflags.size(); ++i)
+	{
+		if(udmfflags[i].value == doomFlag)
+			doomFlagIndex = i;
+		if(udmfflags[i].udmfKey.noCaseEqual(udmfFlag))
+			udmfFlagIndex = i;
+	}
+	if(udmfFlagIndex != -1)
+	{
+		if(doomFlagIndex == -1)
+			udmfflags[udmfFlagIndex].value = doomFlag;
+		else if(doomFlagIndex != udmfFlagIndex)
+			std::swap(udmfflags[udmfFlagIndex].value, udmfflags[doomFlagIndex].value);
+	}
+}
+
 NewResources loadResources(const LoadingData& loading, const WadData &waddata) noexcept(false)
 {
 	auto newres = NewResources();
@@ -1024,34 +1046,24 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 	}
 
 	// Now set the hardcoded variables. Put the Eureka-sensitive flags to the proper UDMF places
-	auto adjustHardcodedUDMFFlags = [&newres](int doomFlag, const char *udmfFlag)
-	{
-		int doomFlagIndex = -1;
-		int udmfFlagIndex = -1;
-		std::vector<lineflag_t> &udmfflags = newres.config.udmf_line_flags;
-		for(int i = 0; i < (int)udmfflags.size(); ++i)
-		{
-			if(udmfflags[i].value == doomFlag)
-				doomFlagIndex = i;
-			if(udmfflags[i].udmfKey.noCaseEqual(udmfFlag))
-				udmfFlagIndex = i;
-		}
-		if(udmfFlagIndex != -1)
-		{
-			if(doomFlagIndex == -1)
-				udmfflags[udmfFlagIndex].value = doomFlag;
-			else if(doomFlagIndex != udmfFlagIndex)
-				std::swap(udmfflags[udmfFlagIndex].value, udmfflags[doomFlagIndex].value);
-		}
-	};
 
-	adjustHardcodedUDMFFlags(MLF_TwoSided, "twosided");
-	adjustHardcodedUDMFFlags(MLF_UpperUnpegged, "dontpegtop");
-	adjustHardcodedUDMFFlags(MLF_LowerUnpegged, "dontpegbottom");
-	adjustHardcodedUDMFFlags(MLF_Blocking, "blocking");
-	adjustHardcodedUDMFFlags(MLF_BlockMonsters, "blockmonsters");
-	adjustHardcodedUDMFFlags(MLF_SoundBlock, "blocksound");
-	adjustHardcodedUDMFFlags(MLF_Boom_PassThru, "passthru");
+	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_TwoSided, "twosided");
+	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_UpperUnpegged, "dontpegtop");
+	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_LowerUnpegged, "dontpegbottom");
+	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_Blocking, "blocking");
+	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_BlockMonsters, "blockmonsters");
+	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_SoundBlock, "blocksound");
+	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_Boom_PassThru, "passthru");
+
+	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_UDMF_Easiest, "skill1");
+	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Easy, "skill2");
+	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Medium, "skill3");
+	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Hard, "skill4");
+	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_UDMF_Hardest, "skill5");
+	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Hexen_SP, "single");
+	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Hexen_COOP, "coop");
+	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Hexen_DM, "dm");
+	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Ambush, "ambush");
 
 	return newres;
 }

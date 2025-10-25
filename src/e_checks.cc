@@ -1551,7 +1551,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		if (inst.loaded.levelFormat != MapFormat::doom)
+		if (inst.loaded.levelFormat == MapFormat::hexen)
 		{
 			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 		}
@@ -1624,7 +1624,7 @@ void Things_FixDuds(Instance &inst)
 				new_options &= ~(MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		if (inst.loaded.levelFormat != MapFormat::doom)
+		if (inst.loaded.levelFormat == MapFormat::hexen)
 		{
 			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 

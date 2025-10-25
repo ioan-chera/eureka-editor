@@ -709,11 +709,13 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		else
 			flag.value = (int)strtol(argv[5], nullptr, 0);
 
+		std::vector<thingflag_t> &target_thing_flags =
+				isUDMF ? config.udmf_thing_flags : config.thing_flags;
 
 		// Check if we already have one in the same location, and replace it if so (needed for
 		// ports like BOOM which overwrite vanilla flags)
 		bool found = false;
-		for(thingflag_t &existingflag : config.thing_flags)
+		for(thingflag_t &existingflag : target_thing_flags)
 			if(existingflag.row == flag.row && existingflag.column == flag.column)
 			{
 				if(isUDMF)
@@ -725,8 +727,8 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if(!found)
 		{
 			if(isUDMF)
-				flag.value = 1 << (int)config.thing_flags.size();
-			config.thing_flags.push_back(flag);
+				flag.value = 1 << (int)target_thing_flags.size();
+			target_thing_flags.push_back(flag);
 		}
 	}
 

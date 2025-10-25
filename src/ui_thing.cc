@@ -716,7 +716,10 @@ void UI_ThingBox::UpdateField(int field)
 
 		// Check if anything's out of the fields
 		unsigned mask = 0;
-		for(const thingflag_t &flag : inst.conf.thing_flags)
+		const std::vector<thingflag_t> &target_thing_flags =
+				inst.loaded.levelFormat == MapFormat::udmf ? inst.conf.udmf_thing_flags
+														   : inst.conf.thing_flags;
+		for(const thingflag_t &flag : target_thing_flags)
 			mask |= flag.value;
 		if(options & ~mask)
 			flagBox->color(fl_rgb_color(255, 255, 0));
@@ -802,10 +805,12 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 	flagButtons.clear();
 
 	int Y = y() + optionStartY;
-	if(!config.thing_flags.empty())
+	const std::vector<thingflag_t> &target_thing_flags = loaded.levelFormat == MapFormat::udmf ?
+			config.udmf_thing_flags : config.thing_flags;
+	if(!target_thing_flags.empty())
 	{
 		std::vector<const thingflag_t *> rowSortedFlags;
-		for(const thingflag_t &flag : config.thing_flags)
+		for(const thingflag_t &flag : target_thing_flags)
 			rowSortedFlags.push_back(&flag);
 		// We need to sort by row, because we increment Y this way
 		std::sort(rowSortedFlags.begin(), rowSortedFlags.end(), [](const thingflag_t *a,
