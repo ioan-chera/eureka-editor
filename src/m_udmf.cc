@@ -97,6 +97,13 @@ public:
 		SString string = text;
 		string.erase(0, 1);
 		string.pop_back();
+
+		for(size_t pos = string.find('\\'); pos != std::string::npos;
+			pos = string.find('\\', pos + 1))
+		{
+			string.erase(pos, 1);
+		}
+
 		return string;
 	}
 
@@ -156,7 +163,20 @@ private:
 	int b_pos = 0;
 	int b_size = 0;
 
+	int line = 0;
+
 public:
+	void throwException(const char *format, ...) const
+	{
+		SString message;
+		va_list ap;
+		va_start(ap, format);
+		message = SString::vprintf(format, ap);
+		va_end(ap);
+		throw std::runtime_error(SString::printf("UDMF error at line %d: %s", line,
+												 message.c_str()).get());
+	}
+
 	Udmf_Parser(const Lump_c &_lump) : stream(_lump)
 	{
 		remaining = _lump.Length();
@@ -214,7 +234,8 @@ public:
 					b_pos += 2;
 					continue;
 				}
-
+				if(b_pos == '\n')
+					line++;
 				b_pos++;
 				continue;
 			}
@@ -244,6 +265,8 @@ public:
 
 			if ((ch <= 32) || (ch >= 127 && ch <= 160))
 			{
+				if(ch == '\n')
+					line++;
 				b_pos++;
 				continue;
 			}
@@ -260,6 +283,8 @@ public:
 					// skip escapes
 					if (buffer[b_pos] == '\\' && b_pos+1 < b_size)
 					{
+						if(buffer[b_pos+1] == '\n')
+							line++;
 						b_pos += 2;
 						continue;
 					}
@@ -270,6 +295,9 @@ public:
 						b_pos++;
 						break;
 					}
+
+					if(buffer[b_pos] == '\n')
+						line++;
 
 					b_pos++;
 				}
@@ -297,6 +325,7 @@ public:
 			}
 
 			// it must be a symbol, such as '{' or '}'
+			assert(buffer[b_pos] != '\n');
 			b_pos++;
 
 			return Udmf_Token(buffer+start, 1);
@@ -313,6 +342,8 @@ public:
 	{
 		while (b_pos < b_size && buffer[b_pos] != '\n')
 			b_pos++;
+		if(b_pos < b_size)	// so it's '\n'
+			line++;
 	}
 };
 
@@ -322,13 +353,13 @@ static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
 	{
-		// TODO mark error
+		parser.throwException("expected value for global setting %s, reached end of text map",
+							  name.c_str());
 		return;
 	}
 	if (!parser.Expect(";"))
 	{
-		// TODO mark error
-		parser.SkipToEOLN();
+		parser.throwException("expected semicolon");
 		return;
 	}
 
@@ -669,8 +700,7 @@ void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 		if (! tok.IsIdentifier())
 		{
 			// something has gone wrong
-			// TODO mark the error somehow, pop-up dialog later
-			parser->SkipToEOLN();
+			parser->throwException("expected identifier, got %s instead", tok.c_str());
 			continue;
 		}
 
