@@ -177,6 +177,11 @@ public:
 												 message.c_str()).get());
 	}
 
+	int getLine() const
+	{
+		return line;
+	}
+
 	Udmf_Parser(const Lump_c &_lump) : stream(_lump)
 	{
 		remaining = _lump.Length();
@@ -381,7 +386,8 @@ static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const
 }
 
 
-static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token& field, const Udmf_Token& value)
+static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token& field,
+								 const Udmf_Token& value)
 {
 	// just ignore any setting with the "false" keyword
 	if (value.Match("false"))
@@ -416,23 +422,26 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 		T->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		T->arg5 = value.DecodeInt();
-
+	else if(field.Match("skill1"))
+		T->options |= MTF_UDMF_Easiest;
 	else if (field.Match("skill2"))
 		T->options |= MTF_Easy;
 	else if (field.Match("skill3"))
 		T->options |= MTF_Medium;
 	else if (field.Match("skill4"))
 		T->options |= MTF_Hard;
+	else if(field.Match("skill5"))
+		T->options |= MTF_UDMF_Hardest;
 	else if (field.Match("ambush"))
 		T->options |= MTF_Ambush;
 	else if (field.Match("friend"))
 		T->options |= MTF_Friend;
 	else if (field.Match("single"))
-		T->options &= ~MTF_Not_SP;
+		T->options |= MTF_Hexen_SP;
 	else if (field.Match("coop"))
-		T->options &= ~MTF_Not_COOP;
+		T->options |= MTF_Hexen_COOP;
 	else if (field.Match("dm"))
-		T->options &= ~MTF_Not_DM;
+		T->options |= MTF_Hexen_DM;
 
 	else
 	{
@@ -475,6 +484,7 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 	else if (field.Match("special"))
 		LD->type = value.DecodeInt();
 
+	// TODO: separate id from arg0 for UDMF only
 	else if (field.Match("arg0"))
 		LD->tag = value.DecodeInt();
 	else if (field.Match("arg1"))
@@ -575,7 +585,6 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 	{
 		kind = Objid(ObjType::things, 1);
 		auto addedThing = std::make_unique<Thing>();
-		addedThing->options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
 		doc.things.push_back(std::move(addedThing));
 		new_T = doc.things.back().get();
 	}
@@ -615,7 +624,8 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 	if (!kind.valid())
 	{
 		// unknown object kind
-		gLog.printf("skipping unknown block '%s' in UDMF\n", name.c_str());
+		gLog.printf("skipping unknown block '%s' in UDMF at line %d\n", name.c_str(),
+					parser.getLine());
 	}
 
 	for (;;)
@@ -629,8 +639,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 
 		if (! parser.Expect("="))
 		{
-			// TODO mark error
-			parser.SkipToEOLN();
+			parser.throwException("expected equal sign");
 			continue;
 		}
 
@@ -640,8 +649,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 
 		if (! parser.Expect(";"))
 		{
-			// TODO mark error
-			parser.SkipToEOLN();
+			parser.throwException("expected semicolon");
 			continue;
 		}
 
@@ -720,8 +728,7 @@ void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 		}
 
 		// unexpected symbol
-		// TODO mark the error somehow, show dialog later
-		parser->SkipToEOLN();
+		parser->throwException("unexpected symbol %s", tok2.c_str());
 	}
 
 	ValidateLevel_UDMF(config, bad);
