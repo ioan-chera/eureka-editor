@@ -1721,31 +1721,50 @@ static bool ThingStuckInThing(const Instance &inst, const Thing *T1, const thing
 
 	if (inst.loaded.levelFormat != MapFormat::doom)
 	{
-		if (info1->group == 'p') opt1 |= 0x7E7;
-		if (info2->group == 'p') opt2 |= 0x7E7;
+		int presenceOptions = MTF_Easy | MTF_Medium | MTF_Hard | MTF_Hexen_SP | MTF_Hexen_COOP |
+				MTF_Hexen_DM;
+		if(inst.loaded.levelFormat == MapFormat::hexen)
+			presenceOptions |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
+		else // UDMF
+			presenceOptions |= MTF_UDMF_Easiest | MTF_UDMF_Hardest;
+
+		if (info1->group == 'p') opt1 |= presenceOptions;
+		if (info2->group == 'p') opt2 |= presenceOptions;
+
+		int skillOptions = MTF_Easy | MTF_Medium | MTF_Hard;
+		if(inst.loaded.levelFormat == MapFormat::udmf)
+			skillOptions |= MTF_UDMF_Easiest | MTF_UDMF_Hardest;
 
 		// check skill bits
-		if ((opt1 & opt2 & 0x07) == 0) return false;
+		if ((opt1 & opt2 & skillOptions) == 0) return false;
 
-		// check class bits
-		if ((opt1 & opt2 & 0xE0) == 0) return false;
+		if(inst.loaded.levelFormat == MapFormat::hexen)
+		{
+			int classOptions = MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
+			// check class bits
+			if ((opt1 & opt2 & classOptions) == 0) return false;
+		}
 
+		static const int gameModeOptions = MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
 		// check game mode
-		if ((opt1 & opt2 & 0x700) == 0) return false;
+		if ((opt1 & opt2 & gameModeOptions) == 0) return false;
 	}
 	else
 	{
 		// invert game-mode bits (MTF_Not_COOP etc)
-		opt1 ^= 0x70; opt2 ^= 0x70;
+		static const int nonGameModeOptions = MTF_Not_SP | MTF_Not_DM | MTF_Not_COOP;
+		opt1 ^= nonGameModeOptions; opt2 ^= nonGameModeOptions;
 
-		if (info1->group == 'p') opt1 |= 0x77;
-		if (info2->group == 'p') opt2 |= 0x77;
+		static const int presenceOptions = nonGameModeOptions | MTF_Easy | MTF_Medium | MTF_Hard;
+		if (info1->group == 'p') opt1 |= presenceOptions;
+		if (info2->group == 'p') opt2 |= presenceOptions;
 
+		static const int skillOptions = MTF_Easy | MTF_Medium | MTF_Hard;
 		// check skill bits
-		if ((opt1 & opt2 & 0x07) == 0) return false;
+		if ((opt1 & opt2 & skillOptions) == 0) return false;
 
 		// check game mode
-		if ((opt1 & opt2 & 0x70) == 0) return false;
+		if ((opt1 & opt2 & nonGameModeOptions) == 0) return false;
 	}
 
 	return true;

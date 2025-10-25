@@ -847,7 +847,8 @@ void UI_LineBox::CalcLength()
 void UI_LineBox::FlagsFromInt(int lineflags)
 {
 	// compute activation
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	if (inst.loaded.levelFormat == MapFormat::hexen ||
+		(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
 	{
 		int new_act = (lineflags & MLF_Activation) >> 9;
 
@@ -891,7 +892,8 @@ int UI_LineBox::CalcFlags() const
 	}
 
 	// Activation for non-DOOM formats
-	if (inst.loaded.levelFormat != MapFormat::doom)
+	if (inst.loaded.levelFormat == MapFormat::hexen ||
+		(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
 	{
 		int actval = actkind->value();
 		if (actval >= getActivationCount())

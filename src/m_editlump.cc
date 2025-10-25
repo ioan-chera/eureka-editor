@@ -200,7 +200,7 @@ UI_ChooseTextLump::UI_ChooseTextLump(MapFormat levelFormat) :
 		Fl_Button *b2 = new Fl_Button(230, mhy, 120, 25, "Map Scripts");
 		b2->callback(script_callback, this);
 
-		if (levelFormat == MapFormat::hexen)
+		if (levelFormat != MapFormat::doom)
 			b2->color(BUTTON_COL);
 		else
 			b2->deactivate();
@@ -411,10 +411,10 @@ void Instance::CMD_EditLump()
 	// only create a per-level SCRIPTS lump in a Hexen map
 	// [ the UI_ChooseTextLump already prevents this, but we need to
 	//   handle the /scripts option of the EditLump command ]
-	if (lump_name == EDLUMP_SCRIPTS && loaded.levelFormat != MapFormat::hexen)
+	if (lump_name == EDLUMP_SCRIPTS && loaded.levelFormat == MapFormat::doom)
 	{
 		DLG_Notify("A per-level SCRIPTS lump can only be created "
-			"on a Hexen format map.");
+			"on a Hexen or UDMF format map.");
 		return;
 	}
 
@@ -494,9 +494,9 @@ void Instance::CMD_EditLump()
 
 void Instance::CMD_AddBehaviorLump()
 {
-	if (loaded.levelFormat != MapFormat::hexen)
+	if (loaded.levelFormat == MapFormat::doom)
 	{
-		DLG_Notify("A BEHAVIOR lump can only be added to a Hexen format map.");
+		DLG_Notify("A BEHAVIOR lump can only be added to a Hexen or UDMF format map.");
 		return;
 	}
 
