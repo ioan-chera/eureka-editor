@@ -5,6 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2007-2018 Andrew Apted
+//  Copyright (C) 2025      Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -127,7 +128,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	Y += type->h() + INPUT_SPACING;
 
 
-	new Fl_Box(FL_NO_BOX, X + DESC_INSET, Y, DESC_WIDTH, TYPE_INPUT_HEIGHT, "Desc: ");
+	descBox = new Fl_Box(FL_NO_BOX, X + DESC_INSET, Y, DESC_WIDTH, TYPE_INPUT_HEIGHT, "Desc: ");
 
 	desc = new Fl_Output(type->x(), Y, W - type->x(), TYPE_INPUT_HEIGHT);
 	desc->align(FL_ALIGN_LEFT);
@@ -956,6 +957,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	if (loaded.levelFormat == MapFormat::hexen)
 	{
 		tag->hide();
+		descBox->show();
 		length->hide();
 		gen->hide();
 
@@ -967,19 +969,18 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 	else if(loaded.levelFormat == MapFormat::udmf)
 	{
+		tag->show();
+		tag->resize(actkind->x(), actkind->y(), actkind->w(), actkind->h());
+		descBox->hide();
+
 		if(config.features.udmf_lineparameters)
-		{
-			tag->hide();
 			length->hide();
-		}
 		else
-		{
-			tag->show();
 			length->show();
-		}
 
 		actkind->hide();	// UDMF uses the separate line flags for activation
-		desc->resize(type->x(), desc->y(), w()-78, desc->h());
+
+		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
 
 		if (config.features.gen_types)
 			gen->show();
@@ -989,6 +990,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	else
 	{
 		tag->show();
+		tag->resize(type->x(), length->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
+		descBox->show();
+
 		length->show();
 
 		actkind->hide();

@@ -35,6 +35,8 @@ private:
 	Fl_Button    *choose;
 	Fl_Button    *gen;
 
+	Fl_Box       *descBox;
+
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
 
