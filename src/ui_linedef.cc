@@ -848,8 +848,7 @@ void UI_LineBox::CalcLength()
 void UI_LineBox::FlagsFromInt(int lineflags)
 {
 	// compute activation
-	if (inst.loaded.levelFormat == MapFormat::hexen ||
-		(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
+	if (inst.loaded.levelFormat == MapFormat::hexen)
 	{
 		int new_act = (lineflags & MLF_Activation) >> 9;
 
@@ -893,8 +892,7 @@ int UI_LineBox::CalcFlags() const
 	}
 
 	// Activation for non-DOOM formats
-	if (inst.loaded.levelFormat == MapFormat::hexen ||
-		(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
+	if (inst.loaded.levelFormat == MapFormat::hexen)
 	{
 		int actval = actkind->value();
 		if (actval >= getActivationCount())
@@ -1109,9 +1107,13 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		if (loaded.levelFormat == MapFormat::hexen ||
-			(loaded.levelFormat == MapFormat::udmf && config.features.udmf_lineparameters))
+			(loaded.levelFormat == MapFormat::udmf && (config.features.udmf_lineparameters || !a)))
 		{
 			args[a]->show();
+			if(loaded.levelFormat == MapFormat::hexen || config.features.udmf_lineparameters)
+				args[0]->resize(args[0]->x(), args[0]->y(), ARG_WIDTH, TYPE_INPUT_HEIGHT);
+			else
+				args[0]->resize(args[0]->x(), args[0]->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
 		}
 		else
 			args[a]->hide();
