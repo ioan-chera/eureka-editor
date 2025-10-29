@@ -100,6 +100,7 @@ set(source_m
     m_testmap.cc
     m_testmap.h
     m_udmf.cc
+    m_udmf.h
 )
 
 set(source_r

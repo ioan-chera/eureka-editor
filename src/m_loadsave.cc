@@ -1116,8 +1116,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (! loading.parseEurekaLump(global::home_dir, global::old_linux_home_and_cache_dir,
-				global::install_dir, global::recent, wad.get()))
+		if (! loading.parseEurekaLump(global::recent, wad.get()))
 		{
 			return;
 		}
@@ -1177,8 +1176,7 @@ void Instance::CMD_OpenMap()
 	}
 
 	LoadingData loading = loaded;
-	if (did_load && wad->FindLump(EUREKA_LUMP) && !loading.parseEurekaLump(global::home_dir,
-		global::old_linux_home_and_cache_dir, global::install_dir, global::recent, wad.get()))
+	if (did_load && wad->FindLump(EUREKA_LUMP) && !loading.parseEurekaLump(global::recent, wad.get()))
 	{
 		return;
 	}
@@ -1810,8 +1808,7 @@ bool Instance::M_ExportMap(bool inhibit_node_build)
 	LoadingData loading = loaded;
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (!loading.parseEurekaLump(global::home_dir, global::old_linux_home_and_cache_dir,
-				global::install_dir, global::recent, wad.get()))
+		if (!loading.parseEurekaLump(global::recent, wad.get()))
 		{
 			return false;
 		}

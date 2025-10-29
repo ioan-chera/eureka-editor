@@ -5,6 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2019 Andrew Apted
+//  Copyright (C) 2025 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -352,6 +353,34 @@ public:
 	}
 };
 
+static SString sLinedefFlags[32] = {
+	"blocking",
+	"blockmonsters",
+	"twosided",
+	"dontpegtop",
+	"dontpegbottom",
+	"secret",
+	"soundblock",
+	"dontdraw",
+	"mapped",
+	"passuse",
+	"midtex3d",
+};
+
+int UDMF_InternalizeNewLinedefFlag(const char* name)
+{
+	for (int i = 0; i < (int)lengthof(sLinedefFlags); i++)
+	{
+		if (sLinedefFlags[i].empty())
+		{
+			sLinedefFlags[i] = name;
+			return 1 << i;
+		}
+		if(sLinedefFlags[i].noCaseEqual(name))
+			return 1 << i;
+	}
+	ThrowException("Too many UDMF flags defined: no space for new flag '%s'", name);
+}
 
 static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name)
 {
@@ -941,7 +970,6 @@ void Instance::UDMF_SaveLevel(const LoadingData& loading, Wad_file& wad) const
 
 	wad.AddLump("ENDMAP");
 }
-
 
 //----------------------------------------------------------------------
 

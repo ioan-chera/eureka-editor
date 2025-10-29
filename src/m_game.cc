@@ -27,6 +27,7 @@
 #include "Instance.h"
 #include "m_parse.h"
 #include "m_streams.h"
+#include "m_udmf.h"
 #include <assert.h>
 
 #define MAX_TOKENS  30   /* tokens per line */
@@ -175,8 +176,7 @@ std::unordered_map<SString, SString> LoadingData::prepareConfigVariables() const
 	{
 		parse_vars["$GAME_NAME"] = gameName;
 
-		if (M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
-				global::install_dir, GAMES_DIR, gameName))
+		if (M_CanLoadDefinitions(GAMES_DIR, gameName))
 		{
 			SString base_game = M_GetBaseGame(gameName);
 			parse_vars["$BASE_GAME"] = base_game;
@@ -417,11 +417,10 @@ static tl::optional<fs::path> FindDefinitionFile(const fs::path &home_dir,
 }
 
 
-bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &old_home_dir,
-		const fs::path &install_dir, const fs::path &folder, const SString &name)
+bool M_CanLoadDefinitions(const fs::path &folder, const SString &name)
 {
-	tl::optional<fs::path> filename = FindDefinitionFile(home_dir, old_home_dir, install_dir,
-			folder, name);
+	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+			global::old_linux_home_and_cache_dir, global::install_dir, folder, name);
 
 	return filename.has_value();
 }
@@ -773,7 +772,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		lineflag_t flag{};
 		flag.label = argv[1];
 		flag.udmfKey = argv[2];
-		flag.value = 1 << (int)config.udmf_line_flags.size();
+		flag.value = UDMF_InternalizeNewLinedefFlag(flag.udmfKey.c_str());
 
 		config.udmf_line_flags.push_back(flag);
 	}
