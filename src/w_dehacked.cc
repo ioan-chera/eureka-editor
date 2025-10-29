@@ -195,6 +195,8 @@ static SString thingName(std::vector<SString> tokens)
 		if ((long unsigned int)i != tokens.size()-1)
 			ret += " ";
 	}
+	if(ret.length() <= 2)
+		return "";
 	return ret.substr(1, ret.length()-2);
 }
 
@@ -397,7 +399,11 @@ static void read(std::istream &is, ConfigData &config)
 			sprite += char('A' + spawnframe.subspritenum);
 
 		it->second.thing.sprite = sprite;
-		config.thing_types[it->first] = it->second.thing;
+		thingtype_t& typeToChange = config.thing_types[it->first];
+		SString originalDesc = typeToChange.desc;
+		typeToChange = it->second.thing;
+		if(typeToChange.desc.empty())
+			typeToChange.desc = originalDesc;	// restore name if accidentally removed by Dehacked
 	}
 }
 
