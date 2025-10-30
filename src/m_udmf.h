@@ -22,5 +22,6 @@
 #define M_UDMF_H_
 
 int UDMF_InternalizeNewLinedefFlag(const char* name);
+int UDMF_InternalizeNewThingFlag(const char* name);
 
 #endif

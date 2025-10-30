@@ -893,6 +893,7 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 	}
 	else
 	{
+		flagBox->show();
 		pos_z->hide();
 
 		tid->hide();

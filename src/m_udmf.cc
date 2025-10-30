@@ -353,7 +353,8 @@ public:
 	}
 };
 
-static SString sLinedefFlags[32] = {
+static SString sLinedefFlags[32] =
+{
 	"blocking",
 	"blockmonsters",
 	"twosided",
@@ -365,6 +366,28 @@ static SString sLinedefFlags[32] = {
 	"mapped",
 	"passuse",
 	"midtex3d",
+};
+
+static SString sThingFlags[32] =
+{
+	"skill2",
+	"skill3",
+	"skill4",
+	"ambush",
+	"dormant",
+	"class1",
+	"class2",
+	"class3",
+	"single",
+	"coop",
+	"dm",
+	"skill1",
+	"skill5",
+	"friend",
+	"standing",
+	"strifeally",
+	"translucent",
+	"invisible",
 };
 
 int UDMF_InternalizeNewLinedefFlag(const char* name)
@@ -379,7 +402,22 @@ int UDMF_InternalizeNewLinedefFlag(const char* name)
 		if(sLinedefFlags[i].noCaseEqual(name))
 			return 1 << i;
 	}
-	ThrowException("Too many UDMF flags defined: no space for new flag '%s'", name);
+	ThrowException("Too many UDMF linedef flags defined: no space for new flag '%s'", name);
+}
+
+int UDMF_InternalizeNewThingFlag(const char* name)
+{
+	for (int i = 0; i < (int)lengthof(sThingFlags); i++)
+	{
+		if (sThingFlags[i].empty())
+		{
+			sThingFlags[i] = name;
+			return 1 << i;
+		}
+		if(sThingFlags[i].noCaseEqual(name))
+			return 1 << i;
+	}
+	ThrowException("Too many UDMF thing flags defined: no space for new flag '%s'", name);
 }
 
 static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name)

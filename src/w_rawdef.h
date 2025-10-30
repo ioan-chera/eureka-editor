@@ -525,6 +525,11 @@ enum udmf_option_e
 {
 	MTF_UDMF_Easiest = 2048,
 	MTF_UDMF_Hardest = 4096,
+	MTF_UDMF_Friend = 8192,
+	MTF_UDMF_Standing = 0x4000,
+	MTF_UDMF_StrifeAlly = 0x8000,
+	MTF_UDMF_Translucent = 0x10000,
+	MTF_UDMF_Invisible = 0x20000,
 };
 
 

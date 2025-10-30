@@ -704,7 +704,10 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		else
 			pst->fail("invalid default setting \"%s\", expected off, on or on-opposite", argv[4]);
 		if(isUDMF)
+		{
 			flag.udmfKey = argv[5];
+			flag.value = UDMF_InternalizeNewThingFlag(flag.udmfKey.c_str());
+		}
 		else
 			flag.value = (int)strtol(argv[5], nullptr, 0);
 
@@ -717,16 +720,12 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		for(thingflag_t &existingflag : target_thing_flags)
 			if(existingflag.row == flag.row && existingflag.column == flag.column)
 			{
-				if(isUDMF)
-					flag.value = existingflag.value;	// keep the internal value of the replaced
 				existingflag = flag;
 				found = true;
 				break;
 			}
 		if(!found)
 		{
-			if(isUDMF)
-				flag.value = 1 << (int)target_thing_flags.size();
 			target_thing_flags.push_back(flag);
 		}
 	}
