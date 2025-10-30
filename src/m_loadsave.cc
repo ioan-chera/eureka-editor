@@ -93,6 +93,12 @@ static Document makeFreshDocument(Instance &inst, const ConfigData &config, MapF
 		th->type  = pl;
 		th->angle = 90;
 
+		const std::vector<thingflag_t>& thingFlags = levelFormat == MapFormat::udmf ? config.udmf_thing_flags
+			: config.thing_flags;
+		for(const thingflag_t& flag : thingFlags)
+			if(flag.defaultSet == thingflag_t::DefaultMode::on)
+				th->options |= flag.value;
+
 		th->SetRawX(levelFormat, (pl == 1) ? 0 : (pl - 3) * 48);
 		th->SetRawY(levelFormat, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
 		doc.things.push_back(std::move(th));

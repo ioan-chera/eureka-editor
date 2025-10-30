@@ -864,6 +864,10 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 
 	if (loaded.levelFormat != MapFormat::doom)
 	{
+		if(loaded.levelFormat == MapFormat::udmf)
+			flagBox->hide();
+		else
+			flagBox->show();
 		pos_z->show();
 
 		tid->show();
