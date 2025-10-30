@@ -453,7 +453,7 @@ static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const
 }
 
 
-static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token& field,
+static void UDMF_ParseThingField(const Document &doc, const ConfigData &config, Thing *T, const Udmf_Token& field,
 								 const Udmf_Token& value)
 {
 	// just ignore any setting with the "false" keyword
@@ -489,29 +489,15 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 		T->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		T->arg5 = value.DecodeInt();
-	else if(field.Match("skill1"))
-		T->options |= MTF_UDMF_Easiest;
-	else if (field.Match("skill2"))
-		T->options |= MTF_Easy;
-	else if (field.Match("skill3"))
-		T->options |= MTF_Medium;
-	else if (field.Match("skill4"))
-		T->options |= MTF_Hard;
-	else if(field.Match("skill5"))
-		T->options |= MTF_UDMF_Hardest;
-	else if (field.Match("ambush"))
-		T->options |= MTF_Ambush;
-	else if (field.Match("friend"))
-		T->options |= MTF_Friend;
-	else if (field.Match("single"))
-		T->options |= MTF_Hexen_SP;
-	else if (field.Match("coop"))
-		T->options |= MTF_Hexen_COOP;
-	else if (field.Match("dm"))
-		T->options |= MTF_Hexen_DM;
 
 	else
 	{
+		for(const thingflag_t &flag : config.udmf_thing_flags)
+			if (field.Match(flag.udmfKey.c_str()))
+			{
+				T->options |= flag.value;
+				return;
+			}
 		gLog.debugPrintf("thing #%d: unknown field '%s'\n", doc.numThings()-1, field.c_str());
 	}
 }
@@ -707,7 +693,7 @@ static void UDMF_ParseObject(Document &doc, const ConfigData &config, Udmf_Parse
 		}
 
 		if (new_T)
-			UDMF_ParseThingField(doc, new_T, tok, value);
+			UDMF_ParseThingField(doc, config, new_T, tok, value);
 
 		if (new_V)
 			UDMF_ParseVertexField(doc, new_V, tok, value);
@@ -812,30 +798,18 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 
 		const auto th = inst.level.things[i];
 
-		lump->Printf("x = %1.3f;\n", th->x());
-		lump->Printf("y = %1.3f;\n", th->y());
+		lump->Printf("x = %0.16g;\n", th->x());
+		lump->Printf("y = %0.16g;\n", th->y());
 
 		if (th->raw_h != FFixedPoint{})
-			lump->Printf("height = %1.3f;\n", th->h());
+			lump->Printf("height = %0.16g;\n", th->h());
 
 		lump->Printf("angle = %d;\n", th->angle);
 		lump->Printf("type = %d;\n", th->type);
 
 		// thing options
-		WrFlag(lump, th->options, "skill1", MTF_UDMF_Easiest);
-		WrFlag(lump, th->options, "skill2", MTF_Easy);
-		WrFlag(lump, th->options, "skill3", MTF_Medium);
-		WrFlag(lump, th->options, "skill4", MTF_Hard);
-		WrFlag(lump, th->options, "skill5", MTF_UDMF_Hardest);
-
-		WrFlag(lump, th->options, "single", MTF_Hexen_SP);
-		WrFlag(lump, th->options, "coop",   MTF_Hexen_COOP);
-		WrFlag(lump, th->options, "dm",     MTF_Hexen_DM);
-
-		WrFlag(lump, th->options, "ambush", MTF_Ambush);
-
-		if (inst.conf.features.friend_flag)
-			WrFlag(lump, th->options, "friend", MTF_Friend);
+		for(const thingflag_t &flag : inst.conf.udmf_thing_flags)
+			WrFlag(lump, th->options, flag.udmfKey.c_str(), flag.value);
 
 		// TODO Hexen flags
 
@@ -856,8 +830,8 @@ static void UDMF_WriteVertices(const Document &doc, Lump_c *lump)
 
 		const auto vert = doc.vertices[i];
 
-		lump->Printf("x = %1.3f;\n", vert->x());
-		lump->Printf("y = %1.3f;\n", vert->y());
+		lump->Printf("x = %0.16g;\n", vert->x());
+		lump->Printf("y = %0.16g;\n", vert->y());
 
 		lump->Printf("}\n\n");
 	}
