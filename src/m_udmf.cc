@@ -528,7 +528,8 @@ static void UDMF_ParseVertexField(const Document &doc, Vertex *V, const Udmf_Tok
 	}
 }
 
-static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_Token& field, const Udmf_Token& value)
+static void UDMF_ParseLinedefField(const Document &doc, const ConfigData &config, LineDef *LD, const Udmf_Token& field,
+	const Udmf_Token& value)
 {
 	// Note: vertex and sidedef numbers are validated later on
 
@@ -564,31 +565,14 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 		LD->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		LD->arg5 = value.DecodeInt();
-
-	else if (field.Match("blocking"))
-		LD->flags |= MLF_Blocking;
-	else if (field.Match("blockmonsters"))
-		LD->flags |= MLF_BlockMonsters;
-	else if (field.Match("twosided"))
-		LD->flags |= MLF_TwoSided;
-	else if (field.Match("dontpegtop"))
-		LD->flags |= MLF_UpperUnpegged;
-	else if (field.Match("dontpegbottom"))
-		LD->flags |= MLF_LowerUnpegged;
-	else if (field.Match("secret"))
-		LD->flags |= MLF_Secret;
-	else if (field.Match("blocksound"))
-		LD->flags |= MLF_SoundBlock;
-	else if (field.Match("dontdraw"))
-		LD->flags |= MLF_DontDraw;
-	else if (field.Match("mapped"))
-		LD->flags |= MLF_Mapped;
-
-	else if (field.Match("passuse"))
-		LD->flags |= MLF_Boom_PassThru;
-
 	else
 	{
+		for(const lineflag_t &flag : config.udmf_line_flags)
+			if (field.Match(flag.udmfKey.c_str()))
+			{
+				LD->flags |= flag.value;
+				return;
+			}
 		gLog.debugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
 	}
 }
@@ -639,7 +623,7 @@ static void UDMF_ParseSectorField(const Document &doc, Sector *S, const Udmf_Tok
 	}
 }
 
-static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Token& name)
+static void UDMF_ParseObject(Document &doc, const ConfigData &config, Udmf_Parser& parser, const Udmf_Token& name)
 {
 	// create a new object of the specified type
 	Objid kind;
@@ -729,7 +713,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 			UDMF_ParseVertexField(doc, new_V, tok, value);
 
 		if (new_LD)
-			UDMF_ParseLinedefField(doc, new_LD, tok, value);
+			UDMF_ParseLinedefField(doc, config, new_LD, tok, value);
 
 		if (new_SD)
 			UDMF_ParseSidedefField(doc, new_SD, tok, value);
@@ -792,7 +776,7 @@ void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 		}
 		if (tok2.Match("{"))
 		{
-			UDMF_ParseObject(*this, *parser, tok);
+			UDMF_ParseObject(*this, config, *parser, tok);
 			continue;
 		}
 
@@ -913,21 +897,8 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
 
 		// linedef flags
-		WrFlag(lump, ld->flags, "blocking",      MLF_Blocking);
-		WrFlag(lump, ld->flags, "blockmonsters", MLF_BlockMonsters);
-		WrFlag(lump, ld->flags, "twosided",      MLF_TwoSided);
-		WrFlag(lump, ld->flags, "dontpegtop",    MLF_UpperUnpegged);
-		WrFlag(lump, ld->flags, "dontpegbottom", MLF_LowerUnpegged);
-		WrFlag(lump, ld->flags, "secret",        MLF_Secret);
-		WrFlag(lump, ld->flags, "blocksound",    MLF_SoundBlock);
-		WrFlag(lump, ld->flags, "dontdraw",      MLF_DontDraw);
-		WrFlag(lump, ld->flags, "mapped",        MLF_Mapped);
-
-		if (inst.conf.features.pass_through)
-			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
-
-		if (inst.conf.features.midtex_3d)
-			WrFlag(lump, ld->flags, "midtex3d", MLF_Eternity_3DMidTex);
+		for(const lineflag_t &flag : inst.conf.udmf_line_flags)
+			WrFlag(lump, ld->flags, flag.udmfKey.c_str(), flag.value);
 
 		// TODO : hexen stuff (SPAC flags, etc)
 
