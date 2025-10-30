@@ -969,6 +969,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	{
 		tag->show();
 		tag->resize(actkind->x(), actkind->y(), actkind->w(), actkind->h());
+		tag->label("LineID:");
 		descBox->hide();
 
 		if(config.features.udmf_lineparameters)
@@ -989,6 +990,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	{
 		tag->show();
 		tag->resize(type->x(), length->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
+		tag->label("Tag: ");
 		descBox->show();
 
 		length->show();
@@ -1111,9 +1113,15 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		{
 			args[a]->show();
 			if(loaded.levelFormat == MapFormat::hexen || config.features.udmf_lineparameters)
+			{
 				args[0]->resize(args[0]->x(), args[0]->y(), ARG_WIDTH, TYPE_INPUT_HEIGHT);
+				args[0]->label("Args: ");
+			}
 			else
+			{
 				args[0]->resize(args[0]->x(), args[0]->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
+				args[0]->label("Target:");
+			}
 		}
 		else
 			args[a]->hide();
