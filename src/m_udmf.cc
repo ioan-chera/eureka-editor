@@ -800,15 +800,15 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		lump->Printf("type = %d;\n", th->type);
 
 		// thing options
-		WrFlag(lump, th->options, "skill1", MTF_Easy);
+		WrFlag(lump, th->options, "skill1", MTF_UDMF_Easiest);
 		WrFlag(lump, th->options, "skill2", MTF_Easy);
 		WrFlag(lump, th->options, "skill3", MTF_Medium);
 		WrFlag(lump, th->options, "skill4", MTF_Hard);
-		WrFlag(lump, th->options, "skill5", MTF_Hard);
+		WrFlag(lump, th->options, "skill5", MTF_UDMF_Hardest);
 
-		WrFlag(lump, ~ th->options, "single", MTF_Not_SP);
-		WrFlag(lump, ~ th->options, "coop",   MTF_Not_COOP);
-		WrFlag(lump, ~ th->options, "dm",     MTF_Not_DM);
+		WrFlag(lump, th->options, "single", MTF_Hexen_SP);
+		WrFlag(lump, th->options, "coop",   MTF_Hexen_COOP);
+		WrFlag(lump, th->options, "dm",     MTF_Hexen_DM);
 
 		WrFlag(lump, th->options, "ambush", MTF_Ambush);
 

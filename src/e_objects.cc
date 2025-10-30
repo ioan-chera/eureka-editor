@@ -148,7 +148,9 @@ void ObjectsModule::insertThing() const
 		{
 			T->type = inst.conf.default_thing;
 
-			for(const thingflag_t &flag : inst.conf.thing_flags)
+			const std::vector<thingflag_t> &thingFlags = inst.loaded.levelFormat == MapFormat::udmf ? inst.conf.udmf_thing_flags
+				: inst.conf.thing_flags;
+			for(const thingflag_t &flag : thingFlags)
 				if(flag.defaultSet == thingflag_t::DefaultMode::on)
 					T->options |= flag.value;
 		}
