@@ -40,3 +40,6 @@ thing  888 - -  12 DOGS   "Dog (MBF)"
 line 271 - "-- MBF: Transfer sky"   :tag
 line 272 - "-- MBF: Mirror sky"     :tag
 
+#---- UDMF INFORMATION ---------------
+
+udmf_thingflag 0 1 friend off friend
