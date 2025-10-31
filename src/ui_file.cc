@@ -965,8 +965,11 @@ void UI_ProjectSetup::PopulateMapFormat()
 
 	// don't leave namespace as "" when chosen format is UDMF.
 	// [ this is to handle broken config files somewhat sanely ]
-	if (result.nameSpace.empty() && result.mapFormat == MapFormat::udmf)
-		result.nameSpace = "Hexen";
+	if((result.nameSpace.empty() && result.mapFormat == MapFormat::udmf) ||
+		result.nameSpace.noCaseEqual("$BASE_GAME"))
+	{
+		result.nameSpace = M_GetBaseGame(c_game).asTitle();
+	}
 }
 
 

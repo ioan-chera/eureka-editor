@@ -38,13 +38,13 @@ udmf_thingflag 2 1 coop   on  coop
 udmf_thingflag 3 1 dm     on  dm
 udmf_thingflag 4 1 ambush off ambush
 
-if $GAME_NAME is heretic
-  udmf_namespace Heretic
+udmf_namespace $BASE_GAME
+
+if $BASE_GAME is heretic
   feature udmf_lineparameters 0
   feature udmf_thingspecials 0
 endif
-if $GAME_NAME is hexen
-  udmf_namespace Hexen
+if $BASE_GAME is hexen
   feature udmf_lineparameters 1
   feature udmf_thingspecials 1
   udmf_lineflag "player cross" playercross
@@ -61,8 +61,7 @@ if $GAME_NAME is hexen
   udmf_thingflag 2 2 Cleric on class2
   udmf_thingflag 3 2 Mage on class3
 endif
-if $GAME_NAME is strife1
-  udmf_namespace Strife
+if $BASE_GAME is strife
   feature udmf_lineparameters 0
   feature udmf_thingspecials 0
   udmf_lineflag translucent translucent
