@@ -1,0 +1,76 @@
+#------------------------------------------------------------------------
+#  Vanilla game specific UDMF namespaces
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2025 Ioan Chera
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+
+map_formats UDMF
+supported_games heretic hexen strife	# Doom already has UDMF in Boom
+
+udmf_lineflag "two sided"   twosided
+udmf_lineflag "upper unpeg" dontpegtop
+udmf_lineflag "lower unpeg" dontpegbottom
+udmf_lineflag "impassable"  blocking
+udmf_lineflag "block mons"  blockmonsters
+udmf_lineflag "sound block" blocksound
+
+udmf_thingflag 0 0 easy-  on  skill1
+udmf_thingflag 1 0 easy   on  skill2
+udmf_thingflag 2 0 medium on  skill3
+udmf_thingflag 3 0 hard   on  skill4
+udmf_thingflag 4 0 hard+  on  skill5
+udmf_thingflag 1 1 sp     on  single
+udmf_thingflag 2 1 coop   on  coop
+udmf_thingflag 3 1 dm     on  dm
+udmf_thingflag 4 1 ambush off ambush
+
+if $GAME_NAME is heretic
+  udmf_namespace Heretic
+  feature udmf_lineparameters 0
+  feature udmf_thingspecials 0
+endif
+if $GAME_NAME is hexen
+  udmf_namespace Hexen
+  feature udmf_lineparameters 1
+  feature udmf_thingspecials 1
+  udmf_lineflag "player cross" playercross
+  udmf_lineflag "player use" playeruse
+  udmf_lineflag "monster cross" monstercross
+  udmf_lineflag "monster use" monsteruse
+  udmf_lineflag "player shoot" impact
+  udmf_lineflag "player push" playerpush
+  udmf_lineflag "monster push" monsterpush
+  udmf_lineflag "missile cross" missilecross
+  udmf_lineflag "repeatable" repeatspecial
+  udmf_thingflag 0 1 dormant off dormant
+  udmf_thingflag 1 2 Fighter on class1
+  udmf_thingflag 2 2 Cleric on class2
+  udmf_thingflag 3 2 Mage on class3
+endif
+if $GAME_NAME is strife1
+  udmf_namespace Strife
+  feature udmf_lineparameters 0
+  feature udmf_thingspecials 0
+  udmf_lineflag translucent translucent
+  udmf_lineflag transparent transparent
+  udmf_lineflag "jump over" jumpover
+  udmf_lineflag "block flyers" blockfloaters
+  udmf_thingflag 5 0 stand off standing
+  udmf_thingflag 5 1 friend off strifeally
+  udmf_thingflag 1 2 shadow off translucent
+  udmf_thingflag 2 2 alt-vis off invisible
+endif

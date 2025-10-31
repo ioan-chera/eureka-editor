@@ -366,6 +366,20 @@ static SString sLinedefFlags[32] =
 	"mapped",
 	"passuse",
 	"midtex3d",
+	"repeatspecial",
+	"playercross",
+	"playeruse",
+	"monstercross",
+	"monsteruse",
+	"impact",
+	"playerpush",
+	"monsterpush",
+	"missilecross",
+	"repeatspecial",
+	"translucent",
+	"transparent",
+	"jumpover",
+	"blockfloaters",
 };
 
 static SString sThingFlags[32] =
