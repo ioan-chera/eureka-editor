@@ -24,6 +24,7 @@
 
 #include "LineDef.h"
 #include "m_game.h"
+#include "m_files.h"
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
@@ -434,27 +435,65 @@ int UDMF_InternalizeNewThingFlag(const char* name)
 	ThrowException("Too many UDMF thing flags defined: no space for new flag '%s'", name);
 }
 
-static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name)
+static tl::optional<ConfigData> UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name)
 {
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
 	{
 		parser.throwException("expected value for global setting %s, reached end of text map",
 							  name.c_str());
-		return;
+		return tl::nullopt;
 	}
 	if (!parser.Expect(";"))
 	{
 		parser.throwException("expected semicolon");
-		return;
+		return tl::nullopt;
 	}
 
 	if (name.Match("namespace"))
 	{
-		// TODO : check if namespace is supported by current port
-		//        [ if not, show a dialog with some options ]
-
 		loading.udmfNamespace = value.DecodeString();
+
+		// Check if the namespace matches the current port+game configuration
+		const std::vector<PortGamePair> &pairs = M_FindPortGameForUDMFNamespace(loading.udmfNamespace);
+		if (!pairs.empty())
+		{
+			// Check if current port+game matches any registered pair for this namespace
+			bool foundMatch = false;
+			for (const PortGamePair &pair : pairs)
+			{
+				if (pair.portName == loading.portName && pair.gameName == loading.gameName)
+				{
+					foundMatch = true;
+					break;
+				}
+			}
+
+			// If no match found, use the first registered port/game pair for this namespace
+			if (!foundMatch)
+			{
+				gLog.printf("UDMF namespace '%s' doesn't match current port '%s' / game '%s'\n",
+							loading.udmfNamespace.c_str(), loading.portName.c_str(), loading.gameName.c_str());
+				gLog.printf("Switching to port '%s' / game '%s'\n",
+							pairs[0].portName.c_str(), pairs[0].gameName.c_str());
+
+				loading.portName = pairs[0].portName;
+				SString oldGameName = loading.gameName;
+				loading.gameName = pairs[0].gameName;
+
+				if (loading.gameName != oldGameName)
+				{
+					const fs::path *iwadPath = global::recent.queryIWAD(loading.gameName);
+					if (iwadPath)
+						loading.iwadName = *iwadPath;
+					else
+						gLog.printf("Warning: could not find IWAD for game '%s'\n", loading.gameName.c_str());
+				}
+				
+				// Load the new ConfigData for the changed port/game
+				return loadConfigOnly(loading);
+			}
+		}
 	}
 	else if (name.Match("ee_compat"))
 	{
@@ -464,6 +503,8 @@ static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const
 	{
 		gLog.printf("skipping unknown global '%s' in UDMF\n", name.c_str());
 	}
+
+	return tl::nullopt;
 }
 
 
@@ -752,6 +793,10 @@ void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 	// NOTE: this must be a pointer to heap, due to stack size.
 	auto parser = std::make_unique<Udmf_Parser>(*lump);
 
+	// Config to use for parsing - may be overridden if namespace changes port/game
+	tl::optional<ConfigData> overrideConfig;
+	const ConfigData *activeConfig = &config;
+
 	for (;;)
 	{
 		Udmf_Token tok = parser->Next();
@@ -771,12 +816,17 @@ void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 
 		if (tok2.Match("="))
 		{
-			UDMF_ParseGlobalVar(loading, *parser, tok);
+			tl::optional<ConfigData> newConfig = UDMF_ParseGlobalVar(loading, *parser, tok);
+			if (newConfig.has_value())
+			{
+				overrideConfig = std::move(newConfig);
+				activeConfig = &overrideConfig.value();
+			}
 			continue;
 		}
 		if (tok2.Match("{"))
 		{
-			UDMF_ParseObject(*this, config, *parser, tok);
+			UDMF_ParseObject(*this, *activeConfig, *parser, tok);
 			continue;
 		}
 
@@ -784,7 +834,7 @@ void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 		parser->throwException("unexpected symbol %s", tok2.c_str());
 	}
 
-	ValidateLevel_UDMF(config, bad);
+	ValidateLevel_UDMF(*activeConfig, bad);
 }
 
 

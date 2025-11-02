@@ -163,6 +163,7 @@ struct NewResources;
 struct WadData;
 
 NewResources loadResources(const LoadingData& loading, const WadData& waddata) noexcept(false);
+ConfigData loadConfigOnly(const LoadingData& loading) noexcept(false);
 
 /*
  *  Various global functions

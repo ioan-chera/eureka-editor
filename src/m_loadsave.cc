@@ -1014,13 +1014,34 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 
 void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 {
+	LoadingData oldLoading = loaded;
 	NewDocument newdoc = openDocument(loaded, *wad, lev_num);
 	if (newdoc.bad.linedef_count || newdoc.bad.sector_refs || newdoc.bad.sidedef_refs)
 	{
 		ShowLoadProblem(newdoc.bad);
 	}
+
+	// Check if port or game changed during loading (e.g., from UDMF namespace)
+	bool needsResourceReload = (newdoc.loading.portName != oldLoading.portName ||
+								 newdoc.loading.gameName != oldLoading.gameName);
+
 	loaded = newdoc.loading;
 	level = std::move(newdoc.doc);
+
+	if (needsResourceReload)
+	{
+		gLog.printf("Port or game changed during level load, reloading resources...\n");
+		try
+		{
+			Main_LoadResources(loaded);
+		}
+		catch (const std::runtime_error &e)
+		{
+			gLog.printf("Error reloading resources: %s\n", e.what());
+			// Continue with old resources rather than failing completely
+		}
+	}
+
 	if(main_win)
 		testmap::updateMenuName(main_win->menu_bar, loaded);
 	Subdiv_InvalidateAll();
@@ -1222,8 +1243,7 @@ void Instance::CMD_OpenMap()
 		return;
 	}
 
-
-	if (new_resources)
+	if (new_resources || newdoc.loading.gameName != loading.gameName || newdoc.loading.portName != loading.portName)
 	{
 		NewResources newres = {};
 		try

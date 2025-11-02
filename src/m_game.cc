@@ -41,6 +41,9 @@ namespace global
 	static std::unordered_map<SString, GameInfo> sLoadedGameDefs;
 	static std::map<SString, PortInfo_c> loaded_port_defs;
 
+	// UDMF namespace to port/game mapping
+	static std::unordered_map<SString, std::vector<PortGamePair>> udmfNamespaceMapping;
+
 	// the information being loaded for PURPOSE_GameInfo / PortInfo
 	// TODO : move into parser_state_c
 	static PortInfo_c loading_Port;
@@ -1352,6 +1355,112 @@ SString M_GetBaseGame(const SString &game) noexcept(false)
 	SYS_ASSERT(ginfo.isSet());
 
 	return ginfo.baseGame;
+}
+
+
+//
+// Build the UDMF namespace to port/game mapping at startup
+//
+void M_BuildUDMFNamespaceMapping()
+{
+	global::udmfNamespaceMapping.clear();
+
+	// First, build a mapping of base_game -> list of game names
+	std::unordered_map<SString, std::vector<SString>> baseGameToGames;
+	std::vector<SString> gameList = M_CollectKnownDefs({global::install_dir,
+		global::old_linux_home_and_cache_dir, global::home_dir}, "games");
+
+	for (const SString &gameName : gameList)
+	{
+		try
+		{
+			GameInfo ginfo = M_LoadGameInfo(gameName);
+			if (ginfo.isSet())
+			{
+				baseGameToGames[ginfo.baseGame].push_back(gameName);
+			}
+		}
+		catch (const std::exception &e)
+		{
+			// Skip games that fail to load
+			continue;
+		}
+		catch (...)
+		{
+			continue;
+		}
+	}
+
+	// Now process port definitions
+	std::vector<SString> portList = M_CollectKnownDefs({global::install_dir,
+		global::old_linux_home_and_cache_dir, global::home_dir}, "ports");
+
+	for (const SString &portName : portList)
+	{
+		const PortInfo_c *pinfo = nullptr;
+		try
+		{
+			pinfo = M_LoadPortInfo(portName);
+		}
+		catch (const std::exception &e)
+		{
+			gLog.printf("Warning: failed to load port '%s': %s\n", portName.c_str(), e.what());
+			continue;
+		}
+		catch (...)
+		{
+			gLog.printf("Warning: failed to load port '%s': unknown error\n", portName.c_str());
+			continue;
+		}
+
+		if (!pinfo)
+			continue;
+
+		// Check if this port supports UDMF
+		if (!(pinfo->formats & (1 << static_cast<int>(MapFormat::udmf))))
+			continue;
+
+		// Check if it has a UDMF namespace defined
+		if (pinfo->udmf_namespace.empty())
+			continue;
+
+		// For each supported base game, find all matching game configurations
+		for (const SString &baseGame : pinfo->supported_games)
+		{
+			auto it = baseGameToGames.find(baseGame);
+			if (it != baseGameToGames.end())
+			{
+				for (const SString &gameName : it->second)
+				{
+					PortGamePair pair;
+					pair.portName = portName;
+					pair.gameName = gameName;
+
+					// If namespace is "$BASE_GAME", use the base game as the key
+					// Otherwise, use the explicit namespace
+					const SString &namespaceKey = (pinfo->udmf_namespace == "$BASE_GAME")
+						? baseGame : pinfo->udmf_namespace;
+
+					global::udmfNamespaceMapping[namespaceKey.asLower()].push_back(pair);
+				}
+			}
+		}
+	}
+}
+
+
+//
+// Find port/game pairs for a given UDMF namespace
+//
+const std::vector<PortGamePair> & M_FindPortGameForUDMFNamespace(const SString &udmfNamespace)
+{
+	static const std::vector<PortGamePair> emptyList;
+
+	auto it = global::udmfNamespaceMapping.find(udmfNamespace.asLower());
+	if (it == global::udmfNamespaceMapping.end())
+		return emptyList;
+
+	return it->second;
 }
 
 

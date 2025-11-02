@@ -972,6 +972,61 @@ static void adjustHardcodedUDMFFlags(std::vector<T> &flaglist, int doomFlag, con
 	}
 }
 
+//
+// Apply all hardcoded UDMF flag adjustments to a ConfigData
+//
+static void applyHardcodedUDMFAdjustments(ConfigData &config)
+{
+	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_TwoSided, "twosided");
+	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_UpperUnpegged, "dontpegtop");
+	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_LowerUnpegged, "dontpegbottom");
+	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_Blocking, "blocking");
+	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_BlockMonsters, "blockmonsters");
+	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_SoundBlock, "blocksound");
+	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_Boom_PassThru, "passthru");
+
+	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_UDMF_Easiest, "skill1");
+	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_Easy, "skill2");
+	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_Medium, "skill3");
+	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_Hard, "skill4");
+	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_UDMF_Hardest, "skill5");
+	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_Hexen_SP, "single");
+	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_Hexen_COOP, "coop");
+	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_Hexen_DM, "dm");
+	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_Ambush, "ambush");
+}
+
+//
+// Lightweight version of loadResources that only loads ConfigData
+// Used when UDMF namespace changes port/game during map loading
+//
+ConfigData loadConfigOnly(const LoadingData& loading) noexcept(false)
+{
+	ConfigData config;
+	LoadingData loadingCopy = loading;
+
+	gLog.printf("Loading config for port '%s' / game '%s'\n",
+				loading.portName.c_str(), loading.gameName.c_str());
+
+	// clear the parse variables, pre-set a few vars
+	std::unordered_map<SString, SString> parseVars = loading.prepareConfigVariables();
+
+	try
+	{
+		readGameInfo(parseVars, loadingCopy, config);
+		readPortInfo(parseVars, loadingCopy, config);
+	}
+	catch (const std::runtime_error &e)
+	{
+		gLog.printf("%s\n", e.what());
+		throw;
+	}
+
+	applyHardcodedUDMFAdjustments(config);
+
+	return config;
+}
+
 NewResources loadResources(const LoadingData& loading, const WadData &waddata) noexcept(false)
 {
 	auto newres = NewResources();
@@ -1042,24 +1097,7 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 	}
 
 	// Now set the hardcoded variables. Put the Eureka-sensitive flags to the proper UDMF places
-
-	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_TwoSided, "twosided");
-	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_UpperUnpegged, "dontpegtop");
-	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_LowerUnpegged, "dontpegbottom");
-	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_Blocking, "blocking");
-	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_BlockMonsters, "blockmonsters");
-	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_SoundBlock, "blocksound");
-	adjustHardcodedUDMFFlags(newres.config.udmf_line_flags, MLF_Boom_PassThru, "passthru");
-
-	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_UDMF_Easiest, "skill1");
-	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Easy, "skill2");
-	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Medium, "skill3");
-	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Hard, "skill4");
-	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_UDMF_Hardest, "skill5");
-	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Hexen_SP, "single");
-	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Hexen_COOP, "coop");
-	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Hexen_DM, "dm");
-	adjustHardcodedUDMFFlags(newres.config.udmf_thing_flags, MTF_Ambush, "ambush");
+	applyHardcodedUDMFAdjustments(newres.config);
 
 	return newres;
 }
@@ -1264,6 +1302,9 @@ int EurekaMain(int argc, char *argv[])
 
 		Determine_InstallPath(argv[0]);
 		Determine_HomeDir(argv[0]);
+
+		// Build UDMF namespace mapping from all port definitions
+		M_BuildUDMFNamespaceMapping();
 
 		if(!gLog.openFile(global::log_file))
 			gLog.printf("WARNING: failed opening log file '%s'\n",

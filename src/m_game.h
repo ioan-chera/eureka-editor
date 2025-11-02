@@ -29,6 +29,7 @@
 
 #include "im_color.h"
 #include "m_strings.h"
+#include "tl/optional.hpp"
 #include <initializer_list>
 #include <map>
 #include <unordered_map>
@@ -305,6 +306,15 @@ struct GameInfo
 	}
 };
 
+//
+// Port and game pair for UDMF namespace mapping
+//
+struct PortGamePair
+{
+	SString portName;
+	SString gameName;
+};
+
 class PortInfo_c
 {
 public:
@@ -472,6 +482,10 @@ bool M_CheckPortSupportsGame(const SString &base_game,
 SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name) noexcept(false);
 
 SString M_GetBaseGame(const SString &game) noexcept(false);
+
+void M_BuildUDMFNamespaceMapping();
+
+const std::vector<PortGamePair> & M_FindPortGameForUDMFNamespace(const SString &udmfNamespace);
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
