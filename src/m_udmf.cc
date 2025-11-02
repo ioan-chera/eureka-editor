@@ -33,6 +33,7 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
+#include "ui_file.h"
 #include "ui_window.h"
 
 class Udmf_Token
@@ -469,17 +470,37 @@ static tl::optional<ConfigData> UDMF_ParseGlobalVar(LoadingData &loading, Udmf_P
 				}
 			}
 
-			// If no match found, use the first registered port/game pair for this namespace
+			// If no match found, show dialog for user to select port/game pair
 			if (!foundMatch)
 			{
 				gLog.printf("UDMF namespace '%s' doesn't match current port '%s' / game '%s'\n",
 							loading.udmfNamespace.c_str(), loading.portName.c_str(), loading.gameName.c_str());
-				gLog.printf("Switching to port '%s' / game '%s'\n",
-							pairs[0].portName.c_str(), pairs[0].gameName.c_str());
 
-				loading.portName = pairs[0].portName;
+				tl::optional<PortGamePair> selectedPair;
+				if(pairs.size() > 1)
+				{
+					UI_UDMFSetup dialog(loading.udmfNamespace, pairs);
+					selectedPair = dialog.Run();
+
+					if(!selectedPair.has_value())
+					{
+						// User closed dialog without selecting - use first pair as fallback
+						gLog.printf("No selection made, using default: port '%s' / game '%s'\n",
+							pairs[0].portName.c_str(), pairs[0].gameName.c_str());
+						selectedPair = pairs[0];
+					}
+					else
+					{
+						gLog.printf("User selected: port '%s' / game '%s'\n",
+							selectedPair->portName.c_str(), selectedPair->gameName.c_str());
+					}
+				}
+				else
+					selectedPair = pairs[0];
+
+				loading.portName = selectedPair->portName;
 				SString oldGameName = loading.gameName;
-				loading.gameName = pairs[0].gameName;
+				loading.gameName = selectedPair->gameName;
 
 				if (loading.gameName != oldGameName)
 				{
@@ -489,7 +510,7 @@ static tl::optional<ConfigData> UDMF_ParseGlobalVar(LoadingData &loading, Udmf_P
 					else
 						gLog.printf("Warning: could not find IWAD for game '%s'\n", loading.gameName.c_str());
 				}
-				
+
 				// Load the new ConfigData for the changed port/game
 				return loadConfigOnly(loading);
 			}

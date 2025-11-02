@@ -647,6 +647,156 @@ void UI_OpenMap::LoadFile()
 
 
 //------------------------------------------------------------------------
+//  UDMF NAMESPACE SETUP
+//------------------------------------------------------------------------
+
+UI_UDMFSetup::UI_UDMFSetup(const SString &udmfNamespace, const std::vector<PortGamePair> &pairs) :
+	UI_Escapable_Window(400, 189, "UDMF Namespace Mismatch"),
+	availablePairs(pairs)
+{
+	callback(close_callback, this);
+	resizable(NULL);
+
+	char msg[256];
+	snprintf(msg, sizeof(msg), "UDMF namespace \"%s\" requires specific port/game:", udmfNamespace.c_str());
+	Fl_Box *message = new Fl_Box(FL_NO_BOX, 15, 15, 350, 25, "");
+	message->copy_label(msg);
+	message->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+	game_choice = new Fl_Choice(140, 50, 150, 29, "Game IWAD: ");
+	game_choice->labelfont(FL_HELVETICA_BOLD);
+	game_choice->down_box(FL_BORDER_BOX);
+
+	port_choice = new Fl_Choice(140, 87, 150, 29, "Source Port: ");
+	port_choice->labelfont(FL_HELVETICA_BOLD);
+	port_choice->down_box(FL_BORDER_BOX);
+	port_choice->callback((Fl_Callback*)port_callback, this);
+
+	Fl_Group* g = new Fl_Group(0, 124, w(), h() - 124);
+	g->box(FL_FLAT_BOX);
+	g->color(WINDOW_BG, WINDOW_BG);
+
+	use_but = new Fl_Return_Button(w() - 160, g->y() + 14, 80, 35, "Use");
+	use_but->labelfont(FL_HELVETICA_BOLD);
+	use_but->callback((Fl_Callback*)use_callback, this);
+	g->end();
+
+	end();
+}
+
+tl::optional<PortGamePair> UI_UDMFSetup::Run()
+{
+	PopulatePort();
+	PopulateGame();
+
+	set_modal();
+	show();
+
+	while (action == Action::none)
+	{
+		Fl::wait(0.2);
+	}
+
+	return (action == Action::accept) ? tl::optional<PortGamePair>(result) : tl::nullopt;
+}
+
+void UI_UDMFSetup::PopulatePort()
+{
+	port_choice->clear();
+
+	// Build unique list of port names
+	std::vector<SString> ports;
+	for (const PortGamePair &pair : availablePairs)
+	{
+		bool found = false;
+		for (const SString &p : ports)
+		{
+			if (p == pair.portName)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			ports.push_back(pair.portName);
+	}
+
+	// Add ports to dropdown
+	for (const SString &port : ports)
+	{
+		port_choice->add(port.c_str());
+	}
+
+	// Select first port by default
+	if (!ports.empty())
+	{
+		port_choice->value(0);
+		result.portName = ports[0];
+	}
+}
+
+void UI_UDMFSetup::PopulateGame()
+{
+	game_choice->clear();
+
+	if (result.portName.empty())
+		return;
+
+	// Find all games for the selected port
+	for (const PortGamePair &pair : availablePairs)
+	{
+		if (pair.portName == result.portName)
+		{
+			game_choice->add(pair.gameName.c_str());
+		}
+	}
+
+	// Select first game by default
+	if (game_choice->size() > 0)
+	{
+		game_choice->value(0);
+		// Find the first pair with this port to get the game name
+		for (const PortGamePair &pair : availablePairs)
+		{
+			if (pair.portName == result.portName)
+			{
+				result.gameName = pair.gameName;
+				break;
+			}
+		}
+	}
+}
+
+void UI_UDMFSetup::port_callback(Fl_Choice *w, void *data)
+{
+	UI_UDMFSetup *dialog = (UI_UDMFSetup *)data;
+
+	if (w->mvalue())
+	{
+		dialog->result.portName = w->mvalue()->text;
+		dialog->PopulateGame();
+	}
+}
+
+void UI_UDMFSetup::close_callback(Fl_Widget *w, void *data)
+{
+	UI_UDMFSetup *dialog = (UI_UDMFSetup *)data;
+	dialog->action = Action::accept;
+}
+
+void UI_UDMFSetup::use_callback(Fl_Button *w, void *data)
+{
+	UI_UDMFSetup *dialog = (UI_UDMFSetup *)data;
+
+	// Update result from current selections
+	if (dialog->game_choice->mvalue())
+		dialog->result.gameName = dialog->game_choice->mvalue()->text;
+
+	dialog->action = Action::accept;
+}
+
+
+//------------------------------------------------------------------------
 
 #define STARTUP_MSG  "No IWADs could be found."
 
