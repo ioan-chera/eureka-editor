@@ -2217,9 +2217,10 @@ build_result_e LevelData::BuildLevel(nodebuildinfo_t *info, int lev_idx)
 }  // namespace ajbsp
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &inst, const Document &doc, const LoadingData& loading, Wad_file& wad)
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &inst, const Document &doc,
+	MapFormat mapFormat, Wad_file& wad)
 {
-	ajbsp::LevelData lev_data(loading.levelFormat, wad, doc, inst.conf, [&inst](const SString &message){
+	ajbsp::LevelData lev_data(mapFormat, wad, doc, inst.conf, [&inst](const SString &message){
 		inst.GB_PrintMsg("%s", message.c_str());
 	});
 	return lev_data.BuildLevel(info, lev_idx);

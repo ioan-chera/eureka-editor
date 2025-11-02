@@ -286,7 +286,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 		{
 			NewDocument newdoc = openDocument(loaded, *wad.master.editWad(), n);
 
-			ret = AJBSP_BuildLevel(info, n, *this, newdoc.doc, newdoc.loading, *wad.master.editWad());
+			ret = AJBSP_BuildLevel(info, n, *this, newdoc.doc, newdoc.loading.levelFormat, *wad.master.editWad());
 		}
 		catch(const std::runtime_error &e)
 		{
@@ -358,7 +358,7 @@ void Instance::BuildNodesAfterSave(int lev_idx, const LoadingData& loading, Wad_
 
 	PrepareInfo(&nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this, level, loading, wad);
+	build_result_e ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this, level, loading.levelFormat, wad);
 
 	// TODO : maybe print # of serious/minor warnings
 
