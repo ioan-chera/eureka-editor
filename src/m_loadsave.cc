@@ -206,10 +206,10 @@ void Instance::CMD_ManageProject()
 
 void Instance::CMD_NewProject()
 {
-	NewResources newres{};
+	auto newres = std::make_unique<NewResources>();	// moved to heap due to size
 	ConfigData backupConfig = conf;
 	LoadingData backupLoading = loaded;
-	WadData backupWadData = wad;
+	auto backupWadData = std::make_unique<WadData>(wad);
 	tl::optional<Document> backupDoc;
 	try
 	{
@@ -271,18 +271,18 @@ void Instance::CMD_NewProject()
 
 		LoadingData loading = loaded;
 		updateLoading(*result, loading);
-		newres = loadResources(loading, wad);
+		*newres = loadResources(loading, wad);
 
 
 		// determine map name (same as first level in the IWAD)
 		SString map_name = "MAP01";
 
-		int idx = newres.waddata.master.gameWad()->LevelFindFirst();
+		int idx = newres->waddata.master.gameWad()->LevelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = newres.waddata.master.gameWad()->LevelHeader(idx);
-			map_name = newres.waddata.master.gameWad()->GetLump(idx)->Name();
+			idx = newres->waddata.master.gameWad()->LevelHeader(idx);
+			map_name = newres->waddata.master.gameWad()->GetLump(idx)->Name();
 		}
 
 		gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename->u8string().c_str());
@@ -297,13 +297,13 @@ void Instance::CMD_NewProject()
 		}
 
 		backupDoc = std::move(level);
-		level = makeFreshDocument(*this, newres.config, newres.loading.levelFormat);
-		conf = std::move(newres.config);
-		loaded = std::move(newres.loading);
+		level = makeFreshDocument(*this, newres->config, newres->loading.levelFormat);
+		conf = std::move(newres->config);
+		loaded = std::move(newres->loading);
 		if(main_win)
 			testmap::updateMenuName(main_win->menu_bar, loaded);
 
-		this->wad = std::move(newres.waddata);
+		this->wad = std::move(newres->waddata);
 
 		SaveLevel(loaded, map_name, *wad, false);
 		this->wad.master.ReplaceEditWad(wad);
@@ -316,7 +316,7 @@ void Instance::CMD_NewProject()
 	{
 		conf = std::move(backupConfig);
 		loaded = std::move(backupLoading);
-		wad = std::move(backupWadData);
+		wad = std::move(*backupWadData);
 		if(backupDoc)
 			level = std::move(backupDoc.value());
 		if(main_win)
@@ -1225,7 +1225,6 @@ void Instance::CMD_OpenMap()
 
 	if (new_resources)
 	{
-		// TODO: call a safe version of Main_LoadResources
 		NewResources newres = {};
 		try
 		{
