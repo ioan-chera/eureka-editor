@@ -436,8 +436,9 @@ int UDMF_InternalizeNewThingFlag(const char* name)
 	ThrowException("Too many UDMF thing flags defined: no space for new flag '%s'", name);
 }
 
-static tl::optional<ConfigData> UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name)
+static tl::optional<ConfigData> UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name, bool &accepted)
 {
+	accepted = true;
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
 	{
@@ -482,17 +483,17 @@ static tl::optional<ConfigData> UDMF_ParseGlobalVar(LoadingData &loading, Udmf_P
 					UI_UDMFSetup dialog(loading.udmfNamespace, pairs);
 					selectedPair = dialog.Run();
 
-					if(!selectedPair.has_value())
-					{
-						// User closed dialog without selecting - use first pair as fallback
-						gLog.printf("No selection made, using default: port '%s' / game '%s'\n",
-							pairs[0].portName.c_str(), pairs[0].gameName.c_str());
-						selectedPair = pairs[0];
-					}
-					else
+					if(selectedPair.has_value())
 					{
 						gLog.printf("User selected: port '%s' / game '%s'\n",
 							selectedPair->portName.c_str(), selectedPair->gameName.c_str());
+					}
+					else
+					{
+						// User closed dialog without selecting - use first pair as fallback
+						gLog.printf("No selection made, rejecting\n");
+						accepted = false;
+						return tl::nullopt;
 					}
 				}
 				else
@@ -803,13 +804,12 @@ void Document::ValidateLevel_UDMF(const ConfigData &config, BadCount &bad)
 }
 
 
-void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, LoadingData &loading,
+bool Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, LoadingData &loading,
 							  const ConfigData &config, BadCount &bad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "TEXTMAP");
-	// we assume this cannot happen
 	if (! lump)
-		return;
+		ThrowLogicException("%s: couldn't find TEXTMAP lump!", __func__);
 
 	// NOTE: this must be a pointer to heap, due to stack size.
 	auto parser = std::make_unique<Udmf_Parser>(*lump);
@@ -837,7 +837,10 @@ void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 
 		if (tok2.Match("="))
 		{
-			tl::optional<ConfigData> newConfig = UDMF_ParseGlobalVar(loading, *parser, tok);
+			bool accepted;
+			tl::optional<ConfigData> newConfig = UDMF_ParseGlobalVar(loading, *parser, tok, accepted);
+			if(!accepted)
+				return false;
 			if (newConfig.has_value())
 			{
 				overrideConfig = std::move(newConfig);
@@ -856,6 +859,7 @@ void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 	}
 
 	ValidateLevel_UDMF(*activeConfig, bad);
+	return true;
 }
 
 

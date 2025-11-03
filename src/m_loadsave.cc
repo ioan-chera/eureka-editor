@@ -933,7 +933,8 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 	if (lev_num < 0)
 		ThrowException("No such map: %s\n", level.c_str());
 
-	LoadLevelNum(wad, lev_num);
+	if(!LoadLevelNum(wad, lev_num))
+		return;
 
 	// reset various editor state
 	Editor_ClearAction();
@@ -970,6 +971,7 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	assert(level >= 0 && level < wad.LevelCount());
 
 	NewDocument newdoc = { Document(*this), inLoading, BadCount() };
+	newdoc.accepted = true;	// mark it false if user is asked and cancels
 
 	Document& doc = newdoc.doc;
 	LoadingData& loading = newdoc.loading;
@@ -979,7 +981,12 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	doc.LoadHeader(level, wad);
 	if(loading.levelFormat == MapFormat::udmf)
 	{
-		doc.UDMF_LoadLevel(level, &wad, loading, conf, bad);
+		if(!doc.UDMF_LoadLevel(level, &wad, loading, conf, bad))
+		{
+			newdoc.accepted = false;
+			gLog.printf("User cancelled loading UDMF level.\n");
+			return newdoc;
+		}
 	}
 	else try
 	{
@@ -1012,10 +1019,12 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	return newdoc;
 }
 
-void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
+bool Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 {
 	LoadingData oldLoading = loaded;
 	NewDocument newdoc = openDocument(loaded, *wad, lev_num);
+	if(!newdoc.accepted)
+		return false;
 	if (newdoc.bad.linedef_count || newdoc.bad.sector_refs || newdoc.bad.sidedef_refs)
 	{
 		ShowLoadProblem(newdoc.bad);
@@ -1045,6 +1054,7 @@ void Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 	if(main_win)
 		testmap::updateMenuName(main_win->menu_bar, loaded);
 	Subdiv_InvalidateAll();
+	return true;
 }
 
 void Instance::refreshViewAfterLoad(const BadCount& bad, const Wad_file *wad, const SString &map_name, bool new_resources)
@@ -2151,6 +2161,7 @@ void Instance::CMD_DeleteMap()
 
 		// TODO: overhaul the interface to NOT go back to the IWAD
 		LoadLevel(wad.master.editWad().get(), map_name);
+		// FIXME: WHAT IF USER REJECTS CHANGING LEVEL?
 	}
 	catch (const std::runtime_error& e)
 	{

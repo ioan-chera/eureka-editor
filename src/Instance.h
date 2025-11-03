@@ -290,7 +290,7 @@ public:
 	// M_LOADSAVE
 	NewDocument openDocument(const LoadingData &inLoading, const Wad_file &wad, int level);
 	void LoadLevel(const Wad_file *wad, const SString &level) noexcept(false);
-	void LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false);
+	bool LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false);
 	bool MissingIWAD_Dialog();
 	bool M_SaveMap(bool inhibit_node_build);
 	void refreshViewAfterLoad(const BadCount& bad, const Wad_file* wad, const SString& map_name, bool new_resources);
