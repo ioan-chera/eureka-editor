@@ -5,6 +5,8 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2006-2008 Andrew Apted
+//  Copyright (C) 2025 Ioan Chera
+//  Copyright (C) 2025 Cristian Rodríguez
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -25,17 +27,15 @@
 
 #pragma once
 
-#if defined(__has_include)
-/* glibc or anything compliant with IEEE Std 1003.1-2024 */
 #if __has_include(<endian.h>)
 #include <endian.h>
-/* older BSDs */
+// older BSDs
 #elif __has_include(<sys/endian.h>)
 #include <sys/endian.h>
 #endif
-#endif
 
 #if defined(__APPLE__) && !defined(le16toh)
+// NOTE: le16toh may already be defined in <sys/endian.h> for MacOSX.sdk
 #include <machine/endian.h>
 #define le16toh(X)  OSSwapLittleToHostInt16(X)
 #define le32toh(X)  OSSwapLittleToHostInt32(X)
@@ -52,7 +52,7 @@
 #  define bswap_16(x) __builtin_bswap16((uint16_t)(x))
 #  define bswap_32(x) __builtin_bswap32((uint32_t)(x))
 #endif
-/* There is only little-endian windows*/
+// There is only little-endian windows
 #define le16toh(X)  (X)
 #define le32toh(X)  (X)
 #define be16toh(X)  bswap_16(X)
