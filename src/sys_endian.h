@@ -5,6 +5,8 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2006-2008 Andrew Apted
+//  Copyright (C) 2025 Ioan Chera
+//  Copyright (C) 2025 Cristian Rodríguez
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -23,98 +25,49 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __SYS_ENDIAN_H__
-#define __SYS_ENDIAN_H__
+#pragma once
 
-
-// ---- determine byte order ----
-
-#define UT_LIL_ENDIAN  1234
-#define UT_BIG_ENDIAN  4321
-
-#if defined(__LITTLE_ENDIAN__) || defined(WIN32) ||  \
-    defined(__i386__) || defined(__i386) ||          \
-    defined(__ia64__) || defined(__x86_64__)  ||     \
-    defined(__alpha__) || defined(__alpha)  ||       \
-    defined(__arm__) || defined(__SYMBIAN32__) ||    \
-    defined(__aarch64__) ||                          \
-    (defined(__mips__) && defined(__MIPSEL__))
-#define UT_BYTEORDER   UT_LIL_ENDIAN
-#else
-#define UT_BYTEORDER   UT_BIG_ENDIAN
+// for max safety, verify existence of this macro, normally available in C++17
+#if defined(__has_include)
+#if __has_include(<endian.h>)
+#include <endian.h>
+// older BSDs
+#elif __has_include(<sys/endian.h>)
+#include <sys/endian.h>
+#endif
 #endif
 
-
-// ---- the gruntwork of swapping ----
-
-#if defined(__GNUC__) && defined(__i386__)
-static inline uint16_t UT_Swap16(uint16_t x)
-{
-  __asm__("xchgb %b0,%h0" : "=q" (x) :  "0" (x));
-  return x;
-}
-#elif defined(__GNUC__) && defined(__x86_64__)
-static inline uint16_t UT_Swap16(uint16_t x)
-{
-  __asm__("xchgb %b0,%h0" : "=Q" (x) :  "0" (x));
-  return x;
-}
-#elif defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
-static inline uint16_t UT_Swap16(uint16_t x)
-{
-	uint16_t result;
-
-  __asm__("rlwimi %0,%2,8,16,23" : "=&r" (result) : "0" (x >> 8), "r" (x));
-  return result;
-}
-#else
-static inline uint16_t UT_Swap16(uint16_t x) {
-  return(uint16_t)((x<<8)|(x>>8));
-}
+#if defined(__APPLE__) && !defined(le16toh)
+// NOTE: le16toh may already be defined in <sys/endian.h> for MacOSX.sdk
+#include <machine/endian.h>
+#define le16toh(X)  OSSwapLittleToHostInt16(X)
+#define le32toh(X)  OSSwapLittleToHostInt32(X)
+#define be16toh(X)  OSSwapBigToHostInt16(X)
+#define be32toh(X)  OSSwapBigToHostInt32(X)
 #endif
 
-#if defined(__GNUC__) && defined(__i386__)
-static inline uint32_t UT_Swap32(uint32_t x)
-{
-  __asm__("bswap %0" : "=r" (x) : "0" (x));
-  return x;
-}
-#elif defined(__GNUC__) && defined(__x86_64__)
-static inline uint32_t UT_Swap32(uint32_t x)
-{
-  __asm__("bswapl %0" : "=r" (x) : "0" (x));
-  return x;
-}
-#elif defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
-static inline uint32_t UT_Swap32(uint32_t x)
-{
-	uint32_t result;
-
-  __asm__("rlwimi %0,%2,24,16,23" : "=&r" (result) : "0" (x>>24), "r" (x));
-  __asm__("rlwimi %0,%2,8,8,15"   : "=&r" (result) : "0" (result),    "r" (x));
-  __asm__("rlwimi %0,%2,24,0,7"   : "=&r" (result) : "0" (result),    "r" (x));
-  return result;
-}
-#else
-static inline uint32_t UT_Swap32(uint32_t x) {
-  return ((x<<24)|((x<<8)&0x00FF0000)|((x>>8)&0x0000FF00)|(x>>24));
-}
+#if defined(_WIN32)
+#if defined(_MSVC_VER)
+#include <stdlib.h>
+#define bswap_16(x) _byteswap_ushort(x)
+#define bswap_32(x) _byteswap_ulong(x)
+#elif defined(__GNUC__) || defined(__clang__)
+#  define bswap_16(x) __builtin_bswap16((uint16_t)(x))
+#  define bswap_32(x) __builtin_bswap32((uint32_t)(x))
 #endif
-
+// There is only little-endian windows
+#define le16toh(X)  (X)
+#define le32toh(X)  (X)
+#define be16toh(X)  bswap_16(X)
+#define be32toh(X)  bswap_32(X)
+#endif
 
 // ---- byte swap from specified endianness to native ----
 
-#if (UT_BYTEORDER == UT_LIL_ENDIAN)
-#define LE_U16(X)  ((uint16_t)(X))
-#define LE_U32(X)  ((uint32_t)(X))
-#define BE_U16(X)  UT_Swap16(X)
-#define BE_U32(X)  UT_Swap32(X)
-#else
-#define LE_U16(X)  UT_Swap16(X)
-#define LE_U32(X)  UT_Swap32(X)
-#define BE_U16(X)  ((uint16_t)(X))
-#define BE_U32(X)  ((uint32_t)(X))
-#endif
+#define LE_U16(X)  le16toh(X)
+#define LE_U32(X)  le32toh(X)
+#define BE_U16(X)  be16toh(X)
+#define BE_U32(X)  be32toh(X)
 
 // signed versions of the above
 #define LE_S16(X)  ((int16_t) LE_U16((uint16_t) (X)))
@@ -122,8 +75,6 @@ static inline uint32_t UT_Swap32(uint32_t x) {
 #define BE_S16(X)  ((int16_t) BE_U16((uint16_t) (X)))
 #define BE_S32(X)  ((int32_t) BE_U32((uint32_t) (X)))
 
-
-#endif // __SYS_ENDIAN_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
