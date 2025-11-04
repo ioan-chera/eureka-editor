@@ -27,11 +27,14 @@
 
 #pragma once
 
+// for max safety, verify existence of this macro, normally available in C++17
+#if defined(__has_include)
 #if __has_include(<endian.h>)
 #include <endian.h>
 // older BSDs
 #elif __has_include(<sys/endian.h>)
 #include <sys/endian.h>
+#endif
 #endif
 
 #if defined(__APPLE__) && !defined(le16toh)
