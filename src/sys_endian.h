@@ -39,7 +39,7 @@
 
 #if defined(__APPLE__) && !defined(le16toh)
 // NOTE: le16toh may already be defined in <sys/endian.h> for MacOSX.sdk
-#include <machine/endian.h>
+#include <libkern/OSByteOrder.h>
 #define le16toh(X)  OSSwapLittleToHostInt16(X)
 #define le32toh(X)  OSSwapLittleToHostInt32(X)
 #define be16toh(X)  OSSwapBigToHostInt16(X)
