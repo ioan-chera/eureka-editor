@@ -1247,6 +1247,8 @@ void Instance::CMD_OpenMap()
 	try
 	{
 		newdoc = openDocument(loading, *wad, lev_num);
+		if(!newdoc.accepted)
+			return;
 	}
 	catch (const std::runtime_error& e)
 	{

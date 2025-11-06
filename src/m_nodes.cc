@@ -284,8 +284,9 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 		// load level
 		try
 		{
+			// TODO: do not ask user about UDMF game+port
 			NewDocument newdoc = openDocument(loaded, *wad.master.editWad(), n);
-
+			// Do not care about rejection here!
 			ret = AJBSP_BuildLevel(info, n, *this, newdoc.doc, newdoc.loading.levelFormat, *wad.master.editWad());
 		}
 		catch(const std::runtime_error &e)
