@@ -436,7 +436,8 @@ int UDMF_InternalizeNewThingFlag(const char* name)
 	ThrowException("Too many UDMF thing flags defined: no space for new flag '%s'", name);
 }
 
-static tl::optional<ConfigData> UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name, bool &accepted)
+static tl::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name,
+	bool &accepted)
 {
 	accepted = true;
 	Udmf_Token value = parser.Next();
@@ -480,7 +481,7 @@ static tl::optional<ConfigData> UDMF_ParseGlobalVar(LoadingData &loading, Udmf_P
 				tl::optional<PortGamePair> selectedPair;
 				if(pairs.size() > 1)
 				{
-					UI_UDMFSetup dialog(loading.udmfNamespace, pairs);
+					UI_UDMFSetup dialog(inst, loading.udmfNamespace, pairs);
 					selectedPair = dialog.Run();
 
 					if(selectedPair.has_value())
@@ -838,7 +839,7 @@ bool Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 		if (tok2.Match("="))
 		{
 			bool accepted;
-			tl::optional<ConfigData> newConfig = UDMF_ParseGlobalVar(loading, *parser, tok, accepted);
+			tl::optional<ConfigData> newConfig = UDMF_ParseGlobalVar(inst, loading, *parser, tok, accepted);
 			if(!accepted)
 				return false;
 			if (newConfig.has_value())

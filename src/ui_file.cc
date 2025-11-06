@@ -650,8 +650,132 @@ void UI_OpenMap::LoadFile()
 //  UDMF NAMESPACE SETUP
 //------------------------------------------------------------------------
 
-UI_UDMFSetup::UI_UDMFSetup(const SString &udmfNamespace, const std::vector<PortGamePair> &pairs) :
+// Helper function for populating IWADs with optional filtering
+static void PopulateIWADsHelper(Fl_Choice *choice, const SString &prev_game,
+                                const std::vector<SString> *filter, SString &out_game)
+{
+	choice->clear();
+	out_game.clear();
+
+	SString menu_string;
+	int menu_value = 0;
+
+	menu_string = global::recent.collectGamesForMenu(&menu_value, prev_game.c_str());
+
+	if (!menu_string.empty())
+	{
+		if (!filter)
+		{
+			// No filtering - add all games
+			choice->add(menu_string.c_str());
+			choice->value(menu_value);
+			if (choice->mvalue())
+				out_game = choice->mvalue()->text;
+		}
+		else
+		{
+			// Parse menu string and filter by valid games
+			const char *p = menu_string.c_str();
+			int entry_id = 0;
+			bool found_current = false;
+
+			while (*p)
+			{
+				// Extract game name from menu entry (format: "label|label|...")
+				const char *start = p;
+				while (*p && *p != '|')
+					p++;
+
+				SString gameName(start, p - start);
+
+				// Check if this game is in the filter list
+				bool isValid = false;
+				for (const SString &validGame : *filter)
+				{
+					if (gameName.noCaseEqual(validGame))
+					{
+						isValid = true;
+						break;
+					}
+				}
+
+				if (isValid)
+				{
+					choice->add(gameName.c_str());
+
+					// Check if this matches our previous game
+					if (gameName.noCaseEqual(prev_game))
+					{
+						menu_value = entry_id;
+						found_current = true;
+					}
+
+					entry_id++;
+				}
+
+				if (*p == '|')
+					p++;
+			}
+
+			// Select the appropriate game
+			if (choice->size() > 0)
+			{
+				if (found_current)
+					choice->value(menu_value);
+				else
+					choice->value(0);
+
+				if (choice->mvalue())
+					out_game = choice->mvalue()->text;
+			}
+		}
+	}
+	// If menu_string is empty, leave dropdown empty - Find button will populate as needed
+}
+
+// Shared helper function for finding IWADs
+static tl::optional<SString> FindIWAD(const Instance &inst)
+{
+	Fl_Native_File_Chooser chooser;
+
+	chooser.title("Pick file to open");
+	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
+	chooser.filter("Wads\t*.wad");
+	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
+
+	switch (chooser.show())
+	{
+		case -1:  // error
+			DLG_Notify("Unable to open that wad:\n\n%s", chooser.errmsg());
+			return tl::nullopt;
+
+		case 1:  // cancelled
+			return tl::nullopt;
+
+		default:
+			break;  // OK
+	}
+
+	// check that a game definition exists
+
+	SString game = GameNameFromIWAD(fs::u8path(chooser.filename()));
+
+	if (! M_CanLoadDefinitions(GAMES_DIR, game))
+	{
+		DLG_Notify("That game is not supported (no definition file).\n\n"
+		           "Please try again.");
+		return tl::nullopt;
+	}
+
+	global::recent.addIWAD(fs::u8path(chooser.filename()));
+	global::recent.save(global::home_dir);
+
+	return game;
+}
+
+UI_UDMFSetup::UI_UDMFSetup(const Instance &inst, const SString &udmfNamespace, const std::vector<PortGamePair> &pairs) :
 	UI_Escapable_Window(400, 189, "UDMF Namespace Mismatch"),
+	inst(inst),
 	availablePairs(pairs)
 {
 	callback(close_callback, this);
@@ -666,6 +790,12 @@ UI_UDMFSetup::UI_UDMFSetup(const SString &udmfNamespace, const std::vector<PortG
 	game_choice = new Fl_Choice(140, 50, 150, 29, "Game IWAD: ");
 	game_choice->labelfont(FL_HELVETICA_BOLD);
 	game_choice->down_box(FL_BORDER_BOX);
+	game_choice->callback((Fl_Callback*)game_callback, this);
+
+	{
+		Fl_Button* o = new Fl_Button(305, 52, 75, 25, "Find");
+		o->callback((Fl_Callback*)find_callback, this);
+	}
 
 	port_choice = new Fl_Choice(140, 87, 150, 29, "Source Port: ");
 	port_choice->labelfont(FL_HELVETICA_BOLD);
@@ -675,6 +805,9 @@ UI_UDMFSetup::UI_UDMFSetup(const SString &udmfNamespace, const std::vector<PortG
 	Fl_Group* g = new Fl_Group(0, 124, w(), h() - 124);
 	g->box(FL_FLAT_BOX);
 	g->color(WINDOW_BG, WINDOW_BG);
+
+	cancel = new Fl_Button(90, g->y() + 14, 80, 35, "Cancel");
+	cancel->callback((Fl_Callback*)close_callback, this);
 
 	use_but = new Fl_Return_Button(w() - 160, g->y() + 14, 80, 35, "Use");
 	use_but->labelfont(FL_HELVETICA_BOLD);
@@ -686,8 +819,8 @@ UI_UDMFSetup::UI_UDMFSetup(const SString &udmfNamespace, const std::vector<PortG
 
 tl::optional<PortGamePair> UI_UDMFSetup::Run()
 {
+	PopulateIWADs();
 	PopulatePort();
-	PopulateGame();
 
 	set_modal();
 	show();
@@ -703,22 +836,29 @@ tl::optional<PortGamePair> UI_UDMFSetup::Run()
 void UI_UDMFSetup::PopulatePort()
 {
 	port_choice->clear();
+	result.portName.clear();
 
-	// Build unique list of port names
+	if (result.gameName.empty())
+		return;
+
+	// Build unique list of port names for the selected game
 	std::vector<SString> ports;
 	for (const PortGamePair &pair : availablePairs)
 	{
-		bool found = false;
-		for (const SString &p : ports)
+		if (pair.gameName.noCaseEqual(result.gameName))
 		{
-			if (p == pair.portName)
+			bool found = false;
+			for (const SString &p : ports)
 			{
-				found = true;
-				break;
+				if (p == pair.portName)
+				{
+					found = true;
+					break;
+				}
 			}
+			if (!found)
+				ports.push_back(pair.portName);
 		}
-		if (!found)
-			ports.push_back(pair.portName);
 	}
 
 	// Add ports to dropdown
@@ -735,36 +875,50 @@ void UI_UDMFSetup::PopulatePort()
 	}
 }
 
-void UI_UDMFSetup::PopulateGame()
+void UI_UDMFSetup::PopulateIWADs()
 {
-	game_choice->clear();
-
-	if (result.portName.empty())
-		return;
-
-	// Find all games for the selected port
+	// Build list of all valid games from availablePairs (unique)
+	std::vector<SString> validGames;
 	for (const PortGamePair &pair : availablePairs)
 	{
-		if (pair.portName == result.portName)
+		bool found = false;
+		for (const SString &game : validGames)
 		{
-			game_choice->add(pair.gameName.c_str());
-		}
-	}
-
-	// Select first game by default
-	if (game_choice->size() > 0)
-	{
-		game_choice->value(0);
-		// Find the first pair with this port to get the game name
-		for (const PortGamePair &pair : availablePairs)
-		{
-			if (pair.portName == result.portName)
+			if (game.noCaseEqual(pair.gameName))
 			{
-				result.gameName = pair.gameName;
+				found = true;
 				break;
 			}
 		}
+		if (!found)
+			validGames.push_back(pair.gameName);
 	}
+
+	SString prev_game = result.gameName;
+	PopulateIWADsHelper(game_choice, prev_game, &validGames, result.gameName);
+
+	if(!result.gameName.empty())
+		use_but->activate();
+	else
+		use_but->deactivate();
+}
+
+void UI_UDMFSetup::game_callback(Fl_Choice *w, void *data)
+{
+	UI_UDMFSetup *dialog = (UI_UDMFSetup *)data;
+
+	if (w->mvalue())
+	{
+		dialog->result.gameName = w->mvalue()->text;
+		dialog->use_but->activate();
+	}
+	else
+	{
+		dialog->result.gameName.clear();
+		dialog->use_but->deactivate();
+	}
+
+	dialog->PopulatePort();
 }
 
 void UI_UDMFSetup::port_callback(Fl_Choice *w, void *data)
@@ -774,14 +928,13 @@ void UI_UDMFSetup::port_callback(Fl_Choice *w, void *data)
 	if (w->mvalue())
 	{
 		dialog->result.portName = w->mvalue()->text;
-		dialog->PopulateGame();
 	}
 }
 
 void UI_UDMFSetup::close_callback(Fl_Widget *w, void *data)
 {
 	UI_UDMFSetup *dialog = (UI_UDMFSetup *)data;
-	dialog->action = Action::accept;
+	dialog->action = Action::cancel;
 }
 
 void UI_UDMFSetup::use_callback(Fl_Button *w, void *data)
@@ -793,6 +946,19 @@ void UI_UDMFSetup::use_callback(Fl_Button *w, void *data)
 		dialog->result.gameName = dialog->game_choice->mvalue()->text;
 
 	dialog->action = Action::accept;
+}
+
+void UI_UDMFSetup::find_callback(Fl_Button *w, void *data)
+{
+	UI_UDMFSetup *that = (UI_UDMFSetup *)data;
+
+	tl::optional<SString> game = FindIWAD(that->inst);
+	if (!game)
+		return;
+
+	that->result.gameName = *game;
+	that->PopulateIWADs();
+	that->PopulatePort();
 }
 
 
@@ -966,23 +1132,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	if (prev_game.empty())
 		prev_game = "doom2";
 
-
-	result.game.clear();
-	game_choice->clear();
-
-
-	SString menu_string;
-	int menu_value = 0;
-
-	menu_string = global::recent.collectGamesForMenu(&menu_value, prev_game.c_str());
-
-	if (!menu_string.empty())
-	{
-		game_choice->add(menu_string.c_str());
-		game_choice->value(menu_value);
-
-		result.game = game_choice->mvalue()->text;
-	}
+	PopulateIWADsHelper(game_choice, prev_game, nullptr, result.game);
 
 	if (!result.game.empty())
 		ok_but->activate();
@@ -1277,41 +1427,11 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	Fl_Native_File_Chooser chooser;
-
-	chooser.title("Pick file to open");
-	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-	chooser.filter("Wads\t*.wad");
-	chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
-
-	switch (chooser.show())
-	{
-		case -1:  // error
-			DLG_Notify("Unable to open that wad:\n\n%s", chooser.errmsg());
-			return;
-
-		case 1:  // cancelled
-			return;
-
-		default:
-			break;  // OK
-	}
-
-	// check that a game definition exists
-
-	SString game = GameNameFromIWAD(fs::u8path(chooser.filename()));
-
-	if (! M_CanLoadDefinitions(GAMES_DIR, game))
-	{
-		DLG_Notify("That game is not supported (no definition file).\n\n"
-		           "Please try again.");
+	tl::optional<SString> game = FindIWAD(that->inst);
+	if (!game)
 		return;
-	}
 
-	global::recent.addIWAD(fs::u8path(chooser.filename()));
-	global::recent.save(global::home_dir);
-
-	that->result.game = game;
+	that->result.game = *game;
 
 	that->PopulateIWADs();
 	that->PopulatePort();
