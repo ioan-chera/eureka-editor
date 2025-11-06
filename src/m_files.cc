@@ -791,7 +791,10 @@ bool LoadingData::parseEurekaLump(const RecentKnowledge &recent, const Wad_file 
 	if (new_iwad)
 	{
 		if (! (keep_cmd_line_args && !iwadName.empty()))
+		{
 			iwadName = *new_iwad;
+			gameName = GameNameFromIWAD(iwadName);
+		}
 	}
 
 	if (!new_port.empty())

@@ -686,7 +686,7 @@ static void PopulateIWADsHelper(Fl_Choice *choice, const SString &prev_game,
 				while (*p && *p != '|')
 					p++;
 
-				SString gameName(start, p - start);
+				SString gameName(start, (int)(p - start));
 
 				// Check if this game is in the filter list
 				bool isValid = false;
