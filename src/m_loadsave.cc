@@ -1175,6 +1175,8 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 
 	// These 2 may throw, but it's safe here
 	NewDocument newdoc = gInstance->openDocument(loading, *wad, lev_num);
+	if(!newdoc.accepted)
+		return;
 	NewResources newres = loadResources(newdoc.loading, gInstance->wad);
 
 	gInstance->level = std::move(newdoc.doc);
