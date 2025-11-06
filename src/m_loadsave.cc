@@ -926,7 +926,7 @@ static void ShowLoadProblem(const BadCount &bad)
 // Read in the level data
 //
 
-void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(false)
+bool Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(false)
 {
 	int lev_num = wad->LevelFind(level);
 
@@ -934,7 +934,7 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 		ThrowException("No such map: %s\n", level.c_str());
 
 	if(!LoadLevelNum(wad, lev_num))
-		return;
+		return false;
 
 	// reset various editor state
 	Editor_ClearAction();
@@ -964,6 +964,7 @@ void Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 	Status_Set("Loaded %s", loaded.levelName.c_str());
 
 	RedrawMap();
+	return true;
 }
 
 NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file &wad, int level)
@@ -2163,9 +2164,8 @@ void Instance::CMD_DeleteMap()
 
 		gLog.printf("OK.  Loading : %s....\n", map_name.c_str());
 
-		// TODO: overhaul the interface to NOT go back to the IWAD
-		LoadLevel(wad.master.editWad().get(), map_name);
-		// FIXME: WHAT IF USER REJECTS CHANGING LEVEL?
+		if(!LoadLevel(wad.master.editWad().get(), map_name))
+			ThrowException("user rejected opening other map");
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -2180,7 +2180,8 @@ void Instance::CMD_DeleteMap()
 
 		wad.master.RemoveEditWad();
 		const SString& map_name = lump->Name();
-		LoadLevel(wad.master.gameWad().get(), map_name);
+		if(!LoadLevel(wad.master.gameWad().get(), map_name))
+			ThrowLogicException("User had to reject IWAD map");
 	}
 }
 

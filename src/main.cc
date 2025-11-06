@@ -1420,7 +1420,10 @@ int EurekaMain(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance->loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance->LoadLevel(gInstance->wad.master.activeWad().get(), gInstance->loaded.levelName);
+		if(!gInstance->LoadLevel(gInstance->wad.master.activeWad().get(), gInstance->loaded.levelName))
+		{
+			goto quit;
+		}
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
