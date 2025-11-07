@@ -1077,6 +1077,7 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 	// don't transfer certain flags
 	int flags = doc.linedefs[dest_line]->flags;
 	flags = (flags & LINEDEF_FLAG_KEEP) | (L1->flags & ~LINEDEF_FLAG_KEEP);
+	int flags2 = doc.linedefs[dest_line]->flags2;
 
 	// handle textures
 	if (do_tex && doc.getRight(*L1) && doc.getRight(*L2))
@@ -1196,6 +1197,7 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 	}
 
 	op.changeLinedef(dest_line, LineDef::F_FLAGS, flags);
+	op.changeLinedef(dest_line, LineDef::F_FLAGS2, flags2);
 
 	op.changeLinedef(dest_line, LineDef::F_TYPE, L1->type);
 	op.changeLinedef(dest_line, LineDef::F_TAG,  L1->tag);

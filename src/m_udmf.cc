@@ -25,6 +25,7 @@
 #include "LineDef.h"
 #include "m_game.h"
 #include "m_files.h"
+#include "m_udmf.h"
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
@@ -35,6 +36,61 @@
 
 #include "ui_file.h"
 #include "ui_window.h"
+
+#include <array>
+#include <initializer_list>
+
+#define UDMF_MAPPING(name) UDMFMapping{ #name, 1, MLF_UDMF_ ## name }
+#define UDMF_MAPPING2(name) UDMFMapping{#name, 2, MLF2_UDMF_ ## name }
+
+static constexpr std::array kUDMFMapping = {
+	UDMFMapping{ "blocking",      1, MLF_Blocking },
+	UDMFMapping{ "blockmonsters", 1, MLF_BlockMonsters },
+	UDMFMapping{ "twosided",      1, MLF_TwoSided },
+	UDMFMapping{ "dontpegtop",    1, MLF_UpperUnpegged },
+	UDMFMapping{ "dontpegbottom", 1, MLF_LowerUnpegged },
+	UDMFMapping{ "secret",        1, MLF_Secret },
+	UDMFMapping{ "blocksound",    1, MLF_SoundBlock },
+	UDMFMapping{ "dontdraw",      1, MLF_DontDraw },
+	UDMFMapping{ "mapped",        1, MLF_Mapped },
+	UDMFMapping{ "passuse",       1, MLF_Boom_PassThru },
+	UDMF_MAPPING(Translucent),
+	UDMF_MAPPING(Translucent  ),
+	UDMF_MAPPING(Transparent  ),
+	UDMF_MAPPING(JumpOver     ),
+	UDMF_MAPPING(BlockFloaters),
+	UDMF_MAPPING(PlayerCross  ),
+	UDMF_MAPPING(PlayerUse    ),
+	UDMF_MAPPING(MonsterCross ),
+	UDMF_MAPPING(MonsterUse   ),
+	UDMF_MAPPING(Impact       ),
+	UDMF_MAPPING(PlayerPush   ),
+	UDMF_MAPPING(MonsterPush  ),
+	UDMF_MAPPING(MissileCross ),
+	UDMF_MAPPING(RepeatSpecial),
+	UDMF_MAPPING(BlockPlayers     ),
+	UDMF_MAPPING(BlockLandMonsters),
+	UDMF_MAPPING(BlockProjectiles ),
+	UDMF_MAPPING(BlockHitScan     ),
+	UDMF_MAPPING(BlockUse         ),
+	UDMF_MAPPING(BlockSight       ),
+	UDMF_MAPPING2(BlockEverything   ),
+	UDMF_MAPPING2(Revealed          ),
+	UDMF_MAPPING2(AnyCross          ),
+	UDMF_MAPPING2(MonsterActivate   ),
+	UDMF_MAPPING2(PlayerUseBack     ),
+	UDMF_MAPPING2(FirstSideOnly     ),
+	UDMF_MAPPING2(CheckSwitchRange  ),
+	UDMF_MAPPING2(ClipMidTex        ),
+	UDMF_MAPPING2(WrapMidTex        ),
+	UDMF_MAPPING2(MidTex3DImpassible),
+	UDMF_MAPPING2(DamageSpecial     ),
+	UDMF_MAPPING2(DeathSpecial      ),
+};
+
+const auto& getUDMFMapping() {
+	return kUDMFMapping;
+}
 
 class Udmf_Token
 {
@@ -436,6 +492,14 @@ int UDMF_InternalizeNewThingFlag(const char* name)
 	ThrowException("Too many UDMF thing flags defined: no space for new flag '%s'", name);
 }
 
+const UDMFMapping *UDMF_MappingForName(const char *name)
+{
+	for(const UDMFMapping &mapping : kUDMFMapping)
+		if(!y_stricmp(name, mapping.name))
+			return &mapping;
+	return nullptr;
+}
+
 static tl::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name,
 	bool &accepted)
 {
@@ -629,18 +693,13 @@ static void UDMF_ParseLinedefField(const Document &doc, const ConfigData &config
 		LD->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		LD->arg5 = value.DecodeInt();
-	else if (field.Match("mapped"))
-		LD->flags |= MLF_Mapped;
-	else if (field.Match("dontdraw"))
-		LD->flags |= MLF_DontDraw;
-	else if (field.Match("secret"))
-		LD->flags |= MLF_Secret;
 	else
 	{
-		for(const lineflag_t &flag : config.udmf_line_flags)
-			if (field.Match(flag.udmfKey.c_str()))
+		// Flags
+		for(const UDMFMapping &mapping : getUDMFMapping())
+			if(field.Match(mapping.name))
 			{
-				LD->flags |= flag.value;
+				(mapping.flagSet == 1 ? LD->flags : LD->flags2) |= mapping.value;
 				return;
 			}
 		gLog.debugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
@@ -966,19 +1025,9 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		if (ld->arg5 != 0)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
 
-		WrFlag(lump, ld->flags, "mapped", MLF_Mapped);
-		WrFlag(lump, ld->flags, "dontdraw", MLF_DontDraw);
-		WrFlag(lump, ld->flags, "secret", MLF_Secret);
-
 		// linedef flags
-		for(const lineflag_t &flag : inst.conf.udmf_line_flags)
-			WrFlag(lump, ld->flags, flag.udmfKey.c_str(), flag.value);
-
-		// TODO : hexen stuff (SPAC flags, etc)
-
-		// TODO : strife stuff
-
-		// TODO : zdoom stuff
+		for(const UDMFMapping &mapping : getUDMFMapping())
+			WrFlag(lump, mapping.flagSet == 1 ? ld->flags : ld->flags2, mapping.name, mapping.value);
 
 		lump->Printf("}\n\n");
 	}
@@ -1053,6 +1102,8 @@ void Instance::UDMF_SaveLevel(const LoadingData& loading, Wad_file& wad) const
 
 	wad.AddLump("ENDMAP");
 }
+
+
 
 //----------------------------------------------------------------------
 

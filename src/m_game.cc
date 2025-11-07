@@ -740,6 +740,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 
 		lineflag_t flag = {};
 		flag.label = argv[1];
+		flag.flagSet = 1;
 		flag.value = (int)strtol(argv[2], nullptr, 0);
 		flag.pairIndex = -1;
 		// Optional: pair <index>
@@ -774,9 +775,15 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		lineflag_t flag{};
 		flag.label = argv[1];
 		flag.udmfKey = argv[2];
-		flag.value = UDMF_InternalizeNewLinedefFlag(flag.udmfKey.c_str());
-
-		config.udmf_line_flags.push_back(flag);
+		const UDMFMapping *mapping = UDMF_MappingForName(flag.udmfKey.c_str());
+		if(mapping)
+		{
+			flag.flagSet = mapping->flagSet;
+			flag.value = mapping->value;
+			config.udmf_line_flags.push_back(flag);
+		}
+		else
+			gLog.printf("Unknown UDMF flag '%s'\n", flag.udmfKey.c_str());
 	}
 
 	else if(y_stricmp(argv[0], "gensector") == 0)

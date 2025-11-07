@@ -151,6 +151,7 @@ struct lineflag_t
 {
 	SString label;
 	SString udmfKey;	// only relevant under UDMF
+	int flagSet = 1;
 	int value = 0;		// actual flag for Doom, internal flag for UDMF
 	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot
 };

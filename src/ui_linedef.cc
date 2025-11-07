@@ -81,10 +81,11 @@ class line_flag_CB_data_c
 public:
 	UI_LineBox *parent;
 
+	int flagIndex;
 	int mask;
 
-	line_flag_CB_data_c(UI_LineBox *_parent, int _mask) :
-		parent(_parent), mask(_mask)
+	line_flag_CB_data_c(UI_LineBox *_parent, int _flagIndex, int _mask) :
+		parent(_parent), flagIndex(_flagIndex), mask(_mask)
 	{ }
 };
 
@@ -138,7 +139,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	// this order must match the SPAC_XXX constants
 	actkind->add(getActivationMenuString());
 	actkind->value(getActivationCount());
-	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
+	actkind->callback(flags_callback, new line_flag_CB_data_c(this, 1, MLF_Activation | MLF_Repeatable));
 	actkind->deactivate();
 	actkind->hide();
 
@@ -160,7 +161,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		args[a] = new UI_DynIntInput(type->x() + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
-		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
+		args[a]->callback(args_callback, new line_flag_CB_data_c(this, 1, a));
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
 	}
@@ -178,7 +179,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	f_automap = new Fl_Choice(X+W-118, Y, 104, 22, "Vis: ");
 	f_automap->add("Normal|Invisible|Mapped|Secret|MapSecret");
 	f_automap->value(0);
-	f_automap->callback(flags_callback, new line_flag_CB_data_c(this, MLF_ALL_AUTOMAP));
+	f_automap->callback(flags_callback, new line_flag_CB_data_c(this, 1, MLF_ALL_AUTOMAP));
 
 
 	Y += flags->h() - 1;
@@ -613,6 +614,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 	UI_LineBox *box = l_f_c->parent;
 
+	int flagSet = l_f_c->flagIndex;
 	int mask = l_f_c->mask;
 	int new_flags = box->CalcFlags();
 
@@ -630,7 +632,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
-			op.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
+			op.changeLinedef(*it, flagSet == 1 ? LineDef::F_FLAGS : LineDef::F_FLAGS2, ((flagSet == 1 ? L->flags : L->flags2) & ~mask) | (new_flags & mask));
 		}
 	}
 }
@@ -813,6 +815,14 @@ void UI_LineBox::UpdateField(int field)
 			actkind->deactivate();
 		}
 	}
+
+	if(field < 0 || field == LineDef::F_FLAGS2)
+	{
+		if(inst.level.isLinedef(obj))
+			Flags2FromInt(inst.level.linedefs[obj]->flags2);
+		else
+			Flags2FromInt(0);
+	}
 }
 
 
@@ -875,11 +885,19 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 	// Set dynamic line flag buttons
 	for(const auto &btn : flagButtons)
 	{
-		if(btn.button)
+		if(btn.button && btn.data->flagIndex == 1)
 			btn.button->value((lineflags & btn.info->value) ? 1 : 0);
 	}
 }
 
+void UI_LineBox::Flags2FromInt(int lineflags)
+{
+	for(const auto &btn : flagButtons)
+	{
+		if(btn.button && btn.data->flagIndex == 2)
+			btn.button->value((lineflags & btn.info->value) ? 1 : 0);
+	}
+}
 
 int UI_LineBox::CalcFlags() const
 {
@@ -1073,7 +1091,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				LineFlagButton fb;
 				fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
 				fb.button->labelsize(12);
-				fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->value);
+				fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->flagSet, s.a->value);
 				fb.button->callback(flags_callback, fb.data.get());
 				fb.info = s.a;
 				flagButtons.push_back(std::move(fb));
@@ -1083,7 +1101,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				LineFlagButton fb2;
 				fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
 				fb2.button->labelsize(12);
-				fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->value);
+				fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->flagSet, s.b->value);
 				fb2.button->callback(flags_callback, fb2.data.get());
 				fb2.info = s.b;
 				flagButtons.push_back(std::move(fb2));

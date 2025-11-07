@@ -31,6 +31,7 @@ public:
 	int left = -1;
 
 	int flags = 0;
+	int flags2 = 0;
 	int type = 0;
 	int tag = 0;
 
@@ -41,7 +42,7 @@ public:
 	int arg5 = 0;
 
 	enum { F_START, F_END, F_RIGHT, F_LEFT,
-		   F_FLAGS, F_TYPE, F_TAG, F_ARG1,
+		   F_FLAGS, F_FLAGS2, F_TYPE, F_TAG, F_ARG1,
 		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:

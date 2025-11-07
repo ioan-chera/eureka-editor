@@ -21,7 +21,19 @@
 #ifndef M_UDMF_H_
 #define M_UDMF_H_
 
+struct UDMFMapping
+{
+	const char *name;
+	int flagSet;
+	unsigned value;
+};
+
+const auto& getUDMFMapping();
+
 int UDMF_InternalizeNewLinedefFlag(const char* name);
 int UDMF_InternalizeNewThingFlag(const char* name);
+
+const UDMFMapping *UDMF_MappingForName(const char *name);
+
 
 #endif

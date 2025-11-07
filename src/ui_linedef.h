@@ -95,6 +95,7 @@ private:
 
 	int  CalcFlags() const;
 	void FlagsFromInt(int flags);
+	void Flags2FromInt(int flags2);
 
 	void CB_Copy(int uiparts);
 	void CB_Paste(int uiparts, StringID new_tex);
