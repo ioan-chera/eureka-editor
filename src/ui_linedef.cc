@@ -175,7 +175,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 
 	f_automap = new Fl_Choice(X+W-118, Y, 104, 22, "Vis: ");
-	f_automap->add("Normal|Invisible|Mapped|Secret");
+	f_automap->add("Normal|Invisible|Mapped|Secret|MapSecret");
 	f_automap->value(0);
 	f_automap->callback(flags_callback, new line_flag_CB_data_c(this, MLF_ALL_AUTOMAP));
 
@@ -859,10 +859,12 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 		actkind->value(new_act);
 	}
 
-	if (lineflags & MLF_Secret)
-		f_automap->value(3);
-	else if (lineflags & MLF_DontDraw)
+	if (lineflags & MLF_DontDraw)
 		f_automap->value(1);
+	else if(lineflags & MLF_Mapped && lineflags & MLF_Secret)
+		f_automap->value(4);
+	else if (lineflags & MLF_Secret)
+		f_automap->value(3);
 	else if (lineflags & MLF_Mapped)
 		f_automap->value(2);
 	else
@@ -887,6 +889,7 @@ int UI_LineBox::CalcFlags() const
 		case 1: /* Invisible */ lineflags |= MLF_DontDraw; break;
 		case 2: /* Mapped    */ lineflags |= MLF_Mapped; break;
 		case 3: /* Secret    */ lineflags |= MLF_Secret; break;
+		case 4: /* MapSecret */ lineflags |= MLF_Mapped | MLF_Secret; break;
 	}
 
 	// Activation for non-DOOM formats
