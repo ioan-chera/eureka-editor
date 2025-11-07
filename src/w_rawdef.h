@@ -411,6 +411,53 @@ enum eternity_lineflag_e
 	MLF_Eternity_3DMidTex = 0x0400,
 };
 
+// These will be in the same domain as Doom and Eternity and shall be assumed to be together
+// possible
+enum udmf_lineflag_e
+{
+	MLF_UDMF_Translucent       = 0x00000800,
+	MLF_UDMF_Transparent       = 0x00001000,
+	MLF_UDMF_JumpOver          = 0x00002000,
+	MLF_UDMF_BlockFloaters     = 0x00004000,
+	MLF_UDMF_PlayerCross       = 0x00008000,
+	MLF_UDMF_PlayerUse         = 0x00010000,
+	MLF_UDMF_MonsterCross      = 0x00020000,
+	MLF_UDMF_MonsterUse        = 0x00040000,
+	MLF_UDMF_Impact            = 0x00080000,
+	MLF_UDMF_PlayerPush        = 0x00100000,
+	MLF_UDMF_MonsterPush       = 0x00200000,
+	MLF_UDMF_MissileCross      = 0x00400000,
+	MLF_UDMF_RepeatSpecial     = 0x00800000,
+
+	// DSDA-Doom additions
+	MLF_UDMF_BlockPlayers      = 0x01000000,
+	MLF_UDMF_BlockLandMonsters = 0x02000000,
+	MLF_UDMF_BlockProjectiles  = 0x04000000,
+	MLF_UDMF_BlockHitScan      = 0x08000000,
+	MLF_UDMF_BlockUse          = 0x10000000,
+	// MLF_IS_OVERLAP            0x20000000,
+	// MLF_IS_PRECIOUS           0x40000000,
+	MLF_UDMF_BlockSight        = 0x80000000,
+};
+
+// Extra flags, second field
+enum udmf_lineflag2_e
+{
+	MLF2_UDMF_BlockEverything    = 0x80000001,
+	MLF2_UDMF_Revealed           = 0x00000002,
+	MLF2_UDMF_AnyCross           = 0x00000004,
+	MLF2_UDMF_MonsterActivate    = 0x00000008,
+	MLF2_UDMF_PlayerUseBack      = 0x00000010,
+	MLF2_UDMF_FirstSideOnly      = 0x00000020,
+	MLF2_UDMF_CheckSwitchRange   = 0x00000040,
+	MLF2_UDMF_ClipMidTex         = 0x00000080,
+	MLF2_UDMF_WrapMidTex         = 0x00000100,
+	MLF2_UDMF_MidTex3DImpassible = 0x00000200,
+	MLF2_UDMF_DamageSpecial      = 0x00000400,
+	MLF2_UDMF_DeathSpecial       = 0x00000800,
+
+};
+
 
 enum xdoom_lineflag_e
 {
