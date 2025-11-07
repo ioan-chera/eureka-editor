@@ -983,7 +983,7 @@ static void applyHardcodedUDMFAdjustments(ConfigData &config)
 	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_Blocking, "blocking");
 	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_BlockMonsters, "blockmonsters");
 	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_SoundBlock, "blocksound");
-	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_Boom_PassThru, "passthru");
+	adjustHardcodedUDMFFlags(config.udmf_line_flags, MLF_Boom_PassThru, "passuse");
 
 	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_UDMF_Easiest, "skill1");
 	adjustHardcodedUDMFFlags(config.udmf_thing_flags, MTF_Easy, "skill2");

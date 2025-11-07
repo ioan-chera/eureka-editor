@@ -1,0 +1,81 @@
+#------------------------------------------------------------------------
+#  DSDA-Doom source port definitions
+#------------------------------------------------------------------------
+#
+#  Eureka DOOM Editor
+#
+#  Copyright (C) 2025 Ioan Chera
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#------------------------------------------------------------------------
+
+include mbf21
+
+supported_games doom doom2 heretic hexen
+
+# TODO: check if this also applies to doom and doom2
+feature udmf_lineparameters 1
+feature udmf_thingspecials 1
+
+udmf_namespace dsda
+
+udmf_lineflag "block players" blockplayers
+udmf_lineflag "block flyers" blockfloaters
+udmf_lineflag "block land mons" blocklandmonsters
+udmf_lineflag "block missiles" blockprojectiles
+udmf_lineflag "block hitscan" blockhitscan
+udmf_lineflag "block use" blockuse
+udmf_lineflag "block sight" blocksight
+udmf_lineflag "block all" blockeverything
+udmf_lineflag "revealed" revealed
+udmf_lineflag "jump over" jumpover
+udmf_lineflag "player cross" playercross
+udmf_lineflag "player use" playeruse
+udmf_lineflag "monster cross" monstercross
+udmf_lineflag "monster use" monsteruse
+udmf_lineflag "player shoot" impact
+udmf_lineflag "player push" playerpush
+udmf_lineflag "monster push" monsterpush
+udmf_lineflag "missile cross" missilecross
+udmf_lineflag "any cross" anycross
+udmf_lineflag "monster activate" monsteractivate
+udmf_lineflag "player use back" playeruseback
+udmf_lineflag "first side only" firstsideonly
+udmf_lineflag "check switch range" checkswitchrange
+# TODO: locknumber choice
+udmf_lineflag "repeatable" repeatspecial
+# TODO: arg0str text field
+# TODO: alpha number field
+
+# TODO: make this a choice
+udmf_lineflag "translucent" translucent
+udmf_lineflag "transparent" transparent
+
+udmf_lineflag "clip midtex" clipmidtex
+udmf_lineflag "wrap midtex" wrapmidtex
+udmf_lineflag "3d midtex" midtex3d
+udmf_lineflag "3dmidtex passproj" midtex3dimpassible
+# TODO: moreids number list box
+# TODO: automapstyle choice
+# TODO: health number field
+# TODO: healthgroup number field
+udmf_lineflag "act on damage" damagespecial
+udmf_lineflag "act on death" deathspecial
+
+# TODO: sidedef fields
+# TODO: sector fields
+
+# TODO: thing alpha floating-point number field
+# TODO: thing arg0str text field
+udmf_thingflag 0 2 secret off countsecret
+# TODO: thing gravity floating-point number field
+# TODO: thing health floating-point number field

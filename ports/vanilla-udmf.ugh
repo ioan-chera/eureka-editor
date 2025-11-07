@@ -64,8 +64,11 @@ endif
 if $BASE_GAME is strife
   feature udmf_lineparameters 0
   feature udmf_thingspecials 0
+
+  # TODO: make this a choice
   udmf_lineflag translucent translucent
   udmf_lineflag transparent transparent
+
   udmf_lineflag "jump over" jumpover
   udmf_lineflag "block flyers" blockfloaters
   udmf_thingflag 5 0 stand off standing

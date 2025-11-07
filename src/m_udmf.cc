@@ -629,6 +629,12 @@ static void UDMF_ParseLinedefField(const Document &doc, const ConfigData &config
 		LD->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		LD->arg5 = value.DecodeInt();
+	else if (field.Match("mapped"))
+		LD->flags |= MLF_Mapped;
+	else if (field.Match("dontdraw"))
+		LD->flags |= MLF_DontDraw;
+	else if (field.Match("secret"))
+		LD->flags |= MLF_Secret;
 	else
 	{
 		for(const lineflag_t &flag : config.udmf_line_flags)
@@ -959,6 +965,10 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 			lump->Printf("arg3 = %d;\n", ld->arg4);
 		if (ld->arg5 != 0)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
+
+		WrFlag(lump, ld->flags, "mapped", MLF_Mapped);
+		WrFlag(lump, ld->flags, "dontdraw", MLF_DontDraw);
+		WrFlag(lump, ld->flags, "secret", MLF_Secret);
 
 		// linedef flags
 		for(const lineflag_t &flag : inst.conf.udmf_line_flags)

@@ -244,7 +244,7 @@ udmf_lineflag "lower unpeg" dontpegbottom
 udmf_lineflag "impassable"  blocking
 udmf_lineflag "block mons"  blockmonsters
 udmf_lineflag "sound block" blocksound
-udmf_lineflag "pass thru"   passthru
+udmf_lineflag "pass thru"   passuse
 feature udmf_lineparameters 0
 
 # dontdraw and mapped will be handled by the fixed dropdown
