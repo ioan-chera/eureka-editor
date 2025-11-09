@@ -348,10 +348,10 @@ struct generalized_field_t
 
 struct generalized_linetype_t
 {
-	char key;
+	char key = '\0';
 
-	int base;
-	int length;
+	int base = 0;
+	int length = 0;
 
 	SString name;
 

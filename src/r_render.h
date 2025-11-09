@@ -48,8 +48,8 @@ public:
 	int screen_w = 0, screen_h = 0;
 	img_pixel_t *screen = nullptr;
 
-	float aspect_sh;
-	float aspect_sw;  // screen_w * aspect_ratio
+	float aspect_sh = 0;
+	float aspect_sw = 0;  // screen_w * aspect_ratio
 
 	bool texturing = false;
 	bool sprites = false;

@@ -127,8 +127,8 @@ private:
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};
 	rgb_color_t palette_medium[256] = {};
-	byte rgb555_gamma[32];
-	byte rgb555_medium[32];
+	byte rgb555_gamma[32] = {};
+	byte rgb555_medium[32] = {};
 	byte bright_map[256] = {};
 	byte raw_palette[256][3] = {};
 	byte raw_colormap[32][256] = {};
