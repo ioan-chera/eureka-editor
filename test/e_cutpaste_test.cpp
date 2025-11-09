@@ -28,6 +28,11 @@ protected:
 		inst.level.clear();
 	}
 
+	void SetUp() override
+	{
+		inst.Editor_Init();
+	}
+
 	void addArea();
 	void addSecondArea();
 

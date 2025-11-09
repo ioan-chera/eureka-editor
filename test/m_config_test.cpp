@@ -24,8 +24,8 @@
 #include "m_strings.h"
 #include "gtest/gtest.h"
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 //
 // Option end

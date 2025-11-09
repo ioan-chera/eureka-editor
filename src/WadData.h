@@ -24,8 +24,8 @@
 #include "m_strings.h"
 #include "sys_type.h"
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <functional>
 #include <map>

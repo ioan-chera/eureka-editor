@@ -21,8 +21,8 @@
 #ifndef __SYS_DEBUG_H__
 #define __SYS_DEBUG_H__
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 #include "WindowsSanitization.h"
 
 #include <stdio.h>

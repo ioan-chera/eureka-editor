@@ -21,8 +21,8 @@
 #include "m_strings.h"
 #include <vector>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 class SString;
 

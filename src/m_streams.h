@@ -24,8 +24,8 @@
 #include <fstream>
 #include <istream>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 class SString;
 

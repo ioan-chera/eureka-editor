@@ -26,6 +26,11 @@ protected:
 	Instance inst;
 	Document doc{inst};
 
+	void SetUp() override
+	{
+		inst.Editor_Init();
+	}
+
 	std::vector<byte> &lump(LumpType type)
 	{
 		switch(type)
@@ -89,6 +94,11 @@ class BasisChangeStatusFixture : public ::testing::Test
 protected:
 	Instance inst;
 	Document doc{inst};
+
+	void SetUp() override
+	{
+		inst.Editor_Init();
+	}
 
 	void changeHeader(const std::vector<byte> &data)
 	{

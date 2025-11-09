@@ -21,6 +21,8 @@
 #include "testUtils/TempDirContext.hpp"
 #include "gtest/gtest.h"
 
+#include <fstream>
+
 class SafeOutFileTest : public TempDirContext
 {
 };

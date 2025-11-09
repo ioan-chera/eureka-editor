@@ -23,6 +23,7 @@
 #include "sys_debug.h"
 
 #include <chrono>
+#include <fstream>
 
 //
 // Writes data to file

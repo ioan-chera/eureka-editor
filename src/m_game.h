@@ -33,8 +33,8 @@
 #include <map>
 #include <unordered_map>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 struct ConfigData;
 class Instance;
