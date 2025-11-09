@@ -834,6 +834,8 @@ std::optional<PortGamePair> UI_UDMFSetup::Run()
 
 void UI_UDMFSetup::PopulatePort()
 {
+	SString previousPort = result.portName;
+
 	port_choice->clear();
 	result.portName.clear();
 
@@ -866,7 +868,23 @@ void UI_UDMFSetup::PopulatePort()
 		port_choice->add(port.c_str());
 	}
 
-	// Select first port by default
+	// Preserve previously selected port if still available
+	if (!previousPort.empty())
+	{
+		for (int i = 0; i < port_choice->size(); i++)
+		{
+			const Fl_Menu_Item *item = port_choice->menu() + i;
+			if (item->label() && previousPort.noCaseEqual(item->label()))
+			{
+				port_choice->value(i);
+				result.portName = item->label();
+				UpdateSelection();
+				return;
+			}
+		}
+	}
+
+	// Otherwise select first port by default
 	if (!ports.empty())
 	{
 		port_choice->value(0);
@@ -1063,7 +1081,7 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load File");
 		mResourceFileButtons[r] = load;
 		load->callback((Fl_Callback*)load_callback, this);
-		
+
 		load = new Fl_Button(load->x() + load->w() + 10, cy, 90, 25, "Load Folder");
 		mResourceDirButtons[r] = load;
 		load->callback((Fl_Callback*)load_callback, this);
@@ -1463,7 +1481,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
 	SYS_ASSERT(that);
-	
+
 	const char *title = isdir ? "Pick folder to open" : "Pick file to open";
 #ifdef __APPLE__
 	title = "Pick file or folder to open";
