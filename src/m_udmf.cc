@@ -84,6 +84,7 @@ static constexpr UDMFMapping kUDMFMapping[] = {
 	UDMF_LINE_MAPPING2(CheckSwitchRange  ),
 	UDMF_LINE_MAPPING2(ClipMidTex        ),
 	UDMF_LINE_MAPPING2(WrapMidTex        ),
+	UDMFMapping{"midtex3d", UDMFMapping::Category::line, 1, (unsigned)MLF_Eternity_3DMidTex},
 	UDMF_LINE_MAPPING2(MidTex3DImpassible),
 	UDMF_LINE_MAPPING2(DamageSpecial     ),
 	UDMF_LINE_MAPPING2(DeathSpecial      ),
