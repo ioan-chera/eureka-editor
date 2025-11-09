@@ -775,14 +775,14 @@ static std::optional<SString> FindIWAD(const Instance &inst)
 
 UI_UDMFSetup::UI_UDMFSetup(const SString &udmfNamespace, const SString &levelName,
 	const std::vector<PortGamePair> &pairs) :
-	UI_Escapable_Window(400, 209, "UDMF Namespace Mismatch"),
+	UI_Escapable_Window(400, 209, "Pick UDMF Configuration"),
 	availablePairs(pairs)
 {
 	callback(close_callback, this);
 	resizable(NULL);
 
 	char msg[256];
-	snprintf(msg, sizeof(msg), "Map \"%s\" uses UDMF namespace \"%s\" which requires a game and port from the following options:",
+	snprintf(msg, sizeof(msg), "%s uses UDMF namespace \"%s\" which is available for the following game and port combinations:",
 		levelName.c_str(), udmfNamespace.c_str());
 	Fl_Box *message = new Fl_Box(FL_NO_BOX, 15, 15, 350, 44, "");
 	message->copy_label(msg);
