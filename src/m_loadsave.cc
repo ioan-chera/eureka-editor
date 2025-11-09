@@ -972,7 +972,6 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	assert(level >= 0 && level < wad.LevelCount());
 
 	NewDocument newdoc = { Document(*this), inLoading, BadCount() };
-	newdoc.accepted = true;	// mark it false if user is asked and cancels
 
 	Document& doc = newdoc.doc;
 	LoadingData& loading = newdoc.loading;
@@ -982,12 +981,7 @@ NewDocument Instance::openDocument(const LoadingData &inLoading, const Wad_file 
 	doc.LoadHeader(level, wad);
 	if(loading.levelFormat == MapFormat::udmf)
 	{
-		if(!doc.UDMF_LoadLevel(level, &wad, loading, conf, bad))
-		{
-			newdoc.accepted = false;
-			gLog.printf("User cancelled loading UDMF level.\n");
-			return newdoc;
-		}
+		doc.UDMF_LoadLevel(level, &wad, loading, conf, bad);
 	}
 	else try
 	{
@@ -1024,8 +1018,6 @@ bool Instance::LoadLevelNum(const Wad_file *wad, int lev_num) noexcept(false)
 {
 	LoadingData oldLoading = loaded;
 	NewDocument newdoc = openDocument(loaded, *wad, lev_num);
-	if(!newdoc.accepted)
-		return false;
 	if (newdoc.bad.linedef_count || newdoc.bad.sector_refs || newdoc.bad.sidedef_refs)
 	{
 		ShowLoadProblem(newdoc.bad);
@@ -1176,8 +1168,6 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 
 	// These 2 may throw, but it's safe here
 	NewDocument newdoc = gInstance->openDocument(loading, *wad, lev_num);
-	if(!newdoc.accepted)
-		return;
 	NewResources newres = loadResources(newdoc.loading, gInstance->wad);
 
 	gInstance->level = std::move(newdoc.doc);
@@ -1248,8 +1238,6 @@ void Instance::CMD_OpenMap()
 	try
 	{
 		newdoc = openDocument(loading, *wad, lev_num);
-		if(!newdoc.accepted)
-			return;
 	}
 	catch (const std::runtime_error& e)
 	{

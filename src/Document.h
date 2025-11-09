@@ -196,7 +196,7 @@ public:
 	void LoadScripts(int loading_level, const Wad_file *load_wad);
 
 
-	bool UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, LoadingData &loading,
+	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, LoadingData &loading,
 						const ConfigData &config, BadCount &bad);
 
 	void RemoveUnusedVerticesAtEnd();

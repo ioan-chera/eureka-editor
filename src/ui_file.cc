@@ -806,9 +806,6 @@ UI_UDMFSetup::UI_UDMFSetup(const Instance &inst, const SString &udmfNamespace, c
 	g->box(FL_FLAT_BOX);
 	g->color(WINDOW_BG, WINDOW_BG);
 
-	cancel = new Fl_Button(90, g->y() + 14, 80, 35, "Cancel");
-	cancel->callback((Fl_Callback*)close_callback, this);
-
 	use_but = new Fl_Return_Button(w() - 160, g->y() + 14, 80, 35, "Use");
 	use_but->labelfont(FL_HELVETICA_BOLD);
 	use_but->callback((Fl_Callback*)use_callback, this);
@@ -821,16 +818,22 @@ std::optional<PortGamePair> UI_UDMFSetup::Run()
 {
 	PopulateIWADs();
 	PopulatePort();
+	UpdateSelection();
 
 	set_modal();
 	show();
 
-	while (action == Action::none)
+	while (!done)
 	{
 		Fl::wait(0.2);
 	}
 
-	return (action == Action::accept) ? std::optional<PortGamePair>(result) : std::nullopt;
+	UpdateSelection();
+
+	if (result.gameName.empty() || result.portName.empty())
+		return std::nullopt;
+
+	return result;
 }
 
 void UI_UDMFSetup::PopulatePort()
@@ -873,6 +876,8 @@ void UI_UDMFSetup::PopulatePort()
 		port_choice->value(0);
 		result.portName = ports[0];
 	}
+
+	UpdateSelection();
 }
 
 void UI_UDMFSetup::PopulateIWADs()
@@ -896,11 +901,6 @@ void UI_UDMFSetup::PopulateIWADs()
 
 	SString prev_game = result.gameName;
 	PopulateIWADsHelper(game_choice, prev_game, &validGames, result.gameName);
-
-	if(!result.gameName.empty())
-		use_but->activate();
-	else
-		use_but->deactivate();
 }
 
 void UI_UDMFSetup::game_callback(Fl_Choice *w, void *data)
@@ -910,15 +910,14 @@ void UI_UDMFSetup::game_callback(Fl_Choice *w, void *data)
 	if (w->mvalue())
 	{
 		dialog->result.gameName = w->mvalue()->text;
-		dialog->use_but->activate();
 	}
 	else
 	{
 		dialog->result.gameName.clear();
-		dialog->use_but->deactivate();
 	}
 
 	dialog->PopulatePort();
+	dialog->UpdateSelection();
 }
 
 void UI_UDMFSetup::port_callback(Fl_Choice *w, void *data)
@@ -929,12 +928,15 @@ void UI_UDMFSetup::port_callback(Fl_Choice *w, void *data)
 	{
 		dialog->result.portName = w->mvalue()->text;
 	}
+
+	dialog->UpdateSelection();
 }
 
 void UI_UDMFSetup::close_callback(Fl_Widget *w, void *data)
 {
 	UI_UDMFSetup *dialog = (UI_UDMFSetup *)data;
-	dialog->action = Action::cancel;
+	dialog->UpdateSelection();
+	dialog->done = true;
 }
 
 void UI_UDMFSetup::use_callback(Fl_Button *w, void *data)
@@ -942,10 +944,8 @@ void UI_UDMFSetup::use_callback(Fl_Button *w, void *data)
 	UI_UDMFSetup *dialog = (UI_UDMFSetup *)data;
 
 	// Update result from current selections
-	if (dialog->game_choice->mvalue())
-		dialog->result.gameName = dialog->game_choice->mvalue()->text;
-
-	dialog->action = Action::accept;
+	dialog->UpdateSelection();
+	dialog->done = true;
 }
 
 void UI_UDMFSetup::find_callback(Fl_Button *w, void *data)
@@ -959,6 +959,20 @@ void UI_UDMFSetup::find_callback(Fl_Button *w, void *data)
 	that->result.gameName = *game;
 	that->PopulateIWADs();
 	that->PopulatePort();
+	that->UpdateSelection();
+}
+
+void UI_UDMFSetup::UpdateSelection()
+{
+	if (game_choice->mvalue())
+		result.gameName = game_choice->mvalue()->text;
+	else
+		result.gameName.clear();
+
+	if (port_choice->mvalue())
+		result.portName = port_choice->mvalue()->text;
+	else
+		result.portName.clear();
 }
 
 

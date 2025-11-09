@@ -437,10 +437,8 @@ const UDMFMapping *UDMFMapping::getForName(const char *name, Category category)
 	return nullptr;
 }
 
-static std::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name,
-	bool &accepted)
+static std::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name)
 {
-	accepted = true;
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
 	{
@@ -492,9 +490,8 @@ static std::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, Loadi
 					}
 					else
 					{
-						// User closed dialog without selecting - use first pair as fallback
-						gLog.printf("No selection made, rejecting\n");
-						accepted = false;
+						gLog.printf("No selection made, keeping current port '%s' / game '%s'\n",
+							loading.portName.c_str(), loading.gameName.c_str());
 						return std::nullopt;
 					}
 				}
@@ -802,7 +799,7 @@ void Document::ValidateLevel_UDMF(const ConfigData &config, BadCount &bad)
 }
 
 
-bool Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, LoadingData &loading,
+void Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, LoadingData &loading,
 							  const ConfigData &config, BadCount &bad)
 {
 	const Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "TEXTMAP");
@@ -835,10 +832,7 @@ bool Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 
 		if (tok2.Match("="))
 		{
-			bool accepted;
-			std::optional<ConfigData> newConfig = UDMF_ParseGlobalVar(inst, loading, *parser, tok, accepted);
-			if(!accepted)
-				return false;
+			std::optional<ConfigData> newConfig = UDMF_ParseGlobalVar(inst, loading, *parser, tok);
 			if (newConfig.has_value())
 			{
 				overrideConfig = std::move(newConfig);
@@ -857,7 +851,6 @@ bool Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 	}
 
 	ValidateLevel_UDMF(*activeConfig, bad);
-	return true;
 }
 
 

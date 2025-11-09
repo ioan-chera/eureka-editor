@@ -81,8 +81,6 @@ struct NewDocument
 	Document doc;
 	LoadingData loading;
 	BadCount bad;
-
-	bool accepted;
 };
 
 void OpenFileMap(const fs::path &filename, const SString &map_name = "") noexcept(false);

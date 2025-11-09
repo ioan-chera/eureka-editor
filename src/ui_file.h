@@ -146,19 +146,11 @@ private:
 	Fl_Choice *game_choice;
 
 	Fl_Button *use_but;
-	Fl_Button *cancel;
 
 	const Instance &inst;
 	const std::vector<PortGamePair> &availablePairs;
 
-	enum class Action
-	{
-		none,
-		accept,
-		cancel
-	};
-
-	Action action = Action::none;
+	bool done = false;
 
 	PortGamePair result;
 
@@ -170,11 +162,12 @@ private:
 
 	void PopulateIWADs();
 	void PopulatePort();
+	void UpdateSelection();
 
 public:
 	UI_UDMFSetup(const Instance &inst, const SString &udmfNamespace, const std::vector<PortGamePair> &pairs);
 
-	// returns selected port/game pair on accept, nullopt on cancel
+	// returns selected port/game pair if available, nullopt otherwise
 	std::optional<PortGamePair> Run();
 };
 

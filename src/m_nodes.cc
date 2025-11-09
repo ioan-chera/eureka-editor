@@ -285,12 +285,6 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 		try
 		{
 			NewDocument newdoc = openDocument(loaded, *wad.master.editWad(), n);
-			if(!newdoc.accepted)
-			{
-				GB_PrintMsg("User cancelled opening level %d, continuing...\n", n);
-				continue;
-			}
-			// Do not care about rejection here!
 			ret = AJBSP_BuildLevel(info, n, *this, newdoc.doc, newdoc.loading.levelFormat, *wad.master.editWad());
 		}
 		catch(const std::runtime_error &e)
