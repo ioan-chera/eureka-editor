@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2020 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÅ½ Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Raphaâ€˜l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -278,7 +278,7 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 
 		ImageFormat img_fmt = W_DetectImageFormat(*lump);
 		const SString &name = lump->Name();
-		tl::optional<Img_c> img;
+		std::optional<Img_c> img;
 
 		switch (img_fmt)
 		{
@@ -749,7 +749,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 		}
 		else if(info.group == 'p')
 		{
-			tl::optional<Img_c> new_img;
+			std::optional<Img_c> new_img;
 			
 			int src1, src2;
 			int targ1[4], targ2[4];

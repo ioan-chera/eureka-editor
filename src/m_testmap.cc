@@ -303,7 +303,7 @@ public:
 };
 
 
-bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const tl::optional<SString>& commandLine)
+bool Instance::M_PortSetupDialog(const SString &port, const SString &game, const std::optional<SString>& commandLine)
 {
 	SString name_buf;
 

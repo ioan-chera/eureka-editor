@@ -680,7 +680,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &old_
 
 	SString line;
 
-	tl::optional<SString> testingCommandLine;
+	std::optional<SString> testingCommandLine;
 
 	while (stream.readLine(line))
 	{

@@ -207,7 +207,7 @@ public:
 	UI_ProjectSetup(Instance &inst, bool new_project = false, bool is_startup = false);
 
 	// returns true if something changed
-	tl::optional<Result> Run();
+	std::optional<Result> Run();
 };
 
 #endif  /* __EUREKA_UI_FILE_H__ */

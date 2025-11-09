@@ -30,7 +30,6 @@ set(source_base
 
 set(source_thirdparty
     filesystem.hpp
-    tl/optional.hpp
 )
 
 set(source_bsp

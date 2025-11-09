@@ -139,7 +139,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 	Clear();
 
 	const Img_c *img = inst.wad.getSprite(inst.conf, type, inst.loaded, 1);
-	tl::optional<Img_c> new_img;
+	std::optional<Img_c> new_img;
 
 	if (! img || img->width() < 1 || img->height() < 1)
 	{

@@ -784,7 +784,7 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 }
 
 
-tl::optional<UI_ProjectSetup::Result> UI_ProjectSetup::Run()
+std::optional<UI_ProjectSetup::Result> UI_ProjectSetup::Run()
 {
 	PopulateIWADs();
 	PopulatePort();
@@ -800,7 +800,7 @@ tl::optional<UI_ProjectSetup::Result> UI_ProjectSetup::Run()
 		Fl::wait(0.2);
 	}
 
-	return (action == Action::accept) ? result : tl::optional<UI_ProjectSetup::Result>{};
+	return (action == Action::accept) ? result : std::optional<UI_ProjectSetup::Result>{};
 }
 
 void UI_ProjectSetup::PopulateIWADs()

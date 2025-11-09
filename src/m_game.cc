@@ -391,7 +391,7 @@ static void ParseFeatureDef(ConfigData &config, const char **argv, int argc)
 // Both strings are required
 // Returns "" if not found.
 //
-static tl::optional<fs::path> FindDefinitionFile(const fs::path &home_dir,
+static std::optional<fs::path> FindDefinitionFile(const fs::path &home_dir,
 		const fs::path &old_home_dir, const fs::path &install_dir, const fs::path &folder,
 		const SString &name)
 {
@@ -417,7 +417,7 @@ static tl::optional<fs::path> FindDefinitionFile(const fs::path &home_dir,
 bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &old_home_dir,
 		const fs::path &install_dir, const fs::path &folder, const SString &name)
 {
-	tl::optional<fs::path> filename = FindDefinitionFile(home_dir, old_home_dir, install_dir,
+	std::optional<fs::path> filename = FindDefinitionFile(home_dir, old_home_dir, install_dir,
 			folder, name);
 
 	return filename.has_value();
@@ -451,7 +451,7 @@ void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 
 	gLog.printf("Loading Definitions : %s\n", prettyname.u8string().c_str());
 
-	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+	std::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
 			global::old_linux_home_and_cache_dir, global::install_dir, folder, name);
 
 	if (!filename)
@@ -1165,7 +1165,7 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 				pst->fail("Too many includes (check for a loop)");
 
 			fs::path new_folder = folder;
-			tl::optional<fs::path> new_name = FindDefinitionFile(global::home_dir,
+			std::optional<fs::path> new_name = FindDefinitionFile(global::home_dir,
 					global::old_linux_home_and_cache_dir, global::install_dir, new_folder,
 					pst->argv[1]);
 
@@ -1219,7 +1219,7 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	if(it != global::sLoadedGameDefs.end())
 		return it->second;
 
-	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+	std::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
 			global::old_linux_home_and_cache_dir, global::install_dir, GAMES_DIR, game);
 	if(!filename)
 		return {};
@@ -1245,7 +1245,7 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 	if (IT != global::loaded_port_defs.end())
 		return &IT->second;
 
-	tl::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
+	std::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
 			global::old_linux_home_and_cache_dir, global::install_dir, PORTS_DIR, port);
 	if (!filename)
 		return NULL;

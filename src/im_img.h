@@ -35,9 +35,8 @@ typedef unsigned int GLuint;
 #include "FL/gl.h"
 #endif
 
-#include "tl/optional.hpp"
-
 #include <memory>
+#include <optional>
 #include <vector>
 
 static constexpr img_pixel_t IS_RGB_PIXEL = 0x8000;
@@ -151,7 +150,7 @@ private:
 												 const rgb_color_t *palette, int pal_size);
 };
 
-tl::optional<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src);
+std::optional<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src);
 Img_c IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 
 #endif  /* __EUREKA_IM_IMG_H__*/

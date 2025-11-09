@@ -157,7 +157,7 @@ static auto prepareData(const std::vector<uint8_t> &data)
 	return std::make_pair(wad, &lump);
 }
 
-static void assertImageValid(const tl::optional<Img_c> &image)
+static void assertImageValid(const std::optional<Img_c> &image)
 {
 	ASSERT_TRUE(image);
 	ASSERT_FALSE(image->is_null());

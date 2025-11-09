@@ -1400,7 +1400,7 @@ public:
 private:
 
 	std::vector<byte> &out_data;
-	tl::optional<Compression> compression;
+	std::optional<Compression> compression;
 	Bytef out_buffer[1024] = {};
 };
 
