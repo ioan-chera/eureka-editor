@@ -532,8 +532,7 @@ static std::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, Loadi
 }
 
 
-static void UDMF_ParseThingField(const Document &doc, const ConfigData &config, Thing *T, const Udmf_Token& field,
-								 const Udmf_Token& value)
+static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token& field, const Udmf_Token& value)
 {
 	// just ignore any setting with the "false" keyword
 	if (value.Match("false"))
@@ -589,7 +588,7 @@ static void UDMF_ParseVertexField(const Document &doc, Vertex *V, const Udmf_Tok
 	}
 }
 
-static void UDMF_ParseLinedefField(const Document &doc, const ConfigData &config, LineDef *LD, const Udmf_Token& field,
+static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_Token& field,
 	const Udmf_Token& value)
 {
 	// Note: vertex and sidedef numbers are validated later on
@@ -685,7 +684,7 @@ static void UDMF_ParseSectorField(const Document &doc, Sector *S, const Udmf_Tok
 	}
 }
 
-static void UDMF_ParseObject(Document &doc, const ConfigData &config, Udmf_Parser& parser, const Udmf_Token& name)
+static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Token& name)
 {
 	// create a new object of the specified type
 	Objid kind;
@@ -769,13 +768,13 @@ static void UDMF_ParseObject(Document &doc, const ConfigData &config, Udmf_Parse
 		}
 
 		if (new_T)
-			UDMF_ParseThingField(doc, config, new_T, tok, value);
+			UDMF_ParseThingField(doc, new_T, tok, value);
 
 		if (new_V)
 			UDMF_ParseVertexField(doc, new_V, tok, value);
 
 		if (new_LD)
-			UDMF_ParseLinedefField(doc, config, new_LD, tok, value);
+			UDMF_ParseLinedefField(doc, new_LD, tok, value);
 
 		if (new_SD)
 			UDMF_ParseSidedefField(doc, new_SD, tok, value);
@@ -849,7 +848,7 @@ bool Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 		}
 		if (tok2.Match("{"))
 		{
-			UDMF_ParseObject(*this, *activeConfig, *parser, tok);
+			UDMF_ParseObject(*this, *parser, tok);
 			continue;
 		}
 
