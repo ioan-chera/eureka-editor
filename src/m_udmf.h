@@ -23,15 +23,19 @@
 
 struct UDMFMapping
 {
+	enum class Set
+	{
+		line1,
+		line2,
+		thing
+	};
+
 	const char *name;
-	int flagSet;
+	Set set;
 	unsigned value;
 };
 
 const auto& getUDMFMapping();
-
-int UDMF_InternalizeNewLinedefFlag(const char* name);
-int UDMF_InternalizeNewThingFlag(const char* name);
 
 const UDMFMapping *UDMF_MappingForName(const char *name);
 

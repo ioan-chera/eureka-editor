@@ -175,7 +175,7 @@ public:
 	UI_UDMFSetup(const Instance &inst, const SString &udmfNamespace, const std::vector<PortGamePair> &pairs);
 
 	// returns selected port/game pair on accept, nullopt on cancel
-	tl::optional<PortGamePair> Run();
+	std::optional<PortGamePair> Run();
 };
 
 

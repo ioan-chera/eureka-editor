@@ -40,52 +40,74 @@
 #include <array>
 #include <initializer_list>
 
-#define UDMF_MAPPING(name) UDMFMapping{ #name, 1, MLF_UDMF_ ## name }
-#define UDMF_MAPPING2(name) UDMFMapping{#name, 2, MLF2_UDMF_ ## name }
+#define UDMF_LINE_MAPPING(name) UDMFMapping{ #name, UDMFMapping::Set::line1, static_cast<unsigned>(MLF_UDMF_ ## name) }
+#define UDMF_LINE_MAPPING2(name) UDMFMapping{#name, UDMFMapping::Set::line2, static_cast<unsigned>(MLF2_UDMF_ ## name) }
+#define UDMF_THING_MAPPING(name) UDMFMapping{#name, UDMFMapping::Set::thing, static_cast<unsigned>(MTF_UDMF_ ## name) }
 
 static constexpr std::array kUDMFMapping = {
-	UDMFMapping{ "blocking",      1, MLF_Blocking },
-	UDMFMapping{ "blockmonsters", 1, MLF_BlockMonsters },
-	UDMFMapping{ "twosided",      1, MLF_TwoSided },
-	UDMFMapping{ "dontpegtop",    1, MLF_UpperUnpegged },
-	UDMFMapping{ "dontpegbottom", 1, MLF_LowerUnpegged },
-	UDMFMapping{ "secret",        1, MLF_Secret },
-	UDMFMapping{ "blocksound",    1, MLF_SoundBlock },
-	UDMFMapping{ "dontdraw",      1, MLF_DontDraw },
-	UDMFMapping{ "mapped",        1, MLF_Mapped },
-	UDMFMapping{ "passuse",       1, MLF_Boom_PassThru },
-	UDMF_MAPPING(Translucent),
-	UDMF_MAPPING(Translucent  ),
-	UDMF_MAPPING(Transparent  ),
-	UDMF_MAPPING(JumpOver     ),
-	UDMF_MAPPING(BlockFloaters),
-	UDMF_MAPPING(PlayerCross  ),
-	UDMF_MAPPING(PlayerUse    ),
-	UDMF_MAPPING(MonsterCross ),
-	UDMF_MAPPING(MonsterUse   ),
-	UDMF_MAPPING(Impact       ),
-	UDMF_MAPPING(PlayerPush   ),
-	UDMF_MAPPING(MonsterPush  ),
-	UDMF_MAPPING(MissileCross ),
-	UDMF_MAPPING(RepeatSpecial),
-	UDMF_MAPPING(BlockPlayers     ),
-	UDMF_MAPPING(BlockLandMonsters),
-	UDMF_MAPPING(BlockProjectiles ),
-	UDMF_MAPPING(BlockHitScan     ),
-	UDMF_MAPPING(BlockUse         ),
-	UDMF_MAPPING(BlockSight       ),
-	UDMF_MAPPING2(BlockEverything   ),
-	UDMF_MAPPING2(Revealed          ),
-	UDMF_MAPPING2(AnyCross          ),
-	UDMF_MAPPING2(MonsterActivate   ),
-	UDMF_MAPPING2(PlayerUseBack     ),
-	UDMF_MAPPING2(FirstSideOnly     ),
-	UDMF_MAPPING2(CheckSwitchRange  ),
-	UDMF_MAPPING2(ClipMidTex        ),
-	UDMF_MAPPING2(WrapMidTex        ),
-	UDMF_MAPPING2(MidTex3DImpassible),
-	UDMF_MAPPING2(DamageSpecial     ),
-	UDMF_MAPPING2(DeathSpecial      ),
+	UDMFMapping{ "blocking",      UDMFMapping::Set::line1, (unsigned)MLF_Blocking },
+	UDMFMapping{ "blockmonsters", UDMFMapping::Set::line1, (unsigned)MLF_BlockMonsters },
+	UDMFMapping{ "twosided",      UDMFMapping::Set::line1, (unsigned)MLF_TwoSided },
+	UDMFMapping{ "dontpegtop",    UDMFMapping::Set::line1, (unsigned)MLF_UpperUnpegged },
+	UDMFMapping{ "dontpegbottom", UDMFMapping::Set::line1, (unsigned)MLF_LowerUnpegged },
+	UDMFMapping{ "secret",        UDMFMapping::Set::line1, (unsigned)MLF_Secret },
+	UDMFMapping{ "blocksound",    UDMFMapping::Set::line1, (unsigned)MLF_SoundBlock },
+	UDMFMapping{ "dontdraw",      UDMFMapping::Set::line1, (unsigned)MLF_DontDraw },
+	UDMFMapping{ "mapped",        UDMFMapping::Set::line1, (unsigned)MLF_Mapped },
+	UDMFMapping{ "passuse",       UDMFMapping::Set::line1, (unsigned)MLF_Boom_PassThru },
+	UDMF_LINE_MAPPING(Translucent),
+	UDMF_LINE_MAPPING(Translucent  ),
+	UDMF_LINE_MAPPING(Transparent  ),
+	UDMF_LINE_MAPPING(JumpOver     ),
+	UDMF_LINE_MAPPING(BlockFloaters),
+	UDMF_LINE_MAPPING(PlayerCross  ),
+	UDMF_LINE_MAPPING(PlayerUse    ),
+	UDMF_LINE_MAPPING(MonsterCross ),
+	UDMF_LINE_MAPPING(MonsterUse   ),
+	UDMF_LINE_MAPPING(Impact       ),
+	UDMF_LINE_MAPPING(PlayerPush   ),
+	UDMF_LINE_MAPPING(MonsterPush  ),
+	UDMF_LINE_MAPPING(MissileCross ),
+	UDMF_LINE_MAPPING(RepeatSpecial),
+	UDMF_LINE_MAPPING(BlockPlayers     ),
+	UDMF_LINE_MAPPING(BlockLandMonsters),
+	UDMF_LINE_MAPPING(BlockProjectiles ),
+	UDMF_LINE_MAPPING(BlockHitScan     ),
+	UDMF_LINE_MAPPING(BlockUse         ),
+	UDMF_LINE_MAPPING(BlockSight       ),
+	UDMF_LINE_MAPPING2(BlockEverything   ),
+	UDMF_LINE_MAPPING2(Revealed          ),
+	UDMF_LINE_MAPPING2(AnyCross          ),
+	UDMF_LINE_MAPPING2(MonsterActivate   ),
+	UDMF_LINE_MAPPING2(PlayerUseBack     ),
+	UDMF_LINE_MAPPING2(FirstSideOnly     ),
+	UDMF_LINE_MAPPING2(CheckSwitchRange  ),
+	UDMF_LINE_MAPPING2(ClipMidTex        ),
+	UDMF_LINE_MAPPING2(WrapMidTex        ),
+	UDMF_LINE_MAPPING2(MidTex3DImpassible),
+	UDMF_LINE_MAPPING2(DamageSpecial     ),
+	UDMF_LINE_MAPPING2(DeathSpecial      ),
+
+// Things
+	{ "skill1",      UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Easiest },
+	{ "skill2",      UDMFMapping::Set::thing, (unsigned)MTF_Easy },
+	{ "skill3",      UDMFMapping::Set::thing, (unsigned)MTF_Medium },
+	{ "skill4",      UDMFMapping::Set::thing, (unsigned)MTF_Hard },
+	{ "skill5",      UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Hardest },
+	{ "ambush",      UDMFMapping::Set::thing, (unsigned)MTF_Ambush },
+	{ "friend",      UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Friend },
+	{ "dormant",     UDMFMapping::Set::thing, (unsigned)MTF_Hexen_Dormant },
+	{ "single",      UDMFMapping::Set::thing, (unsigned)MTF_Hexen_SP },
+	{ "dm",          UDMFMapping::Set::thing, (unsigned)MTF_Hexen_DM },
+	{ "coop",        UDMFMapping::Set::thing, (unsigned)MTF_Hexen_COOP },
+	{ "class1",      UDMFMapping::Set::thing, (unsigned)MTF_Hexen_Fighter },
+	{ "class2",      UDMFMapping::Set::thing, (unsigned)MTF_Hexen_Cleric },
+	{ "class3",      UDMFMapping::Set::thing, (unsigned)MTF_Hexen_Mage },
+	{ "standing",    UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Standing },
+	{ "strifeally",  UDMFMapping::Set::thing, (unsigned)MTF_UDMF_StrifeAlly },
+	{ "translucent", UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Translucent },
+	{ "invisible",   UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Invisible },
+	{ "countsecret", UDMFMapping::Set::thing, (unsigned)MTF_UDMF_CountSecret },
 };
 
 const auto& getUDMFMapping() {
@@ -411,87 +433,6 @@ public:
 	}
 };
 
-static SString sLinedefFlags[32] =
-{
-	"blocking",
-	"blockmonsters",
-	"twosided",
-	"dontpegtop",
-	"dontpegbottom",
-	"secret",
-	"soundblock",
-	"dontdraw",
-	"mapped",
-	"passuse",
-	"midtex3d",
-	"repeatspecial",
-	"playercross",
-	"playeruse",
-	"monstercross",
-	"monsteruse",
-	"impact",
-	"playerpush",
-	"monsterpush",
-	"missilecross",
-	"repeatspecial",
-	"translucent",
-	"transparent",
-	"jumpover",
-	"blockfloaters",
-};
-
-static SString sThingFlags[32] =
-{
-	"skill2",
-	"skill3",
-	"skill4",
-	"ambush",
-	"dormant",
-	"class1",
-	"class2",
-	"class3",
-	"single",
-	"coop",
-	"dm",
-	"skill1",
-	"skill5",
-	"friend",
-	"standing",
-	"strifeally",
-	"translucent",
-	"invisible",
-};
-
-int UDMF_InternalizeNewLinedefFlag(const char* name)
-{
-	for (int i = 0; i < (int)lengthof(sLinedefFlags); i++)
-	{
-		if (sLinedefFlags[i].empty())
-		{
-			sLinedefFlags[i] = name;
-			return 1 << i;
-		}
-		if(sLinedefFlags[i].noCaseEqual(name))
-			return 1 << i;
-	}
-	ThrowException("Too many UDMF linedef flags defined: no space for new flag '%s'", name);
-}
-
-int UDMF_InternalizeNewThingFlag(const char* name)
-{
-	for (int i = 0; i < (int)lengthof(sThingFlags); i++)
-	{
-		if (sThingFlags[i].empty())
-		{
-			sThingFlags[i] = name;
-			return 1 << i;
-		}
-		if(sThingFlags[i].noCaseEqual(name))
-			return 1 << i;
-	}
-	ThrowException("Too many UDMF thing flags defined: no space for new flag '%s'", name);
-}
-
 const UDMFMapping *UDMF_MappingForName(const char *name)
 {
 	for(const UDMFMapping &mapping : kUDMFMapping)
@@ -500,7 +441,7 @@ const UDMFMapping *UDMF_MappingForName(const char *name)
 	return nullptr;
 }
 
-static tl::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name,
+static std::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name,
 	bool &accepted)
 {
 	accepted = true;
@@ -509,12 +450,12 @@ static tl::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, Loadin
 	{
 		parser.throwException("expected value for global setting %s, reached end of text map",
 							  name.c_str());
-		return tl::nullopt;
+		return std::nullopt;
 	}
 	if (!parser.Expect(";"))
 	{
 		parser.throwException("expected semicolon");
-		return tl::nullopt;
+		return std::nullopt;
 	}
 
 	if (name.Match("namespace"))
@@ -542,7 +483,7 @@ static tl::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, Loadin
 				gLog.printf("UDMF namespace '%s' doesn't match current port '%s' / game '%s'\n",
 							loading.udmfNamespace.c_str(), loading.portName.c_str(), loading.gameName.c_str());
 
-				tl::optional<PortGamePair> selectedPair;
+				std::optional<PortGamePair> selectedPair;
 				if(pairs.size() > 1)
 				{
 					UI_UDMFSetup dialog(inst, loading.udmfNamespace, pairs);
@@ -558,7 +499,7 @@ static tl::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, Loadin
 						// User closed dialog without selecting - use first pair as fallback
 						gLog.printf("No selection made, rejecting\n");
 						accepted = false;
-						return tl::nullopt;
+						return std::nullopt;
 					}
 				}
 				else
@@ -591,7 +532,7 @@ static tl::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, Loadin
 		gLog.printf("skipping unknown global '%s' in UDMF\n", name.c_str());
 	}
 
-	return tl::nullopt;
+	return std::nullopt;
 }
 
 
@@ -699,7 +640,17 @@ static void UDMF_ParseLinedefField(const Document &doc, const ConfigData &config
 		for(const UDMFMapping &mapping : getUDMFMapping())
 			if(field.Match(mapping.name))
 			{
-				(mapping.flagSet == 1 ? LD->flags : LD->flags2) |= mapping.value;
+				switch(mapping.set)
+				{
+				case UDMFMapping::Set::line1:
+					LD->flags |= mapping.value;
+					break;
+				case UDMFMapping::Set::line2:
+					LD->flags2 |= mapping.value;
+					break;
+				default:
+					continue;	// not linedef specific, don't return
+				}
 				return;
 			}
 		gLog.debugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
@@ -881,7 +832,7 @@ bool Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 	auto parser = std::make_unique<Udmf_Parser>(*lump);
 
 	// Config to use for parsing - may be overridden if namespace changes port/game
-	tl::optional<ConfigData> overrideConfig;
+	std::optional<ConfigData> overrideConfig;
 	const ConfigData *activeConfig = &config;
 
 	for (;;)
@@ -904,7 +855,7 @@ bool Document::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Loadi
 		if (tok2.Match("="))
 		{
 			bool accepted;
-			tl::optional<ConfigData> newConfig = UDMF_ParseGlobalVar(inst, loading, *parser, tok, accepted);
+			std::optional<ConfigData> newConfig = UDMF_ParseGlobalVar(inst, loading, *parser, tok, accepted);
 			if(!accepted)
 				return false;
 			if (newConfig.has_value())
@@ -1026,8 +977,20 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
 
 		// linedef flags
-		for(const UDMFMapping &mapping : getUDMFMapping())
-			WrFlag(lump, mapping.flagSet == 1 ? ld->flags : ld->flags2, mapping.name, mapping.value);
+		for(const UDMFMapping& mapping : getUDMFMapping())
+		{
+			switch(mapping.set)
+			{
+			case UDMFMapping::Set::line1:
+				WrFlag(lump, ld->flags, mapping.name, mapping.value);
+				break;
+			case UDMFMapping::Set::line2:
+				WrFlag(lump, ld->flags2, mapping.name, mapping.value);
+				break;
+			default:
+				break;
+			}
+		}
 
 		lump->Printf("}\n\n");
 	}

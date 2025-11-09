@@ -709,7 +709,14 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if(isUDMF)
 		{
 			flag.udmfKey = argv[5];
-			flag.value = UDMF_InternalizeNewThingFlag(flag.udmfKey.c_str());
+			const UDMFMapping* mapping = UDMF_MappingForName(flag.udmfKey.c_str());
+			if(mapping && mapping->set != UDMFMapping::Set::thing)
+				flag.value = mapping->value;
+			else
+			{
+				gLog.printf("Unknown UDMF thing flag '%s'\n", flag.udmfKey.c_str());
+				return;
+			}
 		}
 		else
 			flag.value = (int)strtol(argv[5], nullptr, 0);
@@ -783,7 +790,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			config.udmf_line_flags.push_back(flag);
 		}
 		else
-			gLog.printf("Unknown UDMF flag '%s'\n", flag.udmfKey.c_str());
+			gLog.printf("Unknown UDMF line flag '%s'\n", flag.udmfKey.c_str());
 	}
 
 	else if(y_stricmp(argv[0], "gensector") == 0)

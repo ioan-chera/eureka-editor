@@ -734,7 +734,7 @@ static void PopulateIWADsHelper(Fl_Choice *choice, const SString &prev_game,
 }
 
 // Shared helper function for finding IWADs
-static tl::optional<SString> FindIWAD(const Instance &inst)
+static std::optional<SString> FindIWAD(const Instance &inst)
 {
 	Fl_Native_File_Chooser chooser;
 
@@ -747,10 +747,10 @@ static tl::optional<SString> FindIWAD(const Instance &inst)
 	{
 		case -1:  // error
 			DLG_Notify("Unable to open that wad:\n\n%s", chooser.errmsg());
-			return tl::nullopt;
+			return std::nullopt;
 
 		case 1:  // cancelled
-			return tl::nullopt;
+			return std::nullopt;
 
 		default:
 			break;  // OK
@@ -764,7 +764,7 @@ static tl::optional<SString> FindIWAD(const Instance &inst)
 	{
 		DLG_Notify("That game is not supported (no definition file).\n\n"
 		           "Please try again.");
-		return tl::nullopt;
+		return std::nullopt;
 	}
 
 	global::recent.addIWAD(fs::u8path(chooser.filename()));
@@ -817,7 +817,7 @@ UI_UDMFSetup::UI_UDMFSetup(const Instance &inst, const SString &udmfNamespace, c
 	end();
 }
 
-tl::optional<PortGamePair> UI_UDMFSetup::Run()
+std::optional<PortGamePair> UI_UDMFSetup::Run()
 {
 	PopulateIWADs();
 	PopulatePort();
@@ -830,7 +830,7 @@ tl::optional<PortGamePair> UI_UDMFSetup::Run()
 		Fl::wait(0.2);
 	}
 
-	return (action == Action::accept) ? tl::optional<PortGamePair>(result) : tl::nullopt;
+	return (action == Action::accept) ? std::optional<PortGamePair>(result) : std::nullopt;
 }
 
 void UI_UDMFSetup::PopulatePort()
@@ -952,7 +952,7 @@ void UI_UDMFSetup::find_callback(Fl_Button *w, void *data)
 {
 	UI_UDMFSetup *that = (UI_UDMFSetup *)data;
 
-	tl::optional<SString> game = FindIWAD(that->inst);
+	std::optional<SString> game = FindIWAD(that->inst);
 	if (!game)
 		return;
 
@@ -1427,7 +1427,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	tl::optional<SString> game = FindIWAD(that->inst);
+	std::optional<SString> game = FindIWAD(that->inst);
 	if (!game)
 		return;
 

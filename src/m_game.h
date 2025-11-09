@@ -29,7 +29,6 @@
 
 #include "im_color.h"
 #include "m_strings.h"
-#include "tl/optional.hpp"
 #include <initializer_list>
 #include <map>
 #include <unordered_map>
