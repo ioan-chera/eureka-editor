@@ -31,8 +31,8 @@
 #include <variant>
 #include <vector>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 struct LoadingData;
 

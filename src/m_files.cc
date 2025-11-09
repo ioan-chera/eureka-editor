@@ -32,8 +32,8 @@
 
 #include "ui_window.h"
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 // list of known iwads (mapping GAME name --> PATH)
 
@@ -679,7 +679,7 @@ bool LoadingData::parseEurekaLump(const RecentKnowledge &recent, const Wad_file 
 
 	SString line;
 
-	tl::optional<SString> testingCommandLine;
+	std::optional<SString> testingCommandLine;
 
 	while (stream.readLine(line))
 	{

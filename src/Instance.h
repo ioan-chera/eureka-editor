@@ -300,7 +300,7 @@ public:
 	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
 
 	// M_TESTMAP
-	bool M_PortSetupDialog(const SString& port, const SString& game, const tl::optional<SString> &commandLine);
+	bool M_PortSetupDialog(const SString& port, const SString& game, const std::optional<SString> &commandLine);
 
 	// M_UDMF
 	void UDMF_SaveLevel(const LoadingData &loading, Wad_file &wad) const;
@@ -440,7 +440,7 @@ private:
 	bool M_ExportMap(bool inhibit_node_build);
 	void Navigate2D();
 	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
-	tl::optional<fs::path> Project_AskFile() const;
+	std::optional<fs::path> Project_AskFile() const;
 	void SaveLevel(LoadingData &loading, const SString &level, Wad_file &wad, bool inhibit_node_build);
 	void ConfirmLevelSaveSuccess(const LoadingData &loading, const Wad_file &wad);
 	void SaveLevelAndUpdateWindow(LoadingData& loading, const SString& level, Wad_file &wad, bool inhibit_node_build);
@@ -493,7 +493,7 @@ public:	// will be private when we encapsulate everything
 	//
 	// Selection stuff
 	//
-	tl::optional<selection_c> last_Sel;
+	std::optional<selection_c> last_Sel;
 
 	//
 	// Document stuff
@@ -506,7 +506,7 @@ public:	// will be private when we encapsulate everything
 	Recently_used recent_textures{ *this };
 	Recently_used recent_things{ *this };
 	int last_given_file = 0;
-	tl::optional<UI_NodeDialog> nodeialog;
+	std::optional<UI_NodeDialog> nodeialog;
 	nodebuildinfo_t *nb_info = nullptr;
 	
 	int tagInMemory = 0;

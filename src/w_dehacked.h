@@ -30,8 +30,8 @@
 #ifndef __EUREKA_W_DEHACKED_H__
 #define __EUREKA_W_DEHACKED_H__
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 class MasterDir;
 struct ConfigData;

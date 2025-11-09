@@ -27,8 +27,8 @@
 #ifndef __EUREKA_LEVELS_H__
 #define __EUREKA_LEVELS_H__
 
+#include <optional>
 #include <string>
-#include "tl/optional.hpp"
 
 #include "m_events.h"
 #include "e_objects.h"
@@ -107,7 +107,7 @@ struct Editor_State_t
 	bool pointer_in_window;  // whether the mouse is over the 2D/3D view
 	v3double_t map;  // map coordinates of pointer (no Z in 2D)
 
-	tl::optional<selection_c> Selected;    // all selected objects (usually empty)
+	std::optional<selection_c> Selected;    // all selected objects (usually empty)
 
 	Objid highlight;   // the highlighted object
 

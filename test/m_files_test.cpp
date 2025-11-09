@@ -23,8 +23,8 @@
 #include "m_parse.h"
 #include "m_streams.h"
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include "gtest/gtest.h"
 

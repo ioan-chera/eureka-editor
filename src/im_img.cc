@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr≈Ω Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Rapha‚Äòl Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@
 
 #include "im_img.h"
 #include "m_game.h"
-#include "tl/optional.hpp"
+#include <optional>
 
 #ifndef NO_OPENGL
 // need this for GL_UNSIGNED_INT_8_8_8_8_REV
@@ -631,7 +631,7 @@ static Img_c IM_CreateFont(int W, int H, const char *const *text,
 }
 
 
-tl::optional<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src)
+std::optional<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src)
 {
 	int W  = src.w();
 	int H  = src.h();

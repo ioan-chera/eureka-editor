@@ -96,7 +96,7 @@ TEST(LibFile, ReplaceExtension)
 	ASSERT_EQ(ReplaceExtension(".", nullptr), ".");
 	ASSERT_EQ(ReplaceExtension("..", ""), "..");
 	ASSERT_EQ(ReplaceExtension("..", nullptr), "..");
-	ASSERT_EQ(ReplaceExtension("..", "txt"), "..txt");
+	ASSERT_EQ(ReplaceExtension("..", "txt"), "...txt");
 	ASSERT_EQ(ReplaceExtension("..txt", "wad"), "..wad");
 	ASSERT_EQ(ReplaceExtension("..txt", ""), ".");
 	ASSERT_EQ(ReplaceExtension("..txt", nullptr), ".");

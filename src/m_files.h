@@ -28,8 +28,8 @@
 #include <deque>
 #include <ostream>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 class Wad_file;
 

@@ -120,7 +120,7 @@ void Instance::FreshLevel()
 }
 
 
-tl::optional<fs::path> Instance::Project_AskFile() const
+std::optional<fs::path> Instance::Project_AskFile() const
 {
 	// this returns false if user cancelled
 
@@ -190,7 +190,7 @@ void Instance::CMD_ManageProject()
 	try
 	{
 		UI_ProjectSetup dialog(*this, false /* new_project */, false /* is_startup */);
-		tl::optional<UI_ProjectSetup::Result> result = dialog.Run();
+		std::optional<UI_ProjectSetup::Result> result = dialog.Run();
 
 		if (result)
 		{
@@ -210,7 +210,7 @@ void Instance::CMD_NewProject()
 	ConfigData backupConfig = conf;
 	LoadingData backupLoading = loaded;
 	auto backupWadData = std::make_unique<WadData>(wad);
-	tl::optional<Document> backupDoc;
+	std::optional<Document> backupDoc;
 	try
 	{
 		if (!level.Main_ConfirmQuit("create a new project"))
@@ -218,7 +218,7 @@ void Instance::CMD_NewProject()
 
 		/* first, ask for the output file */
 
-		tl::optional<fs::path> filename = Project_AskFile();
+		std::optional<fs::path> filename = Project_AskFile();
 
 		if (!filename)
 			return;
@@ -234,7 +234,7 @@ void Instance::CMD_NewProject()
 		// TODO: new instance
 		UI_ProjectSetup dialog(*this, true /* new_project */, false /* is_startup */);
 
-		tl::optional<UI_ProjectSetup::Result> result = dialog.Run();
+		std::optional<UI_ProjectSetup::Result> result = dialog.Run();
 
 		if (!result)
 		{
@@ -331,7 +331,7 @@ bool Instance::MissingIWAD_Dialog()
 {
 	UI_ProjectSetup dialog(*this, false /* new_project */, true /* is_startup */);
 
-	tl::optional<UI_ProjectSetup::Result> result = dialog.Run();
+	std::optional<UI_ProjectSetup::Result> result = dialog.Run();
 
 	if (result)
 	{
@@ -352,7 +352,7 @@ bool Instance::MissingIWAD_Dialog()
 
 void Instance::CMD_FreshMap()
 {
-	tl::optional<Document> backupDoc;
+	std::optional<Document> backupDoc;
 	try
 	{
 		if (!wad.master.editWad())
@@ -1997,8 +1997,8 @@ void Instance::CMD_CopyMap()
 
 void Instance::CMD_RenameMap()
 {
-	tl::optional<SString> backupName;
-	tl::optional<int> backupIndex;
+	std::optional<SString> backupName;
+	std::optional<int> backupIndex;
 	try
 	{
 		if(!wad.master.gameWad())

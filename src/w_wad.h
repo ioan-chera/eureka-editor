@@ -32,8 +32,8 @@
 
 #include <memory>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 class Wad_file;
 

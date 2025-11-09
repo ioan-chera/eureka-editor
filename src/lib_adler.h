@@ -32,8 +32,8 @@
 #include "m_strings.h"
 #include <stdint.h>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 class crc32_c
 {

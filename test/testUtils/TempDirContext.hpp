@@ -23,8 +23,8 @@
 
 #include <stack>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 class TempDirContext : public ::testing::Test
 {

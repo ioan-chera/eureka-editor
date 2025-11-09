@@ -30,8 +30,8 @@
 #include "DocumentModule.h"
 #include "m_vector.h"
 #include "objid.h"
-#include "tl/optional.hpp"
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace grid
@@ -100,8 +100,8 @@ struct FastOppositeTree
 {
 	explicit FastOppositeTree(Instance &inst);
 	
-	tl::optional<fastopp_node_c> m_fastopp_X_tree;
-	tl::optional<fastopp_node_c> m_fastopp_Y_tree;
+	std::optional<fastopp_node_c> m_fastopp_X_tree;
+	std::optional<fastopp_node_c> m_fastopp_Y_tree;
 };
 
 //

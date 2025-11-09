@@ -33,8 +33,8 @@
 #ifndef __Eureka_Doom_Editor__OSXCalls__
 #define __Eureka_Doom_Editor__OSXCalls__
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 class SString;
 

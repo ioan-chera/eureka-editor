@@ -17,8 +17,8 @@
 //------------------------------------------------------------------------
 
 #include "m_strings.h"
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 enum class macOSDirType
 {

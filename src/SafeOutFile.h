@@ -19,8 +19,8 @@
 #ifndef SafeOutFile_h
 #define SafeOutFile_h
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <stdint.h>
 

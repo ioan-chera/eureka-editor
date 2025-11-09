@@ -34,8 +34,8 @@
 #include <map>
 #include <unordered_map>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 struct ConfigData;
 class Instance;
@@ -365,10 +365,10 @@ struct generalized_field_t
 
 struct generalized_linetype_t
 {
-	char key;
+	char key = '\0';
 
-	int base;
-	int length;
+	int base = 0;
+	int length = 0;
 
 	SString name;
 

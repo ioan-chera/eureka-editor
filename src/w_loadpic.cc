@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2020 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr≈Ω Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Rapha‚Äòl Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ static void DrawColumn(const Palette &pal, const ConfigData &config,Img_c& img, 
 }
 
 
-tl::optional<Img_c> LoadImage_PNG(const Lump_c &lump, const SString &name)
+std::optional<Img_c> LoadImage_PNG(const Lump_c &lump, const SString &name)
 {
 	// load the raw data
 	const std::vector<byte> &tex_data = lump.getData();
@@ -126,7 +126,7 @@ tl::optional<Img_c> LoadImage_PNG(const Lump_c &lump, const SString &name)
 }
 
 
-tl::optional<Img_c> LoadImage_JPEG(const Lump_c &lump, const SString &name)
+std::optional<Img_c> LoadImage_JPEG(const Lump_c &lump, const SString &name)
 {
 	// load the raw data
 	const std::vector<byte> &tex_data = lump.getData();
@@ -147,7 +147,7 @@ tl::optional<Img_c> LoadImage_JPEG(const Lump_c &lump, const SString &name)
 }
 
 
-tl::optional<Img_c> LoadImage_TGA(const Lump_c &lump, const SString &name)
+std::optional<Img_c> LoadImage_TGA(const Lump_c &lump, const SString &name)
 {
 	// load the raw data
 	const std::vector<byte> &tex_data = lump.getData();
@@ -174,7 +174,7 @@ tl::optional<Img_c> LoadImage_TGA(const Lump_c &lump, const SString &name)
 }
 
 
-static bool ComposePicture(Img_c& dest, const tl::optional<Img_c> &sub,
+static bool ComposePicture(Img_c& dest, const std::optional<Img_c> &sub,
 	int pic_x_offset, int pic_y_offset,
 	int *pic_width, int *pic_height)
 {
@@ -223,7 +223,7 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 	int *pic_height)   // (can be NULL)
 {
 	ImageFormat img_fmt = W_DetectImageFormat(lump);
-	tl::optional<Img_c> sub;
+	std::optional<Img_c> sub;
 	
 	bool result;
 	int localPicWidth = 0, localPicHeight = 0;

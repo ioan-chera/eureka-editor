@@ -29,7 +29,7 @@
 
 #include "im_img.h"
 #include "w_wad.h"
-#include "tl/optional.hpp"
+#include <optional>
 
 
 // Determine the image format of the given wad lump.
@@ -59,9 +59,9 @@ enum class ImageFormat
 };
 ImageFormat W_DetectImageFormat(const Lump_c &lump);
 
-tl::optional<Img_c> LoadImage_JPEG(const Lump_c &lump, const SString &name);
-tl::optional<Img_c> LoadImage_PNG(const Lump_c &lump, const SString &name);
-tl::optional<Img_c> LoadImage_TGA(const Lump_c &lump, const SString &name);
+std::optional<Img_c> LoadImage_JPEG(const Lump_c &lump, const SString &name);
+std::optional<Img_c> LoadImage_PNG(const Lump_c &lump, const SString &name);
+std::optional<Img_c> LoadImage_TGA(const Lump_c &lump, const SString &name);
 bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c &dest, const Lump_c &lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr);
 
 #endif  /* __EUREKA_W_LOADPIC_H__ */

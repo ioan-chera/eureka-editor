@@ -29,6 +29,10 @@
 class EObjectsFixture : public ::testing::Test
 {
 protected:
+	EObjectsFixture()
+	{
+		inst.Editor_Init();
+	}
 	~EObjectsFixture()
 	{
 		inst.level.clear();

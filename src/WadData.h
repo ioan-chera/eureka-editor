@@ -24,8 +24,8 @@
 #include "m_strings.h"
 #include "sys_type.h"
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <functional>
 #include <map>
@@ -121,22 +121,22 @@ private:
 	
 
 	int missing_tex_color = 0;
-	tl::optional<Img_c> missing_tex_image;
+	std::optional<Img_c> missing_tex_image;
 
 	int unknown_tex_color = 0;
-	tl::optional<Img_c> unknown_tex_image;
+	std::optional<Img_c> unknown_tex_image;
 
 	int special_tex_color = 0;
-	tl::optional<Img_c> special_tex_image;
+	std::optional<Img_c> special_tex_image;
 
 	int unknown_flat_color = 0;
-	tl::optional<Img_c> unknown_flat_image;
+	std::optional<Img_c> unknown_flat_image;
 
 	int unknown_sprite_color = 0;
-	tl::optional<Img_c> unknown_sprite_image;
+	std::optional<Img_c> unknown_sprite_image;
 
-	tl::optional<Img_c> digit_font_11x14;
-	tl::optional<Img_c> digit_font_14x19;
+	std::optional<Img_c> digit_font_11x14;
+	std::optional<Img_c> digit_font_14x19;
 };
 
 

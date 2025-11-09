@@ -25,8 +25,8 @@
 #include <functional>
 #include <vector>
 
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #ifdef WIN32
 #define DIR_SEP_CH   '\\'

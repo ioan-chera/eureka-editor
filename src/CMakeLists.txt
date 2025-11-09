@@ -28,11 +28,6 @@ set(source_base
     WadData.h
 )
 
-set(source_thirdparty
-    filesystem.hpp
-    tl/optional.hpp
-)
-
 set(source_bsp
     bsp_level.cc
     bsp_node.cc
@@ -186,7 +181,6 @@ add_library(
     ${source_lib}
     ${source_m}
     ${source_r}
-    ${source_thirdparty}
     ${source_ui}
     ${source_w}
 )
@@ -195,7 +189,6 @@ add_library(
     eurekacore STATIC
     Errors.cc
     Errors.h
-    filesystem.hpp
     FixedPoint.h
     lib_adler.cc
     lib_adler.h
@@ -351,6 +344,5 @@ source_group("m_ source" FILES ${source_m})
 source_group("r_ source" FILES ${source_r})
 source_group("ui_ source" FILES ${source_ui})
 source_group("w_ source" FILES ${source_w})
-source_group("third-party" FILES ${source_thirdparty})
 
 # TODO: add the warnings and warnings-as-errors

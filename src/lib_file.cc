@@ -23,6 +23,8 @@
 #include "safe_ctype.h"
 #include "sys_debug.h"
 
+#include <fstream>
+
 #ifdef WIN32
 #include <io.h>
 #include "m_strings.h"
