@@ -140,7 +140,9 @@ TEST(LibFile, FilenameIsBare)
 	ASSERT_FALSE(FilenameIsBare("/doom"));
 	ASSERT_FALSE(FilenameIsBare("/doom.wad"));
 	ASSERT_FALSE(FilenameIsBare("doom.wad"));
+#ifdef _WIN32
 	ASSERT_FALSE(FilenameIsBare("C:\\doom"));
+#endif
 }
 
 TEST(LibFile, GetAbsolutePath)
