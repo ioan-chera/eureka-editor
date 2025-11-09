@@ -709,8 +709,8 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if(isUDMF)
 		{
 			flag.udmfKey = argv[5];
-			const UDMFMapping* mapping = UDMF_MappingForName(flag.udmfKey.c_str());
-			if(mapping && mapping->set != UDMFMapping::Set::thing)
+			const UDMFMapping* mapping = UDMFMapping::getForName(flag.udmfKey.c_str(), UDMFMapping::Category::thing);
+			if(mapping)
 				flag.value = mapping->value;
 			else
 			{
@@ -782,7 +782,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		lineflag_t flag{};
 		flag.label = argv[1];
 		flag.udmfKey = argv[2];
-		const UDMFMapping *mapping = UDMF_MappingForName(flag.udmfKey.c_str());
+		const UDMFMapping *mapping = UDMFMapping::getForName(flag.udmfKey.c_str(), UDMFMapping::Category::line);
 		if(mapping)
 		{
 			flag.flagSet = mapping->flagSet;

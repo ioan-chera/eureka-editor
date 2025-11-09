@@ -23,21 +23,18 @@
 
 struct UDMFMapping
 {
-	enum class Set
+	enum class Category
 	{
-		line1,
-		line2,
+		line,
 		thing
 	};
 
-	const char *name;
-	Set set;
-	unsigned value;
+	static const UDMFMapping* getForName(const char* name, Category category);
+	
+	const char *const name;
+	const Category category;
+	const int flagSet;
+	const unsigned value;
 };
-
-const auto& getUDMFMapping();
-
-const UDMFMapping *UDMF_MappingForName(const char *name);
-
 
 #endif

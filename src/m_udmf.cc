@@ -40,21 +40,21 @@
 #include <array>
 #include <initializer_list>
 
-#define UDMF_LINE_MAPPING(name) UDMFMapping{ #name, UDMFMapping::Set::line1, static_cast<unsigned>(MLF_UDMF_ ## name) }
-#define UDMF_LINE_MAPPING2(name) UDMFMapping{#name, UDMFMapping::Set::line2, static_cast<unsigned>(MLF2_UDMF_ ## name) }
-#define UDMF_THING_MAPPING(name) UDMFMapping{#name, UDMFMapping::Set::thing, static_cast<unsigned>(MTF_UDMF_ ## name) }
+#define UDMF_LINE_MAPPING(name) UDMFMapping{ #name, UDMFMapping::Category::line, 1, static_cast<unsigned>(MLF_UDMF_ ## name) }
+#define UDMF_LINE_MAPPING2(name) UDMFMapping{#name, UDMFMapping::Category::line, 2, static_cast<unsigned>(MLF2_UDMF_ ## name) }
+#define UDMF_THING_MAPPING(name) UDMFMapping{#name, UDMFMapping::Category::thing, 1, static_cast<unsigned>(MTF_UDMF_ ## name) }
 
-static constexpr std::array kUDMFMapping = {
-	UDMFMapping{ "blocking",      UDMFMapping::Set::line1, (unsigned)MLF_Blocking },
-	UDMFMapping{ "blockmonsters", UDMFMapping::Set::line1, (unsigned)MLF_BlockMonsters },
-	UDMFMapping{ "twosided",      UDMFMapping::Set::line1, (unsigned)MLF_TwoSided },
-	UDMFMapping{ "dontpegtop",    UDMFMapping::Set::line1, (unsigned)MLF_UpperUnpegged },
-	UDMFMapping{ "dontpegbottom", UDMFMapping::Set::line1, (unsigned)MLF_LowerUnpegged },
-	UDMFMapping{ "secret",        UDMFMapping::Set::line1, (unsigned)MLF_Secret },
-	UDMFMapping{ "blocksound",    UDMFMapping::Set::line1, (unsigned)MLF_SoundBlock },
-	UDMFMapping{ "dontdraw",      UDMFMapping::Set::line1, (unsigned)MLF_DontDraw },
-	UDMFMapping{ "mapped",        UDMFMapping::Set::line1, (unsigned)MLF_Mapped },
-	UDMFMapping{ "passuse",       UDMFMapping::Set::line1, (unsigned)MLF_Boom_PassThru },
+static constexpr UDMFMapping kUDMFMapping[] = {
+	UDMFMapping{ "blocking",      UDMFMapping::Category::line, 1, (unsigned)MLF_Blocking },
+	UDMFMapping{ "blockmonsters", UDMFMapping::Category::line, 1, (unsigned)MLF_BlockMonsters },
+	UDMFMapping{ "twosided",      UDMFMapping::Category::line, 1, (unsigned)MLF_TwoSided },
+	UDMFMapping{ "dontpegtop",    UDMFMapping::Category::line, 1, (unsigned)MLF_UpperUnpegged },
+	UDMFMapping{ "dontpegbottom", UDMFMapping::Category::line, 1, (unsigned)MLF_LowerUnpegged },
+	UDMFMapping{ "secret",        UDMFMapping::Category::line, 1, (unsigned)MLF_Secret },
+	UDMFMapping{ "blocksound",    UDMFMapping::Category::line, 1, (unsigned)MLF_SoundBlock },
+	UDMFMapping{ "dontdraw",      UDMFMapping::Category::line, 1, (unsigned)MLF_DontDraw },
+	UDMFMapping{ "mapped",        UDMFMapping::Category::line, 1, (unsigned)MLF_Mapped },
+	UDMFMapping{ "passuse",       UDMFMapping::Category::line, 1, (unsigned)MLF_Boom_PassThru },
 	UDMF_LINE_MAPPING(Translucent),
 	UDMF_LINE_MAPPING(Translucent  ),
 	UDMF_LINE_MAPPING(Transparent  ),
@@ -89,30 +89,26 @@ static constexpr std::array kUDMFMapping = {
 	UDMF_LINE_MAPPING2(DeathSpecial      ),
 
 // Things
-	{ "skill1",      UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Easiest },
-	{ "skill2",      UDMFMapping::Set::thing, (unsigned)MTF_Easy },
-	{ "skill3",      UDMFMapping::Set::thing, (unsigned)MTF_Medium },
-	{ "skill4",      UDMFMapping::Set::thing, (unsigned)MTF_Hard },
-	{ "skill5",      UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Hardest },
-	{ "ambush",      UDMFMapping::Set::thing, (unsigned)MTF_Ambush },
-	{ "friend",      UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Friend },
-	{ "dormant",     UDMFMapping::Set::thing, (unsigned)MTF_Hexen_Dormant },
-	{ "single",      UDMFMapping::Set::thing, (unsigned)MTF_Hexen_SP },
-	{ "dm",          UDMFMapping::Set::thing, (unsigned)MTF_Hexen_DM },
-	{ "coop",        UDMFMapping::Set::thing, (unsigned)MTF_Hexen_COOP },
-	{ "class1",      UDMFMapping::Set::thing, (unsigned)MTF_Hexen_Fighter },
-	{ "class2",      UDMFMapping::Set::thing, (unsigned)MTF_Hexen_Cleric },
-	{ "class3",      UDMFMapping::Set::thing, (unsigned)MTF_Hexen_Mage },
-	{ "standing",    UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Standing },
-	{ "strifeally",  UDMFMapping::Set::thing, (unsigned)MTF_UDMF_StrifeAlly },
-	{ "translucent", UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Translucent },
-	{ "invisible",   UDMFMapping::Set::thing, (unsigned)MTF_UDMF_Invisible },
-	{ "countsecret", UDMFMapping::Set::thing, (unsigned)MTF_UDMF_CountSecret },
+	{ "skill1",      UDMFMapping::Category::thing, 1, (unsigned)MTF_UDMF_Easiest },
+	{ "skill2",      UDMFMapping::Category::thing, 1, (unsigned)MTF_Easy },
+	{ "skill3",      UDMFMapping::Category::thing, 1, (unsigned)MTF_Medium },
+	{ "skill4",      UDMFMapping::Category::thing, 1, (unsigned)MTF_Hard },
+	{ "skill5",      UDMFMapping::Category::thing, 1, (unsigned)MTF_UDMF_Hardest },
+	{ "ambush",      UDMFMapping::Category::thing, 1, (unsigned)MTF_Ambush },
+	{ "friend",      UDMFMapping::Category::thing, 1, (unsigned)MTF_UDMF_Friend },
+	{ "dormant",     UDMFMapping::Category::thing, 1, (unsigned)MTF_Hexen_Dormant },
+	{ "single",      UDMFMapping::Category::thing, 1, (unsigned)MTF_Hexen_SP },
+	{ "dm",          UDMFMapping::Category::thing, 1, (unsigned)MTF_Hexen_DM },
+	{ "coop",        UDMFMapping::Category::thing, 1, (unsigned)MTF_Hexen_COOP },
+	{ "class1",      UDMFMapping::Category::thing, 1, (unsigned)MTF_Hexen_Fighter },
+	{ "class2",      UDMFMapping::Category::thing, 1, (unsigned)MTF_Hexen_Cleric },
+	{ "class3",      UDMFMapping::Category::thing, 1, (unsigned)MTF_Hexen_Mage },
+	{ "standing",    UDMFMapping::Category::thing, 1, (unsigned)MTF_UDMF_Standing },
+	{ "strifeally",  UDMFMapping::Category::thing, 1, (unsigned)MTF_UDMF_StrifeAlly },
+	{ "translucent", UDMFMapping::Category::thing, 1, (unsigned)MTF_UDMF_Translucent },
+	{ "invisible",   UDMFMapping::Category::thing, 1, (unsigned)MTF_UDMF_Invisible },
+	{ "countsecret", UDMFMapping::Category::thing, 1, (unsigned)MTF_UDMF_CountSecret },
 };
-
-const auto& getUDMFMapping() {
-	return kUDMFMapping;
-}
 
 class Udmf_Token
 {
@@ -433,10 +429,10 @@ public:
 	}
 };
 
-const UDMFMapping *UDMF_MappingForName(const char *name)
+const UDMFMapping *UDMFMapping::getForName(const char *name, Category category)
 {
 	for(const UDMFMapping &mapping : kUDMFMapping)
-		if(!y_stricmp(name, mapping.name))
+		if(!y_stricmp(name, mapping.name) && mapping.category == category)
 			return &mapping;
 	return nullptr;
 }
@@ -543,10 +539,6 @@ static void UDMF_ParseThingField(const Document &doc, const ConfigData &config, 
 	if (value.Match("false"))
 		return;
 
-	// TODO hexen options
-
-	// TODO strife options
-
 	if (field.Match("x"))
 		T->raw_x = value.DecodeCoord();
 	else if (field.Match("y"))
@@ -575,10 +567,10 @@ static void UDMF_ParseThingField(const Document &doc, const ConfigData &config, 
 
 	else
 	{
-		for(const thingflag_t &flag : config.udmf_thing_flags)
-			if (field.Match(flag.udmfKey.c_str()))
+		for(const UDMFMapping &mapping : kUDMFMapping)
+			if(field.Match(mapping.name) && mapping.category == UDMFMapping::Category::thing)
 			{
-				T->options |= flag.value;
+				T->options |= mapping.value;
 				return;
 			}
 		gLog.debugPrintf("thing #%d: unknown field '%s'\n", doc.numThings()-1, field.c_str());
@@ -637,20 +629,10 @@ static void UDMF_ParseLinedefField(const Document &doc, const ConfigData &config
 	else
 	{
 		// Flags
-		for(const UDMFMapping &mapping : getUDMFMapping())
-			if(field.Match(mapping.name))
+		for(const UDMFMapping &mapping : kUDMFMapping)
+			if(field.Match(mapping.name) && mapping.category == UDMFMapping::Category::line)
 			{
-				switch(mapping.set)
-				{
-				case UDMFMapping::Set::line1:
-					LD->flags |= mapping.value;
-					break;
-				case UDMFMapping::Set::line2:
-					LD->flags2 |= mapping.value;
-					break;
-				default:
-					continue;	// not linedef specific, don't return
-				}
+				(mapping.flagSet == 1 ? LD->flags : LD->flags2) |= mapping.value;
 				return;
 			}
 		gLog.debugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
@@ -914,14 +896,22 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		lump->Printf("type = %d;\n", th->type);
 
 		// thing options
-		for(const thingflag_t &flag : inst.conf.udmf_thing_flags)
-			WrFlag(lump, th->options, flag.udmfKey.c_str(), flag.value);
+		for(const UDMFMapping& mapping : kUDMFMapping)
+		{
+			if (mapping.category != UDMFMapping::Category::thing)
+				continue;
+			WrFlag(lump, th->options, mapping.name, mapping.value);
+		}
 
-		// TODO Hexen flags
-
-		// TODO Strife flags
-
-		// TODO Hexen special and args
+		if(inst.conf.features.udmf_thingspecials)
+		{
+			lump->Printf("special = %d;\n", th->special);
+			lump->Printf("arg0 = %d;\n", th->arg1);
+			lump->Printf("arg1 = %d;\n", th->arg2);
+			lump->Printf("arg2 = %d;\n", th->arg3);
+			lump->Printf("arg3 = %d;\n", th->arg4);
+			lump->Printf("arg4 = %d;\n", th->arg5);
+		}
 
 		lump->Printf("}\n\n");
 	}
@@ -977,19 +967,11 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
 
 		// linedef flags
-		for(const UDMFMapping& mapping : getUDMFMapping())
+		for(const UDMFMapping& mapping : kUDMFMapping)
 		{
-			switch(mapping.set)
-			{
-			case UDMFMapping::Set::line1:
-				WrFlag(lump, ld->flags, mapping.name, mapping.value);
-				break;
-			case UDMFMapping::Set::line2:
-				WrFlag(lump, ld->flags2, mapping.name, mapping.value);
-				break;
-			default:
-				break;
-			}
+			if (mapping.category != UDMFMapping::Category::line)
+				continue;
+			WrFlag(lump, mapping.flagSet == 1 ? ld->flags : ld->flags2, mapping.name, mapping.value);
 		}
 
 		lump->Printf("}\n\n");
