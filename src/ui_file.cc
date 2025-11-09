@@ -733,7 +733,7 @@ static void PopulateIWADsHelper(Fl_Choice *choice, const SString &prev_game,
 	// If menu_string is empty, leave dropdown empty - Find button will populate as needed
 }
 
-// Shared helper function for finding IWADs
+// Helper function for finding IWADs
 static std::optional<SString> FindIWAD(const Instance &inst)
 {
 	Fl_Native_File_Chooser chooser;
@@ -773,36 +773,32 @@ static std::optional<SString> FindIWAD(const Instance &inst)
 	return game;
 }
 
-UI_UDMFSetup::UI_UDMFSetup(const Instance &inst, const SString &udmfNamespace, const std::vector<PortGamePair> &pairs) :
-	UI_Escapable_Window(400, 189, "UDMF Namespace Mismatch"),
-	inst(inst),
+UI_UDMFSetup::UI_UDMFSetup(const SString &udmfNamespace, const SString &levelName,
+	const std::vector<PortGamePair> &pairs) :
+	UI_Escapable_Window(400, 209, "UDMF Namespace Mismatch"),
 	availablePairs(pairs)
 {
 	callback(close_callback, this);
 	resizable(NULL);
 
 	char msg[256];
-	snprintf(msg, sizeof(msg), "UDMF namespace \"%s\" requires specific port/game:", udmfNamespace.c_str());
-	Fl_Box *message = new Fl_Box(FL_NO_BOX, 15, 15, 350, 25, "");
+	snprintf(msg, sizeof(msg), "Map \"%s\" uses UDMF namespace \"%s\" which requires a game and port from the following options:",
+		levelName.c_str(), udmfNamespace.c_str());
+	Fl_Box *message = new Fl_Box(FL_NO_BOX, 15, 15, 350, 44, "");
 	message->copy_label(msg);
-	message->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	message->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_WRAP);
 
-	game_choice = new Fl_Choice(140, 50, 150, 29, "Game IWAD: ");
+	game_choice = new Fl_Choice(140, 70, 150, 29, "Game IWAD: ");
 	game_choice->labelfont(FL_HELVETICA_BOLD);
 	game_choice->down_box(FL_BORDER_BOX);
 	game_choice->callback((Fl_Callback*)game_callback, this);
 
-	{
-		Fl_Button* o = new Fl_Button(305, 52, 75, 25, "Find");
-		o->callback((Fl_Callback*)find_callback, this);
-	}
-
-	port_choice = new Fl_Choice(140, 87, 150, 29, "Source Port: ");
+	port_choice = new Fl_Choice(140, 109, 150, 29, "Source Port: ");
 	port_choice->labelfont(FL_HELVETICA_BOLD);
 	port_choice->down_box(FL_BORDER_BOX);
 	port_choice->callback((Fl_Callback*)port_callback, this);
 
-	Fl_Group* g = new Fl_Group(0, 124, w(), h() - 124);
+	Fl_Group* g = new Fl_Group(0, 144, w(), h() - 144);
 	g->box(FL_FLAT_BOX);
 	g->color(WINDOW_BG, WINDOW_BG);
 
@@ -946,20 +942,6 @@ void UI_UDMFSetup::use_callback(Fl_Button *w, void *data)
 	// Update result from current selections
 	dialog->UpdateSelection();
 	dialog->done = true;
-}
-
-void UI_UDMFSetup::find_callback(Fl_Button *w, void *data)
-{
-	UI_UDMFSetup *that = (UI_UDMFSetup *)data;
-
-	std::optional<SString> game = FindIWAD(that->inst);
-	if (!game)
-		return;
-
-	that->result.gameName = *game;
-	that->PopulateIWADs();
-	that->PopulatePort();
-	that->UpdateSelection();
 }
 
 void UI_UDMFSetup::UpdateSelection()

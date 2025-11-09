@@ -480,7 +480,7 @@ static std::optional<ConfigData> UDMF_ParseGlobalVar(const Instance &inst, Loadi
 				std::optional<PortGamePair> selectedPair;
 				if(pairs.size() > 1)
 				{
-					UI_UDMFSetup dialog(inst, loading.udmfNamespace, pairs);
+					UI_UDMFSetup dialog(loading.udmfNamespace, loading.levelName, pairs);
 					selectedPair = dialog.Run();
 
 					if(selectedPair.has_value())

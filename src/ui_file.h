@@ -147,7 +147,6 @@ private:
 
 	Fl_Button *use_but;
 
-	const Instance &inst;
 	const std::vector<PortGamePair> &availablePairs;
 
 	bool done = false;
@@ -158,14 +157,14 @@ private:
 	static void game_callback(Fl_Choice*, void*);
 	static void close_callback(Fl_Widget*, void*);
 	static void use_callback(Fl_Button*, void*);
-	static void find_callback(Fl_Button*, void*);
 
 	void PopulateIWADs();
 	void PopulatePort();
 	void UpdateSelection();
 
 public:
-	UI_UDMFSetup(const Instance &inst, const SString &udmfNamespace, const std::vector<PortGamePair> &pairs);
+	UI_UDMFSetup(const SString &udmfNamespace, const SString &levelName,
+		const std::vector<PortGamePair> &pairs);
 
 	// returns selected port/game pair if available, nullopt otherwise
 	std::optional<PortGamePair> Run();
