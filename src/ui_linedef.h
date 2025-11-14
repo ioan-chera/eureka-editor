@@ -58,6 +58,16 @@ private:
 		const struct lineflag_t *info;
 	};
 	std::vector<LineFlagButton> flagButtons;
+
+	// Category headers for collapsible flag sections
+	struct CategoryHeader
+	{
+		std::unique_ptr<class UI_CategoryButton> button;
+		std::vector<Fl_Check_Button *> flags;  // pointers to flags in this category
+		bool expanded = true;
+	};
+	std::vector<CategoryHeader> categoryHeaders;
+
 	int flagsStartX = 0;
 	int flagsStartY = 0;
 	int flagsAreaW = 0;
@@ -110,6 +120,9 @@ private:
 
 	const char *GeneralizedDesc(int type_num);
 
+	void categoryToggled(class UI_CategoryButton *categoryBtn);
+	void repositionAfterCategoryToggle();
+
 	static void    type_callback(Fl_Widget *, void *);
 	static void dyntype_callback(Fl_Widget *, void *);
 
@@ -118,6 +131,7 @@ private:
 	static void   args_callback(Fl_Widget *, void *);
 	static void length_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
+	static void category_callback(Fl_Widget *, void *);
 };
 
 #endif  /* __EUREKA_UI_LINEDEF_H__ */

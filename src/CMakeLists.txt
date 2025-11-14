@@ -116,6 +116,8 @@ set(source_ui
     ui_browser.h
     ui_canvas.cc
     ui_canvas.h
+    ui_category_button.cc
+    ui_category_button.h
     ui_default.cc
     ui_default.h
     ui_dialog.cc

@@ -146,10 +146,12 @@ struct thingflag_t
 // - value is the bit mask to toggle in LineDef::flags
 // - optional "pair <index>" allows two small checkboxes to share the same slot
 //   (index 0 is the left-small one, index 1 is the right-small one)
+// - optional category groups flags under collapsible headers
 struct lineflag_t
 {
 	SString label;
 	SString udmfKey;	// only relevant under UDMF
+	SString category;	// optional category name for grouping flags in UI
 	int flagSet = 1;
 	int value = 0;		// actual flag for Doom, internal flag for UDMF
 	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot

@@ -28,48 +28,48 @@ feature udmf_thingspecials 1
 
 udmf_namespace dsda
 
-udmf_lineflag "block players" blockplayers
-udmf_lineflag "block flyers" blockfloaters
-udmf_lineflag "block land mons" blocklandmonsters
-udmf_lineflag "block missiles" blockprojectiles
-udmf_lineflag "block hitscan" blockhitscan
-udmf_lineflag "block use" blockuse
-udmf_lineflag "block sight" blocksight
-udmf_lineflag "block all" blockeverything
-udmf_lineflag "revealed" revealed
-udmf_lineflag "jump over" jumpover
-udmf_lineflag "player cross" playercross
-udmf_lineflag "player use" playeruse
-udmf_lineflag "monster cross" monstercross
-udmf_lineflag "monster use" monsteruse
-udmf_lineflag "player shoot" impact
-udmf_lineflag "player push" playerpush
-udmf_lineflag "monster push" monsterpush
-udmf_lineflag "missile cross" missilecross
-udmf_lineflag "any cross" anycross
-udmf_lineflag "monster activate" monsteractivate
-udmf_lineflag "player use back" playeruseback
-udmf_lineflag "first side only" firstsideonly
-udmf_lineflag "check switch range" checkswitchrange
+udmf_lineflag "block players" blockplayers Blocking
+udmf_lineflag "block flyers" blockfloaters Blocking
+udmf_lineflag "block land mons" blocklandmonsters Blocking
+udmf_lineflag "block missiles" blockprojectiles Blocking
+udmf_lineflag "block hitscan" blockhitscan Blocking
+udmf_lineflag "block use" blockuse Blocking
+udmf_lineflag "block sight" blocksight Blocking
+udmf_lineflag "block all" blockeverything Blocking
+udmf_lineflag "revealed" revealed Automap
+udmf_lineflag "jump over" jumpover Special
+udmf_lineflag "player cross" playercross Activation
+udmf_lineflag "player use" playeruse Activation
+udmf_lineflag "monster cross" monstercross Activation
+udmf_lineflag "monster use" monsteruse Activation
+udmf_lineflag "player shoot" impact Activation
+udmf_lineflag "player push" playerpush Activation
+udmf_lineflag "monster push" monsterpush Activation
+udmf_lineflag "missile cross" missilecross Activation
+udmf_lineflag "any cross" anycross Activation
+udmf_lineflag "monster activate" monsteractivate Activation
+udmf_lineflag "player use back" playeruseback Activation
+udmf_lineflag "first side only" firstsideonly Activation
+udmf_lineflag "check switch range" checkswitchrange Activation
 # TODO: locknumber choice
-udmf_lineflag "repeatable" repeatspecial
+udmf_lineflag "repeatable" repeatspecial Special
 # TODO: arg0str text field
 # TODO: alpha number field
 
 # TODO: make this a choice
-udmf_lineflag "translucent" translucent
-udmf_lineflag "transparent" transparent
+udmf_lineflag "translucent" translucent Rendering
+udmf_lineflag "transparent" transparent Rendering
 
-udmf_lineflag "clip midtex" clipmidtex
-udmf_lineflag "wrap midtex" wrapmidtex
-udmf_lineflag "3d midtex" midtex3d
-udmf_lineflag "3dmidtex passproj" midtex3dimpassible
+udmf_lineflag "clip midtex" clipmidtex "Mid Texture"
+udmf_lineflag "wrap midtex" wrapmidtex "Mid Texture"
+udmf_lineflag "3d midtex" midtex3d "Mid Texture"
+udmf_lineflag "3dmidtex passproj" midtex3dimpassible "Mid Texture"
 # TODO: moreids number list box
 # TODO: automapstyle choice
 # TODO: health number field
 # TODO: healthgroup number field
-udmf_lineflag "act on damage" damagespecial
-udmf_lineflag "act on death" deathspecial
+udmf_lineflag "act on damage" damagespecial Special
+udmf_lineflag "act on death" deathspecial Special
 
 # TODO: sidedef fields
 # TODO: sector fields

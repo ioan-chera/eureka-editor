@@ -23,6 +23,7 @@
 #include "Instance.h"
 
 #include "main.h"
+#include "ui_category_button.h"
 #include "ui_misc.h"
 #include "ui_window.h"
 
@@ -694,6 +695,74 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 	}
 }
 
+void UI_LineBox::category_callback(Fl_Widget *w, void *data)
+{
+	UI_LineBox *box = (UI_LineBox *)data;
+	UI_CategoryButton *categoryBtn = (UI_CategoryButton *)w;
+	box->categoryToggled(categoryBtn);
+}
+
+void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
+{
+	// Find which category was toggled
+	for(auto &cat : categoryHeaders)
+	{
+		if(cat.button.get() == categoryBtn)
+		{
+			cat.expanded = categoryBtn->isExpanded();
+
+			// Show or hide all flags in this category
+			for(Fl_Check_Button *flag : cat.flags)
+			{
+				if(cat.expanded)
+					flag->show();
+				else
+					flag->hide();
+			}
+
+			// Reposition all controls below the flags area
+			repositionAfterCategoryToggle();
+			redraw();
+			break;
+		}
+	}
+}
+
+void UI_LineBox::repositionAfterCategoryToggle()
+{
+	int Y = y() + flagsStartY;
+	const int rowH = 19;
+	const int categoryH = 22;
+
+	// Calculate positions for all categories and their flags
+	for(auto &cat : categoryHeaders)
+	{
+		if(cat.button)
+		{
+			cat.button->position(cat.button->x(), Y);
+			Y += categoryH;
+
+			if(cat.expanded)
+			{
+				// Position all flags in this category
+				for(Fl_Check_Button *flag : cat.flags)
+				{
+					flag->position(flag->x(), Y);
+					Y += rowH;
+				}
+			}
+		}
+	}
+
+	// Add spacing after flags
+	Y += 29;
+
+	// Reposition side boxes
+	front->Fl_Widget::position(front->x(), Y);
+	Y += front->h() + 14;
+	back->Fl_Widget::position(back->x(), Y);
+}
+
 
 //------------------------------------------------------------------------
 
@@ -1029,6 +1098,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	for(const auto &btn : flagButtons)
 		this->remove(btn.button.get());
 	flagButtons.clear();
+	for(const auto &cat : categoryHeaders)
+		this->remove(cat.button.get());
+	categoryHeaders.clear();
 
 	int Y = y() + flagsStartY;
 
@@ -1037,80 +1109,190 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 	if(!flaglist.empty())
 	{
-		// Build slots from sequential flags, supporting optional pairing (pairIndex 0/1)
-		struct Slot
+		// Group flags by category (case-insensitive)
+		struct CaseInsensitiveCompare
 		{
-			const lineflag_t *a = nullptr;
-			const lineflag_t *b = nullptr;
+			bool operator()(const SString &a, const SString &b) const
+			{
+				return a.noCaseCompare(b) < 0;
+			}
 		};
-		std::vector<Slot> slots;
-		slots.reserve(flaglist.size());
-		for(size_t i = 0; i < flaglist.size(); ++i)
+		std::map<SString, std::vector<const lineflag_t *>, CaseInsensitiveCompare> categorized;
+		for(const lineflag_t &f : flaglist)
 		{
-			const lineflag_t *f = &flaglist[i];
-			if(f->pairIndex == 0 && i + 1 < flaglist.size() && flaglist[i + 1].pairIndex == 1)
-			{
-				Slot s;
-				s.a = f;
-				s.b = &flaglist[i + 1];
-				slots.push_back(s);
-				++i; // consume the pair
-			}
-			else
-			{
-				Slot s;
-				if(f->pairIndex == 1)
-					s.b = f;
-				else
-					s.a = f;
-				slots.push_back(s);
-			}
+			SString catName = f.category.empty() ? SString("") : f.category;
+			categorized[catName].push_back(&f);
 		}
 
 		const int FW = 110;
 		const int leftX = x() + flagsStartX + 28;
 		const int rightX = x() + flagsStartX + flagsAreaW - 120;
 		const int rowH = 19;
-
-		const int total = (int)slots.size();
-		const int leftCount = (total + 1) / 2; // ceil to make columns as even as possible
-
-		int yLeft = Y;
-		int yRight = Y;
+		const int categoryH = 22;
 
 		begin();
-		for(int idx = 0; idx < total; ++idx)
-		{
-			const Slot &s = slots[idx];
-			const bool onLeft = idx < leftCount;
-			const int baseX = onLeft ? leftX : rightX;
-			int &curY = onLeft ? yLeft : yRight;
 
-			if(s.a)
+		// Process each category
+		for(auto &catPair : categorized)
+		{
+			const SString &catName = catPair.first;
+			std::vector<const lineflag_t *> &flagsInCat = catPair.second;
+
+			// Create category header if category name is not empty
+			if(!catName.empty())
 			{
-				LineFlagButton fb;
-				fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
-				fb.button->labelsize(12);
-				fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->flagSet, s.a->value);
-				fb.button->callback(flags_callback, fb.data.get());
-				fb.info = s.a;
-				flagButtons.push_back(std::move(fb));
+				CategoryHeader catHeader;
+				catHeader.button = std::make_unique<UI_CategoryButton>(x() + flagsStartX, Y, flagsAreaW, categoryH, catName.c_str());
+				catHeader.button->callback(category_callback, this);
+				catHeader.expanded = true;
+				Y += categoryH;
+
+				// Build slots for flags in this category
+				struct Slot
+				{
+					const lineflag_t *a = nullptr;
+					const lineflag_t *b = nullptr;
+				};
+				std::vector<Slot> slots;
+				slots.reserve(flagsInCat.size());
+				for(size_t i = 0; i < flagsInCat.size(); ++i)
+				{
+					const lineflag_t *f = flagsInCat[i];
+					if(f->pairIndex == 0 && i + 1 < flagsInCat.size() && flagsInCat[i + 1]->pairIndex == 1)
+					{
+						Slot s;
+						s.a = f;
+						s.b = flagsInCat[i + 1];
+						slots.push_back(s);
+						++i; // consume the pair
+					}
+					else
+					{
+						Slot s;
+						if(f->pairIndex == 1)
+							s.b = f;
+						else
+							s.a = f;
+						slots.push_back(s);
+					}
+				}
+
+				const int total = (int)slots.size();
+				const int leftCount = (total + 1) / 2;
+
+				int yLeft = Y;
+				int yRight = Y;
+
+				for(int idx = 0; idx < total; ++idx)
+				{
+					const Slot &s = slots[idx];
+					const bool onLeft = idx < leftCount;
+					const int baseX = onLeft ? leftX : rightX;
+					int &curY = onLeft ? yLeft : yRight;
+
+					if(s.a)
+					{
+						LineFlagButton fb;
+						fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
+						fb.button->labelsize(12);
+						fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->flagSet, s.a->value);
+						fb.button->callback(flags_callback, fb.data.get());
+						fb.info = s.a;
+						catHeader.flags.push_back(fb.button.get());
+						flagButtons.push_back(std::move(fb));
+					}
+					if(s.b)
+					{
+						LineFlagButton fb2;
+						fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
+						fb2.button->labelsize(12);
+						fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->flagSet, s.b->value);
+						fb2.button->callback(flags_callback, fb2.data.get());
+						fb2.info = s.b;
+						catHeader.flags.push_back(fb2.button.get());
+						flagButtons.push_back(std::move(fb2));
+					}
+					curY += rowH;
+				}
+
+				Y = (yLeft > yRight ? yLeft : yRight);
+				categoryHeaders.push_back(std::move(catHeader));
 			}
-			if(s.b)
+			else
 			{
-				LineFlagButton fb2;
-				fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
-				fb2.button->labelsize(12);
-				fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->flagSet, s.b->value);
-				fb2.button->callback(flags_callback, fb2.data.get());
-				fb2.info = s.b;
-				flagButtons.push_back(std::move(fb2));
+				// No category - render flags directly (old behavior for uncategorized flags)
+				struct Slot
+				{
+					const lineflag_t *a = nullptr;
+					const lineflag_t *b = nullptr;
+				};
+				std::vector<Slot> slots;
+				slots.reserve(flagsInCat.size());
+				for(size_t i = 0; i < flagsInCat.size(); ++i)
+				{
+					const lineflag_t *f = flagsInCat[i];
+					if(f->pairIndex == 0 && i + 1 < flagsInCat.size() && flagsInCat[i + 1]->pairIndex == 1)
+					{
+						Slot s;
+						s.a = f;
+						s.b = flagsInCat[i + 1];
+						slots.push_back(s);
+						++i;
+					}
+					else
+					{
+						Slot s;
+						if(f->pairIndex == 1)
+							s.b = f;
+						else
+							s.a = f;
+						slots.push_back(s);
+					}
+				}
+
+				const int total = (int)slots.size();
+				const int leftCount = (total + 1) / 2;
+
+				int yLeft = Y;
+				int yRight = Y;
+
+				for(int idx = 0; idx < total; ++idx)
+				{
+					const Slot &s = slots[idx];
+					const bool onLeft = idx < leftCount;
+					const int baseX = onLeft ? leftX : rightX;
+					int &curY = onLeft ? yLeft : yRight;
+
+					if(s.a)
+					{
+						LineFlagButton fb;
+						fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
+						fb.button->labelsize(12);
+						fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->flagSet, s.a->value);
+						fb.button->callback(flags_callback, fb.data.get());
+						fb.info = s.a;
+						flagButtons.push_back(std::move(fb));
+					}
+					if(s.b)
+					{
+						LineFlagButton fb2;
+						fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
+						fb2.button->labelsize(12);
+						fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->flagSet, s.b->value);
+						fb2.button->callback(flags_callback, fb2.data.get());
+						fb2.info = s.b;
+						flagButtons.push_back(std::move(fb2));
+					}
+					curY += rowH;
+				}
+
+				Y = (yLeft > yRight ? yLeft : yRight);
 			}
-			curY += rowH;
 		}
+
 		end();
 
-		Y = (yLeft > yRight ? yLeft : yRight) + 29;
+		Y += 29;
 	}
 	else
 	{
