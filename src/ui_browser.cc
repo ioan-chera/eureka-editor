@@ -1368,9 +1368,7 @@ public:
 
 
 UI_Generalized_Box::UI_Generalized_Box(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, NULL),
-	num_pages(0),
-	in_update(false), inst(inst)
+    Fl_Group(X, Y, W, H, NULL), inst(inst)
 {
 	box(FL_FLAT_BOX);
 

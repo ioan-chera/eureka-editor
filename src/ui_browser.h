@@ -197,9 +197,9 @@ private:
 
 	UI_Generalized_Page * pages[MAX_PAGES];
 
-	int num_pages;
+	int num_pages = 0;
 
-	int in_update;
+	int in_update = false;
 
 	Instance &inst;
 
