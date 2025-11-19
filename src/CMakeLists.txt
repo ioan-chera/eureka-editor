@@ -324,7 +324,7 @@ target_include_directories(eurekasrc PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(eurekasrc PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(MSVC)
-    target_compile_options(eurekasrc PUBLIC "/MP")
+    target_compile_options(eurekasrc PUBLIC "/MP" "/utf-8")
 endif()
 
 if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
