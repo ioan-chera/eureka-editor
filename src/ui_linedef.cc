@@ -744,12 +744,24 @@ void UI_LineBox::repositionAfterCategoryToggle()
 
 			if(cat.expanded)
 			{
-				// Position all flags in this category
-				for(Fl_Check_Button *flag : cat.flags)
+				// Position all flags in this category using two-column layout
+				const int total = (int)cat.flags.size();
+				const int leftCount = (total + 1) / 2;
+
+				int yLeft = Y;
+				int yRight = Y;
+
+				for(int idx = 0; idx < total; ++idx)
 				{
-					flag->position(flag->x(), Y + 2);
-					Y += rowH;
+					Fl_Check_Button *flag = cat.flags[idx];
+					const bool onLeft = idx < leftCount;
+					int &curY = onLeft ? yLeft : yRight;
+
+					flag->position(flag->x(), curY + 2);
+					curY += rowH;
 				}
+
+				Y = (yLeft > yRight ? yLeft : yRight);
 			}
 		}
 	}
