@@ -62,6 +62,12 @@ due to sector heights. This is an editor convenience feature.
 
 GRAY1 is a default texture that is automatically set for new sidedefs if they don't have any texture reference.
 
+### UGH file parsing
+In UGH file parsing code (such as in `M_ParseNormalLine` in src/m_game.cc), the `nargs` variable counts ONLY the parameters after the command word, NOT the command word itself. This is different from standard `argc` behavior in a typical `main` function, where `argc` includes the program name as `argv[0]`. In Eureka's UGH parsing:
+- `nargs` = number of parameters (excluding the command word)
+- `argv[1]` = first parameter after the command word
+- `argv[2]` = second parameter after the command word, etc.
+
 ## Documentation repository
 
 An accompanying repository with the documentation is at https://github.com/wesleywerner/eureka-docs.git, where I have write access. It contains ReStructured Text format documentation, which gets turned by an automatic script into a website when git-tagged.
