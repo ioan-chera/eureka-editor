@@ -36,8 +36,10 @@ udmf_lineflag "block hitscan" blockhitscan Blocking
 udmf_lineflag "block use" blockuse Blocking
 udmf_lineflag "block sight" blocksight Blocking
 udmf_lineflag "block all" blockeverything Blocking
+udmf_lineflag "jump over" jumpover Blocking
+udmf_lineflag "3d midtex" midtex3d Blocking
+udmf_lineflag "3d midtex passproj" midtex3dimpassible Blocking
 udmf_lineflag "revealed" revealed Automap
-udmf_lineflag "jump over" jumpover Special
 udmf_lineflag "player cross" playercross Activation
 udmf_lineflag "player use" playeruse Activation
 udmf_lineflag "monster cross" monstercross Activation
@@ -51,25 +53,24 @@ udmf_lineflag "monster activate" monsteractivate Activation
 udmf_lineflag "player use back" playeruseback Activation
 udmf_lineflag "first side only" firstsideonly Activation
 udmf_lineflag "check switch range" checkswitchrange Activation
+udmf_lineflag "act on damage" damagespecial Activation
+udmf_lineflag "act on death" deathspecial Activation
+
 # TODO: locknumber choice
-udmf_lineflag "repeatable" repeatspecial Special
+udmf_lineflag "repeatable" repeatspecial Activation
 # TODO: arg0str text field
 # TODO: alpha number field
 
 # TODO: make this a choice
 udmf_lineflag "translucent" translucent Rendering
 udmf_lineflag "transparent" transparent Rendering
+udmf_lineflag "clip midtex" clipmidtex Rendering
+udmf_lineflag "wrap midtex" wrapmidtex Rendering
 
-udmf_lineflag "clip midtex" clipmidtex "Mid Texture"
-udmf_lineflag "wrap midtex" wrapmidtex "Mid Texture"
-udmf_lineflag "3d midtex" midtex3d "Mid Texture"
-udmf_lineflag "3dmidtex passproj" midtex3dimpassible "Mid Texture"
 # TODO: moreids number list box
 # TODO: automapstyle choice
 # TODO: health number field
 # TODO: healthgroup number field
-udmf_lineflag "act on damage" damagespecial Special
-udmf_lineflag "act on death" deathspecial Special
 
 # TODO: sidedef fields
 # TODO: sector fields
