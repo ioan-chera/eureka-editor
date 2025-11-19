@@ -734,6 +734,38 @@ void UI_LineBox::repositionAfterCategoryToggle()
 	const int rowH = 19;
 	const int categoryH = 22;
 
+	// First, count uncategorized flags (not in any category)
+	// These appear before categorized ones and we need to skip over them
+	int uncategorizedCount = 0;
+	for(const auto &fb : flagButtons)
+	{
+		bool inCategory = false;
+		for(const auto &cat : categoryHeaders)
+		{
+			for(const auto *catFlag : cat.flags)
+			{
+				if(catFlag == fb.button.get())
+				{
+					inCategory = true;
+					break;
+				}
+			}
+			if(inCategory)
+				break;
+		}
+		if(!inCategory)
+			uncategorizedCount++;
+	}
+
+	// If there are uncategorized flags, skip over their space
+	if(uncategorizedCount > 0)
+	{
+		const int leftCount = (uncategorizedCount + 1) / 2;
+		const int rightCount = uncategorizedCount - leftCount;
+		const int maxRows = (leftCount > rightCount) ? leftCount : rightCount;
+		Y += maxRows * rowH;
+	}
+
 	// Calculate positions for all categories and their flags
 	for(auto &cat : categoryHeaders)
 	{
