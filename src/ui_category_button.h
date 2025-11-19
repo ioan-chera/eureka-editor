@@ -41,8 +41,6 @@ public:
 
 private:
 	bool mExpanded = true;
-
-	void drawArrow(int x, int y, int size) const;
 };
 
 #endif  /* __EUREKA_UI_CATEGORY_BUTTON_H__ */
