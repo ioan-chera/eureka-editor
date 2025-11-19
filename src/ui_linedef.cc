@@ -1235,30 +1235,23 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				const int baseX = onLeft ? leftX : rightX;
 				int& curY = onLeft ? yLeft : yRight;
 
+				auto addButton = [baseX, curY, FW, this, &catHeader](int offset, const lineflag_t *flag)
+					{
+						LineFlagButton fb;
+						fb.button = std::make_unique<Fl_Check_Button>(baseX + offset, curY + 2, FW, 20, flag->label.c_str());
+						fb.button->labelsize(12);
+						fb.data = std::make_unique<line_flag_CB_data_c>(this, flag->flagSet, flag->value);
+						fb.button->callback(flags_callback, fb.data.get());
+						fb.info = flag;
+						if(catHeader.button)
+							catHeader.flags.push_back(fb.button.get());
+						flagButtons.push_back(std::move(fb));
+					};
+
 				if(s.a)
-				{
-					LineFlagButton fb;
-					fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
-					fb.button->labelsize(12);
-					fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->flagSet, s.a->value);
-					fb.button->callback(flags_callback, fb.data.get());
-					fb.info = s.a;
-					if(catHeader.button)
-						catHeader.flags.push_back(fb.button.get());
-					flagButtons.push_back(std::move(fb));
-				}
+					addButton(0, s.a);
 				if(s.b)
-				{
-					LineFlagButton fb2;
-					fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
-					fb2.button->labelsize(12);
-					fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->flagSet, s.b->value);
-					fb2.button->callback(flags_callback, fb2.data.get());
-					fb2.info = s.b;
-					if(catHeader.button)
-						catHeader.flags.push_back(fb2.button.get());
-					flagButtons.push_back(std::move(fb2));
-				}
+					addButton(16, s.b);
 				curY += rowH;
 			}
 
