@@ -1182,157 +1182,89 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			const SString &catName = catPair.first;
 			std::vector<const lineflag_t *> &flagsInCat = catPair.second;
 
-			// Create category header if category name is not empty
+			CategoryHeader catHeader = {};
 			if(!catName.empty())
 			{
-				CategoryHeader catHeader;
 				catHeader.button = std::make_unique<UI_CategoryButton>(x() + flagsStartX, Y, flagsAreaW, categoryH);
 				catHeader.button->copy_label(catName.c_str());
 				catHeader.button->callback(category_callback, this);
 				catHeader.expanded = true;
 				Y += categoryH;
-
-				// Build slots for flags in this category
-				struct Slot
-				{
-					const lineflag_t *a = nullptr;
-					const lineflag_t *b = nullptr;
-				};
-				std::vector<Slot> slots;
-				slots.reserve(flagsInCat.size());
-				for(size_t i = 0; i < flagsInCat.size(); ++i)
-				{
-					const lineflag_t *f = flagsInCat[i];
-					if(f->pairIndex == 0 && i + 1 < flagsInCat.size() && flagsInCat[i + 1]->pairIndex == 1)
-					{
-						Slot s;
-						s.a = f;
-						s.b = flagsInCat[i + 1];
-						slots.push_back(s);
-						++i; // consume the pair
-					}
-					else
-					{
-						Slot s;
-						if(f->pairIndex == 1)
-							s.b = f;
-						else
-							s.a = f;
-						slots.push_back(s);
-					}
-				}
-
-				const int total = (int)slots.size();
-				const int leftCount = (total + 1) / 2;
-
-				int yLeft = Y;
-				int yRight = Y;
-
-				for(int idx = 0; idx < total; ++idx)
-				{
-					const Slot &s = slots[idx];
-					const bool onLeft = idx < leftCount;
-					const int baseX = onLeft ? leftX : rightX;
-					int &curY = onLeft ? yLeft : yRight;
-
-					if(s.a)
-					{
-						LineFlagButton fb;
-						fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
-						fb.button->labelsize(12);
-						fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->flagSet, s.a->value);
-						fb.button->callback(flags_callback, fb.data.get());
-						fb.info = s.a;
-						catHeader.flags.push_back(fb.button.get());
-						flagButtons.push_back(std::move(fb));
-					}
-					if(s.b)
-					{
-						LineFlagButton fb2;
-						fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
-						fb2.button->labelsize(12);
-						fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->flagSet, s.b->value);
-						fb2.button->callback(flags_callback, fb2.data.get());
-						fb2.info = s.b;
-						catHeader.flags.push_back(fb2.button.get());
-						flagButtons.push_back(std::move(fb2));
-					}
-					curY += rowH;
-				}
-
-				Y = (yLeft > yRight ? yLeft : yRight);
-				categoryHeaders.push_back(std::move(catHeader));
 			}
-			else
+
+			struct Slot
 			{
-				// No category - render flags directly (old behavior for uncategorized flags)
-				struct Slot
+				const lineflag_t* a = nullptr;
+				const lineflag_t* b = nullptr;
+			};
+
+			std::vector<Slot> slots;
+			slots.reserve(flagsInCat.size());
+			for(size_t i = 0; i < flagsInCat.size(); ++i)
+			{
+				const lineflag_t* f = flagsInCat[i];
+				if(f->pairIndex == 0 && i + 1 < flagsInCat.size() && flagsInCat[i + 1]->pairIndex == 1)
 				{
-					const lineflag_t *a = nullptr;
-					const lineflag_t *b = nullptr;
-				};
-				std::vector<Slot> slots;
-				slots.reserve(flagsInCat.size());
-				for(size_t i = 0; i < flagsInCat.size(); ++i)
+					Slot s;
+					s.a = f;
+					s.b = flagsInCat[i + 1];
+					slots.push_back(s);
+					++i; // consume the pair
+				}
+				else
 				{
-					const lineflag_t *f = flagsInCat[i];
-					if(f->pairIndex == 0 && i + 1 < flagsInCat.size() && flagsInCat[i + 1]->pairIndex == 1)
-					{
-						Slot s;
-						s.a = f;
-						s.b = flagsInCat[i + 1];
-						slots.push_back(s);
-						++i;
-					}
+					Slot s;
+					if(f->pairIndex == 1)
+						s.b = f;
 					else
-					{
-						Slot s;
-						if(f->pairIndex == 1)
-							s.b = f;
-						else
-							s.a = f;
-						slots.push_back(s);
-					}
+						s.a = f;
+					slots.push_back(s);
 				}
-
-				const int total = (int)slots.size();
-				const int leftCount = (total + 1) / 2;
-
-				int yLeft = Y;
-				int yRight = Y;
-
-				for(int idx = 0; idx < total; ++idx)
-				{
-					const Slot &s = slots[idx];
-					const bool onLeft = idx < leftCount;
-					const int baseX = onLeft ? leftX : rightX;
-					int &curY = onLeft ? yLeft : yRight;
-
-					if(s.a)
-					{
-						LineFlagButton fb;
-						fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
-						fb.button->labelsize(12);
-						fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->flagSet, s.a->value);
-						fb.button->callback(flags_callback, fb.data.get());
-						fb.info = s.a;
-						flagButtons.push_back(std::move(fb));
-					}
-					if(s.b)
-					{
-						LineFlagButton fb2;
-						fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
-						fb2.button->labelsize(12);
-						fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->flagSet, s.b->value);
-						fb2.button->callback(flags_callback, fb2.data.get());
-						fb2.info = s.b;
-						flagButtons.push_back(std::move(fb2));
-					}
-					curY += rowH;
-				}
-
-				Y = (yLeft > yRight ? yLeft : yRight);
 			}
+
+			const int total = (int)slots.size();
+			const int leftCount = (total + 1) / 2;
+
+			int yLeft = Y;
+			int yRight = Y;
+
+			for(int idx = 0; idx < total; ++idx)
+			{
+				const Slot& s = slots[idx];
+				const bool onLeft = idx < leftCount;
+				const int baseX = onLeft ? leftX : rightX;
+				int& curY = onLeft ? yLeft : yRight;
+
+				if(s.a)
+				{
+					LineFlagButton fb;
+					fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
+					fb.button->labelsize(12);
+					fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->flagSet, s.a->value);
+					fb.button->callback(flags_callback, fb.data.get());
+					fb.info = s.a;
+					if(catHeader.button)
+						catHeader.flags.push_back(fb.button.get());
+					flagButtons.push_back(std::move(fb));
+				}
+				if(s.b)
+				{
+					LineFlagButton fb2;
+					fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
+					fb2.button->labelsize(12);
+					fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->flagSet, s.b->value);
+					fb2.button->callback(flags_callback, fb2.data.get());
+					fb2.info = s.b;
+					if(catHeader.button)
+						catHeader.flags.push_back(fb2.button.get());
+					flagButtons.push_back(std::move(fb2));
+				}
+				curY += rowH;
+			}
+
+			Y = (yLeft > yRight ? yLeft : yRight);
+			if(catHeader.button)
+				categoryHeaders.push_back(std::move(catHeader));
 		}
 
 		end();
