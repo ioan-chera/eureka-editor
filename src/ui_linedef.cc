@@ -1142,7 +1142,8 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			if(!catName.empty())
 			{
 				CategoryHeader catHeader;
-				catHeader.button = std::make_unique<UI_CategoryButton>(x() + flagsStartX, Y, flagsAreaW, categoryH, catName.c_str());
+				catHeader.button = std::make_unique<UI_CategoryButton>(x() + flagsStartX, Y, flagsAreaW, categoryH);
+				catHeader.button->copy_label(catName.c_str());
 				catHeader.button->callback(category_callback, this);
 				catHeader.expanded = true;
 				Y += categoryH;

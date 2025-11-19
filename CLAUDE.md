@@ -51,6 +51,27 @@ Always use cmake. If you want to unit test, the binary is test_general.
 ## Unit tests
 Prefer using the Google Test ASSERT_* macros to the EXPECT_* ones, unless the current function is non-`void`.
 
+## FLTK framework conventions
+
+### Widget label handling
+FLTK widgets do NOT copy label strings by default - they only store a pointer to the label string. When setting widget labels:
+- Only pass string literals, compile-time constants, or strings with guaranteed lifetime (e.g., static storage) directly to the label parameter in constructors or `label()` method
+- For temporary strings, local variables, or dynamically generated strings, ALWAYS use the `copy_label()` method instead to ensure the widget makes its own copy of the string
+- Failure to follow this can result in dangling pointers and undefined behavior when the original string goes out of scope
+
+Example:
+```cpp
+// CORRECT: string literal has permanent lifetime
+Fl_Button btn(x, y, w, h, "Click Me");
+
+// WRONG: temporary std::string will be destroyed, leaving dangling pointer
+Fl_Button btn(x, y, w, h, (std::string("Prefix ") + suffix).c_str());
+
+// CORRECT: copy_label makes a copy of the temporary string
+Fl_Button btn(x, y, w, h);
+btn.copy_label((std::string("Prefix ") + suffix).c_str());
+```
+
 ## Doom editing guidelines
 Coordinate axes are so: x to the right, y to the top. Most typical is for coordinates to be snapped to a grid of 8.
 A usual sector height is 128, but of course it can vary by multiples of 8. Player size is 40x40x56.
