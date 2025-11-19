@@ -747,7 +747,7 @@ void UI_LineBox::repositionAfterCategoryToggle()
 				// Position all flags in this category
 				for(Fl_Check_Button *flag : cat.flags)
 				{
-					flag->position(flag->x(), Y);
+					flag->position(flag->x(), Y + 2);
 					Y += rowH;
 				}
 			}
