@@ -27,11 +27,10 @@
 UI_CategoryButton::UI_CategoryButton(int X, int Y, int W, int H, const char *label) :
 	Fl_Button(X, Y, W, H, label)
 {
-	box(FL_FLAT_BOX);
+	box(FL_NO_BOX);
 	align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	labelsize(12);
 	labelfont(FL_HELVETICA_BOLD);
-	color(fl_rgb_color(230, 230, 230));
 	clear_visible_focus();
 }
 
