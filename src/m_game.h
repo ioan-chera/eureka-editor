@@ -157,6 +157,17 @@ struct lineflag_t
 	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot
 };
 
+// New: udmf_linevisflag <label> <udmf_flags>
+// This describes an automap visibility flag for UDMF linedefs.
+// - label is the UI text shown in the Vis: dropdown
+// - udmf_flags is one or more UDMF flag names separated by '|' (e.g., "revealed" or "revealed|secret")
+struct linevisflag_t
+{
+	SString label;
+	int flags = 0;	// combined flag values for flags set
+	int flags2 = 0;	// combined flag values for flags2 set
+};
+
 struct gensector_t
 {
 	struct option_t
@@ -432,6 +443,7 @@ struct ConfigData
 	std::vector<thingflag_t> udmf_thing_flags;
 	std::vector<lineflag_t> line_flags;
 	std::vector<lineflag_t> udmf_line_flags;
+	std::vector<linevisflag_t> udmf_line_vis_flags;
 	std::vector<gensector_t> gen_sectors; // generalized sector types
 
 	int num_gen_linetypes = 0;

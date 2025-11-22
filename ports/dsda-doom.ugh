@@ -39,7 +39,6 @@ udmf_lineflag "block all" blockeverything Blocking
 udmf_lineflag "jump over" jumpover Blocking
 udmf_lineflag "3d midtex" midtex3d Blocking
 udmf_lineflag "3d midtex passproj" midtex3dimpassible Blocking
-udmf_lineflag "revealed" revealed Automap
 udmf_lineflag "player cross" playercross Activation
 udmf_lineflag "player use" playeruse Activation
 udmf_lineflag "monster cross" monstercross Activation
@@ -71,6 +70,10 @@ udmf_lineflag "wrap midtex" wrapmidtex Rendering
 # TODO: automapstyle choice
 # TODO: health number field
 # TODO: healthgroup number field
+
+# UDMF visibility flags for automap
+udmf_linevisflag "Revealed" revealed
+udmf_linevisflag "RevSecret" revealed|secret
 
 # TODO: sidedef fields
 # TODO: sector fields

@@ -795,6 +795,46 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			gLog.printf("Unknown UDMF line flag '%s'\n", flag.udmfKey.c_str());
 	}
 
+	else if(y_stricmp(argv[0], "udmf_linevisflag") == 0)
+	{
+		if(nargs < 2)
+			pst->fail(bad_arg_count_fail, argv[0], 2);
+
+		linevisflag_t visflag{};
+		visflag.label = argv[1];
+
+		// Parse the second argument which can contain multiple flags separated by '|'
+		SString flagStr = argv[2];
+		size_t start = 0;
+		size_t pos = 0;
+		while(pos <= flagStr.size())
+		{
+			if(pos == flagStr.size() || flagStr[pos] == '|')
+			{
+				if(pos > start)
+				{
+					SString flagName = flagStr.substr(start, pos - start);
+					// Verify it's a valid UDMF flag and add its value
+					const UDMFMapping *mapping = UDMFMapping::getForName(flagName.c_str(), UDMFMapping::Category::line);
+					if(mapping)
+					{
+						if(mapping->flagSet == 1)
+							visflag.flags |= mapping->value;
+						else
+							visflag.flags2 |= mapping->value;
+					}
+					else
+						gLog.printf("Unknown UDMF line flag '%s' in udmf_linevisflag\n", flagName.c_str());
+				}
+				start = pos + 1;
+			}
+			pos++;
+		}
+
+		if(visflag.flags != 0 || visflag.flags2 != 0)
+			config.udmf_line_vis_flags.push_back(visflag);
+	}
+
 	else if(y_stricmp(argv[0], "gensector") == 0)
 	{
 		if(nargs < 2)

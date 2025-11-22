@@ -24,6 +24,7 @@
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
+class line_flag_CB_data_c;
 class UI_DynIntInput;
 struct LoadingData;
 struct lineflag_t; // forward declaration
@@ -49,12 +50,13 @@ private:
 
 	// Flags
 	Fl_Choice *f_automap;
+	std::unique_ptr<line_flag_CB_data_c> f_automap_cb_data;
 
 	// Dynamic linedef flags (configured via .ugh)
 	struct LineFlagButton
 	{
 		std::unique_ptr<Fl_Check_Button> button;
-		std::unique_ptr<class line_flag_CB_data_c> data;
+		std::unique_ptr<line_flag_CB_data_c> data;
 		const struct lineflag_t *info;
 	};
 	std::vector<LineFlagButton> flagButtons;
@@ -103,7 +105,7 @@ private:
 
 	void CalcLength();
 
-	int  CalcFlags() const;
+	void CalcFlags(int &outFlags, int &outFlags2) const;
 	void FlagsFromInt(int flags);
 	void Flags2FromInt(int flags2);
 

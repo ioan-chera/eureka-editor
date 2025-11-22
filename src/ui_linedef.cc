@@ -45,6 +45,9 @@
 #define MLF_ALL_AUTOMAP  \
 	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
 
+static constexpr const char *kHardcodedAutoMapMenu = "Normal|Invisible|Mapped|Secret|MapSecret|InvSecret";
+static constexpr int kHardcodedAutoMapCount = 6;
+
 enum
 {
 	INSET_LEFT = 6,
@@ -82,11 +85,11 @@ class line_flag_CB_data_c
 public:
 	UI_LineBox *parent;
 
-	int flagIndex;
 	int mask;
+	int mask2;	// mask for flags2 set (0 if only flags set is used)
 
-	line_flag_CB_data_c(UI_LineBox *_parent, int _flagIndex, int _mask) :
-		parent(_parent), flagIndex(_flagIndex), mask(_mask)
+	line_flag_CB_data_c(UI_LineBox *_parent, int _mask, int _mask2 = 0) :
+		parent(_parent), mask(_mask), mask2(_mask2)
 	{ }
 };
 
@@ -140,7 +143,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	// this order must match the SPAC_XXX constants
 	actkind->add(getActivationMenuString());
 	actkind->value(getActivationCount());
-	actkind->callback(flags_callback, new line_flag_CB_data_c(this, 1, MLF_Activation | MLF_Repeatable));
+	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
 	actkind->deactivate();
 	actkind->hide();
 
@@ -162,7 +165,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		args[a] = new UI_DynIntInput(type->x() + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
-		args[a]->callback(args_callback, new line_flag_CB_data_c(this, 1, a));
+		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
 	}
@@ -178,9 +181,10 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 
 	f_automap = new Fl_Choice(X+W-118, Y, 104, 22, "Vis: ");
-	f_automap->add("Normal|Invisible|Mapped|Secret|MapSecret");
+	f_automap->add(kHardcodedAutoMapMenu);
 	f_automap->value(0);
-	f_automap->callback(flags_callback, new line_flag_CB_data_c(this, 1, MLF_ALL_AUTOMAP));
+	f_automap_cb_data = std::make_unique<line_flag_CB_data_c>(this, MLF_ALL_AUTOMAP);
+	f_automap->callback(flags_callback, f_automap_cb_data.get());
 
 
 	Y += flags->h() - 1;
@@ -615,9 +619,10 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 	UI_LineBox *box = l_f_c->parent;
 
-	int flagSet = l_f_c->flagIndex;
 	int mask = l_f_c->mask;
-	int new_flags = box->CalcFlags();
+	int mask2 = l_f_c->mask2;
+	int new_flags, new_flags2;
+	box->CalcFlags(new_flags, new_flags2);
 
 	if (! box->inst.edit.Selected->empty())
 	{
@@ -633,7 +638,10 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
-			op.changeLinedef(*it, flagSet == 1 ? LineDef::F_FLAGS : LineDef::F_FLAGS2, ((flagSet == 1 ? L->flags : L->flags2) & ~mask) | (new_flags & mask));
+			if(mask != 0)
+				op.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
+			if(mask2 != 0)
+				op.changeLinedef(*it, LineDef::F_FLAGS2, (L->flags2 & ~mask2) | (new_flags2 & mask2));
 		}
 	}
 }
@@ -984,21 +992,66 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 		actkind->value(new_act);
 	}
 
-	if (lineflags & MLF_DontDraw)
-		f_automap->value(1);
-	else if(lineflags & MLF_Mapped && lineflags & MLF_Secret)
-		f_automap->value(4);
-	else if (lineflags & MLF_Secret)
-		f_automap->value(3);
-	else if (lineflags & MLF_Mapped)
-		f_automap->value(2);
-	else
-		f_automap->value(0);
+	// Check UDMF visibility flags first if in UDMF mode
+	bool foundUDMFMatch = false;
+	if(inst.level.isLinedef(obj) && inst.loaded.levelFormat == MapFormat::udmf && !inst.conf.udmf_line_vis_flags.empty())
+	{
+		const auto L = inst.level.linedefs[obj];
+
+		// Build list of matching flags with their indices
+		std::vector<std::pair<size_t, const linevisflag_t*>> matches;
+		for(size_t i = 0; i < inst.conf.udmf_line_vis_flags.size(); i++)
+		{
+			const linevisflag_t &vf = inst.conf.udmf_line_vis_flags[i];
+			// Check if all required flags match exactly
+			if((L->flags & vf.flags) == vf.flags && (L->flags2 & vf.flags2) == vf.flags2)
+				matches.push_back({i, &vf});
+		}
+
+		// Sort matches so more specific combinations come first
+		if(!matches.empty())
+		{
+			std::sort(matches.begin(), matches.end(),
+				[](const std::pair<size_t, const linevisflag_t*> &a, const std::pair<size_t, const linevisflag_t*> &b) {
+					// b is subset of a if all of b's flags are in a
+					bool bSubsetOfA = ((a.second->flags & b.second->flags) == b.second->flags) &&
+									  ((a.second->flags2 & b.second->flags2) == b.second->flags2);
+					// a is subset of b if all of a's flags are in b
+					bool aSubsetOfB = ((b.second->flags & a.second->flags) == a.second->flags) &&
+									  ((b.second->flags2 & a.second->flags2) == a.second->flags2);
+
+					// If b is subset of a but a is not subset of b, then a comes first
+					if(bSubsetOfA && !aSubsetOfB)
+						return true;
+					return false;
+				});
+
+			f_automap->value(kHardcodedAutoMapCount + (int)matches[0].first);
+			foundUDMFMatch = true;
+		}
+	}
+
+	// Fall back to hardcoded values if no UDMF match
+	if(!foundUDMFMatch)
+	{
+		if(lineflags & MLF_DontDraw && lineflags & MLF_Secret)
+			f_automap->value(5);
+		else if (lineflags & MLF_DontDraw)
+			f_automap->value(1);
+		else if(lineflags & MLF_Mapped && lineflags & MLF_Secret)
+			f_automap->value(4);
+		else if (lineflags & MLF_Secret)
+			f_automap->value(3);
+		else if (lineflags & MLF_Mapped)
+			f_automap->value(2);
+		else
+			f_automap->value(0);
+	}
 
 	// Set dynamic line flag buttons
 	for(const auto &btn : flagButtons)
 	{
-		if(btn.button && btn.data->flagIndex == 1)
+		if(btn.button && btn.info->flagSet == 1)
 			btn.button->value((lineflags & btn.info->value) ? 1 : 0);
 	}
 }
@@ -1007,22 +1060,40 @@ void UI_LineBox::Flags2FromInt(int lineflags)
 {
 	for(const auto &btn : flagButtons)
 	{
-		if(btn.button && btn.data->flagIndex == 2)
+		if(btn.button && btn.info->flagSet == 2)
 			btn.button->value((lineflags & btn.info->value) ? 1 : 0);
 	}
 }
 
-int UI_LineBox::CalcFlags() const
+void UI_LineBox::CalcFlags(int &outFlags, int &outFlags2) const
 {
-	int lineflags = 0;
+	outFlags = 0;
+	outFlags2 = 0;
 
-	switch (f_automap->value())
+	int automapVal = f_automap->value();
+	if(automapVal >= kHardcodedAutoMapCount && inst.loaded.levelFormat == MapFormat::udmf)
 	{
-		case 0: /* Normal    */; break;
-		case 1: /* Invisible */ lineflags |= MLF_DontDraw; break;
-		case 2: /* Mapped    */ lineflags |= MLF_Mapped; break;
-		case 3: /* Secret    */ lineflags |= MLF_Secret; break;
-		case 4: /* MapSecret */ lineflags |= MLF_Mapped | MLF_Secret; break;
+		// UDMF visibility flag selected
+		int udmfIndex = automapVal - kHardcodedAutoMapCount;
+		if(udmfIndex < (int)inst.conf.udmf_line_vis_flags.size())
+		{
+			const linevisflag_t &vf = inst.conf.udmf_line_vis_flags[udmfIndex];
+			outFlags |= vf.flags;
+			outFlags2 |= vf.flags2;
+		}
+	}
+	else
+	{
+		// Hardcoded visibility flags
+		switch (automapVal)
+		{
+			case 0: /* Normal    */; break;
+			case 1: /* Invisible */ outFlags |= MLF_DontDraw; break;
+			case 2: /* Mapped    */ outFlags |= MLF_Mapped; break;
+			case 3: /* Secret    */ outFlags |= MLF_Secret; break;
+			case 4: /* MapSecret */ outFlags |= MLF_Mapped | MLF_Secret; break;
+			case 5: /* InvSecret */ outFlags |= MLF_DontDraw | MLF_Secret; break;
+		}
 	}
 
 	// Activation for non-DOOM formats
@@ -1031,17 +1102,20 @@ int UI_LineBox::CalcFlags() const
 		int actval = actkind->value();
 		if (actval >= getActivationCount())
 			actval = 0;
-		lineflags |= (actval << 9);
+		outFlags |= (actval << 9);
 	}
 
 	// Apply dynamic flags
 	for(const auto &btn : flagButtons)
 	{
 		if(btn.button && btn.button->value())
-			lineflags |= btn.info->value;
+		{
+			if(btn.info->flagSet == 1)
+				outFlags |= btn.info->value;
+			else if(btn.info->flagSet == 2)
+				outFlags2 |= btn.info->value;
+		}
 	}
-
-	return lineflags;
 }
 
 
@@ -1137,6 +1211,36 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		else
 			gen->hide();
 	}
+
+	// Populate f_automap with UDMF visibility flags if in UDMF mode
+	int automapMask = MLF_ALL_AUTOMAP;
+	int automapMask2 = 0;
+	if(loaded.levelFormat == MapFormat::udmf && !config.udmf_line_vis_flags.empty())
+	{
+		// Build the menu string with hardcoded entries plus UDMF entries
+		SString menuStr = kHardcodedAutoMapMenu;
+		for(const linevisflag_t &vf : config.udmf_line_vis_flags)
+		{
+			menuStr += "|";
+			menuStr += vf.label;
+			automapMask |= vf.flags;
+			automapMask2 |= vf.flags2;
+		}
+		f_automap->clear();
+		f_automap->add(menuStr.c_str());
+		f_automap->value(0);
+	}
+	else
+	{
+		// Reset to default hardcoded entries
+		f_automap->clear();
+		f_automap->add(kHardcodedAutoMapMenu);
+		f_automap->value(0);
+	}
+
+	// Update callback data with new masks
+	f_automap_cb_data = std::make_unique<line_flag_CB_data_c>(this, automapMask, automapMask2);
+	f_automap->callback(flags_callback, f_automap_cb_data.get());
 
 	// Recreate dynamic linedef flags from configuration
 	for(const auto &btn : flagButtons)
@@ -1240,7 +1344,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 						LineFlagButton fb;
 						fb.button = std::make_unique<Fl_Check_Button>(baseX + offset, curY + 2, FW, 20, flag->label.c_str());
 						fb.button->labelsize(12);
-						fb.data = std::make_unique<line_flag_CB_data_c>(this, flag->flagSet, flag->value);
+						fb.data = std::make_unique<line_flag_CB_data_c>(this, flag->flagSet == 1 ? flag->value : 0, flag->flagSet == 2 ? flag->value : 0);
 						fb.button->callback(flags_callback, fb.data.get());
 						fb.info = flag;
 						if(catHeader.button)
