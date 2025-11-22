@@ -251,8 +251,8 @@ else()
 
     FetchContent_Declare(
         FLTK
-        GIT_REPOSITORY https://github.com/fltk/fltk.git
-        GIT_TAG release-1.4.4
+        GIT_REPOSITORY https://github.com/ioan-chera/fltk.git
+        GIT_TAG release-1.4.4-pulldown-null-check
         EXCLUDE_FROM_ALL
     )
     FetchContent_MakeAvailable(FLTK)
