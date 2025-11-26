@@ -623,6 +623,8 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 		LD->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		LD->arg5 = value.DecodeInt();
+	else if (field.Match("locknumber"))
+		LD->locknumber = value.DecodeInt();
 	else
 	{
 		// Flags
@@ -958,6 +960,9 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 			lump->Printf("arg3 = %d;\n", ld->arg4);
 		if (ld->arg5 != 0)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
+
+		if (ld->locknumber != 0)
+			lump->Printf("locknumber = %d;\n", ld->locknumber);
 
 		// linedef flags
 		for(const UDMFMapping& mapping : kUDMFMapping)

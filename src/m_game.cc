@@ -835,6 +835,71 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			config.udmf_line_vis_flags.push_back(visflag);
 	}
 
+	else if(y_stricmp(argv[0], "udmf_linechoice_label") == 0)
+	{
+		if(nargs < 2)
+			pst->fail(bad_arg_count_fail, argv[0], 2);
+
+		SString identifier = argv[1];
+		SString label = argv[2];
+
+		// Find or create the linechoice_t with this identifier
+		linechoice_t *choice = nullptr;
+		for(linechoice_t &lc : config.udmf_line_choices)
+		{
+			if(lc.identifier.noCaseEqual(identifier))
+			{
+				choice = &lc;
+				break;
+			}
+		}
+
+		if(!choice)
+		{
+			config.udmf_line_choices.push_back({});
+			choice = &config.udmf_line_choices.back();
+			choice->identifier = identifier;
+		}
+
+		choice->label = label;
+	}
+
+	else if(y_stricmp(argv[0], "udmf_linechoice") == 0)
+	{
+		if(nargs < 3)
+			pst->fail(bad_arg_count_fail, argv[0], 3);
+
+		SString identifier = argv[1];
+		int value = atoi(argv[2]);
+		SString optionLabel = argv[3];
+
+		// Find or create the linechoice_t with this identifier
+		linechoice_t *choice = nullptr;
+		for(linechoice_t &lc : config.udmf_line_choices)
+		{
+			if(lc.identifier.noCaseEqual(identifier))
+			{
+				choice = &lc;
+				break;
+			}
+		}
+
+		if(!choice)
+		{
+			config.udmf_line_choices.push_back({});
+			choice = &config.udmf_line_choices.back();
+			choice->identifier = identifier;
+			// If no label was set via udmf_linechoice_label, use the identifier as label
+			choice->label = identifier;
+		}
+
+		// Add the option
+		linechoice_t::option_t opt;
+		opt.value = value;
+		opt.label = optionLabel;
+		choice->options.push_back(opt);
+	}
+
 	else if(y_stricmp(argv[0], "gensector") == 0)
 	{
 		if(nargs < 2)

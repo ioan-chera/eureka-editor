@@ -168,6 +168,25 @@ struct linevisflag_t
 	int flags2 = 0;	// combined flag values for flags2 set
 };
 
+// New: udmf_linechoice_label <identifier> <label>
+// New: udmf_linechoice <identifier> <number> <label>
+// This describes a choice dropdown for UDMF linedefs.
+// - identifier is the unique name for this choice group (e.g., "locknumber")
+// - label is the UI text shown in the choice widget
+// - number is the value for this option
+struct linechoice_t
+{
+	struct option_t
+	{
+		int value;
+		SString label;
+	};
+
+	SString identifier;
+	SString label;	// human-readable label for the whole choice widget
+	std::vector<option_t> options;
+};
+
 struct gensector_t
 {
 	struct option_t
@@ -444,6 +463,7 @@ struct ConfigData
 	std::vector<lineflag_t> line_flags;
 	std::vector<lineflag_t> udmf_line_flags;
 	std::vector<linevisflag_t> udmf_line_vis_flags;
+	std::vector<linechoice_t> udmf_line_choices;
 	std::vector<gensector_t> gen_sectors; // generalized sector types
 
 	int num_gen_linetypes = 0;

@@ -710,6 +710,53 @@ void UI_LineBox::category_callback(Fl_Widget *w, void *data)
 	box->categoryToggled(categoryBtn);
 }
 
+void UI_LineBox::choice_callback(Fl_Widget *w, void *data)
+{
+	UI_LineBox *box = (UI_LineBox *)data;
+	Fl_Choice *choice = (Fl_Choice *)w;
+
+	if(!box->inst.edit.Selected->empty())
+	{
+		// Find which choice widget this is
+		const linechoice_t *info = nullptr;
+		for(const auto &widget : box->choiceWidgets)
+		{
+			if(widget.choice.get() == choice)
+			{
+				info = widget.info;
+				break;
+			}
+		}
+
+		if(!info)
+			return;
+
+		// Get the selected value
+		int index = choice->value();
+		if(index < 0 || index >= static_cast<int>(info->options.size()))
+			return;
+
+		int new_value = info->options[index].value;
+
+		// Apply to all selected linedefs
+		EditOperation op(box->inst.level.basis);
+		SString message = SString("edited ") + info->identifier + " of";
+		op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
+
+		for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+		{
+			// Hardcode the field mapping for now
+			if(info->identifier.noCaseEqual("locknumber"))
+			{
+				op.changeLinedef(*it, LineDef::F_LOCKNUMBER, new_value);
+			}
+		}
+	}
+
+	// Update the display
+	box->UpdateField(LineDef::F_LOCKNUMBER);
+}
+
 void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
 {
 	// Find which category was toggled
@@ -809,6 +856,17 @@ void UI_LineBox::repositionAfterCategoryToggle()
 	// Add spacing after flags
 	Y += 29;
 
+	// Reposition choice widgets
+	const int choiceH = 22;
+	for(auto &widget : choiceWidgets)
+	{
+		widget.choice->position(widget.choice->x(), Y);
+		Y += choiceH + 4;
+	}
+
+	if(!choiceWidgets.empty())
+		Y += 10;
+
 	// Reposition side boxes
 	front->Fl_Widget::position(front->x(), Y);
 	Y += front->h() + 14;
@@ -828,7 +886,7 @@ void UI_LineBox::UpdateField(int field)
 			mFixUp.setInputValue(length, "");
 	}
 
-	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG5))
+	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_LOCKNUMBER))
 	{
 		for (int a = 0 ; a < 5 ; a++)
 		{
@@ -943,6 +1001,43 @@ void UI_LineBox::UpdateField(int field)
 			Flags2FromInt(inst.level.linedefs[obj]->flags2);
 		else
 			Flags2FromInt(0);
+	}
+
+	if(field < 0 || field == LineDef::F_LOCKNUMBER)
+	{
+		// Update choice widgets for UDMF properties
+		if(inst.level.isLinedef(obj))
+		{
+			const auto L = inst.level.linedefs[obj];
+
+			for(auto &widget : choiceWidgets)
+			{
+				if(widget.info->identifier.noCaseEqual("locknumber"))
+				{
+					int value = L->locknumber;
+
+					// Find matching option
+					int index = 0;
+					for(size_t i = 0; i < widget.info->options.size(); ++i)
+					{
+						if(widget.info->options[i].value == value)
+						{
+							index = static_cast<int>(i);
+							break;
+						}
+					}
+					widget.choice->value(index);
+				}
+			}
+		}
+		else
+		{
+			// No linedef selected, reset to first option
+			for(auto &widget : choiceWidgets)
+			{
+				widget.choice->value(0);
+			}
+		}
 	}
 }
 
@@ -1374,8 +1469,55 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		Y += 29;
 	}
 
+	// Create UDMF line choice widgets (e.g., locknumber)
+	for(const auto &widget : choiceWidgets)
+		this->remove(widget.choice.get());
+	choiceWidgets.clear();
 
-	// Reposition side boxes under the generated flags
+	if(loaded.levelFormat == MapFormat::udmf && !config.udmf_line_choices.empty())
+	{
+		const int choiceH = 22;
+		// Match the args span: starts at type->x() and spans 5 args
+		const int choiceX = x() + TYPE_INPUT_X;
+		const int choiceW = 5 * (ARG_WIDTH + ARG_PADDING);
+
+		begin();
+
+		for(const linechoice_t &lc : config.udmf_line_choices)
+		{
+			if(lc.options.empty())
+				continue;
+
+			LineChoiceWidget widget = {};
+			widget.choice = std::make_unique<Fl_Choice>(choiceX, Y, choiceW, choiceH);
+			widget.choice->copy_label((lc.label + ": ").c_str());
+			widget.choice->align(FL_ALIGN_LEFT);
+			//widget.choice->labelsize(12);
+
+			// Build menu string from options
+			SString menuStr;
+			for(size_t i = 0; i < lc.options.size(); ++i)
+			{
+				if(i > 0)
+					menuStr += "|";
+				menuStr += lc.options[i].label;
+			}
+			widget.choice->add(menuStr.c_str());
+			widget.choice->value(0);
+
+			// Pass the linechoice_t pointer via callback data
+			widget.info = &lc;
+			widget.choice->callback(choice_callback, this);
+
+			choiceWidgets.push_back(std::move(widget));
+			Y += choiceH + 4;
+		}
+
+		end();
+		Y += 10;
+	}
+
+	// Reposition side boxes under the generated flags and choice widgets
 	front->Fl_Widget::position(front->x(), Y);
 	Y += front->h() + 14;
 	back->Fl_Widget::position(back->x(), Y);

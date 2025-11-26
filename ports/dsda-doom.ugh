@@ -55,7 +55,23 @@ udmf_lineflag "check switch range" checkswitchrange Activation
 udmf_lineflag "act on damage" damagespecial Activation
 udmf_lineflag "act on death" deathspecial Activation
 
-# TODO: locknumber choice
+udmf_linechoice_label locknumber "Lock"
+udmf_linechoice locknumber 0 "No lock"
+udmf_linechoice locknumber 1 "Red key card"
+udmf_linechoice locknumber 2 "Blue key card"
+udmf_linechoice locknumber 3 "Yellow key card"
+udmf_linechoice locknumber 4 "Red skull key"
+udmf_linechoice locknumber 5 "Blue skull key"
+udmf_linechoice locknumber 6 "Yellow skull key"
+udmf_linechoice locknumber 100 "Any key"
+udmf_linechoice locknumber 101 "All 6 keys"
+udmf_linechoice locknumber 129 "Any red key"
+udmf_linechoice locknumber 130 "Any blue key"
+udmf_linechoice locknumber 131 "Any yellow key"
+udmf_linechoice locknumber 132 "Red card or skull"
+udmf_linechoice locknumber 133 "Blue card or skull"
+udmf_linechoice locknumber 134 "Yellow card or skull"
+udmf_linechoice locknumber 229 "Any key of each color"
 udmf_lineflag "repeatable" repeatspecial Activation
 # TODO: arg0str text field
 # TODO: alpha number field

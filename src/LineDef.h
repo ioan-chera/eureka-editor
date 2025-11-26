@@ -41,9 +41,11 @@ public:
 	int arg4 = 0;
 	int arg5 = 0;
 
+	int locknumber = 0;	// UDMF locknumber property
+
 	enum { F_START, F_END, F_RIGHT, F_LEFT,
 		   F_FLAGS, F_FLAGS2, F_TYPE, F_TAG, F_ARG1,
-		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
+		   F_ARG2, F_ARG3, F_ARG4, F_ARG5, F_LOCKNUMBER };
 
 public:
 	bool TouchesVertex(int v_num) const
