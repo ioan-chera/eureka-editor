@@ -21,6 +21,25 @@
 include mbf21
 
 supported_games doom doom2 heretic hexen
+map_formats DOOM HEXEN UDMF
+
+if $MAP_FORMAT not DOOM
+  set $ADVANCED_FORMAT 1
+endif
+
+if $ADVANCED_FORMAT is 1
+    thing 9001 - n  16 _MSP "DSDA: MapSpot"
+    thing 9013 - n  16 _MSP "DSDA: MapSpot /gravity"
+    thing 9043 - n  16 NULL "DSDA: TeleportDest3"
+    thing 9044 - n  16 NULL "DSDA: TeleportDest2"
+    thing 9300 - n  16 NULL "DSDA: PolyObj Anchor"
+    thing 9301 - npv  16 NULL "DSDA: PolyObject"
+    thing 9302 - npv  16 NULL "DSDA: PolyObject /crush"
+    thing 9303 - npv  16 NULL "DSDA: PolyObject /burn"
+    # TODO: ambient sounds
+endif
+
+# TODO: all the rest from https://github.com/kraflab/dsda-doom/blob/v0.29.4/docs/things_and_specials.md
 
 # TODO: check if this also applies to doom and doom2
 feature udmf_lineparameters 1
