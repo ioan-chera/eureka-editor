@@ -28,6 +28,9 @@ if $MAP_FORMAT not DOOM
 endif
 
 if $ADVANCED_FORMAT is 1
+    include "hexen_groups"
+
+    thinggroup s DAD "Environment Sounds"
     thing 9001 - n  16 _MSP "DSDA: MapSpot"
     thing 9013 - n  16 _MSP "DSDA: MapSpot /gravity"
     thing 9043 - n  16 NULL "DSDA: TeleportDest3"
@@ -36,8 +39,315 @@ if $ADVANCED_FORMAT is 1
     thing 9301 - npv  16 NULL "DSDA: PolyObject"
     thing 9302 - npv  16 NULL "DSDA: PolyObject /crush"
     thing 9303 - npv  16 NULL "DSDA: PolyObject /burn"
-    # TODO: ambient sounds
+
+    thing 14001 - nv 16 NULL "DSDA: AmbientSound 1"
+    thing 14002 - nv 16 NULL "DSDA: AmbientSound 2"
+    thing 14003 - nv 16 NULL "DSDA: AmbientSound 3"
+    thing 14004 - nv 16 NULL "DSDA: AmbientSound 4"
+    thing 14005 - nv 16 NULL "DSDA: AmbientSound 5"
+    thing 14006 - nv 16 NULL "DSDA: AmbientSound 6"
+    thing 14007 - nv 16 NULL "DSDA: AmbientSound 7"
+    thing 14008 - nv 16 NULL "DSDA: AmbientSound 8"
+    thing 14009 - nv 16 NULL "DSDA: AmbientSound 9"
+    thing 14010 - nv 16 NULL "DSDA: AmbientSound 10"
+    thing 14011 - nv 16 NULL "DSDA: AmbientSound 11"
+    thing 14012 - nv 16 NULL "DSDA: AmbientSound 12"
+    thing 14013 - nv 16 NULL "DSDA: AmbientSound 13"
+    thing 14014 - nv 16 NULL "DSDA: AmbientSound 14"
+    thing 14015 - nv 16 NULL "DSDA: AmbientSound 15"
+    thing 14016 - nv 16 NULL "DSDA: AmbientSound 16"
+    thing 14017 - nv 16 NULL "DSDA: AmbientSound 17"
+    thing 14018 - nv 16 NULL "DSDA: AmbientSound 18"
+    thing 14019 - nv 16 NULL "DSDA: AmbientSound 19"
+    thing 14020 - nv 16 NULL "DSDA: AmbientSound 20"
+    thing 14021 - nv 16 NULL "DSDA: AmbientSound 21"
+    thing 14022 - nv 16 NULL "DSDA: AmbientSound 22"
+    thing 14023 - nv 16 NULL "DSDA: AmbientSound 23"
+    thing 14024 - nv 16 NULL "DSDA: AmbientSound 24"
+    thing 14025 - nv 16 NULL "DSDA: AmbientSound 25"
+    thing 14026 - nv 16 NULL "DSDA: AmbientSound 26"
+    thing 14027 - nv 16 NULL "DSDA: AmbientSound 27"
+    thing 14028 - nv 16 NULL "DSDA: AmbientSound 28"
+    thing 14029 - nv 16 NULL "DSDA: AmbientSound 29"
+    thing 14030 - nv 16 NULL "DSDA: AmbientSound 30"
+    thing 14031 - nv 16 NULL "DSDA: AmbientSound 31"
+    thing 14032 - nv 16 NULL "DSDA: AmbientSound 32"
+    thing 14033 - nv 16 NULL "DSDA: AmbientSound 33"
+    thing 14034 - nv 16 NULL "DSDA: AmbientSound 34"
+    thing 14035 - nv 16 NULL "DSDA: AmbientSound 35"
+    thing 14036 - nv 16 NULL "DSDA: AmbientSound 36"
+    thing 14037 - nv 16 NULL "DSDA: AmbientSound 37"
+    thing 14038 - nv 16 NULL "DSDA: AmbientSound 38"
+    thing 14039 - nv 16 NULL "DSDA: AmbientSound 39"
+    thing 14040 - nv 16 NULL "DSDA: AmbientSound 40"
+    thing 14041 - nv 16 NULL "DSDA: AmbientSound 41"
+    thing 14042 - nv 16 NULL "DSDA: AmbientSound 42"
+    thing 14043 - nv 16 NULL "DSDA: AmbientSound 43"
+    thing 14044 - nv 16 NULL "DSDA: AmbientSound 44"
+    thing 14045 - nv 16 NULL "DSDA: AmbientSound 45"
+    thing 14046 - nv 16 NULL "DSDA: AmbientSound 46"
+    thing 14047 - nv 16 NULL "DSDA: AmbientSound 47"
+    thing 14048 - nv 16 NULL "DSDA: AmbientSound 48"
+    thing 14049 - nv 16 NULL "DSDA: AmbientSound 49"
+    thing 14050 - nv 16 NULL "DSDA: AmbientSound 50"
+    thing 14051 - nv 16 NULL "DSDA: AmbientSound 51"
+    thing 14052 - nv 16 NULL "DSDA: AmbientSound 52"
+    thing 14053 - nv 16 NULL "DSDA: AmbientSound 53"
+    thing 14054 - nv 16 NULL "DSDA: AmbientSound 54"
+    thing 14055 - nv 16 NULL "DSDA: AmbientSound 55"
+    thing 14056 - nv 16 NULL "DSDA: AmbientSound 56"
+    thing 14057 - nv 16 NULL "DSDA: AmbientSound 57"
+    thing 14058 - nv 16 NULL "DSDA: AmbientSound 58"
+    thing 14059 - nv 16 NULL "DSDA: AmbientSound 59"
+    thing 14060 - nv 16 NULL "DSDA: AmbientSound 60"
+    thing 14061 - nv 16 NULL "DSDA: AmbientSound 61"
+    thing 14062 - nv 16 NULL "DSDA: AmbientSound 62"
+    thing 14063 - nv 16 NULL "DSDA: AmbientSound 63"
+    thing 14064 - nv 16 NULL "DSDA: AmbientSound 64"
+
+    thing 14065 - nv 16 NULL "DSDA: AmbientSound Arg"
+
+    thing 14100 - nv 16 NULL "DSDA: MusicChanger 0"
+    thing 14101 - nv 16 NULL "DSDA: MusicChanger 1"
+    thing 14102 - nv 16 NULL "DSDA: MusicChanger 2"
+    thing 14103 - nv 16 NULL "DSDA: MusicChanger 3"
+    thing 14104 - nv 16 NULL "DSDA: MusicChanger 4"
+    thing 14105 - nv 16 NULL "DSDA: MusicChanger 5"
+    thing 14106 - nv 16 NULL "DSDA: MusicChanger 6"
+    thing 14107 - nv 16 NULL "DSDA: MusicChanger 7"
+    thing 14108 - nv 16 NULL "DSDA: MusicChanger 8"
+    thing 14109 - nv 16 NULL "DSDA: MusicChanger 9"
+    thing 14110 - nv 16 NULL "DSDA: MusicChanger 10"
+    thing 14111 - nv 16 NULL "DSDA: MusicChanger 11"
+    thing 14112 - nv 16 NULL "DSDA: MusicChanger 12"
+    thing 14113 - nv 16 NULL "DSDA: MusicChanger 13"
+    thing 14114 - nv 16 NULL "DSDA: MusicChanger 14"
+    thing 14115 - nv 16 NULL "DSDA: MusicChanger 15"
+    thing 14116 - nv 16 NULL "DSDA: MusicChanger 16"
+    thing 14117 - nv 16 NULL "DSDA: MusicChanger 17"
+    thing 14118 - nv 16 NULL "DSDA: MusicChanger 18"
+    thing 14119 - nv 16 NULL "DSDA: MusicChanger 19"
+    thing 14120 - nv 16 NULL "DSDA: MusicChanger 20"
+    thing 14121 - nv 16 NULL "DSDA: MusicChanger 21"
+    thing 14122 - nv 16 NULL "DSDA: MusicChanger 22"
+    thing 14123 - nv 16 NULL "DSDA: MusicChanger 23"
+    thing 14124 - nv 16 NULL "DSDA: MusicChanger 24"
+    thing 14125 - nv 16 NULL "DSDA: MusicChanger 25"
+    thing 14126 - nv 16 NULL "DSDA: MusicChanger 26"
+    thing 14127 - nv 16 NULL "DSDA: MusicChanger 27"
+    thing 14128 - nv 16 NULL "DSDA: MusicChanger 28"
+    thing 14129 - nv 16 NULL "DSDA: MusicChanger 29"
+    thing 14130 - nv 16 NULL "DSDA: MusicChanger 30"
+    thing 14131 - nv 16 NULL "DSDA: MusicChanger 31"
+    thing 14132 - nv 16 NULL "DSDA: MusicChanger 32"
+    thing 14133 - nv 16 NULL "DSDA: MusicChanger 33"
+    thing 14134 - nv 16 NULL "DSDA: MusicChanger 34"
+    thing 14135 - nv 16 NULL "DSDA: MusicChanger 35"
+    thing 14136 - nv 16 NULL "DSDA: MusicChanger 36"
+    thing 14137 - nv 16 NULL "DSDA: MusicChanger 37"
+    thing 14138 - nv 16 NULL "DSDA: MusicChanger 38"
+    thing 14139 - nv 16 NULL "DSDA: MusicChanger 39"
+    thing 14140 - nv 16 NULL "DSDA: MusicChanger 40"
+    thing 14141 - nv 16 NULL "DSDA: MusicChanger 41"
+    thing 14142 - nv 16 NULL "DSDA: MusicChanger 42"
+    thing 14143 - nv 16 NULL "DSDA: MusicChanger 43"
+    thing 14144 - nv 16 NULL "DSDA: MusicChanger 44"
+    thing 14145 - nv 16 NULL "DSDA: MusicChanger 45"
+    thing 14146 - nv 16 NULL "DSDA: MusicChanger 46"
+    thing 14147 - nv 16 NULL "DSDA: MusicChanger 47"
+    thing 14148 - nv 16 NULL "DSDA: MusicChanger 48"
+    thing 14149 - nv 16 NULL "DSDA: MusicChanger 49"
+    thing 14150 - nv 16 NULL "DSDA: MusicChanger 50"
+    thing 14151 - nv 16 NULL "DSDA: MusicChanger 51"
+    thing 14152 - nv 16 NULL "DSDA: MusicChanger 52"
+    thing 14153 - nv 16 NULL "DSDA: MusicChanger 53"
+    thing 14154 - nv 16 NULL "DSDA: MusicChanger 54"
+    thing 14155 - nv 16 NULL "DSDA: MusicChanger 55"
+    thing 14156 - nv 16 NULL "DSDA: MusicChanger 56"
+    thing 14157 - nv 16 NULL "DSDA: MusicChanger 57"
+    thing 14158 - nv 16 NULL "DSDA: MusicChanger 58"
+    thing 14159 - nv 16 NULL "DSDA: MusicChanger 59"
+    thing 14160 - nv 16 NULL "DSDA: MusicChanger 60"
+    thing 14161 - nv 16 NULL "DSDA: MusicChanger 61"
+    thing 14162 - nv 16 NULL "DSDA: MusicChanger 62"
+    thing 14163 - nv 16 NULL "DSDA: MusicChanger 63"
+    thing 14164 - nv 16 NULL "DSDA: MusicChanger 64"
+
+    thing 14165 - nv 16 NULL "DSDA: MusicChanger Arg"
+
+    special   1 p "PolyObject Start Line"  :po  mirror_po:po  sound_seq
+    special   2 p "Polyobj_RotateLeft"     :po  speed  angle
+    special   3 p "Polyobj_RotateRight"    :po  speed  angle
+    special   4 p "Polyobj_Move"           :po  speed  angle  dist
+    special   5 p "Polyobj_ExplicitLine"   :po  render_order  mirror_po:po  sound_seq line_id:self_line_id
+    special   7 p "Polyobj_DoorSwing"      :po  speed  angle  delay
+    special   8 p "Polyobj_DoorSlide"      :po  speed  angle  dist  delay
+    special  10 d "Door_Close"            :tag  speed  light_tag:tag
+    special  11 d "Door_Open"             :tag  speed  light_tag:tag
+    special  12 d "Door_Raise"            :tag  speed  delay  light_tag:tag
+    special  13 d "Door_LockedRaise"      :tag  speed  delay  lock  light_tag:tag
+    special  17 t "Thing_Raise"            :tid
+    special  19 t "Thing_Stop"             :tid
+    special  20 f "Floor_LowerByValue"         :tag  speed  dist
+    special  21 f "Floor_LowerToLowest"        :tag  speed
+    special  22 f "Floor_LowerToNearest"       :tag  speed
+    special  23 f "Floor_RaiseByValue"         :tag  speed  dist
+    special  24 f "Floor_RaiseToHighest"       :tag  speed
+    special  25 f "Floor_RaiseToNearest"       :tag  speed
+    special  26 q "Stairs_BuildDown"           :tag  speed  height  delay  reset_delay
+    special  27 q "Stairs_BuildUp"             :tag  speed  height  delay  reset_delay
+    special  28 f "Floor_RaiseAndCrush"        :tag  speed  damage  crush_mode
+    special  29 e "Pillar_Build"               :tag  speed  dist
+    special  30 e "Pillar_Open"                :tag  speed  floor_dist  ceil_dist
+    special  31 q "Stairs_BuildDownSync"       :tag  speed  height  reset_delay
+    special  32 q "Stairs_BuildUpSync"         :tag  speed  height  reset_delay
+    special  33 - "ForceField"
+    special  34 - "ClearForceField"        :tag
+    special  37 f "Floor_MoveToValue"          :tag  speed  dist  negate?
+    special  38 c "Ceiling_Waggle"               :tag  amp  speed  offset  time
+    special  39 u "Teleport_ZombieChanger" :tid  :tag
+    special  40 c "Ceiling_LowerByValue"         :tag  speed  dist
+    special  41 c "Ceiling_RaiseByValue"         :tag  speed  dist
+    special  42 c "Ceiling_CrushAndRaise"        :tag  speed  damage  crush_mode
+    special  43 c "Ceiling_LowerAndCrush"        :tag  speed  damage  crush_mode
+    special  44 c "Ceiling_CrushStop"            :tag
+    special  45 c "Ceiling_CrushRaiseAndStay"    :tag  speed  damage  crush_mode
+    special  46 f "Floor_CrushStop"            :tag
+    special  47 c "Ceiling_MoveToValue"          :tag  speed  dist  negate?
+    special  52 a "Scroll_Wall"            :line_id  x_speed  y_speed  back?  tex_flags
+    # TODO: Line_SetTextureOffset. Also ZDoom
+    special  54 s "Sector_ChangeFlags"         :tag  set_flags  clear_flags
+    special  55 - "Line_SetBlocking"       :line_id  set_flags  clear_flags
+    # TODO: Line_SetTextureScale. Also ZDoom
+    special  58 a "Sector_CopyScroller"    :tag  flags
+    special  59 p "Polyobj_OR_MoveToSpot"  :po  speed :tid
+    special  60 g "Plat_PerpetualRaise"          :tag  speed  delay
+    special  61 g "Plat_Stop"                    :tag
+    special  62 g "Plat_DownWaitUpStay"          :tag  speed  delay
+    special  63 g "Plat_DownByValue"             :tag  speed  delay  dist_x8
+    special  64 g "Plat_UpWaitDownStay"          :tag  speed  delay
+    special  65 g "Plat_UpByValue"               :tag  speed  delay  dist_x8
+    special  66 f "Floor_LowerInstant"         :tag  -  dist_x8
+    special  67 f "Floor_RaiseInstant"         :tag  -  dist_x8
+    special  70 u "Teleport"               :tid  :tag  no_fog?
+    special  71 u "Teleport_NoFog"         :tid  set_angle?  :tag
+    special  72 t "ThrustThing"             angle  thrust  unlimited? :tid
+    special  73 t "DamageThing"             damage  death_type
+    special  74 x "Exit_ToMap"              map  pos_arg0  keep_angle?
+    special  75 x "End_Game"
+    special  76 u "TeleportOther"          :tid  :tid  fog?
+    special  77 u "TeleportGroup"          group_tid:tid  source_tid:tid  dest_tid:tid  move_source?   fog?
+    special  78 u "TeleportInSector"       :tag  source_tid:tid  dest_tid:tid  fog?  group_tid:tid
+    special  86 p "Polyobj_MoveToSpot"     :po  speed :tid
+    special  87 p "Polyobj_Stop"           :po
+    # TODO: Polyobj_MoveTo. Also ZDoom
+    # TODO: Polyobj_OR_MoveTo. Also ZDoom
+    special  90 p "Polyobj_OR_RotateLeft"  :po  speed  angle
+    special  91 p "Polyobj_OR_RotateRight" :po  speed  angle
+    special  92 p "Polyobj_OR_Move"        :po  speed  angle  dist
+    special  94 e "Pillar_BuildAndCrush"       :tag  speed  dist  damage  crush_mode
+    special  95 e "Elevator_Lower"             :tag  speed  dist
+    special  96 e "Elevator_Raise"             :tag  speed  dist
+    special  97 c "Ceiling_LowerAndCrushDist"    :tag  speed  damage  height  crush_mode
+    special  99 f "Floor_RaiseAndCrushDoom"    :tag  speed  damage  crush_mode
+    special 104 c "Ceiling_CrushAndRaiseSilentDist" :tag  height  speed  damage  crush_mode
+    special 105 d "Door_WaitRaise"        :tag  speed  delay  wait  light_tag:tag
+    special 106 d "Door_WaitClose"        :tag  speed  delay  wait  light_tag:tag
+    special 110 l "Light_RaiseByValue"     :tag  light
+    special 111 l "Light_LowerByValue"     :tag  light
+    special 112 l "Light_ChangeToValue"    :tag  light
+    special 113 l "Light_Fade"             :tag  light  time
+    special 114 l "Light_Glow"             :tag  high  low  time
+    special 115 l "Light_Flicker"          :tag  high  low
+    special 116 l "Light_Strobe"           :tag  high  low  high_time  low_time
+    special 117 l "Light_Stop"             :tag
+    special 119 t "Thing_Damage"           :tid  damage  death_type
+    special 120 - "Earthquake"              intensity  duration  damrad  tremrad :tid
+    special 121 - "Line_SetIdent"           line_id:self_line_id  flags  -  - line_id_hi:self_line_id_hi
+    special 125 t "Thing_Move"             :tid  dest_tid:tid  no_fog?
+    special 127 t "Thing_SetSpecial"       :tid  special  arg1  arg2  arg3
+    special 128 t "ThrustThingZ"           :tid  thrust  down?  additive?
+    special 130 t "Thing_Activate"         :tid
+    special 131 t "Thing_Deactivate"       :tid
+    special 132 t "Thing_Remove"           :tid
+    special 133 t "Thing_Destroy"          :tid  extreme_damage? :tag
+    special 134 t "Thing_Projectile"       :tid  type_id  angle  speed  up_speed
+    special 135 t "Thing_Spawn"            :tid  type_id  angle  new_id
+    special 136 t "Thing_ProjectileGravity" :tid  type_id  angle  speed  up_speed
+    special 137 t "Thing_SpawnNoFog"       :tid  type_id  angle  new_id
+    special 138 f "Floor_Waggle"               :tag  amp  speed  offset  time
+    special 139 t "Thing_SpawnFacing"      :tid  type_id  no_fog?  new_id
+    special 154 u "Teleport_NoStop"        dest_tid:tid  :tag  no_fog?
+    special 168 c "Ceiling_CrushAndRaiseDist"    :tag  height  speed  damage  crush_mode
+    special 169 c "Generic_Crusher2"             :tag  down_speed  up_speed  silent?   damage
+    # TODO: Sector_SetCeilingScale2. Also ZDoom
+    # TODO: Sector_SetFloorScale2. Also ZDoom
+    special 172 g "Plat_UpNearestWaitDownStay"   :tag  speed  delay
+    special 173 - "NoiseAlert"              target_tid:tid  emitter_tid:tid
+    special 176 t "Thing_ChangeTID"        :tid  new_tid
+    special 177 t "Thing_Hate"             :tid  target_tid:tid  hate_type
+    special 178 t "Thing_ProjectileAimed"  :tid  type_id  speed  target_tid:tid  new_tid
+    special 185 s "Sector_SetRotation"         :tag  floor_angle  ceil_angle
+    special 186 s "Sector_SetCeilingPanning"   :tag  x_offset  y_offset  x_frac  y_frac
+    special 187 s "Sector_SetFloorPanning"     :tag  x_offset  y_offset  x_frac  y_frac
+    special 188 s "Sector_SetCeilingScale"     :tag  x_scale  x_frac  y_scale  y_frac
+    special 189 s "Sector_SetFloorScale"       :tag  x_scale  x_frac  y_scale  y_frac
+    special 192 c "Ceiling_LowerToHighestFloor"  :tag  speed
+    special 193 c "Ceiling_LowerInstant"         :tag  -  dist_x8
+    special 194 c "Ceiling_RaiseInstant"         :tag  -  dist_x8
+    special 195 c "Ceiling_CrushRaiseAndStayA"   :tag  speed  speed  damage  crush_mode
+    special 196 c "Ceiling_CrushAndRaiseA"       :tag  down_speed  up_speed  damage  crush_mode
+    special 197 c "Ceiling_CrushAndRaiseSilentA" :tag  down_speed  up_speed  damage  crush_mode
+    special 200 f "Generic_Floor"          :tag  speed  dist  target_type  flags
+    special 201 c "Generic_Ceiling"        :tag  speed  dist  target_type  flags
+    special 202 d "Generic_Door"           :tag  speed  door_kind  delay  lock
+    special 203 g "Generic_Lift"           :tag  speed  delay_octics  lift_type  type0_height
+    special 204 q "Generic_Stairs"         :tag  speed  height  flags  reset_delay
+    special 205 c "Generic_Crusher"        :tag  down_speed  up_speed  silent?   damage
+    special 206 g "Plat_DownWaitUpStayLip"       :tag  speed  delay  lip  sound_type
+    special 207 g "Plat_PerpetualRaiseLip"       :tag  speed  delay  lip
+    special 209 r "Transfer_Heights"       :tag  flags
+    special 214 s "Sector_SetDamage"           :tag  damage  death_type
+    special 215 u "Teleport_Line"          source_line_id:self_line_id  dest_line_id:line_id  flip_180?
+    special 216 s "Sector_SetGravity"          :tag  grav_mul  grav_mul_frac
+    special 217 q "Stairs_BuildUpDoom"         :tag  speed  height  delay  reset_delay
+    special 218 s "Sector_SetWind"             :tag  strength  angle  use_line_angle?
+    special 219 s "Sector_SetFriction"         :tag  friction
+    special 220 s "Sector_SetCurrent"          :tag  strength  angle  use_line_angle?
+    special 222 a "Scroll_Texture_Model"   :line_id  flags
+    special 223 a "Scroll_Floor"           :tag  tex_flags  push?  x_speed  y_speed
+    special 224 a "Scroll_Ceiling"         :tag  tex_flags  -  x_speed  y_speed
+    special 227 s "PointPush_SetForce"         :tag  :tid  strength  use_line_angle?
+    special 228 g "Plat_RaiseAndStayTx0"         :tag  speed  lockout
+    special 230 g "Plat_UpByValueStayTx"         :tag  speed  dist_x8
+    special 231 g "Plat_ToggleCeiling"           :tag
+    special 232 l "Light_StrobeDoom"       :tag  high_time  low_time
+    special 233 l "Light_MinNeighbor"      :tag
+    special 234 l "Light_MaxNeighbor"      :tag
+    special 235 f "Floor_TransferTrigger"      :tag
+    special 236 f "Floor_TransferNumeric"      :tag
+    special 238 f "Floor_RaiseToLowestCeiling" :tag  speed
+    special 239 f "Floor_RaiseByValueTxTy"     :tag  speed  dist
+    special 240 f "Floor_RaiseByTexture"       :tag  speed
+    special 241 f "Floor_LowerToLowestTxTy"    :tag  speed
+    special 242 f "Floor_LowerToHighest"       :tag  speed  lip  adjust?
+    special 243 x "Exit_Normal"             pos_arg0
+    special 244 x "Exit_Secret"             pos_arg0
+    special 245 e "Elevator_RaiseToNearest"    :tag  speed
+    special 246 e "Elevator_MoveToFloor"       :tag  speed
+    special 247 e "Elevator_LowerToNearest"    :tag  speed
+    special 248 t "HealThing"              :tid  health
+    special 249 d "Door_CloseWaitOpen"    :tag  speed  delay  light_tag:tag
+    special 250 f "Floor_Donut"                :tag  speed  speed
+    special 251 e "FloorAndCeiling_LowerRaise" :tag  floor_speed  ceil_speed
+    special 252 c "Ceiling_RaiseToNearest"       :tag  speed
+    special 253 c "Ceiling_LowerToLowest"        :tag  speed
+    # TODO: continue
+    # TODO: DRY
+
 endif
+
+
 
 # TODO: all the rest from https://github.com/kraflab/dsda-doom/blob/v0.29.4/docs/things_and_specials.md
 
