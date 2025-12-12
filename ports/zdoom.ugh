@@ -255,6 +255,16 @@ special 250 f "Floor_Donut"                :tag  speed  speed
 special 138 f "Floor_Waggle"               :tag  amp  speed  offset  time
 special 235 f "Floor_TransferTrigger"      :tag
 special 236 f "Floor_TransferNumeric"      :tag
+if $MAP_FORMAT is UDMF
+special 256 f "Floor_LowerToHighestEE"     :tag speed change
+special 257 f "Floor_RaiseToLowest"        :tag change crush
+special 258 f "Floor_LowerToLowestCeiling" :tag speed change
+special 259 f "Floor_RaiseToCeiling"       :tag speed change crush gap
+special 260 f "Floor_ToCeilingInstant"     :tag change crush gap
+special 261 f "Floor_LowerByTexture"       :tag speed change crush
+special 275 f "Floor_Stop"                 :tag
+special 279 f "Floor_MoveToValueAndCrush"  :tag speed height crush crushmode
+endif
 
 # Ceilings
 special 169 c "Generic_Crusher2"             :tag  down_speed  up_speed  silent?   damage
@@ -282,6 +292,19 @@ special  45 c "Ceiling_CrushRaiseAndStay"    :tag  speed  damage  crush_mode
 special 195 c "Ceiling_CrushRaiseAndStayA"   :tag  speed  speed  damage  crush_mode
 special 255 c "Ceiling_CrushRaiseAndStaySilA"  :tag  speed  speed  damage  crush_mode
 special  44 c "Ceiling_CrushStop"            :tag
+if $MAP_FORMAT is UDMF
+special 262 c "Ceiling_RaiseToHighest"       :tag  speed  change
+special 263 c "Ceiling_ToHighestInstant"     :tag  change crush
+special 264 c "Ceiling_LowerToNearest"       :tag  speed  change  crush
+special 265 c "Ceiling_RaiseToLowest"        :tag  speed  change
+special 266 c "Ceiling_RaiseToHighestFloor"  :tag  speed  change
+special 267 c "Ceiling_ToFloorInstant"       :tag  change crush gap
+special 268 c "Ceiling_RaiseByTexture"       :tag  speed  change
+special 269 c "Ceiling_LowerByTexture"       :tag  speed  change  crush
+special 276 c "Ceiling_Stop"                 :tag
+special 280 c "Ceiling_MoveToValueAndCrush"  :tag  speed  height  crush  crushmode
+special 284 c "Generic_CrusherDist"          :tag  dspeed uspeed silent crush
+endif
 
 # Doors
 special  12 d "Door_Raise"            :tag  speed  delay  light_tag:tag
@@ -292,6 +315,9 @@ special 105 d "Door_WaitRaise"        :tag  speed  delay  wait  light_tag:tag
 special 106 d "Door_WaitClose"        :tag  speed  delay  wait  light_tag:tag
 special 249 d "Door_CloseWaitOpen"    :tag  speed  delay  light_tag:tag
 special  14 d "Door_Animated"         :tag  speed  delay  lock
+if $MAP_FORMAT is UDMF
+special 274 d "Door_AnimatedClose"    :tag  speed
+endif
 
 # Lifts
 special  62 g "Plat_DownWaitUpStay"          :tag  speed  delay
@@ -445,10 +471,12 @@ special   8 p "Polyobj_DoorSlide"      :po  speed  angle  dist  delay
 special  86 p "Polyobj_MoveToSpot"     :po  speed :tid
 special  59 p "Polyobj_OR_MoveToSpot"  :po  speed :tid
 special  87 p "Polyobj_Stop"           :po
-
-## andrewj: leaving out specials 88/89 "Polyobj_MoveTo" because they
-## seem designed for scripts -- when used in a map the target X/Y
-## coordinates will be limited to the range 0-255.
+if $MAP_FORMAT is UDMF
+special  88 p "Polyobj_MoveTo"         :po  speed pos_x pos_y
+special  89 p "Polyobj_OR_MoveTo"      :po  speed pos_x pos_y
+special 283 p "Polyobj_StopSound"      :po
+endif
+# TODO: continue
 
 # Exits
 special 243 x "Exit_Normal"             pos_arg0
@@ -469,6 +497,10 @@ special 157 r "SetGlobalFogParameter (OpenGL)"       property  value
 special 159 r "Sector_SetPlaneReflection (OpenGL)"  :tag  floor  ceiling
 special 208 r "TranslucentLine"        :line_id  opacity  additive?  extra_flags
 special 209 r "Transfer_Heights"       :tag  flags
+if $MAP_FORMAT is UDMF
+special 281 r "Line_SetAutomapFlags"   :line_id setflags clearflags
+special 282 r "Line_SetAutomapStyle"   :line_id style
+endif
 
 # Scripting
 special  80 k "ACS_Execute"             script  map  param1  param2  param3
