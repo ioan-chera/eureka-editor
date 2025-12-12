@@ -342,7 +342,33 @@ if $ADVANCED_FORMAT is 1
     special 251 e "FloorAndCeiling_LowerRaise" :tag  floor_speed  ceil_speed
     special 252 c "Ceiling_RaiseToNearest"       :tag  speed
     special 253 c "Ceiling_LowerToLowest"        :tag  speed
-    # TODO: continue
+    special 254 c "Ceiling_LowerToFloor"         :tag  speed
+    special 255 c "Ceiling_CrushRaiseAndStaySilA"  :tag  speed  speed  damage  crush_mode
+    # TODO: Floor_LowerToHighestEE. Also ZDoom
+    # TODO: 257: Floor_RaiseToLowest
+    # TODO: 258: Floor_LowerToLowestCeiling
+    # TODO: 259: Floor_RaiseToCeiling
+    # TODO: 260: Floor_ToCeilingInstant
+    # TODO: 261: Floor_LowerByTexture
+    # TODO: 262: Ceiling_RaiseToHighest
+    # TODO: 263: Ceiling_ToHighestInstant
+    # TODO: 264: Ceiling_LowerToNearest
+    # TODO: 265: Ceiling_RaiseToLowest
+    # TODO: 266: Ceiling_RaiseToHighestFloor
+    # TODO: 267: Ceiling_ToFloorInstant
+    # TODO: 268: Ceiling_RaiseByTexture
+    # TODO: 269: Ceiling_LowerByTexture
+    # TODO: 270: Stairs_BuildDownDoom
+    # TODO: 271: Stairs_BuildUpDoomSync
+    # TODO: 272: Stairs_BuildDownDoomSync
+    # TODO: 273: Stairs_BuildUpDoomCrush
+    # TODO: 275: Floor_Stop
+    # TODO: 276: Ceiling_Stop
+    # TODO: 279: Floor_MoveToValueAndCrush
+    # TODO: 280: Ceiling_MoveToValueAndCrush
+    # TODO: 281: Line_SetAutomapFlags
+    # TODO: 282: Line_SetAutomapStyle
+    # TODO: only UDMF when over 255
     # TODO: DRY
 
 endif
