@@ -362,8 +362,7 @@ feature gen_sectors zdoom
 
 include "hexen_groups"
 include "hexen_sectors"
-
-special 0 - "NOTHING"
+include "param_lines"
 
 # Floors
 special  22 f "Floor_LowerToNearest"       :tag  speed  change
@@ -379,12 +378,8 @@ special  23 f "Floor_RaiseByValue"         :tag  speed  dist  change  crush
 special  35 f "Floor_RaiseByValueTimes8"   :tag  speed  dist_x8  change  crush
 special 240 f "Floor_RaiseByTexture"       :tag  speed  change  crush
 special  67 f "Floor_RaiseInstant"         :tag  -  dist_x8 change crush
-special  28 f "Floor_RaiseAndCrush"        :tag  speed  damage
-special  46 f "Floor_CrushStop"            :tag
 special  37 f "Floor_MoveToValue"          :tag  speed  dist  negate?  change
-special  68 f "Floor_MoveToValueTimes8"    :tag  speed  height_x8  negate? change
 special 250 f "Floor_Donut"                :tag  speed  speed
-special 138 f "Floor_Waggle"               :tag  amp  speed  offset  time
 special 235 f "Floor_TransferTrigger"      :tag
 special 236 f "Floor_TransferNumeric"      :tag
 # NOTE: specials above 255 can't be used in Hexen format.
@@ -401,7 +396,6 @@ special  41 c "Ceiling_RaiseByValue"         :tag  speed  dist change
 special 198 c "Ceiling_RaiseByValueTimes8"   :tag  speed  dist_x8 change
 special 194 c "Ceiling_RaiseInstant"         :tag  -  dist_x8 change
 special  47 c "Ceiling_MoveToValue"          :tag  speed  height  negate? change
-special  69 c "Ceiling_MoveToValueTimes8"    :tag  speed  height_x8  negate? change
 special  38 c "Ceiling_Waggle"               :tag  amp  speed  offset  time
 special  43 c "Ceiling_LowerAndCrush"        :tag  speed  damage  crush_mode
 special  97 c "Ceiling_LowerAndCrushDist"    :tag  speed  damage  gap  crush_mode
@@ -425,28 +419,18 @@ special 106 d "Door_WaitClose"        :tag  speed  delay  wait  light_tag:tag
 special 249 d "Door_CloseWaitOpen"    :tag  speed  delay  light_tag:tag
 
 # Lifts
-special  62 g "Plat_DownWaitUpStay"          :tag  speed  delay
 special 206 g "Plat_DownWaitUpStayLip"       :tag  speed  delay  lip  sound_type
-special  63 g "Plat_DownByValue"             :tag  speed  delay  dist_x8
-special  64 g "Plat_UpWaitDownStay"          :tag  speed  delay
-special  65 g "Plat_UpByValue"               :tag  speed  delay  dist_x8
 special 230 g "Plat_UpByValueStayTx"         :tag  speed  dist_x8
 special 228 g "Plat_RaiseAndStayTx0"         :tag  speed  lock_out
-special  60 g "Plat_PerpetualRaise"          :tag  speed  delay
 special 207 g "Plat_PerpetualRaiseLip"       :tag  speed  delay  lip
 special 231 g "Plat_ToggleCeiling"           :tag
 special  61 g "Plat_Stop"                    :tag  stop_mode
 
 # Elevators & Pillars
-special  95 e "FloorAndCeiling_LowerByValue" :tag  speed  dist
-special  96 e "FloorAndCeiling_RaiseByValue" :tag  speed  dist
 special 251 e "FloorAndCeiling_LowerRaise" :tag  floor_speed  ceil_speed boom_emu
 special 247 e "Elevator_LowerToNearest"    :tag  speed
 special 245 e "Elevator_RaiseToNearest"    :tag  speed
 special 246 e "Elevator_MoveToFloor"       :tag  speed
-special  30 e "Pillar_Open"                :tag  speed  floor_dist  ceil_dist
-special  29 e "Pillar_Build"               :tag  speed  dist
-special  94 e "Pillar_BuildAndCrush"       :tag  speed  dist  damage
 
 # Stairs
 special  27 q "Stairs_BuildUp"             :tag  speed  height  delay  reset_delay
@@ -456,7 +440,6 @@ special 217 q "Stairs_BuildUpDoom"         :tag  speed  height  delay  reset_del
 special 181 s "Plane_Align"                floor_side  ceil_side
 special 118 s "Plane_Copy"                 front_floor_tag:tag  front_ceil_tag:tag  back_floor_tag:tag  back_ceil_tag:tag  share_flags
 special 190 s "Sky transfer"                :line_id  255  sky_flip?
-special 140 s "Sector_ChangeSound"         :tag  sound_seq
 special 185 s "Sector_SetRotation"         :tag  floor_angle  ceil_angle
 special 187 s "Sector_SetFloorPanning"     :tag  x_offset  x_frac  y_offset  y_frac
 special 186 s "Sector_SetCeilingPanning"   :tag  x_offset  x_frac  y_offset  y_frac
@@ -467,14 +450,7 @@ special 227 s "PointPush_SetForce"         :tag  :tid  force  use_line_angle?
 
 # Lighting
 special 233 l "Light_MinNeighbor"      :tag
-special 111 l "Light_LowerByValue"     :tag  light
 special 234 l "Light_MaxNeighbor"      :tag
-special 110 l "Light_RaiseByValue"     :tag  light
-special 112 l "Light_ChangeToValue"    :tag  light
-special 113 l "Light_Fade"             :tag  light  time
-special 114 l "Light_Glow"             :tag  high  low  time
-special 115 l "Light_Flicker"          :tag  high  low
-special 116 l "Light_Strobe"           :tag  high  low  high_time  low_time
 special 232 l "Light_StrobeDoom"       :tag  high_time  low_time
 
 # Teleporters
@@ -483,52 +459,30 @@ special  71 u "Teleport_NoFog"         :tid  use_angle?  :tag keep_height
 special 215 u "Teleport_Line"          -  :line_id  flip_180?
 
 # Things
-special 130 t "Thing_Activate"          :tid
-special 131 t "Thing_Deactivate"        :tid
 special  17 t "Thing_Raise"             :tid
 special 135 t "Thing_Spawn"             :tid  type_id  angle  new_id
 special 137 t "Thing_SpawnNoFog"        :tid  type_id  angle  new_id
-special 134 t "Thing_Projectile"        :tid  type_id  angle  speed  up_speed
-special 136 t "Thing_ProjectileGravity" :tid  type_id  angle  speed  up_speed
 
 special 248 t "HealThing"               amount  max_health
 special  73 t "DamageThing"             damage  damage_type
 special 119 t "Thing_Damage"            :tid  damage  damage_type
 special 133 t "Thing_Destroy"           :tid  -  :tag
-special 132 t "Thing_Remove"            :tid
 special  72 t "ThrustThing"             angle  thrust  -  :tid
 special 128 t "ThrustThingZ"            :tid  thrust  down?  additive?
 special  19 t "Thing_Stop"              :tid
 special 176 t "Thing_ChangeTID"         :tid  new_tid
 
 # Lines
-special 121 - "Line_SetIdent"           line_id:self_line_id
 special 156 - "Line_SetPortal"          target_id:line_id  this_id:self_line_id  type  anchor
 special  48 - "Sector_Attach3dMidtex"  :line_id  :tag  ceiling?
 
 # Animated
-special 102 a "Scroll_Texture_Up"       speed
-special 103 a "Scroll_Texture_Down"     speed
-special 100 a "Scroll_Texture_Left"     speed
-special 101 a "Scroll_Texture_Right"    speed
 special 225 a "Scroll_Texture_Offsets"
 special 222 a "Scroll_Texture_Model"    :line_id  kind
 special 223 a "Scroll_Floor"            :tag  kind  push?  x_speed  y_speed
 special 224 a "Scroll_Ceiling"          :tag  tex_flags  -  x_speed  y_speed
 
 # PolyObjects
-special   1 p "PolyObject Start Line"   :po  mirror_po:po  sound_seq
-special   5 p "Polyobj_ExplicitLine"    :po  render_order  mirror_po:po  sound_seq
-special   2 p "Polyobj_RotateLeft"      :po  speed  angle
-special  90 p "Polyobj_OR_RotateLeft"   :po  speed  angle
-special   3 p "Polyobj_RotateRight"     :po  speed  angle
-special  91 p "Polyobj_OR_RotateRight"  :po  speed  angle
-special   4 p "Polyobj_Move"            :po  speed  angle  dist
-special  92 p "Polyobj_OR_Move"         :po  speed  angle  dist
-special   6 p "Polyobj_MoveTimes8"      :po  speed  angle  dist_x8
-special  93 p "Polyobj_OR_MoveTimes8"   :po  speed  angle  dist_x8
-special   7 p "Polyobj_DoorSwing"       :po  speed  angle  delay
-special   8 p "Polyobj_DoorSlide"       :po  speed  angle  dist  delay
 special  86 p "Polyobj_MoveToSpot"      :po  speed  :tid
 special  59 p "Polyobj_OR_MoveToSpot"   :po  speed  :tid
 special  87 p "Polyobj_Stop"            :po
@@ -541,7 +495,6 @@ special  87 p "Polyobj_Stop"            :po
 special 243 x "Exit_Normal"
 special 244 x "Exit_Secret"
 special  74 x "Teleport_NewMap"         map
-special  75 x "Teleport_EndGame"
 
 # Renderer
 special   9 r "Line_Horizon"
@@ -551,16 +504,11 @@ special  57 r "Sector_SetPortal"        :tag  portal_type  plane  misc  opacity
 special 209 r "Transfer_Heights"        :tag
 
 # Scripting
-special  80 k "ACS_Execute"             script  map  param1  param2  param3
-special  83 k "ACS_LockedExecute"       script  map  param1  param2  lock
 special  85 k "ACS_LockedExecuteDoor"   script  map  param1  param2  lock
 special  84 k "ACS_ExecuteWithResult"   script  param1  param2  param3
 special 226 k "ACS_ExecuteAlways"       script  map  param1  param2  param3
-special  81 k "ACS_Suspend"             script  map
-special  82 k "ACS_Terminate"           script  map
 
 special 179 - "ChangeSkill"             skill
-special 120 - "Earthquake"              intensity  duration  damrad  tremrad  :tid
 ## special 129 - "UsePuzzleItem"           item  script  param1  param2  param3
 
 # Boom Compatibility

@@ -229,8 +229,6 @@ include "hexen_groups"
 include "hexen_sectors"
 include "param_lines"
 
-special 0 - "NOTHING"
-
 # Floors
 special 241 f "Floor_LowerToLowestTxTy"    :tag  speed
 special 242 f "Floor_LowerToHighest"       :tag  speed  lip  adjust?
