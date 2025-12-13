@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "m_strings.h"
 #include "ui_category_button.h"
 #include <FL/fl_draw.H>
 
@@ -58,13 +59,19 @@ void UI_CategoryButton::draw()
 	// Draw arrow indicator using Unicode character
 	const char *arrow = mExpanded ? "\u25BC" : "\u25B6";  // ▼ (down) or ▶ (right)
 	fl_color(FL_FOREGROUND_COLOR);
-	fl_font(FL_HELVETICA, 10);
+	fl_font(FL_HELVETICA, 12);
 	fl_draw(arrow, x() + 4, y(), 12, h(), FL_ALIGN_LEFT | FL_ALIGN_CENTER);
 
 	// Draw label with offset for arrow
 	fl_color(labelcolor());
 	fl_font(labelfont(), labelsize());
 	fl_draw(label(), x() + 18, y(), w() - 18, h(), align());
+
+	SString labelSpaced = SString(label()) + " ";
+
+	int detailsX = x() + 18 + fl_width(labelSpaced.c_str());
+	fl_font(FL_HELVETICA, labelsize());
+	fl_draw(details().c_str(), detailsX, y(), w() - (detailsX - x()), h(), align());
 }
 
 //

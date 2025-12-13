@@ -623,32 +623,42 @@ endif
 feature udmf_lineparameters 1
 feature udmf_thingspecials 1
 
-udmf_lineflag "block players" blockplayers Blocking
-udmf_lineflag "block flyers" blockfloaters Blocking
-udmf_lineflag "block land mons" blocklandmonsters Blocking
-udmf_lineflag "block missiles" blockprojectiles Blocking
-udmf_lineflag "block hitscan" blockhitscan Blocking
-udmf_lineflag "block use" blockuse Blocking
-udmf_lineflag "block sight" blocksight Blocking
-udmf_lineflag "block all" blockeverything Blocking
-udmf_lineflag "jump over" jumpover Blocking
-udmf_lineflag "3d midtex" midtex3d Blocking
-udmf_lineflag "3d midtex passproj" midtex3dimpassible Blocking
-udmf_lineflag "player cross" playercross Activation
-udmf_lineflag "player use" playeruse Activation
-udmf_lineflag "monster cross" monstercross Activation
-udmf_lineflag "monster use" monsteruse Activation
-udmf_lineflag "player shoot" impact Activation
-udmf_lineflag "player push" playerpush Activation
-udmf_lineflag "monster push" monsterpush Activation
-udmf_lineflag "missile cross" missilecross Activation
-udmf_lineflag "any cross" anycross Activation
-udmf_lineflag "monster activate" monsteractivate Activation
-udmf_lineflag "player use back" playeruseback Activation
-udmf_lineflag "first side only" firstsideonly Activation
-udmf_lineflag "check switch range" checkswitchrange Activation
-udmf_lineflag "act on damage" damagespecial Activation
-udmf_lineflag "act on death" deathspecial Activation
+udmf_lineflag "two sided"   twosided
+udmf_lineflag "upper unpeg" dontpegtop
+udmf_lineflag "lower unpeg" dontpegbottom
+udmf_lineflag "impassable"  blocking
+udmf_lineflag "block mons"  blockmonsters
+udmf_lineflag "sound block" blocksound
+udmf_lineflag "pass thru"   passuse
+
+udmf_lineflag "block players"      blockplayers       Blocking P
+udmf_lineflag "block flyers"       blockfloaters      Blocking F
+udmf_lineflag "block land mons"    blocklandmonsters  Blocking M
+udmf_lineflag "block missiles"     blockprojectiles   Blocking p
+udmf_lineflag "block hitscan"      blockhitscan       Blocking H
+udmf_lineflag "block use"          blockuse           Blocking U
+udmf_lineflag "block sight"        blocksight         Blocking S
+udmf_lineflag "block all"          blockeverything    Blocking E
+udmf_lineflag "jump over"          jumpover           Blocking J
+udmf_lineflag "3d midtex"          midtex3d           Blocking 3
+udmf_lineflag "3d midtex passproj" midtex3dimpassible Blocking i
+
+udmf_lineflag "player cross"       playercross      Activation W
+udmf_lineflag "player use"         playeruse        Activation S
+udmf_lineflag "monster cross"      monstercross     Activation Mw
+udmf_lineflag "monster use"        monsteruse       Activation Ms
+udmf_lineflag "player shoot"       impact           Activation G
+udmf_lineflag "player push"        playerpush       Activation P
+udmf_lineflag "monster push"       monsterpush      Activation Mp
+udmf_lineflag "missile cross"      missilecross     Activation X
+udmf_lineflag "any cross"          anycross         Activation A
+udmf_lineflag "monster activate"   monsteractivate  Activation m
+udmf_lineflag "player use back"    playeruseback    Activation b
+udmf_lineflag "repeatable"         repeatspecial    Activation R
+udmf_lineflag "first side only"    firstsideonly    Activation 1
+udmf_lineflag "check switch range" checkswitchrange Activation r
+udmf_lineflag "act on damage"      damagespecial    Activation d
+udmf_lineflag "act on death"       deathspecial     Activation D
 
 udmf_linechoice_label locknumber "Lock"
 udmf_linechoice locknumber 0 "No lock"
@@ -667,15 +677,15 @@ udmf_linechoice locknumber 132 "Red card or skull"
 udmf_linechoice locknumber 133 "Blue card or skull"
 udmf_linechoice locknumber 134 "Yellow card or skull"
 udmf_linechoice locknumber 229 "Any key of each color"
-udmf_lineflag "repeatable" repeatspecial Activation
+
 # TODO: arg0str text field
 # TODO: alpha number field
 
 # TODO: make this a choice
-udmf_lineflag "translucent" translucent Rendering
-udmf_lineflag "transparent" transparent Rendering
-udmf_lineflag "clip midtex" clipmidtex Rendering
-udmf_lineflag "wrap midtex" wrapmidtex Rendering
+udmf_lineflag "translucent" translucent Rendering t
+udmf_lineflag "transparent" transparent Rendering T
+udmf_lineflag "clip midtex" clipmidtex  Rendering C
+udmf_lineflag "wrap midtex" wrapmidtex  Rendering W
 
 # TODO: moreids number list box
 # TODO: automapstyle choice

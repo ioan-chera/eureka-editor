@@ -65,7 +65,6 @@ private:
 	struct CategoryHeader
 	{
 		std::unique_ptr<class UI_CategoryButton> button;
-		std::unique_ptr<Fl_Box> summary;
 		std::vector<int> lineFlagButtonIndices;  // indices in flagButtons
 		bool expanded = true;
 	};
@@ -133,6 +132,8 @@ private:
 
 	void categoryToggled(class UI_CategoryButton *categoryBtn);
 	void repositionAfterCategoryToggle();
+
+	void updateCategoryDetails();
 
 	static void    type_callback(Fl_Widget *, void *);
 	static void dyntype_callback(Fl_Widget *, void *);

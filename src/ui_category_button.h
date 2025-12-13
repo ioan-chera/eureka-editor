@@ -39,8 +39,19 @@ public:
 	void draw() override;
 	int handle(int event) override;
 
+	const SString &details() const
+	{
+		return mDetails;
+	}
+
+	void details(const SString &text)
+	{
+		mDetails = text;
+	}
+
 private:
 	bool mExpanded = true;
+	SString mDetails;
 };
 
 #endif  /* __EUREKA_UI_CATEGORY_BUTTON_H__ */

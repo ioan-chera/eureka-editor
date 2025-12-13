@@ -624,6 +624,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 	int new_flags, new_flags2;
 	box->CalcFlags(new_flags, new_flags2);
 
+	bool changed = false;
 	if (! box->inst.edit.Selected->empty())
 	{
 		box->mFixUp.checkDirtyFields();
@@ -639,10 +640,21 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
 			if(mask != 0)
+			{
 				op.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
+				changed = true;
+			}
 			if(mask2 != 0)
+			{
 				op.changeLinedef(*it, LineDef::F_FLAGS2, (L->flags2 & ~mask2) | (new_flags2 & mask2));
+				changed = true;
+			}
 		}
+	}
+	if(changed)
+	{
+		box->updateCategoryDetails();
+		box->redraw();
 	}
 }
 
@@ -762,9 +774,9 @@ void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
 	// Find which category was toggled
 	for(auto &cat : categoryHeaders)
 	{
-		if(cat.button.get() == categoryBtn)
+		if(!categoryBtn || cat.button.get() == categoryBtn)
 		{
-			cat.expanded = categoryBtn->isExpanded();
+			cat.expanded = cat.button->isExpanded();
 
 			// Show or hide all flags in this category
 			for(int flagIndex : cat.lineFlagButtonIndices)
@@ -877,6 +889,23 @@ void UI_LineBox::repositionAfterCategoryToggle()
 
 
 //------------------------------------------------------------------------
+
+void UI_LineBox::updateCategoryDetails()
+{
+	for(const CategoryHeader& header : categoryHeaders)
+	{
+		SString summaryText;
+		for(int flagButtonIndex : header.lineFlagButtonIndices)
+		{
+			const LineFlagButton &flagBtn = flagButtons[flagButtonIndex];
+			if(flagBtn.button->value())
+			{
+				summaryText += flagBtn.info->inCategoryAcronym;
+			}
+		}
+		header.button->details(summaryText);
+	}
+}
 
 void UI_LineBox::UpdateField(int field)
 {
@@ -1007,19 +1036,7 @@ void UI_LineBox::UpdateField(int field)
 	}
 
 	if(changed)
-		for(const CategoryHeader& header : categoryHeaders)
-		{
-			SString summaryText;
-			for(int flagButtonIndex : header.lineFlagButtonIndices)
-			{
-				const LineFlagButton &flagBtn = flagButtons[flagButtonIndex];
-				if(flagBtn.button->value())
-				{
-					summaryText += flagBtn.info->inCategoryAcronym;
-				}
-			}
-			header.summary->copy_label(summaryText.c_str());
-		}
+		updateCategoryDetails();
 
 
 	if(field < 0 || field == LineDef::F_LOCKNUMBER)
@@ -1304,6 +1321,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		tag->show();
 		tag->resize(actkind->x(), actkind->y(), actkind->w(), actkind->h());
 		tag->label("LineID:");
+		tag->tooltip("Tag of the linedef");
 		descBox->hide();
 
 		if(config.features.udmf_lineparameters)
@@ -1325,6 +1343,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		tag->show();
 		tag->resize(type->x(), length->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
 		tag->label("Tag: ");
+		tag->tooltip("Tag of targeted sector(s)");
 		descBox->show();
 
 		length->show();
@@ -1373,10 +1392,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		this->remove(btn.button.get());
 	flagButtons.clear();
 	for(const auto &cat : categoryHeaders)
-	{
 		this->remove(cat.button.get());
-		this->remove(cat.summary.get());
-	}
 	categoryHeaders.clear();
 
 	int Y = y() + flagsStartY;
@@ -1419,14 +1435,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			if(!catName.empty())
 			{
 				catHeader.button = std::make_unique<UI_CategoryButton>(x() + flagsStartX, Y,
-					flagsAreaW / 2, categoryH);
+					flagsAreaW, categoryH);
 				catHeader.button->copy_label(catName.c_str());
 				catHeader.button->callback(category_callback, this);
-
-				catHeader.summary = std::make_unique<Fl_Box>(FL_FLAT_BOX,
-					x() + flagsStartX + flagsAreaW / 2, Y, flagsAreaW / 2, categoryH, "");
-				catHeader.summary->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-				catHeader.summary->labelsize(10);
 
 				catHeader.expanded = false;
 				Y += categoryH;
@@ -1576,11 +1587,13 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			{
 				args[0]->resize(args[0]->x(), args[0]->y(), ARG_WIDTH, TYPE_INPUT_HEIGHT);
 				args[0]->label("Args: ");
+				args[0]->tooltip(nullptr);
 			}
 			else
 			{
 				args[0]->resize(args[0]->x(), args[0]->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
 				args[0]->label("Target:");
+				args[0]->tooltip("Tag of targeted sector(s)");
 			}
 		}
 		else
@@ -1588,6 +1601,12 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 
 	redraw();
+
+	for(CategoryHeader& header : categoryHeaders)
+	{
+		header.button->setExpanded(false);
+	}
+	categoryToggled(nullptr);  // Make sure all shows correctly with collapsed categories
 }
 
 
