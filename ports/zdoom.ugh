@@ -350,6 +350,12 @@ special  31 q "Stairs_BuildDownSync"       :tag  speed  height  reset_delay
 special  27 q "Stairs_BuildUp"             :tag  speed  height  delay  reset_delay
 special  32 q "Stairs_BuildUpSync"         :tag  speed  height  reset_delay
 special 217 q "Stairs_BuildUpDoom"         :tag  speed  height  delay  reset_delay
+if $MAP_FORMAT is UDMF
+special 270 q "Stairs_BuildDownDoom"       :tag  speed  height  delay  reset
+special 271 q "Stairs_BuildUpDoomSync"     :tag  speed  height  reset
+special 272 q "Stairs_BuildDownDoomSync"   :tag  speed  height  reset
+special 273 q "Stairs_BuildUpDoomCrush"    :tag  speed  height  delay  reset
+endif
 
 # Sector
 special 181 s "Plane_Align"                floor_side  ceil_side  line_id:self_line_id
@@ -374,6 +380,10 @@ special 218 s "Sector_SetWind"             :tag  strength  angle  use_line_angle
 special 219 s "Sector_SetFriction"         :tag  friction
 special 220 s "Sector_SetCurrent"          :tag  strength  angle  use_line_angle?
 special 227 s "PointPush_SetForce"         :tag  :tid  strength  use_line_angle?
+if $MAP_FORMAT is UDMF
+special 277 s "Sector_SetFloorGlow"        :tag  height  r  g  b
+special 278 s "Sector_SetCeilingGlow"      :tag  height  r  g  b
+endif
 
 ## andrewj: I have omitted special 161 "Sector_SetContents", since the
 ## ZDoom Wiki page for it says "this function is left undocumented at
@@ -476,7 +486,6 @@ special  88 p "Polyobj_MoveTo"         :po  speed pos_x pos_y
 special  89 p "Polyobj_OR_MoveTo"      :po  speed pos_x pos_y
 special 283 p "Polyobj_StopSound"      :po
 endif
-# TODO: continue
 
 # Exits
 special 243 x "Exit_Normal"             pos_arg0
@@ -497,6 +506,8 @@ special 157 r "SetGlobalFogParameter (OpenGL)"       property  value
 special 159 r "Sector_SetPlaneReflection (OpenGL)"  :tag  floor  ceiling
 special 208 r "TranslucentLine"        :line_id  opacity  additive?  extra_flags
 special 209 r "Transfer_Heights"       :tag  flags
+# special 53 not available in the map editor
+# special 56 not available in the map editor
 if $MAP_FORMAT is UDMF
 special 281 r "Line_SetAutomapFlags"   :line_id setflags clearflags
 special 282 r "Line_SetAutomapStyle"   :line_id style
