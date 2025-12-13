@@ -26,6 +26,7 @@ linegroup f "Floor"
 linegroup g "Lift"
 linegroup k "Scripting"
 linegroup l "Lighting"
+linegroup i "Linedef"
 
 linegroup p "Polyobj"
 linegroup q "Stairs"

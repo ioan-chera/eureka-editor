@@ -381,6 +381,8 @@ special 219 s "Sector_SetFriction"         :tag  friction
 special 220 s "Sector_SetCurrent"          :tag  strength  angle  use_line_angle?
 special 227 s "PointPush_SetForce"         :tag  :tid  strength  use_line_angle?
 if $MAP_FORMAT is UDMF
+special 170 s "Sector_SetCeilingScale2"    :tag  u_fixed  v_fixed
+special 171 s "Sector_SetFloorScale2"      :tag  u_fixed  v_fixed
 special 277 s "Sector_SetFloorGlow"        :tag  height  r  g  b
 special 278 s "Sector_SetCeilingGlow"      :tag  height  r  g  b
 endif
@@ -423,6 +425,7 @@ special 137 t "Thing_SpawnNoFog"       :tid  type_id  angle  new_id
 special 139 t "Thing_SpawnFacing"      :tid  type_id  no_fog?  new_id
 special 134 t "Thing_Projectile"       :tid  type_id  angle  speed  up_speed
 special 136 t "Thing_ProjectileGravity" :tid  type_id  angle  speed  up_speed
+special 173 t "NoiseAlert"              target_tid:tid  emitter_tid:tid
 special 178 t "Thing_ProjectileAimed"  :tid  type_id  speed  target_tid:tid  new_tid
 special 175 t "Thing_ProjectileIntercept" :tid  type_id  speed  target_tid:tid  new_tid
 
@@ -443,14 +446,18 @@ special 180 t "Thing_SetTranslation"   :tid  translation
 special 229 t "Thing_SetGoal"          :tid  goal_tid  delay  no_stray?
 
 # Lines
-special 121 - "Line_SetIdent"           line_id:self_line_id  flags  -  - line_id_hi:self_line_id_hi
-special  55 - "Line_SetBlocking"       :line_id  set_flags  clear_flags
-special 156 - "Line_SetPortal"          target_id:line_id  this_id:self_line_id  type  anchor
-special 107 - "Line_SetPortalTarget"    source_id:line_id  target_id:line_id
-special  33 - "ForceField"
-special  34 - "ClearForceField"        :tag
-special  48 - "Attach3dMidtex"         :line_id :tag  ceiling?
-special  49 - "GlassBreak"              no_shards?
+special 121 i "Line_SetIdent"           line_id:self_line_id  flags  -  - line_id_hi:self_line_id_hi
+special  55 i "Line_SetBlocking"       :line_id  set_flags  clear_flags
+special 156 i "Line_SetPortal"          target_id:line_id  this_id:self_line_id  type  anchor
+special 107 i "Line_SetPortalTarget"    source_id:line_id  target_id:line_id
+special  33 i "ForceField"
+special  34 i "ClearForceField"        :tag
+special  48 i "Attach3dMidtex"         :line_id :tag  ceiling?
+special  49 i "GlassBreak"              no_shards?
+if $MAP_FORMAT is UDMF
+special 281 i "Line_SetAutomapFlags"   :line_id setflags clearflags
+special 282 i "Line_SetAutomapStyle"   :line_id style
+endif
 
 # Animated
 special 102 a "Scroll_Texture_Up"       speed  tex_flags
@@ -481,9 +488,9 @@ special   8 p "Polyobj_DoorSlide"      :po  speed  angle  dist  delay
 special  86 p "Polyobj_MoveToSpot"     :po  speed :tid
 special  59 p "Polyobj_OR_MoveToSpot"  :po  speed :tid
 special  87 p "Polyobj_Stop"           :po
-if $MAP_FORMAT is UDMF
 special  88 p "Polyobj_MoveTo"         :po  speed pos_x pos_y
 special  89 p "Polyobj_OR_MoveTo"      :po  speed pos_x pos_y
+if $MAP_FORMAT is UDMF
 special 283 p "Polyobj_StopSound"      :po
 endif
 
@@ -506,11 +513,9 @@ special 157 r "SetGlobalFogParameter (OpenGL)"       property  value
 special 159 r "Sector_SetPlaneReflection (OpenGL)"  :tag  floor  ceiling
 special 208 r "TranslucentLine"        :line_id  opacity  additive?  extra_flags
 special 209 r "Transfer_Heights"       :tag  flags
-# special 53 not available in the map editor
-# special 56 not available in the map editor
 if $MAP_FORMAT is UDMF
-special 281 r "Line_SetAutomapFlags"   :line_id setflags clearflags
-special 282 r "Line_SetAutomapStyle"   :line_id style
+special  53 r "Line_SetTextureOffset"  :line_id  x  y  side  flags
+special  56 r "Line_SetTextureScale"   :line_id  x  y  side  flags
 endif
 
 # Scripting
@@ -539,7 +544,6 @@ special 179 - "ChangeSkill"             skill
 special  18 - "StartConversation"      :tid  face_talker?
 special 120 - "Earthquake"              intensity  duration  damrad  tremrad :tid
 special 129 - "UsePuzzleItem"           item  script  param1  param2  param3
-special 173 - "NoiseAlert"              target_tid:tid  emitter_tid:tid
 special 174 - "SendToCommunicator"      voc_id  front_only?  show_sender?  no_log?
 
 # ZDoom sector specials
