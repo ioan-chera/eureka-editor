@@ -75,8 +75,8 @@ enum
 	SPAC_WIDTH = 57,
 
 	TAG_WIDTH = 64,
-	ARG_WIDTH = 42,
-	ARG_PADDING = 5,
+	ARG_WIDTH = 53,
+	ARG_PADDING = 4,
 };
 
 
@@ -100,6 +100,7 @@ public:
 UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
     MapItemBox(inst, X, Y, W, H, label)
 {
+	//Fl_Scroll *scroll = new Fl_Scroll(X, Y, W, H);
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
 	const int Y0 = Y;
@@ -164,14 +165,12 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		args[a] = new UI_DynIntInput(type->x() + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
+		args[a] = new UI_DynIntInput(X + 7 + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
 		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
+		args[a]->align(FL_ALIGN_BOTTOM);
 	}
-
-	args[0]->label("Args: ");
-
 
 	Y += tag->h() + 10;
 
@@ -209,6 +208,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	mFixUp.loadFields({type, length, tag, args[0], args[1], args[2], args[3], args[4]});
 
+	//scroll->end();
 	end();
 
 	resizable(nullptr);
@@ -922,7 +922,11 @@ void UI_LineBox::UpdateField(int field)
 		for (int a = 0 ; a < 5 ; a++)
 		{
 			mFixUp.setInputValue(args[a], "");
-			args[a]->tooltip(NULL);
+			if (inst.loaded.levelFormat == MapFormat::hexen ||
+				(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
+			{
+				args[a]->label("");
+			}
 			args[a]->textcolor(FL_BLACK);
 		}
 
@@ -934,7 +938,8 @@ void UI_LineBox::UpdateField(int field)
 
 			const linetype_t &info = inst.conf.getLineType(L->type);
 
-			if (inst.loaded.levelFormat != MapFormat::doom)
+			if (inst.loaded.levelFormat == MapFormat::hexen ||
+				(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
 			{
 				for (int a = 0 ; a < 5 ; a++)
 				{
@@ -945,9 +950,12 @@ void UI_LineBox::UpdateField(int field)
 
 					// set the tooltip
 					if (!info.args[a].name.empty())
-						args[a]->copy_tooltip(info.args[a].name.c_str());
+						args[a]->copy_label(info.args[a].name.c_str());
 					else
+					{
+						args[a]->label("");
 						args[a]->textcolor(fl_rgb_color(160,160,160));
+					}
 				}
 			}
 		}
@@ -1585,15 +1593,17 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			args[a]->show();
 			if(loaded.levelFormat == MapFormat::hexen || config.features.udmf_lineparameters)
 			{
-				args[0]->resize(args[0]->x(), args[0]->y(), ARG_WIDTH, TYPE_INPUT_HEIGHT);
-				args[0]->label("Args: ");
+				args[0]->resize(x() + INSET_LEFT + 7, args[0]->y(), ARG_WIDTH, TYPE_INPUT_HEIGHT);
+				args[0]->label(nullptr);
 				args[0]->tooltip(nullptr);
+				args[0]->align(FL_ALIGN_BOTTOM);
 			}
 			else
 			{
-				args[0]->resize(args[0]->x(), args[0]->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
+				args[0]->resize(type->x(), args[0]->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
 				args[0]->label("Target:");
 				args[0]->tooltip("Tag of targeted sector(s)");
+				args[0]->align(FL_ALIGN_LEFT);
 			}
 		}
 		else
