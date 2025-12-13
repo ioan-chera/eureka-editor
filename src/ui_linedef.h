@@ -65,7 +65,8 @@ private:
 	struct CategoryHeader
 	{
 		std::unique_ptr<class UI_CategoryButton> button;
-		std::vector<Fl_Check_Button *> flags;  // pointers to flags in this category
+		std::unique_ptr<Fl_Box> summary;
+		std::vector<int> lineFlagButtonIndices;  // indices in flagButtons
 		bool expanded = true;
 	};
 	std::vector<CategoryHeader> categoryHeaders;
@@ -114,8 +115,8 @@ private:
 	void CalcLength();
 
 	void CalcFlags(int &outFlags, int &outFlags2) const;
-	void FlagsFromInt(int flags);
-	void Flags2FromInt(int flags2);
+	bool FlagsFromInt(int flags);
+	bool Flags2FromInt(int flags2);
 
 	void CB_Copy(int uiparts);
 	void CB_Paste(int uiparts, StringID new_tex);

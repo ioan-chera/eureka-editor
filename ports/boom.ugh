@@ -249,13 +249,13 @@ feature udmf_lineparameters 0
 
 # dontdraw and mapped will be handled by the fixed dropdown
 
-udmf_thingflag 0 0 easy-  on  skill1
-udmf_thingflag 1 0 easy   on  skill2
-udmf_thingflag 2 0 medium on  skill3
-udmf_thingflag 3 0 hard   on  skill4
-udmf_thingflag 4 0 hard+  on  skill5
-udmf_thingflag 1 1 sp     on  single
-udmf_thingflag 2 1 coop   on  coop
-udmf_thingflag 3 1 dm     on  dm
-udmf_thingflag 4 1 ambush off ambush
+udmf_thingflag 0 0 easiest on  skill1
+udmf_thingflag 1 0 easy    on  skill2
+udmf_thingflag 2 0 medium  on  skill3
+udmf_thingflag 3 0 hard    on  skill4
+udmf_thingflag 4 0 hardest on  skill5
+udmf_thingflag 1 1 sp      on  single
+udmf_thingflag 2 1 coop    on  coop
+udmf_thingflag 3 1 dm      on  dm
+udmf_thingflag 4 1 ambush  off ambush
 feature udmf_thingspecials 0

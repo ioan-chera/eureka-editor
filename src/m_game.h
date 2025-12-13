@@ -152,6 +152,7 @@ struct lineflag_t
 	SString label;
 	SString udmfKey;	// only relevant under UDMF
 	SString category;	// optional category name for grouping flags in UI
+	SString inCategoryAcronym; // if category is provided, this acronym is shown in the summary
 	int flagSet = 1;
 	int value = 0;		// actual flag for Doom, internal flag for UDMF
 	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot

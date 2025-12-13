@@ -28,14 +28,14 @@ udmf_lineflag "impassable"  blocking
 udmf_lineflag "block mons"  blockmonsters
 udmf_lineflag "sound block" blocksound
 
-udmf_thingflag 0 0 easy-  on  skill1
-udmf_thingflag 1 0 easy   on  skill2
-udmf_thingflag 2 0 medium on  skill3
-udmf_thingflag 3 0 hard   on  skill4
-udmf_thingflag 4 0 hard+  on  skill5
-udmf_thingflag 1 1 sp     on  single
-udmf_thingflag 2 1 coop   on  coop
-udmf_thingflag 3 1 dm     on  dm
+udmf_thingflag 0 0 easiest on  skill1
+udmf_thingflag 1 0 easy    on  skill2
+udmf_thingflag 2 0 medium  on  skill3
+udmf_thingflag 3 0 hard    on  skill4
+udmf_thingflag 4 0 hardest on  skill5
+udmf_thingflag 1 1 sp      on  single
+udmf_thingflag 2 1 coop    on  coop
+udmf_thingflag 3 1 dm      on  dm
 udmf_thingflag 4 1 ambush off ambush
 
 udmf_namespace $BASE_GAME
@@ -47,15 +47,15 @@ endif
 if $BASE_GAME is hexen
   feature udmf_lineparameters 1
   feature udmf_thingspecials 1
-  udmf_lineflag "player cross" playercross
-  udmf_lineflag "player use" playeruse
-  udmf_lineflag "monster cross" monstercross
-  udmf_lineflag "monster use" monsteruse
-  udmf_lineflag "player shoot" impact
-  udmf_lineflag "player push" playerpush
-  udmf_lineflag "monster push" monsterpush
-  udmf_lineflag "missile cross" missilecross
-  udmf_lineflag "repeatable" repeatspecial
+  udmf_lineflag "player cross"  playercross   Activation W
+  udmf_lineflag "player use"    playeruse     Activation S
+  udmf_lineflag "monster cross" monstercross  Activation Mw
+  udmf_lineflag "monster use"   monsteruse    Activation Ms
+  udmf_lineflag "player shoot"  impact        Activation G
+  udmf_lineflag "player push"   playerpush    Activation P
+  udmf_lineflag "monster push"  monsterpush   Activation Mp
+  udmf_lineflag "missile cross" missilecross  Activation X
+  udmf_lineflag "repeatable"    repeatspecial Activation R
   udmf_thingflag 0 1 dormant off dormant
   udmf_thingflag 1 2 Fighter on class1
   udmf_thingflag 2 2 Cleric on class2

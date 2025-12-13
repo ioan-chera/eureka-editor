@@ -767,12 +767,13 @@ void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
 			cat.expanded = categoryBtn->isExpanded();
 
 			// Show or hide all flags in this category
-			for(Fl_Check_Button *flag : cat.flags)
+			for(int flagIndex : cat.lineFlagButtonIndices)
 			{
+				LineFlagButton &buttonInfo = flagButtons[flagIndex];
 				if(cat.expanded)
-					flag->show();
+					buttonInfo.button->show();
 				else
-					flag->hide();
+					buttonInfo.button->hide();
 			}
 
 			// Reposition all controls below the flags area
@@ -797,9 +798,10 @@ void UI_LineBox::repositionAfterCategoryToggle()
 		bool inCategory = false;
 		for(const auto &cat : categoryHeaders)
 		{
-			for(const auto *catFlag : cat.flags)
+			for(int index : cat.lineFlagButtonIndices)
 			{
-				if(catFlag == fb.button.get())
+				const LineFlagButton &catFlag = flagButtons[index];
+				if(&catFlag == &fb)
 				{
 					inCategory = true;
 					break;
@@ -832,7 +834,7 @@ void UI_LineBox::repositionAfterCategoryToggle()
 			if(cat.expanded)
 			{
 				// Position all flags in this category using two-column layout
-				const int total = (int)cat.flags.size();
+				const int total = (int)cat.lineFlagButtonIndices.size();
 				const int leftCount = (total + 1) / 2;
 
 				int yLeft = Y;
@@ -840,7 +842,7 @@ void UI_LineBox::repositionAfterCategoryToggle()
 
 				for(int idx = 0; idx < total; ++idx)
 				{
-					Fl_Check_Button *flag = cat.flags[idx];
+					Fl_Check_Button *flag = flagButtons[cat.lineFlagButtonIndices[idx]].button.get();
 					const bool onLeft = idx < leftCount;
 					int &curY = onLeft ? yLeft : yRight;
 
@@ -978,17 +980,18 @@ void UI_LineBox::UpdateField(int field)
 		}
 	}
 
+	bool changed = false;
 	if (field < 0 || field == LineDef::F_FLAGS)
 	{
 		if (inst.level.isLinedef(obj))
 		{
 			actkind->activate();
 
-			FlagsFromInt(inst.level.linedefs[obj]->flags);
+			changed |= FlagsFromInt(inst.level.linedefs[obj]->flags);
 		}
 		else
 		{
-			FlagsFromInt(0);
+			changed |= FlagsFromInt(0);
 
 			actkind->value(getActivationCount());  // show as "??"
 			actkind->deactivate();
@@ -998,10 +1001,26 @@ void UI_LineBox::UpdateField(int field)
 	if(field < 0 || field == LineDef::F_FLAGS2)
 	{
 		if(inst.level.isLinedef(obj))
-			Flags2FromInt(inst.level.linedefs[obj]->flags2);
+			changed |= Flags2FromInt(inst.level.linedefs[obj]->flags2);
 		else
-			Flags2FromInt(0);
+			changed |= Flags2FromInt(0);
 	}
+
+	if(changed)
+		for(const CategoryHeader& header : categoryHeaders)
+		{
+			SString summaryText;
+			for(int flagButtonIndex : header.lineFlagButtonIndices)
+			{
+				const LineFlagButton &flagBtn = flagButtons[flagButtonIndex];
+				if(flagBtn.button->value())
+				{
+					summaryText += flagBtn.info->inCategoryAcronym;
+				}
+			}
+			header.summary->copy_label(summaryText.c_str());
+		}
+
 
 	if(field < 0 || field == LineDef::F_LOCKNUMBER)
 	{
@@ -1071,7 +1090,7 @@ void UI_LineBox::CalcLength()
 }
 
 
-void UI_LineBox::FlagsFromInt(int lineflags)
+bool UI_LineBox::FlagsFromInt(int lineflags)
 {
 	// compute activation
 	if (inst.loaded.levelFormat == MapFormat::hexen)
@@ -1144,20 +1163,32 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 	}
 
 	// Set dynamic line flag buttons
+	bool changed = false;
 	for(const auto &btn : flagButtons)
 	{
 		if(btn.button && btn.info->flagSet == 1)
-			btn.button->value((lineflags & btn.info->value) ? 1 : 0);
+		{
+			int newValue = (lineflags & btn.info->value) ? 1 : 0;
+			changed = changed || (btn.button->value() != newValue);
+			btn.button->value(newValue);
+		}
 	}
+	return changed;
 }
 
-void UI_LineBox::Flags2FromInt(int lineflags)
+bool UI_LineBox::Flags2FromInt(int lineflags)
 {
+	bool changed = false;
 	for(const auto &btn : flagButtons)
 	{
 		if(btn.button && btn.info->flagSet == 2)
-			btn.button->value((lineflags & btn.info->value) ? 1 : 0);
+		{
+			int newValue = (lineflags & btn.info->value) ? 1 : 0;
+			changed = changed || (btn.button->value() != newValue);
+			btn.button->value(newValue);
+		}
 	}
+	return changed;
 }
 
 void UI_LineBox::CalcFlags(int &outFlags, int &outFlags2) const
@@ -1342,7 +1373,10 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		this->remove(btn.button.get());
 	flagButtons.clear();
 	for(const auto &cat : categoryHeaders)
+	{
 		this->remove(cat.button.get());
+		this->remove(cat.summary.get());
+	}
 	categoryHeaders.clear();
 
 	int Y = y() + flagsStartY;
@@ -1384,10 +1418,17 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			CategoryHeader catHeader = {};
 			if(!catName.empty())
 			{
-				catHeader.button = std::make_unique<UI_CategoryButton>(x() + flagsStartX, Y, flagsAreaW, categoryH);
+				catHeader.button = std::make_unique<UI_CategoryButton>(x() + flagsStartX, Y,
+					flagsAreaW / 2, categoryH);
 				catHeader.button->copy_label(catName.c_str());
 				catHeader.button->callback(category_callback, this);
-				catHeader.expanded = true;
+
+				catHeader.summary = std::make_unique<Fl_Box>(FL_FLAT_BOX,
+					x() + flagsStartX + flagsAreaW / 2, Y, flagsAreaW / 2, categoryH, "");
+				catHeader.summary->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+				catHeader.summary->labelsize(10);
+
+				catHeader.expanded = false;
 				Y += categoryH;
 			}
 
@@ -1443,7 +1484,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 						fb.button->callback(flags_callback, fb.data.get());
 						fb.info = flag;
 						if(catHeader.button)
-							catHeader.flags.push_back(fb.button.get());
+							catHeader.lineFlagButtonIndices.push_back((int)flagButtons.size());
 						flagButtons.push_back(std::move(fb));
 					};
 
