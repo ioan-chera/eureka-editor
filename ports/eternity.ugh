@@ -387,7 +387,12 @@ special 250 f "Floor_Donut"                :tag  speed  speed
 special 138 f "Floor_Waggle"               :tag  amp  speed  offset  time
 special 235 f "Floor_TransferTrigger"      :tag
 special 236 f "Floor_TransferNumeric"      :tag
-# NOTE: specials above 255 can't be used in Hexen format.
+special 256 f "Floor_LowerToHighestEE"     :tag  speed  change
+special 257 f "Floor_RaiseToLowest"        :tag  change crush
+special 258 f "Floor_LowerToLowestCeiling" :tag  speed  change
+special 259 f "Floor_RaiseToCeiling"       :tag  speed  change  crush  gap
+special 260 f "Floor_ToCeilingInstant"     :tag  change crush   gap
+special 261 f "Floor_LowerByTexture"       :tag  speed  change
 
 # Ceilings
 special 253 c "Ceiling_LowerToLowest"        :tag  speed change crush
@@ -414,6 +419,14 @@ special  45 c "Ceiling_CrushRaiseAndStay"    :tag  speed  damage  crush_mode
 special 195 c "Ceiling_CrushRaiseAndStayA"   :tag  down_speed  up_speed  damage  crush_mode
 special 255 c "Ceiling_CrushRaiseAndStaySilA"  :tag  down_speed  up_speed  damage  crush_mode
 special  44 c "Ceiling_CrushStop"            :tag  stop_mode
+special 262 c "Ceiling_RaiseToHighest"       :tag  speed  change
+special 263 c "Ceiling_ToHighestInstant"     :tag  change crush
+special 264 c "Ceiling_LowerToNearest"       :tag  speed  change crush
+special 265 c "Ceiling_RaiseToLowest"        :tag  speed  change
+special 266 c "Ceiling_RaiseToHighestFloor"  :tag  speed  change
+special 267 c "Ceiling_ToFloorInstant"       :tag  change crush  gap
+special 268 c "Ceiling_RaiseByTexture"       :tag  speed  change
+special 269 c "Ceiling_LowerByTexture"       :tag  speed  change crush
 
 # Doors
 special  12 d "Door_Raise"            :tag  speed  delay  light_tag:tag
@@ -449,8 +462,10 @@ special  29 e "Pillar_Build"               :tag  speed  dist
 special  94 e "Pillar_BuildAndCrush"       :tag  speed  dist  damage
 
 # Stairs
-special  27 q "Stairs_BuildUp"             :tag  speed  height  delay  reset_delay
 special 217 q "Stairs_BuildUpDoom"         :tag  speed  height  delay  reset_delay
+special 270 q "Stairs_BuildDownDoom"       :tag  speed  stepsize delay reset
+special 271 q "Stairs_BuildUpDoomSync"     :tag  speed  stepsize reset
+special 272 q "Stairs_BuildDownDoomSync"   :tag  speed  stepsize reset
 
 # Sector
 special 181 s "Plane_Align"                floor_side  ceil_side
@@ -464,6 +479,7 @@ special 218 s "Sector_SetWind"             :tag  force  angle  flags
 special 219 s "Sector_SetFriction"         :tag
 special 220 s "Sector_SetCurrent"          :tag  force  angle  flags
 special 227 s "PointPush_SetForce"         :tag  :tid  force  use_line_angle?
+special 54  s "Sector_ChangeFlags"         :tag  setflags  clearflags
 
 # Lighting
 special 233 l "Light_MinNeighbor"      :tag
@@ -490,7 +506,6 @@ special 135 t "Thing_Spawn"             :tid  type_id  angle  new_id
 special 137 t "Thing_SpawnNoFog"        :tid  type_id  angle  new_id
 special 134 t "Thing_Projectile"        :tid  type_id  angle  speed  up_speed
 special 136 t "Thing_ProjectileGravity" :tid  type_id  angle  speed  up_speed
-
 special 248 t "HealThing"               amount  max_health
 special  73 t "DamageThing"             damage  damage_type
 special 119 t "Thing_Damage"            :tid  damage  damage_type
@@ -502,9 +517,9 @@ special  19 t "Thing_Stop"              :tid
 special 176 t "Thing_ChangeTID"         :tid  new_tid
 
 # Lines
-special 121 - "Line_SetIdent"           line_id:self_line_id
-special 156 - "Line_SetPortal"          target_id:line_id  this_id:self_line_id  type  anchor
 special  48 - "Sector_Attach3dMidtex"  :line_id  :tag  ceiling?
+special 300 - "Portal_Define"           portalid  type  anchor:line_id  zdelta  flipped?
+special 301 - "Line_QuickPortal"        visual?
 
 # Animated
 special 102 a "Scroll_Texture_Up"       speed
@@ -532,6 +547,8 @@ special   8 p "Polyobj_DoorSlide"       :po  speed  angle  dist  delay
 special  86 p "Polyobj_MoveToSpot"      :po  speed  :tid
 special  59 p "Polyobj_OR_MoveToSpot"   :po  speed  :tid
 special  87 p "Polyobj_Stop"            :po
+special  88 p "Polyobj_MoveTo"          :po  speed x y
+special  89 p "Polyobj_OR_MoveTo"       :po  speed x y
 
 ## andrewj: leaving out specials 88/89 "Polyobj_MoveTo" because they
 ## seem designed for scripts -- when used in a map the target X/Y
@@ -547,7 +564,6 @@ special  75 x "Teleport_EndGame"
 special   9 r "Line_Horizon"
 special 210 r "Transfer_FloorLight"     :tag
 special 211 r "Transfer_CeilingLight"   :tag
-special  57 r "Sector_SetPortal"        :tag  portal_type  plane  misc  opacity
 special 209 r "Transfer_Heights"        :tag
 
 # Scripting
