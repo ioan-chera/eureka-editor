@@ -77,6 +77,7 @@ enum
 	TAG_WIDTH = 64,
 	ARG_WIDTH = 53,
 	ARG_PADDING = 4,
+	ARG_LABELSIZE = 10,
 };
 
 
@@ -170,9 +171,10 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
 		args[a]->align(FL_ALIGN_BOTTOM);
+		args[a]->labelsize(ARG_LABELSIZE);
 	}
 
-	Y += tag->h() + 10;
+	Y += tag->h() + 12;
 
 
 	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X+10, Y, 64, 24, "Flags: ");
@@ -950,11 +952,15 @@ void UI_LineBox::UpdateField(int field)
 
 					// set the tooltip
 					if (!info.args[a].name.empty())
-						args[a]->copy_label(info.args[a].name.c_str());
+					{
+						args[a]->copy_label(info.args[a].name.replacing('_', ' ').c_str());
+						args[a]->parent()->redraw();
+					}
 					else
 					{
 						args[a]->label("");
 						args[a]->textcolor(fl_rgb_color(160,160,160));
+						args[a]->parent()->redraw();
 					}
 				}
 			}
@@ -1539,7 +1545,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		const int choiceH = 22;
 		// Match the args span: starts at type->x() and spans 5 args
 		const int choiceX = x() + TYPE_INPUT_X;
-		const int choiceW = 5 * (ARG_WIDTH + ARG_PADDING);
+		const int choiceW = desc->x() + desc->w() - x() - TYPE_INPUT_X;
 
 		begin();
 
@@ -1595,6 +1601,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			{
 				args[0]->resize(x() + INSET_LEFT + 7, args[0]->y(), ARG_WIDTH, TYPE_INPUT_HEIGHT);
 				args[0]->label(nullptr);
+				args[0]->labelsize(ARG_LABELSIZE);
 				args[0]->tooltip(nullptr);
 				args[0]->align(FL_ALIGN_BOTTOM);
 			}
@@ -1602,6 +1609,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			{
 				args[0]->resize(type->x(), args[0]->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
 				args[0]->label("Target:");
+				args[0]->labelsize(14);
 				args[0]->tooltip("Tag of targeted sector(s)");
 				args[0]->align(FL_ALIGN_LEFT);
 			}

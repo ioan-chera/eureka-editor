@@ -369,6 +369,7 @@ public:
 	size_t findDigit() const;
 
 	SString spaceEscape(bool backslash = false) const;
+	SString replacing(char a, char b) const;
 
 private:
 	std::string data;

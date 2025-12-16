@@ -444,6 +444,17 @@ SString SString::spaceEscape(bool backslash) const
 	return result;
 }
 
+SString SString::replacing(char a, char b) const
+{
+	size_t index;
+	SString result = *this;
+	while((index = result.find(a)) != std::string::npos)
+	{
+		result[index] = b;
+	}
+	return result;
+}
+
 #ifdef _WIN32
 //
 // Fail safe so we avoid failures
