@@ -540,6 +540,8 @@ static bool parseArg(const char *text, SpecialArg &arg)
         arg.type = SpecialArgType::tid;
     else if(!strcmp(type, "po"))
         arg.type = SpecialArgType::po;
+	else if(!strcmp(type, "str"))
+		arg.type = SpecialArgType::str;
     else    // error
         return false;
     return true;

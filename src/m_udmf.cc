@@ -960,6 +960,7 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 			lump->Printf("arg3 = %d;\n", ld->arg4);
 		if (ld->arg5 != 0)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
+		// TODO: add the arg0str. Also when loading
 
 		if (ld->locknumber != 0)
 			lump->Printf("locknumber = %d;\n", ld->locknumber);

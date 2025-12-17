@@ -503,8 +503,7 @@ endif
 special 120 - "Earthquake"              intensity  duration  damrad  tremrad :tid
 if $MAP_FORMAT is UDMF
 
-# TODO: arg0str!
-special 2703 - "Music_ChangeSong"       song  local?  loop?
+special 2703 - "Music_ChangeSong"       song:str  local?  loop?
 
 special 2704 - "Music_Stop"             local?
 endif
@@ -536,9 +535,8 @@ if $MAP_FORMAT is UDMF
 special   53 r "Line_SetTextureOffset"  :line_id  x  y  side  flags
 special   56 r "Line_SetTextureScale"   :line_id  x  y  side  flags
 
-# TODO: arg0str!
-special 2701 r "Map_SetColormap"       colormap
-special 2702 r "Sector_SetColormap"    colormap  :tag
+special 2701 r "Map_SetColormap"       colormap:str
+special 2702 r "Sector_SetColormap"    colormap:str  :tag
 else
 special 208 r "TranslucentLine"        :line_id  opacity  additive?  extra_flags
 special 210 r "Transfer_FloorLight"    :tag

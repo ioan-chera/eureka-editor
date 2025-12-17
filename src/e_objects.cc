@@ -1207,6 +1207,8 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 	op.changeLinedef(dest_line, LineDef::F_ARG3, L1->arg3);
 	op.changeLinedef(dest_line, LineDef::F_ARG4, L1->arg4);
 	op.changeLinedef(dest_line, LineDef::F_ARG5, L1->arg5);
+
+	op.changeLinedef(dest_line, LineDef::F_LOCKNUMBER, L1->locknumber);
 }
 
 

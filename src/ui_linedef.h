@@ -44,6 +44,7 @@ private:
 	UI_DynIntInput *length;
 	UI_DynIntInput *tag;
 	UI_DynIntInput *args[5];
+	UI_DynInput *args0str;
 
 	UI_SideBox *front;
 	UI_SideBox *back;

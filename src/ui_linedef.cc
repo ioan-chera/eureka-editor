@@ -173,6 +173,12 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		args[a]->align(FL_ALIGN_BOTTOM);
 		args[a]->labelsize(ARG_LABELSIZE);
 	}
+	args0str = new UI_DynInput(args[0]->x(), Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
+	args0str->callback(args_callback, new line_flag_CB_data_c(this, 5));
+	args0str->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	args0str->hide();
+	args0str->align(FL_ALIGN_BOTTOM);
+	args0str->labelsize(ARG_LABELSIZE);
 
 	Y += tag->h() + 12;
 
@@ -208,7 +214,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	Y += back->h();
 
-	mFixUp.loadFields({type, length, tag, args[0], args[1], args[2], args[3], args[4]});
+	mFixUp.loadFields({type, length, tag, args[0], args[1], args[2], args[3], args[4], args0str});
 
 	//scroll->end();
 	end();
@@ -668,9 +674,15 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 	UI_LineBox *box = l_f_c->parent;
 
 	int arg_idx = l_f_c->mask;
-	int new_value = atoi(box->args[arg_idx]->value());
-
-	new_value = clamp(0, new_value, 255);
+	int new_value;
+	if(arg_idx == 5)
+		new_value = BA_InternaliseString(box->args0str->value()).get();
+	else
+	{
+		new_value = atoi(box->args[arg_idx]->value());
+		if(box->inst.loaded.levelFormat != MapFormat::udmf)
+			new_value = clamp(0, new_value, 255);
+	}
 
 	if (! box->inst.edit.Selected->empty())
 	{
@@ -679,7 +691,10 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeLinedef(*it, static_cast<byte>(LineDef::F_ARG1 + arg_idx), new_value);
+			int paramIndex = arg_idx == 5 ? LineDef::F_ARG0STR : LineDef::F_ARG1 + arg_idx;
+			op.changeLinedef(*it, static_cast<byte>(paramIndex), new_value);
+
+			// Also change the tag when outside of UDMF
 			if(!arg_idx && box->inst.loaded.levelFormat != MapFormat::udmf)
 				op.changeLinedef(*it, LineDef::F_TAG, new_value);
 		}
@@ -919,7 +934,7 @@ void UI_LineBox::UpdateField(int field)
 			mFixUp.setInputValue(length, "");
 	}
 
-	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_LOCKNUMBER))
+	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG0STR))
 	{
 		for (int a = 0 ; a < 5 ; a++)
 		{
@@ -930,6 +945,7 @@ void UI_LineBox::UpdateField(int field)
 				args[a]->label("");
 			}
 			args[a]->textcolor(FL_BLACK);
+			args0str->textcolor(FL_BLACK);
 		}
 
 		if (inst.level.isLinedef(obj))
@@ -950,17 +966,39 @@ void UI_LineBox::UpdateField(int field)
 					if(arg_val || L->type)
 						mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
+					if(L->arg0str.get())
+						mFixUp.setInputValue(args0str, BA_GetString(L->arg0str).c_str());
+
 					// set the tooltip
 					if (!info.args[a].name.empty())
 					{
 						args[a]->copy_label(info.args[a].name.replacing('_', ' ').c_str());
 						args[a]->parent()->redraw();
+						if(a == 0)
+						{
+							if(info.args[0].type == SpecialArgType::str)
+							{
+								args0str->copy_label(args[0]->label());
+								args0str->show();
+								args[0]->hide();
+							}
+							else
+							{
+								args0str->hide();
+								args[0]->show();
+							}
+						}
 					}
 					else
 					{
 						args[a]->label("");
 						args[a]->textcolor(fl_rgb_color(160,160,160));
 						args[a]->parent()->redraw();
+						if(a == 0)
+						{
+							args0str->hide();
+							args[0]->show();
+						}
 					}
 				}
 			}
@@ -971,6 +1009,8 @@ void UI_LineBox::UpdateField(int field)
 			mFixUp.setInputValue(tag, "");
 		}
 	}
+
+	// TODO: F_ARG0STR
 
 	if (field < 0 || field == LineDef::F_RIGHT || field == LineDef::F_LEFT)
 	{
@@ -1591,6 +1631,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	back->redraw();
 
 	// Show Hexen/UDMF args when needed
+	args0str->hide();
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		if (loaded.levelFormat == MapFormat::hexen ||
