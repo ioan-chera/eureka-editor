@@ -27,8 +27,8 @@
 #ifndef __EUREKA_UI_PANELINPUT_H__
 #define __EUREKA_UI_PANELINPUT_H__
 
-#include "FL/Fl_Group.H"
 #include "FL/Fl_Input.H"
+#include "FL/Fl_Scroll.H"
 #include <unordered_map>
 #include <unordered_set>
 
@@ -109,28 +109,26 @@ private:
 };
 
 
-class MapItemBox : public Fl_Group
+class MapItemBox : public Fl_Scroll
 {
 public:
-	MapItemBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr) : Fl_Group(X, Y, W, H, label), inst(inst)
-	{
-	}
-	
+	MapItemBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr);
+
 	void SetObj(int _index, int _count);
 	int GetObj() const { return obj; }
-	
+
 	virtual void UpdateField(int field = -1) = 0;
 	virtual void UnselectPics() = 0;
 	virtual void UpdateTotal(const Document &doc) noexcept = 0;
 	virtual void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) = 0;
-	
+
 protected:
 	Instance &inst;
 	int obj = -1;
 	int count = 0;
-	
+
 	UI_Nombre *which = nullptr;
-	
+
 	PanelFieldFixUp	mFixUp;
 };
 

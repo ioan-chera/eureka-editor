@@ -107,12 +107,15 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	const int Y0 = Y;
 	const int X0 = X;
 
+	// Put this spacer here so the scroller places the UI elements correctly when content collapses.
+	Fl_Box *spacer = new Fl_Box(X, Y, W, INSET_TOP);
+	spacer->box(FL_FLAT_BOX);
+
 	X += INSET_LEFT;
 	Y += INSET_TOP;
 
 	W -= INSET_LEFT + INSET_RIGHT;
 	H -= INSET_TOP + INSET_BOTTOM;
-
 
 	which = new UI_Nombre(X + NOMBRE_INSET, Y, W - 2 * NOMBRE_INSET, NOMBRE_HEIGHT, "Linedef");
 

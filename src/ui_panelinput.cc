@@ -98,6 +98,12 @@ void PanelFieldFixUp::clearDirtyCallback(Fl_Widget *widget, void *data)
 		it->second.callback(widget, it->second.data);
 }
 
+MapItemBox::MapItemBox(Instance &inst, int X, int Y, int W, int H, const char *label) : Fl_Scroll(X, Y, W, H, label), inst(inst)
+{
+	type(Fl_Scroll::VERTICAL);
+	scrollbar_size(Fl::scrollbar_size() * 3 / 4);
+}
+
 void MapItemBox::SetObj(int _index, int _count)
 {
 	if (obj == _index && count == _count)
