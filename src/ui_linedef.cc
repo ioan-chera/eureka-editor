@@ -183,7 +183,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	args0str->align(FL_ALIGN_BOTTOM);
 	args0str->labelsize(ARG_LABELSIZE);
 
-	Y += tag->h() + 12;
+	Y += tag->h() + 16;
 
 
 	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X+10, Y, 64, 24, "Flags: ");
