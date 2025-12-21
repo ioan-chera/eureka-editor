@@ -694,7 +694,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			int paramIndex = arg_idx == 5 ? LineDef::F_ARG0STR : LineDef::F_ARG1 + arg_idx;
+			int paramIndex = arg_idx == 5 ? LineDef::F_ARG1STR : LineDef::F_ARG1 + arg_idx;
 			op.changeLinedef(*it, static_cast<byte>(paramIndex), new_value);
 
 			// Also change the tag when outside of UDMF
@@ -937,7 +937,7 @@ void UI_LineBox::UpdateField(int field)
 			mFixUp.setInputValue(length, "");
 	}
 
-	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG0STR))
+	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG1STR))
 	{
 		for (int a = 0 ; a < 5 ; a++)
 		{
@@ -969,8 +969,8 @@ void UI_LineBox::UpdateField(int field)
 					if(arg_val || L->type)
 						mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
-					if(L->arg0str.get())
-						mFixUp.setInputValue(args0str, BA_GetString(L->arg0str).c_str());
+					if(L->arg1str.get())
+						mFixUp.setInputValue(args0str, BA_GetString(L->arg1str).c_str());
 
 					// set the tooltip
 					if (!info.args[a].name.empty())
@@ -1012,8 +1012,6 @@ void UI_LineBox::UpdateField(int field)
 			mFixUp.setInputValue(tag, "");
 		}
 	}
-
-	// TODO: F_ARG0STR
 
 	if (field < 0 || field == LineDef::F_RIGHT || field == LineDef::F_LEFT)
 	{
