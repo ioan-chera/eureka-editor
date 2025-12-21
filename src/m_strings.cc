@@ -425,6 +425,20 @@ SString SString::spaceEscape(bool backslash) const
 {
 	if(empty())
 		return "\"\"";
+
+	SString result(*this);
+	if(backslash)
+	{
+		// If we escape quotes with backslashes, it means they have special meaning, and should
+		// also be escaped by themselves
+		size_t pos = std::string::npos;
+		while((pos = result.data.find('\\', pos == std::string::npos ? 0 : pos + 2)) !=
+			std::string::npos)
+		{
+			result.data.insert(result.data.begin() + pos, '\\');
+		}
+	}
+
 	bool needsQuotes = false;
 	for(char c : data)
 		if(safe_isspace(c) || c == '"' || c == '#')
@@ -433,7 +447,6 @@ SString SString::spaceEscape(bool backslash) const
 			break;
 		}
 
-	SString result(*this);
 	if(needsQuotes)
 	{
 		size_t pos = std::string::npos;

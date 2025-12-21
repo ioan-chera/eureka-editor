@@ -445,11 +445,7 @@ SString NormalizeTex(const SString &name)
 	{
 		buffer.push_back(name[i]);
 
-		// remove double quotes
-		if (buffer[i] == '"')
-			buffer[i] = '_';
-		else
-			buffer[i] = static_cast<char>(toupper(buffer[i]));
+		buffer[i] = static_cast<char>(toupper(buffer[i]));
 	}
 
 	return buffer;
@@ -714,7 +710,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 				{
 					if(!spriteset[i].lump)
 						continue;
-					
+
 					if (! LoadPicture(palette, config, result[i], *spriteset[i].lump, info.sprite, 0, 0))
 					{
 						gLog.printf("Failed loading %s rotation %d\n", info.sprite.c_str(), i + 1);
@@ -750,7 +746,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 		else if(info.group == 'p')
 		{
 			std::optional<Img_c> new_img;
-			
+
 			int src1, src2;
 			int targ1[4], targ2[4];
 			if (M_GetBaseGame(loading.gameName) == "heretic")
@@ -763,7 +759,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 				targ2[1] = 160;
 				targ1[2] = targ1[3] = 190;
 				targ2[2] = targ2[3] = 205;
-				
+
 			}
 			else
 			{
@@ -778,7 +774,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 				targ1[3] = 0xc4;
 				targ2[3] = 0xcf;
 			}
-			
+
 			for(Img_c &img : result)
 			{
 				switch (type)
@@ -786,19 +782,19 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 					case 1:
 						// no change
 						break;
-						
+
 					case 2:
 						new_img = img.color_remap(src1, src2, targ1[0], targ2[0]);
 						break;
-						
+
 					case 3:
 						new_img = img.color_remap(src1, src2, targ1[1], targ2[1]);
 						break;
-						
+
 					case 4:
 						new_img = img.color_remap(src1, src2, targ1[2], targ2[2]);
 						break;
-						
+
 						// blue for the extra coop starts
 					case 4001:
 					case 4002:
@@ -807,7 +803,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 						new_img = img.color_remap(src1, src2, targ1[3], targ2[3]);
 						break;
 				}
-				
+
 				if (new_img)
 				{
 					img = std::move(*new_img);
@@ -818,10 +814,10 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type, const Loadin
 
 	// note that a NULL image is OK.  Our renderer will just ignore the
 	// missing sprite.
-	
+
 	images.sprites[type] = result;
 	std::vector<Img_c> &sprites = images.sprites[type];
-	
+
 	return sprites.empty() ? nullptr : sprites.size() == 8 ? &sprites[rotation - 1] : &sprites[0];
 }
 

@@ -192,23 +192,7 @@ public:
 
 	StringID DecodeTexture() const
 	{
-		SString buffer;
-
-		if (! IsString())
-		{
-			// TODO warning
-			buffer = "-";
-		}
-		else
-		{
-			int use_len = 8;
-
-			if (text.size() < 10)
-				use_len = (int)text.size() - 2;
-			buffer = text;
-			buffer.erase(0, 1);
-			buffer.erase(use_len, SString::npos);
-		}
+		SString buffer = DecodeString();
 
 		return BA_InternaliseString(NormalizeTex(buffer));
 	}
@@ -623,6 +607,8 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 		LD->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		LD->arg5 = value.DecodeInt();
+	else if (field.Match("arg0str"))
+		LD->arg1str = BA_InternaliseString(value.DecodeString());
 	else if (field.Match("locknumber"))
 		LD->locknumber = value.DecodeInt();
 	else
@@ -928,6 +914,23 @@ static void UDMF_WriteVertices(const Document &doc, Lump_c *lump)
 	}
 }
 
+static SString EncodeString(const SString &raw)
+{
+	SString result = raw;
+	// Escape all backslashes and quotes
+	size_t pos = std::string::npos;
+	while((pos = result.find('\\', pos == std::string::npos ? 0 : pos + 2)) != std::string::npos)
+	{
+		result.insert(pos, "\\");
+	}
+	pos = std::string::npos;
+	while((pos = result.find('"', pos == std::string::npos ? 0 : pos + 2)) != std::string::npos)
+	{
+		result.insert(pos, "\\");
+	}
+	return "\"" + result + "\"";
+}
+
 static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 {
 	for (int i = 0 ; i < inst.level.numLinedefs(); i++)
@@ -960,7 +963,8 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 			lump->Printf("arg3 = %d;\n", ld->arg4);
 		if (ld->arg5 != 0)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
-		// TODO: add the arg0str. Also when loading
+		if (ld->arg1str.get())
+			lump->Printf("arg0str = %s\n", EncodeString(BA_GetString(ld->arg1str)).c_str());
 
 		if (ld->locknumber != 0)
 			lump->Printf("locknumber = %d;\n", ld->locknumber);
@@ -993,14 +997,12 @@ static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 		if (side->y_offset != 0)
 			lump->Printf("offsety = %d;\n", side->y_offset);
 
-		// use NormalizeTex to ensure no double quote
-
 		if (side->UpperTex() != "-")
-			lump->Printf("texturetop = \"%s\";\n", NormalizeTex(side->UpperTex()).c_str());
+			lump->Printf("texturetop = %s;\n", EncodeString(NormalizeTex(side->UpperTex())).c_str());
 		if (side->LowerTex() != "-")
-			lump->Printf("texturebottom = \"%s\";\n", NormalizeTex(side->LowerTex()).c_str());
+			lump->Printf("texturebottom = %s;\n", EncodeString(NormalizeTex(side->LowerTex())).c_str());
 		if (side->MidTex() != "-")
-			lump->Printf("texturemiddle = \"%s\";\n", NormalizeTex(side->MidTex()).c_str());
+			lump->Printf("texturemiddle = %s;\n", EncodeString(NormalizeTex(side->MidTex())).c_str());
 
 		lump->Printf("}\n\n");
 	}
@@ -1018,10 +1020,8 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 		lump->Printf("heightfloor = %d;\n", sec->floorh);
 		lump->Printf("heightceiling = %d;\n", sec->ceilh);
 
-		// use NormalizeTex to ensure no double quote
-
-		lump->Printf("texturefloor = \"%s\";\n", NormalizeTex(sec->FloorTex()).c_str());
-		lump->Printf("textureceiling = \"%s\";\n", NormalizeTex(sec->CeilTex()).c_str());
+		lump->Printf("texturefloor = %s;\n", EncodeString(NormalizeTex(sec->FloorTex())).c_str());
+		lump->Printf("textureceiling = %s;\n", EncodeString(NormalizeTex(sec->CeilTex())).c_str());
 
 		lump->Printf("lightlevel = %d;\n", sec->light);
 		if (sec->type != 0)
