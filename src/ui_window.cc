@@ -45,6 +45,11 @@
 #define WINDOW_MIN_W  928
 #define WINDOW_MIN_H  640
 
+enum
+{
+	BAR_HEIGHT = 31,
+};
+
 //
 // MainWin Constructor
 //
@@ -63,11 +68,11 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	int cy = 0;
 	int ey = h();
 
-	panel_W = 308;
+	static const int panel_W = 308;
 
 	/* ---- Menu bar ---- */
 	{
-		menu_bar = menu::create(0, 0, w()-3 - panel_W, 31, &mInstance);
+		menu_bar = menu::create(0, 0, w()-3 - panel_W, BAR_HEIGHT, &mInstance);
 		add(menu_bar);
 		testmap::updateMenuName(menu_bar, inst.loaded);
 
@@ -77,13 +82,13 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	}
 
 
-	info_bar = new UI_InfoBar(mInstance, 0, ey - 31, w(), 31);
+	info_bar = new UI_InfoBar(mInstance, 0, ey - BAR_HEIGHT, w(), BAR_HEIGHT);
 	add(info_bar);
 
 	ey = ey - info_bar->h();
 
 
-	int browser_W = MIN_BROWSER_W + 66;
+	static const int browser_W = MIN_BROWSER_W + 66;
 
 	int cw = w() - panel_W - browser_W;
 	int ch = ey - cy;
@@ -127,7 +132,7 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	find_box = new UI_FindAndReplace(inst, w() - panel_W, BY, panel_W, BH);
 	find_box->hide();
 	add(find_box);
-	
+
 	mapItemBoxes[0] = thing_box;
 	mapItemBoxes[1] = line_box;
 	mapItemBoxes[2] = sec_box;

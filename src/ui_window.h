@@ -64,8 +64,6 @@ public:
 
 	Fl_Sys_Menu_Bar *menu_bar;
 
-	int panel_W;
-
 	UI_Tile * tile;
 
 	UI_CanvasScroll *scroll;
@@ -84,16 +82,16 @@ public:
 	UI_FindAndReplace *find_box;
 
 private:
-	
+
 	UI_DefaultProps   *props_box;
-	
+
 	// active cursor
 	Fl_Cursor cursor_shape;
 
 	// remember window size/position after going fullscreen.
 	// the 'last_w' and 'last_h' fields are zero when not fullscreen
 	// int last_x = 0, last_y = 0, last_w = 0, last_h = 0;
-	
+
 	MapItemBox *mapItemBoxes[4] = {};
 
 public:
@@ -103,7 +101,7 @@ public:
 	// FLTK methods
 	int handle(int event);
 	void draw();
-	
+
 	void propsLoadValues()
 	{
 		assert(props_box);
