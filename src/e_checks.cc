@@ -696,7 +696,7 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Instan
 
 	 secs.change_type(ObjType::sectors);
 	lines.change_type(ObjType::linedefs);
-	
+
 	Document &doc = inst.level;
 
 	if (doc.numLinedefs() == 0 || doc.numSectors() == 0)
@@ -3177,10 +3177,10 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc, 
 
 		SpecialTagInfo info = {};
 		bool hasinfo = getSpecialTagInfo(ObjType::linedefs, n, L->type, L.get(), config, info);
-		
+
 		if(!hasinfo)
 			continue;
-		
+
 		for(int i = 0; i < info.numtags; ++i)
 		{
 			if(!SEC_tag_exists(info.tags[i], doc))
@@ -3250,7 +3250,7 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 			gLog.printf("WARNING: invalid empty description for line type %d\n", L->type);
 			continue;
 		}
-		
+
 		char first = info.desc[0];
 
 		if (first == 'D' || first == '-' || ('a' <= first && first <= 'z'))
@@ -3884,8 +3884,8 @@ static void Textures_FindTuttiFrutti(selection_c& lines, const Instance& inst)
 				continue;
 			const Sector &sector = inst.level.getSector(*side);
 			int headroom = sector.ceilh - sector.floorh;
-			if (headroom > texture->height() || 
-				(L->flags & MLF_LowerUnpegged && (side->y_offset > 0 || side->y_offset < texture->height() - headroom)) || 
+			if (headroom > texture->height() ||
+				(L->flags & MLF_LowerUnpegged && (side->y_offset > 0 || side->y_offset < texture->height() - headroom)) ||
 				(!(L->flags & MLF_LowerUnpegged) && (side->y_offset < 0 || side->y_offset > texture->height() - headroom)))
 			{
 				lines.set(n);
@@ -4664,7 +4664,6 @@ int findFreeTag(const Instance &inst, bool forsector)
 	for(int i = 0; i < doc.numLinedefs(); ++i)
 	{
 		addtag(doc.linedefs[i]->tag);
-		addtag(doc.linedefs[i]->arg1);
 	}
 	for(int i = 0; i < doc.numSectors(); ++i)
 		addtag(doc.sectors[i]->tag);
