@@ -818,7 +818,7 @@ void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
 
 void UI_LineBox::repositionAfterCategoryToggle()
 {
-	int Y = y() + flagsStartY;
+	int Y = y() + flagsStartY - yposition();
 	const int rowH = 19;
 	const int categoryH = 22;
 

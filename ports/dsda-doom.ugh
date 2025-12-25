@@ -676,7 +676,6 @@ udmf_linechoice locknumber 133 "Blue card or skull"
 udmf_linechoice locknumber 134 "Yellow card or skull"
 udmf_linechoice locknumber 229 "Any key of each color"
 
-# TODO: arg0str text field
 # TODO: alpha number field
 
 # TODO: make this a choice
