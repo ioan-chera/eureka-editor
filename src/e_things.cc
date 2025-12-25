@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -77,7 +78,7 @@ void Instance::CMD_TH_SpinThings()
 		}
 	}
 
-	main_win->thing_box->UpdateField(Thing::F_ANGLE);
+	main_win->thing_box->UpdateField(Basis::EditField(Thing::F_ANGLE));
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);

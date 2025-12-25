@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -439,7 +440,7 @@ void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
 	}
 }
 
-void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
+void Instance::MapStuff_NotifyChange(ObjType type, int objnum, Basis::EditField efield)
 {
 	if (type == ObjType::vertices)
 	{
@@ -459,14 +460,21 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		Subdiv_InvalidateAll();
 	}
 
-	if (type == ObjType::sidedefs && field == SideDef::F_SECTOR)
+	if (type == ObjType::sidedefs && efield.isRaw(SideDef::F_SECTOR))
 		Subdiv_InvalidateAll();
 
-	if (type == ObjType::linedefs && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT || field == LineDef::F_START || field == LineDef::F_END))
+	if (type == ObjType::linedefs && (efield.isRaw(LineDef::F_LEFT) ||
+			efield.isRaw(LineDef::F_RIGHT) || efield.isRaw(LineDef::F_START) ||
+			efield.isRaw(LineDef::F_END)))
+	{
 		Subdiv_InvalidateAll();
+	}
 
-	if (type == ObjType::sectors && (field == Sector::F_FLOORH || field == Sector::F_CEILH))
+	if (type == ObjType::sectors && (efield.isRaw(Sector::F_FLOORH) ||
+			efield.isRaw(Sector::F_CEILH)))
+	{
 		Subdiv_InvalidateAll();
+	}
 }
 
 void Instance::MapStuff_NotifyEnd()
@@ -524,7 +532,7 @@ void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
 }
 
 
-void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
+void Instance::ObjectBox_NotifyChange(ObjType type, int objnum)
 {
 	if (type != edit.mode || !main_win)
 		return;
@@ -599,12 +607,12 @@ void Instance::Selection_NotifyDelete(ObjType type, int objnum)
 	}
 }
 
-
+/*
 void Selection_NotifyChange(ObjType type, int objnum, int field)
 {
 	// field changes never affect the current selection
 }
-
+*/
 
 void Instance::Selection_NotifyEnd()
 {

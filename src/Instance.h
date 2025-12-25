@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2020 Ioan Chera
+//  Copyright (C) 2020-2025 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -217,12 +217,12 @@ public:
 	bool Editor_ParseUser(const std::vector<SString> &tokens);
 	void Editor_WriteUser(std::ostream &os) const;
 	void MapStuff_NotifyBegin();
-	void MapStuff_NotifyChange(ObjType type, int objnum, int field);
+	void MapStuff_NotifyChange(ObjType type, int objnum, Basis::EditField efield);
 	void MapStuff_NotifyDelete(ObjType type, int objnum);
 	void MapStuff_NotifyEnd();
 	void MapStuff_NotifyInsert(ObjType type, int objnum);
 	void ObjectBox_NotifyBegin();
-	void ObjectBox_NotifyChange(ObjType type, int objnum, int field);
+	void ObjectBox_NotifyChange(ObjType type, int objnum);
 	void ObjectBox_NotifyDelete(ObjType type, int objnum);
 	void ObjectBox_NotifyEnd() const;
 	void ObjectBox_NotifyInsert(ObjType type, int objnum);
@@ -339,43 +339,43 @@ public:
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 	void Status_Clear() const;
-	
+
 	// GridListener
 	void gridRedrawMap() override
 	{
 		RedrawMap();
 	}
-	
+
 	void gridSetGrid(int grid) override
 	{
 		if (main_win)
 			main_win->info_bar->SetGrid(grid);
 	}
-	
+
 	void gridUpdateSnap() override
 	{
 		if (main_win)
 			main_win->info_bar->UpdateSnap();
 	}
-	
+
 	void gridAdjustPos() override
 	{
 		if (main_win)
 			main_win->scroll->AdjustPos();
 	}
-	
+
 	void gridPointerPos() override
 	{
 		if (main_win)
 			main_win->canvas->PointerPos();
 	}
-	
+
 	void gridSetScale(double scale) override
 	{
 		if (main_win)
 			main_win->info_bar->SetScale(scale);
 	}
-	
+
 	void gridBeep(const char *message) override
 	{
 		Beep("%s", message);
@@ -436,7 +436,7 @@ private:
 
 	// M_LOADSAVE
 	void FreshLevel();
-	
+
 	bool M_ExportMap(bool inhibit_node_build);
 	void Navigate2D();
 	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
@@ -508,7 +508,7 @@ public:	// will be private when we encapsulate everything
 	int last_given_file = 0;
 	std::optional<UI_NodeDialog> nodeialog;
 	nodebuildinfo_t *nb_info = nullptr;
-	
+
 	int tagInMemory = 0;
 
 	WadData wad;

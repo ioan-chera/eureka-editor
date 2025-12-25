@@ -4,8 +4,8 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2018 Andrew Apted
 //  Copyright (C) 2025      Ioan Chera
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -245,7 +245,7 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 	}
 
 	// update description
-	box->UpdateField(LineDef::F_TYPE);
+	box->UpdateField(Basis::EditField(LineDef::F_TYPE));
 }
 
 
@@ -786,7 +786,7 @@ void UI_LineBox::choice_callback(Fl_Widget *w, void *data)
 	}
 
 	// Update the display
-	box->UpdateField(LineDef::F_LOCKNUMBER);
+	box->UpdateField(Basis::EditField(LineDef::F_LOCKNUMBER));
 }
 
 void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
@@ -927,9 +927,9 @@ void UI_LineBox::updateCategoryDetails()
 	}
 }
 
-void UI_LineBox::UpdateField(int field)
+void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 {
-	if (field < 0 || field == LineDef::F_START || field == LineDef::F_END)
+	if (!efield || efield->isRaw(LineDef::F_START) || efield->isRaw(LineDef::F_END))
 	{
 		if(inst.level.isLinedef(obj))
 			CalcLength();
@@ -937,7 +937,7 @@ void UI_LineBox::UpdateField(int field)
 			mFixUp.setInputValue(length, "");
 	}
 
-	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG1STR))
+	if (!efield || efield->isRaw(LineDef::F_TAG) || efield->isRaw(LineDef::F_ARG1STR))
 	{
 		for (int a = 0 ; a < 5 ; a++)
 		{
@@ -1013,7 +1013,7 @@ void UI_LineBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == LineDef::F_RIGHT || field == LineDef::F_LEFT)
+	if (!efield || efield->isRaw(LineDef::F_RIGHT) || efield->isRaw(LineDef::F_LEFT))
 	{
 		if (inst.level.isLinedef(obj))
 		{
@@ -1032,7 +1032,7 @@ void UI_LineBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == LineDef::F_TYPE)
+	if (!efield || efield->isRaw(LineDef::F_TYPE))
 	{
 		if (inst.level.isLinedef(obj))
 		{
@@ -1065,7 +1065,7 @@ void UI_LineBox::UpdateField(int field)
 	}
 
 	bool changed = false;
-	if (field < 0 || field == LineDef::F_FLAGS)
+	if (!efield || efield->isRaw(LineDef::F_FLAGS))
 	{
 		if (inst.level.isLinedef(obj))
 		{
@@ -1082,7 +1082,7 @@ void UI_LineBox::UpdateField(int field)
 		}
 	}
 
-	if(field < 0 || field == LineDef::F_FLAGS2)
+	if(!efield || efield->isRaw(LineDef::F_FLAGS2))
 	{
 		if(inst.level.isLinedef(obj))
 			changed |= Flags2FromInt(inst.level.linedefs[obj]->flags2);
@@ -1094,7 +1094,7 @@ void UI_LineBox::UpdateField(int field)
 		updateCategoryDetails();
 
 
-	if(field < 0 || field == LineDef::F_LOCKNUMBER)
+	if(!efield || efield->isRaw(LineDef::F_LOCKNUMBER))
 	{
 		// Update choice widgets for UDMF properties
 		if(inst.level.isLinedef(obj))

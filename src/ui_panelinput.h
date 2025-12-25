@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -27,8 +28,10 @@
 #ifndef __EUREKA_UI_PANELINPUT_H__
 #define __EUREKA_UI_PANELINPUT_H__
 
+#include "e_basis.h"
 #include "FL/Fl_Input.H"
 #include "FL/Fl_Scroll.H"
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -117,7 +120,7 @@ public:
 	void SetObj(int _index, int _count);
 	int GetObj() const { return obj; }
 
-	virtual void UpdateField(int field = -1) = 0;
+	virtual void UpdateField(std::optional<Basis::EditField> efield = std::nullopt) = 0;
 	virtual void UnselectPics() = 0;
 	virtual void UpdateTotal(const Document &doc) noexcept = 0;
 	virtual void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) = 0;

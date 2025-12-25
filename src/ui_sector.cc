@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2007-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -476,7 +477,7 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 	}
 
 	// update the description
-	UpdateField(Sector::F_TYPE);
+	UpdateField(Basis::EditField(Sector::F_TYPE));
 }
 
 
@@ -646,10 +647,10 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_SectorBox::UpdateField(int field)
+void UI_SectorBox::UpdateField(std::optional<Basis::EditField> efield)
 {
 	const Sector *sector = inst.level.isSector(obj) ? inst.level.sectors[obj].get() : nullptr;
-	if (field < 0 || field == Sector::F_FLOORH || field == Sector::F_CEILH)
+	if (!efield || efield->isRaw(Sector::F_FLOORH) || efield->isRaw(Sector::F_CEILH))
 	{
 		if (inst.level.isSector(obj))
 		{
@@ -665,7 +666,7 @@ void UI_SectorBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Sector::F_FLOOR_TEX || field == Sector::F_CEIL_TEX)
+	if (!efield || efield->isRaw(Sector::F_FLOOR_TEX) || efield->isRaw(Sector::F_CEIL_TEX))
 	{
 		if (inst.level.isSector(obj))
 		{
@@ -691,7 +692,7 @@ void UI_SectorBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Sector::F_TYPE)
+	if (!efield || efield->isRaw(Sector::F_TYPE))
 	{
 		for(const SectorFlagButton &button : bm_buttons)
 		{
@@ -736,7 +737,7 @@ void UI_SectorBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Sector::F_LIGHT || field == Sector::F_TAG)
+	if (!efield || efield->isRaw(Sector::F_LIGHT) || efield->isRaw(Sector::F_TAG))
 	{
 		if (inst.level.isSector(obj))
 		{

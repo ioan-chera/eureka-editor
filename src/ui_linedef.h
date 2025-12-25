@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -21,6 +22,7 @@
 #ifndef __EUREKA_UI_LINEDEF_H__
 #define __EUREKA_UI_LINEDEF_H__
 
+#include "e_basis.h"
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
@@ -88,7 +90,7 @@ public:
 
 	// call this if the linedef was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1) override;
+	void UpdateField(std::optional<Basis::EditField> efield = std::nullopt) override;
 
 	// call this is the linedef's sides were externally modified.
 	void UpdateSides();

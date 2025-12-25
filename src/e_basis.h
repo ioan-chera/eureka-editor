@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -93,6 +94,53 @@ bool CoordsMatch(MapFormat format, const v2double_t &v1, const v2double_t &v2);
 class Basis : public DocumentModule
 {
 public:
+	enum class EditFormat
+	{
+		field,
+		linedefDouble
+	};
+
+	struct EditField
+	{
+		EditField() = default;
+		explicit EditField(byte field) : format(EditFormat::field), rawField(field)
+		{
+		}
+
+		bool isRaw(byte rawField) const
+		{
+			return format == EditFormat::field && this->rawField == rawField;
+		}
+
+		int getRaw() const
+		{
+			return format == EditFormat::field ? rawValue : -1;
+		}
+
+		bool operator==(const EditField &other) const
+		{
+			if(format != other.format)
+				return false;
+			if(format == EditFormat::field)
+				return rawField == other.rawField && rawValue == other.rawValue;
+			return doubleLineField == other.doubleLineField && doubleValue == other.doubleValue;
+		}
+
+		EditFormat format = EditFormat::field;
+
+		union
+		{
+			byte rawField = 0;
+			double LineDef::*doubleLineField;
+		};
+
+		union
+		{
+			int rawValue = 0;
+			double doubleValue;
+		};
+	};
+
 	Basis(Document &doc) : DocumentModule(doc)
 	{
 	}
@@ -105,7 +153,7 @@ public:
 		mSavedStack = mUndoHistory;
 	}
 
-	
+
 	Basis &operator = (Basis &&other) noexcept
 	{
 		mCurrentGroup = std::move(other.mCurrentGroup);
@@ -136,15 +184,16 @@ private:
 	{
 		EditType action = EditType::none;
 		ObjType objtype = ObjType::things;
-		byte field = 0;
+
+		EditField efield = {};
+
 		int objnum = 0;
 		std::shared_ptr<Thing> thing;
 		std::shared_ptr<Vertex> vertex;
 		std::shared_ptr<Sector> sector;
 		std::shared_ptr<SideDef> sidedef;
 		std::shared_ptr<LineDef> linedef;
-		int value = 0;
-		
+
 		// For lump changes
 		LumpType lumptype = LumpType::header;
 		std::vector<byte> lumpData;
@@ -156,14 +205,13 @@ private:
 		{
 			return action == other.action
 				&& objtype == other.objtype
-				&& field == other.field
+				&& efield == other.efield
 				&& objnum == other.objnum
 				&& thing == other.thing
 				&& vertex == other.vertex
 				&& sector == other.sector
 				&& sidedef == other.sidedef
 				&& linedef == other.linedef
-				&& value == other.value
 				&& lumptype == other.lumptype
 				&& lumpData == other.lumpData;
 		}
@@ -289,12 +337,12 @@ private:
 		{
 			mMessage = message;
 		}
-		
+
 		void setMenuName(const SString &menuName)
 		{
 			mMenuName = menuName;
 		}
-		
+
 		const SString &getMenuName() const
 		{
 			return mMenuName;
@@ -321,6 +369,7 @@ private:
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeLinedef(int line, byte field, int value);
+	bool changeLinedef(int line, double LineDef::*field, double value);
 	void changeLump(LumpType lumpType, std::vector<byte> &&newData);
 	void del(ObjType type, int objnum);
 	void end();

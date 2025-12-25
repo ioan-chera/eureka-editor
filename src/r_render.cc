@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -251,10 +252,9 @@ void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
 		thing_sec_cache::InvalidateAll(doc, true);
 }
 
-void Render3D_NotifyChange(ObjType type, int objnum, int field)
+void Render3D_NotifyChange(ObjType type, int objnum, Basis::EditField efield)
 {
-	if (type == ObjType::things &&
-		(field == Thing::F_X || field == Thing::F_Y))
+	if (type == ObjType::things && (efield.isRaw(Thing::F_X) || efield.isRaw(Thing::F_Y)))
 	{
 		thing_sec_cache::InvalidateThing(objnum);
 	}
@@ -268,7 +268,7 @@ void Render3D_NotifyEnd(Instance &inst)
 int Render3D_CalcRotation(double viewAngle_rad, int thingAngle_deg)
 {
 	// thingAngle(deg) - viewAngle(deg)
-	
+
 	// 1: front. 45 degrees around 180 difference.  157d30': 202d30'
 	// 2: front-left                                112d30': 157d30'
 	// 3: left                                       67d30': 112d30'
@@ -277,14 +277,14 @@ int Render3D_CalcRotation(double viewAngle_rad, int thingAngle_deg)
 	// 6: back-right                                -67d30': -22d30'
 	// 7: right                                    -112d30': -67d30'
 	// 8: front-right.                             -157d30':-112d30'
-	
+
 	double thingAngle_rad = M_PI / 180.0 * thingAngle_deg;
 	double angleDelta_rad = thingAngle_rad - viewAngle_rad;
 	while(angleDelta_rad > 202.5 * M_PI / 180.0)
 		angleDelta_rad -= 2 * M_PI;
 	while(angleDelta_rad < -157.5 * M_PI / 180.0)
 		angleDelta_rad += 2 * M_PI;
-	
+
 	return clamp((int)floor((202.5 * M_PI / 180.0 - angleDelta_rad) / (M_PI / 4.0) + 1.0), 1, 8);
 }
 

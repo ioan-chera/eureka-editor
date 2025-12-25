@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2007-2016 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -186,7 +187,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_VertexBox::UpdateField(int)
+void UI_VertexBox::UpdateField(std::optional<Basis::EditField> efield)
 {
 	if (inst.level.isVertex(obj))
 	{

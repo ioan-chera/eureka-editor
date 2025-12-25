@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -375,9 +376,10 @@ bool Basis::change(ObjType type, int objnum, byte field, int value)
 
 	op.action = EditType::change;
 	op.objtype = type;
-	op.field = field;
+	op.efield.format = EditFormat::field;
+	op.efield.rawField = field;
+	op.efield.rawValue = value;
 	op.objnum = objnum;
-	op.value = value;
 
 	SYS_ASSERT(mCurrentGroup.isActive());
 
@@ -460,6 +462,21 @@ bool Basis::changeLinedef(int line, byte field, int value)
 	SYS_ASSERT(field <= LineDef::F_LOCKNUMBER);
 
 	return change(ObjType::linedefs, line, field, value);
+}
+
+bool Basis::changeLinedef(int line, double LineDef::*field, double value)
+{
+	SYS_ASSERT(line >= 0 && line < doc.numLinedefs());
+	EditUnit op;
+	op.action = EditType::change;
+	op.objtype = ObjType::linedefs;
+	op.objnum = line;
+	op.efield.format = EditFormat::linedefDouble;
+	op.efield.doubleLineField = field;
+	op.efield.doubleValue = value;
+	SYS_ASSERT(mCurrentGroup.isActive());
+	mCurrentGroup.addApply(std::move(op), *this);
+	return true;
 }
 
 //
@@ -612,43 +629,58 @@ void Basis::EditUnit::destroy()
 //
 void Basis::EditUnit::rawChange(Basis &basis)
 {
-	int *pos = nullptr;
-	switch(objtype)
+	if(efield.format == EditFormat::field)
 	{
-	case ObjType::things:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
-		pos = reinterpret_cast<int *>(basis.doc.things[objnum].get());
-		break;
-	case ObjType::vertices:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
-		pos = reinterpret_cast<int *>(basis.doc.vertices[objnum].get());
-		break;
-	case ObjType::sectors:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
-		pos = reinterpret_cast<int *>(basis.doc.sectors[objnum].get());
-		break;
-	case ObjType::sidedefs:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
-		pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum].get());
-		break;
-	case ObjType::linedefs:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
-		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum].get());
-		break;
-	default:
-		BugError("Basis::EditOperation::rawChange: bad objtype %u\n", (unsigned)objtype);
-		return; /* NOT REACHED */
+		int *pos = nullptr;
+		switch(objtype)
+		{
+		case ObjType::things:
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
+			pos = reinterpret_cast<int *>(basis.doc.things[objnum].get());
+			break;
+		case ObjType::vertices:
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
+			pos = reinterpret_cast<int *>(basis.doc.vertices[objnum].get());
+			break;
+		case ObjType::sectors:
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
+			pos = reinterpret_cast<int *>(basis.doc.sectors[objnum].get());
+			break;
+		case ObjType::sidedefs:
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
+			pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum].get());
+			break;
+		case ObjType::linedefs:
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
+			pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum].get());
+			break;
+		default:
+			BugError("Basis::EditOperation::rawChange: bad objtype %u\n", (unsigned)objtype);
+			return; /* NOT REACHED */
+		}
+		std::swap(pos[efield.rawField], efield.rawValue);
 	}
-	// TODO: CHANGE THIS TO A SAFER WAY!
-	std::swap(pos[field], value);
+	else switch(efield.format)
+	{
+		case EditFormat::linedefDouble:
+		{
+			SYS_ASSERT(objtype == ObjType::linedefs);
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
+			LineDef &L = *basis.doc.linedefs[objnum];
+			std::swap(L.*efield.doubleLineField, efield.doubleValue);
+			break;
+		}
+		default:
+			BugError("Basis::EditOperation::rawChange: bad format %u\n", (unsigned)efield.format);
+			break;
+	}
+
 	basis.mDidMakeChanges = true;
 
 	// TODO: their modules
-	Clipboard_NotifyChange(objtype, objnum, field);
-	Selection_NotifyChange(objtype, objnum, field);
-	basis.inst.MapStuff_NotifyChange(objtype, objnum, field);
-	Render3D_NotifyChange(objtype, objnum, field);
-	basis.inst.ObjectBox_NotifyChange(objtype, objnum, field);
+	basis.inst.MapStuff_NotifyChange(objtype, objnum, efield);
+	Render3D_NotifyChange(objtype, objnum, efield);
+	basis.inst.ObjectBox_NotifyChange(objtype, objnum);
 }
 
 //

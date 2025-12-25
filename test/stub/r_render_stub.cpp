@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2022 Ioan Chera
+//  Copyright (C) 2022-2025 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -25,7 +25,7 @@ void Render3D_NotifyBegin()
 {
 }
 
-void Render3D_NotifyChange(ObjType type, int objnum, int field)
+void Render3D_NotifyChange(ObjType type, int objnum, Basis::EditField efield)
 {
 }
 

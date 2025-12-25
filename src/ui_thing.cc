@@ -4,8 +4,8 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2015-2025 Ioan Chera
 //  Copyright (C) 2007-2018 Andrew Apted
-//  Copyright (C)      2015 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -639,12 +639,10 @@ int UI_ThingBox::CalcOptions() const
 }
 
 
-void UI_ThingBox::UpdateField(int field)
+void UI_ThingBox::UpdateField(std::optional<Basis::EditField> efield)
 {
-	if (field < 0 ||
-		field == Thing::F_X ||
-		field == Thing::F_Y ||
-		field == Thing::F_H)
+	if (!efield || efield->isRaw(Thing::F_X) || efield->isRaw(Thing::F_Y) ||
+		 efield->isRaw(Thing::F_H))
 	{
 		if (inst.level.isThing(obj))
 		{
@@ -663,7 +661,7 @@ void UI_ThingBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Thing::F_ANGLE)
+	if (!efield || efield->isRaw(Thing::F_ANGLE))
 	{
 		if(inst.level.isThing(obj))
 			mFixUp.setInputValue(angle, SString(inst.level.things[obj]->angle).c_str());
@@ -672,7 +670,7 @@ void UI_ThingBox::UpdateField(int field)
 	}
 
 	// IOANCH 9/2015
-	if (field < 0 || field == Thing::F_TID)
+	if (!efield || efield->isRaw(Thing::F_TID))
 	{
 		if(inst.level.isThing(obj))
 			mFixUp.setInputValue(tid, SString(inst.level.things[obj]->tid).c_str());
@@ -680,7 +678,7 @@ void UI_ThingBox::UpdateField(int field)
 			mFixUp.setInputValue(tid, "");
 	}
 
-	if (field < 0 || field == Thing::F_TYPE)
+	if (!efield || efield->isRaw(Thing::F_TYPE))
 	{
 		if (inst.level.isThing(obj))
 		{
@@ -697,7 +695,7 @@ void UI_ThingBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Thing::F_OPTIONS)
+	if (!efield || efield->isRaw(Thing::F_OPTIONS))
 	{
 		int options;
 		SString optString;
@@ -730,7 +728,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (inst.loaded.levelFormat == MapFormat::doom)
 		return;
 
-	if (field < 0 || field == Thing::F_SPECIAL)
+	if (!efield || efield->isRaw(Thing::F_SPECIAL))
 	{
 		if (inst.level.isThing(obj) && inst.level.things[obj]->special)
 		{
@@ -745,7 +743,7 @@ void UI_ThingBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || (field >= Thing::F_ARG1 && field <= Thing::F_ARG5))
+	if (!efield || (efield->getRaw() >= Thing::F_ARG1 && efield->getRaw() <= Thing::F_ARG5))
 	{
 		for (int a = 0 ; a < 5 ; a++)
 		{

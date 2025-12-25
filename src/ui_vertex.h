@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -42,7 +43,7 @@ public:
 	// FLTK virtual method for handling input events.
 
 	// call this if the vertex was externally changed.
-	void UpdateField(int field = -1) override;
+	void UpdateField(std::optional<Basis::EditField> efield = std::nullopt) override;
 	void UnselectPics() override
 	{
 	}

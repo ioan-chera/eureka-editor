@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2009-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -210,12 +211,12 @@ void Clipboard_NotifyDelete(ObjType type, int objnum)
 	clip_board->DeleteRealSector(objnum);
 }
 
-
+/*
 void Clipboard_NotifyChange(ObjType type, int objnum, int field)
 {
 	// field changes never affect the clipboard
 }
-
+*/
 
 //----------------------------------------------------------------------
 //  Texture Clipboard

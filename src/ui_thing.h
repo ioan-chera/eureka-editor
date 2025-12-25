@@ -4,8 +4,8 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2015-2025 Ioan Chera
 //  Copyright (C) 2007-2018 Andrew Apted
-//  Copyright (C)      2015 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -91,7 +91,7 @@ public:
 public:
 	// call this if the thing was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1) override;
+	void UpdateField(std::optional<Basis::EditField> efield = std::nullopt) override;
 
 	void UpdateTotal(const Document &doc) noexcept override;
 

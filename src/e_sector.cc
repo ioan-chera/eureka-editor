@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2001-2017 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -35,6 +36,7 @@
 #include "Sector.h"
 #include "SideDef.h"
 #include "w_rawdef.h"
+#include "e_basis.h"
 #include "e_cutpaste.h"
 #include "e_hover.h"
 #include "e_linedef.h"
@@ -119,7 +121,7 @@ void Instance::CMD_SEC_Floor()
 		}
 	}
 
-	main_win->sec_box->UpdateField(Sector::F_FLOORH);
+	main_win->sec_box->UpdateField(Basis::EditField(Sector::F_FLOORH));
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -157,7 +159,7 @@ void Instance::CMD_SEC_Ceil()
 		}
 	}
 
-	main_win->sec_box->UpdateField(Sector::F_CEILH);
+	main_win->sec_box->UpdateField(Basis::EditField(Sector::F_CEILH));
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -206,7 +208,7 @@ void SectorModule::sectorsAdjustLight(int delta) const
 		}
 	}
 
-	inst.main_win->sec_box->UpdateField(Sector::F_LIGHT);
+	inst.main_win->sec_box->UpdateField(Basis::EditField(Sector::F_LIGHT));
 }
 
 
@@ -259,8 +261,8 @@ void Instance::CMD_SEC_SwapFlats()
 		}
 	}
 
-	main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
-	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
+	main_win->sec_box->UpdateField(Basis::EditField(Sector::F_FLOOR_TEX));
+	main_win->sec_box->UpdateField(Basis::EditField(Sector::F_CEIL_TEX));
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);

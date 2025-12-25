@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2025      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -199,7 +200,7 @@ struct Editor_State_t
 	struct { float x1, y1, x2, y2; } adjust_bbox;
 };
 
-void Selection_NotifyChange(ObjType type, int objnum, int field);
+// void Selection_NotifyChange(ObjType type, int objnum, int field);
 
 
 void DumpSelection (selection_c * list);

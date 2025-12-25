@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2022 Ioan Chera
+//  Copyright (C) 2022-2025 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -37,7 +37,7 @@ void Instance::MapStuff_NotifyBegin()
 {
 }
 
-void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
+void Instance::MapStuff_NotifyChange(ObjType type, int objnum, Basis::EditField efield)
 {
 }
 
@@ -57,7 +57,7 @@ void Instance::ObjectBox_NotifyBegin()
 {
 }
 
-void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
+void Instance::ObjectBox_NotifyChange(ObjType type, int objnum)
 {
 }
 
@@ -102,9 +102,5 @@ void Recently_used::insert(const SString &name)
 }
 
 void Recently_used::insert_number(int val)
-{
-}
-
-void Selection_NotifyChange(ObjType type, int objnum, int field)
 {
 }
