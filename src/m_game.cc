@@ -839,6 +839,21 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			config.udmf_line_vis_flags.push_back(visflag);
 	}
 
+	else if(y_stricmp(argv[0], "udmf_lineslider") == 0)
+	{
+		if(nargs < 5)
+			pst->fail(bad_arg_count_fail, argv[0], 5);
+
+		linefield_t field = {};
+		field.identifier = argv[1];
+		field.label = argv[2];
+		field.type = linefield_t::Type::slider;
+		field.minValue = strtod(argv[3], nullptr);
+		field.maxValue = strtod(argv[4], nullptr);
+		field.step = strtod(argv[5], nullptr);
+		config.udmf_line_fields.push_back(std::move(field));
+	}
+
 	else if(y_stricmp(argv[0], "udmf_linechoice_label") == 0)
 	{
 		if(nargs < 2)
@@ -847,25 +862,25 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		SString identifier = argv[1];
 		SString label = argv[2];
 
-		// Find or create the linechoice_t with this identifier
-		linechoice_t *choice = nullptr;
-		for(linechoice_t &lc : config.udmf_line_choices)
+		// Find or create the linefield_t with this identifier
+		linefield_t *field = nullptr;
+		for(linefield_t &lf : config.udmf_line_fields)
 		{
-			if(lc.identifier.noCaseEqual(identifier))
+			if(lf.identifier.noCaseEqual(identifier))
 			{
-				choice = &lc;
+				field = &lf;
 				break;
 			}
 		}
 
-		if(!choice)
+		if(!field)
 		{
-			config.udmf_line_choices.push_back({});
-			choice = &config.udmf_line_choices.back();
-			choice->identifier = identifier;
+			config.udmf_line_fields.push_back({});
+			field = &config.udmf_line_fields.back();
+			field->identifier = identifier;
 		}
 
-		choice->label = label;
+		field->label = label;
 	}
 
 	else if(y_stricmp(argv[0], "udmf_linechoice") == 0)
@@ -877,31 +892,31 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		int value = atoi(argv[2]);
 		SString optionLabel = argv[3];
 
-		// Find or create the linechoice_t with this identifier
-		linechoice_t *choice = nullptr;
-		for(linechoice_t &lc : config.udmf_line_choices)
+		// Find or create the linefield_t with this identifier
+		linefield_t *field = nullptr;
+		for(linefield_t &lf : config.udmf_line_fields)
 		{
-			if(lc.identifier.noCaseEqual(identifier))
+			if(lf.identifier.noCaseEqual(identifier))
 			{
-				choice = &lc;
+				field = &lf;
 				break;
 			}
 		}
 
-		if(!choice)
+		if(!field)
 		{
-			config.udmf_line_choices.push_back({});
-			choice = &config.udmf_line_choices.back();
-			choice->identifier = identifier;
+			config.udmf_line_fields.push_back({});
+			field = &config.udmf_line_fields.back();
+			field->identifier = identifier;
 			// If no label was set via udmf_linechoice_label, use the identifier as label
-			choice->label = identifier;
+			field->label = identifier;
 		}
 
 		// Add the option
-		linechoice_t::option_t opt;
+		linefield_t::option_t opt;
 		opt.value = value;
 		opt.label = optionLabel;
-		choice->options.push_back(opt);
+		field->options.push_back(opt);
 	}
 
 	else if(y_stricmp(argv[0], "gensector") == 0)

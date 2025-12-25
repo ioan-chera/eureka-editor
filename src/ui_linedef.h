@@ -26,6 +26,7 @@
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
+class Fl_Simple_Counter;
 class line_flag_CB_data_c;
 class UI_DynIntInput;
 struct LoadingData;
@@ -74,12 +75,19 @@ private:
 	std::vector<CategoryHeader> categoryHeaders;
 
 	// Dynamic UDMF line choice widgets (configured via .ugh)
-	struct LineChoiceWidget
+	struct LineField
 	{
-		std::unique_ptr<Fl_Choice> choice;
-		const struct linechoice_t *info;
+		std::unique_ptr<Fl_Widget> widget;
+		const struct linefield_t *info;
 	};
-	std::vector<LineChoiceWidget> choiceWidgets;
+	std::vector<LineField> fields;
+
+	// struct LineSliderWidget
+	// {
+	// 	std::unique_ptr<Fl_Simple_Counter> counter;
+	// 	const struct lineslider_t *info;
+	// };
+	// std::vector<LineSliderWidget> sliderWidgets;
 
 	int flagsStartX = 0;
 	int flagsStartY = 0;
@@ -147,7 +155,7 @@ private:
 	static void length_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
 	static void category_callback(Fl_Widget *, void *);
-	static void choice_callback(Fl_Widget *, void *);
+	static void field_callback(Fl_Widget *, void *);
 };
 
 #endif  /* __EUREKA_UI_LINEDEF_H__ */

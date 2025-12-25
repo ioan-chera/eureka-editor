@@ -421,15 +421,15 @@ namespace std
 //
 // Convenience
 //
-inline static int atoi(const SString &string)
+inline static int atoi(const SString &string) noexcept
 {
 	return atoi(string.c_str());
 }
-inline static double atof(const SString &string)
+inline static double atof(const SString &string) noexcept
 {
 	return atof(string.c_str());
 }
-inline static long strtol(const SString &string, char **endptr, int radix)
+inline static long strtol(const SString &string, char **endptr, int radix) noexcept
 {
 	return strtol(string.c_str(), endptr, radix);
 }
@@ -488,7 +488,7 @@ public:
 	SString get(StringID offset) const noexcept;
 private:
 	// Must start with an empty string, so get(0) gets "".
-	std::vector<SString> mStrings = { "" };	
+	std::vector<SString> mStrings = { "" };
 };
 
 #ifdef _WIN32

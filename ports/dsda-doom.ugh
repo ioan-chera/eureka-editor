@@ -658,6 +658,8 @@ udmf_lineflag "check switch range" checkswitchrange Activation r
 udmf_lineflag "act on damage"      damagespecial    Activation d
 udmf_lineflag "act on death"       deathspecial     Activation D
 
+udmf_lineslider alpha Alpha 0.0 1.0 0.015625 1.0
+
 udmf_linechoice_label locknumber "Lock"
 udmf_linechoice locknumber 0 "No lock"
 udmf_linechoice locknumber 1 "Red key card"
@@ -675,8 +677,6 @@ udmf_linechoice locknumber 132 "Red card or skull"
 udmf_linechoice locknumber 133 "Blue card or skull"
 udmf_linechoice locknumber 134 "Yellow card or skull"
 udmf_linechoice locknumber 229 "Any key of each color"
-
-# TODO: alpha number field
 
 # TODO: make this a choice
 udmf_lineflag "translucent" translucent Rendering t

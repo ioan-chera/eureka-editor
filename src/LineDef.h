@@ -50,6 +50,8 @@ public:
 		   F_FLAGS, F_FLAGS2, F_TYPE, F_TAG, F_ARG1,
 		   F_ARG2, F_ARG3, F_ARG4, F_ARG5, F_ARG1STR, F_LOCKNUMBER };
 
+	double alpha = 1.0;
+
 public:
 	bool TouchesVertex(int v_num) const
 	{

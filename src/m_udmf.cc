@@ -611,6 +611,8 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 		LD->arg1str = BA_InternaliseString(value.DecodeString());
 	else if (field.Match("locknumber"))
 		LD->locknumber = value.DecodeInt();
+	else if (field.Match("alpha"))
+		LD->alpha = value.DecodeFloat();
 	else
 	{
 		// Flags
@@ -968,6 +970,9 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 
 		if (ld->locknumber != 0)
 			lump->Printf("locknumber = %d;\n", ld->locknumber);
+
+		if (ld->alpha != 1.0)
+			lump->Printf("alpha = %0.16g;\n", ld->alpha);
 
 		// linedef flags
 		for(const UDMFMapping& mapping : kUDMFMapping)

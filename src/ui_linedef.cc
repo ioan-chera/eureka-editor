@@ -39,6 +39,8 @@
 #include "w_rawdef.h"
 #include "w_rawdef.h"
 
+#include "FL/Fl_Hor_Value_Slider.H"
+
 #include <algorithm>
 
 
@@ -78,6 +80,8 @@ enum
 	ARG_WIDTH = 53,
 	ARG_PADDING = 4,
 	ARG_LABELSIZE = 10,
+
+	FIELD_HEIGHT = 22,
 };
 
 
@@ -190,7 +194,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	flags->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
 
-	f_automap = new Fl_Choice(X+W-118, Y, 104, 22, "Vis: ");
+	f_automap = new Fl_Choice(X+W-118, Y, 104, FIELD_HEIGHT, "Vis: ");
 	f_automap->add(kHardcodedAutoMapMenu);
 	f_automap->value(0);
 	f_automap_cb_data = std::make_unique<line_flag_CB_data_c>(this, MLF_ALL_AUTOMAP);
@@ -742,20 +746,19 @@ void UI_LineBox::category_callback(Fl_Widget *w, void *data)
 	box->categoryToggled(categoryBtn);
 }
 
-void UI_LineBox::choice_callback(Fl_Widget *w, void *data)
+void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 {
 	UI_LineBox *box = (UI_LineBox *)data;
-	Fl_Choice *choice = (Fl_Choice *)w;
 
 	if(!box->inst.edit.Selected->empty())
 	{
 		// Find which choice widget this is
-		const linechoice_t *info = nullptr;
-		for(const auto &widget : box->choiceWidgets)
+		const linefield_t *info = nullptr;
+		for(const LineField &field : box->fields)
 		{
-			if(widget.choice.get() == choice)
+			if(field.widget.get() == w)
 			{
-				info = widget.info;
+				info = field.info;
 				break;
 			}
 		}
@@ -763,30 +766,61 @@ void UI_LineBox::choice_callback(Fl_Widget *w, void *data)
 		if(!info)
 			return;
 
-		// Get the selected value
-		int index = choice->value();
-		if(index < 0 || index >= static_cast<int>(info->options.size()))
-			return;
-
-		int new_value = info->options[index].value;
-
-		// Apply to all selected linedefs
-		EditOperation op(box->inst.level.basis);
 		SString message = SString("edited ") + info->identifier + " of";
-		op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
 
-		for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+		switch(info->type)
 		{
-			// Hardcode the field mapping for now
-			if(info->identifier.noCaseEqual("locknumber"))
+		case linefield_t::Type::choice:
+		{
+			auto choice = static_cast<Fl_Choice *>(w);
+			int index = choice->value();
+			if(index < 0 || index >= static_cast<int>(info->options.size()))
+				return;
+
+			int new_value = info->options[index].value;
+
+			// Apply to all selected linedefs
+			EditOperation op(box->inst.level.basis);
+			op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
+
+			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			{
-				op.changeLinedef(*it, LineDef::F_LOCKNUMBER, new_value);
+				// Hardcode the field mapping for now
+				if(info->identifier.noCaseEqual("locknumber"))
+				{
+					op.changeLinedef(*it, LineDef::F_LOCKNUMBER, new_value);
+					// Update the display
+					box->UpdateField(Basis::EditField(LineDef::F_LOCKNUMBER));
+				}
 			}
+
+			break;
 		}
+		case linefield_t::Type::slider:
+		{
+			auto valuator = static_cast<Fl_Valuator *>(w);
+
+			EditOperation op(box->inst.level.basis);
+			op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
+
+			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+			{
+				// Hardcode the field mapping for now
+				if(info->identifier.noCaseEqual("alpha"))
+				{
+					op.changeLinedef(*it, &LineDef::alpha, valuator->value());
+					box->UpdateField(Basis::EditField(&LineDef::alpha));
+				}
+			}
+			break;
+		}
+		default:
+			break;
+		}
+
 	}
 
-	// Update the display
-	box->UpdateField(Basis::EditField(LineDef::F_LOCKNUMBER));
+
 }
 
 void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
@@ -820,7 +854,6 @@ void UI_LineBox::repositionAfterCategoryToggle()
 {
 	int Y = y() + flagsStartY - yposition();
 	const int rowH = 19;
-	const int categoryH = 22;
 
 	// First, count uncategorized flags (not in any category)
 	// These appear before categorized ones and we need to skip over them
@@ -861,7 +894,7 @@ void UI_LineBox::repositionAfterCategoryToggle()
 		if(cat.button)
 		{
 			cat.button->position(cat.button->x(), Y);
-			Y += categoryH;
+			Y += FIELD_HEIGHT;
 
 			if(cat.expanded)
 			{
@@ -891,14 +924,13 @@ void UI_LineBox::repositionAfterCategoryToggle()
 	Y += 29;
 
 	// Reposition choice widgets
-	const int choiceH = 22;
-	for(auto &widget : choiceWidgets)
+	for(LineField &field : fields)
 	{
-		widget.choice->position(widget.choice->x(), Y);
-		Y += choiceH + 4;
+		field.widget->position(field.widget->x(), Y);
+		Y += FIELD_HEIGHT + 4;
 	}
 
-	if(!choiceWidgets.empty())
+	if(!fields.empty())
 		Y += 10;
 
 	// Reposition side boxes
@@ -1101,32 +1133,64 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 		{
 			const auto L = inst.level.linedefs[obj];
 
-			for(auto &widget : choiceWidgets)
+			for(const LineField &field : fields)
 			{
-				if(widget.info->identifier.noCaseEqual("locknumber"))
+				if(field.info->type != linefield_t::Type::choice)
+					continue;
+				if(field.info->identifier.noCaseEqual("locknumber"))
 				{
 					int value = L->locknumber;
 
 					// Find matching option
 					int index = 0;
-					for(size_t i = 0; i < widget.info->options.size(); ++i)
+					for(size_t i = 0; i < field.info->options.size(); ++i)
 					{
-						if(widget.info->options[i].value == value)
+						if(field.info->options[i].value == value)
 						{
 							index = static_cast<int>(i);
 							break;
 						}
 					}
-					widget.choice->value(index);
+					static_cast<Fl_Choice*>(field.widget.get())->value(index);
 				}
 			}
 		}
 		else
 		{
 			// No linedef selected, reset to first option
-			for(auto &widget : choiceWidgets)
+			for(const LineField &field : fields)
 			{
-				widget.choice->value(0);
+				if(field.info->type == linefield_t::Type::choice)
+				{
+					static_cast<Fl_Choice*>(field.widget.get())->value(0);
+				}
+			}
+		}
+	}
+
+	if(!efield || (efield->format == Basis::EditFormat::linedefDouble && efield->doubleLineField == &LineDef::alpha))
+	{
+		if(inst.level.isLinedef(obj))
+		{
+			for(const LineField &field : fields)
+			{
+				if(field.info->type != linefield_t::Type::slider)
+					continue;
+				if(field.info->identifier.noCaseEqual("alpha"))
+				{
+					double alpha = inst.level.linedefs[obj]->alpha;
+					static_cast<Fl_Valuator*>(field.widget.get())->value(alpha);
+				}
+			}
+		}
+		else
+		{
+			for(const LineField &field : fields)
+			{
+				if(field.info->type == linefield_t::Type::slider)
+				{
+					static_cast<Fl_Valuator*>(field.widget.get())->value(0);
+				}
 			}
 		}
 	}
@@ -1476,7 +1540,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		const int leftX = x() + flagsStartX + 28;
 		const int rightX = x() + flagsStartX + flagsAreaW - 120;
 		const int rowH = 19;
-		const int categoryH = 22;
 
 		begin();
 
@@ -1490,12 +1553,12 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			if(!catName.empty())
 			{
 				catHeader.button = std::make_unique<UI_CategoryButton>(x() + flagsStartX, Y,
-					flagsAreaW, categoryH);
+					flagsAreaW, FIELD_HEIGHT);
 				catHeader.button->copy_label(catName.c_str());
 				catHeader.button->callback(category_callback, this);
 
 				catHeader.expanded = false;
-				Y += categoryH;
+				Y += FIELD_HEIGHT;
 			}
 
 			struct Slot
@@ -1576,48 +1639,63 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		Y += 29;
 	}
 
-	// Create UDMF line choice widgets (e.g., locknumber)
-	for(const auto &widget : choiceWidgets)
-		this->remove(widget.choice.get());
-	choiceWidgets.clear();
+	for(const LineField &field : fields)
+		this->remove(field.widget.get());
+	fields.clear();
 
-	if(loaded.levelFormat == MapFormat::udmf && !config.udmf_line_choices.empty())
+	if(loaded.levelFormat == MapFormat::udmf && !config.udmf_line_fields.empty())
 	{
-		const int choiceH = 22;
 		// Match the args span: starts at type->x() and spans 5 args
-		const int choiceX = x() + TYPE_INPUT_X;
-		const int choiceW = desc->x() + desc->w() - x() - TYPE_INPUT_X;
+		const int fieldX = x() + TYPE_INPUT_X;
+		const int fieldW = desc->x() + desc->w() - x() - TYPE_INPUT_X;
 
 		begin();
 
-		for(const linechoice_t &lc : config.udmf_line_choices)
+		for(const linefield_t &lf : config.udmf_line_fields)
 		{
-			if(lc.options.empty())
-				continue;
-
-			LineChoiceWidget widget = {};
-			widget.choice = std::make_unique<Fl_Choice>(choiceX, Y, choiceW, choiceH);
-			widget.choice->copy_label((lc.label + ": ").c_str());
-			widget.choice->align(FL_ALIGN_LEFT);
-			//widget.choice->labelsize(12);
-
-			// Build menu string from options
-			SString menuStr;
-			for(size_t i = 0; i < lc.options.size(); ++i)
+			LineField field = {};
+			if(lf.type == linefield_t::Type::choice)
 			{
-				if(i > 0)
-					menuStr += "|";
-				menuStr += lc.options[i].label;
+				if(lf.options.empty())
+					continue;
+				auto choice = new Fl_Choice(fieldX, Y, fieldW, FIELD_HEIGHT);
+				field.widget = std::unique_ptr<Fl_Widget>(choice);
+				choice->copy_label((lf.label + ": ").c_str());
+				choice->align(FL_ALIGN_LEFT);
+				//field.choice->labelsize(12);
+
+				// Build menu string from options
+				SString menuStr;
+				for(size_t i = 0; i < lf.options.size(); ++i)
+				{
+					if(i > 0)
+						menuStr += "|";
+					menuStr += lf.options[i].label;
+				}
+				choice->add(menuStr.c_str());
+				choice->value(0);
 			}
-			widget.choice->add(menuStr.c_str());
-			widget.choice->value(0);
+			else if(lf.type == linefield_t::Type::slider)
+			{
+				auto slider = new Fl_Hor_Value_Slider(fieldX, Y, fieldW, FIELD_HEIGHT);
+				field.widget = std::unique_ptr<Fl_Widget>(slider);
+				slider->copy_label((lf.label + ": ").c_str());
+				slider->align(FL_ALIGN_LEFT);
+				//field.counter->labelsize(12);
 
-			// Pass the linechoice_t pointer via callback data
-			widget.info = &lc;
-			widget.choice->callback(choice_callback, this);
+				slider->step(lf.step);
+				// slider->lstep(lf.step * 8);
+				slider->minimum(lf.minValue);
+				slider->maximum(lf.maxValue);
+				slider->value_width(60);
+			}
 
-			choiceWidgets.push_back(std::move(widget));
-			Y += choiceH + 4;
+			// Pass the linefield_t pointer via callback data
+			field.widget->callback(field_callback, this);
+			field.info = &lf;
+
+			fields.push_back(std::move(field));
+			Y += FIELD_HEIGHT + 4;
 		}
 
 		end();

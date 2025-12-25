@@ -107,6 +107,10 @@ public:
 		{
 		}
 
+		explicit EditField(double LineDef::*field) : format(EditFormat::linedefDouble), doubleLineField(field)
+		{
+		}
+
 		bool isRaw(byte rawField) const
 		{
 			return format == EditFormat::field && this->rawField == rawField;
@@ -456,6 +460,11 @@ public:
 	}
 
 	bool changeLinedef(int line, byte field, int value)
+	{
+		return basis.changeLinedef(line, field, value);
+	}
+
+	bool changeLinedef(int line, double LineDef::*field, double value)
 	{
 		return basis.changeLinedef(line, field, value);
 	}
