@@ -194,7 +194,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	flags->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
 
-	f_automap = new Fl_Choice(X+W-118, Y, 104, FIELD_HEIGHT, "Vis: ");
+	f_automap = new Fl_Choice(X+W-118, Y, 104, FIELD_HEIGHT, "Map: ");
 	f_automap->add(kHardcodedAutoMapMenu);
 	f_automap->value(0);
 	f_automap_cb_data = std::make_unique<line_flag_CB_data_c>(this, MLF_ALL_AUTOMAP);
