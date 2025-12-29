@@ -23,14 +23,6 @@
 #include <algorithm>
 
 //
-// Constructor
-//
-UI_StackPanel::UI_StackPanel(int X, int Y, int W, int H, const char *label)
-	: Fl_Group(X, Y, W, H, label)
-{
-}
-
-//
 // Draw override - triggers relayout before drawing
 //
 void UI_StackPanel::draw()
@@ -65,21 +57,6 @@ void UI_StackPanel::margin(int left, int top, int right, int bottom)
 	mMarginBottom = bottom;
 }
 
-//
-// Get general vertical spacing
-//
-int UI_StackPanel::spacing() const
-{
-	return mSpacing;
-}
-
-//
-// Set general vertical spacing
-//
-void UI_StackPanel::spacing(int value)
-{
-	mSpacing = value;
-}
 
 //
 // Get extra vertical spacing for a specific widget
@@ -124,6 +101,8 @@ void UI_StackPanel::relayout()
 	for (int i = 0; i < children(); ++i)
 	{
 		Fl_Widget *widget = child(i);
+		if(!widget->visible())
+			continue;
 
 		// Apply extra spacing for this widget (above it)
 		currentY += extraSpacing(widget);

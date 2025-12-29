@@ -31,7 +31,9 @@
 class UI_StackPanel : public Fl_Group
 {
 public:
-	UI_StackPanel(int X, int Y, int W, int H, const char *label = nullptr);
+	UI_StackPanel(int X, int Y, int W, int H, const char *label = nullptr) 	: Fl_Group(X, Y, W, H, label)
+	{
+	}
 
 	void draw() override;
 
@@ -40,8 +42,14 @@ public:
 	void margin(int left, int top, int right, int bottom);
 
 	// General vertical spacing between widgets
-	int spacing() const;
-	void spacing(int value);
+	int spacing() const
+	{
+		return mSpacing;
+	}
+	void spacing(int value)
+	{
+		mSpacing = value;
+	}
 
 	// Per-widget extra vertical spacing (added above the widget)
 	int extraSpacing(const Fl_Widget *widget) const;
