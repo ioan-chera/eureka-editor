@@ -37,9 +37,11 @@
 #include "Sector.h"
 #include "SideDef.h"
 #include "w_rawdef.h"
-#include "w_rawdef.h"
+#include "ui_stackpanel.h"
 
+#include "FL/Fl_Grid.H"
 #include "FL/Fl_Hor_Value_Slider.H"
+#include "FL/Fl_Pack.H"
 
 #include <algorithm>
 
@@ -111,9 +113,13 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	const int Y0 = Y;
 	const int X0 = X;
 
+	panel = new UI_StackPanel(X, Y, W, H);
+	panel->margin(INSET_LEFT, INSET_TOP, INSET_RIGHT, INSET_BOTTOM);
+	panel->spacing(INPUT_SPACING);
+
 	// Put this spacer here so the scroller places the UI elements correctly when content collapses.
-	Fl_Box *spacer = new Fl_Box(X, Y, W, INSET_TOP);
-	spacer->box(FL_FLAT_BOX);
+	//Fl_Box *spacer = new Fl_Box(X, Y, W, INSET_TOP);
+	//spacer->box(FL_FLAT_BOX);
 
 	X += INSET_LEFT;
 	Y += INSET_TOP;
@@ -125,83 +131,104 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	Y += which->h() + SPACING_BELOW_NOMBRE;
 
+	{
+		Fl_Pack *type_pack = new Fl_Pack(X + TYPE_INPUT_X, Y, W - TYPE_INPUT_X, TYPE_INPUT_HEIGHT);
+		type_pack->spacing(BUTTON_SPACING);
+		type_pack->type(Fl_Pack::HORIZONTAL);
 
-	type = new UI_DynInput(X + TYPE_INPUT_X, Y, TYPE_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "Type: ");
-	type->align(FL_ALIGN_LEFT);
-	type->callback(type_callback, this);
-	type->callback2(dyntype_callback, this);
-	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-	type->type(FL_INT_INPUT);
+		type = new UI_DynInput(X + TYPE_INPUT_X, Y, TYPE_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "Type: ");
+		type->align(FL_ALIGN_LEFT);
+		type->callback(type_callback, this);
+		type->callback2(dyntype_callback, this);
+		type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		type->type(FL_INT_INPUT);
 
-	choose = new Fl_Button(type->x() + type->w() + BUTTON_SPACING, Y, CHOOSE_BUTTON_WIDTH, TYPE_INPUT_HEIGHT, "Choose");
-	choose->callback(button_callback, this);
+		choose = new Fl_Button(type->x() + type->w() + BUTTON_SPACING, Y, CHOOSE_BUTTON_WIDTH, TYPE_INPUT_HEIGHT, "Choose");
+		choose->callback(button_callback, this);
 
-	gen = new Fl_Button(choose->x() + choose->w() + BUTTON_SPACING, Y, GEN_BUTTON_WIDTH, TYPE_INPUT_HEIGHT, "Gen");
-	gen->callback(button_callback, this);
+		gen = new Fl_Button(choose->x() + choose->w() + BUTTON_SPACING, Y, GEN_BUTTON_WIDTH, TYPE_INPUT_HEIGHT, "Gen");
+		gen->callback(button_callback, this);
+
+		type_pack->end();
+
+		panel->extraSpacing(type_pack, SPACING_BELOW_NOMBRE - INPUT_SPACING);
+	}
 
 	Y += type->h() + INPUT_SPACING;
+	{
+		Fl_Group *desc_pack = new Fl_Group(X, Y, W, TYPE_INPUT_HEIGHT);
+		descBox = new Fl_Box(FL_NO_BOX, X + DESC_INSET, Y, DESC_WIDTH, TYPE_INPUT_HEIGHT, "Desc: ");
 
+		desc = new Fl_Output(type->x(), Y, W - type->x(), TYPE_INPUT_HEIGHT);
+		desc->align(FL_ALIGN_LEFT);
 
-	descBox = new Fl_Box(FL_NO_BOX, X + DESC_INSET, Y, DESC_WIDTH, TYPE_INPUT_HEIGHT, "Desc: ");
+		actkind = new Fl_Choice(type->x(), Y, SPAC_WIDTH, TYPE_INPUT_HEIGHT);
+		// this order must match the SPAC_XXX constants
+		actkind->add(getActivationMenuString());
+		actkind->value(getActivationCount());
+		actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
+		actkind->deactivate();
+		actkind->hide();
 
-	desc = new Fl_Output(type->x(), Y, W - type->x(), TYPE_INPUT_HEIGHT);
-	desc->align(FL_ALIGN_LEFT);
-
-
-	actkind = new Fl_Choice(type->x(), Y, SPAC_WIDTH, TYPE_INPUT_HEIGHT);
-	// this order must match the SPAC_XXX constants
-	actkind->add(getActivationMenuString());
-	actkind->value(getActivationCount());
-	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
-	actkind->deactivate();
-	actkind->hide();
+		desc_pack->end();
+	}
 
 	Y += desc->h() + INPUT_SPACING;
 
-
-	tag = new UI_DynIntInput(type->x(), Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Tag: ");
-	tag->align(FL_ALIGN_LEFT);
-	tag->callback(tag_callback, this);
-	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-
-	length = new UI_DynIntInput(type->x() + W/2, Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Length: ");
-	length->align(FL_ALIGN_LEFT);
-	length->callback(length_callback, this);
-	length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-
-	for (int a = 0 ; a < 5 ; a++)
 	{
-		args[a] = new UI_DynIntInput(X + 7 + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
-		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
-		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-		args[a]->hide();
-		args[a]->align(FL_ALIGN_BOTTOM);
-		args[a]->labelsize(ARG_LABELSIZE);
+		Fl_Group *tag_pack = new Fl_Group(X, Y, W, TYPE_INPUT_HEIGHT);
+		tag = new UI_DynIntInput(type->x(), Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Tag: ");
+		tag->align(FL_ALIGN_LEFT);
+		tag->callback(tag_callback, this);
+		tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+
+		length = new UI_DynIntInput(type->x() + W/2, Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Length: ");
+		length->align(FL_ALIGN_LEFT);
+		length->callback(length_callback, this);
+		length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+
+		for (int a = 0 ; a < 5 ; a++)
+		{
+			args[a] = new UI_DynIntInput(X + 7 + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
+			args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
+			args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+			args[a]->hide();
+			args[a]->align(FL_ALIGN_BOTTOM);
+			args[a]->labelsize(ARG_LABELSIZE);
+		}
+		args0str = new UI_DynInput(args[0]->x(), Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
+		args0str->callback(args_callback, new line_flag_CB_data_c(this, 5));
+		args0str->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		args0str->hide();
+		args0str->align(FL_ALIGN_BOTTOM);
+		args0str->labelsize(ARG_LABELSIZE);
+
+		tag_pack->end();
 	}
-	args0str = new UI_DynInput(args[0]->x(), Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
-	args0str->callback(args_callback, new line_flag_CB_data_c(this, 5));
-	args0str->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-	args0str->hide();
-	args0str->align(FL_ALIGN_BOTTOM);
-	args0str->labelsize(ARG_LABELSIZE);
 
 	Y += tag->h() + 16;
 
-
-	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X+10, Y, 64, 24, "Flags: ");
-	flags->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-
-
-	f_automap = new Fl_Choice(X+W-118, Y, 104, FIELD_HEIGHT, "Vis: ");
-	f_automap->add(kHardcodedAutoMapMenu);
-	f_automap->value(0);
-	f_automap_cb_data = std::make_unique<line_flag_CB_data_c>(this, MLF_ALL_AUTOMAP);
-	f_automap->callback(flags_callback, f_automap_cb_data.get());
+	{
+		Fl_Group *flags_pack = new Fl_Group(X, Y, W, 22);
+		Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X+10, Y, 64, 24, "Flags: ");
+		flags->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 
 
-	Y += flags->h() - 1;
+		f_automap = new Fl_Choice(X+W-118, Y, 104, FIELD_HEIGHT, "Vis: ");
+		f_automap->add(kHardcodedAutoMapMenu);
+		f_automap->value(0);
+		f_automap_cb_data = std::make_unique<line_flag_CB_data_c>(this, MLF_ALL_AUTOMAP);
+		f_automap->callback(flags_callback, f_automap_cb_data.get());
+
+		flags_pack->end();
+
+		panel->extraSpacing(flags_pack, 16 - INPUT_SPACING);
+	}
+
+
+	Y += f_automap->h() - 1;
 
 	// Remember where to place dynamic linedef flags
 	flagsStartX = X - X0;
@@ -224,6 +251,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	mFixUp.loadFields({type, length, tag, args[0], args[1], args[2], args[3], args[4], args0str});
 
 	//scroll->end();
+	panel->end();
 	end();
 
 	resizable(nullptr);
@@ -828,124 +856,31 @@ void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
 	// Find which category was toggled
 	for(auto &cat : categoryHeaders)
 	{
+		if(!cat.button)
+			continue;
 		if(!categoryBtn || cat.button.get() == categoryBtn)
 		{
 			cat.expanded = cat.button->isExpanded();
-
-			// Show or hide all flags in this category
-			for(int flagIndex : cat.lineFlagButtonIndices)
-			{
-				LineFlagButton &buttonInfo = flagButtons[flagIndex];
-				if(cat.expanded)
-					buttonInfo.button->show();
-				else
-					buttonInfo.button->hide();
-			}
+			if(cat.expanded)
+				cat.grid->show();
+			else
+				cat.grid->hide();
 
 			// Reposition all controls below the flags area
-			repositionAfterCategoryToggle();
+			//repositionAfterCategoryToggle();
 			redraw();
 			break;
 		}
 	}
 }
-
-void UI_LineBox::repositionAfterCategoryToggle()
-{
-	int Y = y() + flagsStartY - yposition();
-	const int rowH = 19;
-
-	// First, count uncategorized flags (not in any category)
-	// These appear before categorized ones and we need to skip over them
-	int uncategorizedCount = 0;
-	for(const auto &fb : flagButtons)
-	{
-		bool inCategory = false;
-		for(const auto &cat : categoryHeaders)
-		{
-			for(int index : cat.lineFlagButtonIndices)
-			{
-				const LineFlagButton &catFlag = flagButtons[index];
-				if(&catFlag == &fb)
-				{
-					inCategory = true;
-					break;
-				}
-			}
-			if(inCategory)
-				break;
-		}
-		if(!inCategory)
-			uncategorizedCount++;
-	}
-
-	// If there are uncategorized flags, skip over their space
-	if(uncategorizedCount > 0)
-	{
-		const int leftCount = (uncategorizedCount + 1) / 2;
-		const int rightCount = uncategorizedCount - leftCount;
-		const int maxRows = (leftCount > rightCount) ? leftCount : rightCount;
-		Y += maxRows * rowH;
-	}
-
-	// Calculate positions for all categories and their flags
-	for(auto &cat : categoryHeaders)
-	{
-		if(cat.button)
-		{
-			cat.button->position(cat.button->x(), Y);
-			Y += FIELD_HEIGHT;
-
-			if(cat.expanded)
-			{
-				// Position all flags in this category using two-column layout
-				const int total = (int)cat.lineFlagButtonIndices.size();
-				const int leftCount = (total + 1) / 2;
-
-				int yLeft = Y;
-				int yRight = Y;
-
-				for(int idx = 0; idx < total; ++idx)
-				{
-					Fl_Check_Button *flag = flagButtons[cat.lineFlagButtonIndices[idx]].button.get();
-					const bool onLeft = idx < leftCount;
-					int &curY = onLeft ? yLeft : yRight;
-
-					flag->position(flag->x(), curY + 2);
-					curY += rowH;
-				}
-
-				Y = (yLeft > yRight ? yLeft : yRight);
-			}
-		}
-	}
-
-	// Add spacing after flags
-	Y += 29;
-
-	// Reposition choice widgets
-	for(LineField &field : fields)
-	{
-		field.widget->position(field.widget->x(), Y);
-		Y += FIELD_HEIGHT + 4;
-	}
-
-	if(!fields.empty())
-		Y += 10;
-
-	// Reposition side boxes
-	front->Fl_Widget::position(front->x(), Y);
-	Y += front->h() + 14;
-	back->Fl_Widget::position(back->x(), Y);
-}
-
-
 //------------------------------------------------------------------------
 
 void UI_LineBox::updateCategoryDetails()
 {
 	for(const CategoryHeader& header : categoryHeaders)
 	{
+		if(!header.button)
+			continue;
 		SString summaryText;
 		for(int flagButtonIndex : header.lineFlagButtonIndices)
 		{
@@ -1507,13 +1442,17 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	f_automap->callback(flags_callback, f_automap_cb_data.get());
 
 	// Recreate dynamic linedef flags from configuration
-	for(const auto &btn : flagButtons)
-		this->remove(btn.button.get());
-	flagButtons.clear();
+	//for(const auto &btn : flagButtons)
+	//	this->remove(btn.button.get());
 	for(const auto &cat : categoryHeaders)
-		this->remove(cat.button.get());
+	{
+		if(cat.button)
+			panel->remove(cat.button.get());
+		panel->remove(cat.grid.get());
+	}
 	categoryHeaders.clear();
-
+	flagButtons.clear();
+	
 	int Y = y() + flagsStartY;
 
 	const std::vector<lineflag_t> &flaglist = inst.loaded.levelFormat == MapFormat::udmf ?
@@ -1541,13 +1480,13 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		const int rightX = x() + flagsStartX + flagsAreaW - 120;
 		const int rowH = 19;
 
-		begin();
+		//begin();
 
 		// Process each category
 		for(auto &catPair : categorized)
 		{
 			const SString &catName = catPair.first;
-			std::vector<const lineflag_t *> &flagsInCat = catPair.second;
+			const std::vector<const lineflag_t *> &flagsInCat = catPair.second;
 
 			CategoryHeader catHeader = {};
 			if(!catName.empty())
@@ -1560,6 +1499,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				catHeader.expanded = false;
 				Y += FIELD_HEIGHT;
 			}
+			const int numRows = (int(flagsInCat.size()) + 1) / 2;
+			catHeader.grid = std::make_unique<Fl_Grid>(leftX, 0, FW + rightX - leftX, rowH * numRows);
+			catHeader.grid->layout(numRows, 2);
 
 			struct Slot
 			{
@@ -1607,9 +1549,11 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				auto addButton = [baseX, curY, FW, this, &catHeader](int offset, const lineflag_t *flag)
 					{
 						LineFlagButton fb;
-						fb.button = std::make_unique<Fl_Check_Button>(baseX + offset, curY + 2, FW, 20, flag->label.c_str());
+						fb.button = new Fl_Check_Button(baseX + offset, curY + 2, FW, 20,
+							flag->label.c_str());
 						fb.button->labelsize(12);
-						fb.data = std::make_unique<line_flag_CB_data_c>(this, flag->flagSet == 1 ? flag->value : 0, flag->flagSet == 2 ? flag->value : 0);
+						fb.data = std::make_unique<line_flag_CB_data_c>(this, flag->flagSet == 1 ?
+							flag->value : 0, flag->flagSet == 2 ? flag->value : 0);
 						fb.button->callback(flags_callback, fb.data.get());
 						fb.info = flag;
 						if(catHeader.button)
@@ -1621,15 +1565,37 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 					addButton(0, s.a);
 				if(s.b)
 					addButton(16, s.b);
+
+				if(s.b)
+				{
+					// If we have a B, we deal with a pair, so make a group to assign it into the grid
+					Fl_Group *pairGroup = new Fl_Group(baseX, curY, FW, rowH);
+					pairGroup->end();
+
+					if(s.a)
+						pairGroup->add(flagButtons[flagButtons.size() - 2].button);
+					pairGroup->add(flagButtons.back().button);
+					catHeader.grid->add(pairGroup);
+					catHeader.grid->widget(pairGroup, idx % leftCount, onLeft ? 0 : 1);
+				}
+				else if(s.a)
+				{
+					Fl_Widget *widget = flagButtons.back().button;
+					catHeader.grid->add(widget);
+					catHeader.grid->widget(widget, idx % leftCount, onLeft ? 0 : 1);
+				}
 				curY += rowH;
 			}
 
 			Y = (yLeft > yRight ? yLeft : yRight);
+			
 			if(catHeader.button)
-				categoryHeaders.push_back(std::move(catHeader));
+				panel->insert(*catHeader.button.get(), front);
+			panel->insert(*catHeader.grid.get(), front);
+			categoryHeaders.push_back(std::move(catHeader));
 		}
 
-		end();
+		//end();
 
 		Y += 29;
 	}
@@ -1640,7 +1606,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 
 	for(const LineField &field : fields)
-		this->remove(field.widget.get());
+		panel->remove(field.widget.get());
 	fields.clear();
 
 	if(loaded.levelFormat == MapFormat::udmf && !config.udmf_line_fields.empty())
@@ -1649,7 +1615,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		const int fieldX = x() + TYPE_INPUT_X;
 		const int fieldW = desc->x() + desc->w() - x() - TYPE_INPUT_X;
 
-		begin();
+		//begin();
 
 		for(const linefield_t &lf : config.udmf_line_fields)
 		{
@@ -1696,18 +1662,20 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 			fields.push_back(std::move(field));
 			Y += FIELD_HEIGHT + 4;
+
+			panel->insert(*fields.back().widget.get(), front);
 		}
 
-		end();
+		//end();
 		Y += 10;
 	}
 
 	// Reposition side boxes under the generated flags and choice widgets
-	front->Fl_Widget::position(front->x(), Y);
-	Y += front->h() + 14;
-	back->Fl_Widget::position(back->x(), Y);
-	front->redraw();
-	back->redraw();
+	//front->Fl_Widget::position(front->x(), Y);
+	//Y += front->h() + 14;
+	//back->Fl_Widget::position(back->x(), Y);
+	//front->redraw();
+	//back->redraw();
 
 	// Show Hexen/UDMF args when needed
 	args0str->hide();
@@ -1742,7 +1710,8 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 	for(CategoryHeader& header : categoryHeaders)
 	{
-		header.button->setExpanded(false);
+		if(header.button)
+			header.button->setExpanded(false);
 	}
 	categoryToggled(nullptr);  // Make sure all shows correctly with collapsed categories
 }

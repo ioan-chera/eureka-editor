@@ -33,6 +33,7 @@ class UI_StackPanel : public Fl_Group
 public:
 	UI_StackPanel(int X, int Y, int W, int H, const char *label = nullptr) 	: Fl_Group(X, Y, W, H, label)
 	{
+		resizable(nullptr);
 	}
 
 	void draw() override;
