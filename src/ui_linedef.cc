@@ -87,6 +87,365 @@ enum
 };
 
 
+
+
+
+class IDTag : public Fl_Widget
+{
+public:
+	// Layout constants
+	static constexpr int RADIUS = 4;
+	static constexpr int PADDING = 6;
+	static constexpr int X_BUTTON_SIZE = 14;
+	static constexpr int X_BUTTON_MARGIN = 4;
+	static constexpr int X_OFFSET = 3;
+	static constexpr int MIN_WIDTH = 40;
+	
+	IDTag(int X, int Y, int W, int H, const char *label = nullptr)
+		: Fl_Widget(X, Y, W, H, nullptr)
+		, mCallback(nullptr)
+		, mCallbackData(nullptr)
+	{
+		if (label)
+			copy_label(label);
+		
+		box(FL_NO_BOX);
+		align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
+		labelsize(12);
+	}
+	
+	void callback(Fl_Callback *cb, void *data = nullptr)
+	{
+		mCallback = cb;
+		mCallbackData = data;
+	}
+	
+	// Calculate the required width for a given label
+	static int calcRequiredWidth(const char *labelText, int labelSize = 12)
+	{
+		if (!labelText || !*labelText)
+			return 0;
+		
+		// Measure text width
+		fl_font(FL_HELVETICA, labelSize);
+		int textWidth = static_cast<int>(fl_width(labelText));
+		
+		// Total width = left padding + text + right padding + X button + margin
+		int totalWidth = PADDING + textWidth + PADDING + X_BUTTON_SIZE + X_BUTTON_MARGIN;
+		
+		return totalWidth > MIN_WIDTH ? totalWidth : MIN_WIDTH;
+	}
+	
+	int handle(int event) override
+	{
+		switch (event)
+		{
+			case FL_PUSH:
+			{
+				int mx = Fl::event_x();
+				int my = Fl::event_y();
+				
+				// Check if click is within the X button area
+				if (isInXButton(mx, my))
+				{
+					mXPressed = true;
+					redraw();
+					return 1;
+				}
+				return 1;
+			}
+			
+			case FL_RELEASE:
+			{
+				if (mXPressed)
+				{
+					int mx = Fl::event_x();
+					int my = Fl::event_y();
+					
+					// Trigger callback if released within X button
+					if (isInXButton(mx, my) && mCallback)
+					{
+						mCallback(this, mCallbackData);
+					}
+					
+					mXPressed = false;
+					redraw();
+					return 1;
+				}
+				return 1;
+			}
+			
+			case FL_ENTER:
+				redraw();
+				return 1;
+			
+			case FL_LEAVE:
+				mXPressed = false;
+				redraw();
+				return 1;
+			
+			case FL_MOVE:
+			{
+				int mx = Fl::event_x();
+				int my = Fl::event_y();
+				bool wasInX = mXHovered;
+				mXHovered = isInXButton(mx, my);
+				if (wasInX != mXHovered)
+					redraw();
+				return 1;
+			}
+		}
+		
+		return Fl_Widget::handle(event);
+	}
+	
+	void draw() override
+	{
+		// Background color
+		Fl_Color bgColor = FL_BACKGROUND_COLOR;
+		fl_color(bgColor);
+		
+		// Draw rounded rectangle
+		fl_push_clip(x(), y(), w(), h());
+//		drawRoundedRect(x(), y(), w(), h(), RADIUS, bgColor);
+		
+		// Draw border
+		fl_color(fl_darker(FL_BACKGROUND_COLOR));
+		drawRoundedRectOutline(x(), y(), w(), h(), RADIUS);
+		
+		// Draw label text
+		if (label())
+		{
+			fl_color(labelcolor());
+			fl_font(labelfont(), labelsize());
+			
+			int labelW = w() - PADDING * 2 - X_BUTTON_SIZE - X_BUTTON_MARGIN;
+			fl_draw(label(), x() + PADDING, y(), labelW, h(), 
+				FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+		}
+		
+		// Draw X button
+		int xBtnX = x() + w() - X_BUTTON_SIZE - X_BUTTON_MARGIN;
+		int xBtnY = y() + (h() - X_BUTTON_SIZE) / 2;
+		
+		// X button background when hovered
+		if (mXHovered)
+		{
+			fl_color(mXPressed ? fl_darker(FL_BACKGROUND_COLOR) : fl_lighter(bgColor));
+			fl_pie(xBtnX, xBtnY, X_BUTTON_SIZE, X_BUTTON_SIZE, 0, 360);
+		}
+		
+		// Draw X symbol
+		fl_color(mXHovered ? FL_FOREGROUND_COLOR : fl_darker(FL_BACKGROUND_COLOR));
+		fl_line_style(FL_SOLID, 2);
+		
+		fl_line(xBtnX + X_OFFSET, xBtnY + X_OFFSET, 
+			xBtnX + X_BUTTON_SIZE - X_OFFSET, xBtnY + X_BUTTON_SIZE - X_OFFSET);
+		fl_line(xBtnX + X_BUTTON_SIZE - X_OFFSET, xBtnY + X_OFFSET, 
+			xBtnX + X_OFFSET, xBtnY + X_BUTTON_SIZE - X_OFFSET);
+		
+		fl_line_style(0);
+		fl_pop_clip();
+	}
+
+	
+
+private:
+	Fl_Callback *mCallback;
+	void *mCallbackData;
+	bool mXPressed = false;
+	bool mXHovered = false;
+	
+	bool isInXButton(int mx, int my) const
+	{
+		int xBtnX = x() + w() - X_BUTTON_SIZE - X_BUTTON_MARGIN;
+		int xBtnY = y() + (h() - X_BUTTON_SIZE) / 2;
+		
+		return mx >= xBtnX && mx <= xBtnX + X_BUTTON_SIZE &&
+			   my >= xBtnY && my <= xBtnY + X_BUTTON_SIZE;
+	}
+	
+//	void drawRoundedRect(int X, int Y, int W, int H, int radius, Fl_Color color)
+//	{
+//		fl_color(color);
+//		
+//		// Main rectangles
+//		fl_rectf(X + radius, Y, W - 2 * radius, H);
+//		fl_rectf(X, Y + radius, radius, H - 2 * radius);
+//		fl_rectf(X + W - radius, Y + radius, radius, H - 2 * radius);
+//		
+//		// Corners
+//		fl_pie(X, Y, radius * 2, radius * 2, 90, 180);
+//		fl_pie(X + W - radius * 2, Y, radius * 2, radius * 2, 0, 90);
+//		fl_pie(X, Y + H - radius * 2, radius * 2, radius * 2, 180, 270);
+//		fl_pie(X + W - radius * 2, Y + H - radius * 2, radius * 2, radius * 2, 270, 360);
+//	}
+	
+	void drawRoundedRectOutline(int X, int Y, int W, int H, int radius)
+	{
+		fl_line_style(FL_SOLID, 1);
+		
+		// Top and bottom lines
+		fl_line(X + radius, Y, X + W - radius, Y);
+		fl_line(X + radius, Y + H - 1, X + W - radius, Y + H - 1);
+		
+		// Left and right lines
+		fl_line(X, Y + radius, X, Y + H - radius);
+		fl_line(X + W - 1, Y + radius, X + W - 1, Y + H - radius);
+		
+		// Corner arcs
+		fl_arc(X, Y, radius * 2, radius * 2, 90, 180);
+		fl_arc(X + W - radius * 2, Y, radius * 2, radius * 2, 0, 90);
+		fl_arc(X, Y + H - radius * 2, radius * 2, radius * 2, 180, 270);
+		fl_arc(X + W - radius * 2, Y + H - radius * 2, radius * 2, radius * 2, 270, 360);
+		
+		fl_line_style(0);
+	}
+};
+
+
+class MultiTagView : public Fl_Group
+{
+public:
+	MultiTagView(Instance &inst, const std::function<void()> &redrawCallback, int x, int y,
+				 int width, int height, const char *label = nullptr);
+private:
+	static void addCallback(Fl_Widget *widget, void *data);
+	static void tagCallback(Fl_Widget *widget, void *data);
+
+	void updateTagButtons();
+	void calcNextTagPosition(int tagWidth, int position, int *tagX, int *tagY, int *thisH) const;
+
+	Instance &inst;
+	const std::function<void()> mRedrawCallback;
+
+	Fl_Input *mInput;
+	Fl_Button *mAdd;
+	std::set<SString, StringAlphanumericCompare> mTags;
+	std::vector<IDTag *> mTagButtons;
+};
+
+
+MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCallback, int x, int y,
+						   int width, int height, const char *label) :
+	Fl_Group(x, y, width, height, label), inst(inst), mRedrawCallback(redrawCallback)
+{
+	static const char inputLabel[] = "More tags:";
+	mInput = new Fl_Input(x + fl_width(inputLabel), y, 50, TYPE_INPUT_HEIGHT, inputLabel);
+	mInput->align(FL_ALIGN_LEFT);
+	mInput->callback(addCallback, this);
+	mInput->when(FL_WHEN_ENTER_KEY);
+
+	mAdd = new Fl_Button(mInput->x() + mInput->w() + INPUT_SPACING, y, 40, TYPE_INPUT_HEIGHT,
+						 "Add");
+	mAdd->callback(addCallback, this);
+	resizable(nullptr);
+	end();
+}
+
+
+void MultiTagView::addCallback(Fl_Widget *widget, void *data)
+{
+	auto self = static_cast<MultiTagView *>(data);
+	SString value = self->mInput->value();
+	value.trimLeadingSpaces();
+	value.trimTrailingSpaces();
+	if(value.empty())
+	{
+		self->inst.Beep("Cannot add empty tag");
+		return;
+	}
+	if(self->mTags.count(value))
+	{
+		self->inst.Beep("Tag %s already added", value.c_str());
+		return;
+	}
+
+	self->mInput->value("");
+	self->mTags.insert(value);
+
+	self->updateTagButtons();
+}
+
+
+void MultiTagView::tagCallback(Fl_Widget *widget, void *data)
+{
+	auto tagButton = static_cast<const IDTag *>(widget);
+	auto self = static_cast<MultiTagView *>(data);
+	SString value = tagButton->label();
+
+	self->mTags.erase(value);
+	Fl::delete_widget(widget);
+	for(auto it = self->mTagButtons.begin(); it != self->mTagButtons.end(); ++it)
+		if(*it == tagButton)
+		{
+			self->mTagButtons.erase(it);
+			break;
+		}
+
+	self->updateTagButtons();
+}
+
+
+void MultiTagView::updateTagButtons()
+{
+	for(IDTag *tagButton : mTagButtons)
+		remove(tagButton);
+	mTagButtons.clear();
+	mTagButtons.reserve(mTags.size());
+
+	int thisH = TYPE_INPUT_HEIGHT;
+	begin();
+	for(const SString &tag : mTags)
+	{
+		int tagX, tagY;
+		int tagWidth = IDTag::calcRequiredWidth(tag.c_str());
+		calcNextTagPosition(tagWidth, -1, &tagX, &tagY, &thisH);
+		IDTag *tagButton = new IDTag(tagX, tagY, tagWidth, TYPE_INPUT_HEIGHT, tag.c_str());
+		tagButton->callback(tagCallback, this);
+		mTagButtons.push_back(tagButton);
+	}
+	end();
+
+	h(thisH);
+	redraw();
+	if(mRedrawCallback)
+		mRedrawCallback();
+}
+
+
+void MultiTagView::calcNextTagPosition(int tagWidth, int position, int *tagX, int *tagY,
+									   int *thisH) const
+{
+	const IDTag *lastTag = position == -1 ? mTagButtons.empty() ? nullptr : mTagButtons.back() :
+			position >= 1 ? mTagButtons[position - 1] : nullptr;
+	if(!lastTag)
+	{
+		*tagX = mAdd->x() + mAdd->w() + INPUT_SPACING;
+		*tagY = y();
+		*thisH = TYPE_INPUT_HEIGHT;
+		if(*tagX + tagWidth > x() + w())
+		{
+			*tagX = x();
+			*tagY = mInput->y() + mInput->h() + INPUT_SPACING;
+			*thisH = 2 * TYPE_INPUT_HEIGHT + INPUT_SPACING;
+		}
+	}
+	else
+	{
+		*tagX = lastTag->x() + lastTag->w() + INPUT_SPACING;
+		*tagY = lastTag->y();
+		*thisH = lastTag->y() + lastTag->h() - mInput->y();
+		if(*tagX + tagWidth > x() + w())
+		{
+			*tagX = x();
+			*tagY = lastTag->y() + lastTag->h() + INPUT_SPACING;
+			*thisH = *tagY + TYPE_INPUT_HEIGHT - mInput->y();
+		}
+	}
+}
+
+
 class line_flag_CB_data_c
 {
 public:
@@ -207,6 +566,10 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 		tag_pack->end();
 	}
+
+	MultiTagView *multitag = new MultiTagView(inst, [this](){
+		redraw();
+	}, X, Y, W, TYPE_INPUT_HEIGHT);
 
 	Y += tag->h() + 16;
 
@@ -1546,7 +1909,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				const int baseX = onLeft ? leftX : rightX;
 				int& curY = onLeft ? yLeft : yRight;
 
-				auto addButton = [baseX, curY, FW, this, &catHeader](int offset, const lineflag_t *flag)
+				auto addButton = [baseX, curY, this, &catHeader](int offset, const lineflag_t *flag)
 					{
 						LineFlagButton fb;
 						fb.button = new Fl_Check_Button(baseX + offset, curY + 2, FW, 20,

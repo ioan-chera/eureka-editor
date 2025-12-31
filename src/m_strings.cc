@@ -468,6 +468,46 @@ SString SString::replacing(char a, char b) const
 	return result;
 }
 
+bool StringAlphanumericCompare::operator()(const SString &s1, const SString &s2) const
+{
+	const char *p1 = s1.c_str();
+	const char *p2 = s2.c_str();
+	
+	while (*p1 && *p2)
+	{
+		// If both are digits, compare numerically
+		if (safe_isdigit(*p1) && safe_isdigit(*p2))
+		{
+			char *end1, *end2;
+			long num1 = strtol(p1, &end1, 10);
+			long num2 = strtol(p2, &end2, 10);
+			
+			if (num1 != num2)
+				return num1 < num2;
+			
+			// Numbers are equal, advance pointers
+			p1 = end1;
+			p2 = end2;
+		}
+		else
+		{
+			// Compare characters (case-insensitive)
+			char c1 = static_cast<char>(safe_tolower(*p1));
+			char c2 = static_cast<char>(safe_tolower(*p2));
+			
+			if (c1 != c2)
+				return c1 < c2;
+			
+			p1++;
+			p2++;
+		}
+	}
+	
+	// If we got here, one string is a prefix of the other
+	// The shorter one comes first
+	return *p1 == '\0' && *p2 != '\0';
+}
+
 #ifdef _WIN32
 //
 // Fail safe so we avoid failures
