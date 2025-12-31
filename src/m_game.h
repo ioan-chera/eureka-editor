@@ -326,6 +326,7 @@ struct port_features_t
 	// for UDMF format, whether we use line parameters or thing specials at all
 	int udmf_lineparameters;
 	int udmf_thingspecials;
+	int udmf_multipletags;
 };
 
 //

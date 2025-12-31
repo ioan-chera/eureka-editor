@@ -29,6 +29,7 @@
 class Fl_Grid;
 class Fl_Simple_Counter;
 class line_flag_CB_data_c;
+class MultiTagView;
 class UI_DynIntInput;
 class UI_StackPanel;
 struct LoadingData;
@@ -52,6 +53,8 @@ private:
 	UI_DynIntInput *tag;
 	UI_DynIntInput *args[5];
 	UI_DynInput *args0str;
+
+	MultiTagView *multiTagView;
 
 	UI_SideBox *front;
 	UI_SideBox *back;

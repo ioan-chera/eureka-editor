@@ -367,6 +367,7 @@ static const FeatureMapping skFeatureMappings[] =
 
 	MAPPING(udmf_lineparameters),
 	MAPPING(udmf_thingspecials),
+	MAPPING(udmf_multipletags),
 #undef MAPPING
 };
 

@@ -307,31 +307,41 @@ private:
 class MultiTagView : public Fl_Group
 {
 public:
-	MultiTagView(Instance &inst, const std::function<void()> &redrawCallback, int x, int y,
-				 int width, int height, const char *label = nullptr);
+	MultiTagView(Instance &inst, const std::function<void()> &redrawCallback,
+				 const std::function<void()> &dataCallback, int x, int y, int width, int height,
+				 const char *label = nullptr);
+
+	void setTags(const std::set<int> &tags);
+	void clearTags();
+	const std::set<int> &getTags() const
+	{
+		return mTags;
+	}
 private:
 	static void addCallback(Fl_Widget *widget, void *data);
-	static void tagCallback(Fl_Widget *widget, void *data);
+	static void tagRemoveCallback(Fl_Widget *widget, void *data);
 
 	void updateTagButtons();
 	void calcNextTagPosition(int tagWidth, int position, int *tagX, int *tagY, int *thisH) const;
 
 	Instance &inst;
 	const std::function<void()> mRedrawCallback;
+	const std::function<void()> mDataCallback;
 
-	Fl_Input *mInput;
+	Fl_Int_Input *mInput;
 	Fl_Button *mAdd;
-	std::set<SString, StringAlphanumericCompare> mTags;
+	std::set<int> mTags;
 	std::vector<IDTag *> mTagButtons;
 };
 
 
-MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCallback, int x, int y,
+MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCallback,
+						   const std::function<void()> &dataCallback, int x, int y,
 						   int width, int height, const char *label) :
 	Fl_Group(x, y, width, height, label), inst(inst), mRedrawCallback(redrawCallback)
 {
-	static const char inputLabel[] = "More tags:";
-	mInput = new Fl_Input(x + fl_width(inputLabel), y, 50, TYPE_INPUT_HEIGHT, inputLabel);
+	static const char inputLabel[] = "More IDs:";
+	mInput = new Fl_Int_Input(x + fl_width(inputLabel), y, 50, TYPE_INPUT_HEIGHT, inputLabel);
 	mInput->align(FL_ALIGN_LEFT);
 	mInput->callback(addCallback, this);
 	mInput->when(FL_WHEN_ENTER_KEY);
@@ -341,6 +351,20 @@ MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCa
 	mAdd->callback(addCallback, this);
 	resizable(nullptr);
 	end();
+}
+
+
+void MultiTagView::setTags(const std::set<int> &tags)
+{
+	mTags = tags;
+	updateTagButtons();
+}
+
+
+void MultiTagView::clearTags()
+{
+	mTags.clear();
+	updateTagButtons();
 }
 
 
@@ -355,26 +379,28 @@ void MultiTagView::addCallback(Fl_Widget *widget, void *data)
 		self->inst.Beep("Cannot add empty tag");
 		return;
 	}
-	if(self->mTags.count(value))
+	long valueNumber = strtol(value.c_str(), nullptr, 10);
+	if(self->mTags.count((int)valueNumber))
 	{
-		self->inst.Beep("Tag %s already added", value.c_str());
+		self->inst.Beep("Tag %ld already added", valueNumber);
 		return;
 	}
 
 	self->mInput->value("");
-	self->mTags.insert(value);
+	self->mTags.insert((int)valueNumber);
 
 	self->updateTagButtons();
 }
 
 
-void MultiTagView::tagCallback(Fl_Widget *widget, void *data)
+void MultiTagView::tagRemoveCallback(Fl_Widget *widget, void *data)
 {
 	auto tagButton = static_cast<const IDTag *>(widget);
 	auto self = static_cast<MultiTagView *>(data);
 	SString value = tagButton->label();
+	int valueNumber = atoi(value.c_str());
 
-	self->mTags.erase(value);
+	self->mTags.erase(valueNumber);
 	Fl::delete_widget(widget);
 	for(auto it = self->mTagButtons.begin(); it != self->mTagButtons.end(); ++it)
 		if(*it == tagButton)
@@ -396,13 +422,14 @@ void MultiTagView::updateTagButtons()
 
 	int thisH = TYPE_INPUT_HEIGHT;
 	begin();
-	for(const SString &tag : mTags)
+	for(const int tag : mTags)
 	{
 		int tagX, tagY;
-		int tagWidth = IDTag::calcRequiredWidth(tag.c_str());
+		std::string tagString = std::to_string(tag);
+		int tagWidth = IDTag::calcRequiredWidth(tagString.c_str());
 		calcNextTagPosition(tagWidth, -1, &tagX, &tagY, &thisH);
-		IDTag *tagButton = new IDTag(tagX, tagY, tagWidth, TYPE_INPUT_HEIGHT, tag.c_str());
-		tagButton->callback(tagCallback, this);
+		IDTag *tagButton = new IDTag(tagX, tagY, tagWidth, TYPE_INPUT_HEIGHT, tagString.c_str());
+		tagButton->callback(tagRemoveCallback, this);
 		mTagButtons.push_back(tagButton);
 	}
 	end();
@@ -567,9 +594,21 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		tag_pack->end();
 	}
 
-	MultiTagView *multitag = new MultiTagView(inst, [this](){
+	multiTagView = new MultiTagView(inst, [this](){
 		redraw();
+	}, [this](){
+		if (this->inst.edit.Selected->empty())
+			return;
+		EditOperation op(this->inst.level.basis);
+		op.setMessageForSelection("changed other tags", *this->inst.edit.Selected);
+		for (sel_iter_c it(*this->inst.edit.Selected) ; !it.done() ; it.next())
+		{
+			std::set<int> tags = multiTagView->getTags();
+			op.changeLinedef(*it, &LineDef::moreIDs, std::move(tags));
+		}
+
 	}, X, Y, W, TYPE_INPUT_HEIGHT);
+	multiTagView->hide();
 
 	Y += tag->h() + 16;
 
@@ -1466,7 +1505,8 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 		}
 	}
 
-	if(!efield || (efield->format == Basis::EditFormat::linedefDouble && efield->doubleLineField == &LineDef::alpha))
+	if(!efield || (efield->format == Basis::EditFormat::linedefDouble &&
+				   efield->doubleLineField == &LineDef::alpha))
 	{
 		if(inst.level.isLinedef(obj))
 		{
@@ -1489,6 +1529,22 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 				{
 					static_cast<Fl_Valuator*>(field.widget.get())->value(0);
 				}
+			}
+		}
+	}
+
+	if(inst.conf.features.udmf_multipletags)
+	{
+		if(!efield || (efield->format == Basis::EditFormat::linedefIntSet &&
+					   efield->intSetLineField == &LineDef::moreIDs))
+		{
+			if(inst.level.isLinedef(obj))
+			{
+				multiTagView->setTags(inst.level.linedefs[obj]->moreIDs);
+			}
+			else
+			{
+				multiTagView->clearTags();
 			}
 		}
 	}
@@ -2068,6 +2124,11 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		else
 			args[a]->hide();
 	}
+
+	if(config.features.udmf_multipletags)
+		multiTagView->show();
+	else
+		multiTagView->hide();
 
 	redraw();
 

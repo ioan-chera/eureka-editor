@@ -97,7 +97,8 @@ public:
 	enum class EditFormat
 	{
 		field,
-		linedefDouble
+		linedefDouble,
+		linedefIntSet,
 	};
 
 	struct EditField
@@ -136,6 +137,7 @@ public:
 		{
 			byte rawField = 0;
 			double LineDef::*doubleLineField;
+			std::set<int> LineDef::*intSetLineField;
 		};
 
 		union
@@ -143,6 +145,7 @@ public:
 			int rawValue = 0;
 			double doubleValue;
 		};
+		std::set<int> intSetValue;
 	};
 
 	Basis(Document &doc) : DocumentModule(doc)
@@ -374,6 +377,7 @@ private:
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeLinedef(int line, byte field, int value);
 	bool changeLinedef(int line, double LineDef::*field, double value);
+	bool changeLinedef(int line, std::set<int> LineDef::*field, std::set<int> &&value);
 	void changeLump(LumpType lumpType, std::vector<byte> &&newData);
 	void del(ObjType type, int objnum);
 	void end();
@@ -467,6 +471,11 @@ public:
 	bool changeLinedef(int line, double LineDef::*field, double value)
 	{
 		return basis.changeLinedef(line, field, value);
+	}
+
+	bool changeLinedef(int line, std::set<int> LineDef::*field, std::set<int> &&value)
+	{
+		return basis.changeLinedef(line, field, std::move(value));
 	}
 
 	void changeLump(LumpType lumpType, std::vector<byte> &&newData)
