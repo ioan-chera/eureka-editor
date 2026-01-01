@@ -52,9 +52,11 @@ public:
 		mSpacing = value;
 	}
 
-	// Per-widget extra vertical spacing (added above the widget)
-	int extraSpacing(const Fl_Widget *widget) const;
-	void extraSpacing(const Fl_Widget *widget, int value);
+	// Per-widget extra vertical spacing
+	int beforeSpacing(const Fl_Widget *widget) const;
+	void beforeSpacing(const Fl_Widget *widget, int value);
+	int afterSpacing(const Fl_Widget *widget) const;
+	void afterSpacing(const Fl_Widget *widget, int value);
 
 	// Trigger a relayout of children
 	void relayout();
@@ -69,7 +71,8 @@ private:
 	int mMarginRight = 0;
 	int mMarginBottom = 0;
 	int mSpacing = 0;
-	std::map<const Fl_Widget *, int> mExtraSpacing;
+	std::map<const Fl_Widget *, int> mBeforeSpacing;
+	std::map<const Fl_Widget *, int> mAfterSpacing;
 };
 
 #endif

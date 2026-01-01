@@ -39,6 +39,7 @@
 #include "w_rawdef.h"
 #include "ui_stackpanel.h"
 
+#include "FL/Fl_Flex.H"
 #include "FL/Fl_Grid.H"
 #include "FL/Fl_Hor_Value_Slider.H"
 #include "FL/Fl_Pack.H"
@@ -341,7 +342,7 @@ MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCa
 	Fl_Group(x, y, width, height, label), inst(inst), mRedrawCallback(redrawCallback)
 {
 	static const char inputLabel[] = "More IDs:";
-	mInput = new Fl_Int_Input(x + fl_width(inputLabel), y, 50, TYPE_INPUT_HEIGHT, inputLabel);
+	mInput = new Fl_Int_Input(x + fl_width(inputLabel) + 8, y, 50, TYPE_INPUT_HEIGHT, inputLabel);
 	mInput->align(FL_ALIGN_LEFT);
 	mInput->callback(addCallback, this);
 	mInput->when(FL_WHEN_ENTER_KEY);
@@ -508,88 +509,103 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	//spacer->box(FL_FLAT_BOX);
 
 	X += INSET_LEFT;
-	Y += INSET_TOP;
 
 	W -= INSET_LEFT + INSET_RIGHT;
 	H -= INSET_TOP + INSET_BOTTOM;
 
-	which = new UI_Nombre(X + NOMBRE_INSET, Y, W - 2 * NOMBRE_INSET, NOMBRE_HEIGHT, "Linedef");
-
-	Y += which->h() + SPACING_BELOW_NOMBRE;
+	which = new UI_Nombre(X + NOMBRE_INSET, 0, W - 2 * NOMBRE_INSET, NOMBRE_HEIGHT, "Linedef");
+	panel->afterSpacing(which, SPACING_BELOW_NOMBRE - INPUT_SPACING);
 
 	{
-		Fl_Pack *type_pack = new Fl_Pack(X + TYPE_INPUT_X, Y, W - TYPE_INPUT_X, TYPE_INPUT_HEIGHT);
-		type_pack->spacing(BUTTON_SPACING);
-		type_pack->type(Fl_Pack::HORIZONTAL);
+		Fl_Flex *type_flex = new Fl_Flex(X + TYPE_INPUT_X, 0, W - TYPE_INPUT_X - NOMBRE_INSET,
+										 TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
+		type_flex->spacing(BUTTON_SPACING);
+		type_flex->label("Type:");
+		type_flex->align(FL_ALIGN_LEFT);
 
-		type = new UI_DynInput(X + TYPE_INPUT_X, Y, TYPE_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "Type: ");
+		type = new UI_DynInput(0, 0, 0, 0);
 		type->align(FL_ALIGN_LEFT);
 		type->callback(type_callback, this);
 		type->callback2(dyntype_callback, this);
 		type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		type->type(FL_INT_INPUT);
+		type_flex->fixed(type, TYPE_INPUT_WIDTH);
 
-		choose = new Fl_Button(type->x() + type->w() + BUTTON_SPACING, Y, CHOOSE_BUTTON_WIDTH, TYPE_INPUT_HEIGHT, "Choose");
+		choose = new Fl_Button(0, 0, 0, 0, "Choose");
 		choose->callback(button_callback, this);
+		type_flex->fixed(choose, fl_width(choose->label()) + 16);
 
-		gen = new Fl_Button(choose->x() + choose->w() + BUTTON_SPACING, Y, GEN_BUTTON_WIDTH, TYPE_INPUT_HEIGHT, "Gen");
+		gen = new Fl_Button(0, 0, 0, 0, "Gen");
 		gen->callback(button_callback, this);
+		type_flex->fixed(gen, fl_width(gen->label()) + 16);
 
-		type_pack->end();
-
-		panel->extraSpacing(type_pack, SPACING_BELOW_NOMBRE - INPUT_SPACING);
+		type_flex->end();
 	}
 
-	Y += type->h() + INPUT_SPACING;
 	{
-		Fl_Group *desc_pack = new Fl_Group(X, Y, W, TYPE_INPUT_HEIGHT);
-		descBox = new Fl_Box(FL_NO_BOX, X + DESC_INSET, Y, DESC_WIDTH, TYPE_INPUT_HEIGHT, "Desc: ");
+		descFlex = new Fl_Flex(X + TYPE_INPUT_X, 0, W - TYPE_INPUT_X - NOMBRE_INSET,
+							   TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
+		descFlex->label("Desc:");
+		descFlex->spacing(BUTTON_SPACING);
+		descFlex->align(FL_ALIGN_LEFT);
 
-		desc = new Fl_Output(type->x(), Y, W - type->x(), TYPE_INPUT_HEIGHT);
-		desc->align(FL_ALIGN_LEFT);
-
-		actkind = new Fl_Choice(type->x(), Y, SPAC_WIDTH, TYPE_INPUT_HEIGHT);
+		actkind = new Fl_Choice(0, 0, 0, 0);
 		// this order must match the SPAC_XXX constants
 		actkind->add(getActivationMenuString());
 		actkind->value(getActivationCount());
 		actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
 		actkind->deactivate();
 		actkind->hide();
+		descFlex->fixed(actkind, TYPE_INPUT_WIDTH);
 
-		desc_pack->end();
+		desc = new Fl_Output(0, 0, 0, 0);
+		desc->align(FL_ALIGN_LEFT);
+
+		descFlex->end();
 	}
 
-	Y += desc->h() + INPUT_SPACING;
-
 	{
-		Fl_Group *tag_pack = new Fl_Group(X, Y, W, TYPE_INPUT_HEIGHT);
-		tag = new UI_DynIntInput(type->x(), Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Tag: ");
-		tag->align(FL_ALIGN_LEFT);
-		tag->callback(tag_callback, this);
-		tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		argsFlex = new Fl_Flex(which->x(), 0, which->w(), TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
+		argsFlex->gap(INPUT_SPACING);
 
-
-		length = new UI_DynIntInput(type->x() + W/2, Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Length: ");
-		length->align(FL_ALIGN_LEFT);
-		length->callback(length_callback, this);
-		length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-
-		for (int a = 0 ; a < 5 ; a++)
-		{
-			args[a] = new UI_DynIntInput(X + 7 + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
-			args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
-			args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-			args[a]->hide();
-			args[a]->align(FL_ALIGN_BOTTOM);
-			args[a]->labelsize(ARG_LABELSIZE);
-		}
-		args0str = new UI_DynInput(args[0]->x(), Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
+		args0str = new UI_DynInput(0, 0, 0, 0);
 		args0str->callback(args_callback, new line_flag_CB_data_c(this, 5));
 		args0str->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args0str->hide();
 		args0str->align(FL_ALIGN_BOTTOM);
 		args0str->labelsize(ARG_LABELSIZE);
+
+		for (int a = 0 ; a < 5 ; a++)
+		{
+			args[a] = new UI_DynIntInput(0, 0, 0, 0);
+			args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
+			args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+			args[a]->align(FL_ALIGN_BOTTOM);
+			args[a]->labelsize(ARG_LABELSIZE);
+		}
+
+		argsFlex->end();
+		argsFlex->hide();
+	}
+	panel->afterSpacing(argsFlex, 16 - INPUT_SPACING);
+
+	{
+		Fl_Group *tag_pack = new Fl_Group(X + TYPE_INPUT_X, 0, W - TYPE_INPUT_X - NOMBRE_INSET,
+										  TYPE_INPUT_HEIGHT);
+		static const char lengthLabel[] = "Length:";
+//		tag_pack->gap(fl_width(lengthLabel) + 16);
+
+		tag = new UI_DynIntInput(tag_pack->x(), tag_pack->y(), TAG_WIDTH, tag_pack->h(), "Tag:");
+		tag->align(FL_ALIGN_LEFT);
+		tag->callback(tag_callback, this);
+		tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+		const int labelWidth = fl_width(lengthLabel) + 8;
+		length = new UI_DynIntInput(tag_pack->x() + tag_pack->w() / 2 + labelWidth, tag_pack->y(),
+									tag_pack->w() / 2 - labelWidth, tag_pack->h(), lengthLabel);
+		length->align(FL_ALIGN_LEFT);
+		length->callback(length_callback, this);
+		length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 		tag_pack->end();
 	}
@@ -606,7 +622,6 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 			std::set<int> tags = multiTagView->getTags();
 			op.changeLinedef(*it, &LineDef::moreIDs, std::move(tags));
 		}
-
 	}, X, Y, W, TYPE_INPUT_HEIGHT);
 	multiTagView->hide();
 
@@ -625,8 +640,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		f_automap->callback(flags_callback, f_automap_cb_data.get());
 
 		flags_pack->end();
-
-		panel->extraSpacing(flags_pack, 16 - INPUT_SPACING);
+		panel->beforeSpacing(flags_pack, 8);
 	}
 
 
@@ -640,11 +654,11 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	// Leave space; dynamic flags will be created in UpdateGameInfo and side boxes moved accordingly
 	Y += 29;
 
-
 	front = new UI_SideBox(inst, x(), Y, w(), 140, 0);
 
 	Y += front->h() + 14;
 
+	panel->beforeSpacing(front, 16);
 
 	back = new UI_SideBox(inst, x(), Y, w(), 140, 1);
 
@@ -1306,7 +1320,10 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 			mFixUp.setInputValue(length, "");
 	}
 
-	if (!efield || efield->isRaw(LineDef::F_TAG) || efield->isRaw(LineDef::F_ARG1STR))
+	if (!efield || efield->isRaw(LineDef::F_TAG) || efield->isRaw(LineDef::F_ARG1STR) ||
+		efield->isRaw(LineDef::F_ARG1) || efield->isRaw(LineDef::F_ARG2) ||
+		efield->isRaw(LineDef::F_ARG3) || efield->isRaw(LineDef::F_ARG4) ||
+		efield->isRaw(LineDef::F_ARG5) || efield->isRaw(LineDef::F_TYPE))
 	{
 		for (int a = 0 ; a < 5 ; a++)
 		{
@@ -1329,7 +1346,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 			const linetype_t &info = inst.conf.getLineType(L->type);
 
 			if (inst.loaded.levelFormat == MapFormat::hexen ||
-				(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
+				inst.loaded.levelFormat == MapFormat::udmf)
 			{
 				for (int a = 0 ; a < 5 ; a++)
 				{
@@ -1779,32 +1796,20 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	if (loaded.levelFormat == MapFormat::hexen)
 	{
 		tag->hide();
-		descBox->show();
-		length->hide();
 		gen->hide();
 
 		actkind->clear();
 		actkind->add(getActivationMenuString());
 
 		actkind->show();
-		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
 	}
 	else if(loaded.levelFormat == MapFormat::udmf)
 	{
 		tag->show();
-		tag->resize(actkind->x(), actkind->y(), actkind->w(), actkind->h());
-		tag->label("LineID:");
+		tag->label("Line ID:");
 		tag->tooltip("Tag of the linedef");
-		descBox->hide();
-
-		if(config.features.udmf_lineparameters)
-			length->hide();
-		else
-			length->show();
 
 		actkind->hide();	// UDMF uses the separate line flags for activation
-
-		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
 
 		if (config.features.gen_types)
 			gen->show();
@@ -1814,15 +1819,10 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	else
 	{
 		tag->show();
-		tag->resize(type->x(), length->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
-		tag->label("Tag: ");
+		tag->label("Tag:");
 		tag->tooltip("Tag of targeted sector(s)");
-		descBox->show();
-
-		length->show();
 
 		actkind->hide();
-		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 
 		if (config.features.gen_types)
 			gen->show();
@@ -2045,7 +2045,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 					continue;
 				auto choice = new Fl_Choice(fieldX, Y, fieldW, FIELD_HEIGHT);
 				field.widget = std::unique_ptr<Fl_Widget>(choice);
-				choice->copy_label((lf.label + ": ").c_str());
+				choice->copy_label((lf.label + ":").c_str());
 				choice->align(FL_ALIGN_LEFT);
 				//field.choice->labelsize(12);
 
@@ -2064,7 +2064,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			{
 				auto slider = new Fl_Hor_Value_Slider(fieldX, Y, fieldW, FIELD_HEIGHT);
 				field.widget = std::unique_ptr<Fl_Widget>(slider);
-				slider->copy_label((lf.label + ": ").c_str());
+				slider->copy_label((lf.label + ":").c_str());
 				slider->align(FL_ALIGN_LEFT);
 				//field.counter->labelsize(12);
 
@@ -2097,36 +2097,24 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	//back->redraw();
 
 	// Show Hexen/UDMF args when needed
-	args0str->hide();
-	for (int a = 0 ; a < 5 ; a++)
+
+	if (loaded.levelFormat == MapFormat::hexen || loaded.levelFormat == MapFormat::udmf)
 	{
-		if (loaded.levelFormat == MapFormat::hexen ||
-			(loaded.levelFormat == MapFormat::udmf && (config.features.udmf_lineparameters || !a)))
+		argsFlex->show();
+		args0str->hide();
+		for(int a = 0; a < 5; ++a)
 		{
-			args[a]->show();
-			if(loaded.levelFormat == MapFormat::hexen || config.features.udmf_lineparameters)
-			{
-				args[0]->resize(x() + INSET_LEFT + 7, args[0]->y(), ARG_WIDTH, TYPE_INPUT_HEIGHT);
-				args[0]->label(nullptr);
-				args[0]->labelsize(ARG_LABELSIZE);
-				args[0]->tooltip(nullptr);
-				args[0]->align(FL_ALIGN_BOTTOM);
-			}
-			else
-			{
-				args[0]->resize(type->x(), args[0]->y(), TAG_WIDTH, TYPE_INPUT_HEIGHT);
-				args[0]->label("Target:");
-				args[0]->labelsize(14);
-				args[0]->tooltip("Tag of targeted sector(s)");
-				args[0]->align(FL_ALIGN_LEFT);
-			}
+			args[a]->label("");
 		}
-		else
-			args[a]->hide();
 	}
+	else
+		argsFlex->hide();
 
 	if(config.features.udmf_multipletags)
+	{
 		multiTagView->show();
+		multiTagView->clearTags();
+	}
 	else
 		multiTagView->hide();
 

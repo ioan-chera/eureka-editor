@@ -26,6 +26,7 @@
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
+class Fl_Flex;
 class Fl_Grid;
 class Fl_Simple_Counter;
 class line_flag_CB_data_c;
@@ -44,7 +45,7 @@ private:
 	Fl_Button    *choose;
 	Fl_Button    *gen;
 
-	Fl_Box       *descBox;
+	Fl_Flex      *descFlex;
 
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
@@ -53,6 +54,8 @@ private:
 	UI_DynIntInput *tag;
 	UI_DynIntInput *args[5];
 	UI_DynInput *args0str;
+
+	Fl_Flex     *argsFlex;
 
 	MultiTagView *multiTagView;
 

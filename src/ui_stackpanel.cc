@@ -61,10 +61,10 @@ void UI_StackPanel::margin(int left, int top, int right, int bottom)
 //
 // Get extra vertical spacing for a specific widget
 //
-int UI_StackPanel::extraSpacing(const Fl_Widget *widget) const
+int UI_StackPanel::beforeSpacing(const Fl_Widget *widget) const
 {
-	auto it = mExtraSpacing.find(widget);
-	if (it != mExtraSpacing.end())
+	auto it = mBeforeSpacing.find(widget);
+	if (it != mBeforeSpacing.end())
 		return it->second;
 	return 0;
 }
@@ -72,12 +72,34 @@ int UI_StackPanel::extraSpacing(const Fl_Widget *widget) const
 //
 // Set extra vertical spacing for a specific widget
 //
-void UI_StackPanel::extraSpacing(const Fl_Widget *widget, int value)
+void UI_StackPanel::beforeSpacing(const Fl_Widget *widget, int value)
 {
 	if (value == 0)
-		mExtraSpacing.erase(widget);
+		mBeforeSpacing.erase(widget);
 	else
-		mExtraSpacing[widget] = value;
+		mBeforeSpacing[widget] = value;
+}
+
+//
+// Get extra vertical spacing for a specific widget
+//
+int UI_StackPanel::afterSpacing(const Fl_Widget *widget) const
+{
+	auto it = mAfterSpacing.find(widget);
+	if (it != mAfterSpacing.end())
+		return it->second;
+	return 0;
+}
+
+//
+// Set extra vertical spacing for a specific widget
+//
+void UI_StackPanel::afterSpacing(const Fl_Widget *widget, int value)
+{
+	if (value == 0)
+		mAfterSpacing.erase(widget);
+	else
+		mAfterSpacing[widget] = value;
 }
 
 //
@@ -87,7 +109,10 @@ void UI_StackPanel::on_remove(int index)
 {
 	Fl_Widget *widget = child(index);
 	if (widget)
-		mExtraSpacing.erase(widget);
+	{
+		mBeforeSpacing.erase(widget);
+		mAfterSpacing.erase(widget);
+	}
 }
 
 //
@@ -105,7 +130,7 @@ void UI_StackPanel::relayout()
 			continue;
 
 		// Apply extra spacing for this widget (above it)
-		currentY += extraSpacing(widget);
+		currentY += beforeSpacing(widget);
 
 		// Position the widget
 		widget->position(widget->x(), currentY);
@@ -116,7 +141,7 @@ void UI_StackPanel::relayout()
 			maxRight = widgetRight;
 
 		// Move Y down for the next widget
-		currentY += widget->h();
+		currentY += widget->h() + afterSpacing(widget);
 
 		// Add general spacing if there's a next widget
 		if (i < children() - 1)
