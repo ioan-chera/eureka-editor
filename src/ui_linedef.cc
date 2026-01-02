@@ -533,11 +533,11 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 		choose = new Fl_Button(0, 0, 0, 0, "Choose");
 		choose->callback(button_callback, this);
-		type_flex->fixed(choose, fl_width(choose->label()) + 16);
+		type_flex->fixed(choose, CHOOSE_BUTTON_WIDTH);
 
 		gen = new Fl_Button(0, 0, 0, 0, "Gen");
 		gen->callback(button_callback, this);
-		type_flex->fixed(gen, fl_width(gen->label()) + 16);
+		type_flex->fixed(gen, GEN_BUTTON_WIDTH);
 
 		type_flex->end();
 	}
@@ -600,7 +600,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		tag->callback(tag_callback, this);
 		tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-		const int labelWidth = fl_width(lengthLabel) + 8;
+		const int labelWidth = 60;
 		length = new UI_DynIntInput(tag_pack->x() + tag_pack->w() / 2 + labelWidth, tag_pack->y(),
 									tag_pack->w() / 2 - labelWidth, tag_pack->h(), lengthLabel);
 		length->align(FL_ALIGN_LEFT);
