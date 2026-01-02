@@ -312,7 +312,7 @@ public:
 				 const std::function<void()> &dataCallback, int x, int y, int width, int height,
 				 const char *label = nullptr);
 
-	void setTags(const std::set<int> &tags);
+	void setTags(std::set<int> &&tags);
 	void clearTags();
 	const std::set<int> &getTags() const
 	{
@@ -339,10 +339,11 @@ private:
 MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCallback,
 						   const std::function<void()> &dataCallback, int x, int y,
 						   int width, int height, const char *label) :
-	Fl_Group(x, y, width, height, label), inst(inst), mRedrawCallback(redrawCallback)
+	Fl_Group(x, y, width, height, label), inst(inst), mRedrawCallback(redrawCallback),
+	mDataCallback(dataCallback)
 {
 	static const char inputLabel[] = "More IDs:";
-	mInput = new Fl_Int_Input(x + fl_width(inputLabel) + 8, y, 50, TYPE_INPUT_HEIGHT, inputLabel);
+	mInput = new Fl_Int_Input(x + TYPE_INPUT_X + 16, y, 50, TYPE_INPUT_HEIGHT, inputLabel);
 	mInput->align(FL_ALIGN_LEFT);
 	mInput->callback(addCallback, this);
 	mInput->when(FL_WHEN_ENTER_KEY);
@@ -355,9 +356,9 @@ MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCa
 }
 
 
-void MultiTagView::setTags(const std::set<int> &tags)
+void MultiTagView::setTags(std::set<int> &&tags)
 {
-	mTags = tags;
+	mTags = std::move(tags);
 	updateTagButtons();
 }
 
@@ -391,6 +392,8 @@ void MultiTagView::addCallback(Fl_Widget *widget, void *data)
 	self->mTags.insert((int)valueNumber);
 
 	self->updateTagButtons();
+	if(self->mDataCallback)
+		self->mDataCallback();
 }
 
 
@@ -402,6 +405,8 @@ void MultiTagView::tagRemoveCallback(Fl_Widget *widget, void *data)
 	int valueNumber = atoi(value.c_str());
 
 	self->mTags.erase(valueNumber);
+
+	// Clear it from here in a deferred manner, because updateTagButtons will just delete.
 	Fl::delete_widget(widget);
 	for(auto it = self->mTagButtons.begin(); it != self->mTagButtons.end(); ++it)
 		if(*it == tagButton)
@@ -411,6 +416,8 @@ void MultiTagView::tagRemoveCallback(Fl_Widget *widget, void *data)
 		}
 
 	self->updateTagButtons();
+	if(self->mDataCallback)
+		self->mDataCallback();
 }
 
 
@@ -1600,7 +1607,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 		{
 			if(inst.level.isLinedef(obj))
 			{
-				multiTagView->setTags(inst.level.linedefs[obj]->moreIDs);
+				multiTagView->setTags(std::set(inst.level.linedefs[obj]->moreIDs));
 			}
 			else
 			{

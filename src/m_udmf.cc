@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2019 Andrew Apted
-//  Copyright (C) 2025 Ioan Chera
+//  Copyright (C) 2025-2026 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -570,6 +570,36 @@ static void UDMF_ParseVertexField(const Document &doc, Vertex *V, const Udmf_Tok
 	}
 }
 
+static std::set<int> parseMoreIDs(const char *string)
+{
+	long number;
+	char *endptr;
+	std::set<int> result;
+
+	bool afterNumber = false;
+	for(const char *c = string; *c; ++c)
+	{
+		if(safe_isspace(*c))
+		{
+			afterNumber = false;
+			continue;
+		}
+		if(afterNumber)
+			continue;
+		number = strtol(c, &endptr, 10);
+		if(c == endptr)
+		{
+			afterNumber = true;	// no longer valid
+			continue;
+		}
+		c = endptr - 1;
+		result.insert((int)number);
+		afterNumber = true;
+	}
+
+	return result;
+}
+
 static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_Token& field,
 	const Udmf_Token& value)
 {
@@ -615,6 +645,8 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 		LD->automapstyle = value.DecodeInt();
 	else if (field.Match("alpha"))
 		LD->alpha = value.DecodeFloat();
+	else if (field.Match("moreids"))
+		LD->moreIDs = parseMoreIDs(value.DecodeString().c_str());
 	else
 	{
 		// Flags
@@ -978,6 +1010,20 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 
 		if (ld->alpha != 1.0)
 			lump->Printf("alpha = %0.16g;\n", ld->alpha);
+
+		if (!ld->moreIDs.empty())
+		{
+			lump->Printf("moreids = \"");
+			bool first = true;
+			for(int id : ld->moreIDs)
+			{
+				if (!first)
+					lump->Printf(" ");
+				lump->Printf("%d", id);
+				first = false;
+			}
+			lump->Printf("\";\n");
+		}
 
 		// linedef flags
 		for(const UDMFMapping& mapping : kUDMFMapping)
