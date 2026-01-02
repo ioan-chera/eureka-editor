@@ -679,13 +679,27 @@ udmf_linechoice locknumber 133 "Blue card or skull"
 udmf_linechoice locknumber 134 "Yellow card or skull"
 udmf_linechoice locknumber 229 "Any key of each color"
 
+udmf_linechoice_label automapstyle "Automap style"
+udmf_linechoice automapstyle 0 "Automatic"
+udmf_linechoice automapstyle 1 "One-sided"
+udmf_linechoice automapstyle 2 "Two-sided"
+udmf_linechoice automapstyle 3 "Different floor"
+udmf_linechoice automapstyle 4 "Different ceiling"
+# 5 is reserved (3D floor border)
+udmf_linechoice automapstyle 6 "Special non-door action"
+udmf_linechoice automapstyle 7 "Secret"
+udmf_linechoice automapstyle 8 "Unseen"
+udmf_linechoice automapstyle 9 "Locked"
+udmf_linechoice automapstyle 10 "Intra-level teleporter"
+udmf_linechoice automapstyle 12 "Unseen secret"
+# 13 is reserved (portal)
+
 # TODO: make this a choice
 udmf_lineflag "translucent" translucent Rendering t
 udmf_lineflag "transparent" transparent Rendering T
 udmf_lineflag "clip midtex" clipmidtex  Rendering C
 udmf_lineflag "wrap midtex" wrapmidtex  Rendering W
 
-# TODO: automapstyle choice
 # TODO: health number field
 # TODO: healthgroup number field
 

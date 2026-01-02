@@ -459,7 +459,7 @@ bool Basis::changeSidedef(int side, SideDef::StringIDAddress field, StringID val
 bool Basis::changeLinedef(int line, byte field, int value)
 {
 	SYS_ASSERT(line >= 0 && line < doc.numLinedefs());
-	SYS_ASSERT(field <= LineDef::F_LOCKNUMBER);
+	SYS_ASSERT(field <= LineDef::F_AUTOMAPSTYLE);
 
 	return change(ObjType::linedefs, line, field, value);
 }

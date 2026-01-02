@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2025      Ioan Chera
+//  Copyright (C) 2025-2026 Ioan Chera
 //  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -1192,6 +1192,18 @@ void UI_LineBox::category_callback(Fl_Widget *w, void *data)
 
 void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 {
+	struct ChoiceMapping
+	{
+		const char *name;
+		int fieldID;
+	};
+
+	static const ChoiceMapping choiceMapping[] =
+	{
+		{ "locknumber", LineDef::F_LOCKNUMBER },
+		{ "automapstyle", LineDef::F_AUTOMAPSTYLE },
+	};
+
 	UI_LineBox *box = (UI_LineBox *)data;
 
 	if(!box->inst.edit.Selected->empty())
@@ -1229,12 +1241,15 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 
 			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			{
-				// Hardcode the field mapping for now
-				if(info->identifier.noCaseEqual("locknumber"))
+				for(const ChoiceMapping &cm : choiceMapping)
 				{
-					op.changeLinedef(*it, LineDef::F_LOCKNUMBER, new_value);
-					// Update the display
-					box->UpdateField(Basis::EditField(LineDef::F_LOCKNUMBER));
+					if(info->identifier.noCaseEqual(cm.name))
+					{
+						op.changeLinedef(*it, cm.fieldID, new_value);
+						// Update the display
+						box->UpdateField(Basis::EditField(cm.fieldID));
+						break;
+					}
 				}
 			}
 
@@ -1479,8 +1494,32 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	if(changed)
 		updateCategoryDetails();
 
+	struct ChoiceMapping
+	{
+		const char *const name;
+		int LineDef::* field;
+		int fieldID;
+	};
 
-	if(!efield || efield->isRaw(LineDef::F_LOCKNUMBER))
+	static const ChoiceMapping choiceMappings[] =
+	{
+		{ "locknumber", &LineDef::locknumber, LineDef::F_LOCKNUMBER },
+		{ "automapstyle", &LineDef::automapstyle, LineDef::F_AUTOMAPSTYLE },
+	};
+
+	bool isCalled = false;
+	if(efield)
+	{
+		for(const ChoiceMapping &cm : choiceMappings)
+		{
+			if(!efield->isRaw(cm.fieldID))
+				continue;
+			isCalled = true;
+			break;
+		}
+	}
+
+	if(!efield || isCalled)
 	{
 		// Update choice widgets for UDMF properties
 		if(inst.level.isLinedef(obj))
@@ -1491,21 +1530,25 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 			{
 				if(field.info->type != linefield_t::Type::choice)
 					continue;
-				if(field.info->identifier.noCaseEqual("locknumber"))
+				for(const ChoiceMapping &cm : choiceMappings)
 				{
-					int value = L->locknumber;
-
-					// Find matching option
-					int index = 0;
-					for(size_t i = 0; i < field.info->options.size(); ++i)
+					if(field.info->identifier.noCaseEqual(cm.name))
 					{
-						if(field.info->options[i].value == value)
+						int value = L.get()->*cm.field;
+
+						// Find matching option
+						int index = 0;
+						for(size_t i = 0; i < field.info->options.size(); ++i)
 						{
-							index = static_cast<int>(i);
-							break;
+							if(field.info->options[i].value == value)
+							{
+								index = static_cast<int>(i);
+								break;
+							}
 						}
+						static_cast<Fl_Choice*>(field.widget.get())->value(index);
+						break;
 					}
-					static_cast<Fl_Choice*>(field.widget.get())->value(index);
 				}
 			}
 		}
@@ -2043,7 +2086,10 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			{
 				if(lf.options.empty())
 					continue;
-				auto choice = new Fl_Choice(fieldX, Y, fieldW, FIELD_HEIGHT);
+				int labelWidth = fl_width(lf.label.c_str()) + 16;
+				int choiceX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
+				auto choice = new Fl_Choice(choiceX, Y, which->x() + which->w() - choiceX,
+										    FIELD_HEIGHT);
 				field.widget = std::unique_ptr<Fl_Widget>(choice);
 				choice->copy_label((lf.label + ":").c_str());
 				choice->align(FL_ALIGN_LEFT);

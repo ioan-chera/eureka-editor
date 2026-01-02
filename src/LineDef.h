@@ -3,7 +3,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2022 Ioan Chera
+//  Copyright (C) 2022-2026 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -46,10 +46,11 @@ public:
 	StringID arg1str;
 
 	int locknumber = 0;	// UDMF locknumber property
+	int automapstyle = 0; // UDMF automapstyle property
 
 	enum { F_START, F_END, F_RIGHT, F_LEFT,
 		   F_FLAGS, F_FLAGS2, F_TYPE, F_TAG, F_ARG1,
-		   F_ARG2, F_ARG3, F_ARG4, F_ARG5, F_ARG1STR, F_LOCKNUMBER };
+		   F_ARG2, F_ARG3, F_ARG4, F_ARG5, F_ARG1STR, F_LOCKNUMBER, F_AUTOMAPSTYLE };
 
 	double alpha = 1.0;
 	std::set<int> moreIDs;
