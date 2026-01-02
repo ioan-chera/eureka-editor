@@ -800,7 +800,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			gLog.printf("Unknown UDMF line flag '%s'\n", flag.udmfKey.c_str());
 	}
 
-	else if(y_stricmp(argv[0], "udmf_linevisflag") == 0)
+	else if(y_stricmp(argv[0], "udmf_linemapflag") == 0)
 	{
 		if(nargs < 2)
 			pst->fail(bad_arg_count_fail, argv[0], 2);
@@ -829,7 +829,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 							visflag.flags2 |= mapping->value;
 					}
 					else
-						gLog.printf("Unknown UDMF line flag '%s' in udmf_linevisflag\n", flagName.c_str());
+						gLog.printf("Unknown UDMF line flag '%s' in udmf_linemapflag\n", flagName.c_str());
 				}
 				start = pos + 1;
 			}

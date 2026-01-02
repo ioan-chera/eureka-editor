@@ -159,7 +159,7 @@ struct lineflag_t
 	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot
 };
 
-// New: udmf_linevisflag <label> <udmf_flags>
+// New: udmf_linemapflag <label> <udmf_flags>
 // This describes an automap visibility flag for UDMF linedefs.
 // - label is the UI text shown in the Vis: dropdown
 // - udmf_flags is one or more UDMF flag names separated by '|' (e.g., "revealed" or "revealed|secret")

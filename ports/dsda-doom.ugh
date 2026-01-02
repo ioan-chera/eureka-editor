@@ -690,8 +690,8 @@ udmf_lineflag "wrap midtex" wrapmidtex  Rendering W
 # TODO: healthgroup number field
 
 # UDMF visibility flags for automap
-udmf_linevisflag "Revealed" revealed
-udmf_linevisflag "RevSecret" revealed|secret
+udmf_linemapflag "Revealed" revealed
+udmf_linemapflag "RevSecret" revealed|secret
 
 # TODO: sidedef fields
 # TODO: sector fields
