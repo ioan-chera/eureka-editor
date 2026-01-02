@@ -491,6 +491,11 @@ private:
 	std::vector<SString> mStrings = { "" };
 };
 
+struct StringAlphanumericCompare
+{
+	bool operator()(const SString &s1, const SString &s2) const;
+};
+
 #ifdef _WIN32
 SString WideToUTF8(const wchar_t *text);
 std::wstring UTF8ToWide(const char* text);

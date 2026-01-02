@@ -479,6 +479,21 @@ bool Basis::changeLinedef(int line, double LineDef::*field, double value)
 	return true;
 }
 
+bool Basis::changeLinedef(int line, std::set<int> LineDef::*field, std::set<int> &&value)
+{
+	SYS_ASSERT(line >= 0 && line < doc.numLinedefs());
+	EditUnit op;
+	op.action = EditType::change;
+	op.objtype = ObjType::linedefs;
+	op.objnum = line;
+	op.efield.format = EditFormat::linedefIntSet;
+	op.efield.intSetLineField = field;
+	op.efield.intSetValue = std::move(value);
+	SYS_ASSERT(mCurrentGroup.isActive());
+	mCurrentGroup.addApply(std::move(op), *this);
+	return true;
+}
+
 //
 // Change lump data
 //
@@ -668,6 +683,14 @@ void Basis::EditUnit::rawChange(Basis &basis)
 			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
 			LineDef &L = *basis.doc.linedefs[objnum];
 			std::swap(L.*efield.doubleLineField, efield.doubleValue);
+			break;
+		}
+		case EditFormat::linedefIntSet:
+		{
+			SYS_ASSERT(objtype == ObjType::linedefs);
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
+			LineDef &L = *basis.doc.linedefs[objnum];
+			std::swap(L.*efield.intSetLineField, efield.intSetValue);
 			break;
 		}
 		default:

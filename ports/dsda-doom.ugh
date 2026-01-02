@@ -620,6 +620,7 @@ endif
 
 feature udmf_lineparameters 1
 feature udmf_thingspecials 1
+feature udmf_multipletags 1
 
 udmf_lineflag "two sided"   twosided
 udmf_lineflag "upper unpeg" dontpegtop
@@ -684,7 +685,6 @@ udmf_lineflag "transparent" transparent Rendering T
 udmf_lineflag "clip midtex" clipmidtex  Rendering C
 udmf_lineflag "wrap midtex" wrapmidtex  Rendering W
 
-# TODO: moreids number list box
 # TODO: automapstyle choice
 # TODO: health number field
 # TODO: healthgroup number field

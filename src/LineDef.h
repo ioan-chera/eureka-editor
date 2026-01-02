@@ -22,6 +22,7 @@
 
 #include "Side.h"
 #include "m_strings.h"
+#include <set>
 
 class LineDef
 {
@@ -51,6 +52,7 @@ public:
 		   F_ARG2, F_ARG3, F_ARG4, F_ARG5, F_ARG1STR, F_LOCKNUMBER };
 
 	double alpha = 1.0;
+	std::set<int> moreIDs;
 
 public:
 	bool TouchesVertex(int v_num) const

@@ -26,20 +26,26 @@
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
+class Fl_Flex;
+class Fl_Grid;
 class Fl_Simple_Counter;
 class line_flag_CB_data_c;
+class MultiTagView;
 class UI_DynIntInput;
+class UI_StackPanel;
 struct LoadingData;
 struct lineflag_t; // forward declaration
 
 class UI_LineBox : public MapItemBox
 {
 private:
+	UI_StackPanel *panel;
+
 	UI_DynInput  *type;
 	Fl_Button    *choose;
 	Fl_Button    *gen;
 
-	Fl_Box       *descBox;
+	Fl_Flex      *descFlex;
 
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
@@ -48,6 +54,10 @@ private:
 	UI_DynIntInput *tag;
 	UI_DynIntInput *args[5];
 	UI_DynInput *args0str;
+
+	Fl_Flex     *argsFlex;
+
+	MultiTagView *multiTagView;
 
 	UI_SideBox *front;
 	UI_SideBox *back;
@@ -59,7 +69,7 @@ private:
 	// Dynamic linedef flags (configured via .ugh)
 	struct LineFlagButton
 	{
-		std::unique_ptr<Fl_Check_Button> button;
+		Fl_Check_Button *button;
 		std::unique_ptr<line_flag_CB_data_c> data;
 		const struct lineflag_t *info;
 	};
@@ -69,6 +79,7 @@ private:
 	struct CategoryHeader
 	{
 		std::unique_ptr<class UI_CategoryButton> button;
+		std::unique_ptr<Fl_Grid> grid;
 		std::vector<int> lineFlagButtonIndices;  // indices in flagButtons
 		bool expanded = true;
 	};
