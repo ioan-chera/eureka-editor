@@ -22,6 +22,7 @@
 #define __EUREKA_UI_SIDEDEF_H__
 
 #include "ui_panelinput.h"
+#include "ui_stackpanel.h"
 
 #define SETOBJ_NO_LINE  -2
 
@@ -36,12 +37,33 @@ enum
 
 };
 
+class UI_SideSectionPanel : public UI_StackPanel
+{
+public:
+	UI_SideSectionPanel(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr);
+
+	UI_Pic* getPic() const
+	{
+		return pic;
+	}
+
+	UI_DynInput* getTex() const
+	{
+		return tex;
+	}
+
+private:
+
+	UI_Pic *pic;
+	UI_DynInput *tex;
+};
+
 
 class UI_SideBox : public Fl_Group
 {
 private:
 	int  obj = SETOBJ_NO_LINE;
-	bool is_front;
+	const bool is_front;
 
 	int what_is_solid;
 	bool on_2S_line = false;
@@ -51,13 +73,9 @@ public:
 	UI_DynIntInput *y_ofs;
 	UI_DynIntInput *sec;
 
-	UI_Pic *l_pic;
-	UI_Pic *u_pic;
-	UI_Pic *r_pic;
-
-	UI_DynInput *l_tex;
-	UI_DynInput *u_tex;
-	UI_DynInput *r_tex;
+	UI_SideSectionPanel *l_panel;
+	UI_SideSectionPanel *u_panel;
+	UI_SideSectionPanel *r_panel;
 
 	Fl_Button *add_button;
 	Fl_Button *del_button;

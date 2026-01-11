@@ -702,7 +702,6 @@ udmf_lineflag "transparent" transparent Rendering T
 udmf_lineflag "clip midtex" clipmidtex  Rendering C
 udmf_lineflag "wrap midtex" wrapmidtex  Rendering W
 
-# UDMF visibility flags for automap
 udmf_linemapflag "Revealed" revealed
 udmf_linemapflag "RevSecret" revealed|secret
 

@@ -155,7 +155,6 @@ private:
 	const char *GeneralizedDesc(int type_num);
 
 	void categoryToggled(class UI_CategoryButton *categoryBtn);
-	void repositionAfterCategoryToggle();
 
 	void updateCategoryDetails();
 

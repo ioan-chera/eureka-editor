@@ -950,9 +950,9 @@ void UI_LineBox::CB_Copy(int uiparts)
 			if ((uiparts & try_part) == 0)
 				continue;
 
-			const char *b_name = (b == 0) ? SD->l_tex->value() :
-								 (b == 1) ? SD->u_tex->value() :
-											SD->r_tex->value();
+			const char *b_name = (b == 0) ? SD->l_panel->getTex()->value() :
+								 (b == 1) ? SD->u_panel->getTex()->value() :
+											SD->r_panel->getTex()->value();
 			SYS_ASSERT(b_name);
 
 			if (name && y_stricmp(name, b_name) != 0)
@@ -1255,6 +1255,9 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 			if(index < 0 || index >= static_cast<int>(info->options.size()))
 				return;
 
+			box->checkDirtyFields();
+			box->checkSidesDirtyFields();
+
 			int new_value = info->options[index].value;
 
 			// Apply to all selected linedefs
@@ -1279,6 +1282,9 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		}
 		case linefield_t::Type::slider:
 		{
+			box->checkDirtyFields();
+			box->checkSidesDirtyFields();
+
 			auto valuator = static_cast<Fl_Valuator *>(w);
 
 			EditOperation op(box->inst.level.basis);

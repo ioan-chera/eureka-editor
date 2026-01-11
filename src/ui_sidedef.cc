@@ -54,6 +54,21 @@ inline static void checkLinedefDirtyFields(const Instance &inst)
 	inst.main_win->line_box->checkDirtyFields();
 }
 
+UI_SideSectionPanel::UI_SideSectionPanel(Instance &inst, int X, int Y, int W, int H,
+	const char *label) :
+	UI_StackPanel(X, Y, W, H)
+{
+	spacing(1);
+	const int picSize = W - 2 * TEXTURE_TILE_OUTSET;
+	pic = new UI_Pic(inst, X + TEXTURE_TILE_OUTSET, 0, picSize, picSize, label);
+	tex = new UI_DynInput(X, 0, W, 20);
+	tex->textsize(12);
+	tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+	end();
+
+	relayout();
+}
+
 //
 // Constructor
 //
@@ -118,37 +133,25 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 		std::swap(UX, LX);
 	}
 
-	l_pic = new UI_Pic(inst, LX, Y, 64, 64, "Lower");
-	u_pic = new UI_Pic(inst, UX, Y, 64, 64, "Upper");
-	r_pic = new UI_Pic(inst, MX, Y, 64, 64, "Rail");
+	l_panel = new UI_SideSectionPanel(inst, LX, Y, 80, 85, "Lower");
+	u_panel = new UI_SideSectionPanel(inst, UX, Y, 80, 85, "Upper");
+	r_panel = new UI_SideSectionPanel(inst, MX, Y, 80, 85, "Rail");
 
-	l_pic->callback(tex_callback, this);
-	u_pic->callback(tex_callback, this);
-	r_pic->callback(tex_callback, this);
+	l_panel->getPic()->callback(tex_callback, this);
+	u_panel->getPic()->callback(tex_callback, this);
+	r_panel->getPic()->callback(tex_callback, this);
 
 	Y += 65;
 
-	l_tex = new UI_DynInput(LX - TEXTURE_TILE_OUTSET, Y, 80, 20);
-	u_tex = new UI_DynInput(UX - TEXTURE_TILE_OUTSET, Y, 80, 20);
-	r_tex = new UI_DynInput(MX - TEXTURE_TILE_OUTSET, Y, 80, 20);
+	l_panel->getTex()->callback(tex_callback, this);
+	u_panel->getTex()->callback(tex_callback, this);
+	r_panel->getTex()->callback(tex_callback, this);
 
-	l_tex->textsize(12);
-	u_tex->textsize(12);
-	r_tex->textsize(12);
+	l_panel->getTex()->callback2(dyntex_callback, this);
+	u_panel->getTex()->callback2(dyntex_callback, this);
+	r_panel->getTex()->callback2(dyntex_callback, this);
 
-	l_tex->callback(tex_callback, this);
-	u_tex->callback(tex_callback, this);
-	r_tex->callback(tex_callback, this);
-
-	l_tex->callback2(dyntex_callback, this);
-	u_tex->callback2(dyntex_callback, this);
-	r_tex->callback2(dyntex_callback, this);
-
-	l_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-	u_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-	r_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-
-	mFixUp.loadFields({ x_ofs, y_ofs, sec, l_tex, u_tex, r_tex });
+	mFixUp.loadFields({ x_ofs, y_ofs, sec, l_panel->getTex(), u_panel->getTex(), r_panel->getTex() });
 
 	end();
 
@@ -167,7 +170,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		return;
 
 	if (Fl::event_button() != FL_RIGHT_MOUSE &&
-		(w == box->l_pic || w == box->u_pic || w == box->r_pic))
+		(w == box->l_panel->getPic() || w == box->u_panel->getPic() || w == box->r_panel->getPic()))
 	{
 		UI_Pic * pic = (UI_Pic *)w;
 
@@ -185,19 +188,19 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	// right click sets to default value, "-" for rail
 	if (Fl::event_button() == FL_RIGHT_MOUSE)
 	{
-		if (w == box->r_pic)
+		if (w == box->r_panel->getPic())
 			new_tex = BA_InternaliseString("-");
 		else
 			new_tex = BA_InternaliseString(box->inst.conf.default_wall_tex);
 	}
 	else
 	{
-		if (w == box->l_tex)
-			new_tex = BA_InternaliseString(NormalizeTex(box->l_tex->value()));
-		else if (w == box->u_tex)
-			new_tex = BA_InternaliseString(NormalizeTex(box->u_tex->value()));
+		if (w == box->l_panel->getTex())
+			new_tex = BA_InternaliseString(NormalizeTex(box->l_panel->getTex()->value()));
+		else if (w == box->u_panel->getTex())
+			new_tex = BA_InternaliseString(NormalizeTex(box->u_panel->getTex()->value()));
 		else
-			new_tex = BA_InternaliseString(NormalizeTex(box->r_tex->value()));
+			new_tex = BA_InternaliseString(NormalizeTex(box->r_panel->getTex()->value()));
 	}
 
 	// iterate over selected linedefs
@@ -215,9 +218,9 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 				if (box->inst.level.isSidedef(sd))
 				{
-					bool lower = (w == box->l_tex || w == box->l_pic);
-					bool upper = (w == box->u_tex || w == box->u_pic);
-					bool rail  = (w == box->r_tex || w == box->r_pic);
+					bool lower = (w == box->l_panel->getTex() || w == box->l_panel->getPic());
+					bool upper = (w == box->u_panel->getTex() || w == box->u_panel->getPic());
+					bool rail  = (w == box->r_panel->getTex() || w == box->r_panel->getPic());
 
 
 					if (lower)
@@ -250,17 +253,17 @@ void UI_SideBox::dyntex_callback(Fl_Widget *w, void *data)
 	if (box->obj < 0)
 		return;
 
-	if (w == box->l_tex)
+	if (w == box->l_panel->getTex())
 	{
-		box->l_pic->GetTex(box->l_tex->value());
+		box->l_panel->getPic()->GetTex(box->l_panel->getTex()->value());
 	}
-	else if (w == box->u_tex)
+	else if (w == box->u_panel->getTex())
 	{
-		box->u_pic->GetTex(box->u_tex->value());
+		box->u_panel->getPic()->GetTex(box->u_panel->getTex()->value());
 	}
-	else if (w == box->r_tex)
+	else if (w == box->r_panel->getTex())
 	{
-		box->r_pic->GetTex(box->r_tex->value());
+		box->r_panel->getPic()->GetTex(box->r_panel->getTex()->value());
 	}
 }
 
@@ -473,27 +476,27 @@ void UI_SideBox::UpdateField()
 		SString rail  = sd->MidTex();
 		SString upper = sd->UpperTex();
 
-		mFixUp.setInputValue(l_tex, lower.c_str());
-		mFixUp.setInputValue(u_tex, upper.c_str());
-		mFixUp.setInputValue(r_tex, rail.c_str());
+		mFixUp.setInputValue(l_panel->getTex(), lower.c_str());
+		mFixUp.setInputValue(u_panel->getTex(), upper.c_str());
+		mFixUp.setInputValue(r_panel->getTex(), rail.c_str());
 
-		l_pic->GetTex(lower);
-		u_pic->GetTex(upper);
-		r_pic->GetTex(rail);
+		l_panel->getPic()->GetTex(lower);
+		u_panel->getPic()->GetTex(upper);
+		r_panel->getPic()->GetTex(rail);
 
 		if ((what_is_solid & SOLID_LOWER) && is_null_tex(lower))
-			l_pic->MarkMissing();
+			l_panel->getPic()->MarkMissing();
 
 		if ((what_is_solid & SOLID_UPPER) && is_null_tex(upper))
-			u_pic->MarkMissing();
+			u_panel->getPic()->MarkMissing();
 
-		if (is_special_tex(lower)) l_pic->MarkSpecial();
-		if (is_special_tex(upper)) u_pic->MarkSpecial();
-		if (is_special_tex(rail))  r_pic->MarkSpecial();
+		if (is_special_tex(lower)) l_panel->getPic()->MarkSpecial();
+		if (is_special_tex(upper)) u_panel->getPic()->MarkSpecial();
+		if (is_special_tex(rail))  r_panel->getPic()->MarkSpecial();
 
-		l_pic->AllowHighlight(true);
-		u_pic->AllowHighlight(true);
-		r_pic->AllowHighlight(true);
+		l_panel->getPic()->AllowHighlight(true);
+		u_panel->getPic()->AllowHighlight(true);
+		r_panel->getPic()->AllowHighlight(true);
 	}
 	else
 	{
@@ -501,17 +504,17 @@ void UI_SideBox::UpdateField()
 		mFixUp.setInputValue(y_ofs, "");
 		mFixUp.setInputValue(sec, "");
 
-		mFixUp.setInputValue(l_tex, "");
-		mFixUp.setInputValue(u_tex, "");
-		mFixUp.setInputValue(r_tex, "");
+		mFixUp.setInputValue(l_panel->getTex(), "");
+		mFixUp.setInputValue(u_panel->getTex(), "");
+		mFixUp.setInputValue(r_panel->getTex(), "");
 
-		l_pic->Clear();
-		u_pic->Clear();
-		r_pic->Clear();
+		l_panel->getPic()->Clear();
+		u_panel->getPic()->Clear();
+		r_panel->getPic()->Clear();
 
-		l_pic->AllowHighlight(false);
-		u_pic->AllowHighlight(false);
-		r_pic->AllowHighlight(false);
+		l_panel->getPic()->AllowHighlight(false);
+		u_panel->getPic()->AllowHighlight(false);
+		r_panel->getPic()->AllowHighlight(false);
 	}
 }
 
@@ -558,8 +561,8 @@ void UI_SideBox::UpdateAddDel()
 int UI_SideBox::getMidTexX(int position) const
 {
 	if(position == 0)
-		return config::swap_sidedefs ? u_pic->x() : l_pic->x();
-	return (l_pic->x() + u_pic->x()) / 2;
+		return config::swap_sidedefs ? u_panel->x() : l_panel->x();
+	return (l_panel->x() + u_panel->x()) / 2;
 }
 
 void UI_SideBox::UpdateHiding()
@@ -570,13 +573,9 @@ void UI_SideBox::UpdateHiding()
 		y_ofs->hide();
 		  sec->hide();
 
-		l_tex->hide();
-		u_tex->hide();
-		r_tex->hide();
-
-		l_pic->hide();
-		u_pic->hide();
-		r_pic->hide();
+		l_panel->hide();
+		u_panel->hide();
+		r_panel->hide();
 	}
 	else
 	{
@@ -584,36 +583,27 @@ void UI_SideBox::UpdateHiding()
 		y_ofs->show();
 		  sec->show();
 
-		r_tex->show();
-		r_pic->show();
+		r_panel->show();
 
 		if (on_2S_line || config::show_full_one_sided)
 		{
-			r_pic->position(getMidTexX(1), r_pic->y());
-			r_tex->Fl_Widget::position(getMidTexX(1) - TEXTURE_TILE_OUTSET, r_tex->y());
+			r_panel->position(getMidTexX(1), r_panel->y());
 
-			l_tex->show();
-			u_tex->show();
-
-			l_pic->show();
-			u_pic->show();
+			l_panel->show();
+			u_panel->show();
 		}
 		else
 		{
-			r_pic->position(getMidTexX(0), r_pic->y());
-			r_tex->Fl_Widget::position(getMidTexX(0) - TEXTURE_TILE_OUTSET, r_tex->y());
+			r_panel->position(getMidTexX(0), r_panel->y());	
 
-			l_tex->hide();
-			u_tex->hide();
+			l_panel->hide();
+			u_panel->hide();
 
-			l_pic->hide();
-			u_pic->hide();
+			l_panel->getPic()->Unhighlight();
+			u_panel->getPic()->Unhighlight();
 
-			l_pic->Unhighlight();
-			u_pic->Unhighlight();
-
-			l_pic->Selected(false);
-			u_pic->Selected(false);
+			l_panel->getPic()->Selected(false);
+			u_panel->getPic()->Selected(false);
 		}
 	}
 }
@@ -623,30 +613,30 @@ int UI_SideBox::GetSelectedPics() const
 {
 	if (obj < 0) return 0;
 
-	return	(l_pic->Selected() ? PART_RT_LOWER : 0) |
-			(u_pic->Selected() ? PART_RT_UPPER : 0) |
-			(r_pic->Selected() ? PART_RT_RAIL  : 0);
+	return	(l_panel->getPic()->Selected() ? PART_RT_LOWER : 0) |
+			(u_panel->getPic()->Selected() ? PART_RT_UPPER : 0) |
+			(r_panel->getPic()->Selected() ? PART_RT_RAIL  : 0);
 }
 
 int UI_SideBox::GetHighlightedPics() const
 {
 	if (obj < 0) return 0;
 
-	return	(l_pic->Highlighted() ? PART_RT_LOWER : 0) |
-			(u_pic->Highlighted() ? PART_RT_UPPER : 0) |
-			(r_pic->Highlighted() ? PART_RT_RAIL  : 0);
+	return	(l_panel->getPic()->Highlighted() ? PART_RT_LOWER : 0) |
+			(u_panel->getPic()->Highlighted() ? PART_RT_UPPER : 0) |
+			(r_panel->getPic()->Highlighted() ? PART_RT_RAIL  : 0);
 }
 
 
 void UI_SideBox::UnselectPics()
 {
-	l_pic->Unhighlight();
-	u_pic->Unhighlight();
-	r_pic->Unhighlight();
+	l_panel->getPic()->Unhighlight();
+	u_panel->getPic()->Unhighlight();
+	r_panel->getPic()->Unhighlight();
 
-	l_pic->Selected(false);
-	u_pic->Selected(false);
-	r_pic->Selected(false);
+	l_panel->getPic()->Selected(false);
+	u_panel->getPic()->Selected(false);
+	r_panel->getPic()->Selected(false);
 }
 
 
