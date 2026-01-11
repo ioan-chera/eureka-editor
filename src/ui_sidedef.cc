@@ -252,6 +252,9 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 	mFixUp.loadFields({ x_ofs, y_ofs, sec, l_panel->getTex(), u_panel->getTex(), r_panel->getTex() });
 
 	end();
+	end();
+
+	resizable(nullptr);
 
 
 	UpdateHiding();
@@ -824,6 +827,8 @@ void UI_SideBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	l_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
 	u_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
 	r_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
+
+	resize(x(), y(), w(), l_panel->y() - y() + l_panel->h() + 3);
 
 	redraw();
 }
