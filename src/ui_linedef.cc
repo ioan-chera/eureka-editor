@@ -343,7 +343,8 @@ MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCa
 	mDataCallback(dataCallback)
 {
 	static const char inputLabel[] = "More IDs:";
-	mInput = new Fl_Int_Input(x + TYPE_INPUT_X + 16, y, 50, TYPE_INPUT_HEIGHT, inputLabel);
+	fl_font(FL_HELVETICA, 12);	// prepare
+	mInput = new Fl_Int_Input(x + fl_width(inputLabel) + 8, y, 50, TYPE_INPUT_HEIGHT, inputLabel);
 	mInput->align(FL_ALIGN_LEFT);
 	mInput->callback(addCallback, this);
 	mInput->when(FL_WHEN_ENTER_KEY);
@@ -523,6 +524,9 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	which = new UI_Nombre(X + NOMBRE_INSET, 0, W - 2 * NOMBRE_INSET, NOMBRE_HEIGHT, "Linedef");
 	panel->afterSpacing(which, SPACING_BELOW_NOMBRE - INPUT_SPACING);
 
+	// Prepare before calling fl_width
+	fl_font(FL_HELVETICA, 12);
+
 	{
 		Fl_Flex *type_flex = new Fl_Flex(X + TYPE_INPUT_X, 0, W - TYPE_INPUT_X - NOMBRE_INSET,
 										 TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
@@ -540,11 +544,11 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 		choose = new Fl_Button(0, 0, 0, 0, "Choose");
 		choose->callback(button_callback, this);
-		type_flex->fixed(choose, CHOOSE_BUTTON_WIDTH);
+		type_flex->fixed(choose, fl_width(choose->label()) + 16);
 
 		gen = new Fl_Button(0, 0, 0, 0, "Gen");
 		gen->callback(button_callback, this);
-		type_flex->fixed(gen, GEN_BUTTON_WIDTH);
+		type_flex->fixed(gen, fl_width(gen->label()) + 16);
 
 		type_flex->end();
 	}
@@ -607,7 +611,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		tag->callback(tag_callback, this);
 		tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-		const int labelWidth = 60;
+		const int labelWidth = fl_width(lengthLabel) + 8;
 		length = new UI_DynIntInput(tag_pack->x() + tag_pack->w() / 2 + labelWidth, tag_pack->y(),
 									tag_pack->w() / 2 - labelWidth, tag_pack->h(), lengthLabel);
 		length->align(FL_ALIGN_LEFT);
