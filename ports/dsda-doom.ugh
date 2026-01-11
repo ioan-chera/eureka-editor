@@ -708,6 +708,7 @@ udmf_linemapflag "RevSecret" revealed|secret
 # Sidedef UDMF per-part fields
 udmf_sidepart float 2 offsetx_ offsety_ "Offset XY"
 udmf_sidepart float 2 scalex_ scaley_ "Scale XY"
+udmf_sidepart int 1 light_ "Light"
 
 # TODO: sector fields
 

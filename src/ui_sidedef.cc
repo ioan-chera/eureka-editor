@@ -634,6 +634,12 @@ void UI_SideBox::UpdateField()
 						value = sd->scalex_bottom;
 					else if(fieldName.noCaseEqual("scaley_bottom"))
 						value = sd->scaley_bottom;
+					else if(fieldName.noCaseEqual("light_top"))
+						value = sd->light_top;
+					else if(fieldName.noCaseEqual("light_mid"))
+						value = sd->light_mid;
+					else if(fieldName.noCaseEqual("light_bottom"))
+						value = sd->light_bottom;
 
 					if(field.info->type == sidefield_t::Type::floatType)
 					{
@@ -910,8 +916,12 @@ void UI_SideBox::udmf_field_callback(Fl_Widget *w, void *data)
 					{
 						auto input = static_cast<UI_DynIntInput *>(w);
 						int newValue = atoi(input->value());
-						(void)newValue;
-						// Currently no integer per-part sidedef fields defined
+						if(fieldName.noCaseEqual("light_top"))
+							op.changeSidedef(sd, SideDef::F_LIGHT_TOP, newValue);
+						if(fieldName.noCaseEqual("light_mid"))
+							op.changeSidedef(sd, SideDef::F_LIGHT_MID, newValue);
+						if(fieldName.noCaseEqual("light_bottom"))
+							op.changeSidedef(sd, SideDef::F_LIGHT_BOTTOM, newValue);
 					}
 					else if(field.info->type == sidefield_t::Type::boolType)
 					{

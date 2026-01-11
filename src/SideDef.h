@@ -34,6 +34,11 @@ struct SideDef
 	StringID lower_tex;
 	int sector = 0;
 
+	// UDMF ints
+	int light_top = 0;
+	int light_mid = 0;
+	int light_bottom = 0;
+
 	// UDMF per-part offsets
 	double offsetx_top = 0.0;
 	double offsety_top = 0.0;
@@ -55,6 +60,9 @@ struct SideDef
 		F_X_OFFSET,
 		F_Y_OFFSET,
 		F_SECTOR = 5,
+		F_LIGHT_TOP,
+		F_LIGHT_MID,
+		F_LIGHT_BOTTOM,
 	};
 
 	enum StringIDAddress
