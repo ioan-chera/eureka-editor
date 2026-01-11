@@ -706,8 +706,8 @@ udmf_linemapflag "Revealed" revealed
 udmf_linemapflag "RevSecret" revealed|secret
 
 # Sidedef UDMF per-part fields
-udmf_sidepart float 2 offsetx_ offsety_ Offset
-udmf_sidepart float 2 scalex_ scaley_ Scale
+udmf_sidepart float 2 offsetx_ offsety_ "Offset XY"
+udmf_sidepart float 2 scalex_ scaley_ "Scale XY"
 
 # TODO: sector fields
 
