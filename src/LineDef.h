@@ -47,10 +47,13 @@ public:
 
 	int locknumber = 0;	// UDMF locknumber property
 	int automapstyle = 0; // UDMF automapstyle property
+	int health = 0;		// UDMF health property
+	int healthgroup = 0;	// UDMF healthgroup property
 
 	enum { F_START, F_END, F_RIGHT, F_LEFT,
 		   F_FLAGS, F_FLAGS2, F_TYPE, F_TAG, F_ARG1,
-		   F_ARG2, F_ARG3, F_ARG4, F_ARG5, F_ARG1STR, F_LOCKNUMBER, F_AUTOMAPSTYLE };
+		   F_ARG2, F_ARG3, F_ARG4, F_ARG5, F_ARG1STR, F_LOCKNUMBER, F_AUTOMAPSTYLE,
+		   F_HEALTH, F_HEALTHGROUP };
 
 	double alpha = 1.0;
 	std::set<int> moreIDs;

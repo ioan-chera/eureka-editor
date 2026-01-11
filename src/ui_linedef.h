@@ -85,10 +85,12 @@ private:
 	};
 	std::vector<CategoryHeader> categoryHeaders;
 
-	// Dynamic UDMF line choice widgets (configured via .ugh)
+	// Dynamic UDMF line field widgets (configured via .ugh)
 	struct LineField
 	{
 		std::unique_ptr<Fl_Widget> widget;
+		std::unique_ptr<Fl_Widget> widget2;    // second widget for intpair type
+		std::unique_ptr<Fl_Group> container;   // container for intpair (Fl_Flex holding both widgets)
 		const struct linefield_t *info;
 	};
 	std::vector<LineField> fields;

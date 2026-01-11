@@ -79,6 +79,7 @@ class PanelFieldFixUp
 {
 public:
 	void loadFields(std::initializer_list<ICallback2 *> fields);
+	void unloadFields(std::initializer_list<ICallback2 *> fields);
 
 	// Call it before starting basis
 	void checkDirtyFields();

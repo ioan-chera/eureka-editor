@@ -920,6 +920,20 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		field->options.push_back(opt);
 	}
 
+	else if(y_stricmp(argv[0], "udmf_lineintpair") == 0)
+	{
+		if(nargs < 4)
+			pst->fail(bad_arg_count_fail, argv[0], 4);
+
+		linefield_t field = {};
+		field.identifier = argv[1];
+		field.label = argv[2];
+		field.identifier2 = argv[3];
+		field.label2 = argv[4];
+		field.type = linefield_t::Type::intpair;
+		config.udmf_line_fields.push_back(std::move(field));
+	}
+
 	else if(y_stricmp(argv[0], "gensector") == 0)
 	{
 		if(nargs < 2)

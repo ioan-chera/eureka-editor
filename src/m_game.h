@@ -176,6 +176,7 @@ struct linefield_t
 	{
 		choice,
 		slider,
+		intpair,
 	};
 	struct option_t
 	{
@@ -195,6 +196,10 @@ struct linefield_t
 	double minValue;
 	double maxValue;
 	double step;
+
+	// intpair (two integer fields on same row)
+	SString identifier2;
+	SString label2;
 };
 
 struct gensector_t

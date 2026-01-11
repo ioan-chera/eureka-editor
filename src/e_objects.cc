@@ -1211,6 +1211,9 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 	op.changeLinedef(dest_line, LineDef::F_LOCKNUMBER, L1->locknumber);
 	op.changeLinedef(dest_line, LineDef::F_AUTOMAPSTYLE, L1->automapstyle);
 
+	op.changeLinedef(dest_line, LineDef::F_HEALTH, L1->health);
+	op.changeLinedef(dest_line, LineDef::F_HEALTHGROUP, L1->healthgroup);
+
 	op.changeLinedef(dest_line, &LineDef::alpha, L1->alpha);
 	op.changeLinedef(dest_line, &LineDef::moreIDs, std::set(L1->moreIDs));
 }

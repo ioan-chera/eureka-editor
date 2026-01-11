@@ -47,6 +47,21 @@ void PanelFieldFixUp::loadFields(std::initializer_list<ICallback2 *> fields)
 }
 
 //
+// Removes fields from tracking. Call this before deleting dynamically created widgets.
+//
+void PanelFieldFixUp::unloadFields(std::initializer_list<ICallback2 *> fields)
+{
+	for(ICallback2 *field : fields)
+	{
+		mOriginalCallbacks.erase(field);
+		mOriginalCallbacks2.erase(field);
+		mAsCallback2.erase(field->asWidget());
+		mAsWidget.erase(field);
+		mDirtyFields.erase(field);
+	}
+}
+
+//
 // Check all dirty flags and calls the callbacks. Meant to be called before
 // any non-edit action!
 //

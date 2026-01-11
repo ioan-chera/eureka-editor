@@ -643,6 +643,10 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 		LD->locknumber = value.DecodeInt();
 	else if (field.Match("automapstyle"))
 		LD->automapstyle = value.DecodeInt();
+	else if (field.Match("health"))
+		LD->health = value.DecodeInt();
+	else if (field.Match("healthgroup"))
+		LD->healthgroup = value.DecodeInt();
 	else if (field.Match("alpha"))
 		LD->alpha = value.DecodeFloat();
 	else if (field.Match("moreids"))
@@ -1007,6 +1011,12 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 
 		if (ld->automapstyle != 0)
 			lump->Printf("automapstyle = %d;\n", ld->automapstyle);
+
+		if (ld->health != 0)
+			lump->Printf("health = %d;\n", ld->health);
+
+		if (ld->healthgroup != 0)
+			lump->Printf("healthgroup = %d;\n", ld->healthgroup);
 
 		if (ld->alpha != 1.0)
 			lump->Printf("alpha = %0.16g;\n", ld->alpha);

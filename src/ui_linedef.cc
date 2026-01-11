@@ -1203,24 +1203,27 @@ void UI_LineBox::category_callback(Fl_Widget *w, void *data)
 
 void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 {
-	struct ChoiceMapping
+	struct IntFieldMapping
 	{
 		const char *name;
 		int fieldID;
 	};
 
-	static const ChoiceMapping choiceMapping[] =
+	static const IntFieldMapping intFieldMapping[] =
 	{
 		{ "locknumber", LineDef::F_LOCKNUMBER },
 		{ "automapstyle", LineDef::F_AUTOMAPSTYLE },
+		{ "health", LineDef::F_HEALTH },
+		{ "healthgroup", LineDef::F_HEALTHGROUP },
 	};
 
 	UI_LineBox *box = (UI_LineBox *)data;
 
 	if(!box->inst.edit.Selected->empty())
 	{
-		// Find which choice widget this is
+		// Find which field widget this is and whether it's widget or widget2
 		const linefield_t *info = nullptr;
+		bool isSecondWidget = false;
 		for(const LineField &field : box->fields)
 		{
 			if(field.widget.get() == w)
@@ -1228,12 +1231,20 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 				info = field.info;
 				break;
 			}
+			if(field.widget2 && field.widget2.get() == w)
+			{
+				info = field.info;
+				isSecondWidget = true;
+				break;
+			}
 		}
 
 		if(!info)
 			return;
 
-		SString message = SString("edited ") + info->identifier + " of";
+		// Determine which identifier to use based on which widget was triggered
+		const SString &identifier = isSecondWidget ? info->identifier2 : info->identifier;
+		SString message = SString("edited ") + identifier + " of";
 
 		switch(info->type)
 		{
@@ -1252,9 +1263,9 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 
 			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			{
-				for(const ChoiceMapping &cm : choiceMapping)
+				for(const IntFieldMapping &cm : intFieldMapping)
 				{
-					if(info->identifier.noCaseEqual(cm.name))
+					if(identifier.noCaseEqual(cm.name))
 					{
 						op.changeLinedef(*it, cm.fieldID, new_value);
 						// Update the display
@@ -1276,10 +1287,32 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			{
 				// Hardcode the field mapping for now
-				if(info->identifier.noCaseEqual("alpha"))
+				if(identifier.noCaseEqual("alpha"))
 				{
 					op.changeLinedef(*it, &LineDef::alpha, valuator->value());
 					box->UpdateField(Basis::EditField(&LineDef::alpha));
+				}
+			}
+			break;
+		}
+		case linefield_t::Type::intpair:
+		{
+			auto input = static_cast<Fl_Int_Input *>(w);
+			int new_value = atoi(input->value());
+
+			EditOperation op(box->inst.level.basis);
+			op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
+
+			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+			{
+				for(const IntFieldMapping &cm : intFieldMapping)
+				{
+					if(identifier.noCaseEqual(cm.name))
+					{
+						op.changeLinedef(*it, cm.fieldID, new_value);
+						box->UpdateField(Basis::EditField(cm.fieldID));
+						break;
+					}
 				}
 			}
 			break;
@@ -1505,23 +1538,25 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	if(changed)
 		updateCategoryDetails();
 
-	struct ChoiceMapping
+	struct IntFieldMapping
 	{
 		const char *const name;
 		int LineDef::* field;
 		int fieldID;
 	};
 
-	static const ChoiceMapping choiceMappings[] =
+	static const IntFieldMapping intFieldMappings[] =
 	{
 		{ "locknumber", &LineDef::locknumber, LineDef::F_LOCKNUMBER },
 		{ "automapstyle", &LineDef::automapstyle, LineDef::F_AUTOMAPSTYLE },
+		{ "health", &LineDef::health, LineDef::F_HEALTH },
+		{ "healthgroup", &LineDef::healthgroup, LineDef::F_HEALTHGROUP },
 	};
 
 	bool isCalled = false;
 	if(efield)
 	{
-		for(const ChoiceMapping &cm : choiceMappings)
+		for(const IntFieldMapping &cm : intFieldMappings)
 		{
 			if(!efield->isRaw(cm.fieldID))
 				continue;
@@ -1532,45 +1567,76 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 
 	if(!efield || isCalled)
 	{
-		// Update choice widgets for UDMF properties
+		// Update choice and intpair widgets for UDMF properties
 		if(inst.level.isLinedef(obj))
 		{
 			const auto L = inst.level.linedefs[obj];
 
 			for(const LineField &field : fields)
 			{
-				if(field.info->type != linefield_t::Type::choice)
-					continue;
-				for(const ChoiceMapping &cm : choiceMappings)
+				if(field.info->type == linefield_t::Type::choice)
 				{
-					if(field.info->identifier.noCaseEqual(cm.name))
+					for(const IntFieldMapping &cm : intFieldMappings)
 					{
-						int value = L.get()->*cm.field;
-
-						// Find matching option
-						int index = 0;
-						for(size_t i = 0; i < field.info->options.size(); ++i)
+						if(field.info->identifier.noCaseEqual(cm.name))
 						{
-							if(field.info->options[i].value == value)
+							int value = L.get()->*cm.field;
+
+							// Find matching option
+							int index = 0;
+							for(size_t i = 0; i < field.info->options.size(); ++i)
 							{
-								index = static_cast<int>(i);
-								break;
+								if(field.info->options[i].value == value)
+								{
+									index = static_cast<int>(i);
+									break;
+								}
 							}
+							static_cast<Fl_Choice*>(field.widget.get())->value(index);
+							break;
 						}
-						static_cast<Fl_Choice*>(field.widget.get())->value(index);
-						break;
+					}
+				}
+				else if(field.info->type == linefield_t::Type::intpair)
+				{
+					// Update first widget
+					for(const IntFieldMapping &cm : intFieldMappings)
+					{
+						if(field.info->identifier.noCaseEqual(cm.name))
+						{
+							int value = L.get()->*cm.field;
+							mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget.get()),
+												 SString(value).c_str());
+							break;
+						}
+					}
+					// Update second widget
+					for(const IntFieldMapping &cm : intFieldMappings)
+					{
+						if(field.info->identifier2.noCaseEqual(cm.name))
+						{
+							int value = L.get()->*cm.field;
+							mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2.get()),
+												 SString(value).c_str());
+							break;
+						}
 					}
 				}
 			}
 		}
 		else
 		{
-			// No linedef selected, reset to first option
+			// No linedef selected, reset widgets
 			for(const LineField &field : fields)
 			{
 				if(field.info->type == linefield_t::Type::choice)
 				{
 					static_cast<Fl_Choice*>(field.widget.get())->value(0);
+				}
+				else if(field.info->type == linefield_t::Type::intpair)
+				{
+					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget.get()), "");
+					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2.get()), "");
 				}
 			}
 		}
@@ -2079,7 +2145,19 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 
 	for(const LineField &field : fields)
-		panel->remove(field.widget.get());
+	{
+		// Unload intpair widgets from mFixUp before removing them
+		if(field.info->type == linefield_t::Type::intpair && field.widget2)
+		{
+			mFixUp.unloadFields({static_cast<UI_DynIntInput *>(field.widget.get()),
+								 static_cast<UI_DynIntInput *>(field.widget2.get())});
+			panel->remove(field.container.get());
+		}
+		else
+		{
+			panel->remove(field.widget.get());
+		}
+	}
 	fields.clear();
 
 	if(loaded.levelFormat == MapFormat::udmf && !config.udmf_line_fields.empty())
@@ -2124,6 +2202,44 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				slider->minimum(lf.minValue);
 				slider->maximum(lf.maxValue);
 				slider->value_width(60);
+			}
+			else if(lf.type == linefield_t::Type::intpair)
+			{
+				// Calculate label widths for spacing
+				const int label2Width = static_cast<int>(fl_width(lf.label2.c_str())) + 20;
+
+				// Create horizontal Fl_Flex container
+				auto flex = new Fl_Flex(fieldX, Y, fieldW, FIELD_HEIGHT, Fl_Flex::HORIZONTAL);
+				flex->gap(16 + fl_width(lf.label2.c_str()));
+				field.container = std::unique_ptr<Fl_Group>(flex);
+
+				// First input (left)
+				auto input1 = new UI_DynIntInput(0, 0, 0, FIELD_HEIGHT);
+				field.widget = std::unique_ptr<Fl_Widget>(input1);
+				input1->copy_label((lf.label + ":").c_str());
+				input1->align(FL_ALIGN_LEFT);
+				input1->callback(field_callback, this);
+
+				// Second input (right) - set fixed width for the label spacing
+				auto input2 = new UI_DynIntInput(0, 0, 0, FIELD_HEIGHT);
+				field.widget2 = std::unique_ptr<Fl_Widget>(input2);
+				input2->copy_label((lf.label2 + ":").c_str());
+				input2->align(FL_ALIGN_LEFT);
+				input2->callback(field_callback, this);
+				//flex->fixed(input2, label2Width + 64);  // label width + input width
+
+				flex->end();
+
+				field.info = &lf;
+				fields.push_back(std::move(field));
+				Y += FIELD_HEIGHT + 4;
+
+				panel->insert(*fields.back().container.get(), front);
+
+				// Register both inputs with mFixUp
+				mFixUp.loadFields({static_cast<UI_DynIntInput *>(fields.back().widget.get()),
+								   static_cast<UI_DynIntInput *>(fields.back().widget2.get())});
+				continue;
 			}
 			else
 			{
