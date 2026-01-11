@@ -2085,26 +2085,23 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	if(loaded.levelFormat == MapFormat::udmf && !config.udmf_line_fields.empty())
 	{
 		// Match the args span: starts at type->x() and spans 5 args
-		const int fieldX = x() + TYPE_INPUT_X;
-		const int fieldW = desc->x() + desc->w() - x() - TYPE_INPUT_X;
 
 		//begin();
 
 		for(const linefield_t &lf : config.udmf_line_fields)
 		{
 			LineField field = {};
+			const int labelWidth = fl_width(lf.label.c_str()) + 16;
+			const int fieldX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
+			const int fieldW = which->x() + which->w() - fieldX;
+
 			if(lf.type == linefield_t::Type::choice)
 			{
 				if(lf.options.empty())
 					continue;
-				int labelWidth = fl_width(lf.label.c_str()) + 16;
-				int choiceX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
-				auto choice = new Fl_Choice(choiceX, Y, which->x() + which->w() - choiceX,
-										    FIELD_HEIGHT);
+				
+				auto choice = new Fl_Choice(fieldX, Y, fieldW, FIELD_HEIGHT);
 				field.widget = std::unique_ptr<Fl_Widget>(choice);
-				choice->copy_label((lf.label + ":").c_str());
-				choice->align(FL_ALIGN_LEFT);
-				//field.choice->labelsize(12);
 
 				// Build menu string from options
 				SString menuStr;
@@ -2121,9 +2118,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			{
 				auto slider = new Fl_Hor_Value_Slider(fieldX, Y, fieldW, FIELD_HEIGHT);
 				field.widget = std::unique_ptr<Fl_Widget>(slider);
-				slider->copy_label((lf.label + ":").c_str());
-				slider->align(FL_ALIGN_LEFT);
-				//field.counter->labelsize(12);
 
 				slider->step(lf.step);
 				// slider->lstep(lf.step * 8);
@@ -2131,6 +2125,12 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				slider->maximum(lf.maxValue);
 				slider->value_width(60);
 			}
+			else
+			{
+				assert(false);
+			}
+			field.widget->copy_label((lf.label + ":").c_str());
+			field.widget->align(FL_ALIGN_LEFT);
 
 			// Pass the linefield_t pointer via callback data
 			field.widget->callback(field_callback, this);
