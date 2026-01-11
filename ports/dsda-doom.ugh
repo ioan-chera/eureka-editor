@@ -705,7 +705,10 @@ udmf_lineflag "wrap midtex" wrapmidtex  Rendering W
 udmf_linemapflag "Revealed" revealed
 udmf_linemapflag "RevSecret" revealed|secret
 
-# TODO: sidedef fields
+# Sidedef UDMF per-part fields
+udmf_sidepart float 2 offsetx_ offsety_ Offset
+udmf_sidepart float 2 scalex_ scaley_ Scale
+
 # TODO: sector fields
 
 # TODO: thing alpha floating-point number field

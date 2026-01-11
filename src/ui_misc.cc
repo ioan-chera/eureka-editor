@@ -497,5 +497,21 @@ int UI_DynIntInput::handle(int event)
 	return res;
 }
 
+
+//
+// Handler for the dynamic float input
+//
+int UI_DynFloatInput::handle(int event)
+{
+	int res = Fl_Float_Input::handle(event);
+
+	if((event == FL_KEYBOARD || event == FL_PASTE) && mCallback2)
+	{
+		mCallback2(this, mData2);
+	}
+
+	return res;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

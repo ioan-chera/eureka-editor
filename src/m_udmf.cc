@@ -668,8 +668,6 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_
 {
 	// Note: sector numbers are validated later on
 
-	// TODO: consider how to handle "offsetx_top" (etc), if at all
-
 	if (field.Match("sector"))
 		SD->sector = value.DecodeInt();
 	else if (field.Match("texturetop"))
@@ -682,9 +680,38 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_
 		SD->x_offset = value.DecodeInt();
 	else if (field.Match("offsety"))
 		SD->y_offset = value.DecodeInt();
+
+	// Per-part offsets
+	else if (field.Match("offsetx_top"))
+		SD->offsetx_top = value.DecodeFloat();
+	else if (field.Match("offsety_top"))
+		SD->offsety_top = value.DecodeFloat();
+	else if (field.Match("offsetx_mid"))
+		SD->offsetx_mid = value.DecodeFloat();
+	else if (field.Match("offsety_mid"))
+		SD->offsety_mid = value.DecodeFloat();
+	else if (field.Match("offsetx_bottom"))
+		SD->offsetx_bottom = value.DecodeFloat();
+	else if (field.Match("offsety_bottom"))
+		SD->offsety_bottom = value.DecodeFloat();
+
+	// Per-part scales
+	else if (field.Match("scalex_top"))
+		SD->scalex_top = value.DecodeFloat();
+	else if (field.Match("scaley_top"))
+		SD->scaley_top = value.DecodeFloat();
+	else if (field.Match("scalex_mid"))
+		SD->scalex_mid = value.DecodeFloat();
+	else if (field.Match("scaley_mid"))
+		SD->scaley_mid = value.DecodeFloat();
+	else if (field.Match("scalex_bottom"))
+		SD->scalex_bottom = value.DecodeFloat();
+	else if (field.Match("scaley_bottom"))
+		SD->scaley_bottom = value.DecodeFloat();
+
 	else
 	{
-		gLog.debugPrintf("sidedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
+		gLog.debugPrintf("sidedef #%d: unknown field '%s'\n", doc.numSidedefs() - 1, field.c_str());
 	}
 }
 

@@ -2297,6 +2297,10 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	else
 		multiTagView->hide();
 
+	// Update UDMF sidepart widgets for sidedefs
+	front->UpdateGameInfo(loaded, config);
+	back->UpdateGameInfo(loaded, config);
+
 	redraw();
 
 	for(CategoryHeader& header : categoryHeaders)

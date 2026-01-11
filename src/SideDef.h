@@ -34,6 +34,22 @@ struct SideDef
 	StringID lower_tex;
 	int sector = 0;
 
+	// UDMF per-part offsets
+	double offsetx_top = 0.0;
+	double offsety_top = 0.0;
+	double offsetx_mid = 0.0;
+	double offsety_mid = 0.0;
+	double offsetx_bottom = 0.0;
+	double offsety_bottom = 0.0;
+
+	// UDMF per-part scales
+	double scalex_top = 1.0;
+	double scaley_top = 1.0;
+	double scalex_mid = 1.0;
+	double scaley_mid = 1.0;
+	double scalex_bottom = 1.0;
+	double scaley_bottom = 1.0;
+
 	enum IntAddress
 	{
 		F_X_OFFSET,

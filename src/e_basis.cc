@@ -453,6 +453,21 @@ bool Basis::changeSidedef(int side, SideDef::StringIDAddress field, StringID val
 	return change(ObjType::sidedefs, side, field, value.get());
 }
 
+bool Basis::changeSidedef(int side, double SideDef::*field, double value)
+{
+	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
+	EditUnit op;
+	op.action = EditType::change;
+	op.objtype = ObjType::sidedefs;
+	op.objnum = side;
+	op.efield.format = EditFormat::sidedefDouble;
+	op.efield.doubleSideField = field;
+	op.efield.doubleValue = value;
+	SYS_ASSERT(mCurrentGroup.isActive());
+	mCurrentGroup.addApply(std::move(op), *this);
+	return true;
+}
+
 //
 // Change linedef
 //
@@ -691,6 +706,14 @@ void Basis::EditUnit::rawChange(Basis &basis)
 			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
 			LineDef &L = *basis.doc.linedefs[objnum];
 			std::swap(L.*efield.intSetLineField, efield.intSetValue);
+			break;
+		}
+		case EditFormat::sidedefDouble:
+		{
+			SYS_ASSERT(objtype == ObjType::sidedefs);
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
+			SideDef &S = *basis.doc.sidedefs[objnum];
+			std::swap(S.*efield.doubleSideField, efield.doubleValue);
 			break;
 		}
 		default:

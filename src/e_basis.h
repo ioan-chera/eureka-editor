@@ -99,6 +99,7 @@ public:
 		field,
 		linedefDouble,
 		linedefIntSet,
+		sidedefDouble,
 	};
 
 	struct EditField
@@ -109,6 +110,10 @@ public:
 		}
 
 		explicit EditField(double LineDef::*field) : format(EditFormat::linedefDouble), doubleLineField(field)
+		{
+		}
+
+		explicit EditField(double SideDef::*field) : format(EditFormat::sidedefDouble), doubleSideField(field)
 		{
 		}
 
@@ -128,6 +133,8 @@ public:
 				return false;
 			if(format == EditFormat::field)
 				return rawField == other.rawField && rawValue == other.rawValue;
+			if(format == EditFormat::sidedefDouble)
+				return doubleSideField == other.doubleSideField && doubleValue == other.doubleValue;
 			return doubleLineField == other.doubleLineField && doubleValue == other.doubleValue;
 		}
 
@@ -138,6 +145,7 @@ public:
 			byte rawField = 0;
 			double LineDef::*doubleLineField;
 			std::set<int> LineDef::*intSetLineField;
+			double SideDef::*doubleSideField;
 		};
 
 		union
@@ -375,6 +383,7 @@ private:
 	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
+	bool changeSidedef(int side, double SideDef::*field, double value);
 	bool changeLinedef(int line, byte field, int value);
 	bool changeLinedef(int line, double LineDef::*field, double value);
 	bool changeLinedef(int line, std::set<int> LineDef::*field, std::set<int> &&value);
@@ -459,6 +468,10 @@ public:
 		return basis.changeSidedef(side, field, value);
 	}
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value)
+	{
+		return basis.changeSidedef(side, field, value);
+	}
+	bool changeSidedef(int side, double SideDef::*field, double value)
 	{
 		return basis.changeSidedef(side, field, value);
 	}

@@ -5,6 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2026 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -23,10 +24,16 @@
 
 #include "ui_panelinput.h"
 #include "ui_stackpanel.h"
+#include <memory>
+#include <vector>
 
 #define SETOBJ_NO_LINE  -2
 
+class UI_DynFloatInput;
 class UI_DynIntInput;
+struct ConfigData;
+struct LoadingData;
+struct sidefield_t;
 
 // solid_mask bits : when set, that part requires a texture
 enum
@@ -35,6 +42,14 @@ enum
 	SOLID_MID   = (1 << 1),
 	SOLID_UPPER = (1 << 2)
 
+};
+
+// Stores widgets for a single UDMF sidepart field (one row of inputs per part)
+struct SidepartFieldWidgets
+{
+	const sidefield_t *info = nullptr;
+	std::unique_ptr<Fl_Group> container;
+	std::vector<std::unique_ptr<Fl_Widget>> widgets; // one per dimension
 };
 
 class UI_SideSectionPanel : public UI_StackPanel
@@ -52,10 +67,23 @@ public:
 		return tex;
 	}
 
+	const std::vector<SidepartFieldWidgets> &getUDMFFields() const
+	{
+		return mUDMFFields;
+	}
+
+	// Creates UDMF sidepart widgets based on config
+	void updateUDMFFields(const LoadingData &loaded, const ConfigData &config,
+						  Fl_Callback *callback, void *callbackData,
+						  PanelFieldFixUp &fixUp);
+
 private:
+	Instance &mInst;
 
 	UI_Pic *pic;
 	UI_DynInput *tex;
+
+	std::vector<SidepartFieldWidgets> mUDMFFields;
 };
 
 
@@ -103,6 +131,9 @@ public:
 
 	void UnselectPics();
 
+	// Updates UDMF sidepart widgets based on config
+	void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config);
+
 	//
 	// Forward to the fixup
 	//
@@ -124,6 +155,7 @@ private:
 	static void sector_callback(Fl_Widget *, void *);
 	static void    add_callback(Fl_Widget *, void *);
 	static void delete_callback(Fl_Widget *, void *);
+	static void udmf_field_callback(Fl_Widget *, void *);
 };
 
 #endif  /* __EUREKA_UI_SIDEDEF_H__ */

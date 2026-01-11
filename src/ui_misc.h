@@ -22,9 +22,8 @@
 #define __EUREKA_UI_MISC_H__
 
 #include "ui_window.h"
+#include "FL/Fl_Float_Input.H"
 #include "FL/Fl_Int_Input.H"
-
-class Fl_Float_Input;
 
 class UI_MoveDialog : public UI_Escapable_Window
 {
@@ -181,6 +180,52 @@ private:
 	void value(const char *s)	// prevent direct editing
 	{
 		Fl_Int_Input::value(s);
+	}
+
+	Fl_Callback *mCallback2 = nullptr;
+	void *mData2 = nullptr;
+};
+
+//
+// Similar to UI_DynInput but for Fl_Float_Input
+//
+class UI_DynFloatInput : public Fl_Float_Input, public ICallback2
+{
+public:
+	UI_DynFloatInput(int X, int Y, int W, int H, const char *L = nullptr) :
+		Fl_Float_Input(X, Y, W, H, L)
+	{
+	}
+
+	int handle(int event) override;
+
+	//
+	// Assign the change callback
+	//
+	void callback2(Fl_Callback *callback, void *data) override
+	{
+		mCallback2 = callback;
+		mData2 = data;
+	}
+	Fl_Callback *callback2() const override
+	{
+		return mCallback2;
+	}
+	void *user_data2() const override
+	{
+		return mData2;
+	}
+
+	const char *value() const
+	{
+		return Fl_Float_Input::value();
+	}
+
+	ICALLBACK2_BOILERPLATE()
+private:
+	void value(const char *s)	// prevent direct editing
+	{
+		Fl_Float_Input::value(s);
 	}
 
 	Fl_Callback *mCallback2 = nullptr;

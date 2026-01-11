@@ -5,6 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2007-2016 Andrew Apted
+//  Copyright (C) 2026 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -35,6 +36,9 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 
+#include "FL/Fl_Check_Button.H"
+#include "FL/Fl_Flex.H"
+
 enum
 {
 	TEXTURE_TILE_OUTSET = 8
@@ -56,7 +60,8 @@ inline static void checkLinedefDirtyFields(const Instance &inst)
 
 UI_SideSectionPanel::UI_SideSectionPanel(Instance &inst, int X, int Y, int W, int H,
 	const char *label) :
-	UI_StackPanel(X, Y, W, H)
+	UI_StackPanel(X, Y, W, H),
+	mInst(inst)
 {
 	spacing(1);
 	const int picSize = W - 2 * TEXTURE_TILE_OUTSET;
@@ -66,6 +71,99 @@ UI_SideSectionPanel::UI_SideSectionPanel(Instance &inst, int X, int Y, int W, in
 	tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	end();
 
+	relayout();
+}
+
+
+void UI_SideSectionPanel::updateUDMFFields(const LoadingData &loaded, const ConfigData &config,
+										   Fl_Callback *callback, void *callbackData,
+										   PanelFieldFixUp &fixUp)
+{
+	// Unload existing UDMF field widgets from fixUp and remove them
+	for(auto &field : mUDMFFields)
+	{
+		// Unload widgets from fixUp
+		for(auto &widget : field.widgets)
+		{
+			if(field.info->type == sidefield_t::Type::intType)
+				fixUp.unloadFields({static_cast<UI_DynIntInput *>(widget.get())});
+			else if(field.info->type == sidefield_t::Type::floatType)
+				fixUp.unloadFields({static_cast<UI_DynFloatInput *>(widget.get())});
+		}
+
+		if(field.container)
+			remove(field.container.get());
+	}
+	mUDMFFields.clear();
+
+	// Only create widgets for UDMF format
+	if(loaded.levelFormat != MapFormat::udmf || config.udmf_sidepart_fields.empty())
+	{
+		relayout();
+		return;
+	}
+
+	begin();
+
+	for(const sidefield_t &sf : config.udmf_sidepart_fields)
+	{
+		SidepartFieldWidgets fieldWidgets;
+		fieldWidgets.info = &sf;
+
+		// Create a horizontal flex container for this field's widgets
+		auto flex = new Fl_Flex(x(), 0, w(), 20, Fl_Flex::HORIZONTAL);
+		flex->gap(2);
+		fieldWidgets.container = std::unique_ptr<Fl_Group>(flex);
+
+		// Create one widget per dimension
+		for(size_t i = 0; i < sf.prefixes.size(); ++i)
+		{
+			Fl_Widget *widget = nullptr;
+
+			switch(sf.type)
+			{
+			case sidefield_t::Type::boolType:
+			{
+				auto checkBtn = new Fl_Check_Button(0, 0, 0, 20);
+				checkBtn->callback(callback, callbackData);
+				widget = checkBtn;
+				break;
+			}
+			case sidefield_t::Type::intType:
+			{
+				auto input = new UI_DynIntInput(0, 0, 0, 20);
+				input->callback(callback, callbackData);
+				input->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+				fixUp.loadFields({input});
+				widget = input;
+				break;
+			}
+			case sidefield_t::Type::floatType:
+			{
+				auto input = new UI_DynFloatInput(0, 0, 0, 20);
+				input->callback(callback, callbackData);
+				input->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+				fixUp.loadFields({input});
+				widget = input;
+				break;
+			}
+			}
+
+			if(widget)
+				fieldWidgets.widgets.push_back(std::unique_ptr<Fl_Widget>(widget));
+		}
+
+		flex->end();
+
+		// Set label above the flex, centered
+		flex->copy_label(sf.label.c_str());
+		flex->align(FL_ALIGN_TOP | FL_ALIGN_CENTER);
+		beforeSpacing(flex, 14); // Leave gap for the label above
+
+		mUDMFFields.push_back(std::move(fieldWidgets));
+	}
+
+	end();
 	relayout();
 }
 
@@ -497,6 +595,60 @@ void UI_SideBox::UpdateField()
 		l_panel->getPic()->AllowHighlight(true);
 		u_panel->getPic()->AllowHighlight(true);
 		r_panel->getPic()->AllowHighlight(true);
+
+		// Populate UDMF sidepart field widgets
+		auto populateUDMFFields = [this, &sd](UI_SideSectionPanel *panel, const char *partSuffix)
+		{
+			const auto &fields = panel->getUDMFFields();
+			for(const auto &field : fields)
+			{
+				for(size_t dimIdx = 0; dimIdx < field.widgets.size(); ++dimIdx)
+				{
+					SString fieldName = field.info->prefixes[dimIdx] + partSuffix;
+
+					double value = 0.0;
+					if(fieldName.noCaseEqual("offsetx_top"))
+						value = sd->offsetx_top;
+					else if(fieldName.noCaseEqual("offsety_top"))
+						value = sd->offsety_top;
+					else if(fieldName.noCaseEqual("offsetx_mid"))
+						value = sd->offsetx_mid;
+					else if(fieldName.noCaseEqual("offsety_mid"))
+						value = sd->offsety_mid;
+					else if(fieldName.noCaseEqual("offsetx_bottom"))
+						value = sd->offsetx_bottom;
+					else if(fieldName.noCaseEqual("offsety_bottom"))
+						value = sd->offsety_bottom;
+					else if(fieldName.noCaseEqual("scalex_top"))
+						value = sd->scalex_top;
+					else if(fieldName.noCaseEqual("scaley_top"))
+						value = sd->scaley_top;
+					else if(fieldName.noCaseEqual("scalex_mid"))
+						value = sd->scalex_mid;
+					else if(fieldName.noCaseEqual("scaley_mid"))
+						value = sd->scaley_mid;
+					else if(fieldName.noCaseEqual("scalex_bottom"))
+						value = sd->scalex_bottom;
+					else if(fieldName.noCaseEqual("scaley_bottom"))
+						value = sd->scaley_bottom;
+
+					if(field.info->type == sidefield_t::Type::floatType)
+					{
+						auto input = static_cast<UI_DynFloatInput *>(field.widgets[dimIdx].get());
+						mFixUp.setInputValue(input, SString::printf("%g", value).c_str());
+					}
+					else if(field.info->type == sidefield_t::Type::intType)
+					{
+						auto input = static_cast<UI_DynIntInput *>(field.widgets[dimIdx].get());
+						mFixUp.setInputValue(input, SString(static_cast<int>(value)).c_str());
+					}
+				}
+			}
+		};
+
+		populateUDMFFields(l_panel, "bottom");
+		populateUDMFFields(u_panel, "top");
+		populateUDMFFields(r_panel, "mid");
 	}
 	else
 	{
@@ -515,6 +667,32 @@ void UI_SideBox::UpdateField()
 		l_panel->getPic()->AllowHighlight(false);
 		u_panel->getPic()->AllowHighlight(false);
 		r_panel->getPic()->AllowHighlight(false);
+
+		// Clear UDMF sidepart field widgets
+		auto clearUDMFFields = [this](UI_SideSectionPanel *panel)
+		{
+			const auto &fields = panel->getUDMFFields();
+			for(const auto &field : fields)
+			{
+				for(size_t dimIdx = 0; dimIdx < field.widgets.size(); ++dimIdx)
+				{
+					if(field.info->type == sidefield_t::Type::floatType)
+					{
+						auto input = static_cast<UI_DynFloatInput *>(field.widgets[dimIdx].get());
+						mFixUp.setInputValue(input, "");
+					}
+					else if(field.info->type == sidefield_t::Type::intType)
+					{
+						auto input = static_cast<UI_DynIntInput *>(field.widgets[dimIdx].get());
+						mFixUp.setInputValue(input, "");
+					}
+				}
+			}
+		};
+
+		clearUDMFFields(l_panel);
+		clearUDMFFields(u_panel);
+		clearUDMFFields(r_panel);
 	}
 }
 
@@ -637,6 +815,112 @@ void UI_SideBox::UnselectPics()
 	l_panel->getPic()->Selected(false);
 	u_panel->getPic()->Selected(false);
 	r_panel->getPic()->Selected(false);
+}
+
+
+void UI_SideBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
+{
+	// Update UDMF sidepart widgets for each section panel
+	l_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
+	u_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
+	r_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
+
+	redraw();
+}
+
+
+void UI_SideBox::udmf_field_callback(Fl_Widget *w, void *data)
+{
+	UI_SideBox *box = static_cast<UI_SideBox *>(data);
+
+	if(box->obj < 0)
+		return;
+
+	if(box->inst.edit.Selected->empty())
+		return;
+
+	// Find which widget was triggered and which panel it belongs to
+	UI_SideSectionPanel *panels[] = { box->l_panel, box->u_panel, box->r_panel };
+	static const char *partSuffixes[] = { "bottom", "top", "mid" };
+
+	for(int panelIdx = 0; panelIdx < 3; ++panelIdx)
+	{
+		const auto &fields = panels[panelIdx]->getUDMFFields();
+		for(const auto &field : fields)
+		{
+			for(size_t dimIdx = 0; dimIdx < field.widgets.size(); ++dimIdx)
+			{
+				if(field.widgets[dimIdx].get() != w)
+					continue;
+
+				// Found the widget - build the UDMF field name
+				SString fieldName = field.info->prefixes[dimIdx] + partSuffixes[panelIdx];
+
+				// Get the new value and apply it
+				EditOperation op(box->inst.level.basis);
+				SString message = SString("edited ") + fieldName + " on";
+				op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
+
+				for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+				{
+					const auto L = box->inst.level.linedefs[*it];
+					int sd = box->is_front ? L->right : L->left;
+
+					if(!box->inst.level.isSidedef(sd))
+						continue;
+
+					// Apply based on field type and field name
+					if(field.info->type == sidefield_t::Type::floatType)
+					{
+						auto input = static_cast<UI_DynFloatInput *>(w);
+						double newValue = atof(input->value());
+
+						// Match field name to SideDef member
+						if(fieldName.noCaseEqual("offsetx_top"))
+							op.changeSidedef(sd, &SideDef::offsetx_top, newValue);
+						else if(fieldName.noCaseEqual("offsety_top"))
+							op.changeSidedef(sd, &SideDef::offsety_top, newValue);
+						else if(fieldName.noCaseEqual("offsetx_mid"))
+							op.changeSidedef(sd, &SideDef::offsetx_mid, newValue);
+						else if(fieldName.noCaseEqual("offsety_mid"))
+							op.changeSidedef(sd, &SideDef::offsety_mid, newValue);
+						else if(fieldName.noCaseEqual("offsetx_bottom"))
+							op.changeSidedef(sd, &SideDef::offsetx_bottom, newValue);
+						else if(fieldName.noCaseEqual("offsety_bottom"))
+							op.changeSidedef(sd, &SideDef::offsety_bottom, newValue);
+						else if(fieldName.noCaseEqual("scalex_top"))
+							op.changeSidedef(sd, &SideDef::scalex_top, newValue);
+						else if(fieldName.noCaseEqual("scaley_top"))
+							op.changeSidedef(sd, &SideDef::scaley_top, newValue);
+						else if(fieldName.noCaseEqual("scalex_mid"))
+							op.changeSidedef(sd, &SideDef::scalex_mid, newValue);
+						else if(fieldName.noCaseEqual("scaley_mid"))
+							op.changeSidedef(sd, &SideDef::scaley_mid, newValue);
+						else if(fieldName.noCaseEqual("scalex_bottom"))
+							op.changeSidedef(sd, &SideDef::scalex_bottom, newValue);
+						else if(fieldName.noCaseEqual("scaley_bottom"))
+							op.changeSidedef(sd, &SideDef::scaley_bottom, newValue);
+					}
+					else if(field.info->type == sidefield_t::Type::intType)
+					{
+						auto input = static_cast<UI_DynIntInput *>(w);
+						int newValue = atoi(input->value());
+						(void)newValue;
+						// Currently no integer per-part sidedef fields defined
+					}
+					else if(field.info->type == sidefield_t::Type::boolType)
+					{
+						auto checkBtn = static_cast<Fl_Check_Button *>(w);
+						bool newValue = checkBtn->value() != 0;
+						(void)newValue;
+						// Currently no boolean per-part sidedef fields defined
+					}
+				}
+
+				return;
+			}
+		}
+	}
 }
 
 

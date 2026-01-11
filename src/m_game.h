@@ -202,6 +202,23 @@ struct linefield_t
 	SString label2;
 };
 
+// udmf_sidepart <type> <dim_size> <dim1prefix> ... <label>
+// Describes a UDMF sidedef property that applies per-part (top, mid, bottom)
+// The UDMF field names are constructed as: prefixes[i] + "top", "mid", "bottom"
+struct sidefield_t
+{
+	enum class Type
+	{
+		boolType,
+		intType,
+		floatType,
+	};
+
+	Type type;
+	std::vector<SString> prefixes; // dimension prefixes (e.g., "offsetx_", "offsety_")
+	SString label;                 // UI label text
+};
+
 struct gensector_t
 {
 	struct option_t
@@ -480,6 +497,7 @@ struct ConfigData
 	std::vector<lineflag_t> udmf_line_flags;
 	std::vector<linevisflag_t> udmf_line_vis_flags;
 	std::vector<linefield_t> udmf_line_fields;
+	std::vector<sidefield_t> udmf_sidepart_fields;
 	std::vector<gensector_t> gen_sectors; // generalized sector types
 
 	int num_gen_linetypes = 0;
