@@ -2015,7 +2015,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				const int baseX = onLeft ? leftX : rightX;
 				int& curY = onLeft ? yLeft : yRight;
 
-				auto addButton = [baseX, curY, this, &catHeader](int offset, const lineflag_t *flag)
+				auto addButton = [baseX, curY, this, FW, &catHeader](int offset, const lineflag_t *flag)
 					{
 						LineFlagButton fb;
 						fb.button = new Fl_Check_Button(baseX + offset, curY + 2, FW, 20,
