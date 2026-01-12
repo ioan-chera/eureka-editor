@@ -709,6 +709,19 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_
 	else if (field.Match("scaley_bottom"))
 		SD->scaley_bottom = value.DecodeFloat();
 
+	else if(field.Match("light_top"))
+		SD->light_top = value.DecodeInt();
+	else if(field.Match("light_mid"))
+		SD->light_mid = value.DecodeInt();
+	else if(field.Match("light_bottom"))
+		SD->light_bottom = value.DecodeInt();
+	else if(field.Match("lightabsolute_top") && !value.Match("false"))
+		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_TOP;
+	else if(field.Match("lightabsolute_mid") && !value.Match("false"))
+		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_MID;
+	else if(field.Match("lightabsolute_bottom") && !value.Match("false"))
+		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
+
 	else
 	{
 		gLog.debugPrintf("sidedef #%d: unknown field '%s'\n", doc.numSidedefs() - 1, field.c_str());
@@ -1096,6 +1109,43 @@ static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 			lump->Printf("texturebottom = %s;\n", EncodeString(NormalizeTex(side->LowerTex())).c_str());
 		if (side->MidTex() != "-")
 			lump->Printf("texturemiddle = %s;\n", EncodeString(NormalizeTex(side->MidTex())).c_str());
+
+		if (side->offsetx_top)
+			lump->Printf("offsetx_top = %.16g;\n", side->offsetx_top);
+		if (side->offsetx_mid)
+			lump->Printf("offsetx_mid = %.16g;\n", side->offsetx_mid);
+		if (side->offsetx_bottom)
+			lump->Printf("offsetx_bottom = %.16g;\n", side->offsetx_bottom);
+		if (side->offsety_top)
+			lump->Printf("offsety_top = %.16g;\n", side->offsety_top);
+		if (side->offsety_mid)
+			lump->Printf("offsety_mid = %.16g;\n", side->offsety_mid);
+		if (side->offsety_bottom)
+			lump->Printf("offsety_bottom = %.16g;\n", side->offsety_bottom);
+		if (side->scalex_top != 1)
+			lump->Printf("scalex_top = %.16g;\n", side->scalex_top);
+		if (side->scalex_mid != 1)
+			lump->Printf("scalex_mid = %.16g;\n", side->scalex_mid);
+		if (side->scalex_bottom != 1)
+			lump->Printf("scalex_bottom = %.16g;\n", side->scalex_bottom);
+		if (side->scaley_top != 1)
+			lump->Printf("scaley_top = %.16g;\n", side->scaley_top);
+		if (side->scaley_mid != 1)
+			lump->Printf("scaley_mid = %.16g;\n", side->scaley_mid);
+		if (side->scaley_bottom != 1)
+			lump->Printf("scaley_bottom = %.16g;\n", side->scaley_bottom);
+		if (side->light_top)
+			lump->Printf("light_top = %d;\n", side->light_top);
+		if (side->light_mid)
+			lump->Printf("light_mid = %d;\n", side->light_mid);
+		if (side->light_bottom)
+			lump->Printf("light_bottom = %d;\n", side->light_bottom);
+		if (side->flags & SideDef::FLAG_LIGHT_ABSOLUTE_TOP)
+			lump->Printf("lightabsolute_top = true;\n");
+		if (side->flags & SideDef::FLAG_LIGHT_ABSOLUTE_MID)
+			lump->Printf("lightabsolute_mid = true;\n");
+		if (side->flags & SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM)
+			lump->Printf("lightabsolute_bottom = true;\n");
 
 		lump->Printf("}\n\n");
 	}

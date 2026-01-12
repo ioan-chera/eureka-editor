@@ -78,8 +78,6 @@ public:
 						  PanelFieldFixUp &fixUp);
 
 private:
-	Instance &mInst;
-
 	UI_Pic *pic;
 	UI_DynInput *tex;
 

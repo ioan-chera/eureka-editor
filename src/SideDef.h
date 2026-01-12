@@ -27,6 +27,13 @@ struct Document;
 
 struct SideDef
 {
+	enum
+	{
+		FLAG_LIGHT_ABSOLUTE_TOP =    0x00000001,
+		FLAG_LIGHT_ABSOLUTE_MID =    0x00000002,
+		FLAG_LIGHT_ABSOLUTE_BOTTOM = 0x00000004,
+	};
+
 	int x_offset = 0;
 	int y_offset = 0;
 	StringID upper_tex;
@@ -38,6 +45,7 @@ struct SideDef
 	int light_top = 0;
 	int light_mid = 0;
 	int light_bottom = 0;
+	int flags;
 
 	// UDMF per-part offsets
 	double offsetx_top = 0.0;
@@ -63,6 +71,7 @@ struct SideDef
 		F_LIGHT_TOP,
 		F_LIGHT_MID,
 		F_LIGHT_BOTTOM,
+		F_FLAGS,
 	};
 
 	enum StringIDAddress

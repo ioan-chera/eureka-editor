@@ -36,7 +36,7 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 
-#include "FL/Fl_Check_Button.H"
+#include "FL/Fl_Light_Button.H"
 #include "FL/Fl_Flex.H"
 
 enum
@@ -60,8 +60,7 @@ inline static void checkLinedefDirtyFields(const Instance &inst)
 
 UI_SideSectionPanel::UI_SideSectionPanel(Instance &inst, int X, int Y, int W, int H,
 	const char *label) :
-	UI_StackPanel(X, Y, W, H),
-	mInst(inst)
+	UI_StackPanel(X, Y, W, H)
 {
 	spacing(1);
 	const int picSize = W - 2 * TEXTURE_TILE_OUTSET;
@@ -124,9 +123,11 @@ void UI_SideSectionPanel::updateUDMFFields(const LoadingData &loaded, const Conf
 			{
 			case sidefield_t::Type::boolType:
 			{
-				auto checkBtn = new Fl_Check_Button(0, 0, 0, 20);
-				checkBtn->callback(callback, callbackData);
-				widget = checkBtn;
+				auto lightBtn = new Fl_Light_Button(0, 0, 0, 20);
+				lightBtn->callback(callback, callbackData);
+				if(sf.prefixes.size() == 1)
+					lightBtn->copy_label(sf.label.c_str());
+				widget = lightBtn;
 				break;
 			}
 			case sidefield_t::Type::intType:
@@ -155,10 +156,13 @@ void UI_SideSectionPanel::updateUDMFFields(const LoadingData &loaded, const Conf
 
 		flex->end();
 
-		// Set label above the flex, centered
-		flex->copy_label(sf.label.c_str());
-		flex->align(FL_ALIGN_TOP | FL_ALIGN_CENTER);
-		beforeSpacing(flex, 14); // Leave gap for the label above
+		if(sf.type != sidefield_t::Type::boolType || sf.prefixes.size() > 1)
+		{
+			// Set label above the flex, centered
+			flex->copy_label(sf.label.c_str());
+			flex->align(FL_ALIGN_TOP | FL_ALIGN_CENTER);
+			beforeSpacing(flex, 14); // Leave gap for the label above
+		}
 
 		mUDMFFields.push_back(std::move(fieldWidgets));
 	}
@@ -610,6 +614,7 @@ void UI_SideBox::UpdateField()
 					SString fieldName = field.info->prefixes[dimIdx] + partSuffix;
 
 					double value = 0.0;
+					int flag = 0;
 					if(fieldName.noCaseEqual("offsetx_top"))
 						value = sd->offsetx_top;
 					else if(fieldName.noCaseEqual("offsety_top"))
@@ -640,6 +645,12 @@ void UI_SideBox::UpdateField()
 						value = sd->light_mid;
 					else if(fieldName.noCaseEqual("light_bottom"))
 						value = sd->light_bottom;
+					else if(fieldName.noCaseEqual("lightabsolute_top"))
+						flag = SideDef::FLAG_LIGHT_ABSOLUTE_TOP;
+					else if(fieldName.noCaseEqual("lightabsolute_mid"))
+						flag = SideDef::FLAG_LIGHT_ABSOLUTE_MID;
+					else if(fieldName.noCaseEqual("lightabsolute_bottom"))
+						flag = SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
 
 					if(field.info->type == sidefield_t::Type::floatType)
 					{
@@ -650,6 +661,11 @@ void UI_SideBox::UpdateField()
 					{
 						auto input = static_cast<UI_DynIntInput *>(field.widgets[dimIdx].get());
 						mFixUp.setInputValue(input, SString(static_cast<int>(value)).c_str());
+					}
+					else if(field.info->type == sidefield_t::Type::boolType)
+					{
+						auto button = static_cast<Fl_Light_Button *>(field.widgets[dimIdx].get());
+						button->value(!!(sd->flags & flag));
 					}
 				}
 			}
@@ -925,10 +941,23 @@ void UI_SideBox::udmf_field_callback(Fl_Widget *w, void *data)
 					}
 					else if(field.info->type == sidefield_t::Type::boolType)
 					{
-						auto checkBtn = static_cast<Fl_Check_Button *>(w);
-						bool newValue = checkBtn->value() != 0;
-						(void)newValue;
-						// Currently no boolean per-part sidedef fields defined
+						auto lightBtn = static_cast<Fl_Light_Button *>(w);
+						bool newValue = lightBtn->value() != 0;
+						int flag = 0;
+						if(fieldName.noCaseEqual("lightabsolute_top"))
+							flag = SideDef::FLAG_LIGHT_ABSOLUTE_TOP;
+						else if(fieldName.noCaseEqual("lightabsolute_mid"))
+							flag = SideDef::FLAG_LIGHT_ABSOLUTE_MID;
+						else if(fieldName.noCaseEqual("lightabsolute_BOTTOM"))
+							flag = SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
+						if(flag)
+						{
+							auto &sidedef = box->inst.level.sidedefs[sd];
+							if(newValue)
+								op.changeSidedef(sd, SideDef::F_FLAGS, sidedef->flags | flag);
+							else
+								op.changeSidedef(sd, SideDef::F_FLAGS, sidedef->flags & ~flag);
+						}
 					}
 				}
 
