@@ -402,6 +402,7 @@ sector 18 "Carry Player by tag"
 
 include "doom_groups"
 
+lineflag "two sided"    0x0004
 lineflag "upper unpeg"  0x0008
 lineflag "lower unpeg"  0x0010
 lineflag "jump over"    0x0200
