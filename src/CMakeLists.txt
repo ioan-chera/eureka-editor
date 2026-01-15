@@ -112,6 +112,8 @@ set(source_r
 set(source_ui
     ui_about.cc
     ui_about.h
+    ui_activation_button.cc
+    ui_activation_button.h
     ui_browser.cc
     ui_browser.h
     ui_canvas.cc

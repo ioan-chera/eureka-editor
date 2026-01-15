@@ -23,6 +23,7 @@
 #include "Instance.h"
 
 #include "main.h"
+#include "ui_activation_button.h"
 #include "ui_category_button.h"
 #include "ui_misc.h"
 #include "ui_window.h"
@@ -568,6 +569,10 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		actkind->deactivate();
 		actkind->hide();
 		descFlex->fixed(actkind, TYPE_INPUT_WIDTH);
+
+		activationBtn = std::make_unique<UI_ActivationButton>(0, 0, 0, 0, "Activation");
+		activationBtn->hide();
+		descFlex->fixed(activationBtn.get(), TYPE_INPUT_WIDTH);
 
 		desc = new Fl_Output(0, 0, 0, 0);
 		desc->align(FL_ALIGN_LEFT);
@@ -1354,6 +1359,37 @@ void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
 		}
 	}
 }
+
+void UI_LineBox::onActivationFlagChanged(const lineflag_t *flag, int value)
+{
+	if(inst.edit.Selected->empty())
+		return;
+
+	mFixUp.checkDirtyFields();
+	checkSidesDirtyFields();
+
+	int mask = (flag->flagSet == 1) ? flag->value : 0;
+	int mask2 = (flag->flagSet == 2) ? flag->value : 0;
+
+	EditOperation op(inst.level.basis);
+	op.setMessageForSelection("edited activation flags of", *inst.edit.Selected);
+
+	for(sel_iter_c it(*inst.edit.Selected); !it.done(); it.next())
+	{
+		const auto L = inst.level.linedefs[*it];
+
+		if(mask != 0)
+		{
+			int newFlags = value ? (L->flags | mask) : (L->flags & ~mask);
+			op.changeLinedef(*it, LineDef::F_FLAGS, newFlags);
+		}
+		if(mask2 != 0)
+		{
+			int newFlags2 = value ? (L->flags2 | mask2) : (L->flags2 & ~mask2);
+			op.changeLinedef(*it, LineDef::F_FLAGS2, newFlags2);
+		}
+	}
+}
 //------------------------------------------------------------------------
 
 void UI_LineBox::updateCategoryDetails()
@@ -1543,6 +1579,23 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 
 	if(changed)
 		updateCategoryDetails();
+
+	// Always update activation button for UDMF when flags are being processed
+	if(!efield || efield->isRaw(LineDef::F_FLAGS) || efield->isRaw(LineDef::F_FLAGS2))
+	{
+		if(activationBtn->visible())
+		{
+			if(inst.level.isLinedef(obj))
+			{
+				activationBtn->updateFromFlags(inst.level.linedefs[obj]->flags,
+											   inst.level.linedefs[obj]->flags2);
+			}
+			else
+			{
+				activationBtn->updateFromFlags(0, 0);
+			}
+		}
+	}
 
 	struct IntFieldMapping
 	{
@@ -1928,6 +1981,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		actkind->add(getActivationMenuString());
 
 		actkind->show();
+		activationBtn->hide();
 	}
 	else if(loaded.levelFormat == MapFormat::udmf)
 	{
@@ -1935,7 +1989,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		tag->label("Line ID:");
 		tag->tooltip("Tag of the linedef");
 
-		actkind->hide();	// UDMF uses the separate line flags for activation
+		actkind->hide();	// UDMF uses the activation button with popup
 
 		if (config.features.gen_types)
 			gen->show();
@@ -1949,6 +2003,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		tag->tooltip("Tag of targeted sector(s)");
 
 		actkind->hide();
+		activationBtn->hide();
 
 		if (config.features.gen_types)
 			gen->show();
@@ -1997,6 +2052,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 	categoryHeaders.clear();
 	flagButtons.clear();
+	activationFlags.clear();
 
 	int Y = y() + flagsStartY;
 
@@ -2032,6 +2088,18 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		{
 			const SString &catName = catPair.first;
 			const std::vector<const lineflag_t *> &flagsInCat = catPair.second;
+
+			// In UDMF mode, handle "Activation" category with the popup button
+			if(loaded.levelFormat == MapFormat::udmf && catName.noCaseEqual("Activation"))
+			{
+				activationFlags = flagsInCat;
+				activationBtn->setFlags(activationFlags);
+				activationBtn->setCallback([this](const lineflag_t *flag, int value) {
+					onActivationFlagChanged(flag, value);
+				});
+				activationBtn->show();
+				continue;  // Skip creating category header and grid for Activation
+			}
 
 			CategoryHeader catHeader = {};
 			if(!catName.empty())
@@ -2149,6 +2217,10 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		// keep some spacing if no flags defined
 		Y += 29;
 	}
+
+	// Hide activation button if no activation flags were found in UDMF mode
+	if(loaded.levelFormat == MapFormat::udmf && activationFlags.empty())
+		activationBtn->hide();
 
 	for(const LineField &field : fields)
 	{

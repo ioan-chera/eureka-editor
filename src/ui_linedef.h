@@ -31,6 +31,7 @@ class Fl_Grid;
 class Fl_Simple_Counter;
 class line_flag_CB_data_c;
 class MultiTagView;
+class UI_ActivationButton;
 class UI_DynIntInput;
 class UI_StackPanel;
 struct LoadingData;
@@ -49,6 +50,7 @@ private:
 
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
+	std::unique_ptr<UI_ActivationButton> activationBtn;
 
 	UI_DynIntInput *length;
 	UI_DynIntInput *tag;
@@ -84,6 +86,9 @@ private:
 		bool expanded = true;
 	};
 	std::vector<CategoryHeader> categoryHeaders;
+
+	// Activation flags for UDMF (stored separately for popup button)
+	std::vector<const lineflag_t *> activationFlags;
 
 	// Dynamic UDMF line field widgets (configured via .ugh)
 	struct LineField
@@ -157,6 +162,7 @@ private:
 	void categoryToggled(class UI_CategoryButton *categoryBtn);
 
 	void updateCategoryDetails();
+	void onActivationFlagChanged(const lineflag_t *flag, int value);
 
 	static void    type_callback(Fl_Widget *, void *);
 	static void dyntype_callback(Fl_Widget *, void *);
