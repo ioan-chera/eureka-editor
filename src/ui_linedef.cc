@@ -469,10 +469,22 @@ void MultiTagView::calcNextTagPosition(int tagWidth, int position, int *tagX, in
 class ActivationPopup : public Fl_Menu_Window
 {
 public:
-	ActivationPopup(int width, int height) : Fl_Menu_Window(width, height)
+	ActivationPopup(int width, int height);
+
+	void setGridLayout(int rows, int columns) const
 	{
+		mGrid->layout(rows, columns);
 	}
+
+private:
+	Fl_Grid *mGrid;
 };
+
+ActivationPopup::ActivationPopup(int width, int height) : Fl_Menu_Window(width, height)
+{
+	mGrid = new Fl_Grid(x(), y(), width, height);
+	end();
+}
 
 
 class line_flag_CB_data_c

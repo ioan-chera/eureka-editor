@@ -26,6 +26,7 @@
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
+class ActivationPopup;
 class Fl_Flex;
 class Fl_Grid;
 class Fl_Simple_Counter;
@@ -50,6 +51,7 @@ private:
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
 	Fl_Button    *udmfActivationButton;
+	ActivationPopup *activationPopup;
 
 	UI_DynIntInput *length;
 	UI_DynIntInput *tag;
