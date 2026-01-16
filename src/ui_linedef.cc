@@ -19,32 +19,16 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
 #include "Instance.h"
 
-#include "main.h"
 #include "ui_category_button.h"
 #include "ui_misc.h"
-#include "ui_window.h"
 
-#include "e_checks.h"
-#include "e_cutpaste.h"
-#include "e_linedef.h"
-#include "e_main.h"
-#include "e_things.h"
-#include "LineDef.h"
-#include "m_game.h"
-#include "Sector.h"
-#include "SideDef.h"
 #include "w_rawdef.h"
-#include "ui_stackpanel.h"
 
 #include "FL/Fl_Flex.H"
 #include "FL/Fl_Grid.H"
 #include "FL/Fl_Hor_Value_Slider.H"
-#include "FL/Fl_Pack.H"
-
-#include <algorithm>
 
 
 #define MLF_ALL_AUTOMAP  \
