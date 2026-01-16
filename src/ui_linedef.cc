@@ -29,7 +29,7 @@
 #include "FL/Fl_Flex.H"
 #include "FL/Fl_Grid.H"
 #include "FL/Fl_Hor_Value_Slider.H"
-
+#include "FL/Fl_Menu_Window.H"
 
 #define MLF_ALL_AUTOMAP  \
 	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
@@ -466,6 +466,15 @@ void MultiTagView::calcNextTagPosition(int tagWidth, int position, int *tagX, in
 }
 
 
+class ActivationPopup : public Fl_Menu_Window
+{
+public:
+	ActivationPopup(int width, int height) : Fl_Menu_Window(width, height)
+	{
+	}
+};
+
+
 class line_flag_CB_data_c
 {
 public:
@@ -551,7 +560,13 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
 		actkind->deactivate();
 		actkind->hide();
+
+		udmfActivationButton = new Fl_Button(0, 0, 0, 0, "Activation");
+		udmfActivationButton->deactivate();
+		udmfActivationButton->hide();
+
 		descFlex->fixed(actkind, TYPE_INPUT_WIDTH);
+		descFlex->fixed(udmfActivationButton, TYPE_INPUT_WIDTH);
 
 		desc = new Fl_Output(0, 0, 0, 0);
 		desc->align(FL_ALIGN_LEFT);
@@ -1505,6 +1520,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 		if (inst.level.isLinedef(obj))
 		{
 			actkind->activate();
+			udmfActivationButton->active();
 
 			changed |= FlagsFromInt(inst.level.linedefs[obj]->flags);
 		}
@@ -1514,6 +1530,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 
 			actkind->value(getActivationCount());  // show as "??"
 			actkind->deactivate();
+			udmfActivationButton->deactivate();
 		}
 	}
 
@@ -1723,6 +1740,8 @@ bool UI_LineBox::FlagsFromInt(int lineflags)
 		actkind->value(new_act);
 	}
 
+	// TODO: set the UDMF activation button label
+
 	// Check UDMF visibility flags first if in UDMF mode
 	bool foundUDMFMatch = false;
 	if(inst.level.isLinedef(obj) && inst.loaded.levelFormat == MapFormat::udmf && !inst.conf.udmf_line_vis_flags.empty())
@@ -1912,6 +1931,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		actkind->add(getActivationMenuString());
 
 		actkind->show();
+		udmfActivationButton->hide();
 	}
 	else if(loaded.levelFormat == MapFormat::udmf)
 	{
@@ -1920,6 +1940,12 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		tag->tooltip("Tag of the linedef");
 
 		actkind->hide();	// UDMF uses the separate line flags for activation
+
+		// Actually, if there are ANY activation flags
+		if(config.features.udmf_lineparameters)
+			udmfActivationButton->show();
+		else
+			udmfActivationButton->hide();
 
 		if (config.features.gen_types)
 			gen->show();
@@ -1933,6 +1959,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		tag->tooltip("Tag of targeted sector(s)");
 
 		actkind->hide();
+		udmfActivationButton->hide();
 
 		if (config.features.gen_types)
 			gen->show();

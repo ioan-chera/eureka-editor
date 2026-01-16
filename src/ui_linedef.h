@@ -49,6 +49,7 @@ private:
 
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
+	Fl_Button    *udmfActivationButton;
 
 	UI_DynIntInput *length;
 	UI_DynIntInput *tag;
