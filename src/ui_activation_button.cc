@@ -20,247 +20,97 @@
 
 #include "ui_activation_button.h"
 #include "m_game.h"
-#include <FL/Fl.H>
-#include <FL/fl_draw.H>
 
-static constexpr int kCheckboxWidth = 110;
-static constexpr int kCheckboxHeight = 20;
-static constexpr int kGridPadding = 8;
-static constexpr int kRowHeight = 22;
-
-//------------------------------------------------------------------------
-// UI_ActivationPopup implementation
-//------------------------------------------------------------------------
-
-UI_ActivationPopup::UI_ActivationPopup(int W, int H) :
-	Fl_Menu_Window(W, H)
-{
-	box(FL_UP_BOX);
-	end();
-}
-
-int UI_ActivationPopup::handle(int event)
-{
-	switch(event)
-	{
-	case FL_PUSH:
-		// If click is outside our bounds, hide the popup
-		if(Fl::event_x() < 0 || Fl::event_x() >= w() ||
-		   Fl::event_y() < 0 || Fl::event_y() >= h())
-		{
-			hide();
-			return 1;
-		}
-		break;
-
-	case FL_UNFOCUS:
-		// Hide when losing focus
-		hide();
-		return 1;
-	}
-
-	return Fl_Menu_Window::handle(event);
-}
-
-void UI_ActivationPopup::setFlags(const std::vector<const lineflag_t *> &flags)
-{
-	// Clear existing checkboxes
-	if(mGrid)
-	{
-		remove(mGrid.get());
-		mGrid.reset();
-	}
-	mCheckboxes.clear();
-
-	if(flags.empty())
-		return;
-
-	// Calculate grid dimensions
-	const int numFlags = static_cast<int>(flags.size());
-	const int numRows = (numFlags + 1) / 2;
-	const int gridW = kCheckboxWidth * 2 + kGridPadding * 3;
-	const int gridH = kRowHeight * numRows + kGridPadding * 2;
-
-	// Resize window to fit
-	size(gridW, gridH);
-
-	// Create grid
-	begin();
-	mGrid = std::make_unique<Fl_Grid>(kGridPadding, kGridPadding,
-									  gridW - kGridPadding * 2, gridH - kGridPadding * 2);
-	mGrid->layout(numRows, 2);
-	mGrid->box(FL_NO_BOX);
-
-	// Create checkboxes
-	mCheckboxes.reserve(numFlags);
-	for(int i = 0; i < numFlags; ++i)
-	{
-		const lineflag_t *flag = flags[i];
-		const int row = i / 2;
-		const int col = i % 2;
-
-		auto checkbox = new Fl_Check_Button(0, 0, kCheckboxWidth, kCheckboxHeight,
-											flag->label.c_str());
-		checkbox->labelsize(12);
-		checkbox->callback(checkboxCallback, this);
-
-		mGrid->widget(checkbox, row, col);
-
-		FlagCheckbox fc;
-		fc.button = checkbox;
-		fc.info = flag;
-		mCheckboxes.push_back(fc);
-	}
-
-	mGrid->end();
-	end();
-}
-
-void UI_ActivationPopup::setCallback(const std::function<void(const lineflag_t *, int)> &cb)
-{
-	mCallback = cb;
-}
-
-void UI_ActivationPopup::updateFromFlags(int flags, int flags2)
-{
-	for(const FlagCheckbox &fc : mCheckboxes)
-	{
-		int flagVal = (fc.info->flagSet == 1) ? flags : flags2;
-		fc.button->value((flagVal & fc.info->value) ? 1 : 0);
-	}
-}
-
-void UI_ActivationPopup::checkboxCallback(Fl_Widget *w, void *data)
-{
-	auto popup = static_cast<UI_ActivationPopup *>(data);
-	auto checkbox = static_cast<Fl_Check_Button *>(w);
-
-	// Find which flag was toggled
-	for(const FlagCheckbox &fc : popup->mCheckboxes)
-	{
-		if(fc.button == checkbox)
-		{
-			if(popup->mCallback)
-				popup->mCallback(fc.info, checkbox->value());
-			break;
-		}
-	}
-}
-
-SString UI_ActivationPopup::getSummary() const
-{
-	SString summary;
-	for(const FlagCheckbox &fc : mCheckboxes)
-	{
-		if(fc.button->value())
-			summary += fc.info->inCategoryAcronym;
-	}
-	return summary;
-}
+static constexpr const char *kDefaultLabel = "Activation...";
 
 //------------------------------------------------------------------------
 // UI_ActivationButton implementation
 //------------------------------------------------------------------------
 
 UI_ActivationButton::UI_ActivationButton(int X, int Y, int W, int H, const char *label) :
-	Fl_Button(X, Y, W, H, label)
+	Fl_Menu_Button(X, Y, W, H, label)
 {
-	box(FL_UP_BOX);
-	down_box(FL_DOWN_BOX);
+	copy_label(kDefaultLabel);
 	align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-}
-
-int UI_ActivationButton::handle(int event)
-{
-	if(event == FL_PUSH)
-	{
-		if(mPopup && mPopup->visible())
-			hidePopup();
-		else
-			showPopup();
-		return 1;
-	}
-
-	return Fl_Button::handle(event);
 }
 
 void UI_ActivationButton::setFlags(const std::vector<const lineflag_t *> &flags)
 {
 	mFlags = flags;
 
-	// Create or recreate popup with these flags
-	mPopup = std::make_unique<UI_ActivationPopup>(200, 200);
-	mPopup->setFlags(flags);
-	mPopup->setCallback([this](const lineflag_t *flag, int value) {
-		if(mCallback)
-			mCallback(flag, value);
-		updateSummaryLabel();
-	});
+	// Clear and rebuild the menu
+	clear();
+
+	for(size_t i = 0; i < flags.size(); ++i)
+	{
+		const lineflag_t *flag = flags[i];
+		// Add checkable menu item
+		add(flag->label.c_str(), 0, menuCallback, this, FL_MENU_TOGGLE);
+	}
 }
 
 void UI_ActivationButton::setCallback(const std::function<void(const lineflag_t *, int)> &cb)
 {
 	mCallback = cb;
-	if(mPopup)
-	{
-		mPopup->setCallback([this, cb](const lineflag_t *flag, int value) {
-			if(cb)
-				cb(flag, value);
-			updateSummaryLabel();
-		});
-	}
 }
 
 void UI_ActivationButton::updateFromFlags(int flags, int flags2)
 {
-	if(mPopup)
-		mPopup->updateFromFlags(flags, flags2);
-	updateSummaryLabel();
+	// Update the check state of each menu item based on the flag values
+	for(size_t i = 0; i < mFlags.size(); ++i)
+	{
+		const lineflag_t *flag = mFlags[i];
+		int flagVal = (flag->flagSet == 1) ? flags : flags2;
+		bool isSet = (flagVal & flag->value) != 0;
+
+		Fl_Menu_Item *item = const_cast<Fl_Menu_Item *>(&menu()[i]);
+		if(isSet)
+			item->set();
+		else
+			item->clear();
+	}
+
+	updateLabel();
 }
 
-void UI_ActivationButton::updateSummaryLabel()
+void UI_ActivationButton::updateLabel()
 {
-	if(mPopup)
-		mSummary = mPopup->getSummary();
-	else
-		mSummary.clear();
+	mLabelText.clear();
+
+	// Build summary from checked menu items
+	for(size_t i = 0; i < mFlags.size(); ++i)
+	{
+		const Fl_Menu_Item &item = menu()[i];
+		if(item.value())
+			mLabelText += mFlags[i]->inCategoryAcronym;
+	}
 
 	// Update button label
-	if(mSummary.empty())
-		copy_label("Activation");
+	if(mLabelText.empty())
+		copy_label(kDefaultLabel);
 	else
-		copy_label(("Activation: " + mSummary).c_str());
+		copy_label(mLabelText.c_str());
 
 	redraw();
 }
 
-void UI_ActivationButton::showPopup()
+void UI_ActivationButton::menuCallback(Fl_Widget *w, void *data)
 {
-	if(!mPopup)
+	auto button = static_cast<UI_ActivationButton *>(data);
+
+	// Find which menu item was toggled
+	int index = button->value();
+	if(index < 0 || index >= static_cast<int>(button->mFlags.size()))
 		return;
 
-	// Position popup below the button
-	int popupX = window()->x() + x();
-	int popupY = window()->y() + y() + h();
+	const lineflag_t *flag = button->mFlags[index];
+	const Fl_Menu_Item &item = button->menu()[index];
+	int isChecked = item.value() ? 1 : 0;
 
-	// Ensure popup stays on screen
-	int screenW = Fl::w();
-	int screenH = Fl::h();
+	if(button->mCallback)
+		button->mCallback(flag, isChecked);
 
-	if(popupX + mPopup->w() > screenW)
-		popupX = screenW - mPopup->w();
-	if(popupY + mPopup->h() > screenH)
-		popupY = window()->y() + y() - mPopup->h();
-
-	mPopup->position(popupX, popupY);
-	mPopup->show();
-	mPopup->take_focus();
-}
-
-void UI_ActivationButton::hidePopup()
-{
-	if(mPopup)
-		mPopup->hide();
+	button->updateLabel();
 }
 
 //--- editor settings ---
