@@ -29,7 +29,6 @@
 #include "FL/Fl_Flex.H"
 #include "FL/Fl_Grid.H"
 #include "FL/Fl_Hor_Value_Slider.H"
-#include "FL/Fl_Menu_Window.H"
 
 #define MLF_ALL_AUTOMAP  \
 	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
@@ -466,27 +465,6 @@ void MultiTagView::calcNextTagPosition(int tagWidth, int position, int *tagX, in
 }
 
 
-class ActivationPopup : public Fl_Menu_Window
-{
-public:
-	ActivationPopup(int width, int height);
-
-	void setGridLayout(int rows, int columns) const
-	{
-		mGrid->layout(rows, columns);
-	}
-
-private:
-	Fl_Grid *mGrid;
-};
-
-ActivationPopup::ActivationPopup(int width, int height) : Fl_Menu_Window(width, height)
-{
-	mGrid = new Fl_Grid(x(), y(), width, height);
-	end();
-}
-
-
 class line_flag_CB_data_c
 {
 public:
@@ -573,8 +551,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		actkind->deactivate();
 		actkind->hide();
 
-		udmfActivationButton = new Fl_Button(0, 0, 0, 0, "Activation");
-		udmfActivationButton->deactivate();
+		udmfActivationButton = new Fl_Menu_Button(0, 0, 0, 0, "Activation");
 		udmfActivationButton->hide();
 
 		descFlex->fixed(actkind, TYPE_INPUT_WIDTH);
@@ -1217,7 +1194,7 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 	struct IntFieldMapping
 	{
 		const char *name;
-		int fieldID;
+		byte fieldID;
 	};
 
 	static const IntFieldMapping intFieldMapping[] =
@@ -1532,7 +1509,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 		if (inst.level.isLinedef(obj))
 		{
 			actkind->activate();
-			udmfActivationButton->active();
+			udmfActivationButton->activate();
 
 			changed |= FlagsFromInt(inst.level.linedefs[obj]->flags);
 		}
@@ -1561,7 +1538,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	{
 		const char *const name;
 		int LineDef::* field;
-		int fieldID;
+		byte fieldID;
 	};
 
 	static const IntFieldMapping intFieldMappings[] =
@@ -2020,6 +1997,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 	categoryHeaders.clear();
 	flagButtons.clear();
+	udmfActivationButton->clear();
 
 	int Y = y() + flagsStartY;
 
@@ -2043,7 +2021,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			categorized[catName].push_back(&f);
 		}
 
-		const int FW = 110;
+		static const int FW = 110;
 		const int leftX = x() + flagsStartX + 28;
 		const int rightX = x() + flagsStartX + flagsAreaW - 120;
 		const int rowH = 19;
@@ -2055,6 +2033,16 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		{
 			const SString &catName = catPair.first;
 			const std::vector<const lineflag_t *> &flagsInCat = catPair.second;
+
+			if(catName.noCaseEqual("activation"))
+			{
+				for(const lineflag_t *flag : flagsInCat)
+				{
+					// TODO: add callback
+					udmfActivationButton->add(flag->label.c_str(), 0, nullptr, nullptr, FL_MENU_TOGGLE);
+				}
+				continue;
+			}
 
 			CategoryHeader catHeader = {};
 			if(!catName.empty())
@@ -2114,7 +2102,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				const int baseX = onLeft ? leftX : rightX;
 				int& curY = onLeft ? yLeft : yRight;
 
-				auto addButton = [baseX, curY, this, FW, &catHeader](int offset, const lineflag_t *flag)
+				auto addButton = [baseX, curY, this, &catHeader](int offset, const lineflag_t *flag)
 					{
 						LineFlagButton fb;
 						fb.button = new Fl_Check_Button(baseX + offset, curY + 2, FW, 20,
