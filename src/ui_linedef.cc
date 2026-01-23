@@ -470,28 +470,30 @@ void MultiTagView::calcNextTagPosition(int tagWidth, int position, int *tagX, in
 class ActivationPopup : public Fl_Window
 {
 public:
-	ActivationPopup(int x, int y, int w, int h);
+	ActivationPopup(UI_LineBox *box, int x, int y, int w, int h);
 
 	int handle(int event) override;
 	void show() override;
 
-	void setFlags(std::vector<const lineflag_t *> &&flags);
+	void setFlags(const std::vector<const lineflag_t *> &flags);
+	bool updateCheckBoxes(int lineflags, int set);
 
 private:
 	enum
 	{
 		MARGIN = 8,
 	};
+	UI_LineBox *const mParent;
+
 
 	Fl_Grid *mGrid;
-	std::vector<const lineflag_t *> mFlags;
-	std::vector<Fl_Check_Button *> mButtons;
-	// TODO: callback data
+	std::vector<UI_LineBox::LineFlagButton> mFlagButtons;
 
 	bool mDuringShowCall = false;
 };
 
-ActivationPopup::ActivationPopup(int x, int y, int w, int h) : Fl_Window(x, y, w, h)
+ActivationPopup::ActivationPopup(UI_LineBox *box, int x, int y, int w, int h) :
+	Fl_Window(x, y, w, h), mParent(box)
 {
 	clear_border();
 
@@ -525,30 +527,51 @@ void ActivationPopup::show()
 	mDuringShowCall = false;
 }
 
-void ActivationPopup::setFlags(std::vector<const lineflag_t *> &&flags)
+void ActivationPopup::setFlags(const std::vector<const lineflag_t *> &flags)
 {
-	mFlags = std::move(flags);
-	mGrid->clear();
-	mButtons.clear();
-	mButtons.reserve(mFlags.size());
+	mFlagButtons.resize(flags.size());
 
-	int numRows = ((int)mFlags.size() + 1) / 2;
+	mGrid->clear();	// this will delete all buttons
+
+	int numRows = ((int)flags.size() + 1) / 2;
 	mGrid->layout(numRows, 2);
 	mGrid->size(mGrid->w(), FLAG_ROW_HEIGHT * numRows);
 	size(mGrid->w() + 2 * MARGIN, mGrid->h() + 2 * MARGIN);
 
 	mGrid->begin();
-	for(size_t i = 0; i < mFlags.size(); ++i)
+	for(size_t i = 0; i < flags.size(); ++i)
 	{
-		const lineflag_t *flag = mFlags[i];
-		Fl_Check_Button *button = new Fl_Check_Button(0, 0, 0, 0);
-		button->copy_label(flag->label.c_str());
-		mGrid->widget(button, (int)i % numRows, (int)i / numRows);
-		// TODO: set callback
+		const lineflag_t *flag = flags[i];
+
+		UI_LineBox::LineFlagButton &flagButton = mFlagButtons[i];
+
+		flagButton.button = new Fl_Check_Button(0, 0, 0, 0);
+		flagButton.button->copy_label(flag->label.c_str());
+		
+		mGrid->widget(flagButton.button, (int)i % numRows, (int)i / numRows);
+		flagButton.data = std::make_unique<line_flag_CB_data_c>(mParent, flag->flagSet == 1 ?
+			flag->value : 0, flag->flagSet == 2 ? flag->value : 0);
+
+		flagButton.button->callback(UI_LineBox::flags_callback, flagButton.data.get());
+
+		flagButton.info = flag;
 		// TODO: replace menu button with button opening this window
-		mButtons.push_back(button);
 	}
 	mGrid->end();
+}
+
+bool ActivationPopup::updateCheckBoxes(int lineflags, int set)
+{
+	bool changed = false;
+	for(const auto& button : mFlagButtons)
+	{
+		if(!button.button || button.info->flagSet != set)
+			continue;
+		int newValue = (lineflags & button.info->value) ? 1 : 0;
+		changed = changed || (button.button->value() != newValue);
+		button.button->value(newValue);
+	}
+	return changed;
 }
 
 
@@ -756,7 +779,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	panel->end();
 	end();
 
-	activationPopup = new ActivationPopup(200, 200, 200, 200);
+	activationPopup = new ActivationPopup(this, 200, 200, 200, 200);
 	activationPopup->hide();
 
 	resizable(nullptr);
@@ -1878,7 +1901,7 @@ bool UI_LineBox::FlagsFromInt(int lineflags)
 	}
 
 	// Set dynamic line flag buttons
-	bool changed = false;
+	bool changed = activationPopup->updateCheckBoxes(lineflags, 1);
 	for(const auto &btn : flagButtons)
 	{
 		if(btn.button && btn.info->flagSet == 1)
@@ -1893,7 +1916,7 @@ bool UI_LineBox::FlagsFromInt(int lineflags)
 
 bool UI_LineBox::Flags2FromInt(int lineflags)
 {
-	bool changed = false;
+	bool changed = activationPopup->updateCheckBoxes(lineflags, 2);
 	for(const auto &btn : flagButtons)
 	{
 		if(btn.button && btn.info->flagSet == 2)
