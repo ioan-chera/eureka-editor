@@ -68,6 +68,8 @@ enum
 	ARG_LABELSIZE = 10,
 
 	FIELD_HEIGHT = 22,
+
+	FLAG_ROW_HEIGHT = 19,
 };
 
 
@@ -473,13 +475,28 @@ public:
 	int handle(int event) override;
 	void show() override;
 
+	void setFlags(std::vector<const lineflag_t *> &&flags);
+
 private:
+	enum
+	{
+		MARGIN = 8,
+	};
+
+	Fl_Grid *mGrid;
+	std::vector<const lineflag_t *> mFlags;
+	std::vector<Fl_Check_Button *> mButtons;
+	// TODO: callback data
+
 	bool mDuringShowCall = false;
 };
 
 ActivationPopup::ActivationPopup(int x, int y, int w, int h) : Fl_Window(x, y, w, h)
 {
 	clear_border();
+
+	mGrid = new Fl_Grid(x + MARGIN, y + MARGIN, w - 2 * MARGIN, h - 2 * MARGIN);
+
 	end();
 }
 
@@ -506,6 +523,32 @@ void ActivationPopup::show()
 	mDuringShowCall = true;
 	Fl_Window::show();
 	mDuringShowCall = false;
+}
+
+void ActivationPopup::setFlags(std::vector<const lineflag_t *> &&flags)
+{
+	mFlags = std::move(flags);
+	mGrid->clear();
+	mButtons.clear();
+	mButtons.reserve(mFlags.size());
+
+	int numRows = ((int)mFlags.size() + 1) / 2;
+	mGrid->layout(numRows, 2);
+	mGrid->size(mGrid->w(), FLAG_ROW_HEIGHT * numRows);
+	size(mGrid->w() + 2 * MARGIN, mGrid->h() + 2 * MARGIN);
+
+	mGrid->begin();
+	for(size_t i = 0; i < mFlags.size(); ++i)
+	{
+		const lineflag_t *flag = mFlags[i];
+		Fl_Check_Button *button = new Fl_Check_Button(0, 0, 0, 0);
+		button->copy_label(flag->label.c_str());
+		mGrid->widget(button, (int)i % numRows, (int)i / numRows);
+		// TODO: set callback
+		// TODO: replace menu button with button opening this window
+		mButtons.push_back(button);
+	}
+	mGrid->end();
 }
 
 
@@ -2071,7 +2114,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		static const int FW = 110;
 		const int leftX = x() + flagsStartX + 28;
 		const int rightX = x() + flagsStartX + flagsAreaW - 120;
-		const int rowH = 19;
 
 		//begin();
 
@@ -2083,11 +2125,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 			if(catName.noCaseEqual("activation"))
 			{
-				for(const lineflag_t *flag : flagsInCat)
-				{
-					// TODO: add callback
-					udmfActivationButton->add(flag->label.c_str(), 0, nullptr, nullptr, FL_MENU_TOGGLE);
-				}
+				activationPopup->setFlags(std::vector(flagsInCat));
 				continue;
 			}
 
@@ -2103,7 +2141,8 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				Y += FIELD_HEIGHT;
 			}
 			const int numRows = (int(flagsInCat.size()) + 1) / 2;
-			catHeader.grid = std::make_unique<Fl_Grid>(leftX, 0, FW + rightX - leftX, rowH * numRows);
+			catHeader.grid = std::make_unique<Fl_Grid>(leftX, 0, FW + rightX - leftX,
+													   FLAG_ROW_HEIGHT * numRows);
 			catHeader.grid->layout(numRows, 2);
 
 			struct Slot
@@ -2172,7 +2211,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				if(s.b)
 				{
 					// If we have a B, we deal with a pair, so make a group to assign it into the grid
-					Fl_Group *pairGroup = new Fl_Group(baseX, curY, FW, rowH);
+					Fl_Group *pairGroup = new Fl_Group(baseX, curY, FW, FLAG_ROW_HEIGHT);
 					pairGroup->end();
 
 					if(s.a)
@@ -2187,7 +2226,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 					catHeader.grid->add(widget);
 					catHeader.grid->widget(widget, idx % leftCount, onLeft ? 0 : 1);
 				}
-				curY += rowH;
+				curY += FLAG_ROW_HEIGHT;
 			}
 
 			Y = (yLeft > yRight ? yLeft : yRight);
