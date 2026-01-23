@@ -465,6 +465,50 @@ void MultiTagView::calcNextTagPosition(int tagWidth, int position, int *tagX, in
 }
 
 
+class ActivationPopup : public Fl_Window
+{
+public:
+	ActivationPopup(int x, int y, int w, int h);
+
+	int handle(int event) override;
+	void show() override;
+
+private:
+	bool mDuringShowCall = false;
+};
+
+ActivationPopup::ActivationPopup(int x, int y, int w, int h) : Fl_Window(x, y, w, h)
+{
+	clear_border();
+	end();
+}
+
+int ActivationPopup::handle(int event)
+{
+	switch(event)
+	{
+		case FL_UNFOCUS:
+			// Events may trigger right in the middle of a show() call, and it's invalid to call
+			// hide() during that, so avoid it.
+			if(mDuringShowCall)
+				break;
+			hide();
+			return 1;
+		default:
+			break;
+	}
+
+	return Fl_Window::handle(event);
+}
+
+void ActivationPopup::show()
+{
+	mDuringShowCall = true;
+	Fl_Window::show();
+	mDuringShowCall = false;
+}
+
+
 class line_flag_CB_data_c
 {
 public:
@@ -668,6 +712,9 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	//scroll->end();
 	panel->end();
 	end();
+
+	activationPopup = new ActivationPopup(200, 200, 200, 200);
+	activationPopup->hide();
 
 	resizable(nullptr);
 }

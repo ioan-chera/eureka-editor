@@ -51,6 +51,7 @@ private:
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
 	Fl_Menu_Button *udmfActivationButton;
+	ActivationPopup *activationPopup;
 
 	UI_DynIntInput *length;
 	UI_DynIntInput *tag;
