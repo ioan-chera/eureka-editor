@@ -498,6 +498,7 @@ ActivationPopup::ActivationPopup(UI_LineBox *box, int x, int y, int w, int h) :
 	clear_border();
 
 	mGrid = new Fl_Grid(x + MARGIN, y + MARGIN, w - 2 * MARGIN, h - 2 * MARGIN);
+	mGrid->end();
 
 	end();
 }
@@ -538,7 +539,6 @@ void ActivationPopup::setFlags(const std::vector<const lineflag_t *> &flags)
 	mGrid->size(mGrid->w(), FLAG_ROW_HEIGHT * numRows);
 	size(mGrid->w() + 2 * MARGIN, mGrid->h() + 2 * MARGIN);
 
-	mGrid->begin();
 	for(size_t i = 0; i < flags.size(); ++i)
 	{
 		const lineflag_t *flag = flags[i];
@@ -547,7 +547,8 @@ void ActivationPopup::setFlags(const std::vector<const lineflag_t *> &flags)
 
 		flagButton.button = new Fl_Check_Button(0, 0, 0, 0);
 		flagButton.button->copy_label(flag->label.c_str());
-		
+
+		mGrid->add(flagButton.button);
 		mGrid->widget(flagButton.button, (int)i % numRows, (int)i / numRows);
 		flagButton.data = std::make_unique<line_flag_CB_data_c>(mParent, flag->flagSet == 1 ?
 			flag->value : 0, flag->flagSet == 2 ? flag->value : 0);
@@ -557,7 +558,8 @@ void ActivationPopup::setFlags(const std::vector<const lineflag_t *> &flags)
 		flagButton.info = flag;
 		// TODO: replace menu button with button opening this window
 	}
-	mGrid->end();
+
+	redraw();
 }
 
 bool ActivationPopup::updateCheckBoxes(int lineflags, int set)
@@ -661,8 +663,13 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		actkind->deactivate();
 		actkind->hide();
 
-		udmfActivationButton = new Fl_Menu_Button(0, 0, 0, 0, "Activation");
+		udmfActivationButton = new Fl_Button(0, 0, 0, 0, "Activation");
 		udmfActivationButton->hide();
+		udmfActivationButton->callback([](Fl_Widget *widget, void *data)
+									   {
+			auto box = static_cast<UI_LineBox *>(data);
+			box->activationPopup->show();
+		}, this);
 
 		descFlex->fixed(actkind, TYPE_INPUT_WIDTH);
 		descFlex->fixed(udmfActivationButton, TYPE_INPUT_WIDTH);

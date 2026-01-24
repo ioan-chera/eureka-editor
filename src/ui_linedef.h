@@ -50,7 +50,7 @@ private:
 
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
-	Fl_Menu_Button *udmfActivationButton;
+	Fl_Button    *udmfActivationButton;
 
 	friend class ActivationPopup;
 	ActivationPopup *activationPopup;
