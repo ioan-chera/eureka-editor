@@ -21,6 +21,31 @@
 #ifndef M_UDMF_H_
 #define M_UDMF_H_
 
+struct ConfigData;
+
+enum class UDMF_LineFeature : unsigned
+{
+	anycross,
+	checkswitchrange,
+	damagespecial,
+	deathspecial,
+
+	firstsideonly,
+	impact,
+	missilecross,
+	monsteractivate,
+
+	monstercross,
+	monsterpush,
+	monsteruse,
+	playercross,
+
+	playerpush,
+	playeruse,
+	playeruseback,
+	repeatspecial,
+};
+
 struct UDMFMapping
 {
 	enum class Category
@@ -36,5 +61,8 @@ struct UDMFMapping
 	const int flagSet;
 	const unsigned value;
 };
+
+bool UDMF_AddLineFeature(ConfigData &config, const char *featureName);
+bool UDMF_HasLineFeature(const ConfigData &config, UDMF_LineFeature feature);
 
 #endif

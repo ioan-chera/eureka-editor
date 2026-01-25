@@ -137,6 +137,8 @@ public:
 	}
 
 private:
+	void updateUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config);
+
 	int getActivationCount() const;
 	const char *getActivationMenuString() const;
 

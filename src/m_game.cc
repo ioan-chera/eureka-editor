@@ -800,6 +800,15 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			gLog.printf("Unknown UDMF line flag '%s'\n", flag.udmfKey.c_str());
 	}
 
+	else if(y_stricmp(argv[0], "udmf_linedef") == 0)
+	{
+		if(nargs < 1)
+			pst->fail(bad_arg_count_fail, argv[0], 1);
+
+		if(!UDMF_AddLineFeature(config, argv[1]))
+			gLog.printf("Unknown UDMF linedef feature '%s'\n", argv[1]);
+	}
+
 	else if(y_stricmp(argv[0], "udmf_linemapflag") == 0)
 	{
 		if(nargs < 2)

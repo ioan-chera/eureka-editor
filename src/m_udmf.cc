@@ -111,6 +111,53 @@ static constexpr UDMFMapping kUDMFMapping[] = {
 	{ "countsecret", UDMFMapping::Category::thing, 1, (unsigned)MTF_UDMF_CountSecret },
 };
 
+// Returns false on invalid string
+bool UDMF_AddLineFeature(ConfigData &config, const char *featureName)
+{
+	struct FeatureMap
+	{
+		const char *name;
+		UDMF_LineFeature flagIndex;
+	};
+
+#define ENTRY(a) { #a, UDMF_LineFeature::a }
+	static const FeatureMap map[] =
+	{
+		ENTRY(anycross),
+		ENTRY(checkswitchrange),
+		ENTRY(damagespecial),
+		ENTRY(deathspecial),
+		ENTRY(firstsideonly),
+		ENTRY(impact),
+		ENTRY(missilecross),
+		ENTRY(monsteractivate),
+		ENTRY(monstercross),
+		ENTRY(monsterpush),
+		ENTRY(monsteruse),
+		ENTRY(playercross),
+		ENTRY(playerpush),
+		ENTRY(playeruse),
+		ENTRY(playeruseback),
+		ENTRY(repeatspecial),
+	};
+#undef ENTRY
+
+	for(const FeatureMap &entry : map)
+	{
+		if (y_stricmp(entry.name, featureName) == 0)
+		{
+			config.udmfLineFeatures |= (1ULL << (uint64_t)entry.flagIndex);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool UDMF_HasLineFeature(const ConfigData &config, UDMF_LineFeature feature)
+{
+	return (config.udmfLineFeatures & (1ULL << (uint64_t)feature)) != 0;
+}
+
 class Udmf_Token
 {
 private:

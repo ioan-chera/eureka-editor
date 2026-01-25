@@ -24,6 +24,7 @@
 #include "ui_category_button.h"
 #include "ui_misc.h"
 
+#include "m_udmf.h"
 #include "w_rawdef.h"
 
 #include "FL/Fl_Flex.H"
@@ -849,6 +850,122 @@ void UI_LineBox::checkSidesDirtyFields()
 	back->checkDirtyFields();
 }
 
+void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config)
+{
+	udmfActivationButton->clear();
+	udmfActivationMenuItems.clear();
+	switch(loaded.levelFormat)
+	{
+		case MapFormat::udmf:
+			if(config.features.udmf_lineparameters)
+			{
+				udmfActivationButton->show();
+				break;
+			}
+			// else fall through
+		case MapFormat::doom:
+		case MapFormat::hexen:
+			udmfActivationButton->hide();
+			return;
+	}
+
+	// We have it, so let's do it.
+	struct ActivationMapping
+	{
+		UDMF_LineFeature feature;
+		const char *label;
+		const char *tooltip;
+		int value;
+		int flagSet;
+
+	};
+
+	// Description source: https://github.com/ZDoom/gzdoom/blob/g4.14.2/specs/udmf_zdoom.txt
+	static const ActivationMapping activatorAndMode[] =
+	{
+		{ UDMF_LineFeature::playercross, "Player crossing",
+		"Player crossing will trigger this line", MLF_UDMF_PlayerCross, 1 },
+		{ UDMF_LineFeature::playeruse, "Player using", "Player operating will trigger this line",
+	    MLF_UDMF_PlayerUse, 1 },
+		{ UDMF_LineFeature::playerpush, "Player bumping", "Player bumping will trigger this line",
+		MLF_UDMF_PlayerPush, 1 },
+		{ UDMF_LineFeature::monstercross, "Monster crossing",
+		"Monster crossing will trigger this line", MLF_UDMF_MonsterCross, 1 },
+		{ UDMF_LineFeature::monsteruse, "Monster using", "Monster operating will trigger this line",
+		MLF_UDMF_MonsterUse, 1 },
+		{ UDMF_LineFeature::monsterpush, "Monster bumping",
+		"Monster pushing will trigger this line", MLF_UDMF_MonsterPush, 1 },
+		{ UDMF_LineFeature::impact, "On gunshot",
+		"Shooting bullets will trigger this line", MLF_UDMF_Impact, 1 },
+		{ UDMF_LineFeature::missilecross, "Projectile crossing",
+		"Projectile crossing will trigger this line", MLF_UDMF_MissileCross, 1 },
+		{ UDMF_LineFeature::anycross, "Anything crossing",
+		"Any non-projectile crossing will trigger this line", MLF2_UDMF_AnyCross, 2 },
+	};
+
+	static const ActivationMapping mainFlags[] =
+	{
+		{ UDMF_LineFeature::repeatspecial, "Repeatable activation", "Allow retriggering",
+		MLF_UDMF_RepeatSpecial, 1 },
+		{ UDMF_LineFeature::checkswitchrange, "Check switch range",
+		"Switch can only be activated when vertically reachable", MLF2_UDMF_CheckSwitchRange, 2 },
+		{ UDMF_LineFeature::firstsideonly, "First side only",
+		"Line can only be triggered from the front side", MLF2_UDMF_FirstSideOnly, 2 },
+		{ UDMF_LineFeature::playeruseback, "Player can use from behind",
+		"Player can use from back (left) side", MLF2_UDMF_PlayerUseBack, 2 },
+		{ UDMF_LineFeature::monsteractivate, "Monster can activate",
+		"Monsters can trigger this line (for compatibility only)", MLF2_UDMF_MonsterActivate, 2 },
+	};
+
+	static const ActivationMapping destructibleFlags[] =
+	{
+		{ UDMF_LineFeature::damagespecial, "Trigger on damage",
+		"This line will call special if having health > 0 and receiving damage",
+		MLF2_UDMF_DamageSpecial, 2 },
+		{ UDMF_LineFeature::deathspecial, "Trigger on death",
+		"This line will call special if health was reduced to 0", MLF2_UDMF_DeathSpecial, 2 },
+	};
+
+	auto addItem = [this, &config](const ActivationMapping &entry, bool &addSeparator)
+	{
+		if(!UDMF_HasLineFeature(config, entry.feature))
+			return;
+
+		if(addSeparator && !udmfActivationMenuItems.empty())
+		{
+			udmfActivationMenuItems.back().flags |= FL_MENU_DIVIDER;
+			addSeparator =false;
+		}
+
+		Fl_Menu_Item item = {};
+		item.flags = FL_MENU_TOGGLE;
+		item.text = entry.label;
+		// FIXME: tooltip
+
+		LineFlagButton button{};
+		button.udmfActivationMenuIndex = static_cast<int>(udmfActivationMenuItems.size());
+		button.data = std::make_unique<line_flag_CB_data_c>(
+			this, entry.flagSet == 1 ? entry.value : 0, entry.flagSet == 2 ? entry.value : 0
+		);
+		// TODO: info
+		flagButtons.push_back(std::move(button));
+		item.callback(flags_callback, flagButtons.back().data.get());
+		udmfActivationMenuItems.push_back(std::move(item));
+	};
+
+	bool addSeparator = false;
+	for(const ActivationMapping &entry : activatorAndMode)
+		addItem(entry, addSeparator);
+	addSeparator = true;
+	for(const ActivationMapping &entry : mainFlags)
+		addItem(entry, addSeparator);
+	addSeparator = true;
+	for(const ActivationMapping &entry : destructibleFlags)
+		addItem(entry, addSeparator);
+	udmfActivationMenuItems.emplace_back();
+	udmfActivationButton->menu(udmfActivationMenuItems.data());
+}
+
 int UI_LineBox::getActivationCount() const
 {
 	return inst.conf.features.player_use_passthru_activation ? 14 : 12;
@@ -1371,20 +1488,6 @@ void UI_LineBox::updateCategoryDetails()
 		header.button->details(summaryText);
 	}
 
-	SString summaryText;
-	for(const LineFlagButton &button : flagButtons)
-	{
-		if(button.udmfActivationMenuIndex < 0)
-			continue;
-		const Fl_Menu_Item &item = udmfActivationMenuItems[button.udmfActivationMenuIndex];
-		if(!item.value())
-			continue;
-		summaryText += button.info->inCategoryAcronym;
-	}
-	if(summaryText.good())
-		udmfActivationButton->copy_label(summaryText.c_str());
-	else
-		udmfActivationButton->label(UDMF_ACTIVATION_BUTTON_LABEL);
 }
 
 void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
@@ -1521,7 +1624,6 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 		{
 			mFixUp.setInputValue(type, "");
 			desc->value("");
-			choose->label("Choose");
 
 			inst.main_win->browser->UpdateGenType(0);
 		}
@@ -1742,9 +1844,10 @@ bool UI_LineBox::updateDynamicFlagControls(int lineFlags, int flagSet)
 	bool changed = false;
 	for(const auto &btn : flagButtons)
 	{
-		if(btn.info->flagSet != flagSet)
+		if(!btn.data || (flagSet == 1 && !btn.data->mask) || (flagSet == 2 && !btn.data->mask2))
 			continue;
-		const int newValue = (lineFlags & btn.info->value) ? 1 : 0;
+		const int newValue = ((flagSet == 1 && btn.data->mask & lineFlags) ||
+							  (flagSet == 2 && btn.data->mask2 & lineFlags)) ? 1 : 0;
 		if(btn.button)
 		{
 			changed = changed || (btn.button->value() != newValue);
@@ -1885,29 +1988,14 @@ void UI_LineBox::CalcFlags(int &outFlags, int &outFlags2) const
 	// Apply dynamic flags
 	for(const auto &btn : flagButtons)
 	{
-		if(btn.button)
+		if(!btn.data || (btn.button && !btn.button->value()) ||
+		   (btn.udmfActivationMenuIndex >= 0 &&
+			!udmfActivationMenuItems[btn.udmfActivationMenuIndex].value()))
 		{
-			if(btn.button->value())
-			{
-				if(btn.info->flagSet == 1)
-					outFlags |= btn.info->value;
-				else if(btn.info->flagSet == 2)
-					outFlags2 |= btn.info->value;
-			}
 			continue;
 		}
-		if(btn.udmfActivationMenuIndex >= 0)
-		{
-			const Fl_Menu_Item &item = udmfActivationMenuItems[btn.udmfActivationMenuIndex];
-			if(item.value())
-			{
-				if(btn.info->flagSet == 1)
-					outFlags |= btn.info->value;
-				else if(btn.info->flagSet == 2)
-					outFlags2 |= btn.info->value;
-			}
-			continue;
-		}
+		outFlags |= btn.data->mask;
+		outFlags2 |= btn.data->mask2;
 	}
 }
 
@@ -1951,8 +2039,6 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 
 void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
-	choose->label("Choose");
-
 	if (loaded.levelFormat == MapFormat::hexen)
 	{
 		tag->hide();
@@ -1962,7 +2048,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		actkind->add(getActivationMenuString());
 
 		actkind->show();
-		udmfActivationButton->hide();
 	}
 	else if(loaded.levelFormat == MapFormat::udmf)
 	{
@@ -1971,12 +2056,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		tag->tooltip("Tag of the linedef");
 
 		actkind->hide();	// UDMF uses the separate line flags for activation
-
-		// Actually, if there are ANY activation flags
-		if(config.features.udmf_lineparameters)
-			udmfActivationButton->show();
-		else
-			udmfActivationButton->hide();
 
 		if (config.features.gen_types)
 			gen->show();
@@ -1990,7 +2069,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		tag->tooltip("Tag of targeted sector(s)");
 
 		actkind->hide();
-		udmfActivationButton->hide();
 
 		if (config.features.gen_types)
 			gen->show();
@@ -2039,7 +2117,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 	categoryHeaders.clear();
 	flagButtons.clear();
-	udmfActivationButton->clear();
+	updateUDMFActivationMenu(loaded, config);
 
 	int Y = y() + flagsStartY;
 
@@ -2074,35 +2152,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		{
 			const SString &catName = catPair.first;
 			const std::vector<const lineflag_t *> &flagsInCat = catPair.second;
-
-			if(catName.noCaseEqual("activation"))
-			{
-				udmfActivationMenuItems.clear();
-				udmfActivationMenuItems.reserve(flagsInCat.size());
-				for(const lineflag_t *flag : flagsInCat)
-				{
-					Fl_Menu_Item item = {};
-					item.flags = FL_MENU_TOGGLE;
-					item.text = flag->label.c_str();
-
-					LineFlagButton flagButton{};
-					flagButton.udmfActivationMenuIndex = (int)udmfActivationMenuItems.size();
-					flagButton.data = std::make_unique<line_flag_CB_data_c>(
-						this, flag->flagSet == 1 ? flag->value : 0,
-						flag->flagSet == 2 ? flag->value : 0
-					);
-					flagButton.info = flag;
-					flagButtons.push_back(std::move(flagButton));
-
-					item.callback(flags_callback, flagButtons.back().data.get());
-					udmfActivationMenuItems.push_back(std::move(item));
-
-				}
-				udmfActivationMenuItems.emplace_back();
-				udmfActivationButton->menu(udmfActivationMenuItems.data());
-
-				continue;
-			}
 
 			CategoryHeader catHeader = {};
 			if(!catName.empty())
@@ -2255,7 +2304,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			{
 				if(lf.options.empty())
 					continue;
-				
+
 				auto choice = new Fl_Choice(fieldX, Y, fieldW, FIELD_HEIGHT);
 				field.widget = std::unique_ptr<Fl_Widget>(choice);
 

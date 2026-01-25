@@ -622,6 +622,24 @@ feature udmf_lineparameters 1
 feature udmf_thingspecials 1
 feature udmf_multipletags 1
 
+# Activation entries
+udmf_linedef anycross
+udmf_linedef checkswitchrange
+udmf_linedef damagespecial
+udmf_linedef deathspecial
+udmf_linedef firstsideonly
+udmf_linedef impact
+udmf_linedef missilecross
+udmf_linedef monsteractivate
+udmf_linedef monstercross
+udmf_linedef monsterpush
+udmf_linedef monsteruse
+udmf_linedef playercross
+udmf_linedef playerpush
+udmf_linedef playeruse
+udmf_linedef playeruseback
+udmf_linedef repeatspecial
+
 udmf_lineflag "two sided"   twosided
 udmf_lineflag "upper unpeg" dontpegtop
 udmf_lineflag "lower unpeg" dontpegbottom
@@ -641,23 +659,6 @@ udmf_lineflag "block all"          blockeverything    Blocking E
 udmf_lineflag "jump over"          jumpover           Blocking J
 udmf_lineflag "3d midtex"          midtex3d           Blocking 3
 udmf_lineflag "3d midtex passproj" midtex3dimpassible Blocking i
-
-udmf_lineflag "player cross"       playercross      Activation W
-udmf_lineflag "player use"         playeruse        Activation S
-udmf_lineflag "monster cross"      monstercross     Activation Mw
-udmf_lineflag "monster use"        monsteruse       Activation Ms
-udmf_lineflag "player shoot"       impact           Activation G
-udmf_lineflag "player push"        playerpush       Activation P
-udmf_lineflag "monster push"       monsterpush      Activation Mp
-udmf_lineflag "missile cross"      missilecross     Activation X
-udmf_lineflag "any cross"          anycross         Activation A
-udmf_lineflag "monster activate"   monsteractivate  Activation m
-udmf_lineflag "player use back"    playeruseback    Activation b
-udmf_lineflag "repeatable"         repeatspecial    Activation R
-udmf_lineflag "first side only"    firstsideonly    Activation 1
-udmf_lineflag "check switch range" checkswitchrange Activation r
-udmf_lineflag "act on damage"      damagespecial    Activation d
-udmf_lineflag "act on death"       deathspecial     Activation D
 
 udmf_lineslider alpha Alpha 0.0 1.0 0.015625 1.0
 
