@@ -33,6 +33,8 @@
 #define MLF_ALL_AUTOMAP  \
 	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
 
+#define UDMF_ACTIVATION_BUTTON_LABEL "Trigger?"
+
 static constexpr const char *kHardcodedAutoMapMenu = "Normal|Invisible|Mapped|Secret|MapSecret|InvSecret";
 static constexpr int kHardcodedAutoMapCount = 6;
 
@@ -467,116 +469,6 @@ void MultiTagView::calcNextTagPosition(int tagWidth, int position, int *tagX, in
 }
 
 
-class ActivationPopup : public Fl_Window
-{
-public:
-	ActivationPopup(UI_LineBox *box, int x, int y, int w, int h);
-
-	int handle(int event) override;
-	void show() override;
-
-	void setFlags(const std::vector<const lineflag_t *> &flags);
-	bool updateCheckBoxes(int lineflags, int set);
-
-private:
-	enum
-	{
-		MARGIN = 8,
-	};
-	UI_LineBox *const mParent;
-
-
-	Fl_Grid *mGrid;
-	std::vector<UI_LineBox::LineFlagButton> mFlagButtons;
-
-	bool mDuringShowCall = false;
-};
-
-ActivationPopup::ActivationPopup(UI_LineBox *box, int x, int y, int w, int h) :
-	Fl_Window(x, y, w, h), mParent(box)
-{
-	clear_border();
-
-	mGrid = new Fl_Grid(x + MARGIN, y + MARGIN, w - 2 * MARGIN, h - 2 * MARGIN);
-	mGrid->end();
-
-	end();
-}
-
-int ActivationPopup::handle(int event)
-{
-	switch(event)
-	{
-		case FL_UNFOCUS:
-			// Events may trigger right in the middle of a show() call, and it's invalid to call
-			// hide() during that, so avoid it.
-			if(mDuringShowCall)
-				break;
-			hide();
-			return 1;
-		default:
-			break;
-	}
-
-	return Fl_Window::handle(event);
-}
-
-void ActivationPopup::show()
-{
-	mDuringShowCall = true;
-	Fl_Window::show();
-	mDuringShowCall = false;
-}
-
-void ActivationPopup::setFlags(const std::vector<const lineflag_t *> &flags)
-{
-	mFlagButtons.resize(flags.size());
-
-	mGrid->clear();	// this will delete all buttons
-
-	int numRows = ((int)flags.size() + 1) / 2;
-	mGrid->layout(numRows, 2);
-	mGrid->size(mGrid->w(), FLAG_ROW_HEIGHT * numRows);
-	size(mGrid->w() + 2 * MARGIN, mGrid->h() + 2 * MARGIN);
-
-	for(size_t i = 0; i < flags.size(); ++i)
-	{
-		const lineflag_t *flag = flags[i];
-
-		UI_LineBox::LineFlagButton &flagButton = mFlagButtons[i];
-
-		flagButton.button = new Fl_Check_Button(0, 0, 0, 0);
-		flagButton.button->copy_label(flag->label.c_str());
-
-		mGrid->add(flagButton.button);
-		mGrid->widget(flagButton.button, (int)i % numRows, (int)i / numRows);
-		flagButton.data = std::make_unique<line_flag_CB_data_c>(mParent, flag->flagSet == 1 ?
-			flag->value : 0, flag->flagSet == 2 ? flag->value : 0);
-
-		flagButton.button->callback(UI_LineBox::flags_callback, flagButton.data.get());
-
-		flagButton.info = flag;
-		// TODO: replace menu button with button opening this window
-	}
-
-	redraw();
-}
-
-bool ActivationPopup::updateCheckBoxes(int lineflags, int set)
-{
-	bool changed = false;
-	for(const auto& button : mFlagButtons)
-	{
-		if(!button.button || button.info->flagSet != set)
-			continue;
-		int newValue = (lineflags & button.info->value) ? 1 : 0;
-		changed = changed || (button.button->value() != newValue);
-		button.button->value(newValue);
-	}
-	return changed;
-}
-
-
 class line_flag_CB_data_c
 {
 public:
@@ -663,13 +555,8 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		actkind->deactivate();
 		actkind->hide();
 
-		udmfActivationButton = new Fl_Button(0, 0, 0, 0, "Activation");
+		udmfActivationButton = new Fl_Menu_Button(0, 0, 0, 0, UDMF_ACTIVATION_BUTTON_LABEL);
 		udmfActivationButton->hide();
-		udmfActivationButton->callback([](Fl_Widget *widget, void *data)
-									   {
-			auto box = static_cast<UI_LineBox *>(data);
-			box->activationPopup->show();
-		}, this);
 
 		descFlex->fixed(actkind, TYPE_INPUT_WIDTH);
 		descFlex->fixed(udmfActivationButton, TYPE_INPUT_WIDTH);
@@ -785,9 +672,6 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	//scroll->end();
 	panel->end();
 	end();
-
-	activationPopup = new ActivationPopup(this, 200, 200, 200, 200);
-	activationPopup->hide();
 
 	resizable(nullptr);
 }
@@ -1234,6 +1118,11 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 		box->updateCategoryDetails();
 		box->redraw();
 	}
+
+	if(w == box->udmfActivationButton)
+	{
+		box->udmfActivationButton->popup();
+	}
 }
 
 
@@ -1474,13 +1363,28 @@ void UI_LineBox::updateCategoryDetails()
 		for(int flagButtonIndex : header.lineFlagButtonIndices)
 		{
 			const LineFlagButton &flagBtn = flagButtons[flagButtonIndex];
-			if(flagBtn.button->value())
+			if(flagBtn.button && flagBtn.button->value())
 			{
 				summaryText += flagBtn.info->inCategoryAcronym;
 			}
 		}
 		header.button->details(summaryText);
 	}
+
+	SString summaryText;
+	for(const LineFlagButton &button : flagButtons)
+	{
+		if(button.udmfActivationMenuIndex < 0)
+			continue;
+		const Fl_Menu_Item &item = udmfActivationMenuItems[button.udmfActivationMenuIndex];
+		if(!item.value())
+			continue;
+		summaryText += button.info->inCategoryAcronym;
+	}
+	if(summaryText.good())
+		udmfActivationButton->copy_label(summaryText.c_str());
+	else
+		udmfActivationButton->label(UDMF_ACTIVATION_BUTTON_LABEL);
 }
 
 void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
@@ -1832,6 +1736,29 @@ void UI_LineBox::CalcLength()
 	mFixUp.setInputValue(length, buffer);
 }
 
+bool UI_LineBox::updateDynamicFlagControls(int lineFlags, int flagSet)
+{
+	// Set dynamic line flag buttons
+	bool changed = false;
+	for(const auto &btn : flagButtons)
+	{
+		if(btn.info->flagSet != flagSet)
+			continue;
+		const int newValue = (lineFlags & btn.info->value) ? 1 : 0;
+		if(btn.button)
+		{
+			changed = changed || (btn.button->value() != newValue);
+			btn.button->value(newValue);
+		}
+		else if(btn.udmfActivationMenuIndex >= 0)
+		{
+			Fl_Menu_Item &item = udmfActivationMenuItems[btn.udmfActivationMenuIndex];
+			changed = changed || (item.value() != newValue);
+			item.value(newValue);
+		}
+	}
+	return changed;
+}
 
 bool UI_LineBox::FlagsFromInt(int lineflags)
 {
@@ -1907,33 +1834,12 @@ bool UI_LineBox::FlagsFromInt(int lineflags)
 			f_automap->value(0);
 	}
 
-	// Set dynamic line flag buttons
-	bool changed = activationPopup->updateCheckBoxes(lineflags, 1);
-	for(const auto &btn : flagButtons)
-	{
-		if(btn.button && btn.info->flagSet == 1)
-		{
-			int newValue = (lineflags & btn.info->value) ? 1 : 0;
-			changed = changed || (btn.button->value() != newValue);
-			btn.button->value(newValue);
-		}
-	}
-	return changed;
+	return updateDynamicFlagControls(lineflags, 1);
 }
 
 bool UI_LineBox::Flags2FromInt(int lineflags)
 {
-	bool changed = activationPopup->updateCheckBoxes(lineflags, 2);
-	for(const auto &btn : flagButtons)
-	{
-		if(btn.button && btn.info->flagSet == 2)
-		{
-			int newValue = (lineflags & btn.info->value) ? 1 : 0;
-			changed = changed || (btn.button->value() != newValue);
-			btn.button->value(newValue);
-		}
-	}
-	return changed;
+	return updateDynamicFlagControls(lineflags, 2);
 }
 
 void UI_LineBox::CalcFlags(int &outFlags, int &outFlags2) const
@@ -1979,12 +1885,28 @@ void UI_LineBox::CalcFlags(int &outFlags, int &outFlags2) const
 	// Apply dynamic flags
 	for(const auto &btn : flagButtons)
 	{
-		if(btn.button && btn.button->value())
+		if(btn.button)
 		{
-			if(btn.info->flagSet == 1)
-				outFlags |= btn.info->value;
-			else if(btn.info->flagSet == 2)
-				outFlags2 |= btn.info->value;
+			if(btn.button->value())
+			{
+				if(btn.info->flagSet == 1)
+					outFlags |= btn.info->value;
+				else if(btn.info->flagSet == 2)
+					outFlags2 |= btn.info->value;
+			}
+			continue;
+		}
+		if(btn.udmfActivationMenuIndex >= 0)
+		{
+			const Fl_Menu_Item &item = udmfActivationMenuItems[btn.udmfActivationMenuIndex];
+			if(item.value())
+			{
+				if(btn.info->flagSet == 1)
+					outFlags |= btn.info->value;
+				else if(btn.info->flagSet == 2)
+					outFlags2 |= btn.info->value;
+			}
+			continue;
 		}
 	}
 }
@@ -2155,7 +2077,30 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 			if(catName.noCaseEqual("activation"))
 			{
-				activationPopup->setFlags(std::vector(flagsInCat));
+				udmfActivationMenuItems.clear();
+				udmfActivationMenuItems.reserve(flagsInCat.size());
+				for(const lineflag_t *flag : flagsInCat)
+				{
+					Fl_Menu_Item item = {};
+					item.flags = FL_MENU_TOGGLE;
+					item.text = flag->label.c_str();
+
+					LineFlagButton flagButton{};
+					flagButton.udmfActivationMenuIndex = (int)udmfActivationMenuItems.size();
+					flagButton.data = std::make_unique<line_flag_CB_data_c>(
+						this, flag->flagSet == 1 ? flag->value : 0,
+						flag->flagSet == 2 ? flag->value : 0
+					);
+					flagButton.info = flag;
+					flagButtons.push_back(std::move(flagButton));
+
+					item.callback(flags_callback, flagButtons.back().data.get());
+					udmfActivationMenuItems.push_back(std::move(item));
+
+				}
+				udmfActivationMenuItems.emplace_back();
+				udmfActivationButton->menu(udmfActivationMenuItems.data());
+
 				continue;
 			}
 

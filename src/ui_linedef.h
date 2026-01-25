@@ -50,10 +50,9 @@ private:
 
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
-	Fl_Button    *udmfActivationButton;
 
-	friend class ActivationPopup;
-	ActivationPopup *activationPopup;
+	Fl_Menu_Button *udmfActivationButton;
+	std::vector<Fl_Menu_Item> udmfActivationMenuItems;
 
 	UI_DynIntInput *length;
 	UI_DynIntInput *tag;
@@ -74,9 +73,10 @@ private:
 	// Dynamic linedef flags (configured via .ugh)
 	struct LineFlagButton
 	{
-		Fl_Check_Button *button;
+		Fl_Check_Button *button = nullptr;
+		int udmfActivationMenuIndex = -1;
 		std::unique_ptr<line_flag_CB_data_c> data;
-		const struct lineflag_t *info;
+		const struct lineflag_t *info = nullptr;
 	};
 	std::vector<LineFlagButton> flagButtons;
 
@@ -143,6 +143,7 @@ private:
 	void CalcLength();
 
 	void CalcFlags(int &outFlags, int &outFlags2) const;
+	bool updateDynamicFlagControls(int lineFlags, int flagSet);
 	bool FlagsFromInt(int flags);
 	bool Flags2FromInt(int flags2);
 
