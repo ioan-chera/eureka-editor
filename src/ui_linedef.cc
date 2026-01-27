@@ -1347,7 +1347,7 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 				info = field.info;
 				break;
 			}
-			if(field.widget2 && field.widget2.get() == w)
+			if(field.widget2 == w)
 			{
 				info = field.info;
 				isSecondWidget = true;
@@ -1740,7 +1740,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 						if(field.info->identifier2.noCaseEqual(cm.name))
 						{
 							int value = L.get()->*cm.field;
-							mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2.get()),
+							mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2),
 												 SString(value).c_str());
 							break;
 						}
@@ -1760,7 +1760,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 				else if(field.info->type == linefield_t::Type::intpair)
 				{
 					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget), "");
-					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2.get()), "");
+					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2), "");
 				}
 			}
 		}
@@ -2281,8 +2281,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		if(field.info->type == linefield_t::Type::intpair && field.widget2)
 		{
 			mFixUp.unloadFields({static_cast<UI_DynIntInput *>(field.widget),
-								 static_cast<UI_DynIntInput *>(field.widget2.get())});
-			panel->remove(field.container.get());
+								 static_cast<UI_DynIntInput *>(field.widget2)});
+			panel->remove(field.container);
+			delete field.container;
 		}
 		else
 		{
@@ -2340,7 +2341,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				// Create horizontal Fl_Flex container
 				auto flex = new Fl_Flex(fieldX, Y, fieldW, FIELD_HEIGHT, Fl_Flex::HORIZONTAL);
 				flex->gap(16 + fl_width(lf.label2.c_str()));
-				field.container = std::unique_ptr<Fl_Group>(flex);
+				field.container = flex;
 
 				// First input (left)
 				auto input1 = new UI_DynIntInput(0, 0, 0, FIELD_HEIGHT);
@@ -2351,7 +2352,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 				// Second input (right) - set fixed width for the label spacing
 				auto input2 = new UI_DynIntInput(0, 0, 0, FIELD_HEIGHT);
-				field.widget2 = std::unique_ptr<Fl_Widget>(input2);
+				field.widget2 = input2;
 				input2->copy_label((lf.label2 + ":").c_str());
 				input2->align(FL_ALIGN_LEFT);
 				input2->callback(field_callback, this);
@@ -2363,11 +2364,11 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				fields.push_back(std::move(field));
 				Y += FIELD_HEIGHT + 4;
 
-				panel->insert(*fields.back().container.get(), front);
+				panel->insert(*fields.back().container, front);
 
 				// Register both inputs with mFixUp
 				mFixUp.loadFields({static_cast<UI_DynIntInput *>(fields.back().widget),
-								   static_cast<UI_DynIntInput *>(fields.back().widget2.get())});
+								   static_cast<UI_DynIntInput *>(fields.back().widget2)});
 				continue;
 			}
 			else

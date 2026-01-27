@@ -95,8 +95,8 @@ private:
 	struct LineField
 	{
 		Fl_Widget *widget;
-		std::unique_ptr<Fl_Widget> widget2;    // second widget for intpair type
-		std::unique_ptr<Fl_Group> container;   // container for intpair (Fl_Flex holding both widgets)
+		Fl_Widget *widget2;    // second widget for intpair type
+		Fl_Group *container;   // container for intpair (Fl_Flex holding both widgets)
 		const struct linefield_t *info;
 	};
 	std::vector<LineField> fields;
