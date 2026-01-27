@@ -867,6 +867,8 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 		case MapFormat::hexen:
 			udmfActivationButton->hide();
 			return;
+		default:
+			return;
 	}
 
 	// We have it, so let's do it.
@@ -2332,9 +2334,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			}
 			else if(lf.type == linefield_t::Type::intpair)
 			{
-				// Calculate label widths for spacing
-				const int label2Width = static_cast<int>(fl_width(lf.label2.c_str())) + 20;
-
 				// Create horizontal Fl_Flex container
 				auto flex = new Fl_Flex(fieldX, Y, fieldW, FIELD_HEIGHT, Fl_Flex::HORIZONTAL);
 				flex->gap(16 + fl_width(lf.label2.c_str()));
