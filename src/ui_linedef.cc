@@ -76,7 +76,14 @@ enum
 };
 
 
-
+struct FeatureFlagMapping
+{
+	UDMF_LineFeature feature;
+	const char *label;
+	const char *tooltip;
+	int value;
+	int flagSet;
+};
 
 
 class IDTag : public Fl_Widget
@@ -872,18 +879,10 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 	}
 
 	// We have it, so let's do it.
-	struct ActivationMapping
-	{
-		UDMF_LineFeature feature;
-		const char *label;
-		const char *tooltip;
-		int value;
-		int flagSet;
 
-	};
 
 	// Description source: https://github.com/ZDoom/gzdoom/blob/g4.14.2/specs/udmf_zdoom.txt
-	static const ActivationMapping activatorAndMode[] =
+	static const FeatureFlagMapping activatorAndMode[] =
 	{
 		{ UDMF_LineFeature::playercross, "Player crossing",
 		"Player crossing will trigger this line", MLF_UDMF_PlayerCross, 1 },
@@ -905,7 +904,7 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 		"Any non-projectile crossing will trigger this line", MLF2_UDMF_AnyCross, 2 },
 	};
 
-	static const ActivationMapping mainFlags[] =
+	static const FeatureFlagMapping mainFlags[] =
 	{
 		{ UDMF_LineFeature::repeatspecial, "Repeatable activation", "Allow retriggering",
 		MLF_UDMF_RepeatSpecial, 1 },
@@ -919,7 +918,7 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 		"Monsters can trigger this line (for compatibility only)", MLF2_UDMF_MonsterActivate, 2 },
 	};
 
-	static const ActivationMapping destructibleFlags[] =
+	static const FeatureFlagMapping destructibleFlags[] =
 	{
 		{ UDMF_LineFeature::damagespecial, "Trigger on damage",
 		"This line will call special if having health > 0 and receiving damage",
@@ -928,7 +927,7 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 		"This line will call special if health was reduced to 0", MLF2_UDMF_DeathSpecial, 2 },
 	};
 
-	auto addItem = [this, &config](const ActivationMapping &entry, bool &addSeparator)
+	auto addItem = [this, &config](const FeatureFlagMapping &entry, bool &addSeparator)
 	{
 		if(!UDMF_HasLineFeature(config, entry.feature))
 			return;
@@ -956,16 +955,82 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 	};
 
 	bool addSeparator = false;
-	for(const ActivationMapping &entry : activatorAndMode)
+	for(const FeatureFlagMapping &entry : activatorAndMode)
 		addItem(entry, addSeparator);
 	addSeparator = true;
-	for(const ActivationMapping &entry : mainFlags)
+	for(const FeatureFlagMapping &entry : mainFlags)
 		addItem(entry, addSeparator);
 	addSeparator = true;
-	for(const ActivationMapping &entry : destructibleFlags)
+	for(const FeatureFlagMapping &entry : destructibleFlags)
 		addItem(entry, addSeparator);
 	udmfActivationMenuItems.emplace_back();
 	udmfActivationButton->menu(udmfActivationMenuItems.data());
+}
+
+void UI_LineBox::updateAdvancedBlockingSection(const LoadingData &loaded, const ConfigData &config)
+{
+	if(loaded.levelFormat != MapFormat::udmf)
+		return;
+
+	static const FeatureFlagMapping blockingFlags[] =
+	{
+		{UDMF_LineFeature::blockeverything, "Block everything", "Act as a solid wall", MLF2_UDMF_BlockEverything, 2},
+		{UDMF_LineFeature::midtex3d, "3DMidTex", "Eternity 3D middle texture", MLF_Eternity_3DMidTex, 1},
+		{UDMF_LineFeature::midtex3d, "3DMidTex+missiles", "Eternity 3D middle texture", MLF2_UDMF_MidTex3DImpassible, 2},
+		{UDMF_LineFeature::jumpover, "Strife railing", "Strife-style jumpable railing", MLF_UDMF_JumpOver, 1},
+		{UDMF_LineFeature::blockfloaters, "Block floaters", "Block flying enemies", MLF_UDMF_BlockFloaters, 1},
+		{UDMF_LineFeature::blocklandmonsters, "Block land monsters", "Block walking enemies", MLF_UDMF_BlockLandMonsters, 1},
+		{UDMF_LineFeature::blockplayers, "Block players", "Block only players", MLF_UDMF_BlockPlayers, 1},
+		{UDMF_LineFeature::blockhitscan, "Block gunshots", "Blocks hitscans", MLF_UDMF_BlockHitScan, 1},
+		{UDMF_LineFeature::blockprojectiles, "Block projectiles", "Blocks finite-speed projectiles", MLF_UDMF_BlockProjectiles, 1},
+		{UDMF_LineFeature::blocksight, "Block sight", "Blocks monster sight", MLF_UDMF_BlockSight, 1},
+		{UDMF_LineFeature::blockuse, "Block use", "Blocks operation", MLF_UDMF_BlockUse, 1},
+	};
+
+	// Check if features exist at all before proceeding
+	bool found = false;
+	for(const FeatureFlagMapping &entry : blockingFlags)
+	{
+		if(UDMF_HasLineFeature(config, entry.feature))
+		{
+			found = true;
+			break;
+		}
+	}
+	if(!found)
+		return;
+
+	CategoryHeader header{};
+	header.button = new UI_CategoryButton(x() + flagsStartX, 0, flagsAreaW, FIELD_HEIGHT, "Advanced blocking");
+	header.button->callback(category_callback, this);
+	header.expanded = false;
+	const int numRows = (int)(lengthof(blockingFlags) + 1) / 2;
+	header.grid = new Fl_Grid(header.button->x() + 16, 0, header.button->w() - 16, FLAG_ROW_HEIGHT * numRows);
+	header.grid->layout(numRows, 2);
+
+	int index = 0;
+	for(const FeatureFlagMapping &entry : blockingFlags)
+	{
+		LineFlagButton button{};
+		button.button = new Fl_Check_Button(0, 0, 0, 0, entry.label);
+		button.button->labelsize(12);
+		button.data = std::make_unique<line_flag_CB_data_c>(
+			this, entry.flagSet == 1 ? entry.value : 0, entry.flagSet == 2 ? entry.value : 0
+		);
+		button.button->callback(flags_callback, button.data.get());
+		flagButtons.push_back(std::move(button));
+
+		header.grid->add(button.button);
+		header.grid->widget(button.button, index % numRows, index / numRows);
+		header.lineFlagButtonIndices.push_back(static_cast<int>(flagButtons.size()) - 1);
+		++index;
+	}
+
+	panel->insert(*header.button, front);
+	panel->insert(*header.grid, front);
+
+	categoryHeaders.push_back(std::move(header));
+
 }
 
 int UI_LineBox::getActivationCount() const
@@ -1482,7 +1547,7 @@ void UI_LineBox::updateCategoryDetails()
 		for(int flagButtonIndex : header.lineFlagButtonIndices)
 		{
 			const LineFlagButton &flagBtn = flagButtons[flagButtonIndex];
-			if(flagBtn.button && flagBtn.button->value())
+			if(flagBtn.button && flagBtn.info && flagBtn.button->value())
 			{
 				summaryText += flagBtn.info->inCategoryAcronym;
 			}
@@ -2122,6 +2187,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	categoryHeaders.clear();
 	flagButtons.clear();
 	updateUDMFActivationMenu(loaded, config);
+	updateAdvancedBlockingSection(loaded, config);
 
 	int Y = y() + flagsStartY;
 

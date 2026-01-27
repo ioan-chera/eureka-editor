@@ -640,6 +640,19 @@ udmf_linedef playeruse
 udmf_linedef playeruseback
 udmf_linedef repeatspecial
 
+# Advanced blocking
+udmf_linedef blockeverything
+udmf_linedef blockfloaters
+udmf_linedef blockhitscan
+udmf_linedef blocklandmonsters
+udmf_linedef blockplayers
+udmf_linedef blockprojectiles
+udmf_linedef blocksight
+udmf_linedef blockuse
+udmf_linedef jumpover
+udmf_linedef midtex3d
+udmf_linedef midtex3dimpassible
+
 udmf_lineflag "two sided"   twosided
 udmf_lineflag "upper unpeg" dontpegtop
 udmf_lineflag "lower unpeg" dontpegbottom
@@ -648,17 +661,6 @@ udmf_lineflag "block mons"  blockmonsters
 udmf_lineflag "sound block" blocksound
 udmf_lineflag "pass thru"   passuse
 
-udmf_lineflag "block players"      blockplayers       Blocking P
-udmf_lineflag "block flyers"       blockfloaters      Blocking F
-udmf_lineflag "block land mons"    blocklandmonsters  Blocking M
-udmf_lineflag "block missiles"     blockprojectiles   Blocking p
-udmf_lineflag "block hitscan"      blockhitscan       Blocking H
-udmf_lineflag "block use"          blockuse           Blocking U
-udmf_lineflag "block sight"        blocksight         Blocking S
-udmf_lineflag "block all"          blockeverything    Blocking E
-udmf_lineflag "jump over"          jumpover           Blocking J
-udmf_lineflag "3d midtex"          midtex3d           Blocking 3
-udmf_lineflag "3d midtex passproj" midtex3dimpassible Blocking i
 
 udmf_lineslider alpha Alpha 0.0 1.0 0.015625 1.0
 

@@ -26,20 +26,28 @@ struct ConfigData;
 enum class UDMF_LineFeature : unsigned
 {
 	anycross,
+	blockeverything,
+	blockfloaters,
+	blockhitscan,
+	blocklandmonsters,
+	blockplayers,
+	blockprojectiles,
+	blocksight,
+	blockuse,
 	checkswitchrange,
 	damagespecial,
 	deathspecial,
-
 	firstsideonly,
 	impact,
+	jumpover,
+	midtex3d,
+	midtex3dimpassible,
 	missilecross,
 	monsteractivate,
-
 	monstercross,
 	monsterpush,
 	monsteruse,
 	playercross,
-
 	playerpush,
 	playeruse,
 	playeruseback,
