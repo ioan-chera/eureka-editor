@@ -1455,7 +1455,7 @@ void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
 	{
 		if(!cat.button)
 			continue;
-		if(!categoryBtn || cat.button.get() == categoryBtn)
+		if(!categoryBtn || cat.button == categoryBtn)
 		{
 			cat.expanded = cat.button->isExpanded();
 			if(cat.expanded)
@@ -2114,8 +2114,10 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	for(const auto &cat : categoryHeaders)
 	{
 		if(cat.button)
-			panel->remove(cat.button.get());
-		panel->remove(cat.grid.get());
+			panel->remove(cat.button);
+		delete cat.button;
+		panel->remove(cat.grid);
+		delete cat.grid;
 	}
 	categoryHeaders.clear();
 	flagButtons.clear();
@@ -2158,7 +2160,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			CategoryHeader catHeader = {};
 			if(!catName.empty())
 			{
-				catHeader.button = std::make_unique<UI_CategoryButton>(x() + flagsStartX, Y,
+				catHeader.button = new UI_CategoryButton(x() + flagsStartX, Y,
 					flagsAreaW, FIELD_HEIGHT);
 				catHeader.button->copy_label(catName.c_str());
 				catHeader.button->callback(category_callback, this);
@@ -2167,7 +2169,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				Y += FIELD_HEIGHT;
 			}
 			const int numRows = (int(flagsInCat.size()) + 1) / 2;
-			catHeader.grid = std::make_unique<Fl_Grid>(leftX, 0, FW + rightX - leftX,
+			catHeader.grid = new Fl_Grid(leftX, 0, FW + rightX - leftX,
 													   FLAG_ROW_HEIGHT * numRows);
 			catHeader.grid->layout(numRows, 2);
 
@@ -2258,8 +2260,8 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			Y = (yLeft > yRight ? yLeft : yRight);
 
 			if(catHeader.button)
-				panel->insert(*catHeader.button.get(), front);
-			panel->insert(*catHeader.grid.get(), front);
+				panel->insert(*catHeader.button, front);
+			panel->insert(*catHeader.grid, front);
 			categoryHeaders.push_back(std::move(catHeader));
 		}
 

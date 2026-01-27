@@ -32,6 +32,7 @@ class Fl_Grid;
 class Fl_Simple_Counter;
 class line_flag_CB_data_c;
 class MultiTagView;
+class UI_CategoryButton;
 class UI_DynIntInput;
 class UI_StackPanel;
 struct LoadingData;
@@ -83,8 +84,8 @@ private:
 	// Category headers for collapsible flag sections
 	struct CategoryHeader
 	{
-		std::unique_ptr<class UI_CategoryButton> button;
-		std::unique_ptr<Fl_Grid> grid;
+		UI_CategoryButton *button;
+		Fl_Grid *grid;
 		std::vector<int> lineFlagButtonIndices;  // indices in flagButtons
 		bool expanded = true;
 	};
