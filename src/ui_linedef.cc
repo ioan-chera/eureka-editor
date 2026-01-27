@@ -1342,7 +1342,7 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		bool isSecondWidget = false;
 		for(const LineField &field : box->fields)
 		{
-			if(field.widget.get() == w)
+			if(field.widget == w)
 			{
 				info = field.info;
 				break;
@@ -1716,7 +1716,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 									break;
 								}
 							}
-							static_cast<Fl_Choice*>(field.widget.get())->value(index);
+							static_cast<Fl_Choice*>(field.widget)->value(index);
 							break;
 						}
 					}
@@ -1729,7 +1729,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 						if(field.info->identifier.noCaseEqual(cm.name))
 						{
 							int value = L.get()->*cm.field;
-							mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget.get()),
+							mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget),
 												 SString(value).c_str());
 							break;
 						}
@@ -1755,11 +1755,11 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 			{
 				if(field.info->type == linefield_t::Type::choice)
 				{
-					static_cast<Fl_Choice*>(field.widget.get())->value(0);
+					static_cast<Fl_Choice*>(field.widget)->value(0);
 				}
 				else if(field.info->type == linefield_t::Type::intpair)
 				{
-					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget.get()), "");
+					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget), "");
 					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2.get()), "");
 				}
 			}
@@ -1778,7 +1778,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 				if(field.info->identifier.noCaseEqual("alpha"))
 				{
 					double alpha = inst.level.linedefs[obj]->alpha;
-					static_cast<Fl_Valuator*>(field.widget.get())->value(alpha);
+					static_cast<Fl_Valuator*>(field.widget)->value(alpha);
 				}
 			}
 		}
@@ -1788,7 +1788,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 			{
 				if(field.info->type == linefield_t::Type::slider)
 				{
-					static_cast<Fl_Valuator*>(field.widget.get())->value(0);
+					static_cast<Fl_Valuator*>(field.widget)->value(0);
 				}
 			}
 		}
@@ -2280,13 +2280,14 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		// Unload intpair widgets from mFixUp before removing them
 		if(field.info->type == linefield_t::Type::intpair && field.widget2)
 		{
-			mFixUp.unloadFields({static_cast<UI_DynIntInput *>(field.widget.get()),
+			mFixUp.unloadFields({static_cast<UI_DynIntInput *>(field.widget),
 								 static_cast<UI_DynIntInput *>(field.widget2.get())});
 			panel->remove(field.container.get());
 		}
 		else
 		{
-			panel->remove(field.widget.get());
+			panel->remove(field.widget);
+			delete field.widget;
 		}
 	}
 	fields.clear();
@@ -2310,7 +2311,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 					continue;
 
 				auto choice = new Fl_Choice(fieldX, Y, fieldW, FIELD_HEIGHT);
-				field.widget = std::unique_ptr<Fl_Widget>(choice);
+				field.widget = choice;
 
 				// Build menu string from options
 				SString menuStr;
@@ -2326,7 +2327,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			else if(lf.type == linefield_t::Type::slider)
 			{
 				auto slider = new Fl_Hor_Value_Slider(fieldX, Y, fieldW, FIELD_HEIGHT);
-				field.widget = std::unique_ptr<Fl_Widget>(slider);
+				field.widget = slider;
 
 				slider->step(lf.step);
 				// slider->lstep(lf.step * 8);
@@ -2343,7 +2344,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 				// First input (left)
 				auto input1 = new UI_DynIntInput(0, 0, 0, FIELD_HEIGHT);
-				field.widget = std::unique_ptr<Fl_Widget>(input1);
+				field.widget = input1;
 				input1->copy_label((lf.label + ":").c_str());
 				input1->align(FL_ALIGN_LEFT);
 				input1->callback(field_callback, this);
@@ -2365,7 +2366,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				panel->insert(*fields.back().container.get(), front);
 
 				// Register both inputs with mFixUp
-				mFixUp.loadFields({static_cast<UI_DynIntInput *>(fields.back().widget.get()),
+				mFixUp.loadFields({static_cast<UI_DynIntInput *>(fields.back().widget),
 								   static_cast<UI_DynIntInput *>(fields.back().widget2.get())});
 				continue;
 			}
@@ -2383,7 +2384,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			fields.push_back(std::move(field));
 			Y += FIELD_HEIGHT + 4;
 
-			panel->insert(*fields.back().widget.get(), front);
+			panel->insert(*fields.back().widget, front);
 		}
 
 		//end();
