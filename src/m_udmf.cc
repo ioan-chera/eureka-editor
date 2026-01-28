@@ -136,6 +136,7 @@ bool UDMF_AddLineFeature(ConfigData &config, const char *featureName)
 		ENTRY(blocksound),
 		ENTRY(blockuse),
 		ENTRY(checkswitchrange),
+		ENTRY(clipmidtex),
 		ENTRY(damagespecial),
 		ENTRY(deathspecial),
 		ENTRY(dontpegbottom),
@@ -156,7 +157,10 @@ bool UDMF_AddLineFeature(ConfigData &config, const char *featureName)
 		ENTRY(playeruse),
 		ENTRY(playeruseback),
 		ENTRY(repeatspecial),
+		ENTRY(translucent),
+		ENTRY(transparent),
 		ENTRY(twosided),
+		ENTRY(wrapmidtex),
 	};
 #undef ENTRY
 

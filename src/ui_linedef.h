@@ -35,6 +35,7 @@ class MultiTagView;
 class UI_CategoryButton;
 class UI_DynIntInput;
 class UI_StackPanel;
+struct FeatureFlagMapping;
 struct LoadingData;
 struct lineflag_t; // forward declaration
 
@@ -87,7 +88,6 @@ private:
 		UI_CategoryButton *button;
 		Fl_Grid *grid;
 		std::vector<int> lineFlagButtonIndices;  // indices in flagButtons
-		bool expanded = true;
 	};
 	std::vector<CategoryHeader> categoryHeaders;
 
@@ -138,9 +138,14 @@ public:
 	}
 
 private:
+	void populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
+									const LoadingData &loaded, const ConfigData &config,
+									const char *title);
+
 	void updateUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config);
 	void updateUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config);
-	void updateAdvancedBlockingSection(const LoadingData &loaded, const ConfigData &config);
+	void updateUDMFBlockingFlags(const LoadingData &loaded, const ConfigData &config);
+	void updateUDMFRenderingControls(const LoadingData &loaded, const ConfigData &config);
 
 	int getActivationCount() const;
 	const char *getActivationMenuString() const;

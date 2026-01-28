@@ -413,7 +413,7 @@ enum eternity_lineflag_e
 
 // These will be in the same domain as Doom and Eternity and shall be assumed to be together
 // possible
-enum udmf_lineflag_e
+enum udmf_lineflag_e : unsigned
 {
 	MLF_UDMF_Translucent       = 0x00000800,
 	MLF_UDMF_Transparent       = 0x00001000,

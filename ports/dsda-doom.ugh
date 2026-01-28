@@ -662,7 +662,11 @@ udmf_linedef jumpover
 udmf_linedef midtex3d
 udmf_linedef midtex3dimpassible
 
-
+# Rendering
+udmf_linedef clipmidtex
+udmf_linedef wrapmidtex
+udmf_linedef translucent
+udmf_linedef transparent
 
 udmf_lineslider alpha Alpha 0.0 1.0 0.015625 1.0
 
@@ -702,10 +706,6 @@ udmf_linechoice automapstyle 12 "Unseen secret"
 # 13 is reserved (portal)
 
 # TODO: make this a choice
-udmf_lineflag "translucent" translucent Rendering t
-udmf_lineflag "transparent" transparent Rendering T
-udmf_lineflag "clip midtex" clipmidtex  Rendering C
-udmf_lineflag "wrap midtex" wrapmidtex  Rendering W
 
 udmf_linemapflag "Revealed" revealed
 udmf_linemapflag "RevSecret" revealed|secret

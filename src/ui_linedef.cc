@@ -857,33 +857,45 @@ void UI_LineBox::checkSidesDirtyFields()
 	back->checkDirtyFields();
 }
 
-void UI_LineBox::updateUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config)
+void UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
+											const LoadingData &loaded, const ConfigData &config,
+											const char *title)
 {
 	if(loaded.levelFormat != MapFormat::udmf)
 		return;
 
-	static const FeatureFlagMapping baseFlags[] =
+	// Check if features exist at all before proceeding
+	bool found = false;
+	for(size_t i = 0; i < count; ++i)
 	{
-		{UDMF_LineFeature::twosided, "two sided", "", MLF_TwoSided, 1},
-		{UDMF_LineFeature::dontpegtop, "upper unpeg", "", MLF_UpperUnpegged, 1},
-		{UDMF_LineFeature::dontpegbottom, "lower unpeg", "", MLF_LowerUnpegged, 1},
-		{UDMF_LineFeature::blocking, "impassable", "", MLF_Blocking, 1},
-		{UDMF_LineFeature::blockmonsters, "block monsters", "", MLF_BlockMonsters, 1},
-		{UDMF_LineFeature::blocksound, "sound block", "", MLF_SoundBlock, 1},
-		{UDMF_LineFeature::passuse, "pass thru", "", MLF_Boom_PassThru, 1},
-	};
+		const FeatureFlagMapping &entry = mapping[i];
+		if(UDMF_HasLineFeature(config, entry.feature))
+		{
+			found = true;
+			break;
+		}
+	}
+	if(!found)
+		return;
 
 	CategoryHeader header{};
-	const int numRows = (int)(lengthof(baseFlags) + 1) / 2;
+	if(title)
+	{
+		header.button = new UI_CategoryButton(x() + flagsStartX, 0, flagsAreaW, FIELD_HEIGHT, title);
+		header.button->callback(category_callback, this);
+	}
+	const int numRows = (int)(count + 1) / 2;
 	header.grid = new Fl_Grid(x() + flagsStartX + 16, 0, flagsAreaW - 16, FLAG_ROW_HEIGHT * numRows);
 	header.grid->layout(numRows, 2);
 
 	int index = 0;
-	for(const FeatureFlagMapping &entry : baseFlags)
+	for(size_t i = 0; i < count; ++i)
 	{
+		const FeatureFlagMapping &entry = mapping[i];
 		LineFlagButton button{};
 		button.button = new Fl_Check_Button(0, 0, 0, 0, entry.label);
 		button.button->labelsize(12);
+		button.button->tooltip(entry.tooltip);
 		button.data = std::make_unique<line_flag_CB_data_c>(
 			this, entry.flagSet == 1 ? entry.value : 0, entry.flagSet == 2 ? entry.value : 0
 		);
@@ -896,9 +908,33 @@ void UI_LineBox::updateUDMFBaseFlags(const LoadingData &loaded, const ConfigData
 		++index;
 	}
 
+	if(title)
+		panel->insert(*header.button, front);
 	panel->insert(*header.grid, front);
 
 	categoryHeaders.push_back(std::move(header));
+}
+
+void UI_LineBox::updateUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config)
+{
+	static const FeatureFlagMapping baseFlags[] =
+	{
+		{UDMF_LineFeature::twosided, "two sided", "Line behaves properly as two-sided",
+		MLF_TwoSided, 1},
+		{UDMF_LineFeature::dontpegtop, "upper unpeg", "Upper texture tiles from the top",
+		MLF_UpperUnpegged, 1},
+		{UDMF_LineFeature::dontpegbottom, "lower unpeg",
+		"Lower texture tiles starting from ceiling", MLF_LowerUnpegged, 1},
+		{UDMF_LineFeature::blocking, "impassable", "Classic Doom wall or railing", MLF_Blocking, 1},
+		{UDMF_LineFeature::blockmonsters, "block monsters", "Blocks only enemy monsters",
+		MLF_BlockMonsters, 1},
+		{UDMF_LineFeature::blocksound, "sound block", "Half-blocks alert propagation",
+		MLF_SoundBlock, 1},
+		{UDMF_LineFeature::passuse, "pass thru", "Allows the 'use' activation to pass through",
+		MLF_Boom_PassThru, 1},
+	};
+
+	populateUDMFFlagCheckBoxes(baseFlags, lengthof(baseFlags), loaded, config, nullptr);
 }
 
 void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config)
@@ -1011,70 +1047,55 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 	udmfActivationButton->menu(udmfActivationMenuItems.data());
 }
 
-void UI_LineBox::updateAdvancedBlockingSection(const LoadingData &loaded, const ConfigData &config)
+void UI_LineBox::updateUDMFBlockingFlags(const LoadingData &loaded, const ConfigData &config)
+{
+	static const FeatureFlagMapping blockingFlags[] =
+	{
+		{UDMF_LineFeature::blockeverything, "block everything", "Acts as a solid wall", MLF2_UDMF_BlockEverything, 2},
+		{UDMF_LineFeature::midtex3d, "3DMidTex",
+		"Eternity 3D middle texture: solid railing which can be walked over and under",
+		MLF_Eternity_3DMidTex, 1},
+		{UDMF_LineFeature::midtex3dimpassible, "3DMidTex+missiles",
+		"Coupled with 3DMidTex, this also allows projectiles to pass", MLF2_UDMF_MidTex3DImpassible,
+		2},
+		{UDMF_LineFeature::jumpover, "Strife railing", "Strife-style skippable railing",
+		MLF_UDMF_JumpOver, 1},
+		{UDMF_LineFeature::blockfloaters, "block floaters", "Block flying enemies",
+		MLF_UDMF_BlockFloaters, 1},
+		{UDMF_LineFeature::blocklandmonsters, "block land monsters", "Block walking enemies",
+		MLF_UDMF_BlockLandMonsters, 1},
+		{UDMF_LineFeature::blockplayers, "block players", "Block only players", MLF_UDMF_BlockPlayers, 1},
+		{UDMF_LineFeature::blockhitscan, "block gunshots",
+		"Blocks hitscans (infinite speed gunshots)", MLF_UDMF_BlockHitScan, 1},
+		{UDMF_LineFeature::blockprojectiles, "block projectiles", "Blocks finite-speed projectiles",
+		MLF_UDMF_BlockProjectiles, 1},
+		{UDMF_LineFeature::blocksight, "block sight", "Blocks monster sight", MLF_UDMF_BlockSight,
+		1},
+		{UDMF_LineFeature::blockuse, "block use", "Blocks 'use' operation", MLF_UDMF_BlockUse, 1},
+	};
+
+	populateUDMFFlagCheckBoxes(blockingFlags, lengthof(blockingFlags), loaded, config, "Advanced blocking");
+}
+
+void UI_LineBox::updateUDMFRenderingControls(const LoadingData &loaded, const ConfigData &config)
 {
 	if(loaded.levelFormat != MapFormat::udmf)
 		return;
 
-	static const FeatureFlagMapping blockingFlags[] =
+	static const FeatureFlagMapping renderingFlags[] =
 	{
-		{UDMF_LineFeature::blockeverything, "block everything", "Act as a solid wall", MLF2_UDMF_BlockEverything, 2},
-		{UDMF_LineFeature::midtex3d, "3DMidTex", "Eternity 3D middle texture", MLF_Eternity_3DMidTex, 1},
-		{UDMF_LineFeature::midtex3d, "3DMidTex+missiles", "Eternity 3D middle texture", MLF2_UDMF_MidTex3DImpassible, 2},
-		{UDMF_LineFeature::jumpover, "Strife railing", "Strife-style jumpable railing", MLF_UDMF_JumpOver, 1},
-		{UDMF_LineFeature::blockfloaters, "block floaters", "Block flying enemies", MLF_UDMF_BlockFloaters, 1},
-		{UDMF_LineFeature::blocklandmonsters, "block land monsters", "Block walking enemies", MLF_UDMF_BlockLandMonsters, 1},
-		{UDMF_LineFeature::blockplayers, "block players", "Block only players", MLF_UDMF_BlockPlayers, 1},
-		{UDMF_LineFeature::blockhitscan, "block gunshots", "Blocks hitscans", MLF_UDMF_BlockHitScan, 1},
-		{UDMF_LineFeature::blockprojectiles, "block projectiles", "Blocks finite-speed projectiles", MLF_UDMF_BlockProjectiles, 1},
-		{UDMF_LineFeature::blocksight, "block sight", "Blocks monster sight", MLF_UDMF_BlockSight, 1},
-		{UDMF_LineFeature::blockuse, "block use", "Blocks operation", MLF_UDMF_BlockUse, 1},
+		{UDMF_LineFeature::translucent, "translucent", "Render line as translucent (Strife style)",
+		MLF_UDMF_Translucent, 1},
+		{UDMF_LineFeature::transparent, "more translucent",
+		"Render line as even more translucent (Strife style)", MLF_UDMF_Transparent, 1},
+		{UDMF_LineFeature::clipmidtex, "clip railing texture",
+		"Always clip two-sided middle texture to floor and ceiling, even if sector properties don't change",
+		MLF2_UDMF_ClipMidTex, 2},
+		{UDMF_LineFeature::clipmidtex, "tile railing texture", "Repeat two-sided middle texture vertically",
+		MLF2_UDMF_WrapMidTex, 2},
 	};
 
-	// Check if features exist at all before proceeding
-	bool found = false;
-	for(const FeatureFlagMapping &entry : blockingFlags)
-	{
-		if(UDMF_HasLineFeature(config, entry.feature))
-		{
-			found = true;
-			break;
-		}
-	}
-	if(!found)
-		return;
-
-	CategoryHeader header{};
-	header.button = new UI_CategoryButton(x() + flagsStartX, 0, flagsAreaW, FIELD_HEIGHT, "Advanced blocking");
-	header.button->callback(category_callback, this);
-	header.expanded = false;
-	const int numRows = (int)(lengthof(blockingFlags) + 1) / 2;
-	header.grid = new Fl_Grid(header.button->x() + 16, 0, header.button->w() - 16, FLAG_ROW_HEIGHT * numRows);
-	header.grid->layout(numRows, 2);
-
-	int index = 0;
-	for(const FeatureFlagMapping &entry : blockingFlags)
-	{
-		LineFlagButton button{};
-		button.button = new Fl_Check_Button(0, 0, 0, 0, entry.label);
-		button.button->labelsize(12);
-		button.data = std::make_unique<line_flag_CB_data_c>(
-			this, entry.flagSet == 1 ? entry.value : 0, entry.flagSet == 2 ? entry.value : 0
-		);
-		button.button->callback(flags_callback, button.data.get());
-		flagButtons.push_back(std::move(button));
-
-		header.grid->add(button.button);
-		header.grid->widget(button.button, index % numRows, index / numRows);
-		header.lineFlagButtonIndices.push_back(static_cast<int>(flagButtons.size()) - 1);
-		++index;
-	}
-
-	panel->insert(*header.button, front);
-	panel->insert(*header.grid, front);
-
-	categoryHeaders.push_back(std::move(header));
-
+	populateUDMFFlagCheckBoxes(renderingFlags, lengthof(renderingFlags), loaded, config, "Advanced rendering");
 }
 
 int UI_LineBox::getActivationCount() const
@@ -1566,14 +1587,11 @@ void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
 			continue;
 		if(!categoryBtn || cat.button == categoryBtn)
 		{
-			cat.expanded = cat.button->isExpanded();
-			if(cat.expanded)
+			if(cat.button->isExpanded())
 				cat.grid->show();
 			else
 				cat.grid->hide();
 
-			// Reposition all controls below the flags area
-			//repositionAfterCategoryToggle();
 			redraw();
 			break;
 		}
@@ -2232,7 +2250,8 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	flagButtons.clear();
 	updateUDMFBaseFlags(loaded, config);
 	updateUDMFActivationMenu(loaded, config);
-	updateAdvancedBlockingSection(loaded, config);
+	updateUDMFBlockingFlags(loaded, config);
+	updateUDMFRenderingControls(loaded, config);
 
 	int Y = y() + flagsStartY;
 
@@ -2276,7 +2295,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				catHeader.button->copy_label(catName.c_str());
 				catHeader.button->callback(category_callback, this);
 
-				catHeader.expanded = false;
 				Y += FIELD_HEIGHT;
 			}
 			const int numRows = (int(flagsInCat.size()) + 1) / 2;

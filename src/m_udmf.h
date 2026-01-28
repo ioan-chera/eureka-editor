@@ -38,6 +38,7 @@ enum class UDMF_LineFeature : unsigned
 	blocksound,
 	blockuse,
 	checkswitchrange,
+	clipmidtex,
 	damagespecial,
 	deathspecial,
 	dontpegbottom,
@@ -58,7 +59,10 @@ enum class UDMF_LineFeature : unsigned
 	playeruse,
 	playeruseback,
 	repeatspecial,
+	translucent,
+	transparent,
 	twosided,
+	wrapmidtex,
 };
 
 struct UDMFMapping
