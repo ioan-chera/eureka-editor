@@ -25,6 +25,7 @@ struct ConfigData;
 
 enum class UDMF_LineFeature : unsigned
 {
+	alpha,
 	anycross,
 	blockeverything,
 	blockfloaters,

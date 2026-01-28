@@ -1096,6 +1096,15 @@ void UI_LineBox::updateUDMFRenderingControls(const LoadingData &loaded, const Co
 	};
 
 	populateUDMFFlagCheckBoxes(renderingFlags, lengthof(renderingFlags), loaded, config, "Advanced rendering");
+
+	Fl_Grid *grid = categoryHeaders.back().grid;
+
+	if(UDMF_HasLineFeature(config, UDMF_LineFeature::alpha))
+	{
+		grid->layout(grid->rows() + 1, grid->cols());
+		Fl_Hor_Value_Slider *slider = new Fl_Hor_Value_Slider(0, 0, 0, 0, "Alpha:");
+		// TODO: setup the slider
+	}
 }
 
 int UI_LineBox::getActivationCount() const

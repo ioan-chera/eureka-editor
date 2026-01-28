@@ -663,12 +663,12 @@ udmf_linedef midtex3d
 udmf_linedef midtex3dimpassible
 
 # Rendering
+udmf_linedef alpha
 udmf_linedef clipmidtex
 udmf_linedef wrapmidtex
 udmf_linedef translucent
 udmf_linedef transparent
 
-udmf_lineslider alpha Alpha 0.0 1.0 0.015625 1.0
 
 udmf_linechoice_label locknumber "Lock"
 udmf_linechoice locknumber 0 "No lock"

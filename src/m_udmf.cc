@@ -123,6 +123,7 @@ bool UDMF_AddLineFeature(ConfigData &config, const char *featureName)
 #define ENTRY(a) { #a, UDMF_LineFeature::a }
 	static const FeatureMap map[] =
 	{
+		ENTRY(alpha),
 		ENTRY(anycross),
 		ENTRY(blockeverything),
 		ENTRY(blockfloaters),
