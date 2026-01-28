@@ -81,7 +81,7 @@ struct FeatureFlagMapping
 	UDMF_LineFeature feature;
 	const char *label;
 	const char *tooltip;
-	int value;
+	unsigned value;
 	int flagSet;
 };
 

@@ -443,7 +443,7 @@ enum udmf_lineflag_e
 // Extra flags, second field
 enum udmf_lineflag2_e
 {
-	MLF2_UDMF_BlockEverything    = 0x80000001,
+	MLF2_UDMF_BlockEverything    = 0x00000001,
 	MLF2_UDMF_Revealed           = 0x00000002,
 	MLF2_UDMF_AnyCross           = 0x00000004,
 	MLF2_UDMF_MonsterActivate    = 0x00000008,
