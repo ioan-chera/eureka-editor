@@ -622,6 +622,15 @@ feature udmf_lineparameters 1
 feature udmf_thingspecials 1
 feature udmf_multipletags 1
 
+# Basic flags
+udmf_linedef twosided
+udmf_linedef dontpegtop
+udmf_linedef dontpegbottom
+udmf_linedef blocking
+udmf_linedef blockmonsters
+udmf_linedef blocksound
+udmf_linedef passuse
+
 # Activation entries
 udmf_linedef anycross
 udmf_linedef checkswitchrange
@@ -653,13 +662,6 @@ udmf_linedef jumpover
 udmf_linedef midtex3d
 udmf_linedef midtex3dimpassible
 
-udmf_lineflag "two sided"   twosided
-udmf_lineflag "upper unpeg" dontpegtop
-udmf_lineflag "lower unpeg" dontpegbottom
-udmf_lineflag "impassable"  blocking
-udmf_lineflag "block mons"  blockmonsters
-udmf_lineflag "sound block" blocksound
-udmf_lineflag "pass thru"   passuse
 
 
 udmf_lineslider alpha Alpha 0.0 1.0 0.015625 1.0

@@ -857,6 +857,50 @@ void UI_LineBox::checkSidesDirtyFields()
 	back->checkDirtyFields();
 }
 
+void UI_LineBox::updateUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config)
+{
+	if(loaded.levelFormat != MapFormat::udmf)
+		return;
+
+	static const FeatureFlagMapping baseFlags[] =
+	{
+		{UDMF_LineFeature::twosided, "two sided", "", MLF_TwoSided, 1},
+		{UDMF_LineFeature::dontpegtop, "upper unpeg", "", MLF_UpperUnpegged, 1},
+		{UDMF_LineFeature::dontpegbottom, "lower unpeg", "", MLF_LowerUnpegged, 1},
+		{UDMF_LineFeature::blocking, "impassable", "", MLF_Blocking, 1},
+		{UDMF_LineFeature::blockmonsters, "block monsters", "", MLF_BlockMonsters, 1},
+		{UDMF_LineFeature::blocksound, "sound block", "", MLF_SoundBlock, 1},
+		{UDMF_LineFeature::passuse, "pass thru", "", MLF_Boom_PassThru, 1},
+	};
+
+	CategoryHeader header{};
+	const int numRows = (int)(lengthof(baseFlags) + 1) / 2;
+	header.grid = new Fl_Grid(x() + flagsStartX + 16, 0, flagsAreaW - 16, FLAG_ROW_HEIGHT * numRows);
+	header.grid->layout(numRows, 2);
+
+	int index = 0;
+	for(const FeatureFlagMapping &entry : baseFlags)
+	{
+		LineFlagButton button{};
+		button.button = new Fl_Check_Button(0, 0, 0, 0, entry.label);
+		button.button->labelsize(12);
+		button.data = std::make_unique<line_flag_CB_data_c>(
+			this, entry.flagSet == 1 ? entry.value : 0, entry.flagSet == 2 ? entry.value : 0
+		);
+		button.button->callback(flags_callback, button.data.get());
+		flagButtons.push_back(std::move(button));
+
+		header.grid->add(button.button);
+		header.grid->widget(button.button, index % numRows, index / numRows);
+		header.lineFlagButtonIndices.push_back(static_cast<int>(flagButtons.size()) - 1);
+		++index;
+	}
+
+	panel->insert(*header.grid, front);
+
+	categoryHeaders.push_back(std::move(header));
+}
+
 void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config)
 {
 	udmfActivationButton->clear();
@@ -974,17 +1018,17 @@ void UI_LineBox::updateAdvancedBlockingSection(const LoadingData &loaded, const 
 
 	static const FeatureFlagMapping blockingFlags[] =
 	{
-		{UDMF_LineFeature::blockeverything, "Block everything", "Act as a solid wall", MLF2_UDMF_BlockEverything, 2},
+		{UDMF_LineFeature::blockeverything, "block everything", "Act as a solid wall", MLF2_UDMF_BlockEverything, 2},
 		{UDMF_LineFeature::midtex3d, "3DMidTex", "Eternity 3D middle texture", MLF_Eternity_3DMidTex, 1},
 		{UDMF_LineFeature::midtex3d, "3DMidTex+missiles", "Eternity 3D middle texture", MLF2_UDMF_MidTex3DImpassible, 2},
 		{UDMF_LineFeature::jumpover, "Strife railing", "Strife-style jumpable railing", MLF_UDMF_JumpOver, 1},
-		{UDMF_LineFeature::blockfloaters, "Block floaters", "Block flying enemies", MLF_UDMF_BlockFloaters, 1},
-		{UDMF_LineFeature::blocklandmonsters, "Block land monsters", "Block walking enemies", MLF_UDMF_BlockLandMonsters, 1},
-		{UDMF_LineFeature::blockplayers, "Block players", "Block only players", MLF_UDMF_BlockPlayers, 1},
-		{UDMF_LineFeature::blockhitscan, "Block gunshots", "Blocks hitscans", MLF_UDMF_BlockHitScan, 1},
-		{UDMF_LineFeature::blockprojectiles, "Block projectiles", "Blocks finite-speed projectiles", MLF_UDMF_BlockProjectiles, 1},
-		{UDMF_LineFeature::blocksight, "Block sight", "Blocks monster sight", MLF_UDMF_BlockSight, 1},
-		{UDMF_LineFeature::blockuse, "Block use", "Blocks operation", MLF_UDMF_BlockUse, 1},
+		{UDMF_LineFeature::blockfloaters, "block floaters", "Block flying enemies", MLF_UDMF_BlockFloaters, 1},
+		{UDMF_LineFeature::blocklandmonsters, "block land monsters", "Block walking enemies", MLF_UDMF_BlockLandMonsters, 1},
+		{UDMF_LineFeature::blockplayers, "block players", "Block only players", MLF_UDMF_BlockPlayers, 1},
+		{UDMF_LineFeature::blockhitscan, "block gunshots", "Blocks hitscans", MLF_UDMF_BlockHitScan, 1},
+		{UDMF_LineFeature::blockprojectiles, "block projectiles", "Blocks finite-speed projectiles", MLF_UDMF_BlockProjectiles, 1},
+		{UDMF_LineFeature::blocksight, "block sight", "Blocks monster sight", MLF_UDMF_BlockSight, 1},
+		{UDMF_LineFeature::blockuse, "block use", "Blocks operation", MLF_UDMF_BlockUse, 1},
 	};
 
 	// Check if features exist at all before proceeding
@@ -2186,6 +2230,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 	categoryHeaders.clear();
 	flagButtons.clear();
+	updateUDMFBaseFlags(loaded, config);
 	updateUDMFActivationMenu(loaded, config);
 	updateAdvancedBlockingSection(loaded, config);
 

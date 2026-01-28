@@ -138,6 +138,7 @@ public:
 	}
 
 private:
+	void updateUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config);
 	void updateUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config);
 	void updateAdvancedBlockingSection(const LoadingData &loaded, const ConfigData &config);
 
