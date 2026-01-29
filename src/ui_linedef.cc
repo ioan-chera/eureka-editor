@@ -1102,15 +1102,18 @@ void UI_LineBox::updateUDMFRenderingControls(const LoadingData &loaded, const Co
 	if(UDMF_HasLineFeature(config, UDMF_LineFeature::alpha))
 	{
 		grid->layout(grid->rows() + 1, grid->cols());
+		grid->size(grid->w(), grid->h() + FLAG_ROW_HEIGHT);
+
 		Fl_Hor_Value_Slider *slider = new Fl_Hor_Value_Slider(0, 0, 0, 0, "Alpha:");
+		alphaWidget = slider;
 		slider->step(0.015625);
 		slider->minimum(0);
 		slider->maximum(1);
 		slider->value_width(60);
-		///slider->callback(field_callback, this);
+		slider->callback(field_callback, this);
 		grid->add(slider);
 		grid->widget(slider, grid->rows() - 1, 0, 1, 2);
-		// TODO: setup the slider
+
 	}
 }
 
@@ -1480,6 +1483,20 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 	};
 
 	UI_LineBox *box = (UI_LineBox *)data;
+	if(w == box->alphaWidget)
+	{
+		box->checkDirtyFields();
+		box->checkSidesDirtyFields();
+
+		EditOperation op(box->inst.level.basis);
+		op.setMessageForSelection("edited alpha of", *box->inst.edit.Selected);
+		for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+		{
+			op.changeLinedef(*it, &LineDef::alpha, box->alphaWidget->value());
+			box->UpdateField(Basis::EditField(&LineDef::alpha));
+		}
+		return;
+	}
 
 	if(!box->inst.edit.Selected->empty())
 	{
@@ -1909,32 +1926,13 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 		}
 	}
 
-	if(!efield || (efield->format == Basis::EditFormat::linedefDouble &&
-				   efield->doubleLineField == &LineDef::alpha))
+	if(alphaWidget && (!efield || (efield->format == Basis::EditFormat::linedefDouble &&
+								   efield->doubleLineField == &LineDef::alpha)))
 	{
 		if(inst.level.isLinedef(obj))
-		{
-			for(const LineField &field : fields)
-			{
-				if(field.info->type != linefield_t::Type::slider)
-					continue;
-				if(field.info->identifier.noCaseEqual("alpha"))
-				{
-					double alpha = inst.level.linedefs[obj]->alpha;
-					static_cast<Fl_Valuator*>(field.widget)->value(alpha);
-				}
-			}
-		}
+			alphaWidget->value(inst.level.linedefs[obj]->alpha);
 		else
-		{
-			for(const LineField &field : fields)
-			{
-				if(field.info->type == linefield_t::Type::slider)
-				{
-					static_cast<Fl_Valuator*>(field.widget)->value(0);
-				}
-			}
-		}
+			alphaWidget->value(0);
 	}
 
 	if(inst.conf.features.udmf_multipletags)
@@ -2264,6 +2262,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 	categoryHeaders.clear();
 	flagButtons.clear();
+	alphaWidget = nullptr;
 	updateUDMFBaseFlags(loaded, config);
 	updateUDMFActivationMenu(loaded, config);
 	updateUDMFBlockingFlags(loaded, config);

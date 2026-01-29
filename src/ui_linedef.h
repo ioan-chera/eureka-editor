@@ -65,6 +65,8 @@ private:
 
 	MultiTagView *multiTagView;
 
+	Fl_Valuator *alphaWidget;
+
 	UI_SideBox *front;
 	UI_SideBox *back;
 
