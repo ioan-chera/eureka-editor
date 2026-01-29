@@ -1103,6 +1103,13 @@ void UI_LineBox::updateUDMFRenderingControls(const LoadingData &loaded, const Co
 	{
 		grid->layout(grid->rows() + 1, grid->cols());
 		Fl_Hor_Value_Slider *slider = new Fl_Hor_Value_Slider(0, 0, 0, 0, "Alpha:");
+		slider->step(0.015625);
+		slider->minimum(0);
+		slider->maximum(1);
+		slider->value_width(60);
+		///slider->callback(field_callback, this);
+		grid->add(slider);
+		grid->widget(slider, grid->rows() - 1, 0, 1, 2);
 		// TODO: setup the slider
 	}
 }
