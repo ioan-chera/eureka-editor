@@ -66,6 +66,7 @@ private:
 	MultiTagView *multiTagView;
 
 	Fl_Valuator *alphaWidget;
+	Fl_Check_Button *udmfTranslucencyCheckBoxes[2];
 
 	UI_SideBox *front;
 	UI_SideBox *back;

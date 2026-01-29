@@ -67,8 +67,10 @@ enum
 
 	TAG_WIDTH = 64,
 	ARG_WIDTH = 53,
+	ALPHA_NUMBER_WIDTH = 60,
 	ARG_PADDING = 4,
 	ARG_LABELSIZE = 10,
+	FLAG_LABELSIZE = 12,
 
 	FIELD_HEIGHT = 22,
 
@@ -107,7 +109,7 @@ public:
 
 		box(FL_NO_BOX);
 		align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-		labelsize(12);
+		labelsize(FLAG_LABELSIZE);
 	}
 
 	void callback(Fl_Callback *cb, void *data = nullptr)
@@ -117,7 +119,7 @@ public:
 	}
 
 	// Calculate the required width for a given label
-	static int calcRequiredWidth(const char *labelText, int labelSize = 12)
+	static int calcRequiredWidth(const char *labelText, int labelSize = FLAG_LABELSIZE)
 	{
 		if (!labelText || !*labelText)
 			return 0;
@@ -338,7 +340,7 @@ MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCa
 	mDataCallback(dataCallback)
 {
 	static const char inputLabel[] = "More IDs:";
-	fl_font(FL_HELVETICA, 12);	// prepare
+	fl_font(FL_HELVETICA, FLAG_LABELSIZE);	// prepare
 	mInput = new Fl_Int_Input(x + fl_width(inputLabel) + 8, y, 50, TYPE_INPUT_HEIGHT, inputLabel);
 	mInput->align(FL_ALIGN_LEFT);
 	mInput->callback(addCallback, this);
@@ -520,7 +522,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	panel->afterSpacing(which, SPACING_BELOW_NOMBRE - INPUT_SPACING);
 
 	// Prepare before calling fl_width
-	fl_font(FL_HELVETICA, 12);
+	fl_font(FL_HELVETICA, FLAG_LABELSIZE);
 
 	{
 		Fl_Flex *type_flex = new Fl_Flex(X + TYPE_INPUT_X, 0, W - TYPE_INPUT_X - NOMBRE_INSET,
@@ -879,13 +881,15 @@ void UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 		return;
 
 	CategoryHeader header{};
+	const int xPos = which->x();
+	const int wSize = which->w();
 	if(title)
 	{
-		header.button = new UI_CategoryButton(x() + flagsStartX, 0, flagsAreaW, FIELD_HEIGHT, title);
+		header.button = new UI_CategoryButton(xPos, 0, wSize, FIELD_HEIGHT, title);
 		header.button->callback(category_callback, this);
 	}
 	const int numRows = (int)(count + 1) / 2;
-	header.grid = new Fl_Grid(x() + flagsStartX + 16, 0, flagsAreaW - 16, FLAG_ROW_HEIGHT * numRows);
+	header.grid = new Fl_Grid(xPos + 8, 0, wSize - 8, FLAG_ROW_HEIGHT * numRows);
 	header.grid->layout(numRows, 2);
 
 	int index = 0;
@@ -894,7 +898,7 @@ void UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 		const FeatureFlagMapping &entry = mapping[i];
 		LineFlagButton button{};
 		button.button = new Fl_Check_Button(0, 0, 0, 0, entry.label);
-		button.button->labelsize(12);
+		button.button->labelsize(FLAG_LABELSIZE);
 		button.button->tooltip(entry.tooltip);
 		button.data = std::make_unique<line_flag_CB_data_c>(
 			this, entry.flagSet == 1 ? entry.value : 0, entry.flagSet == 2 ? entry.value : 0
@@ -1101,19 +1105,43 @@ void UI_LineBox::updateUDMFRenderingControls(const LoadingData &loaded, const Co
 
 	if(UDMF_HasLineFeature(config, UDMF_LineFeature::alpha))
 	{
+		int count = 0;
+		for(int index : categoryHeaders.back().lineFlagButtonIndices)
+		{
+			LineFlagButton &button = flagButtons[index];
+			if(!button.data || !(button.data->mask & (MLF_UDMF_Translucent | MLF_UDMF_Transparent)))
+				continue;
+			udmfTranslucencyCheckBoxes[count++] = button.button;
+			if(count >= (int)lengthof(udmfTranslucencyCheckBoxes))
+				break;
+		}
 		grid->layout(grid->rows() + 1, grid->cols());
 		grid->size(grid->w(), grid->h() + FLAG_ROW_HEIGHT);
 
-		Fl_Hor_Value_Slider *slider = new Fl_Hor_Value_Slider(0, 0, 0, 0, "Alpha:");
+		static const char labelText[] = "Custom alpha:";
+		fl_font(FL_HELVETICA, FLAG_LABELSIZE);
+		const int margin = fl_width(labelText);
+
+		Fl_Flex *spacerFlex = new Fl_Flex(0, 0, 0, 0);
+		spacerFlex->margin(margin, 0, 0, 0);
+
+		// Provide a nonzero placeholder width to prevent value_width below from getting truncated
+		Fl_Hor_Value_Slider *slider = new Fl_Hor_Value_Slider(0, 0, 2 * ALPHA_NUMBER_WIDTH, 0,
+															  labelText);
 		alphaWidget = slider;
+		slider->align(FL_ALIGN_LEFT);
+		slider->labelsize(FLAG_LABELSIZE);
 		slider->step(0.015625);
 		slider->minimum(0);
 		slider->maximum(1);
-		slider->value_width(60);
+		slider->value_width(ALPHA_NUMBER_WIDTH);
 		slider->callback(field_callback, this);
-		grid->add(slider);
-		grid->widget(slider, grid->rows() - 1, 0, 1, 2);
+		slider->tooltip("Custom translucency");
+		slider->when(FL_WHEN_RELEASE);
+		spacerFlex->end();
 
+		grid->add(spacerFlex);
+		grid->widget(spacerFlex, grid->rows() - 1, 0, 1, 2);
 	}
 }
 
@@ -1930,9 +1958,20 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 								   efield->doubleLineField == &LineDef::alpha)))
 	{
 		if(inst.level.isLinedef(obj))
-			alphaWidget->value(inst.level.linedefs[obj]->alpha);
+		{
+			double alpha = inst.level.linedefs[obj]->alpha;
+			alphaWidget->value(alpha);
+			for(Fl_Check_Button *button : udmfTranslucencyCheckBoxes)
+				if(button)
+					button->labelcolor(alpha >= 1 ? FL_FOREGROUND_COLOR : FL_INACTIVE_COLOR);
+		}
 		else
+		{
 			alphaWidget->value(0);
+			for(Fl_Check_Button *button : udmfTranslucencyCheckBoxes)
+				if(button)
+					button->labelcolor(FL_FOREGROUND_COLOR);
+		}
 	}
 
 	if(inst.conf.features.udmf_multipletags)
@@ -2263,6 +2302,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	categoryHeaders.clear();
 	flagButtons.clear();
 	alphaWidget = nullptr;
+	memset(udmfTranslucencyCheckBoxes, 0, sizeof(udmfTranslucencyCheckBoxes));
 	updateUDMFBaseFlags(loaded, config);
 	updateUDMFActivationMenu(loaded, config);
 	updateUDMFBlockingFlags(loaded, config);
@@ -2365,7 +2405,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 						LineFlagButton fb;
 						fb.button = new Fl_Check_Button(baseX + offset, curY + 2, FW, 20,
 							flag->label.c_str());
-						fb.button->labelsize(12);
+						fb.button->labelsize(FLAG_LABELSIZE);
 						fb.data = std::make_unique<line_flag_CB_data_c>(this, flag->flagSet == 1 ?
 							flag->value : 0, flag->flagSet == 2 ? flag->value : 0);
 						fb.button->callback(flags_callback, fb.data.get());
@@ -2478,7 +2518,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				// slider->lstep(lf.step * 8);
 				slider->minimum(lf.minValue);
 				slider->maximum(lf.maxValue);
-				slider->value_width(60);
+				slider->value_width(ALPHA_NUMBER_WIDTH);
 			}
 			else if(lf.type == linefield_t::Type::intpair)
 			{
