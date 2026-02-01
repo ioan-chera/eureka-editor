@@ -1664,170 +1664,149 @@ void UI_LineBox::updateCategoryDetails()
 
 void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 {
-	if (!efield || efield->isRaw(LineDef::F_START) || efield->isRaw(LineDef::F_END))
+	if(inst.level.isLinedef(obj))
+		CalcLength();
+	else
+		mFixUp.setInputValue(length, "");
+
+	for (int a = 0 ; a < 5 ; a++)
 	{
-		if(inst.level.isLinedef(obj))
-			CalcLength();
-		else
-			mFixUp.setInputValue(length, "");
+		mFixUp.setInputValue(args[a], "");
+		if (inst.loaded.levelFormat == MapFormat::hexen ||
+			(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
+		{
+			args[a]->label("");
+		}
+		args[a]->textcolor(FL_BLACK);
+		args0str->textcolor(FL_BLACK);
 	}
 
-	if (!efield || efield->isRaw(LineDef::F_TAG) || efield->isRaw(LineDef::F_ARG1STR) ||
-		efield->isRaw(LineDef::F_ARG1) || efield->isRaw(LineDef::F_ARG2) ||
-		efield->isRaw(LineDef::F_ARG3) || efield->isRaw(LineDef::F_ARG4) ||
-		efield->isRaw(LineDef::F_ARG5) || efield->isRaw(LineDef::F_TYPE))
+	if (inst.level.isLinedef(obj))
 	{
-		for (int a = 0 ; a < 5 ; a++)
+		const auto L = inst.level.linedefs[obj];
+
+		mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
+
+		const linetype_t &info = inst.conf.getLineType(L->type);
+
+		if (inst.loaded.levelFormat == MapFormat::hexen ||
+			inst.loaded.levelFormat == MapFormat::udmf)
 		{
-			mFixUp.setInputValue(args[a], "");
-			if (inst.loaded.levelFormat == MapFormat::hexen ||
-				(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
+			for (int a = 0 ; a < 5 ; a++)
 			{
-				args[a]->label("");
-			}
-			args[a]->textcolor(FL_BLACK);
-			args0str->textcolor(FL_BLACK);
-		}
+				int arg_val = L->Arg(1 + a);
 
-		if (inst.level.isLinedef(obj))
-		{
-			const auto L = inst.level.linedefs[obj];
+				if(arg_val || L->type)
+					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
-			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
+				if(L->arg1str.get())
+					mFixUp.setInputValue(args0str, BA_GetString(L->arg1str).c_str());
 
-			const linetype_t &info = inst.conf.getLineType(L->type);
-
-			if (inst.loaded.levelFormat == MapFormat::hexen ||
-				inst.loaded.levelFormat == MapFormat::udmf)
-			{
-				for (int a = 0 ; a < 5 ; a++)
+				// set the tooltip
+				if (!info.args[a].name.empty())
 				{
-					int arg_val = L->Arg(1 + a);
-
-					if(arg_val || L->type)
-						mFixUp.setInputValue(args[a], SString(arg_val).c_str());
-
-					if(L->arg1str.get())
-						mFixUp.setInputValue(args0str, BA_GetString(L->arg1str).c_str());
-
-					// set the tooltip
-					if (!info.args[a].name.empty())
+					args[a]->copy_label(info.args[a].name.replacing('_', ' ').c_str());
+					args[a]->parent()->redraw();
+					if(a == 0)
 					{
-						args[a]->copy_label(info.args[a].name.replacing('_', ' ').c_str());
-						args[a]->parent()->redraw();
-						if(a == 0)
+						if(info.args[0].type == SpecialArgType::str)
 						{
-							if(info.args[0].type == SpecialArgType::str)
-							{
-								args0str->copy_label(args[0]->label());
-								args0str->show();
-								args[0]->hide();
-							}
-							else
-							{
-								args0str->hide();
-								args[0]->show();
-							}
+							args0str->copy_label(args[0]->label());
+							args0str->show();
+							args[0]->hide();
 						}
-					}
-					else
-					{
-						args[a]->label("");
-						args[a]->textcolor(fl_rgb_color(160,160,160));
-						args[a]->parent()->redraw();
-						if(a == 0)
+						else
 						{
 							args0str->hide();
 							args[0]->show();
 						}
 					}
 				}
+				else
+				{
+					args[a]->label("");
+					args[a]->textcolor(fl_rgb_color(160,160,160));
+					args[a]->parent()->redraw();
+					if(a == 0)
+					{
+						args0str->hide();
+						args[0]->show();
+					}
+				}
 			}
-		}
-		else
-		{
-			mFixUp.setInputValue(length, "");
-			mFixUp.setInputValue(tag, "");
 		}
 	}
-
-	if (!efield || efield->isRaw(LineDef::F_RIGHT) || efield->isRaw(LineDef::F_LEFT))
+	else
 	{
-		if (inst.level.isLinedef(obj))
-		{
-			const auto L = inst.level.linedefs[obj];
-
-			int right_mask = SolidMask(L.get(), Side::right);
-			int  left_mask = SolidMask(L.get(), Side::left);
-
-			front->SetObj(L->right, right_mask, L->TwoSided());
-			 back->SetObj(L->left,   left_mask, L->TwoSided());
-		}
-		else
-		{
-			front->SetObj(SETOBJ_NO_LINE, 0, false);
-			 back->SetObj(SETOBJ_NO_LINE, 0, false);
-		}
+		mFixUp.setInputValue(length, "");
+		mFixUp.setInputValue(tag, "");
 	}
 
-	if (!efield || efield->isRaw(LineDef::F_TYPE))
+	if (inst.level.isLinedef(obj))
 	{
-		if (inst.level.isLinedef(obj))
+		const auto L = inst.level.linedefs[obj];
+
+		int right_mask = SolidMask(L.get(), Side::right);
+		int  left_mask = SolidMask(L.get(), Side::left);
+
+		front->SetObj(L->right, right_mask, L->TwoSided());
+			back->SetObj(L->left,   left_mask, L->TwoSided());
+	}
+	else
+	{
+		front->SetObj(SETOBJ_NO_LINE, 0, false);
+			back->SetObj(SETOBJ_NO_LINE, 0, false);
+	}
+
+	if (inst.level.isLinedef(obj))
+	{
+		int type_num = inst.level.linedefs[obj]->type;
+
+		mFixUp.setInputValue(type, SString(type_num).c_str());
+
+		const char *gen_desc = GeneralizedDesc(type_num);
+
+		if (gen_desc)
 		{
-			int type_num = inst.level.linedefs[obj]->type;
-
-			mFixUp.setInputValue(type, SString(type_num).c_str());
-
-			const char *gen_desc = GeneralizedDesc(type_num);
-
-			if (gen_desc)
-			{
-				desc->value(gen_desc);
-			}
-			else
-			{
-				const linetype_t &info = inst.conf.getLineType(type_num);
-				desc->value(info.desc.c_str());
-			}
-
-			inst.main_win->browser->UpdateGenType(type_num);
+			desc->value(gen_desc);
 		}
 		else
 		{
-			mFixUp.setInputValue(type, "");
-			desc->value("");
-
-			inst.main_win->browser->UpdateGenType(0);
+			const linetype_t &info = inst.conf.getLineType(type_num);
+			desc->value(info.desc.c_str());
 		}
+
+		inst.main_win->browser->UpdateGenType(type_num);
+	}
+	else
+	{
+		mFixUp.setInputValue(type, "");
+		desc->value("");
+
+		inst.main_win->browser->UpdateGenType(0);
 	}
 
 	bool changed = false;
-	if (!efield || efield->isRaw(LineDef::F_FLAGS))
+	if (inst.level.isLinedef(obj))
 	{
-		if (inst.level.isLinedef(obj))
-		{
-			actkind->activate();
-			udmfActivationButton->activate();
+		actkind->activate();
+		udmfActivationButton->activate();
 
-			changed |= FlagsFromInt(inst.level.linedefs[obj]->flags);
-		}
-		else
-		{
-			changed |= FlagsFromInt(0);
+		changed |= FlagsFromInt(inst.level.linedefs[obj]->flags);
+	}
+	else
+	{
+		changed |= FlagsFromInt(0);
 
-			actkind->value(getActivationCount());  // show as "??"
-			actkind->deactivate();
-			udmfActivationButton->deactivate();
-		}
+		actkind->value(getActivationCount());  // show as "??"
+		actkind->deactivate();
+		udmfActivationButton->deactivate();
 	}
 
-	if(!efield || efield->isRaw(LineDef::F_FLAGS2))
-	{
-		if(inst.level.isLinedef(obj))
-			changed |= Flags2FromInt(inst.level.linedefs[obj]->flags2);
-		else
-			changed |= Flags2FromInt(0);
-	}
+	if(inst.level.isLinedef(obj))
+		changed |= Flags2FromInt(inst.level.linedefs[obj]->flags2);
+	else
+		changed |= Flags2FromInt(0);
 
 	if(changed)
 		updateCategoryDetails();
@@ -1836,108 +1815,91 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	{
 		const char *const name;
 		int LineDef::* field;
-		byte fieldID;
 	};
 
 	static const IntFieldMapping intFieldMappings[] =
 	{
-		{ "locknumber", &LineDef::locknumber, LineDef::F_LOCKNUMBER },
-		{ "automapstyle", &LineDef::automapstyle, LineDef::F_AUTOMAPSTYLE },
-		{ "health", &LineDef::health, LineDef::F_HEALTH },
-		{ "healthgroup", &LineDef::healthgroup, LineDef::F_HEALTHGROUP },
+		{ "locknumber", &LineDef::locknumber },
+		{ "automapstyle", &LineDef::automapstyle },
+		{ "health", &LineDef::health },
+		{ "healthgroup", &LineDef::healthgroup },
 	};
 
-	bool isCalled = false;
-	if(efield)
+	// Update choice and intpair widgets for UDMF properties
+	if(inst.level.isLinedef(obj))
 	{
-		for(const IntFieldMapping &cm : intFieldMappings)
-		{
-			if(!efield->isRaw(cm.fieldID))
-				continue;
-			isCalled = true;
-			break;
-		}
-	}
+		const auto L = inst.level.linedefs[obj];
 
-	if(!efield || isCalled)
-	{
-		// Update choice and intpair widgets for UDMF properties
-		if(inst.level.isLinedef(obj))
+		for(const LineField &field : fields)
 		{
-			const auto L = inst.level.linedefs[obj];
-
-			for(const LineField &field : fields)
+			if(field.info->type == linefield_t::Type::choice)
 			{
-				if(field.info->type == linefield_t::Type::choice)
+				for(const IntFieldMapping &cm : intFieldMappings)
 				{
-					for(const IntFieldMapping &cm : intFieldMappings)
+					if(field.info->identifier.noCaseEqual(cm.name))
 					{
-						if(field.info->identifier.noCaseEqual(cm.name))
-						{
-							int value = L.get()->*cm.field;
+						int value = L.get()->*cm.field;
 
-							// Find matching option
-							int index = 0;
-							for(size_t i = 0; i < field.info->options.size(); ++i)
+						// Find matching option
+						int index = 0;
+						for(size_t i = 0; i < field.info->options.size(); ++i)
+						{
+							if(field.info->options[i].value == value)
 							{
-								if(field.info->options[i].value == value)
-								{
-									index = static_cast<int>(i);
-									break;
-								}
+								index = static_cast<int>(i);
+								break;
 							}
-							static_cast<Fl_Choice*>(field.widget)->value(index);
-							break;
 						}
-					}
-				}
-				else if(field.info->type == linefield_t::Type::intpair)
-				{
-					// Update first widget
-					for(const IntFieldMapping &cm : intFieldMappings)
-					{
-						if(field.info->identifier.noCaseEqual(cm.name))
-						{
-							int value = L.get()->*cm.field;
-							mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget),
-												 SString(value).c_str());
-							break;
-						}
-					}
-					// Update second widget
-					for(const IntFieldMapping &cm : intFieldMappings)
-					{
-						if(field.info->identifier2.noCaseEqual(cm.name))
-						{
-							int value = L.get()->*cm.field;
-							mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2),
-												 SString(value).c_str());
-							break;
-						}
+						static_cast<Fl_Choice*>(field.widget)->value(index);
+						break;
 					}
 				}
 			}
-		}
-		else
-		{
-			// No linedef selected, reset widgets
-			for(const LineField &field : fields)
+			else if(field.info->type == linefield_t::Type::intpair)
 			{
-				if(field.info->type == linefield_t::Type::choice)
+				// Update first widget
+				for(const IntFieldMapping &cm : intFieldMappings)
 				{
-					static_cast<Fl_Choice*>(field.widget)->value(0);
+					if(field.info->identifier.noCaseEqual(cm.name))
+					{
+						int value = L.get()->*cm.field;
+						mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget),
+												SString(value).c_str());
+						break;
+					}
 				}
-				else if(field.info->type == linefield_t::Type::intpair)
+				// Update second widget
+				for(const IntFieldMapping &cm : intFieldMappings)
 				{
-					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget), "");
-					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2), "");
+					if(field.info->identifier2.noCaseEqual(cm.name))
+					{
+						int value = L.get()->*cm.field;
+						mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2),
+												SString(value).c_str());
+						break;
+					}
 				}
 			}
 		}
 	}
+	else
+	{
+		// No linedef selected, reset widgets
+		for(const LineField &field : fields)
+		{
+			if(field.info->type == linefield_t::Type::choice)
+			{
+				static_cast<Fl_Choice*>(field.widget)->value(0);
+			}
+			else if(field.info->type == linefield_t::Type::intpair)
+			{
+				mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget), "");
+				mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2), "");
+			}
+		}
+	}
 
-	if(alphaWidget && (!efield || (efield->format == Basis::EditFormat::linedefDouble &&
-								   efield->doubleLineField == &LineDef::alpha)))
+	if(alphaWidget)
 	{
 		if(inst.level.isLinedef(obj))
 		{
@@ -1958,17 +1920,13 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 
 	if(inst.conf.features.udmf_multipletags)
 	{
-		if(!efield || (efield->format == Basis::EditFormat::linedefIntSet &&
-					   efield->intSetLineField == &LineDef::moreIDs))
+		if(inst.level.isLinedef(obj))
 		{
-			if(inst.level.isLinedef(obj))
-			{
-				multiTagView->setTags(std::set(inst.level.linedefs[obj]->moreIDs));
-			}
-			else
-			{
-				multiTagView->clearTags();
-			}
+			multiTagView->setTags(std::set(inst.level.linedefs[obj]->moreIDs));
+		}
+		else
+		{
+			multiTagView->clearTags();
 		}
 	}
 }
