@@ -531,14 +531,26 @@ void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
 	invalidated_panel_obj = true;
 }
 
+static bool currentLineReferencesEditedSide(const Instance &inst, const int sidenum)
+{
+	if(!inst.main_win || inst.edit.mode != ObjType::linedefs)
+		return false;
+	const int linenum = inst.main_win->GetPanelObjNum();
+	const LineDef &line = *inst.level.linedefs[linenum].get();
+	return line.left == sidenum || line.right == sidenum;
+}
 
 void Instance::ObjectBox_NotifyChange(ObjType type, int objnum)
 {
-	if (type != edit.mode || !main_win)
+	bool editingSidedef = type == ObjType::sidedefs && edit.mode == ObjType::linedefs;
+	if ((type != edit.mode && !editingSidedef) || !main_win)
 		return;
 
-	if (objnum != main_win->GetPanelObjNum())
+	if((!editingSidedef || !currentLineReferencesEditedSide(*this, objnum)) &&
+	   (objnum != main_win->GetPanelObjNum()))
+	{
 		return;
+	}
 
 	changed_panel_obj = true;
 }

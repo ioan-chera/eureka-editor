@@ -432,9 +432,6 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 
 		op.setMessageForSelection("added sidedef to", *box->inst.edit.Selected);
 	}
-
-	box->inst.main_win->line_box->UpdateField();
-	box->inst.main_win->line_box->UpdateSides();
 }
 
 
@@ -471,9 +468,6 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 
 		op.setMessageForSelection("deleted sidedef from", *box->inst.edit.Selected);
 	}
-
-	box->inst.main_win->line_box->UpdateField();
-	box->inst.main_win->line_box->UpdateSides();
 }
 
 
@@ -797,7 +791,7 @@ void UI_SideBox::UpdateHiding()
 		}
 		else
 		{
-			r_panel->position(getMidTexX(0), r_panel->y());	
+			r_panel->position(getMidTexX(0), r_panel->y());
 
 			l_panel->hide();
 			u_panel->hide();

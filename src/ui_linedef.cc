@@ -704,9 +704,6 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 			op.changeLinedef(*it, LineDef::F_TYPE, new_type);
 		}
 	}
-
-	// update description
-	box->UpdateField(Basis::EditField(LineDef::F_TYPE));
 }
 
 
@@ -1194,9 +1191,6 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int uiparts)
 		}
 	}
 
-	UpdateField();
-	UpdateSides();
-
 	redraw();
 }
 
@@ -1297,9 +1291,6 @@ void UI_LineBox::CB_Paste(int uiparts, StringID new_tex)
 			}
 		}
 	}
-
-	UpdateField();
-	UpdateSides();
 
 	redraw();
 }
@@ -1519,10 +1510,7 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 		op.setMessageForSelection("edited alpha of", *box->inst.edit.Selected);
 		for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
-		{
 			op.changeLinedef(*it, &LineDef::alpha, box->alphaWidget->value());
-			box->UpdateField(Basis::EditField(&LineDef::alpha));
-		}
 		return;
 	}
 
@@ -1578,8 +1566,6 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 					if(identifier.noCaseEqual(cm.name))
 					{
 						op.changeLinedef(*it, cm.fieldID, new_value);
-						// Update the display
-						box->UpdateField(Basis::EditField(cm.fieldID));
 						break;
 					}
 				}
@@ -1601,10 +1587,7 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 			{
 				// Hardcode the field mapping for now
 				if(identifier.noCaseEqual("alpha"))
-				{
 					op.changeLinedef(*it, &LineDef::alpha, valuator->value());
-					box->UpdateField(Basis::EditField(&LineDef::alpha));
-				}
 			}
 			break;
 		}
@@ -1623,7 +1606,6 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 					if(identifier.noCaseEqual(cm.name))
 					{
 						op.changeLinedef(*it, cm.fieldID, new_value);
-						box->UpdateField(Basis::EditField(cm.fieldID));
 						break;
 					}
 				}
