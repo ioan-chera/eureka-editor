@@ -502,9 +502,6 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	//Fl_Scroll *scroll = new Fl_Scroll(X, Y, W, H);
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
-	const int Y0 = Y;
-	const int X0 = X;
-
 	panel = new UI_StackPanel(X, Y, W, H);
 	panel->margin(INSET_LEFT, INSET_TOP, INSET_RIGHT, INSET_BOTTOM);
 	panel->spacing(INPUT_SPACING);
@@ -661,7 +658,6 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	Y += f_automap->h() - 1;
 
 	// Remember where to place dynamic linedef flags
-	flagsStartY = Y - Y0;
 	flagsAreaW = W;
 
 	// Leave space; dynamic flags will be created in UpdateGameInfo and side boxes moved accordingly
@@ -2240,8 +2236,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	loadUDMFBlockingFlags(loaded, config);
 	loadUDMFRenderingControls(loaded, config);
 
-	int Y = y() + flagsStartY;
-
 	const std::vector<lineflag_t> &flaglist = inst.loaded.levelFormat == MapFormat::udmf ?
 			inst.conf.udmf_line_flags : inst.conf.line_flags;
 
@@ -2279,8 +2273,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 					flagsAreaW, FIELD_HEIGHT);
 				catHeader.button->copy_label(catName.c_str());
 				catHeader.button->callback(category_callback, this);
-
-				Y += FIELD_HEIGHT;
 			}
 			const int numRows = (int(flagsInCat.size()) + 1) / 2;
 			catHeader.grid = new Fl_Grid(leftX, 0, FW + rightX - leftX,
@@ -2320,20 +2312,16 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			const int total = (int)slots.size();
 			const int leftCount = (total + 1) / 2;
 
-			int yLeft = Y;
-			int yRight = Y;
-
 			for(int idx = 0; idx < total; ++idx)
 			{
 				const Slot& s = slots[idx];
 				const bool onLeft = idx < leftCount;
 				const int baseX = onLeft ? leftX : rightX;
-				int& curY = onLeft ? yLeft : yRight;
 
-				auto addButton = [baseX, curY, this, &catHeader](int offset, const lineflag_t *flag)
+				auto addButton = [baseX, this, &catHeader](int offset, const lineflag_t *flag)
 					{
 						LineFlagButton fb;
-						fb.button = new Fl_Check_Button(baseX + offset, curY + 2, FW, 20,
+						fb.button = new Fl_Check_Button(baseX + offset, 0, FW, 20,
 							flag->label.c_str());
 						fb.button->labelsize(FLAG_LABELSIZE);
 						fb.data = std::make_unique<line_flag_CB_data_c>(this, flag->flagSet == 1 ?
@@ -2352,7 +2340,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				if(s.b)
 				{
 					// If we have a B, we deal with a pair, so make a group to assign it into the grid
-					Fl_Group *pairGroup = new Fl_Group(baseX, curY, FW, FLAG_ROW_HEIGHT);
+					Fl_Group *pairGroup = new Fl_Group(baseX, 0, FW, FLAG_ROW_HEIGHT);
 					pairGroup->end();
 
 					if(s.a)
@@ -2367,25 +2355,13 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 					catHeader.grid->add(widget);
 					catHeader.grid->widget(widget, idx % leftCount, onLeft ? 0 : 1);
 				}
-				curY += FLAG_ROW_HEIGHT;
 			}
-
-			Y = (yLeft > yRight ? yLeft : yRight);
 
 			if(catHeader.button)
 				panel->insert(*catHeader.button, front);
 			panel->insert(*catHeader.grid, front);
 			categoryHeaders.push_back(std::move(catHeader));
 		}
-
-		//end();
-
-		Y += 29;
-	}
-	else
-	{
-		// keep some spacing if no flags defined
-		Y += 29;
 	}
 
 	for(const LineField &field : fields)
@@ -2475,7 +2451,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 				field.info = &lf;
 				fields.push_back(std::move(field));
-				Y += FIELD_HEIGHT + 4;
 
 				panel->insert(*fields.back().container, front);
 
@@ -2496,13 +2471,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			field.info = &lf;
 
 			fields.push_back(std::move(field));
-			Y += FIELD_HEIGHT + 4;
 
 			panel->insert(*fields.back().widget, front);
 		}
-
-		//end();
-		Y += 10;
 	}
 
 	// Reposition side boxes under the generated flags and choice widgets

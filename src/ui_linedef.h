@@ -110,7 +110,6 @@ private:
 	// };
 	// std::vector<LineSliderWidget> sliderWidgets;
 
-	int flagsStartY = 0;
 	int flagsAreaW = 0;
 
 public:
