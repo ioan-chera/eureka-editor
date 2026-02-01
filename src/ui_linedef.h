@@ -147,10 +147,10 @@ private:
 									const LoadingData &loaded, const ConfigData &config,
 									const char *title);
 
-	void updateUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config);
-	void updateUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config);
-	void updateUDMFBlockingFlags(const LoadingData &loaded, const ConfigData &config);
-	void updateUDMFRenderingControls(const LoadingData &loaded, const ConfigData &config);
+	void loadUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config);
+	void loadUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config);
+	void loadUDMFBlockingFlags(const LoadingData &loaded, const ConfigData &config);
+	void loadUDMFRenderingControls(const LoadingData &loaded, const ConfigData &config);
 
 	int getActivationCount() const;
 	const char *getActivationMenuString() const;
@@ -161,6 +161,7 @@ private:
 	bool updateDynamicFlagControls(int lineFlags, int flagSet);
 	bool FlagsFromInt(int flags);
 	bool Flags2FromInt(int flags2);
+	void setUDMFActivationLabel(int flags, int flags2);
 
 	void CB_Copy(int uiparts);
 	void CB_Paste(int uiparts, StringID new_tex);

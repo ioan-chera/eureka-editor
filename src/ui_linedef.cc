@@ -566,6 +566,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 		actkind->hide();
 
 		udmfActivationButton = new Fl_Menu_Button(0, 0, 0, 0, UDMF_ACTIVATION_BUTTON_LABEL);
+		udmfActivationButton->labelsize(FLAG_LABELSIZE);
 		udmfActivationButton->hide();
 
 		descFlex->fixed(actkind, TYPE_INPUT_WIDTH);
@@ -986,7 +987,7 @@ void UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 	categoryHeaders.push_back(std::move(header));
 }
 
-void UI_LineBox::updateUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config)
+void UI_LineBox::loadUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config)
 {
 	static const FeatureFlagMapping baseFlags[] =
 	{
@@ -1008,7 +1009,7 @@ void UI_LineBox::updateUDMFBaseFlags(const LoadingData &loaded, const ConfigData
 	populateUDMFFlagCheckBoxes(baseFlags, lengthof(baseFlags), loaded, config, nullptr);
 }
 
-void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config)
+void UI_LineBox::loadUDMFActivationMenu(const LoadingData &loaded, const ConfigData &config)
 {
 	udmfActivationButton->clear();
 	udmfActivationMenuItems.clear();
@@ -1119,7 +1120,7 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 	}
 }
 
-void UI_LineBox::updateUDMFBlockingFlags(const LoadingData &loaded, const ConfigData &config)
+void UI_LineBox::loadUDMFBlockingFlags(const LoadingData &loaded, const ConfigData &config)
 {
 	static const FeatureFlagMapping blockingFlags[] =
 	{
@@ -1149,7 +1150,7 @@ void UI_LineBox::updateUDMFBlockingFlags(const LoadingData &loaded, const Config
 	populateUDMFFlagCheckBoxes(blockingFlags, lengthof(blockingFlags), loaded, config, "Advanced blocking");
 }
 
-void UI_LineBox::updateUDMFRenderingControls(const LoadingData &loaded, const ConfigData &config)
+void UI_LineBox::loadUDMFRenderingControls(const LoadingData &loaded, const ConfigData &config)
 {
 	if(loaded.levelFormat != MapFormat::udmf)
 		return;
@@ -1469,10 +1470,9 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 		}
 	}
 
+	// Respawn the menu if user clicks an option, to make it look more like a popover panel
 	if(w == box->udmfActivationButton)
-	{
 		box->udmfActivationButton->popup();
-	}
 }
 
 
@@ -1791,6 +1791,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 
 	FlagsFromInt(L->flags);
 	Flags2FromInt(L->flags2);
+	setUDMFActivationLabel(L->flags, L->flags2);
 
 	struct IntFieldMapping
 	{
@@ -1938,12 +1939,11 @@ bool UI_LineBox::FlagsFromInt(int lineflags)
 
 		// show "??" for unknown values
 		int count = getActivationCount();
-		if (new_act > count) new_act = count;
+		if (new_act > count)
+			new_act = count;
 
 		actkind->value(new_act);
 	}
-
-	// TODO: set the UDMF activation button label
 
 	// Check UDMF visibility flags first if in UDMF mode
 	bool foundUDMFMatch = false;
@@ -2007,6 +2007,57 @@ bool UI_LineBox::FlagsFromInt(int lineflags)
 bool UI_LineBox::Flags2FromInt(int lineflags)
 {
 	return updateDynamicFlagControls(lineflags, 2);
+}
+
+void UI_LineBox::setUDMFActivationLabel(const int flags, const int flags2)
+{
+	if(!udmfActivationButton->visible())
+		return;
+
+	fl_font(FLAG_LABELSIZE, udmfActivationButton->labelsize());
+	const int maxWidth = udmfActivationButton->w() - 32;
+
+	SString left, right;
+
+	auto add = [&left, &right, maxWidth](int whichFlags, int flag, const char *what,
+										 SString &toWhich)
+	{
+		if(!(whichFlags & flag))
+			return;
+		SString berth = left + right + what;
+		if(fl_width(berth.c_str()) > maxWidth)
+			throw true;
+		toWhich += what;
+	};
+
+	try
+	{
+		add(flags, MLF_UDMF_PlayerCross, "W", left);
+		add(flags, MLF_UDMF_PlayerUse, "S", left);
+		add(flags, MLF_UDMF_Impact, "G", left);
+		add(flags, MLF_UDMF_RepeatSpecial, "R", right);
+		add(flags, MLF_UDMF_PlayerPush, "P", left);
+		add(flags, MLF_UDMF_MonsterCross, "M", left);
+		add(flags, MLF_UDMF_MonsterUse, "N", left);
+		add(flags, MLF_UDMF_MonsterPush, "Q", left);
+		add(flags, MLF_UDMF_MissileCross, "X", left);
+		add(flags2, MLF2_UDMF_AnyCross, "A", left);
+		add(flags2, MLF2_UDMF_CheckSwitchRange, "r", right);
+		add(flags2, MLF2_UDMF_FirstSideOnly, "f", right);
+		add(flags2, MLF2_UDMF_PlayerUseBack, "b", right);
+		add(flags2, MLF2_UDMF_MonsterActivate, "m", right);
+		add(flags2, MLF2_UDMF_DamageSpecial, "🪓", right);
+		add(flags2, MLF2_UDMF_DeathSpecial, "💥", right);
+	}
+	catch(bool)
+	{
+		right += "…";
+	}
+
+	if(left.empty() && right.empty())
+		udmfActivationButton->label(UDMF_ACTIVATION_BUTTON_LABEL);
+	else
+		udmfActivationButton->copy_label((left + right).c_str());
 }
 
 void UI_LineBox::CalcFlags(int &outFlags, int &outFlags2) const
@@ -2185,10 +2236,10 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	flagButtons.clear();
 	alphaWidget = nullptr;
 	memset(udmfTranslucencyCheckBoxes, 0, sizeof(udmfTranslucencyCheckBoxes));
-	updateUDMFBaseFlags(loaded, config);
-	updateUDMFActivationMenu(loaded, config);
-	updateUDMFBlockingFlags(loaded, config);
-	updateUDMFRenderingControls(loaded, config);
+	loadUDMFBaseFlags(loaded, config);
+	loadUDMFActivationMenu(loaded, config);
+	loadUDMFBlockingFlags(loaded, config);
+	loadUDMFRenderingControls(loaded, config);
 
 	int Y = y() + flagsStartY;
 
