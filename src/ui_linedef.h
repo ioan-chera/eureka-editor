@@ -56,6 +56,10 @@ private:
 	Fl_Menu_Button *udmfActivationButton;
 	std::vector<Fl_Menu_Item> udmfActivationMenuItems;
 
+	Fl_Flex *healthFlex;
+	UI_DynIntInput *healthInput;
+	UI_DynIntInput *healthGroupInput;
+
 	UI_DynIntInput *length;
 	UI_DynIntInput *tag;
 	UI_DynIntInput *args[5];
@@ -102,13 +106,6 @@ private:
 		const struct linefield_t *info;
 	};
 	std::vector<LineField> fields;
-
-	// struct LineSliderWidget
-	// {
-	// 	std::unique_ptr<Fl_Simple_Counter> counter;
-	// 	const struct lineslider_t *info;
-	// };
-	// std::vector<LineSliderWidget> sliderWidgets;
 
 	int flagsAreaW = 0;
 

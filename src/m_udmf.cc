@@ -143,6 +143,8 @@ bool UDMF_AddLineFeature(ConfigData &config, const char *featureName)
 		ENTRY(dontpegbottom),
 		ENTRY(dontpegtop),
 		ENTRY(firstsideonly),
+		ENTRY(health),
+		ENTRY(healthgroup),
 		ENTRY(impact),
 		ENTRY(jumpover),
 		ENTRY(midtex3d),

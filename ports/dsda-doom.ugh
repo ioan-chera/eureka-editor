@@ -668,6 +668,9 @@ udmf_linedef wrapmidtex
 udmf_linedef translucent
 udmf_linedef transparent
 
+# Health bar
+udmf_linedef health
+udmf_linedef healthgroup
 
 udmf_linechoice_label locknumber "Lock"
 udmf_linechoice locknumber 0 "No lock"
@@ -687,7 +690,7 @@ udmf_linechoice locknumber 133 "Blue card or skull"
 udmf_linechoice locknumber 134 "Yellow card or skull"
 udmf_linechoice locknumber 229 "Any key of each color"
 
-udmf_lineintpair health Health healthgroup Group
+# udmf_lineintpair health Health healthgroup Group
 
 udmf_linechoice_label automapstyle "Automap style"
 udmf_linechoice automapstyle 0 "Automatic"

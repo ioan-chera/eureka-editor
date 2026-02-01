@@ -45,6 +45,8 @@ enum class UDMF_LineFeature : unsigned
 	dontpegbottom,
 	dontpegtop,
 	firstsideonly,
+	health,
+	healthgroup,
 	impact,
 	jumpover,
 	midtex3d,

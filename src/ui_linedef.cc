@@ -576,6 +576,22 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	}
 
 	{
+		healthFlex = new Fl_Flex(which->x(), 0, which->w(), TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
+		healthFlex->gap(16 + fl_width("Group:"));
+
+		healthInput = new UI_DynIntInput(0, 0, 0, 0, "Health:");
+		healthInput->align(FL_ALIGN_LEFT);
+		// TODO: callback
+
+		healthGroupInput = new UI_DynIntInput(0, 0, 0, 0, "Group:");
+		healthGroupInput->align(FL_ALIGN_LEFT);
+		// TODO: callback
+
+		healthFlex->end();
+	}
+	healthFlex->hide();
+
+	{
 		argsFlex = new Fl_Flex(which->x(), 0, which->w(), TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
 		argsFlex->gap(INPUT_SPACING);
 
@@ -673,7 +689,8 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	Y += back->h();
 
-	mFixUp.loadFields({type, length, tag, args[0], args[1], args[2], args[3], args[4], args0str});
+	mFixUp.loadFields({healthInput, healthGroupInput, type, length, tag, args[0], args[1], args[2],
+		args[3], args[4], args0str});
 
 	//scroll->end();
 	panel->end();
@@ -1787,6 +1804,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	FlagsFromInt(L->flags);
 	Flags2FromInt(L->flags2);
 	setUDMFActivationLabel(L->flags, L->flags2);
+	// TODO: show or hide the bar
 
 	struct IntFieldMapping
 	{
