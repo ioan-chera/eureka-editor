@@ -661,7 +661,6 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	Y += f_automap->h() - 1;
 
 	// Remember where to place dynamic linedef flags
-	flagsStartX = X - X0;
 	flagsStartY = Y - Y0;
 	flagsAreaW = W;
 
@@ -2264,10 +2263,8 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		}
 
 		static const int FW = 110;
-		const int leftX = x() + flagsStartX + 28;
-		const int rightX = x() + flagsStartX + flagsAreaW - 120;
-
-		//begin();
+		const int leftX = x() + INSET_LEFT + 28;
+		const int rightX = x() + INSET_LEFT + flagsAreaW - 120;
 
 		// Process each category
 		for(auto &catPair : categorized)
@@ -2278,7 +2275,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			CategoryHeader catHeader = {};
 			if(!catName.empty())
 			{
-				catHeader.button = new UI_CategoryButton(x() + flagsStartX, Y,
+				catHeader.button = new UI_CategoryButton(x() + INSET_LEFT, 0,
 					flagsAreaW, FIELD_HEIGHT);
 				catHeader.button->copy_label(catName.c_str());
 				catHeader.button->callback(category_callback, this);
@@ -2427,7 +2424,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				if(lf.options.empty())
 					continue;
 
-				auto choice = new Fl_Choice(fieldX, Y, fieldW, FIELD_HEIGHT);
+				auto choice = new Fl_Choice(fieldX, 0, fieldW, FIELD_HEIGHT);
 				field.widget = choice;
 
 				// Build menu string from options
@@ -2443,7 +2440,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			}
 			else if(lf.type == linefield_t::Type::slider)
 			{
-				auto slider = new Fl_Hor_Value_Slider(fieldX, Y, fieldW, FIELD_HEIGHT);
+				auto slider = new Fl_Hor_Value_Slider(fieldX, 0, fieldW, FIELD_HEIGHT);
 				field.widget = slider;
 
 				slider->step(lf.step);
@@ -2455,7 +2452,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			else if(lf.type == linefield_t::Type::intpair)
 			{
 				// Create horizontal Fl_Flex container
-				auto flex = new Fl_Flex(fieldX, Y, fieldW, FIELD_HEIGHT, Fl_Flex::HORIZONTAL);
+				auto flex = new Fl_Flex(fieldX, 0, fieldW, FIELD_HEIGHT, Fl_Flex::HORIZONTAL);
 				flex->gap(16 + fl_width(lf.label2.c_str()));
 				field.container = flex;
 
