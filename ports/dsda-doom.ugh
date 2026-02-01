@@ -618,7 +618,6 @@ gensector 768 Damage 0 NONE 256 "5 hp" 512 "10 hp" 768 "20 hp"
 
 endif
 
-feature udmf_lineparameters 1
 feature udmf_thingspecials 1
 feature udmf_multipletags 1
 

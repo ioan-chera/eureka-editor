@@ -365,7 +365,6 @@ static const FeatureMapping skFeatureMappings[] =
 	MAPPING(slopes),
 	MAPPING(player_use_passthru_activation),
 
-	MAPPING(udmf_lineparameters),
 	MAPPING(udmf_thingspecials),
 	MAPPING(udmf_multipletags),
 #undef MAPPING

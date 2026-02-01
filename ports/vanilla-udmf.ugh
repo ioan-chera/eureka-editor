@@ -41,11 +41,9 @@ udmf_thingflag 4 1 ambush off ambush
 udmf_namespace $BASE_GAME
 
 if $BASE_GAME is heretic
-  feature udmf_lineparameters 0
   feature udmf_thingspecials 0
 endif
 if $BASE_GAME is hexen
-  feature udmf_lineparameters 1
   feature udmf_thingspecials 1
   udmf_lineflag "player cross"  playercross   Activation W
   udmf_lineflag "player use"    playeruse     Activation S
@@ -62,7 +60,6 @@ if $BASE_GAME is hexen
   udmf_thingflag 3 2 Mage on class3
 endif
 if $BASE_GAME is strife
-  feature udmf_lineparameters 0
   feature udmf_thingspecials 0
 
   # TODO: make this a choice

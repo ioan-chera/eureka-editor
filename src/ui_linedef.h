@@ -81,7 +81,6 @@ private:
 		Fl_Check_Button *button = nullptr;
 		int udmfActivationMenuIndex = -1;
 		std::unique_ptr<line_flag_CB_data_c> data;
-		const struct lineflag_t *info = nullptr;
 	};
 	std::vector<LineFlagButton> flagButtons;
 
@@ -141,6 +140,9 @@ public:
 	}
 
 private:
+	void clearArgs();
+	void clearFields();
+
 	void populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
 									const LoadingData &loaded, const ConfigData &config,
 									const char *title);
@@ -174,8 +176,6 @@ private:
 	const char *GeneralizedDesc(int type_num);
 
 	void categoryToggled(class UI_CategoryButton *categoryBtn);
-
-	void updateCategoryDetails();
 
 	static void    type_callback(Fl_Widget *, void *);
 	static void dyntype_callback(Fl_Widget *, void *);

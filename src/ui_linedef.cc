@@ -856,6 +856,76 @@ void UI_LineBox::checkSidesDirtyFields()
 	back->checkDirtyFields();
 }
 
+void UI_LineBox::clearArgs()
+{
+	for (int a = 0 ; a < 5 ; a++)
+	{
+		mFixUp.setInputValue(args[a], "");
+		args[a]->label("");
+		args[a]->textcolor(FL_BLACK);
+		args0str->textcolor(FL_BLACK);
+	}
+	if(inst.loaded.levelFormat == MapFormat::hexen || inst.loaded.levelFormat == MapFormat::udmf)
+	{
+		args0str->hide();
+		args[0]->show();
+	}
+}
+
+void UI_LineBox::clearFields()
+{
+	mFixUp.setInputValue(type, "");
+	desc->value("");
+	actkind->value(getActivationCount());  // show as "??"
+	actkind->deactivate();
+	udmfActivationButton->label(UDMF_ACTIVATION_BUTTON_LABEL);
+	udmfActivationButton->deactivate();
+	for(Fl_Menu_Item &item : udmfActivationMenuItems)
+		item.value(0);
+	mFixUp.setInputValue(length, "");
+	mFixUp.setInputValue(tag, "");
+	clearArgs();
+
+	if(inst.conf.features.udmf_multipletags)
+		multiTagView->clearTags();
+
+	if(alphaWidget)
+	{
+		alphaWidget->value(1.0);
+		for(Fl_Check_Button *button : udmfTranslucencyCheckBoxes)
+			if(button)
+				button->labelcolor(FL_FOREGROUND_COLOR);
+	}
+
+
+	front->SetObj(SETOBJ_NO_LINE, 0, false);
+	back->SetObj(SETOBJ_NO_LINE, 0, false);
+
+	inst.main_win->browser->UpdateGenType(0);
+
+	f_automap->value(0);
+	for(LineFlagButton &button : flagButtons)
+	{
+		if(!button.button)
+			continue;
+		button.button->value(0);
+	}
+
+	// No linedef selected, reset widgets
+	for(const LineField &field : fields)
+	{
+		if(field.info->type == linefield_t::Type::choice)
+		{
+			static_cast<Fl_Choice*>(field.widget)->value(0);
+		}
+		else if(field.info->type == linefield_t::Type::intpair)
+		{
+			mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget), "");
+			mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2), "");
+		}
+	}
+}
+
 void UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
 											const LoadingData &loaded, const ConfigData &config,
 											const char *title)
@@ -945,12 +1015,7 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 	switch(loaded.levelFormat)
 	{
 		case MapFormat::udmf:
-			if(config.features.udmf_lineparameters)
-			{
-				udmfActivationButton->show();
-				break;
-			}
-			// else fall through
+			break;
 		case MapFormat::doom:
 		case MapFormat::hexen:
 			udmfActivationButton->hide();
@@ -1045,7 +1110,13 @@ void UI_LineBox::updateUDMFActivationMenu(const LoadingData &loaded, const Confi
 	for(const FeatureFlagMapping &entry : destructibleFlags)
 		addItem(entry, addSeparator);
 	udmfActivationMenuItems.emplace_back();
-	udmfActivationButton->menu(udmfActivationMenuItems.data());
+	if(udmfActivationMenuItems.size() <= 1)
+		udmfActivationButton->hide();
+	else
+	{
+		udmfActivationButton->show();
+		udmfActivationButton->menu(udmfActivationMenuItems.data());
+	}
 }
 
 void UI_LineBox::updateUDMFBlockingFlags(const LoadingData &loaded, const ConfigData &config)
@@ -1373,7 +1444,6 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 	int new_flags, new_flags2;
 	box->CalcFlags(new_flags, new_flags2);
 
-	bool changed = false;
 	if (! box->inst.edit.Selected->empty())
 	{
 		box->mFixUp.checkDirtyFields();
@@ -1391,19 +1461,12 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 			if(mask != 0)
 			{
 				op.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
-				changed = true;
 			}
 			if(mask2 != 0)
 			{
 				op.changeLinedef(*it, LineDef::F_FLAGS2, (L->flags2 & ~mask2) | (new_flags2 & mask2));
-				changed = true;
 			}
 		}
-	}
-	if(changed)
-	{
-		box->updateCategoryDetails();
-		box->redraw();
 	}
 
 	if(w == box->udmfActivationButton)
@@ -1642,174 +1705,92 @@ void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
 }
 //------------------------------------------------------------------------
 
-void UI_LineBox::updateCategoryDetails()
-{
-	for(const CategoryHeader& header : categoryHeaders)
-	{
-		if(!header.button)
-			continue;
-		SString summaryText;
-		for(int flagButtonIndex : header.lineFlagButtonIndices)
-		{
-			const LineFlagButton &flagBtn = flagButtons[flagButtonIndex];
-			if(flagBtn.button && flagBtn.info && flagBtn.button->value())
-			{
-				summaryText += flagBtn.info->inCategoryAcronym;
-			}
-		}
-		header.button->details(summaryText);
-	}
-
-}
-
 void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 {
-	if(inst.level.isLinedef(obj))
-		CalcLength();
-	else
-		mFixUp.setInputValue(length, "");
-
-	for (int a = 0 ; a < 5 ; a++)
+	if(!inst.level.isLinedef(obj))
 	{
-		mFixUp.setInputValue(args[a], "");
-		if (inst.loaded.levelFormat == MapFormat::hexen ||
-			(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_lineparameters))
-		{
-			args[a]->label("");
-		}
-		args[a]->textcolor(FL_BLACK);
-		args0str->textcolor(FL_BLACK);
+		clearFields();
+		return;
 	}
 
-	if (inst.level.isLinedef(obj))
+	CalcLength();
+
+	clearArgs();
+
+	const auto& L = inst.level.linedefs[obj];
+	const int type_num = L->type;
+	const linetype_t &info = inst.conf.getLineType(type_num);
+
+	mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
+
+	if (inst.loaded.levelFormat == MapFormat::hexen || inst.loaded.levelFormat == MapFormat::udmf)
 	{
-		const auto L = inst.level.linedefs[obj];
-
-		mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
-
-		const linetype_t &info = inst.conf.getLineType(L->type);
-
-		if (inst.loaded.levelFormat == MapFormat::hexen ||
-			inst.loaded.levelFormat == MapFormat::udmf)
+		for (int a = 0 ; a < 5 ; a++)
 		{
-			for (int a = 0 ; a < 5 ; a++)
+			int arg_val = L->Arg(1 + a);
+
+			if(arg_val || type_num)
+				mFixUp.setInputValue(args[a], SString(arg_val).c_str());
+
+			if(L->arg1str.get())
+				mFixUp.setInputValue(args0str, BA_GetString(L->arg1str).c_str());
+
+			// set the label
+			if (!info.args[a].name.empty())
 			{
-				int arg_val = L->Arg(1 + a);
-
-				if(arg_val || L->type)
-					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
-
-				if(L->arg1str.get())
-					mFixUp.setInputValue(args0str, BA_GetString(L->arg1str).c_str());
-
-				// set the tooltip
-				if (!info.args[a].name.empty())
+				args[a]->copy_label(info.args[a].name.replacing('_', ' ').c_str());
+				args[a]->parent()->redraw();
+				if(a == 0)
 				{
-					args[a]->copy_label(info.args[a].name.replacing('_', ' ').c_str());
-					args[a]->parent()->redraw();
-					if(a == 0)
+					if(info.args[0].type == SpecialArgType::str)
 					{
-						if(info.args[0].type == SpecialArgType::str)
-						{
-							args0str->copy_label(args[0]->label());
-							args0str->show();
-							args[0]->hide();
-						}
-						else
-						{
-							args0str->hide();
-							args[0]->show();
-						}
+						args0str->copy_label(args[0]->label());
+						args0str->show();
+						args[0]->hide();
 					}
-				}
-				else
-				{
-					args[a]->label("");
-					args[a]->textcolor(fl_rgb_color(160,160,160));
-					args[a]->parent()->redraw();
-					if(a == 0)
+					else
 					{
 						args0str->hide();
 						args[0]->show();
 					}
 				}
 			}
+			else
+			{
+				args[a]->label("");
+				args[a]->textcolor(fl_rgb_color(160,160,160));
+				args[a]->parent()->redraw();
+				if(a == 0)
+				{
+					args0str->hide();
+					args[0]->show();
+				}
+			}
 		}
 	}
+
+	int right_mask = SolidMask(L.get(), Side::right);
+	int  left_mask = SolidMask(L.get(), Side::left);
+
+	front->SetObj(L->right, right_mask, L->TwoSided());
+	back->SetObj(L->left,   left_mask, L->TwoSided());
+
+	mFixUp.setInputValue(type, SString(type_num).c_str());
+
+	const char *gen_desc = GeneralizedDesc(type_num);
+
+	if (gen_desc)
+		desc->value(gen_desc);
 	else
-	{
-		mFixUp.setInputValue(length, "");
-		mFixUp.setInputValue(tag, "");
-	}
+		desc->value(info.desc.c_str());
 
-	if (inst.level.isLinedef(obj))
-	{
-		const auto L = inst.level.linedefs[obj];
+	inst.main_win->browser->UpdateGenType(type_num);
 
-		int right_mask = SolidMask(L.get(), Side::right);
-		int  left_mask = SolidMask(L.get(), Side::left);
+	actkind->activate();
+	udmfActivationButton->activate();
 
-		front->SetObj(L->right, right_mask, L->TwoSided());
-			back->SetObj(L->left,   left_mask, L->TwoSided());
-	}
-	else
-	{
-		front->SetObj(SETOBJ_NO_LINE, 0, false);
-			back->SetObj(SETOBJ_NO_LINE, 0, false);
-	}
-
-	if (inst.level.isLinedef(obj))
-	{
-		int type_num = inst.level.linedefs[obj]->type;
-
-		mFixUp.setInputValue(type, SString(type_num).c_str());
-
-		const char *gen_desc = GeneralizedDesc(type_num);
-
-		if (gen_desc)
-		{
-			desc->value(gen_desc);
-		}
-		else
-		{
-			const linetype_t &info = inst.conf.getLineType(type_num);
-			desc->value(info.desc.c_str());
-		}
-
-		inst.main_win->browser->UpdateGenType(type_num);
-	}
-	else
-	{
-		mFixUp.setInputValue(type, "");
-		desc->value("");
-
-		inst.main_win->browser->UpdateGenType(0);
-	}
-
-	bool changed = false;
-	if (inst.level.isLinedef(obj))
-	{
-		actkind->activate();
-		udmfActivationButton->activate();
-
-		changed |= FlagsFromInt(inst.level.linedefs[obj]->flags);
-	}
-	else
-	{
-		changed |= FlagsFromInt(0);
-
-		actkind->value(getActivationCount());  // show as "??"
-		actkind->deactivate();
-		udmfActivationButton->deactivate();
-	}
-
-	if(inst.level.isLinedef(obj))
-		changed |= Flags2FromInt(inst.level.linedefs[obj]->flags2);
-	else
-		changed |= Flags2FromInt(0);
-
-	if(changed)
-		updateCategoryDetails();
+	FlagsFromInt(L->flags);
+	Flags2FromInt(L->flags2);
 
 	struct IntFieldMapping
 	{
@@ -1826,109 +1807,70 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	};
 
 	// Update choice and intpair widgets for UDMF properties
-	if(inst.level.isLinedef(obj))
+
+	for(const LineField &field : fields)
 	{
-		const auto L = inst.level.linedefs[obj];
-
-		for(const LineField &field : fields)
+		if(field.info->type == linefield_t::Type::choice)
 		{
-			if(field.info->type == linefield_t::Type::choice)
+			for(const IntFieldMapping &cm : intFieldMappings)
 			{
-				for(const IntFieldMapping &cm : intFieldMappings)
+				if(field.info->identifier.noCaseEqual(cm.name))
 				{
-					if(field.info->identifier.noCaseEqual(cm.name))
-					{
-						int value = L.get()->*cm.field;
+					int value = L.get()->*cm.field;
 
-						// Find matching option
-						int index = 0;
-						for(size_t i = 0; i < field.info->options.size(); ++i)
+					// Find matching option
+					int index = 0;
+					for(size_t i = 0; i < field.info->options.size(); ++i)
+					{
+						if(field.info->options[i].value == value)
 						{
-							if(field.info->options[i].value == value)
-							{
-								index = static_cast<int>(i);
-								break;
-							}
+							index = static_cast<int>(i);
+							break;
 						}
-						static_cast<Fl_Choice*>(field.widget)->value(index);
-						break;
 					}
-				}
-			}
-			else if(field.info->type == linefield_t::Type::intpair)
-			{
-				// Update first widget
-				for(const IntFieldMapping &cm : intFieldMappings)
-				{
-					if(field.info->identifier.noCaseEqual(cm.name))
-					{
-						int value = L.get()->*cm.field;
-						mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget),
-												SString(value).c_str());
-						break;
-					}
-				}
-				// Update second widget
-				for(const IntFieldMapping &cm : intFieldMappings)
-				{
-					if(field.info->identifier2.noCaseEqual(cm.name))
-					{
-						int value = L.get()->*cm.field;
-						mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2),
-												SString(value).c_str());
-						break;
-					}
+					static_cast<Fl_Choice*>(field.widget)->value(index);
+					break;
 				}
 			}
 		}
-	}
-	else
-	{
-		// No linedef selected, reset widgets
-		for(const LineField &field : fields)
+		else if(field.info->type == linefield_t::Type::intpair)
 		{
-			if(field.info->type == linefield_t::Type::choice)
+			// Update first widget
+			for(const IntFieldMapping &cm : intFieldMappings)
 			{
-				static_cast<Fl_Choice*>(field.widget)->value(0);
+				if(field.info->identifier.noCaseEqual(cm.name))
+				{
+					int value = L.get()->*cm.field;
+					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget),
+											SString(value).c_str());
+					break;
+				}
 			}
-			else if(field.info->type == linefield_t::Type::intpair)
+			// Update second widget
+			for(const IntFieldMapping &cm : intFieldMappings)
 			{
-				mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget), "");
-				mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2), "");
+				if(field.info->identifier2.noCaseEqual(cm.name))
+				{
+					int value = L.get()->*cm.field;
+					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2),
+											SString(value).c_str());
+					break;
+				}
 			}
 		}
 	}
 
 	if(alphaWidget)
 	{
-		if(inst.level.isLinedef(obj))
-		{
-			double alpha = inst.level.linedefs[obj]->alpha;
-			alphaWidget->value(alpha);
-			for(Fl_Check_Button *button : udmfTranslucencyCheckBoxes)
-				if(button)
-					button->labelcolor(alpha >= 1 ? FL_FOREGROUND_COLOR : FL_INACTIVE_COLOR);
-		}
-		else
-		{
-			alphaWidget->value(0);
-			for(Fl_Check_Button *button : udmfTranslucencyCheckBoxes)
-				if(button)
-					button->labelcolor(FL_FOREGROUND_COLOR);
-		}
+		double alpha = L->alpha;
+		alphaWidget->value(alpha);
+		for(Fl_Check_Button *button : udmfTranslucencyCheckBoxes)
+			if(button)
+				button->labelcolor(alpha >= 1 ? FL_FOREGROUND_COLOR : FL_INACTIVE_COLOR);
 	}
 
 	if(inst.conf.features.udmf_multipletags)
-	{
-		if(inst.level.isLinedef(obj))
-		{
-			multiTagView->setTags(std::set(inst.level.linedefs[obj]->moreIDs));
-		}
-		else
-		{
-			multiTagView->clearTags();
-		}
-	}
+		multiTagView->setTags(std::set(L->moreIDs));
 }
 
 
@@ -2349,7 +2291,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 						fb.data = std::make_unique<line_flag_CB_data_c>(this, flag->flagSet == 1 ?
 							flag->value : 0, flag->flagSet == 2 ? flag->value : 0);
 						fb.button->callback(flags_callback, fb.data.get());
-						fb.info = flag;
 						if(catHeader.button)
 							catHeader.lineFlagButtonIndices.push_back((int)flagButtons.size());
 						flagButtons.push_back(std::move(fb));
