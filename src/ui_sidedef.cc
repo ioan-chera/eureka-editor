@@ -84,9 +84,9 @@ void UI_SideSectionPanel::updateUDMFFields(const LoadingData &loaded, const Conf
 		// Unload widgets from fixUp
 		for(auto &widget : field.widgets)
 		{
-			if(field.info->type == sidefield_t::Type::intType)
+			if(field.info.type == sidefield_t::Type::intType)
 				fixUp.unloadFields({static_cast<UI_DynIntInput *>(widget.get())});
-			else if(field.info->type == sidefield_t::Type::floatType)
+			else if(field.info.type == sidefield_t::Type::floatType)
 				fixUp.unloadFields({static_cast<UI_DynFloatInput *>(widget.get())});
 		}
 
@@ -107,7 +107,7 @@ void UI_SideSectionPanel::updateUDMFFields(const LoadingData &loaded, const Conf
 	for(const sidefield_t &sf : config.udmf_sidepart_fields)
 	{
 		SidepartFieldWidgets fieldWidgets;
-		fieldWidgets.info = &sf;
+		fieldWidgets.info = sf;
 
 		// Create a horizontal flex container for this field's widgets
 		auto flex = new Fl_Flex(x(), 0, w(), 20, Fl_Flex::HORIZONTAL);
@@ -605,7 +605,7 @@ void UI_SideBox::UpdateField()
 			{
 				for(size_t dimIdx = 0; dimIdx < field.widgets.size(); ++dimIdx)
 				{
-					SString fieldName = field.info->prefixes[dimIdx] + partSuffix;
+					SString fieldName = field.info.prefixes[dimIdx] + partSuffix;
 
 					double value = 0.0;
 					int flag = 0;
@@ -646,17 +646,17 @@ void UI_SideBox::UpdateField()
 					else if(fieldName.noCaseEqual("lightabsolute_bottom"))
 						flag = SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
 
-					if(field.info->type == sidefield_t::Type::floatType)
+					if(field.info.type == sidefield_t::Type::floatType)
 					{
 						auto input = static_cast<UI_DynFloatInput *>(field.widgets[dimIdx].get());
 						mFixUp.setInputValue(input, SString::printf("%g", value).c_str());
 					}
-					else if(field.info->type == sidefield_t::Type::intType)
+					else if(field.info.type == sidefield_t::Type::intType)
 					{
 						auto input = static_cast<UI_DynIntInput *>(field.widgets[dimIdx].get());
 						mFixUp.setInputValue(input, SString(static_cast<int>(value)).c_str());
 					}
-					else if(field.info->type == sidefield_t::Type::boolType)
+					else if(field.info.type == sidefield_t::Type::boolType)
 					{
 						auto button = static_cast<Fl_Light_Button *>(field.widgets[dimIdx].get());
 						button->value(!!(sd->flags & flag));
@@ -695,12 +695,12 @@ void UI_SideBox::UpdateField()
 			{
 				for(size_t dimIdx = 0; dimIdx < field.widgets.size(); ++dimIdx)
 				{
-					if(field.info->type == sidefield_t::Type::floatType)
+					if(field.info.type == sidefield_t::Type::floatType)
 					{
 						auto input = static_cast<UI_DynFloatInput *>(field.widgets[dimIdx].get());
 						mFixUp.setInputValue(input, "");
 					}
-					else if(field.info->type == sidefield_t::Type::intType)
+					else if(field.info.type == sidefield_t::Type::intType)
 					{
 						auto input = static_cast<UI_DynIntInput *>(field.widgets[dimIdx].get());
 						mFixUp.setInputValue(input, "");
@@ -875,7 +875,7 @@ void UI_SideBox::udmf_field_callback(Fl_Widget *w, void *data)
 					continue;
 
 				// Found the widget - build the UDMF field name
-				SString fieldName = field.info->prefixes[dimIdx] + partSuffixes[panelIdx];
+				SString fieldName = field.info.prefixes[dimIdx] + partSuffixes[panelIdx];
 
 				// Get the new value and apply it
 				EditOperation op(box->inst.level.basis);
@@ -891,7 +891,7 @@ void UI_SideBox::udmf_field_callback(Fl_Widget *w, void *data)
 						continue;
 
 					// Apply based on field type and field name
-					if(field.info->type == sidefield_t::Type::floatType)
+					if(field.info.type == sidefield_t::Type::floatType)
 					{
 						auto input = static_cast<UI_DynFloatInput *>(w);
 						double newValue = atof(input->value());
@@ -922,7 +922,7 @@ void UI_SideBox::udmf_field_callback(Fl_Widget *w, void *data)
 						else if(fieldName.noCaseEqual("scaley_bottom"))
 							op.changeSidedef(sd, &SideDef::scaley_bottom, newValue);
 					}
-					else if(field.info->type == sidefield_t::Type::intType)
+					else if(field.info.type == sidefield_t::Type::intType)
 					{
 						auto input = static_cast<UI_DynIntInput *>(w);
 						int newValue = atoi(input->value());
@@ -933,7 +933,7 @@ void UI_SideBox::udmf_field_callback(Fl_Widget *w, void *data)
 						if(fieldName.noCaseEqual("light_bottom"))
 							op.changeSidedef(sd, SideDef::F_LIGHT_BOTTOM, newValue);
 					}
-					else if(field.info->type == sidefield_t::Type::boolType)
+					else if(field.info.type == sidefield_t::Type::boolType)
 					{
 						auto lightBtn = static_cast<Fl_Light_Button *>(w);
 						bool newValue = lightBtn->value() != 0;

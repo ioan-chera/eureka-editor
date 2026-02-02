@@ -24,6 +24,7 @@
 
 #include "e_basis.h"
 #include "e_cutpaste.h"
+#include "m_game.h"
 #include "ui_panelinput.h"
 
 class ActivationPopup;
@@ -103,7 +104,7 @@ private:
 		Fl_Widget *widget;
 		Fl_Widget *widget2;    // second widget for intpair type
 		Fl_Group *container;   // container for intpair (Fl_Flex holding both widgets)
-		const struct linefield_t *info;
+		linefield_t info;
 	};
 	std::vector<LineField> fields;
 

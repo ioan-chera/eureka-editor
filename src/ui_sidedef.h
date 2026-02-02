@@ -22,6 +22,7 @@
 #ifndef __EUREKA_UI_SIDEDEF_H__
 #define __EUREKA_UI_SIDEDEF_H__
 
+#include "m_game.h"
 #include "ui_panelinput.h"
 #include "ui_stackpanel.h"
 #include <memory>
@@ -33,7 +34,6 @@ class UI_DynFloatInput;
 class UI_DynIntInput;
 struct ConfigData;
 struct LoadingData;
-struct sidefield_t;
 
 // solid_mask bits : when set, that part requires a texture
 enum
@@ -47,7 +47,7 @@ enum
 // Stores widgets for a single UDMF sidepart field (one row of inputs per part)
 struct SidepartFieldWidgets
 {
-	const sidefield_t *info = nullptr;
+	sidefield_t info = {};
 	std::unique_ptr<Fl_Group> container;
 	std::vector<std::unique_ptr<Fl_Widget>> widgets; // one per dimension
 };

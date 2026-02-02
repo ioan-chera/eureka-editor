@@ -238,13 +238,13 @@ gensector 96 Damage 0 NONE 32 "5 hp" 64 "10 hp" 96 "20 hp"
 
 udmf_namespace Doom
 
-udmf_lineflag "two sided"   twosided
-udmf_lineflag "upper unpeg" dontpegtop
-udmf_lineflag "lower unpeg" dontpegbottom
-udmf_lineflag "impassable"  blocking
-udmf_lineflag "block mons"  blockmonsters
-udmf_lineflag "sound block" blocksound
-udmf_lineflag "pass thru"   passuse
+udmf_linedef twosided
+udmf_linedef dontpegtop
+udmf_linedef dontpegbottom
+udmf_linedef blocking
+udmf_linedef blockmonsters
+udmf_linedef blocksound
+udmf_linedef passuse
 
 # dontdraw and mapped will be handled by the fixed dropdown
 

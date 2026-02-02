@@ -21,12 +21,12 @@
 map_formats UDMF
 supported_games heretic hexen strife	# Doom already has UDMF in Boom
 
-udmf_lineflag "two sided"   twosided
-udmf_lineflag "upper unpeg" dontpegtop
-udmf_lineflag "lower unpeg" dontpegbottom
-udmf_lineflag "impassable"  blocking
-udmf_lineflag "block mons"  blockmonsters
-udmf_lineflag "sound block" blocksound
+udmf_linedef twosided
+udmf_linedef dontpegtop
+udmf_linedef dontpegbottom
+udmf_linedef blocking
+udmf_linedef blockmonsters
+udmf_linedef blocksound
 
 udmf_thingflag 0 0 easiest on  skill1
 udmf_thingflag 1 0 easy    on  skill2
@@ -45,15 +45,15 @@ if $BASE_GAME is heretic
 endif
 if $BASE_GAME is hexen
   feature udmf_thingspecials 1
-  udmf_lineflag "player cross"  playercross   Activation W
-  udmf_lineflag "player use"    playeruse     Activation S
-  udmf_lineflag "monster cross" monstercross  Activation Mw
-  udmf_lineflag "monster use"   monsteruse    Activation Ms
-  udmf_lineflag "player shoot"  impact        Activation G
-  udmf_lineflag "player push"   playerpush    Activation P
-  udmf_lineflag "monster push"  monsterpush   Activation Mp
-  udmf_lineflag "missile cross" missilecross  Activation X
-  udmf_lineflag "repeatable"    repeatspecial Activation R
+  udmf_linedef playercross
+  udmf_linedef playeruse
+  udmf_linedef monstercross
+  udmf_linedef monsteruse
+  udmf_linedef impact
+  udmf_linedef playerpush
+  udmf_linedef monsterpush
+  udmf_linedef missilecross
+  udmf_linedef repeatspecial
   udmf_thingflag 0 1 dormant off dormant
   udmf_thingflag 1 2 Fighter on class1
   udmf_thingflag 2 2 Cleric on class2
@@ -63,11 +63,11 @@ if $BASE_GAME is strife
   feature udmf_thingspecials 0
 
   # TODO: make this a choice
-  udmf_lineflag translucent translucent
-  udmf_lineflag transparent transparent
+  udmf_linedef translucent
+  udmf_linedef transparent
+  udmf_linedef jumpover
+  udmf_linedef blockfloaters
 
-  udmf_lineflag "jump over" jumpover
-  udmf_lineflag "block flyers" blockfloaters
   udmf_thingflag 5 0 stand off standing
   udmf_thingflag 5 1 friend off strifeally
   udmf_thingflag 1 2 shadow off translucent

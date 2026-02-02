@@ -902,8 +902,11 @@ void UI_LineBox::clearFields()
 	mFixUp.setInputValue(tag, "");
 	clearArgs();
 
-	if(inst.conf.features.udmf_multipletags)
+	if(inst.loaded.levelFormat == MapFormat::udmf && inst.conf.features.udmf_multipletags)
+	{
 		multiTagView->clearTags();
+		multiTagView->deactivate();
+	}
 
 	if(alphaWidget)
 	{
@@ -930,11 +933,11 @@ void UI_LineBox::clearFields()
 	// No linedef selected, reset widgets
 	for(const LineField &field : fields)
 	{
-		if(field.info->type == linefield_t::Type::choice)
+		if(field.info.type == linefield_t::Type::choice)
 		{
 			static_cast<Fl_Choice*>(field.widget)->value(0);
 		}
-		else if(field.info->type == linefield_t::Type::intpair)
+		else if(field.info.type == linefield_t::Type::intpair)
 		{
 			mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget), "");
 			mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2), "");
@@ -950,17 +953,14 @@ bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 		return false;
 
 	// Check if features exist at all before proceeding
-	bool found = false;
+	int countFound = 0;
 	for(size_t i = 0; i < count; ++i)
 	{
 		const FeatureFlagMapping &entry = mapping[i];
 		if(UDMF_HasLineFeature(config, entry.feature))
-		{
-			found = true;
-			break;
-		}
+			++countFound;
 	}
-	if(!found)
+	if(!countFound)
 		return false;
 
 	CategoryHeader header{};
@@ -971,7 +971,7 @@ bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 		header.button = new UI_CategoryButton(xPos, 0, wSize, FIELD_HEIGHT, title);
 		header.button->callback(category_callback, this);
 	}
-	const int numRows = (int)(count + 1) / 2;
+	const int numRows = (int)(countFound + 1) / 2;
 	header.grid = new Fl_Grid(xPos + 8, 0, wSize - 8, FLAG_ROW_HEIGHT * numRows);
 	header.grid->layout(numRows, 2);
 
@@ -1633,12 +1633,12 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		{
 			if(field.widget == w)
 			{
-				info = field.info;
+				info = &field.info;
 				break;
 			}
 			if(field.widget2 == w)
 			{
-				info = field.info;
+				info = &field.info;
 				isSecondWidget = true;
 				break;
 			}
@@ -1835,6 +1835,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 
 	actkind->activate();
 	udmfActivationButton->activate();
+	multiTagView->activate();
 
 	FlagsFromInt(L->flags);
 	Flags2FromInt(L->flags2);
@@ -1866,19 +1867,19 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 
 	for(const LineField &field : fields)
 	{
-		if(field.info->type == linefield_t::Type::choice)
+		if(field.info.type == linefield_t::Type::choice)
 		{
 			for(const IntFieldMapping &cm : intFieldMappings)
 			{
-				if(field.info->identifier.noCaseEqual(cm.name))
+				if(field.info.identifier.noCaseEqual(cm.name))
 				{
 					int value = L.get()->*cm.field;
 
 					// Find matching option
 					int index = 0;
-					for(size_t i = 0; i < field.info->options.size(); ++i)
+					for(size_t i = 0; i < field.info.options.size(); ++i)
 					{
-						if(field.info->options[i].value == value)
+						if(field.info.options[i].value == value)
 						{
 							index = static_cast<int>(i);
 							break;
@@ -1889,12 +1890,12 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 				}
 			}
 		}
-		else if(field.info->type == linefield_t::Type::intpair)
+		else if(field.info.type == linefield_t::Type::intpair)
 		{
 			// Update first widget
 			for(const IntFieldMapping &cm : intFieldMappings)
 			{
-				if(field.info->identifier.noCaseEqual(cm.name))
+				if(field.info.identifier.noCaseEqual(cm.name))
 				{
 					int value = L.get()->*cm.field;
 					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget),
@@ -1905,7 +1906,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 			// Update second widget
 			for(const IntFieldMapping &cm : intFieldMappings)
 			{
-				if(field.info->identifier2.noCaseEqual(cm.name))
+				if(field.info.identifier2.noCaseEqual(cm.name))
 				{
 					int value = L.get()->*cm.field;
 					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2),
@@ -2427,7 +2428,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	for(const LineField &field : fields)
 	{
 		// Unload intpair widgets from mFixUp before removing them
-		if(field.info->type == linefield_t::Type::intpair && field.widget2)
+		if(field.info.type == linefield_t::Type::intpair && field.widget2)
 		{
 			mFixUp.unloadFields({static_cast<UI_DynIntInput *>(field.widget),
 								 static_cast<UI_DynIntInput *>(field.widget2)});
@@ -2509,7 +2510,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 				flex->end();
 
-				field.info = &lf;
+				field.info = lf;
 				fields.push_back(std::move(field));
 
 				panel->insert(*fields.back().container, front);
@@ -2528,7 +2529,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 			// Pass the linefield_t pointer via callback data
 			field.widget->callback(field_callback, this);
-			field.info = &lf;
+			field.info = lf;
 
 			fields.push_back(std::move(field));
 
@@ -2557,7 +2558,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	else
 		argsFlex->hide();
 
-	if(config.features.udmf_multipletags)
+	if(loaded.levelFormat == MapFormat::udmf && config.features.udmf_multipletags)
 	{
 		multiTagView->show();
 		multiTagView->clearTags();
