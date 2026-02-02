@@ -576,7 +576,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	}
 
 	{
-		healthFlex = new Fl_Flex(which->x(), 0, which->w(), TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
+		healthFlex = new Fl_Flex(X + TYPE_INPUT_X, 0, W - TYPE_INPUT_X - NOMBRE_INSET, TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
 		healthFlex->gap(16 + fl_width("Group:"));
 
 		healthInput = new UI_DynIntInput(0, 0, 0, 0, "Health:");
@@ -895,6 +895,9 @@ void UI_LineBox::clearFields()
 	udmfActivationButton->deactivate();
 	for(Fl_Menu_Item &item : udmfActivationMenuItems)
 		item.value(0);
+
+	healthFlex->hide();
+
 	mFixUp.setInputValue(length, "");
 	mFixUp.setInputValue(tag, "");
 	clearArgs();
@@ -1568,6 +1571,13 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		byte fieldID;
 	};
 
+	struct IntInputMapping
+	{
+		const UI_DynIntInput *input;
+		const char *name;
+		byte fieldID;
+	};
+
 	static const IntFieldMapping intFieldMapping[] =
 	{
 		{ "locknumber", LineDef::F_LOCKNUMBER },
@@ -1586,6 +1596,24 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited alpha of", *box->inst.edit.Selected);
 		for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 			op.changeLinedef(*it, &LineDef::alpha, box->alphaWidget->value());
+		return;
+	}
+
+	const IntInputMapping intInputMapping[] =
+	{
+		{ box->healthInput, "health", LineDef::F_HEALTH },
+		{ box->healthGroupInput, "health group", LineDef::F_HEALTHGROUP },
+	};
+
+	for(const IntInputMapping &mapping : intInputMapping)
+	{
+		if(w != mapping.input)
+			continue;
+		EditOperation op(box->inst.level.basis);
+		SString msg = SString::printf("edited %s of", mapping.name);
+		op.setMessageForSelection(msg.c_str(), *box->inst.edit.Selected);
+		for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+			op.changeLinedef(*it, mapping.fieldID, atoi(mapping.input->value()));
 		return;
 	}
 
@@ -1804,7 +1832,14 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	FlagsFromInt(L->flags);
 	Flags2FromInt(L->flags2);
 	setUDMFActivationLabel(L->flags, L->flags2);
-	// TODO: show or hide the bar
+	if(L->flags2 & (MLF2_UDMF_DamageSpecial | MLF2_UDMF_DeathSpecial))
+	{
+		healthFlex->show();
+		mFixUp.setInputValue(healthInput, SString(L->health).c_str());
+		mFixUp.setInputValue(healthGroupInput, SString(L->healthgroup).c_str());
+	}
+	else
+		healthFlex->hide();
 
 	struct IntFieldMapping
 	{
