@@ -942,12 +942,12 @@ void UI_LineBox::clearFields()
 	}
 }
 
-void UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
+bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
 											const LoadingData &loaded, const ConfigData &config,
 											const char *title)
 {
 	if(loaded.levelFormat != MapFormat::udmf)
-		return;
+		return false;
 
 	// Check if features exist at all before proceeding
 	bool found = false;
@@ -961,7 +961,7 @@ void UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 		}
 	}
 	if(!found)
-		return;
+		return false;
 
 	CategoryHeader header{};
 	const int xPos = which->x();
@@ -979,6 +979,8 @@ void UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 	for(size_t i = 0; i < count; ++i)
 	{
 		const FeatureFlagMapping &entry = mapping[i];
+		if(!UDMF_HasLineFeature(config, entry.feature))
+			continue;
 		LineFlagButton button{};
 		button.button = new Fl_Check_Button(0, 0, 0, 0, entry.label);
 		button.button->labelsize(FLAG_LABELSIZE);
@@ -1000,6 +1002,7 @@ void UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 	panel->insert(*header.grid, front);
 
 	categoryHeaders.push_back(std::move(header));
+	return true;
 }
 
 void UI_LineBox::loadUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config)
@@ -1183,7 +1186,11 @@ void UI_LineBox::loadUDMFRenderingControls(const LoadingData &loaded, const Conf
 		MLF2_UDMF_WrapMidTex, 2},
 	};
 
-	populateUDMFFlagCheckBoxes(renderingFlags, lengthof(renderingFlags), loaded, config, "Advanced rendering");
+	if(!populateUDMFFlagCheckBoxes(renderingFlags, lengthof(renderingFlags), loaded, config,
+								   "Advanced rendering"))
+	{
+		return;
+	}
 
 	Fl_Grid *grid = categoryHeaders.back().grid;
 

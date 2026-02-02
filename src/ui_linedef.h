@@ -138,7 +138,7 @@ private:
 	void clearArgs();
 	void clearFields();
 
-	void populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
+	bool populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
 									const LoadingData &loaded, const ConfigData &config,
 									const char *title);
 
