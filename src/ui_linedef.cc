@@ -581,11 +581,11 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 		healthInput = new UI_DynIntInput(0, 0, 0, 0, "Health:");
 		healthInput->align(FL_ALIGN_LEFT);
-		// TODO: callback
+		healthInput->callback(field_callback, this);
 
 		healthGroupInput = new UI_DynIntInput(0, 0, 0, 0, "Group:");
 		healthGroupInput->align(FL_ALIGN_LEFT);
-		// TODO: callback
+		healthGroupInput->callback(field_callback, this);
 
 		healthFlex->end();
 	}
@@ -934,9 +934,7 @@ void UI_LineBox::clearFields()
 	for(const LineField &field : fields)
 	{
 		if(field.info.type == linefield_t::Type::choice)
-		{
-			static_cast<Fl_Choice*>(field.widget)->value(0);
-		}
+			static_cast<Fl_Input_Choice*>(field.widget)->value("");
 		else if(field.info.type == linefield_t::Type::intpair)
 		{
 			mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget), "");
@@ -1655,32 +1653,35 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		{
 		case linefield_t::Type::choice:
 		{
-			auto choice = static_cast<Fl_Choice *>(w);
-			int index = choice->value();
-			if(index < 0 || index >= static_cast<int>(info->options.size()))
+			auto choice = static_cast<Fl_Input_Choice *>(w);
+			const char *inputText = choice->value();
+			if(!inputText || !inputText[0])
 				return;
 
 			box->checkDirtyFields();
 			box->checkSidesDirtyFields();
-
-			int new_value = info->options[index].value;
+			// Parse the input - could be just a number or "{number}: {label}"
+			int new_value = atoi(inputText);
 
 			// Apply to all selected linedefs
-			EditOperation op(box->inst.level.basis);
-			op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
-
-			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+			box->inCallbackChoice = w;
 			{
-				for(const IntFieldMapping &cm : intFieldMapping)
+				EditOperation op(box->inst.level.basis);
+				op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
+
+				for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 				{
-					if(identifier.noCaseEqual(cm.name))
+					for(const IntFieldMapping &cm : intFieldMapping)
 					{
+						if(!identifier.noCaseEqual(cm.name))
+							continue;
 						op.changeLinedef(*it, cm.fieldID, new_value);
 						break;
 					}
 				}
 			}
 
+			box->inCallbackChoice = nullptr;
 			break;
 		}
 		case linefield_t::Type::slider:
@@ -1869,25 +1870,33 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	{
 		if(field.info.type == linefield_t::Type::choice)
 		{
+			if(static_cast<Fl_Input_Choice *>(field.widget) == inCallbackChoice)
+				continue;
 			for(const IntFieldMapping &cm : intFieldMappings)
 			{
-				if(field.info.identifier.noCaseEqual(cm.name))
-				{
-					int value = L.get()->*cm.field;
+				if(!field.info.identifier.noCaseEqual(cm.name))
+					continue;
 
-					// Find matching option
-					int index = 0;
-					for(size_t i = 0; i < field.info.options.size(); ++i)
-					{
-						if(field.info.options[i].value == value)
-						{
-							index = static_cast<int>(i);
-							break;
-						}
-					}
-					static_cast<Fl_Choice*>(field.widget)->value(index);
+				int value = L.get()->*cm.field;
+
+				// Find matching option to show full entry, or just the number
+				bool found = false;
+				for(size_t i = 0; i < field.info.options.size(); ++i)
+				{
+					if(field.info.options[i].value != value)
+						continue;
+
+					SString fullEntry = SString(value) + ": " + field.info.options[i].label;
+					static_cast<Fl_Input_Choice *>(field.widget)->value(fullEntry.c_str());
+					found = true;
 					break;
 				}
+
+				// If not found in menu, just show the number
+				if(!found)
+					static_cast<Fl_Input_Choice *>(field.widget)->value(SString(value).c_str());
+				break;
+
 			}
 		}
 		else if(field.info.type == linefield_t::Type::intpair)
@@ -2461,19 +2470,21 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				if(lf.options.empty())
 					continue;
 
-				auto choice = new Fl_Choice(fieldX, 0, fieldW, FIELD_HEIGHT);
+				auto choice = new Fl_Input_Choice(fieldX, 0, fieldW, FIELD_HEIGHT);
 				field.widget = choice;
 
-				// Build menu string from options
+				// Build menu string from options in format "{value}: {label}"
 				SString menuStr;
 				for(size_t i = 0; i < lf.options.size(); ++i)
 				{
 					if(i > 0)
 						menuStr += "|";
-					menuStr += lf.options[i].label;
+					menuStr += SString(lf.options[i].value) + ": " + lf.options[i].label;
 				}
 				choice->add(menuStr.c_str());
-				choice->value(0);
+				// Pass the linefield_t pointer via callback data
+				choice->callback(field_callback, this);
+				choice->value("");
 			}
 			else if(lf.type == linefield_t::Type::slider)
 			{
@@ -2485,6 +2496,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				slider->minimum(lf.minValue);
 				slider->maximum(lf.maxValue);
 				slider->value_width(ALPHA_NUMBER_WIDTH);
+				slider->callback(field_callback, this);
 			}
 			else if(lf.type == linefield_t::Type::intpair)
 			{
@@ -2527,8 +2539,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			field.widget->copy_label((lf.label + ":").c_str());
 			field.widget->align(FL_ALIGN_LEFT);
 
-			// Pass the linefield_t pointer via callback data
-			field.widget->callback(field_callback, this);
 			field.info = lf;
 
 			fields.push_back(std::move(field));

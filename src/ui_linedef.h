@@ -107,6 +107,7 @@ private:
 		linefield_t info;
 	};
 	std::vector<LineField> fields;
+	const Fl_Widget *inCallbackChoice = {};
 
 	int flagsAreaW = 0;
 
