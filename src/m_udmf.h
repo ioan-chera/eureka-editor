@@ -27,6 +27,7 @@ enum class UDMF_LineFeature : unsigned
 {
 	alpha,
 	anycross,
+	automapstyle,
 	blockeverything,
 	blockfloaters,
 	blockhitscan,
@@ -49,6 +50,7 @@ enum class UDMF_LineFeature : unsigned
 	healthgroup,
 	impact,
 	jumpover,
+	locknumber,
 	midtex3d,
 	midtex3dimpassible,
 	missilecross,

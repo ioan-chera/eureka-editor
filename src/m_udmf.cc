@@ -125,6 +125,7 @@ bool UDMF_AddLineFeature(ConfigData &config, const char *featureName)
 	{
 		ENTRY(alpha),
 		ENTRY(anycross),
+		ENTRY(automapstyle),
 		ENTRY(blockeverything),
 		ENTRY(blockfloaters),
 		ENTRY(blockhitscan),
@@ -147,6 +148,7 @@ bool UDMF_AddLineFeature(ConfigData &config, const char *featureName)
 		ENTRY(healthgroup),
 		ENTRY(impact),
 		ENTRY(jumpover),
+		ENTRY(locknumber),
 		ENTRY(midtex3d),
 		ENTRY(midtex3dimpassible),
 		ENTRY(missilecross),

@@ -672,8 +672,9 @@ udmf_linedef transparent
 udmf_linedef health
 udmf_linedef healthgroup
 
-udmf_linechoice_label locknumber "Lock"
-udmf_linechoice locknumber 0 "No lock"
+# Overrides
+udmf_linedef locknumber
+udmf_linechoice locknumber 0 "Default"
 udmf_linechoice locknumber 1 "Red key card"
 udmf_linechoice locknumber 2 "Blue key card"
 udmf_linechoice locknumber 3 "Yellow key card"
@@ -692,8 +693,8 @@ udmf_linechoice locknumber 229 "Any key of each color"
 
 # udmf_lineintpair health Health healthgroup Group
 
-udmf_linechoice_label automapstyle "Automap style"
-udmf_linechoice automapstyle 0 "Automatic"
+udmf_linedef automapstyle
+udmf_linechoice automapstyle 0 "Default"
 udmf_linechoice automapstyle 1 "One-sided"
 udmf_linechoice automapstyle 2 "Two-sided"
 udmf_linechoice automapstyle 3 "Different floor"

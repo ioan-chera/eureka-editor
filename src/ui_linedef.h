@@ -30,6 +30,7 @@
 class ActivationPopup;
 class Fl_Flex;
 class Fl_Grid;
+class Fl_Input_Choice;
 class Fl_Simple_Counter;
 class line_flag_CB_data_c;
 class MultiTagView;
@@ -97,6 +98,10 @@ private:
 		std::vector<int> lineFlagButtonIndices;  // indices in flagButtons
 	};
 	std::vector<CategoryHeader> categoryHeaders;
+
+	Fl_Widget *widgetAfterFlags;
+	Fl_Input_Choice *automapStyle;
+	Fl_Input_Choice *lockNumber;
 
 	// Dynamic UDMF line field widgets (configured via .ugh)
 	struct LineField

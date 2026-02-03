@@ -30,6 +30,7 @@
 #include "FL/Fl_Flex.H"
 #include "FL/Fl_Grid.H"
 #include "FL/Fl_Hor_Value_Slider.H"
+#include "FL/Fl_Input_Choice.H"
 
 #define MLF_ALL_AUTOMAP  \
 	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
@@ -676,6 +677,24 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	// Remember where to place dynamic linedef flags
 	flagsAreaW = W;
 
+	fl_font(FL_HELVETICA, FLAG_LABELSIZE + 2);
+	int labelWidth = fl_width("Automap style") + 16;
+	int fieldX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
+	int fieldW = which->x() + which->w() - fieldX;
+	automapStyle = new Fl_Input_Choice(fieldX, 0, fieldW, FIELD_HEIGHT, "Automap style:");
+	automapStyle->callback(field_callback, this);
+	automapStyle->value("");
+	automapStyle->align(FL_ALIGN_LEFT);
+	labelWidth = fl_width("Lock") + 16;
+	fieldX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
+	fieldW = which->x() + which->w() - fieldX;
+	lockNumber = new Fl_Input_Choice(fieldX, 0, fieldW, FIELD_HEIGHT, "Lock:");
+	lockNumber->callback(field_callback, this);
+	lockNumber->value("");
+	lockNumber->align(FL_ALIGN_LEFT);
+
+	widgetAfterFlags = automapStyle;
+
 	// Leave space; dynamic flags will be created in UpdateGameInfo and side boxes moved accordingly
 	Y += 29;
 
@@ -930,17 +949,10 @@ void UI_LineBox::clearFields()
 		button.button->value(0);
 	}
 
-	// No linedef selected, reset widgets
-	for(const LineField &field : fields)
-	{
-		if(field.info.type == linefield_t::Type::choice)
-			static_cast<Fl_Input_Choice*>(field.widget)->value("");
-		else if(field.info.type == linefield_t::Type::intpair)
-		{
-			mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget), "");
-			mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2), "");
-		}
-	}
+	if(automapStyle->visible())
+		automapStyle->value("");
+	if(lockNumber->visible())
+		lockNumber->value("");
 }
 
 bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
@@ -996,8 +1008,8 @@ bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 	}
 
 	if(title)
-		panel->insert(*header.button, front);
-	panel->insert(*header.grid, front);
+		panel->insert(*header.button, widgetAfterFlags);
+	panel->insert(*header.grid, widgetAfterFlags);
 
 	categoryHeaders.push_back(std::move(header));
 	return true;
@@ -1583,6 +1595,13 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		byte fieldID;
 	};
 
+	struct IntChoiceMapping
+	{
+		const Fl_Input_Choice *choice;
+		const char *name;
+		byte fieldID;
+	};
+
 	static const IntFieldMapping intFieldMapping[] =
 	{
 		{ "locknumber", LineDef::F_LOCKNUMBER },
@@ -1592,6 +1611,10 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 	};
 
 	UI_LineBox *box = (UI_LineBox *)data;
+
+	if(box->inst.edit.Selected->empty())
+		return;
+
 	if(w == box->alphaWidget)
 	{
 		box->checkDirtyFields();
@@ -1622,114 +1645,31 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	if(!box->inst.edit.Selected->empty())
+	const IntChoiceMapping choiceMapping[] =
 	{
-		// Find which field widget this is and whether it's widget or widget2
-		const linefield_t *info = nullptr;
-		bool isSecondWidget = false;
-		for(const LineField &field : box->fields)
+		{ box->automapStyle, "automapstyle", LineDef::F_AUTOMAPSTYLE },
+		{ box->lockNumber, "locknumber", LineDef::F_LOCKNUMBER },
+	};
+
+	for(const IntChoiceMapping &entry : choiceMapping)
+	{
+		if(w != entry.choice)
+			continue;
+		box->checkDirtyFields();
+		box->checkSidesDirtyFields();
+
+		int new_value = atoi(entry.choice->value());
+		box->inCallbackChoice = w;
 		{
-			if(field.widget == w)
-			{
-				info = &field.info;
-				break;
-			}
-			if(field.widget2 == w)
-			{
-				info = &field.info;
-				isSecondWidget = true;
-				break;
-			}
-		}
-
-		if(!info)
-			return;
-
-		// Determine which identifier to use based on which widget was triggered
-		const SString &identifier = isSecondWidget ? info->identifier2 : info->identifier;
-		SString message = SString("edited ") + identifier + " of";
-
-		switch(info->type)
-		{
-		case linefield_t::Type::choice:
-		{
-			auto choice = static_cast<Fl_Input_Choice *>(w);
-			const char *inputText = choice->value();
-			if(!inputText || !inputText[0])
-				return;
-
-			box->checkDirtyFields();
-			box->checkSidesDirtyFields();
-			// Parse the input - could be just a number or "{number}: {label}"
-			int new_value = atoi(inputText);
-
-			// Apply to all selected linedefs
-			box->inCallbackChoice = w;
-			{
-				EditOperation op(box->inst.level.basis);
-				op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
-
-				for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
-				{
-					for(const IntFieldMapping &cm : intFieldMapping)
-					{
-						if(!identifier.noCaseEqual(cm.name))
-							continue;
-						op.changeLinedef(*it, cm.fieldID, new_value);
-						break;
-					}
-				}
-			}
-
-			box->inCallbackChoice = nullptr;
-			break;
-		}
-		case linefield_t::Type::slider:
-		{
-			box->checkDirtyFields();
-			box->checkSidesDirtyFields();
-
-			auto valuator = static_cast<Fl_Valuator *>(w);
-
 			EditOperation op(box->inst.level.basis);
-			op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
-
+			SString msg = SString::printf("edited %s of", entry.name);
+			op.setMessageForSelection(msg.c_str(), *box->inst.edit.Selected);
 			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
-			{
-				// Hardcode the field mapping for now
-				if(identifier.noCaseEqual("alpha"))
-					op.changeLinedef(*it, &LineDef::alpha, valuator->value());
-			}
-			break;
+				op.changeLinedef(*it, entry.fieldID, new_value);
 		}
-		case linefield_t::Type::intpair:
-		{
-			auto input = static_cast<Fl_Int_Input *>(w);
-			int new_value = atoi(input->value());
-
-			EditOperation op(box->inst.level.basis);
-			op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
-
-			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
-			{
-				for(const IntFieldMapping &cm : intFieldMapping)
-				{
-					if(identifier.noCaseEqual(cm.name))
-					{
-						op.changeLinedef(*it, cm.fieldID, new_value);
-						break;
-					}
-				}
-			}
-			break;
-		}
-		default:
-			break;
-		}
-
+		box->inCallbackChoice = nullptr;
+		return;
 	}
-
-
 }
 
 void UI_LineBox::categoryToggled(UI_CategoryButton *categoryBtn)
@@ -1841,7 +1781,8 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	FlagsFromInt(L->flags);
 	Flags2FromInt(L->flags2);
 	setUDMFActivationLabel(L->flags, L->flags2);
-	if(L->flags2 & (MLF2_UDMF_DamageSpecial | MLF2_UDMF_DeathSpecial))
+	if(inst.loaded.levelFormat == MapFormat::udmf && L->flags2 & (MLF2_UDMF_DamageSpecial |
+																  MLF2_UDMF_DeathSpecial))
 	{
 		healthFlex->show();
 		mFixUp.setInputValue(healthInput, SString(L->health).c_str());
@@ -1850,79 +1791,58 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	else
 		healthFlex->hide();
 
-	struct IntFieldMapping
+	struct IntChoiceMapping
 	{
-		const char *const name;
-		int LineDef::* field;
+		int linefield;
+		Fl_Input_Choice *choice;
+		const linefield_t *info;
 	};
 
-	static const IntFieldMapping intFieldMappings[] =
+	const linefield_t *automapStyleField = nullptr;
+	const linefield_t *lockNumberField = nullptr;
+	for(const linefield_t &field : inst.conf.udmf_line_fields)
 	{
-		{ "locknumber", &LineDef::locknumber },
-		{ "automapstyle", &LineDef::automapstyle },
-		{ "health", &LineDef::health },
-		{ "healthgroup", &LineDef::healthgroup },
-	};
-
-	// Update choice and intpair widgets for UDMF properties
-
-	for(const LineField &field : fields)
-	{
-		if(field.info.type == linefield_t::Type::choice)
+		if(field.identifier.noCaseEqual("automapstyle"))
 		{
-			if(static_cast<Fl_Input_Choice *>(field.widget) == inCallbackChoice)
-				continue;
-			for(const IntFieldMapping &cm : intFieldMappings)
-			{
-				if(!field.info.identifier.noCaseEqual(cm.name))
-					continue;
-
-				int value = L.get()->*cm.field;
-
-				// Find matching option to show full entry, or just the number
-				bool found = false;
-				for(size_t i = 0; i < field.info.options.size(); ++i)
-				{
-					if(field.info.options[i].value != value)
-						continue;
-
-					SString fullEntry = SString(value) + ": " + field.info.options[i].label;
-					static_cast<Fl_Input_Choice *>(field.widget)->value(fullEntry.c_str());
-					found = true;
-					break;
-				}
-
-				// If not found in menu, just show the number
-				if(!found)
-					static_cast<Fl_Input_Choice *>(field.widget)->value(SString(value).c_str());
-				break;
-
-			}
+			automapStyleField = &field;
+			continue;
 		}
-		else if(field.info.type == linefield_t::Type::intpair)
+		if(field.identifier.noCaseEqual("locknumber"))
 		{
-			// Update first widget
-			for(const IntFieldMapping &cm : intFieldMappings)
+			lockNumberField = &field;
+			continue;
+		}
+	}
+
+	const IntChoiceMapping mapping[] =
+	{
+		{ L->automapstyle, automapStyle, automapStyleField },
+		{ L->locknumber, lockNumber, lockNumberField },
+	};
+
+	if(inst.loaded.levelFormat == MapFormat::udmf)
+	{
+		for(const IntChoiceMapping &entry : mapping)
+		{
+			// If we're in the middle of handling user interaction, do not modify the value at the
+			// same time. Otherwise, we autocomplete the text prematurely and impede the user from
+			// writing custom numbers.
+			// Also, avoid spending computation time if the given feature doesn't exist
+			if(inCallbackChoice == entry.choice || !entry.choice->visible() || !entry.info)
+				continue;
+
+			bool found = false;
+			for(const linefield_t::option_t &option : entry.info->options)
 			{
-				if(field.info.identifier.noCaseEqual(cm.name))
-				{
-					int value = L.get()->*cm.field;
-					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget),
-											SString(value).c_str());
-					break;
-				}
+				if(option.value != entry.linefield)
+					continue;
+				SString fullEntry = SString(entry.linefield) + ": " + option.label;
+				entry.choice->value(fullEntry.c_str());
+				found = true;
+				break;
 			}
-			// Update second widget
-			for(const IntFieldMapping &cm : intFieldMappings)
-			{
-				if(field.info.identifier2.noCaseEqual(cm.name))
-				{
-					int value = L.get()->*cm.field;
-					mFixUp.setInputValue(static_cast<UI_DynIntInput*>(field.widget2),
-											SString(value).c_str());
-					break;
-				}
-			}
+			if(!found)
+				entry.choice->value(SString(entry.linefield).c_str());
 		}
 	}
 
@@ -2428,122 +2348,44 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			}
 
 			if(catHeader.button)
-				panel->insert(*catHeader.button, front);
-			panel->insert(*catHeader.grid, front);
+				panel->insert(*catHeader.button, widgetAfterFlags);
+			panel->insert(*catHeader.grid, widgetAfterFlags);
 			categoryHeaders.push_back(std::move(catHeader));
 		}
 	}
 
-	for(const LineField &field : fields)
+	automapStyle->hide();
+	automapStyle->clear();
+	lockNumber->hide();
+	lockNumber->clear();
+	struct ChoiceTable
 	{
-		// Unload intpair widgets from mFixUp before removing them
-		if(field.info.type == linefield_t::Type::intpair && field.widget2)
-		{
-			mFixUp.unloadFields({static_cast<UI_DynIntInput *>(field.widget),
-								 static_cast<UI_DynIntInput *>(field.widget2)});
-			panel->remove(field.container);
-			delete field.container;
-		}
-		else
-		{
-			panel->remove(field.widget);
-			delete field.widget;
-		}
-	}
-	fields.clear();
-
-	if(loaded.levelFormat == MapFormat::udmf && !config.udmf_line_fields.empty())
+		UDMF_LineFeature feature;
+		const char *identifier;
+		Fl_Input_Choice *choice;
+	};
+	const ChoiceTable table[] =
 	{
-		// Match the args span: starts at type->x() and spans 5 args
-
-		//begin();
-
-		for(const linefield_t &lf : config.udmf_line_fields)
+		{ UDMF_LineFeature::automapstyle, "automapstyle", automapStyle },
+		{ UDMF_LineFeature::locknumber, "locknumber", lockNumber },
+	};
+	if(loaded.levelFormat == MapFormat::udmf)
+	{
+		for(const ChoiceTable &entry : table)
 		{
-			LineField field = {};
-			const int labelWidth = fl_width(lf.label.c_str()) + 16;
-			const int fieldX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
-			const int fieldW = which->x() + which->w() - fieldX;
-
-			if(lf.type == linefield_t::Type::choice)
-			{
-				if(lf.options.empty())
-					continue;
-
-				auto choice = new Fl_Input_Choice(fieldX, 0, fieldW, FIELD_HEIGHT);
-				field.widget = choice;
-
-				// Build menu string from options in format "{value}: {label}"
-				SString menuStr;
-				for(size_t i = 0; i < lf.options.size(); ++i)
-				{
-					if(i > 0)
-						menuStr += "|";
-					menuStr += SString(lf.options[i].value) + ": " + lf.options[i].label;
-				}
-				choice->add(menuStr.c_str());
-				// Pass the linefield_t pointer via callback data
-				choice->callback(field_callback, this);
-				choice->value("");
-			}
-			else if(lf.type == linefield_t::Type::slider)
-			{
-				auto slider = new Fl_Hor_Value_Slider(fieldX, 0, fieldW, FIELD_HEIGHT);
-				field.widget = slider;
-
-				slider->step(lf.step);
-				// slider->lstep(lf.step * 8);
-				slider->minimum(lf.minValue);
-				slider->maximum(lf.maxValue);
-				slider->value_width(ALPHA_NUMBER_WIDTH);
-				slider->callback(field_callback, this);
-			}
-			else if(lf.type == linefield_t::Type::intpair)
-			{
-				// Create horizontal Fl_Flex container
-				auto flex = new Fl_Flex(fieldX, 0, fieldW, FIELD_HEIGHT, Fl_Flex::HORIZONTAL);
-				flex->gap(16 + fl_width(lf.label2.c_str()));
-				field.container = flex;
-
-				// First input (left)
-				auto input1 = new UI_DynIntInput(0, 0, 0, FIELD_HEIGHT);
-				field.widget = input1;
-				input1->copy_label((lf.label + ":").c_str());
-				input1->align(FL_ALIGN_LEFT);
-				input1->callback(field_callback, this);
-
-				// Second input (right) - set fixed width for the label spacing
-				auto input2 = new UI_DynIntInput(0, 0, 0, FIELD_HEIGHT);
-				field.widget2 = input2;
-				input2->copy_label((lf.label2 + ":").c_str());
-				input2->align(FL_ALIGN_LEFT);
-				input2->callback(field_callback, this);
-				//flex->fixed(input2, label2Width + 64);  // label width + input width
-
-				flex->end();
-
-				field.info = lf;
-				fields.push_back(std::move(field));
-
-				panel->insert(*fields.back().container, front);
-
-				// Register both inputs with mFixUp
-				mFixUp.loadFields({static_cast<UI_DynIntInput *>(fields.back().widget),
-								   static_cast<UI_DynIntInput *>(fields.back().widget2)});
+			if(!UDMF_HasLineFeature(config, entry.feature))
 				continue;
-			}
-			else
+			entry.choice->show();
+			for(const linefield_t &field : config.udmf_line_fields)
 			{
-				assert(false);
+				if(field.type != linefield_t::Type::choice ||
+				   !field.identifier.noCaseEqual(entry.identifier))
+				{
+					continue;
+				}
+				for(const linefield_t::option_t &option : field.options)
+					entry.choice->add((SString(option.value) + ": " + option.label).c_str());
 			}
-			field.widget->copy_label((lf.label + ":").c_str());
-			field.widget->align(FL_ALIGN_LEFT);
-
-			field.info = lf;
-
-			fields.push_back(std::move(field));
-
-			panel->insert(*fields.back().widget, front);
 		}
 	}
 
