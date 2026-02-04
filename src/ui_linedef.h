@@ -25,6 +25,7 @@
 #include "e_basis.h"
 #include "e_cutpaste.h"
 #include "m_game.h"
+#include "m_udmf.h"
 #include "ui_panelinput.h"
 
 class ActivationPopup;
@@ -44,6 +45,17 @@ struct lineflag_t; // forward declaration
 class UI_LineBox : public MapItemBox
 {
 private:
+	struct UDMFIntChoiceField
+	{
+		Fl_Input_Choice *UI_LineBox::*choice;
+		UDMF_LineFeature feature;
+		byte fieldID;
+		const char *identifier;
+		const char *label;
+		int LineDef::*linedefField;
+	};
+	static const UDMFIntChoiceField udmfIntChoiceFields[];
+
 	UI_StackPanel *panel;
 
 	UI_DynInput  *type;

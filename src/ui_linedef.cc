@@ -88,6 +88,14 @@ struct FeatureFlagMapping
 	int flagSet;
 };
 
+const UI_LineBox::UDMFIntChoiceField UI_LineBox::udmfIntChoiceFields[] =
+{
+	{ &UI_LineBox::automapStyle, UDMF_LineFeature::automapstyle, LineDef::F_AUTOMAPSTYLE,
+	"automapstyle", "Automap style:", &LineDef::automapstyle },
+	{ &UI_LineBox::lockNumber, UDMF_LineFeature::locknumber, LineDef::F_LOCKNUMBER, "locknumber",
+	"Lock:", &LineDef::locknumber },
+};
+
 
 class IDTag : public Fl_Widget
 {
@@ -682,22 +690,25 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	overrideHeader->callback(overrideClicked, this);
 
 	fl_font(FL_HELVETICA, FLAG_LABELSIZE + 2);
-	int labelWidth = fl_width("Automap style") + 16;
-	int fieldX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
-	int fieldW = which->x() + which->w() - fieldX;
-	automapStyle = new Fl_Input_Choice(fieldX, 0, fieldW, FIELD_HEIGHT, "Automap style:");
-	automapStyle->callback(field_callback, this);
-	automapStyle->value("");
-	automapStyle->align(FL_ALIGN_LEFT);
-	automapStyle->hide();
-	labelWidth = fl_width("Lock") + 16;
-	fieldX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
-	fieldW = which->x() + which->w() - fieldX;
-	lockNumber = new Fl_Input_Choice(fieldX, 0, fieldW, FIELD_HEIGHT, "Lock:");
-	lockNumber->callback(field_callback, this);
-	lockNumber->value("");
-	lockNumber->align(FL_ALIGN_LEFT);
-	lockNumber->hide();
+
+	int labelWidth = 0;
+	for(const UDMFIntChoiceField &field : udmfIntChoiceFields)
+	{
+		const int width = fl_width(field.label) + 16;
+		if(width > labelWidth)
+			labelWidth = width;
+	}
+	if(labelWidth < TYPE_INPUT_X)
+		labelWidth = TYPE_INPUT_X;
+	for(const UDMFIntChoiceField &field : udmfIntChoiceFields)
+	{
+		this->*field.choice = new Fl_Input_Choice(x() + labelWidth, 0, which->w() - labelWidth,
+												  FIELD_HEIGHT, field.label);
+		(this->*field.choice)->callback(field_callback, this);
+		(this->*field.choice)->value("");
+		(this->*field.choice)->align(FL_ALIGN_LEFT);
+		(this->*field.choice)->hide();
+	}
 
 	widgetAfterFlags = overrideHeader;
 
@@ -896,30 +907,20 @@ void UI_LineBox::checkSidesDirtyFields()
 
 void UI_LineBox::overrideClicked(Fl_Widget *widget, void *context)
 {
-	struct Mapping
-	{
-		Fl_Input_Choice *choice;
-		UDMF_LineFeature feature;
-	};
 	auto box = static_cast<UI_LineBox *>(context);
-	const Mapping mapping[] =
-	{
-		{ box->automapStyle, UDMF_LineFeature::automapstyle },
-		{ box->lockNumber, UDMF_LineFeature::locknumber },
-	};
 
 	if(box->overrideHeader->isExpanded())
 	{
-		for(const Mapping &entry : mapping)
+		for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
 		{
 			if(UDMF_HasLineFeature(box->inst.conf, entry.feature))
-				entry.choice->show();
+				(box->*entry.choice)->show();
 			else
-				entry.choice->hide();
+				(box->*entry.choice)->hide();
 		}
 	}
-	else for(const Mapping &entry : mapping)
-		entry.choice->hide();
+	else for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
+		(box->*entry.choice)->hide();
 	box->redraw();
 }
 
@@ -984,8 +985,11 @@ void UI_LineBox::clearFields()
 		button.button->value(0);
 	}
 
-	automapStyle->value("");
-	lockNumber->value("");
+	for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
+	{
+		(this->*entry.choice)->deactivate();
+		(this->*entry.choice)->value("");
+	}
 }
 
 bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
@@ -1635,14 +1639,6 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		byte fieldID;
 	};
 
-	static const IntFieldMapping intFieldMapping[] =
-	{
-		{ "locknumber", LineDef::F_LOCKNUMBER },
-		{ "automapstyle", LineDef::F_AUTOMAPSTYLE },
-		{ "health", LineDef::F_HEALTH },
-		{ "healthgroup", LineDef::F_HEALTHGROUP },
-	};
-
 	UI_LineBox *box = (UI_LineBox *)data;
 
 	if(box->inst.edit.Selected->empty())
@@ -1678,24 +1674,18 @@ void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	const IntChoiceMapping choiceMapping[] =
+	for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
 	{
-		{ box->automapStyle, "automapstyle", LineDef::F_AUTOMAPSTYLE },
-		{ box->lockNumber, "locknumber", LineDef::F_LOCKNUMBER },
-	};
-
-	for(const IntChoiceMapping &entry : choiceMapping)
-	{
-		if(w != entry.choice)
+		if(w != box->*entry.choice)
 			continue;
 		box->checkDirtyFields();
 		box->checkSidesDirtyFields();
 
-		int new_value = atoi(entry.choice->value());
+		int new_value = atoi((box->*entry.choice)->value());
 		box->inCallbackChoice = w;
 		{
 			EditOperation op(box->inst.level.basis);
-			SString msg = SString::printf("edited %s of", entry.name);
+			SString msg = SString::printf("edited %s of", entry.identifier);
 			op.setMessageForSelection(msg.c_str(), *box->inst.edit.Selected);
 			for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 				op.changeLinedef(*it, entry.fieldID, new_value);
@@ -1824,62 +1814,47 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	else
 		healthFlex->hide();
 
-	struct IntChoiceMapping
-	{
-		int linefield;
-		Fl_Input_Choice *choice;
-		const linefield_t *info;
-		UDMF_LineFeature feature;
-	};
-
-	const linefield_t *automapStyleField = nullptr;
-	const linefield_t *lockNumberField = nullptr;
+	std::unordered_map<SString, const linefield_t *> linefieldMap;
 	for(const linefield_t &field : inst.conf.udmf_line_fields)
 	{
-		if(field.identifier.noCaseEqual("automapstyle"))
+		for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
 		{
-			automapStyleField = &field;
-			continue;
-		}
-		if(field.identifier.noCaseEqual("locknumber"))
-		{
-			lockNumberField = &field;
-			continue;
+			if(field.identifier.noCaseEqual(entry.identifier))
+			{
+				linefieldMap[entry.identifier] = &field;
+				break;
+			}
 		}
 	}
 
-	const IntChoiceMapping mapping[] =
-	{
-		{ L->automapstyle, automapStyle, automapStyleField, UDMF_LineFeature::automapstyle },
-		{ L->locknumber, lockNumber, lockNumberField, UDMF_LineFeature::locknumber },
-	};
-
 	if(inst.loaded.levelFormat == MapFormat::udmf)
 	{
-		for(const IntChoiceMapping &entry : mapping)
+		for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
 		{
 			// If we're in the middle of handling user interaction, do not modify the value at the
 			// same time. Otherwise, we autocomplete the text prematurely and impede the user from
 			// writing custom numbers.
 			// Also, avoid spending computation time if the given feature doesn't exist
-			if(inCallbackChoice == entry.choice || !UDMF_HasLineFeature(inst.conf, entry.feature) ||
-			   !entry.info)
+			if(inCallbackChoice == this->*entry.choice || !UDMF_HasLineFeature(inst.conf, entry.feature) ||
+			   linefieldMap.find(entry.identifier) == linefieldMap.end())
 			{
 				continue;
 			}
 
+			(this->*entry.choice)->activate();
+
 			bool found = false;
-			for(const linefield_t::option_t &option : entry.info->options)
+			for(const linefield_t::option_t &option : linefieldMap[entry.identifier]->options)
 			{
-				if(option.value != entry.linefield)
+				if(option.value != L.get()->*entry.linedefField)
 					continue;
-				SString fullEntry = SString(entry.linefield) + ": " + option.label;
-				entry.choice->value(fullEntry.c_str());
+				SString fullEntry = SString(L.get()->*entry.linedefField) + ": " + option.label;
+				(this->*entry.choice)->value(fullEntry.c_str());
 				found = true;
 				break;
 			}
 			if(!found)
-				entry.choice->value(SString(entry.linefield).c_str());
+				(this->*entry.choice)->value(SString(L.get()->*entry.linedefField).c_str());
 		}
 	}
 
@@ -2391,32 +2366,21 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		}
 	}
 
-	struct ChoiceTable
-	{
-		UDMF_LineFeature feature;
-		const char *identifier;
-		Fl_Input_Choice *choice;
-	};
-	const ChoiceTable table[] =
-	{
-		{ UDMF_LineFeature::automapstyle, "automapstyle", automapStyle },
-		{ UDMF_LineFeature::locknumber, "locknumber", lockNumber },
-	};
 	overrideHeader->hide();
-	for(const ChoiceTable &entry : table)
+	for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
 	{
-		entry.choice->hide();
-		entry.choice->clear();
+		(this->*entry.choice)->hide();
+		(this->*entry.choice)->clear();
 	}
 	if(loaded.levelFormat == MapFormat::udmf)
 	{
 		bool hasOne = false;
-		for(const ChoiceTable &entry : table)
+		for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
 		{
 			if(!UDMF_HasLineFeature(config, entry.feature))
 				continue;
 			if(overrideHeader->isExpanded())
-				entry.choice->show();
+				(this->*entry.choice)->show();
 			hasOne = true;
 			for(const linefield_t &field : config.udmf_line_fields)
 			{
@@ -2426,7 +2390,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 					continue;
 				}
 				for(const linefield_t::option_t &option : field.options)
-					entry.choice->add((SString(option.value) + ": " + option.label).c_str());
+					(this->*entry.choice)->add((SString(option.value) + ": " + option.label).c_str());
 			}
 		}
 		if(hasOne)
