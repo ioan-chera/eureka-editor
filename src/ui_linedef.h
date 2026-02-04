@@ -100,6 +100,7 @@ private:
 	std::vector<CategoryHeader> categoryHeaders;
 
 	Fl_Widget *widgetAfterFlags;
+	UI_CategoryButton *overrideHeader;
 	Fl_Input_Choice *automapStyle;
 	Fl_Input_Choice *lockNumber;
 
@@ -142,6 +143,7 @@ public:
 	}
 
 private:
+	static void overrideClicked(Fl_Widget *widget, void *context);
 	void clearArgs();
 	void clearFields();
 

@@ -677,6 +677,10 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	// Remember where to place dynamic linedef flags
 	flagsAreaW = W;
 
+	overrideHeader = new UI_CategoryButton(which->x(), 0, which->w(), FIELD_HEIGHT, "Override settings");
+	overrideHeader->setExpanded(false);
+	overrideHeader->callback(overrideClicked, this);
+
 	fl_font(FL_HELVETICA, FLAG_LABELSIZE + 2);
 	int labelWidth = fl_width("Automap style") + 16;
 	int fieldX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
@@ -685,6 +689,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	automapStyle->callback(field_callback, this);
 	automapStyle->value("");
 	automapStyle->align(FL_ALIGN_LEFT);
+	automapStyle->hide();
 	labelWidth = fl_width("Lock") + 16;
 	fieldX = x() + std::max((int)TYPE_INPUT_X, labelWidth);
 	fieldW = which->x() + which->w() - fieldX;
@@ -692,8 +697,9 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	lockNumber->callback(field_callback, this);
 	lockNumber->value("");
 	lockNumber->align(FL_ALIGN_LEFT);
+	lockNumber->hide();
 
-	widgetAfterFlags = automapStyle;
+	widgetAfterFlags = overrideHeader;
 
 	// Leave space; dynamic flags will be created in UpdateGameInfo and side boxes moved accordingly
 	Y += 29;
@@ -888,6 +894,35 @@ void UI_LineBox::checkSidesDirtyFields()
 	back->checkDirtyFields();
 }
 
+void UI_LineBox::overrideClicked(Fl_Widget *widget, void *context)
+{
+	struct Mapping
+	{
+		Fl_Input_Choice *choice;
+		UDMF_LineFeature feature;
+	};
+	auto box = static_cast<UI_LineBox *>(context);
+	const Mapping mapping[] =
+	{
+		{ box->automapStyle, UDMF_LineFeature::automapstyle },
+		{ box->lockNumber, UDMF_LineFeature::locknumber },
+	};
+
+	if(box->overrideHeader->isExpanded())
+	{
+		for(const Mapping &entry : mapping)
+		{
+			if(UDMF_HasLineFeature(box->inst.conf, entry.feature))
+				entry.choice->show();
+			else
+				entry.choice->hide();
+		}
+	}
+	else for(const Mapping &entry : mapping)
+		entry.choice->hide();
+	box->redraw();
+}
+
 void UI_LineBox::clearArgs()
 {
 	for (int a = 0 ; a < 5 ; a++)
@@ -949,10 +984,8 @@ void UI_LineBox::clearFields()
 		button.button->value(0);
 	}
 
-	if(automapStyle->visible())
-		automapStyle->value("");
-	if(lockNumber->visible())
-		lockNumber->value("");
+	automapStyle->value("");
+	lockNumber->value("");
 }
 
 bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
@@ -1796,6 +1829,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 		int linefield;
 		Fl_Input_Choice *choice;
 		const linefield_t *info;
+		UDMF_LineFeature feature;
 	};
 
 	const linefield_t *automapStyleField = nullptr;
@@ -1816,8 +1850,8 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 
 	const IntChoiceMapping mapping[] =
 	{
-		{ L->automapstyle, automapStyle, automapStyleField },
-		{ L->locknumber, lockNumber, lockNumberField },
+		{ L->automapstyle, automapStyle, automapStyleField, UDMF_LineFeature::automapstyle },
+		{ L->locknumber, lockNumber, lockNumberField, UDMF_LineFeature::locknumber },
 	};
 
 	if(inst.loaded.levelFormat == MapFormat::udmf)
@@ -1828,8 +1862,11 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 			// same time. Otherwise, we autocomplete the text prematurely and impede the user from
 			// writing custom numbers.
 			// Also, avoid spending computation time if the given feature doesn't exist
-			if(inCallbackChoice == entry.choice || !entry.choice->visible() || !entry.info)
+			if(inCallbackChoice == entry.choice || !UDMF_HasLineFeature(inst.conf, entry.feature) ||
+			   !entry.info)
+			{
 				continue;
+			}
 
 			bool found = false;
 			for(const linefield_t::option_t &option : entry.info->options)
@@ -2354,10 +2391,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		}
 	}
 
-	automapStyle->hide();
-	automapStyle->clear();
-	lockNumber->hide();
-	lockNumber->clear();
 	struct ChoiceTable
 	{
 		UDMF_LineFeature feature;
@@ -2369,13 +2402,22 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		{ UDMF_LineFeature::automapstyle, "automapstyle", automapStyle },
 		{ UDMF_LineFeature::locknumber, "locknumber", lockNumber },
 	};
+	overrideHeader->hide();
+	for(const ChoiceTable &entry : table)
+	{
+		entry.choice->hide();
+		entry.choice->clear();
+	}
 	if(loaded.levelFormat == MapFormat::udmf)
 	{
+		bool hasOne = false;
 		for(const ChoiceTable &entry : table)
 		{
 			if(!UDMF_HasLineFeature(config, entry.feature))
 				continue;
-			entry.choice->show();
+			if(overrideHeader->isExpanded())
+				entry.choice->show();
+			hasOne = true;
 			for(const linefield_t &field : config.udmf_line_fields)
 			{
 				if(field.type != linefield_t::Type::choice ||
@@ -2387,6 +2429,8 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 					entry.choice->add((SString(option.value) + ": " + option.label).c_str());
 			}
 		}
+		if(hasOne)
+			overrideHeader->show();
 	}
 
 	// Reposition side boxes under the generated flags and choice widgets
