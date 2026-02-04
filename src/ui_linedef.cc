@@ -1619,22 +1619,9 @@ void UI_LineBox::category_callback(Fl_Widget *w, void *data)
 
 void UI_LineBox::field_callback(Fl_Widget *w, void *data)
 {
-	struct IntFieldMapping
-	{
-		const char *name;
-		byte fieldID;
-	};
-
 	struct IntInputMapping
 	{
 		const UI_DynIntInput *input;
-		const char *name;
-		byte fieldID;
-	};
-
-	struct IntChoiceMapping
-	{
-		const Fl_Input_Choice *choice;
 		const char *name;
 		byte fieldID;
 	};
