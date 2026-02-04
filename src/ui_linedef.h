@@ -108,6 +108,9 @@ private:
 		UI_CategoryButton *button;
 		Fl_Grid *grid;
 		std::vector<int> lineFlagButtonIndices;  // indices in flagButtons
+		const FeatureFlagMapping *mapping = nullptr;  // mapping array for this category
+		size_t mappingCount = 0;  // number of items in the mapping array
+		bool hasAlpha;
 	};
 	std::vector<CategoryHeader> categoryHeaders;
 
@@ -193,6 +196,9 @@ private:
 	const char *GeneralizedDesc(int type_num);
 
 	void categoryToggled(class UI_CategoryButton *categoryBtn);
+
+	void updateCategorySummary(const CategoryHeader &header);
+	void updateOverrideSummary();
 
 	static void    type_callback(Fl_Widget *, void *);
 	static void dyntype_callback(Fl_Widget *, void *);

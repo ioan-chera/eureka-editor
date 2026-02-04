@@ -86,6 +86,7 @@ struct FeatureFlagMapping
 	const char *tooltip;
 	unsigned value;
 	int flagSet;
+	const char *shortDisplay;  // Short form for collapsed category display (emoji or acronym)
 };
 
 const UI_LineBox::UDMFIntChoiceField UI_LineBox::udmfIntChoiceFields[] =
@@ -990,6 +991,92 @@ void UI_LineBox::clearFields()
 		(this->*entry.choice)->deactivate();
 		(this->*entry.choice)->value("");
 	}
+
+	for(const CategoryHeader &header : categoryHeaders)
+		if(header.button)
+			updateCategorySummary(header);
+	updateOverrideSummary();
+}
+
+//
+// Update the summary details displayed on a collapsed category header
+//
+void UI_LineBox::updateCategorySummary(const CategoryHeader &header)
+{
+	if(!header.button)
+		return;
+
+	if(!inst.level.isLinedef(obj))
+	{
+		header.button->details("");
+		header.button->redraw();
+		return;
+	}
+	const int flags = inst.level.linedefs[obj]->flags;
+	const int flags2 = inst.level.linedefs[obj]->flags2;
+
+	double alpha = inst.level.linedefs[obj]->alpha;
+	bool hasAlpha = header.hasAlpha && UDMF_HasLineFeature(inst.conf, UDMF_LineFeature::alpha) &&
+		alpha < 1.0f;
+
+	SString summary;
+	if(hasAlpha)
+		summary = SString::printf("A=%.2g", alpha);
+	for(size_t i = 0; i < header.mappingCount; ++i)
+	{
+		const FeatureFlagMapping &entry = header.mapping[i];
+		if(!UDMF_HasLineFeature(inst.conf, entry.feature) ||
+		   (hasAlpha && (entry.feature == UDMF_LineFeature::translucent ||
+						 entry.feature == UDMF_LineFeature::transparent)))
+		{
+			continue;
+		}
+		const int checkFlags = entry.flagSet == 1 ? flags : flags2;
+		if(checkFlags & entry.value)
+			summary += entry.shortDisplay;
+	}
+
+	header.button->details(summary);
+	header.button->redraw();
+}
+
+//
+// Update the summary for the override settings category
+//
+void UI_LineBox::updateOverrideSummary()
+{
+	if(!inst.level.isLinedef(obj))
+	{
+		overrideHeader->details("");
+		overrideHeader->redraw();
+		return;
+	}
+
+	const auto& L = inst.level.linedefs[obj];
+	std::vector<SString> activeOverrides;
+
+	// Check each override field
+	SString summary;
+	for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
+	{
+		if(!UDMF_HasLineFeature(inst.conf, entry.feature))
+			continue;
+
+		int value = L.get()->*entry.linedefField;
+		if(!value)
+			continue;
+
+		if(!summary.empty())
+			summary.push_back(' ');
+		
+		if(*entry.label)
+			summary.push_back(*entry.label);
+		summary.push_back('=');
+		summary += SString(value);
+	}
+
+	overrideHeader->details(summary);
+	overrideHeader->redraw();
 }
 
 bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, size_t count,
@@ -1048,6 +1135,8 @@ bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 		panel->insert(*header.button, widgetAfterFlags);
 	panel->insert(*header.grid, widgetAfterFlags);
 
+	header.mapping = mapping;
+	header.mappingCount = count;
 	categoryHeaders.push_back(std::move(header));
 	return true;
 }
@@ -1097,46 +1186,46 @@ void UI_LineBox::loadUDMFActivationMenu(const LoadingData &loaded, const ConfigD
 	static const FeatureFlagMapping activatorAndMode[] =
 	{
 		{ UDMF_LineFeature::playercross, "Player crossing",
-		"Player crossing will trigger this line", MLF_UDMF_PlayerCross, 1 },
+		"Player crossing will trigger this line", MLF_UDMF_PlayerCross, 1},
 		{ UDMF_LineFeature::playeruse, "Player using", "Player operating will trigger this line",
-	    MLF_UDMF_PlayerUse, 1 },
+	    MLF_UDMF_PlayerUse, 1},
 		{ UDMF_LineFeature::playerpush, "Player bumping", "Player bumping will trigger this line",
-		MLF_UDMF_PlayerPush, 1 },
+		MLF_UDMF_PlayerPush, 1},
 		{ UDMF_LineFeature::monstercross, "Monster crossing",
-		"Monster crossing will trigger this line", MLF_UDMF_MonsterCross, 1 },
+		"Monster crossing will trigger this line", MLF_UDMF_MonsterCross, 1},
 		{ UDMF_LineFeature::monsteruse, "Monster using", "Monster operating will trigger this line",
-		MLF_UDMF_MonsterUse, 1 },
+		MLF_UDMF_MonsterUse, 1},
 		{ UDMF_LineFeature::monsterpush, "Monster bumping",
-		"Monster pushing will trigger this line", MLF_UDMF_MonsterPush, 1 },
+		"Monster pushing will trigger this line", MLF_UDMF_MonsterPush, 1},
 		{ UDMF_LineFeature::impact, "On gunshot",
-		"Shooting bullets will trigger this line", MLF_UDMF_Impact, 1 },
+		"Shooting bullets will trigger this line", MLF_UDMF_Impact, 1},
 		{ UDMF_LineFeature::missilecross, "Projectile crossing",
-		"Projectile crossing will trigger this line", MLF_UDMF_MissileCross, 1 },
+		"Projectile crossing will trigger this line", MLF_UDMF_MissileCross, 1},
 		{ UDMF_LineFeature::anycross, "Anything crossing",
-		"Any non-projectile crossing will trigger this line", MLF2_UDMF_AnyCross, 2 },
+		"Any non-projectile crossing will trigger this line", MLF2_UDMF_AnyCross, 2},
 	};
 
 	static const FeatureFlagMapping mainFlags[] =
 	{
 		{ UDMF_LineFeature::repeatspecial, "Repeatable activation", "Allow retriggering",
-		MLF_UDMF_RepeatSpecial, 1 },
+		MLF_UDMF_RepeatSpecial, 1},
 		{ UDMF_LineFeature::checkswitchrange, "Check switch range",
-		"Switch can only be activated when vertically reachable", MLF2_UDMF_CheckSwitchRange, 2 },
+		"Switch can only be activated when vertically reachable", MLF2_UDMF_CheckSwitchRange, 2},
 		{ UDMF_LineFeature::firstsideonly, "First side only",
-		"Line can only be triggered from the front side", MLF2_UDMF_FirstSideOnly, 2 },
+		"Line can only be triggered from the front side", MLF2_UDMF_FirstSideOnly, 2},
 		{ UDMF_LineFeature::playeruseback, "Player can use from behind",
-		"Player can use from back (left) side", MLF2_UDMF_PlayerUseBack, 2 },
+		"Player can use from back (left) side", MLF2_UDMF_PlayerUseBack, 2},
 		{ UDMF_LineFeature::monsteractivate, "Monster can activate",
-		"Monsters can trigger this line (for compatibility only)", MLF2_UDMF_MonsterActivate, 2 },
+		"Monsters can trigger this line (for compatibility only)", MLF2_UDMF_MonsterActivate, 2},
 	};
 
 	static const FeatureFlagMapping destructibleFlags[] =
 	{
 		{ UDMF_LineFeature::damagespecial, "Trigger on damage",
 		"This line will call special if having health > 0 and receiving damage",
-		MLF2_UDMF_DamageSpecial, 2 },
+		MLF2_UDMF_DamageSpecial, 2},
 		{ UDMF_LineFeature::deathspecial, "Trigger on death",
-		"This line will call special if health was reduced to 0", MLF2_UDMF_DeathSpecial, 2 },
+		"This line will call special if health was reduced to 0", MLF2_UDMF_DeathSpecial, 2},
 	};
 
 	auto addItem = [this, &config](const FeatureFlagMapping &entry, bool &addSeparator)
@@ -1189,30 +1278,34 @@ void UI_LineBox::loadUDMFBlockingFlags(const LoadingData &loaded, const ConfigDa
 {
 	static const FeatureFlagMapping blockingFlags[] =
 	{
-		{UDMF_LineFeature::blockeverything, "block everything", "Acts as a solid wall", MLF2_UDMF_BlockEverything, 2},
+		{UDMF_LineFeature::blockeverything, "block everything", "Acts as a solid wall",
+			MLF2_UDMF_BlockEverything, 2, "🚫"},
 		{UDMF_LineFeature::midtex3d, "3DMidTex",
 		"Eternity 3D middle texture: solid railing which can be walked over and under",
-		MLF_Eternity_3DMidTex, 1},
+		MLF_Eternity_3DMidTex, 1, "🪜"},
 		{UDMF_LineFeature::midtex3dimpassible, "3DMidTex+missiles",
 		"Coupled with 3DMidTex, this also allows projectiles to pass", MLF2_UDMF_MidTex3DImpassible,
-		2},
+		2, "+"},
 		{UDMF_LineFeature::jumpover, "Strife railing", "Strife-style skippable railing",
-		MLF_UDMF_JumpOver, 1},
+		MLF_UDMF_JumpOver, 1, "🚧"},
 		{UDMF_LineFeature::blockfloaters, "block floaters", "Block flying enemies",
-		MLF_UDMF_BlockFloaters, 1},
+		MLF_UDMF_BlockFloaters, 1, "🦇"},
 		{UDMF_LineFeature::blocklandmonsters, "block land monsters", "Block walking enemies",
-		MLF_UDMF_BlockLandMonsters, 1},
-		{UDMF_LineFeature::blockplayers, "block players", "Block only players", MLF_UDMF_BlockPlayers, 1},
+		MLF_UDMF_BlockLandMonsters, 1, "🧌"},
+		{UDMF_LineFeature::blockplayers, "block players", "Block only players",
+			MLF_UDMF_BlockPlayers, 1, "👤"},
 		{UDMF_LineFeature::blockhitscan, "block gunshots",
-		"Blocks hitscans (infinite speed gunshots)", MLF_UDMF_BlockHitScan, 1},
+		"Blocks hitscans (infinite speed gunshots)", MLF_UDMF_BlockHitScan, 1, "🔫"},
 		{UDMF_LineFeature::blockprojectiles, "block projectiles", "Blocks finite-speed projectiles",
-		MLF_UDMF_BlockProjectiles, 1},
+		MLF_UDMF_BlockProjectiles, 1, "🚀"},
 		{UDMF_LineFeature::blocksight, "block sight", "Blocks monster sight", MLF_UDMF_BlockSight,
-		1},
-		{UDMF_LineFeature::blockuse, "block use", "Blocks 'use' operation", MLF_UDMF_BlockUse, 1},
+		1, "👁️"},
+		{UDMF_LineFeature::blockuse, "block use", "Blocks 'use' operation", MLF_UDMF_BlockUse, 1,
+			"🚪"},
 	};
 
-	populateUDMFFlagCheckBoxes(blockingFlags, lengthof(blockingFlags), loaded, config, "Advanced blocking");
+	populateUDMFFlagCheckBoxes(blockingFlags, lengthof(blockingFlags), loaded, config,
+	"Advanced blocking");
 }
 
 void UI_LineBox::loadUDMFRenderingControls(const LoadingData &loaded, const ConfigData &config)
@@ -1223,14 +1316,14 @@ void UI_LineBox::loadUDMFRenderingControls(const LoadingData &loaded, const Conf
 	static const FeatureFlagMapping renderingFlags[] =
 	{
 		{UDMF_LineFeature::translucent, "translucent", "Render line as translucent (Strife style)",
-		MLF_UDMF_Translucent, 1},
+		MLF_UDMF_Translucent, 1, "🪟"},
 		{UDMF_LineFeature::transparent, "more translucent",
-		"Render line as even more translucent (Strife style)", MLF_UDMF_Transparent, 1},
+		"Render line as even more translucent (Strife style)", MLF_UDMF_Transparent, 1, "🌫️"},
 		{UDMF_LineFeature::clipmidtex, "clip railing texture",
 		"Always clip two-sided middle texture to floor and ceiling, even if sector properties don't change",
-		MLF2_UDMF_ClipMidTex, 2},
+		MLF2_UDMF_ClipMidTex, 2, "✂️"},
 		{UDMF_LineFeature::clipmidtex, "tile railing texture", "Repeat two-sided middle texture vertically",
-		MLF2_UDMF_WrapMidTex, 2},
+		MLF2_UDMF_WrapMidTex, 2, "🔲"},
 	};
 
 	if(!populateUDMFFlagCheckBoxes(renderingFlags, lengthof(renderingFlags), loaded, config,
@@ -1243,6 +1336,7 @@ void UI_LineBox::loadUDMFRenderingControls(const LoadingData &loaded, const Conf
 
 	if(UDMF_HasLineFeature(config, UDMF_LineFeature::alpha))
 	{
+		categoryHeaders.back().hasAlpha = true;
 		int count = 0;
 		for(int index : categoryHeaders.back().lineFlagButtonIndices)
 		{
@@ -1856,6 +1950,14 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 
 	if(inst.conf.features.udmf_multipletags)
 		multiTagView->setTags(std::set(L->moreIDs));
+
+	// Update category summaries for collapsed headers
+	for(const CategoryHeader &header : categoryHeaders)
+		if(header.button)
+			updateCategorySummary(header);
+
+	// Update override settings summary
+	updateOverrideSummary();
 }
 
 
