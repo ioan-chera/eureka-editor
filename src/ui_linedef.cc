@@ -89,6 +89,64 @@ struct FeatureFlagMapping
 	const char *shortDisplay;  // Short form for collapsed category display (emoji or acronym)
 };
 
+// Structure defining flag dependencies for UI greying
+struct FlagDependency
+{
+	UDMF_LineFeature masterFlag;  // The controlling flag
+	bool mustBeOn;                // true = grey dependents when master is ON, false = when OFF
+	std::vector<UDMF_LineFeature> dependentFlags;  // Flags to grey out
+};
+
+// Table of flag dependencies
+static const FlagDependency kFlagDependencies[] =
+{
+	// impassable ON -> grey block monsters, strife railing, block floaters, block land monsters, block players
+	{UDMF_LineFeature::blocking, true, {
+		UDMF_LineFeature::blockmonsters,
+		UDMF_LineFeature::jumpover,
+		UDMF_LineFeature::blockfloaters,
+		UDMF_LineFeature::blocklandmonsters,
+		UDMF_LineFeature::blockplayers
+	}},
+
+	// two sided OFF -> grey block gunshots, block sight, clip railing texture, wrap railing texture
+	{UDMF_LineFeature::twosided, false, {
+		UDMF_LineFeature::blockhitscan,
+		UDMF_LineFeature::blocksight,
+		UDMF_LineFeature::blockuse,
+		UDMF_LineFeature::clipmidtex,
+		UDMF_LineFeature::wrapmidtex
+	}},
+
+	// block monsters ON -> grey block floaters, block land monsters
+	{UDMF_LineFeature::blockmonsters, true, {
+		UDMF_LineFeature::blockfloaters,
+		UDMF_LineFeature::blocklandmonsters
+	}},
+
+	// block everything ON -> grey many flags
+	{UDMF_LineFeature::blockeverything, true, {
+		UDMF_LineFeature::blocking,
+		UDMF_LineFeature::blockmonsters,
+		UDMF_LineFeature::passuse,
+		UDMF_LineFeature::midtex3d,
+		UDMF_LineFeature::midtex3dimpassible,
+		UDMF_LineFeature::jumpover,
+		UDMF_LineFeature::blockfloaters,
+		UDMF_LineFeature::blocklandmonsters,
+		UDMF_LineFeature::blockplayers,
+		UDMF_LineFeature::blockhitscan,
+		UDMF_LineFeature::blockprojectiles,
+		UDMF_LineFeature::blocksight,
+		UDMF_LineFeature::blockuse
+	}},
+
+	// 3DMidTex OFF -> grey 3DMidTex+missiles
+	{UDMF_LineFeature::midtex3d, false, {
+		UDMF_LineFeature::midtex3dimpassible
+	}},
+};
+
 const UI_LineBox::UDMFIntChoiceField UI_LineBox::udmfIntChoiceFields[] =
 {
 	{ &UI_LineBox::automapStyle, UDMF_LineFeature::automapstyle, LineDef::F_AUTOMAPSTYLE,
@@ -985,6 +1043,7 @@ void UI_LineBox::clearFields()
 			continue;
 		button.button->value(0);
 	}
+	updateFlagDependencyGreying();
 
 	for(const UDMFIntChoiceField &entry : udmfIntChoiceFields)
 	{
@@ -1068,7 +1127,7 @@ void UI_LineBox::updateOverrideSummary()
 
 		if(!summary.empty())
 			summary.push_back(' ');
-		
+
 		if(*entry.label)
 			summary.push_back(*entry.label);
 		summary.push_back('=');
@@ -1123,6 +1182,11 @@ bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 			this, entry.flagSet == 1 ? entry.value : 0, entry.flagSet == 2 ? entry.value : 0
 		);
 		button.button->callback(flags_callback, button.data.get());
+
+		// Populate feature-to-button lookup array for fast access
+		const size_t featureIndex = static_cast<size_t>(entry.feature);
+		mFeatureToButton[featureIndex] = button.button;
+
 		flagButtons.push_back(std::move(button));
 
 		header.grid->add(button.button);
@@ -1139,6 +1203,61 @@ bool UI_LineBox::populateUDMFFlagCheckBoxes(const FeatureFlagMapping *mapping, s
 	header.mappingCount = count;
 	categoryHeaders.push_back(std::move(header));
 	return true;
+}
+
+void UI_LineBox::updateFlagDependencyGreying()
+{
+	if(inst.loaded.levelFormat != MapFormat::udmf)
+		return;
+	if(!inst.level.isLinedef(obj))
+	{
+		for(size_t i = 0; i < (size_t)UDMF_LineFeature::COUNT; ++i)
+			if(mFeatureToButton[i])
+			{
+				mFeatureToButton[i]->labelcolor(FL_FOREGROUND_COLOR);
+				mFeatureToButton[i]->redraw_label();
+			}
+		return;
+	}
+
+	// Helper lambda to check if a flag is currently set
+	auto isFlagSet = [&](const UDMF_LineFeature feature) -> bool
+	{
+		const size_t index = static_cast<size_t>(feature);
+		const Fl_Check_Button *button = mFeatureToButton[index];
+		return button && !!button->value();
+	};
+
+	// First pass: collect all flags that should be greyed (any master condition met)
+	bool shouldGreyFlag[static_cast<size_t>(UDMF_LineFeature::COUNT)] = {};
+
+	for(const FlagDependency &dep : kFlagDependencies)
+	{
+		// Check if the master flag meets the condition
+		const bool masterSet = isFlagSet(dep.masterFlag);
+		const bool masterConditionMet = dep.mustBeOn == masterSet;
+
+		if(!masterConditionMet)
+			continue;
+
+		// Mark all dependent flags for greying
+		for(const UDMF_LineFeature dependentFeature : dep.dependentFlags)
+		{
+			const size_t index = static_cast<size_t>(dependentFeature);
+			shouldGreyFlag[index] = true;
+		}
+	}
+
+	// Second pass: apply greying based on collected flags
+	for(size_t i = 0; i < static_cast<size_t>(UDMF_LineFeature::COUNT); i++)
+	{
+		Fl_Check_Button *const button = mFeatureToButton[i];
+		if(!button)
+			continue;
+
+		button->labelcolor(shouldGreyFlag[i] ? FL_INACTIVE_COLOR : FL_FOREGROUND_COLOR);
+		button->redraw_label();
+	}
 }
 
 void UI_LineBox::loadUDMFBaseFlags(const LoadingData &loaded, const ConfigData &config)
@@ -1249,7 +1368,6 @@ void UI_LineBox::loadUDMFActivationMenu(const LoadingData &loaded, const ConfigD
 		button.data = std::make_unique<line_flag_CB_data_c>(
 			this, entry.flagSet == 1 ? entry.value : 0, entry.flagSet == 2 ? entry.value : 0
 		);
-		// TODO: info
 		flagButtons.push_back(std::move(button));
 		item.callback(flags_callback, flagButtons.back().data.get());
 		udmfActivationMenuItems.push_back(std::move(item));
@@ -1322,7 +1440,7 @@ void UI_LineBox::loadUDMFRenderingControls(const LoadingData &loaded, const Conf
 		{UDMF_LineFeature::clipmidtex, "clip railing texture",
 		"Always clip two-sided middle texture to floor and ceiling, even if sector properties don't change",
 		MLF2_UDMF_ClipMidTex, 2, "✂️"},
-		{UDMF_LineFeature::clipmidtex, "tile railing texture", "Repeat two-sided middle texture vertically",
+		{UDMF_LineFeature::wrapmidtex, "tile railing texture", "Repeat two-sided middle texture vertically",
 		MLF2_UDMF_WrapMidTex, 2, "🔲"},
 	};
 
@@ -1885,6 +2003,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	FlagsFromInt(L->flags);
 	Flags2FromInt(L->flags2);
 	setUDMFActivationLabel(L->flags, L->flags2);
+	updateFlagDependencyGreying();
 	if(inst.loaded.levelFormat == MapFormat::udmf && L->flags2 & (MLF2_UDMF_DamageSpecial |
 																  MLF2_UDMF_DeathSpecial))
 	{
@@ -2322,6 +2441,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	flagButtons.clear();
 	alphaWidget = nullptr;
 	memset(udmfTranslucencyCheckBoxes, 0, sizeof(udmfTranslucencyCheckBoxes));
+	memset(mFeatureToButton, 0, sizeof(mFeatureToButton));
 	loadUDMFBaseFlags(loaded, config);
 	loadUDMFActivationMenu(loaded, config);
 	loadUDMFBlockingFlags(loaded, config);

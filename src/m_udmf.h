@@ -68,6 +68,7 @@ enum class UDMF_LineFeature : unsigned
 	transparent,
 	twosided,
 	wrapmidtex,
+	COUNT  // Sentinel value for array sizing
 };
 
 struct UDMFMapping

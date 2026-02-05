@@ -102,6 +102,9 @@ private:
 	};
 	std::vector<LineFlagButton> flagButtons;
 
+	// Fast lookup array from UDMF_LineFeature to check button pointer
+	Fl_Check_Button *mFeatureToButton[static_cast<size_t>(UDMF_LineFeature::COUNT)];
+
 	// Category headers for collapsible flag sections
 	struct CategoryHeader
 	{
@@ -199,6 +202,7 @@ private:
 
 	void updateCategorySummary(const CategoryHeader &header);
 	void updateOverrideSummary();
+	void updateFlagDependencyGreying();
 
 	static void    type_callback(Fl_Widget *, void *);
 	static void dyntype_callback(Fl_Widget *, void *);
