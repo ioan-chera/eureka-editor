@@ -127,6 +127,8 @@ set(source_ui
     ui_file.h
     ui_hyper.cc
     ui_hyper.h
+    ui_multitag.cc
+    ui_multitag.h
     ui_infobar.cc
     ui_infobar.h
     ui_keybindingstable.cc
