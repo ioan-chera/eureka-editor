@@ -785,6 +785,15 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			gLog.printf("Unknown UDMF linedef feature '%s'\n", argv[1]);
 	}
 
+	else if(y_stricmp(argv[0], "udmf_sidedef") == 0)
+	{
+		if(nargs < 1)
+			pst->fail(bad_arg_count_fail, argv[0], 1);
+
+		if(!UDMF_AddSideFeature(config, argv[1]))
+			gLog.printf("Unknown UDMF sidedef feature '%s'\n", argv[1]);
+	}
+
 	else if(y_stricmp(argv[0], "udmf_linechoice") == 0)
 	{
 		if(nargs < 3)

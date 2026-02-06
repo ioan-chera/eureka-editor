@@ -715,6 +715,9 @@ udmf_sidepart float 2 scalex_ scaley_ "Scale XY"
 udmf_sidepart int 1 light_ "Light"
 udmf_sidepart bool 1 lightabsolute_ "Absolute"
 
+# Sidedef UDMF flags
+udmf_sidedef clipmidtex
+
 # TODO: sector fields
 
 # TODO: thing alpha floating-point number field

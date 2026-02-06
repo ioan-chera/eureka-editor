@@ -23,6 +23,7 @@
 #define __EUREKA_UI_SIDEDEF_H__
 
 #include "m_game.h"
+#include "m_udmf.h"
 #include "ui_panelinput.h"
 #include "ui_stackpanel.h"
 #include <memory>
@@ -30,6 +31,9 @@
 
 #define SETOBJ_NO_LINE  -2
 
+class Fl_Check_Button;
+class Fl_Grid;
+class UI_CategoryButton;
 class UI_DynFloatInput;
 class UI_DynIntInput;
 struct ConfigData;
@@ -111,6 +115,17 @@ public:
 private:
 	PanelFieldFixUp mFixUp;
 
+	// UDMF sidedef-level flag widgets
+	struct SideFlagButton
+	{
+		Fl_Check_Button *button = nullptr;
+		UDMF_SideFeature feature;
+		int mask = 0;
+	};
+	std::vector<SideFlagButton> mFlagButtons;
+	UI_CategoryButton *mFlagsHeader = nullptr;
+	Fl_Grid *mFlagsGrid = nullptr;
+
 public:
 	UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side);
 
@@ -154,6 +169,13 @@ private:
 	static void    add_callback(Fl_Widget *, void *);
 	static void delete_callback(Fl_Widget *, void *);
 	static void udmf_field_callback(Fl_Widget *, void *);
+	static void side_flag_callback(Fl_Widget *, void *);
+	static void side_category_callback(Fl_Widget *, void *);
+
+	void loadSideFlags(const LoadingData &loaded, const ConfigData &config);
+	void cleanupSideFlags();
+	void updateSideFlagValues();
+	void updateSideFlagSummary();
 };
 
 #endif  /* __EUREKA_UI_SIDEDEF_H__ */

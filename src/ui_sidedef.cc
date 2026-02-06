@@ -36,12 +36,28 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 
+#include "ui_category_button.h"
+
+#include "FL/Fl_Check_Button.H"
+#include "FL/Fl_Grid.H"
 #include "FL/Fl_Light_Button.H"
 #include "FL/Fl_Flex.H"
 
 enum
 {
-	TEXTURE_TILE_OUTSET = 8
+	TEXTURE_TILE_OUTSET = 8,
+	FLAG_LABELSIZE = 12,
+	FLAG_ROW_HEIGHT = 19,
+	FIELD_HEIGHT = 22,
+};
+
+struct SideFeatureFlagMapping
+{
+	UDMF_SideFeature feature;
+	const char *label;
+	const char *tooltip;
+	unsigned value;
+	const char *shortDisplay;
 };
 
 
@@ -668,6 +684,9 @@ void UI_SideBox::UpdateField()
 		populateUDMFFields(l_panel, "bottom");
 		populateUDMFFields(u_panel, "top");
 		populateUDMFFields(r_panel, "mid");
+
+		updateSideFlagValues();
+		updateSideFlagSummary();
 	}
 	else
 	{
@@ -712,6 +731,9 @@ void UI_SideBox::UpdateField()
 		clearUDMFFields(l_panel);
 		clearUDMFFields(u_panel);
 		clearUDMFFields(r_panel);
+
+		updateSideFlagValues();
+		updateSideFlagSummary();
 	}
 }
 
@@ -773,6 +795,11 @@ void UI_SideBox::UpdateHiding()
 		l_panel->hide();
 		u_panel->hide();
 		r_panel->hide();
+
+		if(mFlagsHeader)
+			mFlagsHeader->hide();
+		if(mFlagsGrid)
+			mFlagsGrid->hide();
 	}
 	else
 	{
@@ -802,6 +829,11 @@ void UI_SideBox::UpdateHiding()
 			l_panel->getPic()->Selected(false);
 			u_panel->getPic()->Selected(false);
 		}
+
+		if(mFlagsHeader)
+			mFlagsHeader->show();
+		if(mFlagsGrid && mFlagsHeader && mFlagsHeader->isExpanded())
+			mFlagsGrid->show();
 	}
 }
 
@@ -837,6 +869,196 @@ void UI_SideBox::UnselectPics()
 }
 
 
+static const SideFeatureFlagMapping sidedefFlags[] =
+{
+	{UDMF_SideFeature::clipmidtex, "clip railing texture",
+	"Clip two-sided middle texture to floor and ceiling on this sidedef",
+	SideDef::FLAG_CLIPMIDTEX, "✂️"},
+};
+
+void UI_SideBox::cleanupSideFlags()
+{
+	if(mFlagsHeader)
+	{
+		remove(mFlagsHeader);
+		delete mFlagsHeader;
+		mFlagsHeader = nullptr;
+	}
+	if(mFlagsGrid)
+	{
+		remove(mFlagsGrid);
+		delete mFlagsGrid;
+		mFlagsGrid = nullptr;
+	}
+	mFlagButtons.clear();
+}
+
+void UI_SideBox::loadSideFlags(const LoadingData &loaded, const ConfigData &config)
+{
+	cleanupSideFlags();
+
+	if(loaded.levelFormat != MapFormat::udmf)
+		return;
+
+	int countFound = 0;
+	for(const SideFeatureFlagMapping &entry : sidedefFlags)
+	{
+		if(UDMF_HasSideFeature(config, entry.feature))
+			++countFound;
+	}
+	if(!countFound)
+		return;
+
+	// Position below the tallest section panel
+	int panelBottom = l_panel->y() + l_panel->h();
+	if(u_panel->visible() && u_panel->y() + u_panel->h() > panelBottom)
+		panelBottom = u_panel->y() + u_panel->h();
+	if(r_panel->visible() && r_panel->y() + r_panel->h() > panelBottom)
+		panelBottom = r_panel->y() + r_panel->h();
+
+	int flagsY = panelBottom + 4;
+	int flagsX = x() + 16;
+	int flagsW = w() - 32;
+
+	begin();
+
+	mFlagsHeader = new UI_CategoryButton(flagsX, flagsY, flagsW, FIELD_HEIGHT, "Side flags");
+	mFlagsHeader->setExpanded(false);
+	mFlagsHeader->callback(side_category_callback, this);
+	flagsY += FIELD_HEIGHT;
+
+	int numRows = (countFound + 1) / 2;
+	mFlagsGrid = new Fl_Grid(flagsX + 8, flagsY, flagsW - 8, FLAG_ROW_HEIGHT * numRows);
+	mFlagsGrid->layout(numRows, 2);
+
+	int index = 0;
+	for(const SideFeatureFlagMapping &entry : sidedefFlags)
+	{
+		if(!UDMF_HasSideFeature(config, entry.feature))
+			continue;
+
+		SideFlagButton sfb{};
+		sfb.button = new Fl_Check_Button(0, 0, 0, 0, entry.label);
+		sfb.button->labelsize(FLAG_LABELSIZE);
+		sfb.button->tooltip(entry.tooltip);
+		sfb.button->callback(side_flag_callback, this);
+		sfb.feature = entry.feature;
+		sfb.mask = entry.value;
+
+		mFlagsGrid->add(sfb.button);
+		mFlagsGrid->widget(sfb.button, index % numRows, index / numRows);
+
+		mFlagButtons.push_back(std::move(sfb));
+		++index;
+	}
+
+	end();
+}
+
+void UI_SideBox::updateSideFlagValues()
+{
+	if(mFlagButtons.empty())
+		return;
+
+	if(!inst.level.isSidedef(obj))
+	{
+		for(auto &sfb : mFlagButtons)
+			sfb.button->value(0);
+		return;
+	}
+
+	const auto sd = inst.level.sidedefs[obj];
+	for(auto &sfb : mFlagButtons)
+		sfb.button->value(!!(sd->flags & sfb.mask));
+}
+
+void UI_SideBox::updateSideFlagSummary()
+{
+	if(!mFlagsHeader)
+		return;
+
+	if(!inst.level.isSidedef(obj))
+	{
+		mFlagsHeader->details("");
+		mFlagsHeader->redraw();
+		return;
+	}
+
+	const int flags = inst.level.sidedefs[obj]->flags;
+	SString summary;
+	for(size_t i = 0; i < lengthof(sidedefFlags); ++i)
+	{
+		if(!UDMF_HasSideFeature(inst.conf, sidedefFlags[i].feature))
+			continue;
+		if(flags & sidedefFlags[i].value)
+			summary += sidedefFlags[i].shortDisplay;
+	}
+	mFlagsHeader->details(summary);
+	mFlagsHeader->redraw();
+}
+
+void UI_SideBox::side_flag_callback(Fl_Widget *w, void *data)
+{
+	UI_SideBox *box = static_cast<UI_SideBox *>(data);
+
+	if(box->obj < 0)
+		return;
+
+	if(box->inst.edit.Selected->empty())
+		return;
+
+	// Find which flag button was clicked
+	for(const auto &sfb : box->mFlagButtons)
+	{
+		if(sfb.button != w)
+			continue;
+
+		bool newValue = sfb.button->value() != 0;
+
+		box->mFixUp.checkDirtyFields();
+		checkLinedefDirtyFields(box->inst);
+
+		EditOperation op(box->inst.level.basis);
+		op.setMessageForSelection("edited sidedef flags on", *box->inst.edit.Selected);
+
+		for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+		{
+			const auto L = box->inst.level.linedefs[*it];
+			int sd = box->is_front ? L->right : L->left;
+
+			if(!box->inst.level.isSidedef(sd))
+				continue;
+
+			int oldFlags = box->inst.level.sidedefs[sd]->flags;
+			int newFlags = newValue ? (oldFlags | sfb.mask) : (oldFlags & ~sfb.mask);
+			op.changeSidedef(sd, SideDef::F_FLAGS, newFlags);
+		}
+
+		return;
+	}
+}
+
+void UI_SideBox::side_category_callback(Fl_Widget *w, void *data)
+{
+	UI_SideBox *box = static_cast<UI_SideBox *>(data);
+
+	if(box->mFlagsHeader && box->mFlagsGrid)
+	{
+		if(box->mFlagsHeader->isExpanded())
+		{
+			box->mFlagsGrid->show();
+			box->h(box->mFlagsGrid->y() + box->mFlagsGrid->h() - box->y());
+		}
+		else
+		{
+			box->mFlagsGrid->hide();
+			box->h(box->mFlagsHeader->y() + box->mFlagsHeader->h() - box->y());
+		}
+
+		box->inst.main_win->line_box->redraw();
+	}
+}
+
 void UI_SideBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
 	// Update UDMF sidepart widgets for each section panel
@@ -844,7 +1066,25 @@ void UI_SideBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	u_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
 	r_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
 
-	resize(x(), y(), w(), l_panel->y() - y() + l_panel->h() + 3);
+	// Load sidedef-level flags
+	loadSideFlags(loaded, config);
+
+	// Calculate total height: tallest panel or flags section
+	int bottomY = l_panel->y() + l_panel->h();
+	if(u_panel->visible() && u_panel->y() + u_panel->h() > bottomY)
+		bottomY = u_panel->y() + u_panel->h();
+	if(r_panel->visible() && r_panel->y() + r_panel->h() > bottomY)
+		bottomY = r_panel->y() + r_panel->h();
+
+	if(mFlagsGrid)
+	{
+		if(mFlagsHeader && mFlagsHeader->isExpanded())
+			bottomY = mFlagsGrid->y() + mFlagsGrid->h();
+		else
+			bottomY = mFlagsHeader->y() + mFlagsHeader->h();
+	}
+
+	resize(x(), y(), w(), bottomY - y() + 3);
 
 	redraw();
 }

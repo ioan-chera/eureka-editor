@@ -468,6 +468,7 @@ struct ConfigData
 	std::vector<gensector_t> gen_sectors; // generalized sector types
 
 	uint64_t udmfLineFeatures = 0;
+	uint64_t udmfSideFeatures = 0;
 
 	int num_gen_linetypes = 0;
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {}; // BOOM Generalized Lines

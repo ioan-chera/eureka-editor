@@ -186,6 +186,38 @@ bool UDMF_HasLineFeature(const ConfigData &config, UDMF_LineFeature feature)
 	return (config.udmfLineFeatures & (1ULL << (uint64_t)feature)) != 0;
 }
 
+// Returns false on invalid string
+bool UDMF_AddSideFeature(ConfigData &config, const char *featureName)
+{
+	struct FeatureMap
+	{
+		const char *name;
+		UDMF_SideFeature flagIndex;
+	};
+
+#define ENTRY(a) { #a, UDMF_SideFeature::a }
+	static const FeatureMap map[] =
+	{
+		ENTRY(clipmidtex),
+	};
+#undef ENTRY
+
+	for(const FeatureMap &entry : map)
+	{
+		if(y_stricmp(entry.name, featureName) == 0)
+		{
+			config.udmfSideFeatures |= (1ULL << (uint64_t)entry.flagIndex);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool UDMF_HasSideFeature(const ConfigData &config, UDMF_SideFeature feature)
+{
+	return (config.udmfSideFeatures & (1ULL << (uint64_t)feature)) != 0;
+}
+
 class Udmf_Token
 {
 private:
@@ -796,6 +828,8 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_
 		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_MID;
 	else if(field.Match("lightabsolute_bottom") && !value.Match("false"))
 		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
+	else if(field.Match("clipmidtex") && !value.Match("false"))
+		SD->flags |= SideDef::FLAG_CLIPMIDTEX;
 
 	else
 	{
@@ -1221,6 +1255,8 @@ static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 			lump->Printf("lightabsolute_mid = true;\n");
 		if (side->flags & SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM)
 			lump->Printf("lightabsolute_bottom = true;\n");
+		if (side->flags & SideDef::FLAG_CLIPMIDTEX)
+			lump->Printf("clipmidtex = true;\n");
 
 		lump->Printf("}\n\n");
 	}

@@ -91,4 +91,13 @@ struct UDMFMapping
 bool UDMF_AddLineFeature(ConfigData &config, const char *featureName);
 bool UDMF_HasLineFeature(const ConfigData &config, UDMF_LineFeature feature);
 
+enum class UDMF_SideFeature : unsigned
+{
+	clipmidtex,
+	COUNT  // Sentinel value for array sizing
+};
+
+bool UDMF_AddSideFeature(ConfigData &config, const char *featureName);
+bool UDMF_HasSideFeature(const ConfigData &config, UDMF_SideFeature feature);
+
 #endif
