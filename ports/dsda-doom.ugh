@@ -691,8 +691,6 @@ udmf_linechoice locknumber 133 "Blue card or skull"
 udmf_linechoice locknumber 134 "Yellow card or skull"
 udmf_linechoice locknumber 229 "Any key of each color"
 
-# udmf_lineintpair health Health healthgroup Group
-
 udmf_linedef automapstyle
 udmf_linechoice automapstyle 0 "Default"
 udmf_linechoice automapstyle 1 "One-sided"
@@ -708,10 +706,8 @@ udmf_linechoice automapstyle 10 "Intra-level teleporter"
 udmf_linechoice automapstyle 12 "Unseen secret"
 # 13 is reserved (portal)
 
-# TODO: make this a choice
-
-udmf_linemapflag "Revealed" revealed
-udmf_linemapflag "RevSecret" revealed|secret
+# Automap revealed flag
+udmf_linedef revealed
 
 # Sidedef UDMF per-part fields
 udmf_sidepart float 2 offsetx_ offsety_ "Offset XY"

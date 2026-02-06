@@ -776,29 +776,6 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			config.line_flags.push_back(flag);
 	}
 
-	else if(y_stricmp(argv[0], "udmf_lineflag") == 0)
-	{
-		if(nargs < 2)
-			pst->fail(bad_arg_count_fail, argv[0], 2);
-
-		lineflag_t flag{};
-		flag.label = argv[1];
-		flag.udmfKey = argv[2];
-		if(nargs >= 3)
-			flag.category = argv[3];
-		if(nargs >= 4)
-			flag.inCategoryAcronym = argv[4];
-		const UDMFMapping *mapping = UDMFMapping::getForName(flag.udmfKey.c_str(), UDMFMapping::Category::line);
-		if(mapping)
-		{
-			flag.flagSet = mapping->flagSet;
-			flag.value = mapping->value;
-			config.udmf_line_flags.push_back(flag);
-		}
-		else
-			gLog.printf("Unknown UDMF line flag '%s'\n", flag.udmfKey.c_str());
-	}
-
 	else if(y_stricmp(argv[0], "udmf_linedef") == 0)
 	{
 		if(nargs < 1)
@@ -806,90 +783,6 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 
 		if(!UDMF_AddLineFeature(config, argv[1]))
 			gLog.printf("Unknown UDMF linedef feature '%s'\n", argv[1]);
-	}
-
-	else if(y_stricmp(argv[0], "udmf_linemapflag") == 0)
-	{
-		if(nargs < 2)
-			pst->fail(bad_arg_count_fail, argv[0], 2);
-
-		linevisflag_t visflag{};
-		visflag.label = argv[1];
-
-		// Parse the second argument which can contain multiple flags separated by '|'
-		SString flagStr = argv[2];
-		size_t start = 0;
-		size_t pos = 0;
-		while(pos <= flagStr.size())
-		{
-			if(pos == flagStr.size() || flagStr[pos] == '|')
-			{
-				if(pos > start)
-				{
-					SString flagName = flagStr.substr(start, pos - start);
-					// Verify it's a valid UDMF flag and add its value
-					const UDMFMapping *mapping = UDMFMapping::getForName(flagName.c_str(), UDMFMapping::Category::line);
-					if(mapping)
-					{
-						if(mapping->flagSet == 1)
-							visflag.flags |= mapping->value;
-						else
-							visflag.flags2 |= mapping->value;
-					}
-					else
-						gLog.printf("Unknown UDMF line flag '%s' in udmf_linemapflag\n", flagName.c_str());
-				}
-				start = pos + 1;
-			}
-			pos++;
-		}
-
-		if(visflag.flags != 0 || visflag.flags2 != 0)
-			config.udmf_line_vis_flags.push_back(visflag);
-	}
-
-	else if(y_stricmp(argv[0], "udmf_lineslider") == 0)
-	{
-		if(nargs < 5)
-			pst->fail(bad_arg_count_fail, argv[0], 5);
-
-		linefield_t field = {};
-		field.identifier = argv[1];
-		field.label = argv[2];
-		field.type = linefield_t::Type::slider;
-		field.minValue = strtod(argv[3], nullptr);
-		field.maxValue = strtod(argv[4], nullptr);
-		field.step = strtod(argv[5], nullptr);
-		config.udmf_line_fields.push_back(std::move(field));
-	}
-
-	else if(y_stricmp(argv[0], "udmf_linechoice_label") == 0)
-	{
-		if(nargs < 2)
-			pst->fail(bad_arg_count_fail, argv[0], 2);
-
-		SString identifier = argv[1];
-		SString label = argv[2];
-
-		// Find or create the linefield_t with this identifier
-		linefield_t *field = nullptr;
-		for(linefield_t &lf : config.udmf_line_fields)
-		{
-			if(lf.identifier.noCaseEqual(identifier))
-			{
-				field = &lf;
-				break;
-			}
-		}
-
-		if(!field)
-		{
-			config.udmf_line_fields.push_back({});
-			field = &config.udmf_line_fields.back();
-			field->identifier = identifier;
-		}
-
-		field->label = label;
 	}
 
 	else if(y_stricmp(argv[0], "udmf_linechoice") == 0)
@@ -917,8 +810,6 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			config.udmf_line_fields.push_back({});
 			field = &config.udmf_line_fields.back();
 			field->identifier = identifier;
-			// If no label was set via udmf_linechoice_label, use the identifier as label
-			field->label = identifier;
 		}
 
 		// Add the option
@@ -926,20 +817,6 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		opt.value = value;
 		opt.label = optionLabel;
 		field->options.push_back(opt);
-	}
-
-	else if(y_stricmp(argv[0], "udmf_lineintpair") == 0)
-	{
-		if(nargs < 4)
-			pst->fail(bad_arg_count_fail, argv[0], 4);
-
-		linefield_t field = {};
-		field.identifier = argv[1];
-		field.label = argv[2];
-		field.identifier2 = argv[3];
-		field.label2 = argv[4];
-		field.type = linefield_t::Type::intpair;
-		config.udmf_line_fields.push_back(std::move(field));
 	}
 
 	else if(y_stricmp(argv[0], "udmf_sidepart") == 0)

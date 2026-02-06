@@ -162,6 +162,7 @@ bool UDMF_AddLineFeature(ConfigData &config, const char *featureName)
 		ENTRY(playeruse),
 		ENTRY(playeruseback),
 		ENTRY(repeatspecial),
+		ENTRY(revealed),
 		ENTRY(translucent),
 		ENTRY(transparent),
 		ENTRY(twosided),

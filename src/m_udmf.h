@@ -64,6 +64,7 @@ enum class UDMF_LineFeature : unsigned
 	playeruse,
 	playeruseback,
 	repeatspecial,
+	revealed,
 	translucent,
 	transparent,
 	twosided,

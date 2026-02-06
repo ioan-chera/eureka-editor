@@ -39,7 +39,7 @@
 #define UDMF_ACTIVATION_BUTTON_LABEL "Trigger?"
 
 static constexpr const char *kHardcodedAutoMapMenu = "Normal|Invisible|Mapped|Secret|MapSecret|InvSecret";
-static constexpr int kHardcodedAutoMapCount = 6;
+static constexpr const char *kHardcodedAutoMapMenuWithRevealed = "Normal|Invisible|Mapped|Secret|MapSecret|InvSecret|Revealed|RevSecret";
 
 enum
 {
@@ -1760,48 +1760,20 @@ bool UI_LineBox::FlagsFromInt(int lineflags)
 		actkind->value(new_act);
 	}
 
-	// Check UDMF visibility flags first if in UDMF mode
-	bool foundUDMFMatch = false;
-	if(inst.level.isLinedef(obj) && inst.loaded.levelFormat == MapFormat::udmf && !inst.conf.udmf_line_vis_flags.empty())
+	bool gotValue = false;
+	if(inst.level.isLinedef(obj) && inst.loaded.levelFormat == MapFormat::udmf &&
+	   UDMF_HasLineFeature(inst.conf, UDMF_LineFeature::revealed))
 	{
 		const auto L = inst.level.linedefs[obj];
-
-		// Build list of matching flags with their indices
-		std::vector<std::pair<size_t, const linevisflag_t*>> matches;
-		for(size_t i = 0; i < inst.conf.udmf_line_vis_flags.size(); i++)
-		{
-			const linevisflag_t &vf = inst.conf.udmf_line_vis_flags[i];
-			// Check if all required flags match exactly
-			if((L->flags & vf.flags) == vf.flags && (L->flags2 & vf.flags2) == vf.flags2)
-				matches.push_back({i, &vf});
-		}
-
-		// Sort matches so more specific combinations come first
-		if(!matches.empty())
-		{
-			std::sort(matches.begin(), matches.end(),
-				[](const std::pair<size_t, const linevisflag_t*> &a, const std::pair<size_t, const linevisflag_t*> &b) {
-					// b is subset of a if all of b's flags are in a
-					bool bSubsetOfA = ((a.second->flags & b.second->flags) == b.second->flags) &&
-									  ((a.second->flags2 & b.second->flags2) == b.second->flags2);
-					// a is subset of b if all of a's flags are in b
-					bool aSubsetOfB = ((b.second->flags & a.second->flags) == a.second->flags) &&
-									  ((b.second->flags2 & a.second->flags2) == a.second->flags2);
-
-					// If b is subset of a but a is not subset of b, then a comes first
-					if(bSubsetOfA && !aSubsetOfB)
-						return true;
-					return false;
-				});
-
-			f_automap->value(kHardcodedAutoMapCount + (int)matches[0].first);
-			foundUDMFMatch = true;
-		}
+		if((L->flags2 & MLF2_UDMF_Revealed) && (L->flags & MLF_Secret))
+			f_automap->value(7); // RevSecret
+		else if(L->flags2 & MLF2_UDMF_Revealed)
+			f_automap->value(6); // Revealed
+		gotValue = true;
 	}
-
-	// Fall back to hardcoded values if no UDMF match
-	if(!foundUDMFMatch)
+	if(!gotValue)
 	{
+		// Standard automap flags
 		if(lineflags & MLF_DontDraw && lineflags & MLF_Secret)
 			f_automap->value(5);
 		else if (lineflags & MLF_DontDraw)
@@ -1881,29 +1853,24 @@ void UI_LineBox::CalcFlags(int &outFlags, int &outFlags2) const
 	outFlags2 = 0;
 
 	int automapVal = f_automap->value();
-	if(automapVal >= kHardcodedAutoMapCount && inst.loaded.levelFormat == MapFormat::udmf)
+	// Hardcoded visibility flags
+	switch (automapVal)
 	{
-		// UDMF visibility flag selected
-		int udmfIndex = automapVal - kHardcodedAutoMapCount;
-		if(udmfIndex < (int)inst.conf.udmf_line_vis_flags.size())
-		{
-			const linevisflag_t &vf = inst.conf.udmf_line_vis_flags[udmfIndex];
-			outFlags |= vf.flags;
-			outFlags2 |= vf.flags2;
-		}
-	}
-	else
-	{
-		// Hardcoded visibility flags
-		switch (automapVal)
-		{
-			case 0: /* Normal    */; break;
-			case 1: /* Invisible */ outFlags |= MLF_DontDraw; break;
-			case 2: /* Mapped    */ outFlags |= MLF_Mapped; break;
-			case 3: /* Secret    */ outFlags |= MLF_Secret; break;
-			case 4: /* MapSecret */ outFlags |= MLF_Mapped | MLF_Secret; break;
-			case 5: /* InvSecret */ outFlags |= MLF_DontDraw | MLF_Secret; break;
-		}
+		case 0: /* Normal    */; break;
+		case 1: /* Invisible */ outFlags |= MLF_DontDraw; break;
+		case 2: /* Mapped    */ outFlags |= MLF_Mapped; break;
+		case 3: /* Secret    */ outFlags |= MLF_Secret; break;
+		case 4: /* MapSecret */ outFlags |= MLF_Mapped | MLF_Secret; break;
+		case 5: /* InvSecret */ outFlags |= MLF_DontDraw | MLF_Secret; break;
+		case 6: /* Revealed  */
+			if(UDMF_HasLineFeature(inst.conf, UDMF_LineFeature::revealed))
+				outFlags2 |= MLF2_UDMF_Revealed;
+			break;
+		case 7: /* RevSecret */
+			if(UDMF_HasLineFeature(inst.conf, UDMF_LineFeature::revealed))
+				outFlags2 |= MLF2_UDMF_Revealed;
+			outFlags |= MLF_Secret;
+			break;
 	}
 
 	// Activation for non-DOOM formats
@@ -2006,31 +1973,22 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			gen->hide();
 	}
 
-	// Populate f_automap with UDMF visibility flags if in UDMF mode
+	// Populate f_automap based on UDMF features
 	int automapMask = MLF_ALL_AUTOMAP;
 	int automapMask2 = 0;
-	if(loaded.levelFormat == MapFormat::udmf && !config.udmf_line_vis_flags.empty())
+	f_automap->clear();
+	if(loaded.levelFormat == MapFormat::udmf && UDMF_HasLineFeature(config, UDMF_LineFeature::revealed))
 	{
-		// Build the menu string with hardcoded entries plus UDMF entries
-		SString menuStr = kHardcodedAutoMapMenu;
-		for(const linevisflag_t &vf : config.udmf_line_vis_flags)
-		{
-			menuStr += "|";
-			menuStr += vf.label;
-			automapMask |= vf.flags;
-			automapMask2 |= vf.flags2;
-		}
-		f_automap->clear();
-		f_automap->add(menuStr.c_str());
-		f_automap->value(0);
+		// Use extended menu with Revealed entries
+		f_automap->add(kHardcodedAutoMapMenuWithRevealed);
+		automapMask2 |= MLF2_UDMF_Revealed;
 	}
 	else
 	{
-		// Reset to default hardcoded entries
-		f_automap->clear();
+		// Use default hardcoded entries
 		f_automap->add(kHardcodedAutoMapMenu);
-		f_automap->value(0);
 	}
+	f_automap->value(0);
 
 	// Update callback data with new masks
 	f_automap_cb_data = std::make_unique<line_flag_CB_data_c>(this, automapMask, automapMask2);
@@ -2057,10 +2015,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	loadUDMFBlockingFlags(loaded, config);
 	loadUDMFRenderingControls(loaded, config);
 
-	const std::vector<lineflag_t> &flaglist = inst.loaded.levelFormat == MapFormat::udmf ?
-			inst.conf.udmf_line_flags : inst.conf.line_flags;
+	const std::vector<lineflag_t> &flaglist = config.line_flags;
 
-	if(!flaglist.empty())
+	if(loaded.levelFormat != MapFormat::udmf && !flaglist.empty())
 	{
 		// Group flags by category (case-insensitive)
 		struct CaseInsensitiveCompare
@@ -2203,8 +2160,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			hasOne = true;
 			for(const linefield_t &field : config.udmf_line_fields)
 			{
-				if(field.type != linefield_t::Type::choice ||
-				   !field.identifier.noCaseEqual(entry.identifier))
+				if(!field.identifier.noCaseEqual(entry.identifier))
 				{
 					continue;
 				}
