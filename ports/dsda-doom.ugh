@@ -717,6 +717,7 @@ udmf_sidepart bool 1 lightabsolute_ "Absolute"
 
 # Sidedef UDMF flags
 udmf_sidedef clipmidtex
+udmf_sidedef nofakecontrast
 
 # TODO: sector fields
 

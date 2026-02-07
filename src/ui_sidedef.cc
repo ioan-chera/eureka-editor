@@ -874,6 +874,9 @@ static const SideFeatureFlagMapping sidedefFlags[] =
 	{UDMF_SideFeature::clipmidtex, "clip railing texture",
 	"Clip two-sided middle texture to floor and ceiling on this sidedef",
 	SideDef::FLAG_CLIPMIDTEX, "✂️"},
+	{UDMF_SideFeature::nofakecontrast, "no fake contrast",
+	"Disable fake contrast light effect on this sidedef",
+	SideDef::FLAG_NOFAKECONTRAST, "◑"},
 };
 
 void UI_SideBox::cleanupSideFlags()

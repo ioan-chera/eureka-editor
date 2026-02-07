@@ -199,6 +199,7 @@ bool UDMF_AddSideFeature(ConfigData &config, const char *featureName)
 	static const FeatureMap map[] =
 	{
 		ENTRY(clipmidtex),
+		ENTRY(nofakecontrast),
 	};
 #undef ENTRY
 
@@ -830,6 +831,8 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_
 		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
 	else if(field.Match("clipmidtex") && !value.Match("false"))
 		SD->flags |= SideDef::FLAG_CLIPMIDTEX;
+	else if(field.Match("nofakecontrast") && !value.Match("false"))
+		SD->flags |= SideDef::FLAG_NOFAKECONTRAST;
 
 	else
 	{
@@ -1257,6 +1260,8 @@ static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 			lump->Printf("lightabsolute_bottom = true;\n");
 		if (side->flags & SideDef::FLAG_CLIPMIDTEX)
 			lump->Printf("clipmidtex = true;\n");
+		if (side->flags & SideDef::FLAG_NOFAKECONTRAST)
+			lump->Printf("nofakecontrast = true;\n");
 
 		lump->Printf("}\n\n");
 	}

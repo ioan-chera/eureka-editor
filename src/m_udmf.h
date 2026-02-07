@@ -94,6 +94,7 @@ bool UDMF_HasLineFeature(const ConfigData &config, UDMF_LineFeature feature);
 enum class UDMF_SideFeature : unsigned
 {
 	clipmidtex,
+	nofakecontrast,
 	COUNT  // Sentinel value for array sizing
 };
 
