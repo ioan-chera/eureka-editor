@@ -49,6 +49,8 @@ enum
 	FLAG_LABELSIZE = 12,
 	FLAG_ROW_HEIGHT = 19,
 	FIELD_HEIGHT = 22,
+
+	UDMF_PANEL_WIDTH = 80,
 };
 
 struct SideFeatureFlagMapping
@@ -65,6 +67,16 @@ struct SideFeatureFlagMapping
 bool config::swap_sidedefs = false;
 bool config::show_full_one_sided = false;
 bool config::sidedef_add_del_buttons = false;
+
+static const SideFeatureFlagMapping sidedefFlags[] =
+{
+	{UDMF_SideFeature::clipmidtex, "clip railing texture",
+	"Clip two-sided middle texture to floor and ceiling on this sidedef",
+	SideDef::FLAG_CLIPMIDTEX, "✂️"},
+	{UDMF_SideFeature::nofakecontrast, "no fake contrast",
+	"Disable fake contrast light effect on this sidedef",
+	SideDef::FLAG_NOFAKECONTRAST, "◑"},
+};
 
 //
 // Check dirty fields for the linedef panel
@@ -86,104 +98,6 @@ UI_SideSectionPanel::UI_SideSectionPanel(Instance &inst, int X, int Y, int W, in
 	tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	end();
 
-	relayout();
-}
-
-
-void UI_SideSectionPanel::updateUDMFFields(const LoadingData &loaded, const ConfigData &config,
-										   Fl_Callback *callback, void *callbackData,
-										   PanelFieldFixUp &fixUp)
-{
-	// Unload existing UDMF field widgets from fixUp and remove them
-	for(auto &field : mUDMFFields)
-	{
-		// Unload widgets from fixUp
-		for(auto &widget : field.widgets)
-		{
-			if(field.info.type == sidefield_t::Type::intType)
-				fixUp.unloadFields({static_cast<UI_DynIntInput *>(widget.get())});
-			else if(field.info.type == sidefield_t::Type::floatType)
-				fixUp.unloadFields({static_cast<UI_DynFloatInput *>(widget.get())});
-		}
-
-		if(field.container)
-			remove(field.container.get());
-	}
-	mUDMFFields.clear();
-
-	// Only create widgets for UDMF format
-	if(loaded.levelFormat != MapFormat::udmf || config.udmf_sidepart_fields.empty())
-	{
-		relayout();
-		return;
-	}
-
-	begin();
-
-	for(const sidefield_t &sf : config.udmf_sidepart_fields)
-	{
-		SidepartFieldWidgets fieldWidgets;
-		fieldWidgets.info = sf;
-
-		// Create a horizontal flex container for this field's widgets
-		auto flex = new Fl_Flex(x(), 0, w(), 20, Fl_Flex::HORIZONTAL);
-		flex->gap(2);
-		fieldWidgets.container = std::unique_ptr<Fl_Group>(flex);
-
-		// Create one widget per dimension
-		for(size_t i = 0; i < sf.prefixes.size(); ++i)
-		{
-			Fl_Widget *widget = nullptr;
-
-			switch(sf.type)
-			{
-			case sidefield_t::Type::boolType:
-			{
-				auto lightBtn = new Fl_Light_Button(0, 0, 0, 20);
-				lightBtn->callback(callback, callbackData);
-				if(sf.prefixes.size() == 1)
-					lightBtn->copy_label(sf.label.c_str());
-				widget = lightBtn;
-				break;
-			}
-			case sidefield_t::Type::intType:
-			{
-				auto input = new UI_DynIntInput(0, 0, 0, 20);
-				input->callback(callback, callbackData);
-				input->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-				fixUp.loadFields({input});
-				widget = input;
-				break;
-			}
-			case sidefield_t::Type::floatType:
-			{
-				auto input = new UI_DynFloatInput(0, 0, 0, 20);
-				input->callback(callback, callbackData);
-				input->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-				fixUp.loadFields({input});
-				widget = input;
-				break;
-			}
-			}
-
-			if(widget)
-				fieldWidgets.widgets.push_back(std::unique_ptr<Fl_Widget>(widget));
-		}
-
-		flex->end();
-
-		if(sf.type != sidefield_t::Type::boolType || sf.prefixes.size() > 1)
-		{
-			// Set label above the flex, centered
-			flex->copy_label(sf.label.c_str());
-			flex->align(FL_ALIGN_TOP | FL_ALIGN_CENTER);
-			beforeSpacing(flex, 14); // Leave gap for the label above
-		}
-
-		mUDMFFields.push_back(std::move(fieldWidgets));
-	}
-
-	end();
 	relayout();
 }
 
@@ -251,15 +165,15 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 		std::swap(UX, LX);
 	}
 
-	l_panel = new UI_SideSectionPanel(inst, LX, Y, 80, 85, "Lower");
-	u_panel = new UI_SideSectionPanel(inst, UX, Y, 80, 85, "Upper");
-	r_panel = new UI_SideSectionPanel(inst, MX, Y, 80, 85, "Rail");
+	l_panel = new UI_SideSectionPanel(inst, LX, Y, UDMF_PANEL_WIDTH, 85, "Lower");
+	u_panel = new UI_SideSectionPanel(inst, UX, Y, UDMF_PANEL_WIDTH, 85, "Upper");
+	r_panel = new UI_SideSectionPanel(inst, MX, Y, UDMF_PANEL_WIDTH, 85, "Rail");
 
 	l_panel->getPic()->callback(tex_callback, this);
 	u_panel->getPic()->callback(tex_callback, this);
 	r_panel->getPic()->callback(tex_callback, this);
 
-	Y += 65;
+	Y += 85;
 
 	l_panel->getTex()->callback(tex_callback, this);
 	u_panel->getTex()->callback(tex_callback, this);
@@ -271,7 +185,57 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 
 	mFixUp.loadFields({ x_ofs, y_ofs, sec, l_panel->getTex(), u_panel->getTex(), r_panel->getTex() });
 
-	end();
+	// Master stack panel for collapsible sections below texture panels
+	mMasterStack = new UI_StackPanel(X, Y, W, 0);
+
+	// 1. Category header for UDMF per-part fields
+	mPanelsHeader = new UI_CategoryButton(X, 0, W, FIELD_HEIGHT, "Per part details");
+	mPanelsHeader->setExpanded(false);
+	mPanelsHeader->callback(panels_category_callback, this);
+
+	// 2. Horizontal container for the three UDMF panels
+	mUdmfContainer = new Fl_Group(X, 0, W, 0);
+	mUdmfContainer->resizable(nullptr);
+	l_udmf_panel = new UI_StackPanel(LX, 0, UDMF_PANEL_WIDTH, 0);
+	l_udmf_panel->end();
+	u_udmf_panel = new UI_StackPanel(UX, 0, UDMF_PANEL_WIDTH, 0);
+	u_udmf_panel->end();
+	r_udmf_panel = new UI_StackPanel(MX, 0, UDMF_PANEL_WIDTH, 0);
+	r_udmf_panel->end();
+	mUdmfContainer->end();
+
+	// 3. Flags category header
+	mFlagsHeader = new UI_CategoryButton(X, 0, W, FIELD_HEIGHT, "Side flags");
+	mFlagsHeader->setExpanded(false);
+	mFlagsHeader->callback(flag_category_callback, this);
+
+	// 4. Flags grid (populated in UpdateGameInfo)
+	mFlagsGrid = new Fl_Grid(X + 8, 0, W - 8, 0);
+	mFlagsGrid->layout(0, 2);
+
+	// Create all possible flag buttons in constructor
+	for(const SideFeatureFlagMapping &entry : sidedefFlags)
+	{
+		SideFlagButton sfb{};
+		sfb.button = new Fl_Check_Button(0, 0, 0, 0, entry.label);
+		sfb.button->labelsize(FLAG_LABELSIZE);
+		sfb.button->tooltip(entry.tooltip);
+		sfb.button->callback(side_flag_callback, this);
+		sfb.feature = entry.feature;
+		sfb.mask = entry.value;
+		mFlagButtons.push_back(std::move(sfb));
+	}
+
+	mFlagsGrid->end();
+
+	mMasterStack->end();
+
+	// Initially hide collapsible sections
+	mPanelsHeader->hide();
+	mUdmfContainer->hide();
+	mFlagsHeader->hide();
+	mFlagsGrid->hide();
+
 	end();
 
 	resizable(nullptr);
@@ -614,76 +578,7 @@ void UI_SideBox::UpdateField()
 		r_panel->getPic()->AllowHighlight(true);
 
 		// Populate UDMF sidepart field widgets
-		auto populateUDMFFields = [this, &sd](UI_SideSectionPanel *panel, const char *partSuffix)
-		{
-			const auto &fields = panel->getUDMFFields();
-			for(const auto &field : fields)
-			{
-				for(size_t dimIdx = 0; dimIdx < field.widgets.size(); ++dimIdx)
-				{
-					SString fieldName = field.info.prefixes[dimIdx] + partSuffix;
-
-					double value = 0.0;
-					int flag = 0;
-					if(fieldName.noCaseEqual("offsetx_top"))
-						value = sd->offsetx_top;
-					else if(fieldName.noCaseEqual("offsety_top"))
-						value = sd->offsety_top;
-					else if(fieldName.noCaseEqual("offsetx_mid"))
-						value = sd->offsetx_mid;
-					else if(fieldName.noCaseEqual("offsety_mid"))
-						value = sd->offsety_mid;
-					else if(fieldName.noCaseEqual("offsetx_bottom"))
-						value = sd->offsetx_bottom;
-					else if(fieldName.noCaseEqual("offsety_bottom"))
-						value = sd->offsety_bottom;
-					else if(fieldName.noCaseEqual("scalex_top"))
-						value = sd->scalex_top;
-					else if(fieldName.noCaseEqual("scaley_top"))
-						value = sd->scaley_top;
-					else if(fieldName.noCaseEqual("scalex_mid"))
-						value = sd->scalex_mid;
-					else if(fieldName.noCaseEqual("scaley_mid"))
-						value = sd->scaley_mid;
-					else if(fieldName.noCaseEqual("scalex_bottom"))
-						value = sd->scalex_bottom;
-					else if(fieldName.noCaseEqual("scaley_bottom"))
-						value = sd->scaley_bottom;
-					else if(fieldName.noCaseEqual("light_top"))
-						value = sd->light_top;
-					else if(fieldName.noCaseEqual("light_mid"))
-						value = sd->light_mid;
-					else if(fieldName.noCaseEqual("light_bottom"))
-						value = sd->light_bottom;
-					else if(fieldName.noCaseEqual("lightabsolute_top"))
-						flag = SideDef::FLAG_LIGHT_ABSOLUTE_TOP;
-					else if(fieldName.noCaseEqual("lightabsolute_mid"))
-						flag = SideDef::FLAG_LIGHT_ABSOLUTE_MID;
-					else if(fieldName.noCaseEqual("lightabsolute_bottom"))
-						flag = SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
-
-					if(field.info.type == sidefield_t::Type::floatType)
-					{
-						auto input = static_cast<UI_DynFloatInput *>(field.widgets[dimIdx].get());
-						mFixUp.setInputValue(input, SString::printf("%g", value).c_str());
-					}
-					else if(field.info.type == sidefield_t::Type::intType)
-					{
-						auto input = static_cast<UI_DynIntInput *>(field.widgets[dimIdx].get());
-						mFixUp.setInputValue(input, SString(static_cast<int>(value)).c_str());
-					}
-					else if(field.info.type == sidefield_t::Type::boolType)
-					{
-						auto button = static_cast<Fl_Light_Button *>(field.widgets[dimIdx].get());
-						button->value(!!(sd->flags & flag));
-					}
-				}
-			}
-		};
-
-		populateUDMFFields(l_panel, "bottom");
-		populateUDMFFields(u_panel, "top");
-		populateUDMFFields(r_panel, "mid");
+		populateUDMFFieldValues();
 
 		updateSideFlagValues();
 		updateSideFlagSummary();
@@ -707,10 +602,9 @@ void UI_SideBox::UpdateField()
 		r_panel->getPic()->AllowHighlight(false);
 
 		// Clear UDMF sidepart field widgets
-		auto clearUDMFFields = [this](UI_SideSectionPanel *panel)
+		auto clearFields = [this](const std::vector<SidepartFieldWidgets> &fieldList)
 		{
-			const auto &fields = panel->getUDMFFields();
-			for(const auto &field : fields)
+			for(const auto &field : fieldList)
 			{
 				for(size_t dimIdx = 0; dimIdx < field.widgets.size(); ++dimIdx)
 				{
@@ -724,13 +618,18 @@ void UI_SideBox::UpdateField()
 						auto input = static_cast<UI_DynIntInput *>(field.widgets[dimIdx].get());
 						mFixUp.setInputValue(input, "");
 					}
+					else if(field.info.type == sidefield_t::Type::boolType)
+					{
+						auto button = static_cast<Fl_Light_Button *>(field.widgets[dimIdx].get());
+						button->value(0);
+					}
 				}
 			}
 		};
 
-		clearUDMFFields(l_panel);
-		clearUDMFFields(u_panel);
-		clearUDMFFields(r_panel);
+		clearFields(l_udmf_fields);
+		clearFields(u_udmf_fields);
+		clearFields(r_udmf_fields);
 
 		updateSideFlagValues();
 		updateSideFlagSummary();
@@ -784,9 +683,35 @@ int UI_SideBox::getMidTexX(int position) const
 	return (l_panel->x() + u_panel->x()) / 2;
 }
 
+//
+// Recompute UI_SideBox height from visible content
+//
+void UI_SideBox::adjustHeight()
+{
+	mMasterStack->relayout();
+
+	// Find the bottom of all visible content
+	int bottom = y() + 24; // minimum for label area
+
+	if(x_ofs->visible())
+	{
+		// Texture panels are visible
+		bottom = std::max(bottom, l_panel->y() + l_panel->h());
+		if(u_panel->visible())
+			bottom = std::max(bottom, u_panel->y() + u_panel->h());
+		if(r_panel->visible())
+			bottom = std::max(bottom, r_panel->y() + r_panel->h());
+	}
+
+	if(mMasterStack->visible() && mMasterStack->h() > 0)
+		bottom = std::max(bottom, mMasterStack->y() + mMasterStack->h());
+
+	resize(x(), y(), w(), bottom - y() + 3);
+}
+
 void UI_SideBox::UpdateHiding()
 {
-	if (obj < 0)
+	if(obj < 0)
 	{
 		x_ofs->hide();
 		y_ofs->hide();
@@ -796,10 +721,7 @@ void UI_SideBox::UpdateHiding()
 		u_panel->hide();
 		r_panel->hide();
 
-		if(mFlagsHeader)
-			mFlagsHeader->hide();
-		if(mFlagsGrid)
-			mFlagsGrid->hide();
+		mMasterStack->hide();
 	}
 	else
 	{
@@ -807,19 +729,17 @@ void UI_SideBox::UpdateHiding()
 		y_ofs->show();
 		  sec->show();
 
+		// Texture panels
 		r_panel->show();
-
-		if (on_2S_line || config::show_full_one_sided)
+		if(on_2S_line || config::show_full_one_sided)
 		{
 			r_panel->position(getMidTexX(1), r_panel->y());
-
 			l_panel->show();
 			u_panel->show();
 		}
 		else
 		{
 			r_panel->position(getMidTexX(0), r_panel->y());
-
 			l_panel->hide();
 			u_panel->hide();
 
@@ -830,11 +750,51 @@ void UI_SideBox::UpdateHiding()
 			u_panel->getPic()->Selected(false);
 		}
 
-		if(mFlagsHeader)
+		mMasterStack->show();
+
+		// UDMF panels visibility depends on having fields and expansion state
+		bool hasPanels = !l_udmf_fields.empty() || !u_udmf_fields.empty() || !r_udmf_fields.empty();
+		if(hasPanels)
+		{
+			mPanelsHeader->show();
+			if(mPanelsHeader->isExpanded())
+				mUdmfContainer->show();
+			else
+				mUdmfContainer->hide();
+		}
+		else
+		{
+			mPanelsHeader->hide();
+			mUdmfContainer->hide();
+		}
+
+		// Flags visibility
+		bool anyFlagVisible = false;
+		for(const auto &sfb : mFlagButtons)
+		{
+			if(sfb.button->visible())
+			{
+				anyFlagVisible = true;
+				break;
+			}
+		}
+
+		if(anyFlagVisible)
+		{
 			mFlagsHeader->show();
-		if(mFlagsGrid && mFlagsHeader && mFlagsHeader->isExpanded())
-			mFlagsGrid->show();
+			if(mFlagsHeader->isExpanded())
+				mFlagsGrid->show();
+			else
+				mFlagsGrid->hide();
+		}
+		else
+		{
+			mFlagsHeader->hide();
+			mFlagsGrid->hide();
+		}
 	}
+
+	adjustHeight();
 }
 
 
@@ -868,94 +828,60 @@ void UI_SideBox::UnselectPics()
 	r_panel->getPic()->Selected(false);
 }
 
-
-static const SideFeatureFlagMapping sidedefFlags[] =
-{
-	{UDMF_SideFeature::clipmidtex, "clip railing texture",
-	"Clip two-sided middle texture to floor and ceiling on this sidedef",
-	SideDef::FLAG_CLIPMIDTEX, "✂️"},
-	{UDMF_SideFeature::nofakecontrast, "no fake contrast",
-	"Disable fake contrast light effect on this sidedef",
-	SideDef::FLAG_NOFAKECONTRAST, "◑"},
-};
-
 void UI_SideBox::cleanupSideFlags()
 {
-	if(mFlagsHeader)
-	{
-		remove(mFlagsHeader);
-		delete mFlagsHeader;
-		mFlagsHeader = nullptr;
-	}
-	if(mFlagsGrid)
-	{
-		remove(mFlagsGrid);
-		delete mFlagsGrid;
-		mFlagsGrid = nullptr;
-	}
-	mFlagButtons.clear();
+	// No longer needed - flags are created in constructor and reused
 }
 
 void UI_SideBox::loadSideFlags(const LoadingData &loaded, const ConfigData &config)
 {
-	cleanupSideFlags();
-
 	if(loaded.levelFormat != MapFormat::udmf)
-		return;
-
-	int countFound = 0;
-	for(const SideFeatureFlagMapping &entry : sidedefFlags)
 	{
-		if(UDMF_HasSideFeature(config, entry.feature))
-			++countFound;
-	}
-	if(!countFound)
+		mFlagsHeader->hide();
+		mFlagsGrid->hide();
 		return;
+	}
 
-	// Position below the tallest section panel
-	int panelBottom = l_panel->y() + l_panel->h();
-	if(u_panel->visible() && u_panel->y() + u_panel->h() > panelBottom)
-		panelBottom = u_panel->y() + u_panel->h();
-	if(r_panel->visible() && r_panel->y() + r_panel->h() > panelBottom)
-		panelBottom = r_panel->y() + r_panel->h();
+	// Count and show/hide individual flag buttons based on game support
+	int countFound = 0;
+	for(auto &sfb : mFlagButtons)
+	{
+		if(UDMF_HasSideFeature(config, sfb.feature))
+		{
+			sfb.button->show();
+			++countFound;
+		}
+		else
+		{
+			sfb.button->hide();
+		}
+	}
 
-	int flagsY = panelBottom + 4;
-	int flagsX = x() + 16;
-	int flagsW = w() - 32;
+	if(!countFound)
+	{
+		mFlagsHeader->hide();
+		mFlagsGrid->hide();
+		return;
+	}
 
-	begin();
-
-	mFlagsHeader = new UI_CategoryButton(flagsX, flagsY, flagsW, FIELD_HEIGHT, "Side flags");
-	mFlagsHeader->setExpanded(false);
-	mFlagsHeader->callback(side_category_callback, this);
-	flagsY += FIELD_HEIGHT;
-
+	// Update grid layout based on visible buttons
 	int numRows = (countFound + 1) / 2;
-	mFlagsGrid = new Fl_Grid(flagsX + 8, flagsY, flagsW - 8, FLAG_ROW_HEIGHT * numRows);
+	mFlagsGrid->size(mFlagsGrid->w(), FLAG_ROW_HEIGHT * numRows);
 	mFlagsGrid->layout(numRows, 2);
 
+	// Add visible buttons to grid
 	int index = 0;
-	for(const SideFeatureFlagMapping &entry : sidedefFlags)
+	for(auto &sfb : mFlagButtons)
 	{
-		if(!UDMF_HasSideFeature(config, entry.feature))
-			continue;
-
-		SideFlagButton sfb{};
-		sfb.button = new Fl_Check_Button(0, 0, 0, 0, entry.label);
-		sfb.button->labelsize(FLAG_LABELSIZE);
-		sfb.button->tooltip(entry.tooltip);
-		sfb.button->callback(side_flag_callback, this);
-		sfb.feature = entry.feature;
-		sfb.mask = entry.value;
-
-		mFlagsGrid->add(sfb.button);
-		mFlagsGrid->widget(sfb.button, index % numRows, index / numRows);
-
-		mFlagButtons.push_back(std::move(sfb));
-		++index;
+		if(UDMF_HasSideFeature(config, sfb.feature))
+		{
+			mFlagsGrid->add(sfb.button);
+			mFlagsGrid->widget(sfb.button, index % numRows, index / numRows);
+			++index;
+		}
 	}
 
-	end();
+	mFlagsHeader->show();
 }
 
 void UI_SideBox::updateSideFlagValues()
@@ -977,9 +903,6 @@ void UI_SideBox::updateSideFlagValues()
 
 void UI_SideBox::updateSideFlagSummary()
 {
-	if(!mFlagsHeader)
-		return;
-
 	if(!inst.level.isSidedef(obj))
 	{
 		mFlagsHeader->details("");
@@ -998,6 +921,211 @@ void UI_SideBox::updateSideFlagSummary()
 	}
 	mFlagsHeader->details(summary);
 	mFlagsHeader->redraw();
+}
+
+void UI_SideBox::cleanupUDMFPanels()
+{
+	// Unload existing UDMF field widgets from fixUp and remove them
+	struct FieldPanelPair
+	{
+		std::vector<SidepartFieldWidgets> *fields;
+		UI_StackPanel *panel;
+	};
+
+	const FieldPanelPair pairs[] =
+	{
+		{&l_udmf_fields, l_udmf_panel},
+		{&u_udmf_fields, u_udmf_panel},
+		{&r_udmf_fields, r_udmf_panel}
+	};
+
+	for(const FieldPanelPair &pair : pairs)
+	{
+		for(const SidepartFieldWidgets &field : *pair.fields)
+		{
+			for(const std::unique_ptr<Fl_Widget> &widget : field.widgets)
+			{
+				if(field.info.type == sidefield_t::Type::intType)
+					mFixUp.unloadFields({static_cast<UI_DynIntInput *>(widget.get())});
+				else if(field.info.type == sidefield_t::Type::floatType)
+					mFixUp.unloadFields({static_cast<UI_DynFloatInput *>(widget.get())});
+			}
+			if(field.container)
+				pair.panel->remove(field.container.get());
+		}
+		pair.fields->clear();
+	}
+}
+
+void UI_SideBox::updateUDMFPanels(const LoadingData &loaded, const ConfigData &config)
+{
+	cleanupUDMFPanels();
+
+	// Only create widgets for UDMF format
+	if(loaded.levelFormat != MapFormat::udmf || config.udmf_sidepart_fields.empty())
+	{
+		l_udmf_panel->relayout();
+		u_udmf_panel->relayout();
+		r_udmf_panel->relayout();
+		return;
+	}
+
+	UI_StackPanel *panels[] = { l_udmf_panel, u_udmf_panel, r_udmf_panel };
+	std::vector<SidepartFieldWidgets> *fields[] = { &l_udmf_fields, &u_udmf_fields, &r_udmf_fields};
+
+	for(int panelIdx = 0; panelIdx < 3; ++panelIdx)
+	{
+		auto panel = panels[panelIdx];
+		auto &fieldList = *fields[panelIdx];
+
+		panel->begin();
+
+		for(const sidefield_t &sf : config.udmf_sidepart_fields)
+		{
+			SidepartFieldWidgets fieldWidgets;
+			fieldWidgets.info = sf;
+
+			// Create a horizontal flex container for this field's widgets
+			auto flex = new Fl_Flex(panel->x(), 0, UDMF_PANEL_WIDTH, 20, Fl_Flex::HORIZONTAL);
+			flex->gap(2);
+			fieldWidgets.container = std::unique_ptr<Fl_Group>(flex);
+
+			// Create one widget per dimension
+			for(size_t i = 0; i < sf.prefixes.size(); ++i)
+			{
+				Fl_Widget *widget = nullptr;
+
+				switch(sf.type)
+				{
+				case sidefield_t::Type::boolType:
+				{
+					auto lightBtn = new Fl_Light_Button(0, 0, 0, 20);
+					lightBtn->callback(udmf_field_callback, this);
+					if(sf.prefixes.size() == 1)
+						lightBtn->copy_label(sf.label.c_str());
+					widget = lightBtn;
+					break;
+				}
+				case sidefield_t::Type::intType:
+				{
+					auto input = new UI_DynIntInput(0, 0, 0, 20);
+					input->callback(udmf_field_callback, this);
+					input->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+					mFixUp.loadFields({input});
+					widget = input;
+					break;
+				}
+				case sidefield_t::Type::floatType:
+				{
+					auto input = new UI_DynFloatInput(0, 0, 0, 20);
+					input->callback(udmf_field_callback, this);
+					input->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+					mFixUp.loadFields({input});
+					widget = input;
+					break;
+				}
+				}
+
+				if(widget)
+					fieldWidgets.widgets.push_back(std::unique_ptr<Fl_Widget>(widget));
+			}
+
+			flex->end();
+
+			if(sf.type != sidefield_t::Type::boolType || sf.prefixes.size() > 1)
+			{
+				// Set label above the flex, centered
+				flex->copy_label(sf.label.c_str());
+				flex->align(FL_ALIGN_TOP | FL_ALIGN_CENTER);
+				panel->beforeSpacing(flex, 14); // Leave gap for the label above
+			}
+
+			fieldList.push_back(std::move(fieldWidgets));
+		}
+
+		panel->end();
+		panel->relayout();
+	}
+}
+
+void UI_SideBox::populateUDMFFieldValues()
+{
+	if(!inst.level.isSidedef(obj))
+		return;
+
+	const auto sd = inst.level.sidedefs[obj];
+
+	// Populate UDMF sidepart field widgets
+	auto populateFields = [this, &sd](const std::vector<SidepartFieldWidgets> &fieldList,
+									  const char *partSuffix)
+	{
+		for(const auto &field : fieldList)
+		{
+			for(size_t dimIdx = 0; dimIdx < field.widgets.size(); ++dimIdx)
+			{
+				SString fieldName = field.info.prefixes[dimIdx] + partSuffix;
+
+				double value = 0.0;
+				int flag = 0;
+				if(fieldName.noCaseEqual("offsetx_top"))
+					value = sd->offsetx_top;
+				else if(fieldName.noCaseEqual("offsety_top"))
+					value = sd->offsety_top;
+				else if(fieldName.noCaseEqual("offsetx_mid"))
+					value = sd->offsetx_mid;
+				else if(fieldName.noCaseEqual("offsety_mid"))
+					value = sd->offsety_mid;
+				else if(fieldName.noCaseEqual("offsetx_bottom"))
+					value = sd->offsetx_bottom;
+				else if(fieldName.noCaseEqual("offsety_bottom"))
+					value = sd->offsety_bottom;
+				else if(fieldName.noCaseEqual("scalex_top"))
+					value = sd->scalex_top;
+				else if(fieldName.noCaseEqual("scaley_top"))
+					value = sd->scaley_top;
+				else if(fieldName.noCaseEqual("scalex_mid"))
+					value = sd->scalex_mid;
+				else if(fieldName.noCaseEqual("scaley_mid"))
+					value = sd->scaley_mid;
+				else if(fieldName.noCaseEqual("scalex_bottom"))
+					value = sd->scalex_bottom;
+				else if(fieldName.noCaseEqual("scaley_bottom"))
+					value = sd->scaley_bottom;
+				else if(fieldName.noCaseEqual("light_top"))
+					value = sd->light_top;
+				else if(fieldName.noCaseEqual("light_mid"))
+					value = sd->light_mid;
+				else if(fieldName.noCaseEqual("light_bottom"))
+					value = sd->light_bottom;
+				else if(fieldName.noCaseEqual("lightabsolute_top"))
+					flag = SideDef::FLAG_LIGHT_ABSOLUTE_TOP;
+				else if(fieldName.noCaseEqual("lightabsolute_mid"))
+					flag = SideDef::FLAG_LIGHT_ABSOLUTE_MID;
+				else if(fieldName.noCaseEqual("lightabsolute_bottom"))
+					flag = SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
+
+				if(field.info.type == sidefield_t::Type::floatType)
+				{
+					auto input = static_cast<UI_DynFloatInput *>(field.widgets[dimIdx].get());
+					mFixUp.setInputValue(input, SString::printf("%g", value).c_str());
+				}
+				else if(field.info.type == sidefield_t::Type::intType)
+				{
+					auto input = static_cast<UI_DynIntInput *>(field.widgets[dimIdx].get());
+					mFixUp.setInputValue(input, SString(static_cast<int>(value)).c_str());
+				}
+				else if(field.info.type == sidefield_t::Type::boolType)
+				{
+					auto button = static_cast<Fl_Light_Button *>(field.widgets[dimIdx].get());
+					button->value(!!(sd->flags & flag));
+				}
+			}
+		}
+	};
+
+	populateFields(l_udmf_fields, "bottom");
+	populateFields(u_udmf_fields, "top");
+	populateFields(r_udmf_fields, "mid");
 }
 
 void UI_SideBox::side_flag_callback(Fl_Widget *w, void *data)
@@ -1041,54 +1169,60 @@ void UI_SideBox::side_flag_callback(Fl_Widget *w, void *data)
 	}
 }
 
-void UI_SideBox::side_category_callback(Fl_Widget *w, void *data)
+void UI_SideBox::flag_category_callback(Fl_Widget *w, void *data)
 {
 	UI_SideBox *box = static_cast<UI_SideBox *>(data);
 
-	if(box->mFlagsHeader && box->mFlagsGrid)
-	{
-		if(box->mFlagsHeader->isExpanded())
-		{
-			box->mFlagsGrid->show();
-			box->h(box->mFlagsGrid->y() + box->mFlagsGrid->h() - box->y());
-		}
-		else
-		{
-			box->mFlagsGrid->hide();
-			box->h(box->mFlagsHeader->y() + box->mFlagsHeader->h() - box->y());
-		}
+	if(box->mFlagsHeader->isExpanded())
+		box->mFlagsGrid->show();
+	else
+		box->mFlagsGrid->hide();
 
-		box->inst.main_win->line_box->redraw();
+	box->adjustHeight();
+	box->inst.main_win->line_box->redraw();
+}
+
+void UI_SideBox::panels_category_callback(Fl_Widget *w, void *data)
+{
+	UI_SideBox *box = static_cast<UI_SideBox *>(data);
+
+	if(box->mPanelsHeader->isExpanded())
+	{
+		box->mUdmfContainer->show();
+		printf("%d %d %d %d\n", box->mUdmfContainer->x(), box->mUdmfContainer->y(), box->mUdmfContainer->w(), box->mUdmfContainer->h());
+		printf("(%d %d %d %d)\n", box->l_udmf_panel->x(), box->l_udmf_panel->y(), box->l_udmf_panel->w(), box->l_udmf_panel->h());
 	}
+	else
+		box->mUdmfContainer->hide();
+
+	box->adjustHeight();
+	box->inst.main_win->line_box->redraw();
 }
 
 void UI_SideBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &config)
 {
-	// Update UDMF sidepart widgets for each section panel
-	l_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
-	u_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
-	r_panel->updateUDMFFields(loaded, config, udmf_field_callback, this, mFixUp);
+	// Update UDMF sidepart widgets
+	updateUDMFPanels(loaded, config);
+
+	// Update UDMF container height to max panel height
+	bool hasSidepartFields = loaded.levelFormat == MapFormat::udmf && !config.udmf_sidepart_fields.empty();
+	if(hasSidepartFields)
+	{
+		int maxH = std::max({l_udmf_panel->h(), u_udmf_panel->h(), r_udmf_panel->h()});
+		mUdmfContainer->size(mUdmfContainer->w(), maxH);
+		if(obj >= 0)
+			mPanelsHeader->show();
+	}
+	else
+	{
+		mPanelsHeader->hide();
+		mUdmfContainer->hide();
+	}
 
 	// Load sidedef-level flags
 	loadSideFlags(loaded, config);
 
-	// Calculate total height: tallest panel or flags section
-	int bottomY = l_panel->y() + l_panel->h();
-	if(u_panel->visible() && u_panel->y() + u_panel->h() > bottomY)
-		bottomY = u_panel->y() + u_panel->h();
-	if(r_panel->visible() && r_panel->y() + r_panel->h() > bottomY)
-		bottomY = r_panel->y() + r_panel->h();
-
-	if(mFlagsGrid)
-	{
-		if(mFlagsHeader && mFlagsHeader->isExpanded())
-			bottomY = mFlagsGrid->y() + mFlagsGrid->h();
-		else
-			bottomY = mFlagsHeader->y() + mFlagsHeader->h();
-	}
-
-	resize(x(), y(), w(), bottomY - y() + 3);
-
+	adjustHeight();
 	redraw();
 }
 
@@ -1104,12 +1238,12 @@ void UI_SideBox::udmf_field_callback(Fl_Widget *w, void *data)
 		return;
 
 	// Find which widget was triggered and which panel it belongs to
-	UI_SideSectionPanel *panels[] = { box->l_panel, box->u_panel, box->r_panel };
+	std::vector<SidepartFieldWidgets> *fieldLists[] = { &box->l_udmf_fields, &box->u_udmf_fields, &box->r_udmf_fields };
 	static const char *partSuffixes[] = { "bottom", "top", "mid" };
 
 	for(int panelIdx = 0; panelIdx < 3; ++panelIdx)
 	{
-		const auto &fields = panels[panelIdx]->getUDMFFields();
+		const auto &fields = *fieldLists[panelIdx];
 		for(const auto &field : fields)
 		{
 			for(size_t dimIdx = 0; dimIdx < field.widgets.size(); ++dimIdx)

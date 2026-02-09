@@ -71,21 +71,9 @@ public:
 		return tex;
 	}
 
-	const std::vector<SidepartFieldWidgets> &getUDMFFields() const
-	{
-		return mUDMFFields;
-	}
-
-	// Creates UDMF sidepart widgets based on config
-	void updateUDMFFields(const LoadingData &loaded, const ConfigData &config,
-						  Fl_Callback *callback, void *callbackData,
-						  PanelFieldFixUp &fixUp);
-
 private:
 	UI_Pic *pic;
 	UI_DynInput *tex;
-
-	std::vector<SidepartFieldWidgets> mUDMFFields;
 };
 
 
@@ -114,6 +102,25 @@ public:
 
 private:
 	PanelFieldFixUp mFixUp;
+
+	// Master stack panel for collapsible sections below texture panels
+	UI_StackPanel *mMasterStack = nullptr;
+
+	// Category button for side panels
+	UI_CategoryButton *mPanelsHeader = nullptr;
+
+	// Horizontal container for the three UDMF panels
+	Fl_Group *mUdmfContainer = nullptr;
+
+	// UDMF sidepart field panels (below category header)
+	UI_StackPanel *l_udmf_panel = nullptr;
+	UI_StackPanel *u_udmf_panel = nullptr;
+	UI_StackPanel *r_udmf_panel = nullptr;
+
+	// UDMF sidepart field widgets for each panel
+	std::vector<SidepartFieldWidgets> l_udmf_fields;
+	std::vector<SidepartFieldWidgets> u_udmf_fields;
+	std::vector<SidepartFieldWidgets> r_udmf_fields;
 
 	// UDMF sidedef-level flag widgets
 	struct SideFlagButton
@@ -159,6 +166,7 @@ private:
 	void UpdateLabel();
 	void UpdateHiding();
 	void UpdateAddDel();
+	void adjustHeight();
 
 	int getMidTexX(int position) const;
 
@@ -170,12 +178,17 @@ private:
 	static void delete_callback(Fl_Widget *, void *);
 	static void udmf_field_callback(Fl_Widget *, void *);
 	static void side_flag_callback(Fl_Widget *, void *);
-	static void side_category_callback(Fl_Widget *, void *);
+	static void flag_category_callback(Fl_Widget *, void *);
+	static void panels_category_callback(Fl_Widget *, void *);
 
 	void loadSideFlags(const LoadingData &loaded, const ConfigData &config);
 	void cleanupSideFlags();
 	void updateSideFlagValues();
 	void updateSideFlagSummary();
+
+	void updateUDMFPanels(const LoadingData &loaded, const ConfigData &config);
+	void cleanupUDMFPanels();
+	void populateUDMFFieldValues();
 };
 
 #endif  /* __EUREKA_UI_SIDEDEF_H__ */
