@@ -34,6 +34,9 @@ struct SideDef
 		FLAG_LIGHT_ABSOLUTE_BOTTOM = 0x00000004,
 		FLAG_CLIPMIDTEX =            0x00000008,
 		FLAG_NOFAKECONTRAST =        0x00000010,
+		FLAG_LIGHTABSOLUTE =         0x00000020,  // Global light absolute
+		FLAG_SMOOTHLIGHTING =        0x00000040,  // Smooth lighting
+		FLAG_WRAPMIDTEX =            0x00000080,  // Wrap middle texture
 	};
 
 	int x_offset = 0;
@@ -48,6 +51,7 @@ struct SideDef
 	int light_mid = 0;
 	int light_bottom = 0;
 	int flags = 0;
+	int light = 0;
 
 	// UDMF per-part offsets
 	double offsetx_top = 0.0;
@@ -65,6 +69,18 @@ struct SideDef
 	double scalex_bottom = 1.0;
 	double scaley_bottom = 1.0;
 
+	// Global UDMF fields
+	double xscroll = 0.0;
+	double yscroll = 0.0;
+
+	// Per-part scroll fields
+	double xscrollbottom = 0.0;
+	double xscrollmid = 0.0;
+	double xscrolltop = 0.0;
+	double yscrollbottom = 0.0;
+	double yscrollmid = 0.0;
+	double yscrolltop = 0.0;
+
 	enum IntAddress
 	{
 		F_X_OFFSET,
@@ -74,6 +90,7 @@ struct SideDef
 		F_LIGHT_MID,
 		F_LIGHT_BOTTOM,
 		F_FLAGS,
+		F_LIGHT,  // Global light field
 	};
 
 	enum StringIDAddress

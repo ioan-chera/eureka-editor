@@ -828,43 +828,6 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		field->options.push_back(opt);
 	}
 
-	else if(y_stricmp(argv[0], "udmf_sidepart") == 0)
-	{
-		// udmf_sidepart <type> <dim_size> <dim1prefix> ... <label>
-		if(nargs < 4)
-			pst->fail(bad_arg_count_fail, argv[0], 4);
-
-		sidefield_t field = {};
-
-		// Parse type
-		if(y_stricmp(argv[1], "bool") == 0)
-			field.type = sidefield_t::Type::boolType;
-		else if(y_stricmp(argv[1], "int") == 0)
-			field.type = sidefield_t::Type::intType;
-		else if(y_stricmp(argv[1], "float") == 0)
-			field.type = sidefield_t::Type::floatType;
-		else
-			pst->fail("invalid type \"%s\" for udmf_sidepart, expected bool, int or float", argv[1]);
-
-		// Parse dim_size
-		int dimSize = atoi(argv[2]);
-		if(dimSize < 1 || dimSize > 10)
-			pst->fail("invalid dim_size %d for udmf_sidepart, expected 1-10", dimSize);
-
-		// Verify we have enough arguments: type + dim_size + dimSize prefixes + label
-		if(nargs < 2 + dimSize + 1)
-			pst->fail("udmf_sidepart requires %d prefix arguments plus label", dimSize);
-
-		// Parse prefixes
-		for(int i = 0; i < dimSize; ++i)
-			field.prefixes.push_back(argv[3 + i]);
-
-		// Parse label (last argument)
-		field.label = argv[3 + dimSize];
-
-		config.udmf_sidepart_fields.push_back(std::move(field));
-	}
-
 	else if(y_stricmp(argv[0], "gensector") == 0)
 	{
 		if(nargs < 2)

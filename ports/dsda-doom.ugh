@@ -709,15 +709,39 @@ udmf_linechoice automapstyle 12 "Unseen secret"
 # Automap revealed flag
 udmf_linedef revealed
 
-# Sidedef UDMF per-part fields
-udmf_sidepart float 2 offsetx_ offsety_ "Offset XY"
-udmf_sidepart float 2 scalex_ scaley_ "Scale XY"
-udmf_sidepart int 1 light_ "Light"
-udmf_sidepart bool 1 lightabsolute_ "Absolute"
-
-# Sidedef UDMF flags
+# Sidedef UDMF fields
 udmf_sidedef clipmidtex
+udmf_sidedef light
+udmf_sidedef light_bottom
+udmf_sidedef light_mid
+udmf_sidedef light_top
+udmf_sidedef lightabsolute
+udmf_sidedef lightabsolute_bottom
+udmf_sidedef lightabsolute_mid
+udmf_sidedef lightabsolute_top
 udmf_sidedef nofakecontrast
+udmf_sidedef offsetx_bottom
+udmf_sidedef offsetx_mid
+udmf_sidedef offsetx_top
+udmf_sidedef offsety_bottom
+udmf_sidedef offsety_mid
+udmf_sidedef offsety_top
+udmf_sidedef scalex_bottom
+udmf_sidedef scalex_mid
+udmf_sidedef scalex_top
+udmf_sidedef scaley_bottom
+udmf_sidedef scaley_mid
+udmf_sidedef scaley_top
+udmf_sidedef smoothlighting
+udmf_sidedef wrapmidtex
+udmf_sidedef xscroll
+udmf_sidedef xscrollbottom
+udmf_sidedef xscrollmid
+udmf_sidedef xscrolltop
+udmf_sidedef yscroll
+udmf_sidedef yscrollbottom
+udmf_sidedef yscrollmid
+udmf_sidedef yscrolltop
 
 # TODO: sector fields
 

@@ -33,6 +33,7 @@
 
 class Fl_Check_Button;
 class Fl_Grid;
+class Fl_Light_Button;
 class UI_CategoryButton;
 class UI_DynFloatInput;
 class UI_DynIntInput;
@@ -48,13 +49,6 @@ enum
 
 };
 
-// Stores widgets for a single UDMF sidepart field (one row of inputs per part)
-struct SidepartFieldWidgets
-{
-	sidefield_t info = {};
-	std::unique_ptr<Fl_Group> container;
-	std::vector<std::unique_ptr<Fl_Widget>> widgets; // one per dimension
-};
 
 class UI_SideSectionPanel : public UI_StackPanel
 {
@@ -106,32 +100,38 @@ private:
 	// Master stack panel for collapsible sections below texture panels
 	UI_StackPanel *mMasterStack = nullptr;
 
-	// Category button for side panels
-	UI_CategoryButton *mPanelsHeader = nullptr;
+	UI_CategoryButton *mUDMFHeader = nullptr;
+	Fl_Grid *mUDMFGrid;
 
-	// Horizontal container for the three UDMF panels
-	Fl_Group *mUdmfContainer = nullptr;
+	Fl_Box *mHeader[3] = {};
+	Fl_Box *mOffsetLabel;
+	UI_DynFloatInput *mOffsetX[3] = {};
+	UI_DynFloatInput *mOffsetY[3] = {};
 
-	// UDMF sidepart field panels (below category header)
-	UI_StackPanel *l_udmf_panel = nullptr;
-	UI_StackPanel *u_udmf_panel = nullptr;
-	UI_StackPanel *r_udmf_panel = nullptr;
+	Fl_Box *mScaleLabel;
+	UI_DynFloatInput *mScaleX[3] = {};
+	UI_DynFloatInput *mScaleY[3] = {};
 
-	// UDMF sidepart field widgets for each panel
-	std::vector<SidepartFieldWidgets> l_udmf_fields;
-	std::vector<SidepartFieldWidgets> u_udmf_fields;
-	std::vector<SidepartFieldWidgets> r_udmf_fields;
+	Fl_Box *mGlobalLightLabel;
+	UI_DynIntInput *mGlobalLight;
+	Fl_Light_Button *mGlobalLightAbsolute;
 
-	// UDMF sidedef-level flag widgets
-	struct SideFlagButton
-	{
-		Fl_Check_Button *button = nullptr;
-		UDMF_SideFeature feature;
-		int mask = 0;
-	};
-	std::vector<SideFlagButton> mFlagButtons;
-	UI_CategoryButton *mFlagsHeader = nullptr;
-	Fl_Grid *mFlagsGrid = nullptr;
+	Fl_Box *mLightLabel;
+	UI_DynIntInput *mLight[3] = {};
+	Fl_Light_Button *mLightAbsolute[3] = {};
+
+	Fl_Box *mGlobalScrollLabel;
+	UI_DynFloatInput *mGlobalXScroll = nullptr;
+	UI_DynFloatInput *mGlobalYScroll = nullptr;
+
+	Fl_Box *mScrollLabel;
+	UI_DynFloatInput *mXScroll[3] = {};
+	UI_DynFloatInput *mYScroll[3] = {};
+
+	Fl_Check_Button *mSmoothLighting = nullptr;
+	Fl_Check_Button *mNoFakeContrast = nullptr;
+	Fl_Check_Button *mClipMidTex = nullptr;
+	Fl_Check_Button *mWrapMidTex = nullptr;
 
 public:
 	UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side);
@@ -177,18 +177,9 @@ private:
 	static void    add_callback(Fl_Widget *, void *);
 	static void delete_callback(Fl_Widget *, void *);
 	static void udmf_field_callback(Fl_Widget *, void *);
-	static void side_flag_callback(Fl_Widget *, void *);
-	static void flag_category_callback(Fl_Widget *, void *);
-	static void panels_category_callback(Fl_Widget *, void *);
+	static void udmf_category_callback(Fl_Widget *, void *);
 
-	void loadSideFlags(const LoadingData &loaded, const ConfigData &config);
-	void cleanupSideFlags();
-	void updateSideFlagValues();
-	void updateSideFlagSummary();
-
-	void updateUDMFPanels(const LoadingData &loaded, const ConfigData &config);
-	void cleanupUDMFPanels();
-	void populateUDMFFieldValues();
+	void updateUDMFFields();
 };
 
 #endif  /* __EUREKA_UI_SIDEDEF_H__ */

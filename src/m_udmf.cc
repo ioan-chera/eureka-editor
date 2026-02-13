@@ -198,8 +198,39 @@ bool UDMF_AddSideFeature(ConfigData &config, const char *featureName)
 #define ENTRY(a) { #a, UDMF_SideFeature::a }
 	static const FeatureMap map[] =
 	{
+		// Feature flags
 		ENTRY(clipmidtex),
+		ENTRY(light_bottom),
+		ENTRY(light_mid),
+		ENTRY(light_top),
+		ENTRY(light),
+		ENTRY(lightabsolute_bottom),
+		ENTRY(lightabsolute_mid),
+		ENTRY(lightabsolute_top),
+		ENTRY(lightabsolute),
 		ENTRY(nofakecontrast),
+		ENTRY(offsetx_bottom),
+		ENTRY(offsetx_mid),
+		ENTRY(offsetx_top),
+		ENTRY(offsety_bottom),
+		ENTRY(offsety_mid),
+		ENTRY(offsety_top),
+		ENTRY(scalex_bottom),
+		ENTRY(scalex_mid),
+		ENTRY(scalex_top),
+		ENTRY(scaley_bottom),
+		ENTRY(scaley_mid),
+		ENTRY(scaley_top),
+		ENTRY(smoothlighting),
+		ENTRY(wrapmidtex),
+		ENTRY(xscroll),
+		ENTRY(xscrollbottom),
+		ENTRY(xscrollmid),
+		ENTRY(xscrolltop),
+		ENTRY(yscroll),
+		ENTRY(yscrollbottom),
+		ENTRY(yscrollmid),
+		ENTRY(yscrolltop),
 	};
 #undef ENTRY
 
@@ -717,10 +748,6 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 	if (value.Match("false"))
 		return;
 
-	// TODO hexen flags
-
-	// TODO strife flags
-
 	if (field.Match("v1"))
 		LD->start = value.DecodeInt();
 	else if (field.Match("v2"))
@@ -731,8 +758,6 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 		LD->left = value.DecodeInt();
 	else if (field.Match("special"))
 		LD->type = value.DecodeInt();
-
-	// TODO: separate id from arg0 for UDMF only
 	else if (field.Match("id"))
 		LD->tag = value.DecodeInt();
 	else if (field.Match("arg0"))
@@ -774,7 +799,12 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 
 static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_Token& field, const Udmf_Token& value)
 {
+	// just ignore any setting with the "false" keyword
+	if (value.Match("false"))
+		return;
 	// Note: sector numbers are validated later on
+#define HAS_FLOAT(n) (field.Match(#n)) SD->n = value.DecodeFloat()
+#define HAS_INT(n)   (field.Match(#n)) SD->n = value.DecodeInt()
 
 	if (field.Match("sector"))
 		SD->sector = value.DecodeInt();
@@ -788,56 +818,56 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_
 		SD->x_offset = value.DecodeInt();
 	else if (field.Match("offsety"))
 		SD->y_offset = value.DecodeInt();
+	else if HAS_FLOAT(offsetx_bottom);
+	else if HAS_FLOAT(offsetx_mid);
+	else if HAS_FLOAT(offsetx_top);
+	else if HAS_FLOAT(offsety_bottom);
+	else if HAS_FLOAT(offsety_mid);
+	else if HAS_FLOAT(offsety_top);
+	else if HAS_FLOAT(scalex_bottom);
+	else if HAS_FLOAT(scalex_mid);
+	else if HAS_FLOAT(scalex_top);
+	else if HAS_FLOAT(scaley_bottom);
+	else if HAS_FLOAT(scaley_mid);
+	else if HAS_FLOAT(scaley_top);
 
-	// Per-part offsets
-	else if (field.Match("offsetx_top"))
-		SD->offsetx_top = value.DecodeFloat();
-	else if (field.Match("offsety_top"))
-		SD->offsety_top = value.DecodeFloat();
-	else if (field.Match("offsetx_mid"))
-		SD->offsetx_mid = value.DecodeFloat();
-	else if (field.Match("offsety_mid"))
-		SD->offsety_mid = value.DecodeFloat();
-	else if (field.Match("offsetx_bottom"))
-		SD->offsetx_bottom = value.DecodeFloat();
-	else if (field.Match("offsety_bottom"))
-		SD->offsety_bottom = value.DecodeFloat();
+	else if HAS_INT(light);
+	else if HAS_INT(light_bottom);
+	else if HAS_INT(light_mid);
+	else if HAS_INT(light_top);
 
-	// Per-part scales
-	else if (field.Match("scalex_top"))
-		SD->scalex_top = value.DecodeFloat();
-	else if (field.Match("scaley_top"))
-		SD->scaley_top = value.DecodeFloat();
-	else if (field.Match("scalex_mid"))
-		SD->scalex_mid = value.DecodeFloat();
-	else if (field.Match("scaley_mid"))
-		SD->scaley_mid = value.DecodeFloat();
-	else if (field.Match("scalex_bottom"))
-		SD->scalex_bottom = value.DecodeFloat();
-	else if (field.Match("scaley_bottom"))
-		SD->scaley_bottom = value.DecodeFloat();
-
-	else if(field.Match("light_top"))
-		SD->light_top = value.DecodeInt();
-	else if(field.Match("light_mid"))
-		SD->light_mid = value.DecodeInt();
-	else if(field.Match("light_bottom"))
-		SD->light_bottom = value.DecodeInt();
-	else if(field.Match("lightabsolute_top") && !value.Match("false"))
-		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_TOP;
-	else if(field.Match("lightabsolute_mid") && !value.Match("false"))
-		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_MID;
-	else if(field.Match("lightabsolute_bottom") && !value.Match("false"))
-		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
-	else if(field.Match("clipmidtex") && !value.Match("false"))
+	// Flags
+	// False values are already rejected at the beginning of function
+	else if(field.Match("clipmidtex"))
 		SD->flags |= SideDef::FLAG_CLIPMIDTEX;
-	else if(field.Match("nofakecontrast") && !value.Match("false"))
+	else if(field.Match("lightabsolute"))
+		SD->flags |= SideDef::FLAG_LIGHTABSOLUTE;
+	else if(field.Match("lightabsolute_bottom"))
+		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM;
+	else if(field.Match("lightabsolute_mid"))
+		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_MID;
+	else if(field.Match("lightabsolute_top"))
+		SD->flags |= SideDef::FLAG_LIGHT_ABSOLUTE_TOP;
+	else if(field.Match("nofakecontrast"))
 		SD->flags |= SideDef::FLAG_NOFAKECONTRAST;
-
+	else if(field.Match("smoothlighting"))
+		SD->flags |= SideDef::FLAG_SMOOTHLIGHTING;
+	else if(field.Match("wrapmidtex"))
+		SD->flags |= SideDef::FLAG_WRAPMIDTEX;
+	else if HAS_FLOAT(xscroll);
+	else if HAS_FLOAT(xscrollbottom);
+	else if HAS_FLOAT(xscrollmid);
+	else if HAS_FLOAT(xscrolltop);
+	else if HAS_FLOAT(yscroll);
+	else if HAS_FLOAT(yscrollbottom);
+	else if HAS_FLOAT(yscrollmid);
+	else if HAS_FLOAT(yscrolltop);
 	else
 	{
 		gLog.debugPrintf("sidedef #%d: unknown field '%s'\n", doc.numSidedefs() - 1, field.c_str());
 	}
+#undef HAS_INT
+#undef HAS_FLOAT
 }
 
 static void UDMF_ParseSectorField(const Document &doc, Sector *S, const Udmf_Token& field, const Udmf_Token& value)
@@ -1262,6 +1292,34 @@ static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 			lump->Printf("clipmidtex = true;\n");
 		if (side->flags & SideDef::FLAG_NOFAKECONTRAST)
 			lump->Printf("nofakecontrast = true;\n");
+
+		// Global fields
+		if (side->light)
+			lump->Printf("light = %d;\n", side->light);
+		if (side->flags & SideDef::FLAG_LIGHTABSOLUTE)
+			lump->Printf("lightabsolute = true;\n");
+		if (side->flags & SideDef::FLAG_SMOOTHLIGHTING)
+			lump->Printf("smoothlighting = true;\n");
+		if (side->xscroll)
+			lump->Printf("xscroll = %.16g;\n", side->xscroll);
+		if (side->yscroll)
+			lump->Printf("yscroll = %.16g;\n", side->yscroll);
+		if (side->flags & SideDef::FLAG_WRAPMIDTEX)
+			lump->Printf("wrapmidtex = true;\n");
+
+		// Per-part scroll
+		if (side->xscrolltop)
+			lump->Printf("xscrolltop = %.16g;\n", side->xscrolltop);
+		if (side->xscrollmid)
+			lump->Printf("xscrollmid = %.16g;\n", side->xscrollmid);
+		if (side->xscrollbottom)
+			lump->Printf("xscrollbottom = %.16g;\n", side->xscrollbottom);
+		if (side->yscrolltop)
+			lump->Printf("yscrolltop = %.16g;\n", side->yscrolltop);
+		if (side->yscrollmid)
+			lump->Printf("yscrollmid = %.16g;\n", side->yscrollmid);
+		if (side->yscrollbottom)
+			lump->Printf("yscrollbottom = %.16g;\n", side->yscrollbottom);
 
 		lump->Printf("}\n\n");
 	}

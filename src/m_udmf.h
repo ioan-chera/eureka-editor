@@ -69,7 +69,7 @@ enum class UDMF_LineFeature : unsigned
 	transparent,
 	twosided,
 	wrapmidtex,
-	COUNT  // Sentinel value for array sizing
+	COUNT
 };
 
 struct UDMFMapping
@@ -81,7 +81,7 @@ struct UDMFMapping
 	};
 
 	static const UDMFMapping* getForName(const char* name, Category category);
-	
+
 	const char *const name;
 	const Category category;
 	const int flagSet;
@@ -94,8 +94,38 @@ bool UDMF_HasLineFeature(const ConfigData &config, UDMF_LineFeature feature);
 enum class UDMF_SideFeature : unsigned
 {
 	clipmidtex,
+	light_bottom,
+	light_mid,
+	light_top,
+	light,
+	lightabsolute_bottom,
+	lightabsolute_mid,
+	lightabsolute_top,
+	lightabsolute,
 	nofakecontrast,
-	COUNT  // Sentinel value for array sizing
+	offsetx_bottom,
+	offsetx_mid,
+	offsetx_top,
+	offsety_bottom,
+	offsety_mid,
+	offsety_top,
+	scalex_bottom,
+	scalex_mid,
+	scalex_top,
+	scaley_bottom,
+	scaley_mid,
+	scaley_top,
+	smoothlighting,
+	wrapmidtex,
+	xscroll,
+	xscrollbottom,
+	xscrollmid,
+	xscrolltop,
+	yscroll,
+	yscrollbottom,
+	yscrollmid,
+	yscrolltop,
+	COUNT
 };
 
 bool UDMF_AddSideFeature(ConfigData &config, const char *featureName);
