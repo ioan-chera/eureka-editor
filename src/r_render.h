@@ -119,6 +119,11 @@ int Render3D_CalcRotation(double viewAngle_rad, int thingAngle_deg);
 /* API for rendering a scene (etc) */
 
 void RGL_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh);
+#ifdef NO_OPENGL
+inline void RGL_ResetBuffers() {}
+#else
+void RGL_ResetBuffers();
+#endif
 
 #endif  /* __EUREKA_R_RENDER__ */
 

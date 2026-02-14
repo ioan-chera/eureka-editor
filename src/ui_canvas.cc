@@ -157,7 +157,11 @@ void UI_Canvas::draw()
 
 	if (inst.edit.render3d)
 	{
+#ifdef NO_OPENGL
+		Render3D_Draw(inst, x(), y(), w(), h(), w(), h());
+#else
 		Render3D_Draw(inst, x(), y(), w(), h(), pixel_w(), pixel_h());
+#endif
 		return;
 	}
 
@@ -1651,6 +1655,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                 if(inst.loaded.levelFormat == MapFormat::doom ||
 				   inst.loaded.levelFormat == MapFormat::udmf)
                 {
+                    bool matched = false;
                     if(line.tag > 0)
                     {
                         for(int i = 0; i < info.numlineids; ++i)
@@ -1658,7 +1663,27 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                             {
                                 DrawHighlight(ObjType::linedefs, m);
 								DrawConnection(info.type, info.objnum, ObjType::linedefs, m);
+								matched = true;
+								break;
                             }
+                    }
+                    if(!matched && !line.moreIDs.empty())
+                    {
+                        for(int id : line.moreIDs)
+                        {
+                            for(int i = 0; i < info.numlineids; ++i)
+                            {
+								if(id != info.lineids[i])
+									continue;
+
+								DrawHighlight(ObjType::linedefs, m);
+								DrawConnection(info.type, info.objnum, ObjType::linedefs, m);
+								matched = true;
+								break;
+							}
+                            if(matched)
+                                break;
+                        }
                     }
                 }
                 else if(inst.loaded.levelFormat == MapFormat::hexen)
@@ -1768,6 +1793,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
         {
             highlightTaggingTriggers(line->tag, &SpecialTagInfo::lineids,
                                      &SpecialTagInfo::numlineids, objtype, objnum);
+            for(int id : line->moreIDs)
+                highlightTaggingTriggers(id, &SpecialTagInfo::lineids,
+                                         &SpecialTagInfo::numlineids, objtype, objnum);
         }
         else
         {

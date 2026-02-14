@@ -180,6 +180,7 @@ private:
 	static void udmf_category_callback(Fl_Widget *, void *);
 
 	void updateUDMFFields();
+	void updateSideFlagGreying();
 };
 
 #endif  /* __EUREKA_UI_SIDEDEF_H__ */

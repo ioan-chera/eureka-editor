@@ -99,6 +99,13 @@ public:
 
 	bool fullbright;
 
+	// UDMF properties from sidedef
+	int partLightDelta = 0;
+
+	float partOffsetX = 0.0f;
+	float partScaleX = 1.0f;
+	float partScaleY = 1.0f;
+
 	Instance &inst;
 
 public:
@@ -444,7 +451,18 @@ public:
 			else
 				lower.tex_h = lower.h2;
 
-			lower.tex_h += sd->y_offset;
+			lower.tex_h += sd->y_offset + static_cast<int>(sd->offsety_mid);
+
+			// per-part scale and offset (one-sided uses mid)
+			lower.partOffsetX = static_cast<float>(sd->offsetx_mid);
+			lower.partScaleX = sd->scalex_mid != 0 ? static_cast<float>(sd->scalex_mid) : 1.0f;
+			lower.partScaleY = sd->scaley_mid != 0 ? static_cast<float>(sd->scaley_mid) : 1.0f;
+
+			// per-part light (one-sided uses mid)
+			if (sd->flags & SideDef::FLAG_LIGHT_ABSOLUTE_MID)
+				lower.partLightDelta = sd->light_mid - wall_light;
+			else
+				lower.partLightDelta = sd->light_mid;
 			return;
 		}
 
@@ -464,7 +482,18 @@ public:
 			else
 				upper.tex_h = upper.h2;
 
-			upper.tex_h += sd->y_offset;
+			upper.tex_h += sd->y_offset + static_cast<int>(sd->offsety_top);
+
+			// per-part scale and offset (upper)
+			upper.partOffsetX = static_cast<float>(sd->offsetx_top);
+			upper.partScaleX = sd->scalex_top != 0 ? static_cast<float>(sd->scalex_top) : 1.0f;
+			upper.partScaleY = sd->scaley_top != 0 ? static_cast<float>(sd->scaley_top) : 1.0f;
+
+			// per-part light (upper)
+			if (sd->flags & SideDef::FLAG_LIGHT_ABSOLUTE_TOP)
+				upper.partLightDelta = sd->light_top - wall_light;
+			else
+				upper.partLightDelta = sd->light_top;
 		}
 
 		if (back->floorh > front->floorh && ! self_ref)
@@ -482,7 +511,18 @@ public:
 			else
 				lower.tex_h = lower.h2;
 
-			lower.tex_h += sd->y_offset;
+			lower.tex_h += sd->y_offset + static_cast<int>(sd->offsety_bottom);
+
+			// per-part scale and offset (lower)
+			lower.partOffsetX = static_cast<float>(sd->offsetx_bottom);
+			lower.partScaleX = sd->scalex_bottom != 0 ? static_cast<float>(sd->scalex_bottom) : 1.0f;
+			lower.partScaleY = sd->scaley_bottom != 0 ? static_cast<float>(sd->scaley_bottom) : 1.0f;
+
+			// per-part light (lower)
+			if (sd->flags & SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM)
+				lower.partLightDelta = sd->light_bottom - wall_light;
+			else
+				lower.partLightDelta = sd->light_bottom;
 		}
 
 		/* Mid-Masked texture */
@@ -507,20 +547,48 @@ public:
 		if (f_h >= c_h)
 			return;
 
-		if (ld->flags & MLF_LowerUnpegged)
+		bool wrapMid = (ld->flags2 & MLF2_UDMF_WrapMidTex) ||
+			(sd->flags & SideDef::FLAG_WRAPMIDTEX);
+
+		if (wrapMid)
 		{
-			rail.h1 = f_h + sd->y_offset;
-			rail.h2 = rail.h1 + r_h;
+			// tile the mid texture across the full opening
+			rail.h1 = f_h;
+			rail.h2 = c_h;
+			if (ld->flags & MLF_LowerUnpegged)
+				rail.tex_h = f_h + sd->y_offset + r_h;
+			else
+				rail.tex_h = c_h + sd->y_offset;
 		}
 		else
 		{
-			rail.h2 = c_h + sd->y_offset;
-			rail.h1 = rail.h2 - r_h;
+			if (ld->flags & MLF_LowerUnpegged)
+			{
+				rail.h1 = f_h + sd->y_offset;
+				rail.h2 = rail.h1 + r_h;
+			}
+			else
+			{
+				rail.h2 = c_h + sd->y_offset;
+				rail.h1 = rail.h2 - r_h;
+			}
 		}
 
 		rail.kind = DrawSurf::K_TEXTURE;
 		rail.y_clip = 0;
-		rail.tex_h = rail.h2;
+		if (!wrapMid)
+			rail.tex_h = rail.h2;
+
+		// per-part scale and offset (mid for railing)
+		rail.partOffsetX = static_cast<float>(sd->offsetx_mid);
+		rail.partScaleX = sd->scalex_mid != 0 ? static_cast<float>(sd->scalex_mid) : 1.0f;
+		rail.partScaleY = sd->scaley_mid != 0 ? static_cast<float>(sd->scaley_mid) : 1.0f;
+
+		// per-part light (mid for railing)
+		if (sd->flags & SideDef::FLAG_LIGHT_ABSOLUTE_MID)
+			rail.partLightDelta = sd->light_mid - wall_light;
+		else
+			rail.partLightDelta = sd->light_mid;
 
 		// clip railing, unless sectors on both sides are identical or
 		// we have a sky upper
@@ -845,11 +913,31 @@ public:
 
 		dw->wall_light = dw->sec->light;
 
-		// add "fake constrast" for axis-aligned walls
-		if (inst.level.isVertical(*ld))
-			dw->wall_light += 16;
-		else if (inst.level.isHorizontal(*ld))
-			dw->wall_light -= 16;
+		// sidedef global light
+		if (sd->flags & SideDef::FLAG_LIGHTABSOLUTE)
+			dw->wall_light = sd->light;
+		else
+			dw->wall_light += sd->light;
+
+		// fake contrast / smooth lighting / no fake contrast
+		if (sd->flags & SideDef::FLAG_NOFAKECONTRAST)
+		{
+			// no adjustment
+		}
+		else if (sd->flags & SideDef::FLAG_SMOOTHLIGHTING)
+		{
+			const double dx = inst.level.getEnd(*ld).x() - inst.level.getStart(*ld).x();
+			const double dy = inst.level.getEnd(*ld).y() - inst.level.getStart(*ld).y();
+			const double wallAngle = atan2(dy, dx);
+			dw->wall_light -= static_cast<int>(16.0 * cos(2.0 * wallAngle));
+		}
+		else
+		{
+			if (inst.level.isVertical(*ld))
+				dw->wall_light += 16;
+			else if (inst.level.isHorizontal(*ld))
+				dw->wall_light -= 16;
+		}
 
 		dw->delta_ang = angle1 + XToAngle(sx1) - normal;
 
@@ -1480,21 +1568,22 @@ public:
 		int tw = surf.img->width();
 		int th = surf.img->height();
 
-		int  light = dw->wall_light;
+		const int  light = dw->wall_light + surf.partLightDelta;
 		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		/* compute texture X coord */
 
 		float cur_ang = dw->delta_ang - XToAngle(x);
 
-		int tx = int(dw->t_dist - tan(cur_ang) * dw->dist);
+		int tx = int((dw->sd->x_offset + surf.partOffsetX +
+			(dw->t_dist - tan(cur_ang) * dw->dist)) * surf.partScaleX);
 
-		tx = (dw->sd->x_offset + tx) & (tw - 1);
+		tx = tx & (tw - 1);
 
 		/* compute texture Y coords */
 
-		float hh = surf.tex_h - YToSecH(y1, dw->cur_iz);
-		float dh = surf.tex_h - YToSecH(y2, dw->cur_iz);
+		float hh = (surf.tex_h - YToSecH(y1, dw->cur_iz)) * surf.partScaleY;
+		float dh = (surf.tex_h - YToSecH(y2, dw->cur_iz)) * surf.partScaleY;
 
 		dh = (dh - hh) / std::max(1, y2 - y1);
 		hh += 0.2f;
@@ -1542,7 +1631,7 @@ public:
 
 	void SolidTexColumn(DrawWall *dw, DrawSurf& surf, int x, int y1, int y2)
 	{
-		int  light = dw->wall_light;
+		int  light = dw->wall_light + surf.partLightDelta;
 		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		img_pixel_t *dest = inst.r_view.screen;

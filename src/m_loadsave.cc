@@ -39,6 +39,7 @@
 #include "m_files.h"
 #include "m_loadsave.h"
 #include "m_testmap.h"
+#include "r_render.h"
 #include "r_subdiv.h"
 #include "Sector.h"
 #include "SideDef.h"
@@ -939,6 +940,7 @@ bool Instance::LoadLevel(const Wad_file *wad, const SString &level) noexcept(fal
 	// reset various editor state
 	Editor_ClearAction();
 	Selection_InvalidateLast();
+	RGL_ResetBuffers();
 
 	edit.Selected->clear_all();
 	edit.highlight.clear();

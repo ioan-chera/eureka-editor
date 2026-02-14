@@ -100,12 +100,44 @@ public:
 private:
 	Instance &inst;
 
+	// deferred translucent mid maskers, populated in pass 1
+	struct DeferredMidMasker
+	{
+		const LineDef *ld;
+		const SideDef *sd;
+		const Sector *front;
+		const Sector *back;
+		bool sky_upper;
+		float ld_length;
+		float x1, y1, x2, y2;
+		float alpha;
+	};
+	static std::vector<DeferredMidMasker> sDeferredMidMaskers;
+
 public:
-	explicit RendInfo3D(Instance &inst) : seen_sectors(inst.level.numSectors() + 1), inst(inst)
+	explicit RendInfo3D(Instance &inst) :
+		seen_sectors(inst.level.numSectors() + 1),
+		inst(inst)
 	{ }
 
 	~RendInfo3D()
 	{ }
+
+	static void resetBuffers()
+	{
+		sDeferredMidMaskers = {};
+	}
+
+	float computeLineAlpha(const LineDef &ld) const
+	{
+		if (ld.alpha < 1.0)
+			return static_cast<float>(ld.alpha);
+		if (ld.flags & MLF_UDMF_Transparent)
+			return 0.25f;
+		if (ld.flags & MLF_UDMF_Translucent)
+			return 0.75f;
+		return 1.0f;
+	}
 
 	inline float PointToAngle(float x, float y)
 	{
@@ -455,7 +487,7 @@ public:
 	void RawClippedQuad(float x1, float y1, const slope_plane_c *p1,
 						float x2, float y2, const slope_plane_c *p2,
 						float tx1, float tx2, float tex_top, float tex_scale,
-						char where, float r, float g, float b, float level)
+						char where, float r, float g, float b, float level, float alpha)
 	{
 		float za1 = static_cast<float>(p1->SlopeZ(x1, y1));
 		float za2 = static_cast<float>(p2->SlopeZ(x1, y1));
@@ -482,7 +514,7 @@ public:
 				zb1 = zb2;
 		}
 
-		glColor3f(level * r, level * g, level * b);
+		glColor4f(level * r, level * g, level * b, alpha);
 
 		glBegin(GL_QUADS);
 
@@ -497,7 +529,7 @@ public:
 	void LightClippedQuad(double x1, double y1, const slope_plane_c *p1,
 						  double x2, double y2, const slope_plane_c *p2,
 						  float tx1, float tx2, float tex_top, float tex_scale,
-						  char where, float r, float g, float b, int light)
+						  char where, float r, float g, float b, int light, float alpha)
 	{
 		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0f);
 
@@ -542,14 +574,14 @@ public:
 				if (cat2 > 0)
 				{
 					RawClippedQuad(static_cast<float>(ix), static_cast<float>(iy),p1, static_cast<float>(x2), static_cast<float>(y2),p2, itx,tx2,tex_top,tex_scale,
-									where, r,g,b, level);
+									where, r,g,b, level, alpha);
 
 					x2 = ix; y2 = iy; tx2 = itx;
 				}
 				else
 				{
 					RawClippedQuad(static_cast<float>(x1), static_cast<float>(y1),p1, static_cast<float>(ix), static_cast<float>(iy),p2, tx1,itx,tex_top,tex_scale,
-									where, r,g,b, level);
+									where, r,g,b, level, alpha);
 
 					x1 = ix; y1 = iy; tx1 = itx;
 				}
@@ -557,7 +589,7 @@ public:
 		}
 
 		RawClippedQuad(static_cast<float>(x1), static_cast<float>(y1),p1, static_cast<float>(x2), static_cast<float>(y2),p2, tx1,tx2,tex_top,tex_scale,
-						where, r,g,b, level);
+						where, r,g,b, level, alpha);
 	}
 
 	inline bool IsPolygonClipped(const sector_polygon_t *poly)
@@ -763,13 +795,31 @@ public:
 				tex_top = back->ceilh + img_h;
 			}
 
-			tx1 = (tx1 + sd->x_offset) / img_tw;
-			tx2 = (tx2 + sd->x_offset) / img_tw;
+			// per-part UDMF offsets and scales
+			const double partOffsetX = where == 'U' ? sd->offsetx_top : where == 'L' ?
+												   sd->offsetx_bottom : sd->offsetx_mid;
 
-			tex_top  += (img_th - img_h);
-			tex_top  += sd->y_offset;
+			const double partOffsetY = where == 'U' ? sd->offsety_top : where == 'L' ?
+												   sd->offsety_bottom : sd->offsety_mid;
+			double partScaleX = where == 'U' ? sd->scalex_top : where == 'L' ?
+											sd->scalex_bottom : sd->scalex_mid;
+			double partScaleY = where == 'U' ? sd->scaley_top : where == 'L' ?
+											sd->scaley_bottom : sd->scaley_mid;
+			if (partScaleX == 0)
+				partScaleX = 1.0;
+			if (partScaleY == 0)
+				partScaleY = 1.0;
 
-			tex_scale = 1.0f / img_th;
+			const float effectiveTW = img_tw / static_cast<float>(partScaleX);
+			const float effectiveTH = img_th / static_cast<float>(partScaleY);
+
+			tx1 = (tx1 + sd->x_offset + static_cast<float>(partOffsetX)) / effectiveTW;
+			tx2 = (tx2 + sd->x_offset + static_cast<float>(partOffsetX)) / effectiveTW;
+
+			tex_top  += (effectiveTH - img_h / static_cast<float>(partScaleY));
+			tex_top  += sd->y_offset + static_cast<float>(partOffsetY);
+
+			tex_scale = 1.0f / effectiveTH;
 		}
 
 		glDisable(GL_ALPHA_TEST);
@@ -782,26 +832,56 @@ public:
 		{
 			int light = front->light;
 
-			// add "fake constrast" for axis-aligned walls
-			if (inst.level.isVertical(*ld))
-				light += 16;
-			else if (inst.level.isHorizontal(*ld))
-				light -= 16;
+			if (sd->flags & SideDef::FLAG_LIGHTABSOLUTE)
+				light = sd->light;
+			else
+				light += sd->light;
+
+			const int partLight = where == 'U' ? sd->light_top : where == 'L' ?
+											  sd->light_bottom : sd->light_mid;
+			const bool partAbsolute = where == 'U' ?
+				!!(sd->flags & SideDef::FLAG_LIGHT_ABSOLUTE_TOP) : where == 'L' ?
+				!!(sd->flags & SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM) :
+				!!(sd->flags & SideDef::FLAG_LIGHT_ABSOLUTE_MID);
+			if (partAbsolute)
+				light = partLight;
+			else
+				light += partLight;
+
+			// fake contrast / smooth lighting / no fake contrast
+			if (sd->flags & SideDef::FLAG_NOFAKECONTRAST)
+			{
+				// no adjustment
+			}
+			else if (sd->flags & SideDef::FLAG_SMOOTHLIGHTING)
+			{
+				const double dx = inst.level.getEnd(*ld).x() - inst.level.getStart(*ld).x();
+				const double dy = inst.level.getEnd(*ld).y() - inst.level.getStart(*ld).y();
+				const double wallAngle = atan2(dy, dx);
+				light -= static_cast<int>(16.0 * cos(2.0 * wallAngle));
+			}
+			else
+			{
+				if (inst.level.isVertical(*ld))
+					light += 16;
+				else if (inst.level.isHorizontal(*ld))
+					light -= 16;
+			}
 
 			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
-							 where, static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), light);
+							 where, static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), light, 1.0f);
 		}
 		else
 		{
 			RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
-							where, static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), 1.0);
+							where, static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), 1.0, 1.0f);
 		}
 	}
 
 	void DrawMidMasker(const LineDef *ld, const SideDef *sd,
 		const Sector *front, const Sector *back,
 		bool sky_upper, float ld_length,
-		float x1, float y1, float x2, float y2)
+		float x1, float y1, float x2, float y2, float alpha)
 	{
 		byte r, g, b;
 		bool fullbright;
@@ -836,18 +916,46 @@ public:
 		float tx1 = 0.0;
 		float tx2 = tx1 + ld_length;
 
-		tx1 = (tx1 + sd->x_offset) / img_tw;
-		tx2 = (tx2 + sd->x_offset) / img_tw;
+		// per-part UDMF offsets and scales (mid)
+		double midScaleX = sd->scalex_mid;
+		double midScaleY = sd->scaley_mid;
+		if (midScaleX == 0)
+			midScaleX = 1.0;
+		if (midScaleY == 0)
+			midScaleY = 1.0;
+		const float effectiveTW = img_tw / static_cast<float>(midScaleX);
+		const float effectiveTH = img_th / static_cast<float>(midScaleY);
+		const float scaledImgH = img_h / static_cast<float>(midScaleY);
 
-		if (ld->flags & MLF_LowerUnpegged)
+		tx1 = (tx1 + sd->x_offset + static_cast<float>(sd->offsetx_mid)) / effectiveTW;
+		tx2 = (tx2 + sd->x_offset + static_cast<float>(sd->offsetx_mid)) / effectiveTW;
+
+		const float yOfs = sd->y_offset + static_cast<float>(sd->offsety_mid);
+
+		const bool wrapMid = (ld->flags2 & MLF2_UDMF_WrapMidTex) ||
+			(sd->flags & SideDef::FLAG_WRAPMIDTEX);
+
+		if (wrapMid)
 		{
-			z1 = z1 + sd->y_offset;
-			z2 = z1 + img_h;
+			// keep z1/z2 as full opening; texture tiles via GL_REPEAT
+			// tex_top anchor based on pegging
+			if (ld->flags & MLF_LowerUnpegged)
+				z1 += yOfs;
+			else
+				z2 += yOfs;
 		}
 		else
 		{
-			z2 = z2 + sd->y_offset;
-			z1 = z2 - img_h;
+			if (ld->flags & MLF_LowerUnpegged)
+			{
+				z1 = z1 + yOfs;
+				z2 = z1 + scaledImgH;
+			}
+			else
+			{
+				z2 = z2 + yOfs;
+				z1 = z2 - scaledImgH;
+			}
 		}
 
 		glEnable(GL_ALPHA_TEST);
@@ -859,31 +967,55 @@ public:
 		double g0 = (double)g / 255.0;
 		double b0 = (double)b / 255.0;
 
-		float tex_scale = 1.0f / img_th;
+		float tex_scale = 1.0f / effectiveTH;
 
 		if (inst.r_view.lighting && !fullbright)
 		{
 			int light = inst.level.getSector(*sd).light;
 
-			// add "fake constrast" for axis-aligned walls
-			if (inst.level.isVertical(*ld))
-				light += 16;
-			else if (inst.level.isHorizontal(*ld))
-				light -= 16;
+			if (sd->flags & SideDef::FLAG_LIGHTABSOLUTE)
+				light = sd->light;
+			else
+				light += sd->light;
+
+			if (sd->flags & SideDef::FLAG_LIGHT_ABSOLUTE_MID)
+				light = sd->light_mid;
+			else
+				light += sd->light_mid;
+
+			// fake contrast / smooth lighting / no fake contrast
+			if (sd->flags & SideDef::FLAG_NOFAKECONTRAST)
+			{
+				// no adjustment
+			}
+			else if (sd->flags & SideDef::FLAG_SMOOTHLIGHTING)
+			{
+				const double dx = inst.level.getEnd(*ld).x() - inst.level.getStart(*ld).x();
+				const double dy = inst.level.getEnd(*ld).y() - inst.level.getStart(*ld).y();
+				const double wallAngle = atan2(dy, dx);
+				light -= static_cast<int>(16.0 * cos(2.0 * wallAngle));
+			}
+			else
+			{
+				if (inst.level.isVertical(*ld))
+					light += 16;
+				else if (inst.level.isHorizontal(*ld))
+					light -= 16;
+			}
 
 			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
-							 'R', static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), light);
+							 'R', static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), light, alpha);
 		}
 		else
 		{
 			RawClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
-							'R', static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), 1.0);
+							'R', static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), 1.0, alpha);
 		}
 	}
 
 	void DrawLine(int ld_index)
 	{
-		const auto ld = inst.level.linedefs[ld_index];
+		const auto &ld = inst.level.linedefs[ld_index];
 
 		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
 			return;
@@ -922,7 +1054,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		const SideDef *sd = (side == Side::left) ? inst.level.getLeft(*ld) : inst.level.getRight(*ld);
+		const SideDef *const sd = (side == Side::left) ? inst.level.getLeft(*ld) : inst.level.getRight(*ld);
 
 		if (! sd)
 			return;
@@ -1008,9 +1140,9 @@ public:
 			std::swap(y1, y2);
 		}
 
-		float ld_len = hypotf(x2 - x1, y2 - y1);
+		const float ld_len = hypotf(x2 - x1, y2 - y1);
 
-		const Sector *front = sd ? &inst.level.getSector(*sd) : NULL;
+		const Sector *const front = sd ? &inst.level.getSector(*sd) : NULL;
 
 		bool sky_front = inst.is_sky(front->CeilTex());
 		bool sky_upper = false;
@@ -1068,8 +1200,19 @@ public:
 
 			// railing tex
 			if (!is_null_tex(sd->MidTex()) && inst.r_view.texturing)
-				DrawMidMasker(ld.get(), sd, front, back, sky_upper,
-					ld_len, x1, y1, x2, y2);
+			{
+				float alpha = computeLineAlpha(*ld.get());
+				if (alpha >= 1.0f)
+				{
+					DrawMidMasker(ld.get(), sd, front, back, sky_upper,
+					ld_len, x1, y1, x2, y2, 1.0f);
+				}
+				else
+				{
+					sDeferredMidMaskers.push_back({ ld.get(), sd, front, back, sky_upper,
+						ld_len, x1, y1, x2, y2, alpha });
+				}
+			}
 
 			// draw sides of extrafloors
 			if (front->tag != back->tag)
@@ -1618,19 +1761,35 @@ public:
 		// always draw the sector the camera is in
 		MarkCameraSector();
 
-		for (int i=0 ; i < inst.level.numLinedefs(); i++)
+		sDeferredMidMaskers.clear();
+
+		// pass 1: all walls (translucent mid maskers are deferred)
+		for (int i = 0; i < inst.level.numLinedefs(); i++)
 			DrawLine(i);
 
 		glDisable(GL_ALPHA_TEST);
 
-		for (int s=0 ; s < inst.level.numSectors(); s++)
+		for (int s = 0; s < inst.level.numSectors(); s++)
 			if (seen_sectors.get(s))
 				DrawSector(s);
 
+		// pass 2: translucent mid maskers only
 		glEnable(GL_ALPHA_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDepthMask(GL_FALSE);
+
+		for (const DeferredMidMasker &dm : sDeferredMidMaskers)
+		{
+			DrawMidMasker(dm.ld, dm.sd, dm.front, dm.back, dm.sky_upper,
+				dm.ld_length, dm.x1, dm.y1, dm.x2, dm.y2, dm.alpha);
+		}
+
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
 
 		if (inst.r_view.sprites)
-			for (int t=0 ; t < inst.level.numThings() ; t++)
+			for (int t = 0; t < inst.level.numThings(); t++)
 				DrawThing(t);
 	}
 
@@ -1645,7 +1804,7 @@ public:
 
 		glDisable(GL_CULL_FACE);
 
-		glAlphaFunc(GL_GREATER, 0.5);
+		glAlphaFunc(GL_GREATER, 0.02);
 
 		// setup projection
 
@@ -1699,6 +1858,8 @@ public:
 	}
 };
 
+std::vector<RendInfo3D::DeferredMidMasker> RendInfo3D::sDeferredMidMaskers;
+
 
 void RGL_RenderWorld(Instance &inst, int ox, int oy, int pixel_w, int pixel_h)
 {
@@ -1708,6 +1869,11 @@ void RGL_RenderWorld(Instance &inst, int ox, int oy, int pixel_w, int pixel_h)
 	rend.Render();
 	rend.Highlight();
 	rend.Finish();
+}
+
+void RGL_ResetBuffers()
+{
+	RendInfo3D::resetBuffers();
 }
 
 #endif /* NO_OPENGL */

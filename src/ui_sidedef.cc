@@ -1338,6 +1338,20 @@ void UI_SideBox::updateUDMFFields()
 		summary += "🏼";
 
 	mUDMFHeader->details(summary);
+
+	updateSideFlagGreying();
+}
+
+void UI_SideBox::updateSideFlagGreying()
+{
+	bool smooth = !!mSmoothLighting->value();
+	bool noFake = !!mNoFakeContrast->value();
+
+	mNoFakeContrast->labelcolor(smooth ? FL_INACTIVE_COLOR : FL_FOREGROUND_COLOR);
+	mNoFakeContrast->redraw_label();
+
+	mSmoothLighting->labelcolor(noFake ? FL_INACTIVE_COLOR : FL_FOREGROUND_COLOR);
+	mSmoothLighting->redraw_label();
 }
 
 //--- editor settings ---

@@ -1771,7 +1771,7 @@ static bool ThingStuckInThing(const Instance &inst, const Thing *T1, const thing
 }
 
 
-static inline bool LD_is_blocking(const LineDef *L, const Document &doc)
+static inline bool LD_is_blocking(const LineDef *L, const Document &doc, char group)
 {
 #define MONSTER_HEIGHT  36
 
@@ -1781,6 +1781,16 @@ static inline bool LD_is_blocking(const LineDef *L, const Document &doc)
 
 	if (L->right < 0 || L->left < 0)
 		return true;
+
+	// Also block based on linedef thing-blocking flags
+	if (L->flags & MLF_Blocking || L->flags2 & MLF2_UDMF_BlockEverything)
+		return true;
+	if (group == 'm' && L->flags & (MLF_BlockMonsters | MLF_UDMF_BlockLandMonsters))
+		return true;
+	if (group == 'p' && L->flags & MLF_UDMF_BlockPlayers)
+		return true;
+	// NOTE: for block-floaters and block-land-monsters we need a new "floating" flag for the thing
+	// definition
 
 	const auto &S1 = doc.getSector(*doc.getRight(*L));
 	const auto &S2 = doc.getSector(*doc.getLeft(*L));
@@ -1814,7 +1824,7 @@ static bool ThingStuckInWall(const Thing *T, int r, char group, const Document &
 	{
 		const auto L = doc.linedefs[n];
 
-		if (! LD_is_blocking(L.get(), doc))
+		if (! LD_is_blocking(L.get(), doc, group))
 			continue;
 
 		if (doc.objects.lineTouchesBox(n, x1, y1, x2, y2))
