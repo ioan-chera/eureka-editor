@@ -1047,10 +1047,10 @@ void UI_LineBox::loadUDMFRenderingControls(const LoadingData &loaded, const Conf
 		MLF_UDMF_Translucent, 1, "🪟"},
 		{UDMF_LineFeature::transparent, "more translucent",
 		"Render line as even more translucent (Strife style)", MLF_UDMF_Transparent, 1, "🌫️"},
-		{UDMF_LineFeature::clipmidtex, "clip railing texture",
+		{UDMF_LineFeature::clipmidtex, "clip middle texture",
 		"Always clip two-sided middle texture to floor and ceiling, even if sector properties don't change",
 		MLF2_UDMF_ClipMidTex, 2, "✂️"},
-		{UDMF_LineFeature::wrapmidtex, "tile railing texture", "Repeat two-sided middle texture vertically",
+		{UDMF_LineFeature::wrapmidtex, "tile middle texture", "Repeat two-sided middle texture vertically",
 		MLF2_UDMF_WrapMidTex, 2, "🔲"},
 	};
 

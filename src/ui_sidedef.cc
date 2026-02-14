@@ -372,11 +372,11 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 	mNoFakeContrast->labelsize(FLAG_LABELSIZE);
 	mNoFakeContrast->callback(udmf_field_callback, this);
 
-	mClipMidTex = new Fl_Check_Button(0, 0, 0, 0, "clip railing texture");
+	mClipMidTex = new Fl_Check_Button(0, 0, 0, 0, "clip middle texture");
 	mClipMidTex->labelsize(FLAG_LABELSIZE);
 	mClipMidTex->callback(udmf_field_callback, this);
 
-	mWrapMidTex = new Fl_Check_Button(0, 0, 0, 0, "wrap railing texture");
+	mWrapMidTex = new Fl_Check_Button(0, 0, 0, 0, "tile middle texture");
 	mWrapMidTex->labelsize(FLAG_LABELSIZE);
 	mWrapMidTex->callback(udmf_field_callback, this);
 
@@ -1335,7 +1335,7 @@ void UI_SideBox::updateUDMFFields()
 	if(sd->flags & SideDef::FLAG_CLIPMIDTEX)
 		summary += "✂️";
 	if(sd->flags & SideDef::FLAG_WRAPMIDTEX)
-		summary += "🏼";
+		summary += "🔲";
 
 	mUDMFHeader->details(summary);
 
