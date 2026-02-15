@@ -70,11 +70,11 @@ private:
 class MultiTagView : public Fl_Group
 {
 public:
-	MultiTagView(Instance &inst, const std::function<void()> &redrawCallback,
-				 const std::function<void()> &dataCallback, int x, int y, int width, int height,
+	MultiTagView(Instance &inst, std::function<void()> redrawCallback,
+				 std::function<void()> dataCallback, int x, int y, int width, int height,
 				 const char *label = nullptr);
 
-	void setTags(std::set<int> &&tags);
+	void setTags(std::set<int> tags);
 	void clearTags();
 	const std::set<int> &getTags() const
 	{

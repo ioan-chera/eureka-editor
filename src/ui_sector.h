@@ -25,8 +25,10 @@
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
+class MultiTagView;
 class UI_CategoryButton;
 class UI_DynIntInput;
+class UI_StackPanel;
 struct gensector_t;
 
 struct SectorFlagButton
@@ -79,6 +81,8 @@ public:
 	int basicSectorMask = 65535;
 
 	UI_CategoryButton *udmfHeader;
+	UI_StackPanel *udmfPanel;
+	MultiTagView *multiTagView;
 
 public:
 	UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
@@ -118,6 +122,7 @@ private:
 	int findYForUDMF();
 	void updateUDMFGameInfo(const ConfigData &config);
 	static void udmfCategoryCallback(Fl_Widget *widget, void *data);
+	void multiTagViewCallback();
 
 	static void   height_callback(Fl_Widget *, void *);
 	static void headroom_callback(Fl_Widget *, void *);

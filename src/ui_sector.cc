@@ -22,6 +22,7 @@
 #include "Instance.h"
 #include "main.h"
 #include "ui_misc.h"
+#include "ui_multitag.h"
 #include "ui_window.h"
 
 #include "e_checks.h"
@@ -225,6 +226,18 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	udmfHeader->setExpanded(false);
 	udmfHeader->hide();
 	udmfHeader->callback(udmfCategoryCallback, this);
+
+	udmfPanel = new UI_StackPanel(X, Y, W, 24);
+	udmfPanel->hide();
+
+	multiTagView = new MultiTagView(inst, [this](){
+		redraw();
+	}, [this](){
+		multiTagViewCallback();
+	}, X, 0, W, 24);
+	multiTagView->hide();
+
+	udmfPanel->end();
 
 	mFixUp.loadFields({ type, light, tag, ceil_h, floor_h, c_tex, f_tex, headroom });
 
@@ -627,18 +640,47 @@ void UI_SectorBox::updateUDMFGameInfo(const ConfigData &config)
 	{
 		udmfHeader->show();
 		udmfHeader->position(udmfHeader->x(), findYForUDMF());
+		udmfPanel->position(udmfPanel->x(), udmfHeader->y() + udmfHeader->h());
+		if(udmfHeader->isExpanded())
+			udmfPanel->show();
+		else
+			udmfPanel->hide();
 	}
 	else
 	{
 		udmfHeader->hide();
+		udmfPanel->hide();
 		return;
 	}
+	if(UDMF_HasSectorFeature(config, UDMF_SectorFeature::moreids))
+		multiTagView->show();
+	else
+		multiTagView->hide();
+	udmfPanel->relayout();
 }
 
 void UI_SectorBox::udmfCategoryCallback(Fl_Widget *widget, void *data)
 {
 	auto box = static_cast<UI_SectorBox *>(data);
+	auto header = static_cast<UI_CategoryButton *>(widget);
+	if(header->isExpanded())
+		box->udmfPanel->show();
+	else
+		box->udmfPanel->hide();
 	box->redraw();
+}
+
+void UI_SectorBox::multiTagViewCallback()
+{
+	if(inst.edit.Selected->empty())
+		return;
+	EditOperation op(inst.level.basis);
+	op.setMessageForSelection("changed other tags", *inst.edit.Selected);
+	for(sel_iter_c it(*inst.edit.Selected); !it.done(); it.next())
+	{
+		std::set<int> tags = multiTagView->getTags();
+		op.changeSector(*it, &Sector::moreIDs, std::move(tags));
+	}
 }
 
 void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
@@ -814,6 +856,15 @@ void UI_SectorBox::UpdateField(std::optional<Basis::EditField> efield)
 			mFixUp.setInputValue(light, "");
 			mFixUp.setInputValue(tag, "");
 		}
+	}
+
+	if(inst.level.isSector(obj))
+	{
+		multiTagView->setTags(sector->moreIDs);
+	}
+	else
+	{
+		multiTagView->clearTags();
 	}
 }
 

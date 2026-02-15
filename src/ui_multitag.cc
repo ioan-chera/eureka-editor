@@ -218,11 +218,11 @@ void IDTag::drawRoundedRectOutline(int X, int Y, int W, int H, int radius)
 //  MultiTagView Implementation
 //------------------------------------------------------------------------
 
-MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCallback,
-						   const std::function<void()> &dataCallback, int x, int y,
+MultiTagView::MultiTagView(Instance &inst, std::function<void()> redrawCallback,
+						   std::function<void()> dataCallback, int x, int y,
 						   int width, int height, const char *label) :
-	Fl_Group(x, y, width, height, label), inst(inst), mRedrawCallback(redrawCallback),
-	mDataCallback(dataCallback)
+	Fl_Group(x, y, width, height, label), inst(inst), mRedrawCallback(std::move(redrawCallback)),
+	mDataCallback(std::move(dataCallback))
 {
 	static const char inputLabel[] = "More IDs:";
 	fl_font(FL_HELVETICA, FLAG_LABELSIZE);	// prepare
@@ -238,7 +238,7 @@ MultiTagView::MultiTagView(Instance &inst, const std::function<void()> &redrawCa
 	end();
 }
 
-void MultiTagView::setTags(std::set<int> &&tags)
+void MultiTagView::setTags(std::set<int> tags)
 {
 	mTags = std::move(tags);
 	updateTagButtons();

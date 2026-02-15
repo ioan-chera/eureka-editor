@@ -1678,7 +1678,7 @@ void UI_LineBox::UpdateField(std::optional<Basis::EditField> efield)
 	}
 
 	if(inst.conf.features.udmf_multipletags)
-		multiTagView->setTags(std::set(L->moreIDs));
+		multiTagView->setTags(L->moreIDs);
 
 	// Update category summaries for collapsed headers
 	for(const CategoryHeader &header : categoryHeaders)
