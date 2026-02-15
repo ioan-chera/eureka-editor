@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2025      Ioan Chera
+//  Copyright (C) 2025-2026 Ioan Chera
 //  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -25,14 +25,15 @@
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
+class UI_CategoryButton;
 class UI_DynIntInput;
 struct gensector_t;
 
 struct SectorFlagButton
 {
-	std::unique_ptr<Fl_Check_Button> button;
-	std::unique_ptr<Fl_Choice> choice;
-	const gensector_t *info;
+	Fl_Check_Button *button = nullptr;
+	Fl_Choice *choice = nullptr;
+	const gensector_t *info = nullptr;
 };
 
 class UI_SectorBox : public MapItemBox

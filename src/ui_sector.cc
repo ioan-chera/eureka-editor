@@ -433,13 +433,13 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		mask = 0;
 		for(const SectorFlagButton &button : box->bm_buttons)
 		{
-			if(w == button.button.get())
+			if(w == button.button)
 			{
 				mask = button.info->value;
 				value = button.button->value() ? mask : 0;
 				break;
 			}
-			if(w == button.choice.get())
+			if(w == button.choice)
 			{
 				int idx = button.choice->value();
 				mask = button.info->value;
@@ -925,9 +925,15 @@ void UI_SectorBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &c
 	for(const SectorFlagButton &button : bm_buttons)
 	{
 		if(button.button)
-			this->remove(button.button.get());
+		{
+			this->remove(button.button);
+			delete button.button;
+		}
 		else if(button.choice)
-			this->remove(button.choice.get());
+		{
+			this->remove(button.choice);
+			delete button.choice;
+		}
 	}
 	bm_buttons.clear();
 
@@ -942,7 +948,7 @@ void UI_SectorBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &c
 		if(gensec.options.empty())
 		{
 			// Simple flag
-			button.button = std::make_unique<Fl_Check_Button>(X + 28, Ycheck, 94, 20, "");
+			button.button = new Fl_Check_Button(X + 28, Ycheck, 94, 20, "");
 			button.button->copy_label(gensec.label.c_str());
 			button.button->labelsize(12);
 			button.button->callback(type_callback, this);
@@ -951,7 +957,7 @@ void UI_SectorBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &c
 		else
 		{
 			// Choice
-			button.choice = std::make_unique<Fl_Choice>(X + w() - 95, Ychoice, 80, 24, "");
+			button.choice = new Fl_Choice(X + w() - 95, Ychoice, 80, 24, "");
 			button.choice->copy_label((gensec.label + ": ").c_str());
 			for(const gensector_t::option_t &opt : gensec.options)
 				button.choice->add(opt.label.c_str(), 0, nullptr);
