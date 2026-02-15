@@ -80,33 +80,6 @@ struct DoubleFieldEntry
 	double SideDef::*fields[kNumSidedefParts];  // bottom, mid, top
 };
 
-// Lookup table for per-part double fields
-static const DoubleFieldEntry skDoubleFields[] =
-{
-	{"offsetx", {&SideDef::offsetx_bottom, &SideDef::offsetx_mid, &SideDef::offsetx_top}},
-	{"offsety", {&SideDef::offsety_bottom, &SideDef::offsety_mid, &SideDef::offsety_top}},
-	{"scalex",  {&SideDef::scalex_bottom,  &SideDef::scalex_mid,  &SideDef::scalex_top}},
-	{"scaley",  {&SideDef::scaley_bottom,  &SideDef::scaley_mid,  &SideDef::scaley_top}},
-	{"xscroll", {&SideDef::xscrollbottom,  &SideDef::xscrollmid,  &SideDef::xscrolltop}},
-	{"yscroll", {&SideDef::yscrollbottom,  &SideDef::yscrollmid,  &SideDef::yscrolltop}},
-};
-
-// Lookup table for per-part light fields
-static const SideDef::IntAddress skLightFields[kNumSidedefParts] =
-{
-	SideDef::F_LIGHT_BOTTOM,
-	SideDef::F_LIGHT_MID,
-	SideDef::F_LIGHT_TOP
-};
-
-// Lookup table for per-part light absolute flags
-static const int skLightAbsoluteFlags[kNumSidedefParts] =
-{
-	SideDef::FLAG_LIGHT_ABSOLUTE_BOTTOM,
-	SideDef::FLAG_LIGHT_ABSOLUTE_MID,
-	SideDef::FLAG_LIGHT_ABSOLUTE_TOP
-};
-
 // Field types for general sidedef properties
 enum GeneralFieldType
 {
@@ -124,35 +97,6 @@ struct PartFeatures
 	UDMF_SideFeature light;
 	UDMF_SideFeature lightAbsolute;
 	UDMF_SideFeature scroll[2];  // x, y
-};
-
-// UDMF features for each part (bottom=0, mid=1, top=2)
-static const PartFeatures skPartFeatures[kNumSidedefParts] =
-{
-	// Bottom
-	{
-		{UDMF_SideFeature::offsetx_bottom, UDMF_SideFeature::offsety_bottom},
-		{UDMF_SideFeature::scalex_bottom, UDMF_SideFeature::scaley_bottom},
-		UDMF_SideFeature::light_bottom,
-		UDMF_SideFeature::lightabsolute_bottom,
-		{UDMF_SideFeature::xscrollbottom, UDMF_SideFeature::yscrollbottom},
-	},
-	// Mid
-	{
-		{UDMF_SideFeature::offsetx_mid, UDMF_SideFeature::offsety_mid},
-		{UDMF_SideFeature::scalex_mid, UDMF_SideFeature::scaley_mid},
-		UDMF_SideFeature::light_mid,
-		UDMF_SideFeature::lightabsolute_mid,
-		{UDMF_SideFeature::xscrollmid, UDMF_SideFeature::yscrollmid},
-	},
-	// Top
-	{
-		{UDMF_SideFeature::offsetx_top, UDMF_SideFeature::offsety_top},
-		{UDMF_SideFeature::scalex_top, UDMF_SideFeature::scaley_top},
-		UDMF_SideFeature::light_top,
-		UDMF_SideFeature::lightabsolute_top,
-		{UDMF_SideFeature::xscrolltop, UDMF_SideFeature::yscrolltop},
-	},
 };
 
 //------------------------------------------------------------------------

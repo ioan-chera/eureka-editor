@@ -31,8 +31,10 @@
 #include "e_things.h"
 #include "m_config.h"
 #include "m_game.h"
+#include "m_udmf.h"
 #include "r_render.h"
 #include "Sector.h"
+#include "ui_category_button.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
@@ -218,6 +220,11 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 
 	genStartX = X - X0;
 	genStartY = Y - Y0;
+
+	udmfHeader = new UI_CategoryButton(X, Y, W, 24, "Advanced properties");
+	udmfHeader->setExpanded(false);
+	udmfHeader->hide();
+	udmfHeader->callback(udmfCategoryCallback, this);
 
 	mFixUp.loadFields({ type, light, tag, ceil_h, floor_h, c_tex, f_tex, headroom });
 
@@ -575,6 +582,64 @@ void UI_SectorBox::FreshTag()
 	}
 }
 
+
+int UI_SectorBox::findYForUDMF()
+{
+	int y;
+	if(bm_title->visible())
+	{
+		y = bm_title->y() + bm_title->h();
+
+		for(const SectorFlagButton &button : bm_buttons)
+		{
+			int ytest = -1;
+			if(button.button)
+			{
+				ytest = button.button->y() + button.button->h();
+				if(ytest > y)
+					y = ytest;
+			}
+			if(button.choice)
+			{
+				ytest = button.choice->y() + button.choice->h();
+				if(ytest > y)
+					y = ytest;
+			}
+		}
+	}
+	else
+		y = bm_title->y();
+	y += 10;
+	return y;
+}
+
+
+void UI_SectorBox::updateUDMFGameInfo(const ConfigData &config)
+{
+	bool hasUDMF = false;
+	for(int i = 0; i < (int)UDMF_SectorFeature::COUNT; ++i)
+	{
+		if(!UDMF_HasSectorFeature(config, (UDMF_SectorFeature)i))
+			continue;
+		hasUDMF = true;
+	}
+	if(hasUDMF)
+	{
+		udmfHeader->show();
+		udmfHeader->position(udmfHeader->x(), findYForUDMF());
+	}
+	else
+	{
+		udmfHeader->hide();
+		return;
+	}
+}
+
+void UI_SectorBox::udmfCategoryCallback(Fl_Widget *widget, void *data)
+{
+	auto box = static_cast<UI_SectorBox *>(data);
+	box->redraw();
+}
 
 void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 {
@@ -974,6 +1039,11 @@ void UI_SectorBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &c
 	else
 		bm_title->show();
 	basicSectorMask = M_CalcSectorTypeMask(config);
+
+	if(loaded.levelFormat == MapFormat::udmf)
+	{
+		updateUDMFGameInfo(config);
+	}
 
 	UpdateField();
 

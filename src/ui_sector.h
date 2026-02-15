@@ -78,6 +78,8 @@ public:
 	int genStartX = 0, genStartY = 0;
 	int basicSectorMask = 65535;
 
+	UI_CategoryButton *udmfHeader;
+
 public:
 	UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 
@@ -112,6 +114,10 @@ private:
 	void InstallSectorType(int mask, int value);
 
 	void FreshTag();
+
+	int findYForUDMF();
+	void updateUDMFGameInfo(const ConfigData &config);
+	static void udmfCategoryCallback(Fl_Widget *widget, void *data);
 
 	static void   height_callback(Fl_Widget *, void *);
 	static void headroom_callback(Fl_Widget *, void *);
