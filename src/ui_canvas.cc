@@ -1624,6 +1624,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
 
         if(info.numtags)
             for (int m = 0 ; m < inst.level.numSectors(); m++)
+			{
                 if(inst.level.sectors[m]->tag > 0)
                     for(int i = 0; i < info.numtags; ++i)
                         if (inst.level.sectors[m]->tag == info.tags[i])
@@ -1631,6 +1632,15 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                             DrawHighlight(ObjType::sectors, m);
 							DrawConnection(info.type, info.objnum, ObjType::sectors, m);
                         }
+				if (!inst.level.sectors[m]->moreIDs.empty())
+					for (int id : inst.level.sectors[m]->moreIDs)
+						for (int i = 0; i < info.numtags; ++i)
+							if (id == info.tags[i])
+							{
+								DrawHighlight(ObjType::sectors, m);
+								DrawConnection(info.type, info.objnum, ObjType::sectors, m);
+							}
+			}
         if(info.numtids)
             for(int m = 0; m < inst.level.numThings(); m++)
                 if(inst.level.things[m]->tid > 0)
@@ -1826,6 +1836,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
     {
         highlightTaggingTriggers(inst.level.sectors[objnum]->tag, &SpecialTagInfo::tags,
                                  &SpecialTagInfo::numtags, objtype, objnum);
+		for (int id : inst.level.sectors[objnum]->moreIDs)
+			highlightTaggingTriggers(id, &SpecialTagInfo::tags,
+				&SpecialTagInfo::numtags, objtype, objnum);
     }
 }
 
@@ -2326,7 +2339,31 @@ void UI_Canvas::RenderSector(int num)
 
 ///  fprintf(stderr, "RenderSector %d\n", num);
 
-	rgb_color_t light_col = SectorLightColor(inst.level.sectors[num]->light);
+	const Sector *const sec = inst.level.sectors[num].get();
+
+	// Determine if this is floor or ceiling rendering
+	const bool isCeiling = (inst.edit.sector_render_mode == SREND_Ceiling ||
+		inst.edit.sector_render_mode == SREND_CeilBright);
+
+	// Per-flat lighting
+	int effectiveLight = sec->light;
+	if (isCeiling)
+	{
+		if (sec->flags & Sector::FLAG_LIGHTCEILINGABSOLUTE)
+			effectiveLight = sec->lightceiling;
+		else
+			effectiveLight += sec->lightceiling;
+	}
+	else
+	{
+		if (sec->flags & Sector::FLAG_LIGHTFLOORABSOLUTE)
+			effectiveLight = sec->lightfloor;
+		else
+			effectiveLight += sec->lightfloor;
+	}
+	effectiveLight = std::max(0, std::min(255, effectiveLight));
+
+	rgb_color_t light_col = SectorLightColor(effectiveLight);
 	bool light_and_tex = false;
 
 	SString tex_name;
@@ -2396,6 +2433,23 @@ void UI_Canvas::RenderSector(int num)
 	int th = img ? img->height() : 1;
 
 	const img_pixel_t *src_pix = img ? img->buf() : NULL;
+
+	// UDMF flat transforms
+	const double xpan = isCeiling ? sec->xpanningceiling : sec->xpanningfloor;
+	const double ypan = isCeiling ? sec->ypanningceiling : sec->ypanningfloor;
+	double xscl = isCeiling ? sec->xscaleceiling : sec->xscalefloor;
+	double yscl = isCeiling ? sec->yscaleceiling : sec->yscalefloor;
+	const double rotation = isCeiling ? sec->rotationceiling : sec->rotationfloor;
+
+	if (xscl == 0.0) xscl = 1.0;
+	if (yscl == 0.0) yscl = 1.0;
+
+	const double rot_rad = rotation * M_PI / 180.0;
+	const double cos_r = cos(rot_rad);
+	const double sin_r = sin(rot_rad);
+
+	const bool hasTransform = (rotation != 0.0 || xscl != 1.0 || yscl != 1.0 ||
+		xpan != 0.0 || ypan != 0.0);
 
 	for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 	{
@@ -2470,10 +2524,6 @@ void UI_Canvas::RenderSector(int num)
 			uint8_t *dest = rgb_buf + ((x - rgb_x) + (y - rgb_y) * rgb_w) * 3;
 			uint8_t *dest_end = dest + span_w * 3;
 
-			// the logic here for non-64x64 textures matches the software
-			// 3D renderer, but is different than ZDoom (which scales them).
-			int ty = (0 - (int)MAPY(y)) & (th - 1);
-
 			if (light_and_tex)
 			{
 				int r = RGB_RED(light_col)   * 0x101;
@@ -2482,7 +2532,23 @@ void UI_Canvas::RenderSector(int num)
 
 				for (; dest < dest_end ; dest += 3, x++)
 				{
-					int tx = (int)MAPX(x) & (tw - 1);
+					int tx, ty;
+					if (hasTransform)
+					{
+						double wx = (double)MAPX(x);
+						double wy = (double)(-MAPY(y));
+
+						double rx2 = wx * cos_r + wy * sin_r;
+						double ry2 = -wx * sin_r + wy * cos_r;
+
+						tx = int(rx2 / xscl + xpan) & (tw - 1);
+						ty = int(ry2 / yscl + ypan) & (th - 1);
+					}
+					else
+					{
+						tx = (int)MAPX(x) & (tw - 1);
+						ty = (0 - (int)MAPY(y)) & (th - 1);
+					}
 
 					img_pixel_t pix = src_pix[ty * tw + tx];
 
@@ -2497,7 +2563,23 @@ void UI_Canvas::RenderSector(int num)
 			{
 				for (; dest < dest_end ; dest += 3, x++)
 				{
-					int tx = (int)MAPX(x) & (tw - 1);
+					int tx, ty;
+					if (hasTransform)
+					{
+						double wx = (double)MAPX(x);
+						double wy = (double)(-MAPY(y));
+
+						double rx2 = wx * cos_r + wy * sin_r;
+						double ry2 = -wx * sin_r + wy * cos_r;
+
+						tx = int(rx2 / xscl + xpan) & (tw - 1);
+						ty = int(ry2 / yscl + ypan) & (th - 1);
+					}
+					else
+					{
+						tx = (int)MAPX(x) & (tw - 1);
+						ty = (0 - (int)MAPY(y)) & (th - 1);
+					}
 
 					img_pixel_t pix = src_pix[ty * tw + tx];
 
@@ -2508,6 +2590,20 @@ void UI_Canvas::RenderSector(int num)
 	}
 
 #else // OpenGL
+	// UDMF flat transforms
+	const double xpan = isCeiling ? sec->xpanningceiling : sec->xpanningfloor;
+	const double ypan = isCeiling ? sec->ypanningceiling : sec->ypanningfloor;
+	double xscale = isCeiling ? sec->xscaleceiling : sec->xscalefloor;
+	double yscale = isCeiling ? sec->yscaleceiling : sec->yscalefloor;
+	const double rotation = isCeiling ? sec->rotationceiling : sec->rotationfloor;
+
+	if (xscale == 0.0) xscale = 1.0;
+	if (yscale == 0.0) yscale = 1.0;
+
+	const double rot_rad = rotation * M_PI / 180.0;
+	const double cos_r = cos(rot_rad);
+	const double sin_r = sin(rot_rad);
+
 	if (img)
 	{
 		if (light_and_tex)
@@ -2542,7 +2638,16 @@ void UI_Canvas::RenderSector(int num)
 
 			if (img)
 			{
-				glTexCoord2f(poly->mx[p] / img_w, poly->my[p] / img_h);
+				const double wx = poly->mx[p];
+				const double wy = poly->my[p];
+
+				const double rx = wx * cos_r + wy * sin_r;
+				const double ry = -wx * sin_r + wy * cos_r;
+
+				const float tx = static_cast<float>((rx / xscale + xpan) / img_w);
+				const float ty = static_cast<float>((ry / yscale + ypan) / img_h);
+
+				glTexCoord2f(tx, ty);
 			}
 
 			glVertex2i(sx, sy);

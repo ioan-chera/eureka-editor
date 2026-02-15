@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -1542,14 +1543,65 @@ public:
 
 		dest += x + y1 * inst.r_view.screen_w;
 
-		int light = dw->sec->light;
+		// UDMF flat transforms
+		const bool isFloor = (&surf == &dw->floor);
+		const Sector *const sec = dw->sec;
+
+		const double xpan = isFloor ? sec->xpanningfloor : sec->xpanningceiling;
+		const double ypan = isFloor ? sec->ypanningfloor : sec->ypanningceiling;
+		double xscale = isFloor ? sec->xscalefloor : sec->xscaleceiling;
+		double yscale = isFloor ? sec->yscalefloor : sec->yscaleceiling;
+		const double rotation = isFloor ? sec->rotationfloor : sec->rotationceiling;
+
+		if (xscale == 0.0) xscale = 1.0;
+		if (yscale == 0.0) yscale = 1.0;
+
+		const double rotation_rad = rotation * M_PI / 180.0;
+		const double cos_r = cos(rotation_rad);
+		const double sin_r = sin(rotation_rad);
+
+		const bool hasTransform = (rotation != 0.0 || xscale != 1.0 || yscale != 1.0 ||
+			xpan != 0.0 || ypan != 0.0);
+
+		// Per-flat lighting
+		int light;
+		if (isFloor)
+		{
+			if (sec->flags & Sector::FLAG_LIGHTFLOORABSOLUTE)
+				light = sec->lightfloor;
+			else
+				light = sec->light + sec->lightfloor;
+		}
+		else
+		{
+			if (sec->flags & Sector::FLAG_LIGHTCEILINGABSOLUTE)
+				light = sec->lightceiling;
+			else
+				light = sec->light + sec->lightceiling;
+		}
+		light = std::max(0, std::min(255, light));
 
 		for ( ; y1 <= y2 ; y1++, dest += inst.r_view.screen_w)
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
-			int tx = int( inst.r_view.x - static_cast<double>(t_sin) * dist) & (tw - 1);
-			int ty = int(-inst.r_view.y + static_cast<double>(t_cos) * dist) & (th - 1);
+			int tx, ty;
+			if (hasTransform)
+			{
+				const double wx = inst.r_view.x - static_cast<double>(t_sin) * dist;
+				const double wy = -inst.r_view.y + static_cast<double>(t_cos) * dist;
+
+				const double rx = wx * cos_r + wy * sin_r;
+				const double ry = -wx * sin_r + wy * cos_r;
+
+				tx = int(rx / xscale + xpan) & (tw - 1);
+				ty = int(ry / yscale + ypan) & (th - 1);
+			}
+			else
+			{
+				tx = int( inst.r_view.x - static_cast<double>(t_sin) * dist) & (tw - 1);
+				ty = int(-inst.r_view.y + static_cast<double>(t_cos) * dist) & (th - 1);
+			}
 
 			*dest = src[ty * tw + tx];
 
@@ -1616,7 +1668,25 @@ public:
 
 		dest += x + y1 * inst.r_view.screen_w;
 
-		int light = dw->sec->light;
+		// Per-flat lighting
+		const bool isFloor = (&surf == &dw->floor);
+		const Sector *const sec = dw->sec;
+		int light;
+		if (isFloor)
+		{
+			if (sec->flags & Sector::FLAG_LIGHTFLOORABSOLUTE)
+				light = sec->lightfloor;
+			else
+				light = sec->light + sec->lightfloor;
+		}
+		else
+		{
+			if (sec->flags & Sector::FLAG_LIGHTCEILINGABSOLUTE)
+				light = sec->lightceiling;
+			else
+				light = sec->light + sec->lightceiling;
+		}
+		light = std::max(0, std::min(255, light));
 
 		for ( ; y1 <= y2 ; y1++, dest += inst.r_view.screen_w)
 		{

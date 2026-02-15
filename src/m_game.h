@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -451,6 +452,7 @@ struct ConfigData
 
 	uint64_t udmfLineFeatures = 0;
 	uint64_t udmfSideFeatures = 0;
+	uint64_t udmfSectorFeatures = 0;
 
 	int num_gen_linetypes = 0;
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {}; // BOOM Generalized Lines

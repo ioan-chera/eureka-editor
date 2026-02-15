@@ -250,6 +250,75 @@ bool UDMF_HasSideFeature(const ConfigData &config, UDMF_SideFeature feature)
 	return (config.udmfSideFeatures & (1ULL << (uint64_t)feature)) != 0;
 }
 
+// Returns false on invalid string
+bool UDMF_AddSectorFeature(ConfigData &config, const char *featureName)
+{
+	struct FeatureMap
+	{
+		const char *name;
+		UDMF_SectorFeature flagIndex;
+	};
+
+#define ENTRY(a) { #a, UDMF_SectorFeature::a }
+	static const FeatureMap map[] =
+	{
+		ENTRY(colormap),
+		ENTRY(damageamount),
+		ENTRY(damagehazard),
+		ENTRY(damageinterval),
+		ENTRY(frictionfactor),
+		ENTRY(gravity),
+		ENTRY(hidden),
+		ENTRY(leakiness),
+		ENTRY(lightceiling),
+		ENTRY(lightceilingabsolute),
+		ENTRY(lightfloor),
+		ENTRY(lightfloorabsolute),
+		ENTRY(moreids),
+		ENTRY(movefactor),
+		ENTRY(noattack),
+		ENTRY(rotationceiling),
+		ENTRY(rotationfloor),
+		ENTRY(scrollceilingmode),
+		ENTRY(scrollfloormode),
+		ENTRY(silent),
+		ENTRY(skyceiling),
+		ENTRY(skyfloor),
+		ENTRY(thrustgroup),
+		ENTRY(thrustlocation),
+		ENTRY(xpanningceiling),
+		ENTRY(xpanningfloor),
+		ENTRY(xscaleceiling),
+		ENTRY(xscalefloor),
+		ENTRY(xscrollceiling),
+		ENTRY(xscrollfloor),
+		ENTRY(xthrust),
+		ENTRY(ypanningceiling),
+		ENTRY(ypanningfloor),
+		ENTRY(yscaleceiling),
+		ENTRY(yscalefloor),
+		ENTRY(yscrollceiling),
+		ENTRY(yscrollfloor),
+		ENTRY(ythrust),
+	};
+#undef ENTRY
+
+	for(const FeatureMap &entry : map)
+	{
+		if(y_stricmp(entry.name, featureName) == 0)
+		{
+			config.udmfSectorFeatures |= (1ULL << (uint64_t)entry.flagIndex);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool UDMF_HasSectorFeature(const ConfigData &config, UDMF_SectorFeature feature)
+{
+	return (config.udmfSectorFeatures & (1ULL << (uint64_t)feature)) != 0;
+}
+
 class Udmf_Token
 {
 private:
@@ -872,6 +941,13 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, const Udmf_
 
 static void UDMF_ParseSectorField(const Document &doc, Sector *S, const Udmf_Token& field, const Udmf_Token& value)
 {
+	// just ignore any setting with the "false" keyword
+	if (value.Match("false"))
+		return;
+
+#define HAS_FLOAT(n) (field.Match(#n)) S->n = value.DecodeFloat()
+#define HAS_INT(n)   (field.Match(#n)) S->n = value.DecodeInt()
+
 	if (field.Match("heightfloor"))
 		S->floorh = value.DecodeInt();
 	else if (field.Match("heightceiling"))
@@ -886,10 +962,71 @@ static void UDMF_ParseSectorField(const Document &doc, Sector *S, const Udmf_Tok
 		S->type = value.DecodeInt();
 	else if (field.Match("id"))
 		S->tag = value.DecodeInt();
+
+	// UDMF float fields
+	else if HAS_FLOAT(frictionfactor);
+	else if HAS_FLOAT(gravity);
+	else if HAS_FLOAT(movefactor);
+	else if HAS_FLOAT(rotationceiling);
+	else if HAS_FLOAT(rotationfloor);
+	else if HAS_FLOAT(xpanningceiling);
+	else if HAS_FLOAT(xpanningfloor);
+	else if HAS_FLOAT(xscaleceiling);
+	else if HAS_FLOAT(xscalefloor);
+	else if HAS_FLOAT(xscrollceiling);
+	else if HAS_FLOAT(xscrollfloor);
+	else if HAS_FLOAT(xthrust);
+	else if HAS_FLOAT(ypanningceiling);
+	else if HAS_FLOAT(ypanningfloor);
+	else if HAS_FLOAT(yscaleceiling);
+	else if HAS_FLOAT(yscalefloor);
+	else if HAS_FLOAT(yscrollceiling);
+	else if HAS_FLOAT(yscrollfloor);
+	else if HAS_FLOAT(ythrust);
+
+	// UDMF int fields
+	else if HAS_INT(damageamount);
+	else if HAS_INT(damageinterval);
+	else if HAS_INT(leakiness);
+	else if HAS_INT(lightceiling);
+	else if HAS_INT(lightfloor);
+	else if HAS_INT(scrollceilingmode);
+	else if HAS_INT(scrollfloormode);
+	else if HAS_INT(thrustgroup);
+	else if HAS_INT(thrustlocation);
+
+	// UDMF string fields
+	else if (field.Match("colormap"))
+		S->colormap = BA_InternaliseString(value.DecodeString());
+	else if (field.Match("skyceiling"))
+		S->skyceiling = BA_InternaliseString(value.DecodeString());
+	else if (field.Match("skyfloor"))
+		S->skyfloor = BA_InternaliseString(value.DecodeString());
+
+	// UDMF flags
+	else if (field.Match("damagehazard"))
+		S->flags |= Sector::FLAG_DAMAGEHAZARD;
+	else if (field.Match("hidden"))
+		S->flags |= Sector::FLAG_HIDDEN;
+	else if (field.Match("lightceilingabsolute"))
+		S->flags |= Sector::FLAG_LIGHTCEILINGABSOLUTE;
+	else if (field.Match("lightfloorabsolute"))
+		S->flags |= Sector::FLAG_LIGHTFLOORABSOLUTE;
+	else if (field.Match("noattack"))
+		S->flags |= Sector::FLAG_NOATTACK;
+	else if (field.Match("silent"))
+		S->flags |= Sector::FLAG_SILENT;
+
+	// UDMF moreids
+	else if (field.Match("moreids"))
+		S->moreIDs = parseMoreIDs(value.DecodeString().c_str());
+
 	else
 	{
-		gLog.debugPrintf("sector #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
+		gLog.debugPrintf("sector #%d: unknown field '%s'\n", doc.numSectors() - 1, field.c_str());
 	}
+#undef HAS_INT
+#undef HAS_FLOAT
 }
 
 static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Token& name)
@@ -1153,6 +1290,20 @@ static SString EncodeString(const SString &raw)
 	return "\"" + result + "\"";
 }
 
+static void writeMoreIDs(const std::set<int> &moreIDs, Lump_c *lump)
+{
+	lump->Printf("moreids = \"");
+	bool first = true;
+	for(int id : moreIDs)
+	{
+		if (!first)
+			lump->Printf(" ");
+		lump->Printf("%d", id);
+		first = false;
+	}
+	lump->Printf("\";\n");
+}
+
 static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 {
 	for (int i = 0 ; i < inst.level.numLinedefs(); i++)
@@ -1204,18 +1355,7 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 			lump->Printf("alpha = %0.16g;\n", ld->alpha);
 
 		if (!ld->moreIDs.empty())
-		{
-			lump->Printf("moreids = \"");
-			bool first = true;
-			for(int id : ld->moreIDs)
-			{
-				if (!first)
-					lump->Printf(" ");
-				lump->Printf("%d", id);
-				first = false;
-			}
-			lump->Printf("\";\n");
-		}
+			writeMoreIDs(ld->moreIDs, lump);
 
 		// linedef flags
 		for(const UDMFMapping& mapping : kUDMFMapping)
@@ -1345,6 +1485,100 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 			lump->Printf("special = %d;\n", sec->type);
 		if (sec->tag != 0)
 			lump->Printf("id = %d;\n", sec->tag);
+
+		// UDMF float fields
+		if (sec->frictionfactor != Sector::kDefaultFrictionFactor)
+			lump->Printf("frictionfactor = %.16g;\n", sec->frictionfactor);
+		if (sec->gravity != 1.0)
+			lump->Printf("gravity = %.16g;\n", sec->gravity);
+		if (sec->movefactor != Sector::kDefaultMoveFactor)
+			lump->Printf("movefactor = %.16g;\n", sec->movefactor);
+		if (sec->rotationceiling)
+			lump->Printf("rotationceiling = %.16g;\n", sec->rotationceiling);
+		if (sec->rotationfloor)
+			lump->Printf("rotationfloor = %.16g;\n", sec->rotationfloor);
+		if (sec->xpanningceiling)
+			lump->Printf("xpanningceiling = %.16g;\n", sec->xpanningceiling);
+		if (sec->xpanningfloor)
+			lump->Printf("xpanningfloor = %.16g;\n", sec->xpanningfloor);
+		if (sec->xscaleceiling != 1.0)
+			lump->Printf("xscaleceiling = %.16g;\n", sec->xscaleceiling);
+		if (sec->xscalefloor != 1.0)
+			lump->Printf("xscalefloor = %.16g;\n", sec->xscalefloor);
+		if (sec->xscrollceiling)
+			lump->Printf("xscrollceiling = %.16g;\n", sec->xscrollceiling);
+		if (sec->xscrollfloor)
+			lump->Printf("xscrollfloor = %.16g;\n", sec->xscrollfloor);
+		if (sec->xthrust)
+			lump->Printf("xthrust = %.16g;\n", sec->xthrust);
+		if (sec->ypanningceiling)
+			lump->Printf("ypanningceiling = %.16g;\n", sec->ypanningceiling);
+		if (sec->ypanningfloor)
+			lump->Printf("ypanningfloor = %.16g;\n", sec->ypanningfloor);
+		if (sec->yscaleceiling != 1.0)
+			lump->Printf("yscaleceiling = %.16g;\n", sec->yscaleceiling);
+		if (sec->yscalefloor != 1.0)
+			lump->Printf("yscalefloor = %.16g;\n", sec->yscalefloor);
+		if (sec->yscrollfloor)
+			lump->Printf("yscrollfloor = %.16g;\n", sec->yscrollfloor);
+		if (sec->yscrollceiling)
+			lump->Printf("yscrollceiling = %.16g;\n", sec->yscrollceiling);
+		if (sec->ythrust)
+			lump->Printf("ythrust = %.16g;\n", sec->ythrust);
+
+		// UDMF int fields
+		if (sec->damageamount)
+			lump->Printf("damageamount = %d;\n", sec->damageamount);
+		if (sec->damageinterval != Sector::kDefaultDamageInterval)
+			lump->Printf("damageinterval = %d;\n", sec->damageinterval);
+		if (sec->lightceiling)
+			lump->Printf("lightceiling = %d;\n", sec->lightceiling);
+		if (sec->lightfloor)
+			lump->Printf("lightfloor = %d;\n", sec->lightfloor);
+		if (sec->leakiness)
+			lump->Printf("leakiness = %d;\n", sec->leakiness);
+		if (sec->scrollfloormode)
+			lump->Printf("scrollfloormode = %d;\n", sec->scrollfloormode);
+		if (sec->scrollceilingmode)
+			lump->Printf("scrollceilingmode = %d;\n", sec->scrollceilingmode);
+		if (sec->thrustgroup)
+			lump->Printf("thrustgroup = %d;\n", sec->thrustgroup);
+		if (sec->thrustlocation)
+			lump->Printf("thrustlocation = %d;\n", sec->thrustlocation);
+
+		// UDMF string fields
+		{
+			SString cm = sec->Colormap();
+			if (!cm.empty())
+				lump->Printf("colormap = %s;\n", EncodeString(cm).c_str());
+		}
+		{
+			SString sf = sec->SkyFloor();
+			if (!sf.empty())
+				lump->Printf("skyfloor = %s;\n", EncodeString(sf).c_str());
+		}
+		{
+			SString sc = sec->SkyCeiling();
+			if (!sc.empty())
+				lump->Printf("skyceiling = %s;\n", EncodeString(sc).c_str());
+		}
+
+		// UDMF flags
+		if (sec->flags & Sector::FLAG_DAMAGEHAZARD)
+			lump->Printf("damagehazard = true;\n");
+		if (sec->flags & Sector::FLAG_HIDDEN)
+			lump->Printf("hidden = true;\n");
+		if (sec->flags & Sector::FLAG_LIGHTCEILINGABSOLUTE)
+			lump->Printf("lightceilingabsolute = true;\n");
+		if (sec->flags & Sector::FLAG_LIGHTFLOORABSOLUTE)
+			lump->Printf("lightfloorabsolute = true;\n");
+		if (sec->flags & Sector::FLAG_NOATTACK)
+			lump->Printf("noattack = true;\n");
+		if (sec->flags & Sector::FLAG_SILENT)
+			lump->Printf("silent = true;\n");
+
+		if (!sec->moreIDs.empty())
+			writeMoreIDs(sec->moreIDs, lump);
 
 		lump->Printf("}\n\n");
 	}

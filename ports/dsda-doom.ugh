@@ -743,7 +743,45 @@ udmf_sidedef yscrollbottom
 udmf_sidedef yscrollmid
 udmf_sidedef yscrolltop
 
-# TODO: sector fields
+# Sector UDMF fields
+udmf_sector colormap
+udmf_sector damageamount
+udmf_sector damagehazard
+udmf_sector damageinterval
+udmf_sector frictionfactor
+udmf_sector gravity
+udmf_sector hidden
+udmf_sector leakiness
+udmf_sector lightceiling
+udmf_sector lightceilingabsolute
+udmf_sector lightfloor
+udmf_sector lightfloorabsolute
+udmf_sector moreids
+udmf_sector movefactor
+udmf_sector noattack
+udmf_sector rotationceiling
+udmf_sector rotationfloor
+udmf_sector scrollceilingmode
+udmf_sector scrollfloormode
+udmf_sector silent
+udmf_sector skyceiling
+udmf_sector skyfloor
+udmf_sector thrustgroup
+udmf_sector thrustlocation
+udmf_sector xpanningceiling
+udmf_sector xpanningfloor
+udmf_sector xscaleceiling
+udmf_sector xscalefloor
+udmf_sector xscrollceiling
+udmf_sector xscrollfloor
+udmf_sector xthrust
+udmf_sector ypanningceiling
+udmf_sector ypanningfloor
+udmf_sector yscaleceiling
+udmf_sector yscalefloor
+udmf_sector yscrollceiling
+udmf_sector yscrollfloor
+udmf_sector ythrust
 
 # TODO: thing alpha floating-point number field
 # TODO: thing arg0str text field

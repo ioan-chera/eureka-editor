@@ -131,4 +131,50 @@ enum class UDMF_SideFeature : unsigned
 bool UDMF_AddSideFeature(ConfigData &config, const char *featureName);
 bool UDMF_HasSideFeature(const ConfigData &config, UDMF_SideFeature feature);
 
+enum class UDMF_SectorFeature : unsigned
+{
+	colormap,
+	damageamount,
+	damagehazard,
+	damageinterval,
+	frictionfactor,
+	gravity,
+	hidden,
+	leakiness,
+	lightceiling,
+	lightceilingabsolute,
+	lightfloor,
+	lightfloorabsolute,
+	moreids,
+	movefactor,
+	noattack,
+	rotationceiling,
+	rotationfloor,
+	scrollceilingmode,
+	scrollfloormode,
+	silent,
+	skyceiling,
+	skyfloor,
+	thrustgroup,
+	thrustlocation,
+	xpanningceiling,
+	xpanningfloor,
+	xscaleceiling,
+	xscalefloor,
+	xscrollceiling,
+	xscrollfloor,
+	xthrust,
+	ypanningceiling,
+	ypanningfloor,
+	yscaleceiling,
+	yscalefloor,
+	yscrollceiling,
+	yscrollfloor,
+	ythrust,
+	COUNT
+};
+
+bool UDMF_AddSectorFeature(ConfigData &config, const char *featureName);
+bool UDMF_HasSectorFeature(const ConfigData &config, UDMF_SectorFeature feature);
+
 #endif

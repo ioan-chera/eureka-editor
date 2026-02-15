@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -792,6 +793,15 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 
 		if(!UDMF_AddSideFeature(config, argv[1]))
 			gLog.printf("Unknown UDMF sidedef feature '%s'\n", argv[1]);
+	}
+
+	else if(y_stricmp(argv[0], "udmf_sector") == 0)
+	{
+		if(nargs < 1)
+			pst->fail(bad_arg_count_fail, argv[0], 1);
+
+		if(!UDMF_AddSectorFeature(config, argv[1]))
+			gLog.printf("Unknown UDMF sector feature '%s'\n", argv[1]);
 	}
 
 	else if(y_stricmp(argv[0], "udmf_linechoice") == 0)

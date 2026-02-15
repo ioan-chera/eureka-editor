@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2022 Ioan Chera
+//  Copyright (C) 2022-2026 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -28,6 +28,21 @@ SString Sector::FloorTex() const noexcept
 SString Sector::CeilTex() const noexcept
 {
 	return BA_GetString(ceil_tex);
+}
+
+SString Sector::Colormap() const noexcept
+{
+	return BA_GetString(colormap);
+}
+
+SString Sector::SkyFloor() const noexcept
+{
+	return BA_GetString(skyfloor);
+}
+
+SString Sector::SkyCeiling() const noexcept
+{
+	return BA_GetString(skyceiling);
 }
 
 void Sector::SetDefaults(const ConfigData &config)

@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2020 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -644,6 +645,48 @@ public:
 		float g = g0 / 255.0f;
 		float b = b0 / 255.0f;
 
+		// UDMF flat transforms
+		const bool isFloor = (znormal < 0);
+		const double xpan = isFloor ? sec->xpanningfloor : sec->xpanningceiling;
+		const double ypan = isFloor ? sec->ypanningfloor : sec->ypanningceiling;
+		double xscale = isFloor ? sec->xscalefloor : sec->xscaleceiling;
+		double yscale = isFloor ? sec->yscalefloor : sec->yscaleceiling;
+		const double rotation = isFloor ? sec->rotationfloor : sec->rotationceiling;
+
+		if (xscale == 0.0) xscale = 1.0;
+		if (yscale == 0.0) yscale = 1.0;
+
+		const double rotation_rad = rotation * M_PI / 180.0;
+		const double cos_r = cos(rotation_rad);
+		const double sin_r = sin(rotation_rad);
+
+		auto transformTexCoord = [&](float wx, float wy, float &outTx, float &outTy)
+		{
+			const double rx = wx * cos_r + wy * sin_r;
+			const double ry = -wx * sin_r + wy * cos_r;
+
+			outTx = static_cast<float>((rx / xscale + xpan) / img_w);
+			outTy = static_cast<float>((ry / yscale + ypan) / img_h);
+		};
+
+		// Per-flat lighting
+		int effectiveLight;
+		if (isFloor)
+		{
+			if (sec->flags & Sector::FLAG_LIGHTFLOORABSOLUTE)
+				effectiveLight = sec->lightfloor;
+			else
+				effectiveLight = sec->light + sec->lightfloor;
+		}
+		else
+		{
+			if (sec->flags & Sector::FLAG_LIGHTCEILINGABSOLUTE)
+				effectiveLight = sec->lightceiling;
+			else
+				effectiveLight = sec->light + sec->lightceiling;
+		}
+		effectiveLight = std::max(0, std::min(255, effectiveLight));
+
 		for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 		{
 			const sector_polygon_t *poly = &subdiv->polygons[i];
@@ -658,38 +701,38 @@ public:
 				float ax = poly->mx[0];
 				float ay = poly->my[0];
 				float az = static_cast<float>(plane ? plane->SlopeZ(ax, ay) : z);
-				float atx = ax / img_w;
-				float aty = ay / img_h;
+				float atx, aty;
+				transformTexCoord(ax, ay, atx, aty);
 
 				float bx = poly->mx[1];
 				float by = poly->my[1];
 				float bz = static_cast<float>(plane ? plane->SlopeZ(bx, by) : z);
-				float btx = bx / img_w;
-				float bty = by / img_h;
+				float btx, bty;
+				transformTexCoord(bx, by, btx, bty);
 
 				float cx = poly->mx[2];
 				float cy = poly->my[2];
 				float cz = static_cast<float>(plane ? plane->SlopeZ(cx, cy) : z);
-				float ctx = cx / img_w;
-				float cty = cy / img_h;
+				float ctx, cty;
+				transformTexCoord(cx, cy, ctx, cty);
 
 				LightClippedTriangle(ax, ay, az, atx, aty,
 									 bx, by, bz, btx, bty,
 									 cx, cy, cz, ctx, cty,
-									 0, r, g, b, sec->light);
+									 0, r, g, b, effectiveLight);
 
 				if (poly->count == 4)
 				{
 					float dx = poly->mx[3];
 					float dy = poly->my[3];
 					float dz = static_cast<float>(plane ? plane->SlopeZ(dx, dy) : z);
-					float dtx = dx / img_w;
-					float dty = dy / img_h;
+					float dtx, dty;
+					transformTexCoord(dx, dy, dtx, dty);
 
 					LightClippedTriangle(ax, ay, az, atx, aty,
 										 cx, cy, cz, ctx, cty,
 										 dx, dy, dz, dtx, dty,
-										 0, r, g, b, sec->light);
+										 0, r, g, b, effectiveLight);
 				}
 			}
 			else
@@ -705,7 +748,9 @@ public:
 
 					if (img)
 					{
-						glTexCoord2f(px / img_w, py / img_h);
+						float ptx, pty;
+						transformTexCoord(px, py, ptx, pty);
+						glTexCoord2f(ptx, pty);
 					}
 
 					glVertex3f(px, py, pz);

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2025      Ioan Chera
+//  Copyright (C) 2025-2026 Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -435,6 +435,36 @@ bool Basis::changeSector(int sec, Sector::StringIDAddress field, StringID value)
 	return change(ObjType::sectors, sec, field, value.get());
 }
 
+bool Basis::changeSector(int sec, double Sector::*field, double value)
+{
+	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
+	EditUnit op;
+	op.action = EditType::change;
+	op.objtype = ObjType::sectors;
+	op.objnum = sec;
+	op.efield.format = EditFormat::sectorDouble;
+	op.efield.doubleSectorField = field;
+	op.efield.doubleValue = value;
+	SYS_ASSERT(mCurrentGroup.isActive());
+	mCurrentGroup.addApply(std::move(op), *this);
+	return true;
+}
+
+bool Basis::changeSector(int sec, std::set<int> Sector::*field, std::set<int> &&value)
+{
+	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
+	EditUnit op;
+	op.action = EditType::change;
+	op.objtype = ObjType::sectors;
+	op.objnum = sec;
+	op.efield.format = EditFormat::sectorIntSet;
+	op.efield.intSetSectorField = field;
+	op.efield.intSetValue = std::move(value);
+	SYS_ASSERT(mCurrentGroup.isActive());
+	mCurrentGroup.addApply(std::move(op), *this);
+	return true;
+}
+
 //
 // Change sidedef
 //
@@ -714,6 +744,22 @@ void Basis::EditUnit::rawChange(Basis &basis)
 			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
 			SideDef &S = *basis.doc.sidedefs[objnum];
 			std::swap(S.*efield.doubleSideField, efield.doubleValue);
+			break;
+		}
+		case EditFormat::sectorDouble:
+		{
+			SYS_ASSERT(objtype == ObjType::sectors);
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
+			Sector &S = *basis.doc.sectors[objnum];
+			std::swap(S.*efield.doubleSectorField, efield.doubleValue);
+			break;
+		}
+		case EditFormat::sectorIntSet:
+		{
+			SYS_ASSERT(objtype == ObjType::sectors);
+			SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
+			Sector &S = *basis.doc.sectors[objnum];
+			std::swap(S.*efield.intSetSectorField, efield.intSetValue);
 			break;
 		}
 		default:

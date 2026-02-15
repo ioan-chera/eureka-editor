@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2025      Ioan Chera
+//  Copyright (C) 2025-2026 Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -100,6 +100,8 @@ public:
 		linedefDouble,
 		linedefIntSet,
 		sidedefDouble,
+		sectorDouble,
+		sectorIntSet,
 	};
 
 	struct EditField
@@ -114,6 +116,10 @@ public:
 		}
 
 		explicit EditField(double SideDef::*field) : format(EditFormat::sidedefDouble), doubleSideField(field)
+		{
+		}
+
+		explicit EditField(double Sector::*field) : format(EditFormat::sectorDouble), doubleSectorField(field)
 		{
 		}
 
@@ -135,6 +141,10 @@ public:
 				return rawField == other.rawField && rawValue == other.rawValue;
 			if(format == EditFormat::sidedefDouble)
 				return doubleSideField == other.doubleSideField && doubleValue == other.doubleValue;
+			if(format == EditFormat::sectorDouble)
+				return doubleSectorField == other.doubleSectorField && doubleValue == other.doubleValue;
+			if(format == EditFormat::sectorIntSet)
+				return intSetSectorField == other.intSetSectorField && intSetValue == other.intSetValue;
 			return doubleLineField == other.doubleLineField && doubleValue == other.doubleValue;
 		}
 
@@ -146,6 +156,8 @@ public:
 			double LineDef::*doubleLineField;
 			std::set<int> LineDef::*intSetLineField;
 			double SideDef::*doubleSideField;
+			double Sector::*doubleSectorField;
+			std::set<int> Sector::*intSetSectorField;
 		};
 
 		union
@@ -381,6 +393,8 @@ private:
 	bool changeVertex(int vert, byte field, FFixedPoint value);
 	bool changeSector(int sec, Sector::IntAddress field, int value);
 	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
+	bool changeSector(int sec, double Sector::*field, double value);
+	bool changeSector(int sec, std::set<int> Sector::*field, std::set<int> &&value);
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeSidedef(int side, double SideDef::*field, double value);
@@ -461,6 +475,14 @@ public:
 	bool changeSector(int sec, Sector::StringIDAddress field, StringID value)
 	{
 		return basis.changeSector(sec, field, value);
+	}
+	bool changeSector(int sec, double Sector::*field, double value)
+	{
+		return basis.changeSector(sec, field, value);
+	}
+	bool changeSector(int sec, std::set<int> Sector::*field, std::set<int> &&value)
+	{
+		return basis.changeSector(sec, field, std::move(value));
 	}
 
 	bool changeSidedef(int side, SideDef::IntAddress field, int value)
