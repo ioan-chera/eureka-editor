@@ -2541,8 +2541,8 @@ void UI_Canvas::RenderSector(int num)
 						double rx2 = wx * cos_r + wy * sin_r;
 						double ry2 = -wx * sin_r + wy * cos_r;
 
-						tx = int(rx2 / xscl + xpan) & (tw - 1);
-						ty = int(ry2 / yscl + ypan) & (th - 1);
+						tx = int(rx2 * xscl + xpan) & (tw - 1);
+						ty = int(ry2 * yscl + ypan) & (th - 1);
 					}
 					else
 					{
@@ -2572,8 +2572,8 @@ void UI_Canvas::RenderSector(int num)
 						double rx2 = wx * cos_r + wy * sin_r;
 						double ry2 = -wx * sin_r + wy * cos_r;
 
-						tx = int(rx2 / xscl + xpan) & (tw - 1);
-						ty = int(ry2 / yscl + ypan) & (th - 1);
+						tx = int(rx2 * xscl + xpan) & (tw - 1);
+						ty = int(ry2 * yscl + ypan) & (th - 1);
 					}
 					else
 					{
@@ -2600,7 +2600,7 @@ void UI_Canvas::RenderSector(int num)
 	if (xscale == 0.0) xscale = 1.0;
 	if (yscale == 0.0) yscale = 1.0;
 
-	const double rot_rad = rotation * M_PI / 180.0;
+	const double rot_rad = -rotation * M_PI / 180.0;
 	const double cos_r = cos(rot_rad);
 	const double sin_r = sin(rot_rad);
 
@@ -2644,8 +2644,8 @@ void UI_Canvas::RenderSector(int num)
 				const double rx = wx * cos_r + wy * sin_r;
 				const double ry = -wx * sin_r + wy * cos_r;
 
-				const float tx = static_cast<float>((rx / xscale + xpan) / img_w);
-				const float ty = static_cast<float>((ry / yscale + ypan) / img_h);
+				const float tx = static_cast<float>((rx * xscale + xpan) / img_w);
+				const float ty = static_cast<float>((ry * yscale + ypan) / img_h);
 
 				glTexCoord2f(tx, ty);
 			}

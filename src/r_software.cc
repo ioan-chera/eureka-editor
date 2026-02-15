@@ -1594,8 +1594,8 @@ public:
 				const double rx = wx * cos_r + wy * sin_r;
 				const double ry = -wx * sin_r + wy * cos_r;
 
-				tx = int(rx / xscale + xpan) & (tw - 1);
-				ty = int(ry / yscale + ypan) & (th - 1);
+				tx = int(rx * xscale + xpan) & (tw - 1);
+				ty = int(ry * yscale + ypan) & (th - 1);
 			}
 			else
 			{

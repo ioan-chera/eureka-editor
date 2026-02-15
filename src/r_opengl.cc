@@ -646,7 +646,7 @@ public:
 		float b = b0 / 255.0f;
 
 		// UDMF flat transforms
-		const bool isFloor = (znormal < 0);
+		const bool isFloor = (znormal > 0);
 		const double xpan = isFloor ? sec->xpanningfloor : sec->xpanningceiling;
 		const double ypan = isFloor ? sec->ypanningfloor : sec->ypanningceiling;
 		double xscale = isFloor ? sec->xscalefloor : sec->xscaleceiling;
@@ -656,7 +656,7 @@ public:
 		if (xscale == 0.0) xscale = 1.0;
 		if (yscale == 0.0) yscale = 1.0;
 
-		const double rotation_rad = rotation * M_PI / 180.0;
+		const double rotation_rad = -rotation * M_PI / 180.0;
 		const double cos_r = cos(rotation_rad);
 		const double sin_r = sin(rotation_rad);
 
@@ -665,8 +665,8 @@ public:
 			const double rx = wx * cos_r + wy * sin_r;
 			const double ry = -wx * sin_r + wy * cos_r;
 
-			outTx = static_cast<float>((rx / xscale + xpan) / img_w);
-			outTy = static_cast<float>((ry / yscale + ypan) / img_h);
+			outTx = static_cast<float>((rx * xscale + xpan) / img_w);
+			outTy = static_cast<float>((ry * yscale + ypan) / img_h);
 		};
 
 		// Per-flat lighting
@@ -1849,7 +1849,7 @@ public:
 
 		glDisable(GL_CULL_FACE);
 
-		glAlphaFunc(GL_GREATER, 0.02);
+		glAlphaFunc(GL_GREATER, 0.02f);
 
 		// setup projection
 

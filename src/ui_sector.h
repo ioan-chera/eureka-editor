@@ -25,8 +25,12 @@
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
+class Fl_Grid;
+class Fl_Light_Button;
+class Fl_Menu_Button;
 class MultiTagView;
 class UI_CategoryButton;
+class UI_DynFloatInput;
 class UI_DynIntInput;
 class UI_StackPanel;
 struct gensector_t;
@@ -84,6 +88,44 @@ public:
 	UI_StackPanel *udmfPanel;
 	MultiTagView *multiTagView;
 
+	// Floor/ceiling UDMF part grid
+	Fl_Grid *mPartGrid = nullptr;
+
+	enum
+	{
+		PART_IDX_FLOOR,
+		PART_IDX_CEIL,
+		kNumSectorParts = 2,
+	};
+
+	Fl_Box *mPartHeader[kNumSectorParts] = {};
+
+	Fl_Box *mPanLabel = nullptr;
+	UI_DynFloatInput *mPanX[kNumSectorParts] = {};
+	UI_DynFloatInput *mPanY[kNumSectorParts] = {};
+
+	Fl_Box *mPartScaleLabel = nullptr;
+	UI_DynFloatInput *mPartScaleX[kNumSectorParts] = {};
+	UI_DynFloatInput *mPartScaleY[kNumSectorParts] = {};
+
+	Fl_Box *mRotLabel = nullptr;
+	UI_DynFloatInput *mRotation[kNumSectorParts] = {};
+
+	Fl_Box *mPartLightLabel = nullptr;
+	UI_DynIntInput *mPartLight[kNumSectorParts] = {};
+	Fl_Light_Button *mPartLightAbsolute[kNumSectorParts] = {};
+
+	Fl_Box *mPartScrollLabel = nullptr;
+	UI_DynFloatInput *mPartScrollX[kNumSectorParts] = {};
+	UI_DynFloatInput *mPartScrollY[kNumSectorParts] = {};
+
+	Fl_Box *mScrollModeLabel = nullptr;
+	Fl_Menu_Button *mScrollMode[kNumSectorParts] = {};
+	Fl_Menu_Item mScrollModeItems[kNumSectorParts][5] = {};
+
+	Fl_Box *mSkyLabel = nullptr;
+	UI_DynInput *mSky[kNumSectorParts] = {};
+
 public:
 	UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 
@@ -121,7 +163,12 @@ private:
 
 	int findYForUDMF();
 	void updateUDMFGameInfo(const ConfigData &config);
+	void updatePartGridLayout(const ConfigData &config);
+	void updateUDMFFields();
 	static void udmfCategoryCallback(Fl_Widget *widget, void *data);
+	static void udmfFieldCallback(Fl_Widget *widget, void *data);
+	static void scrollModeCallback(Fl_Widget *widget, void *data);
+	void updateScrollModeLabel(int partIdx);
 	void multiTagViewCallback();
 
 	static void   height_callback(Fl_Widget *, void *);

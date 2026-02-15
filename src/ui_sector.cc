@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2025      Ioan Chera
+//  Copyright (C) 2025-2026 Ioan Chera
 //  Copyright (C) 2007-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -39,6 +39,9 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 
+#include "FL/Fl_Grid.H"
+#include "FL/Fl_Light_Button.H"
+
 
 // config items
 int config::floor_bump_small  = 1;
@@ -67,6 +70,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 
 	const int Y0 = Y;
 	const int X0 = X;
+	new Fl_Box(FL_NO_BOX, X, 0, W, 6, "");
 
 	X += 6;
 	Y += 6;
@@ -228,6 +232,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	udmfHeader->callback(udmfCategoryCallback, this);
 
 	udmfPanel = new UI_StackPanel(X, Y, W, 24);
+	udmfPanel->margin(6, 6, 6, 4);
 	udmfPanel->hide();
 
 	multiTagView = new MultiTagView(inst, [this](){
@@ -236,6 +241,113 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 		multiTagViewCallback();
 	}, X, 0, W, 24);
 	multiTagView->hide();
+
+	// Floor/ceiling part grid
+	mPartGrid = new Fl_Grid(X, 0, W, 22);
+	mPartGrid->layout(1, 5);
+
+	mPartHeader[PART_IDX_FLOOR] = new Fl_Box(FL_NO_BOX, 0, 0, 0, 0, "Floor");
+	mPartHeader[PART_IDX_CEIL] = new Fl_Box(FL_NO_BOX, 0, 0, 0, 0, "Ceiling");
+	mPartHeader[PART_IDX_FLOOR]->labelsize(12);
+	mPartHeader[PART_IDX_CEIL]->labelsize(12);
+
+	struct BoxLabelMapping
+	{
+		Fl_Box **box;
+		const char *text;
+	};
+	const BoxLabelMapping labelMapping[] =
+	{
+		{ &mPanLabel, "Pan:" },
+		{ &mPartScaleLabel, "Scale:" },
+		{ &mRotLabel, "Rotate:" },
+		{ &mPartLightLabel, "Light:" },
+		{ &mPartScrollLabel, "Scroll:" },
+		{ &mScrollModeLabel, "Scr.mode:" },
+		{ &mSkyLabel, "Sky:" },
+	};
+	for(const BoxLabelMapping &entry : labelMapping)
+	{
+		*entry.box = new Fl_Box(FL_NO_BOX, 0, 0, 0, 0, entry.text);
+		(*entry.box)->labelsize(12);
+		(*entry.box)->align(FL_ALIGN_INSIDE);
+	}
+
+	for(int i = 0; i < kNumSectorParts; ++i)
+	{
+		mPanX[i] = new UI_DynFloatInput(0, 0, 0, 0);
+		mPanY[i] = new UI_DynFloatInput(0, 0, 0, 0);
+		mPanX[i]->callback(udmfFieldCallback, this);
+		mPanY[i]->callback(udmfFieldCallback, this);
+		mPanX[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		mPanY[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		mFixUp.loadFields({mPanX[i], mPanY[i]});
+	}
+
+	for(int i = 0; i < kNumSectorParts; ++i)
+	{
+		mPartScaleX[i] = new UI_DynFloatInput(0, 0, 0, 0);
+		mPartScaleY[i] = new UI_DynFloatInput(0, 0, 0, 0);
+		mPartScaleX[i]->callback(udmfFieldCallback, this);
+		mPartScaleY[i]->callback(udmfFieldCallback, this);
+		mPartScaleX[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		mPartScaleY[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		mFixUp.loadFields({mPartScaleX[i], mPartScaleY[i]});
+	}
+
+	for(int i = 0; i < kNumSectorParts; ++i)
+	{
+		mRotation[i] = new UI_DynFloatInput(0, 0, 0, 0);
+		mRotation[i]->callback(udmfFieldCallback, this);
+		mRotation[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		mFixUp.loadFields({mRotation[i]});
+	}
+
+	for(int i = 0; i < kNumSectorParts; ++i)
+	{
+		mPartLight[i] = new UI_DynIntInput(0, 0, 0, 0);
+		mPartLight[i]->callback(udmfFieldCallback, this);
+		mPartLight[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		mFixUp.loadFields({mPartLight[i]});
+
+		mPartLightAbsolute[i] = new Fl_Light_Button(0, 0, 0, 0, "Abs");
+		mPartLightAbsolute[i]->callback(udmfFieldCallback, this);
+	}
+
+	for(int i = 0; i < kNumSectorParts; ++i)
+	{
+		mPartScrollX[i] = new UI_DynFloatInput(0, 0, 0, 0);
+		mPartScrollY[i] = new UI_DynFloatInput(0, 0, 0, 0);
+		mPartScrollX[i]->callback(udmfFieldCallback, this);
+		mPartScrollY[i]->callback(udmfFieldCallback, this);
+		mPartScrollX[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		mPartScrollY[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		mFixUp.loadFields({mPartScrollX[i], mPartScrollY[i]});
+	}
+
+	for(int i = 0; i < kNumSectorParts; ++i)
+	{
+		mScrollModeItems[i][0] = { "Scroll textures", 0, scrollModeCallback, this, FL_MENU_TOGGLE };
+		mScrollModeItems[i][1] = { "Carry static objects", 0, scrollModeCallback, this, FL_MENU_TOGGLE };
+		mScrollModeItems[i][2] = { "Carry players", 0, scrollModeCallback, this, FL_MENU_TOGGLE };
+		mScrollModeItems[i][3] = { "Carry monsters", 0, scrollModeCallback, this, FL_MENU_TOGGLE };
+		mScrollModeItems[i][4] = {};
+
+		mScrollMode[i] = new Fl_Menu_Button(0, 0, 0, 0, "Scr.mode");
+		mScrollMode[i]->labelsize(12);
+		mScrollMode[i]->menu(mScrollModeItems[i]);
+	}
+
+	for(int i = 0; i < kNumSectorParts; ++i)
+	{
+		mSky[i] = new UI_DynInput(0, 0, 0, 0);
+		mSky[i]->callback(udmfFieldCallback, this);
+		mSky[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		mFixUp.loadFields({mSky[i]});
+	}
+
+	mPartGrid->end();
+	mPartGrid->hide();
 
 	udmfPanel->end();
 
@@ -656,7 +768,280 @@ void UI_SectorBox::updateUDMFGameInfo(const ConfigData &config)
 		multiTagView->show();
 	else
 		multiTagView->hide();
+	updatePartGridLayout(config);
 	udmfPanel->relayout();
+}
+
+void UI_SectorBox::updatePartGridLayout(const ConfigData &config)
+{
+	enum
+	{
+		ROW_HEADERS  = 0x01,
+		ROW_PAN      = 0x02,
+		ROW_SCALE    = 0x04,
+		ROW_ROTATION = 0x08,
+		ROW_LIGHT    = 0x10,
+		ROW_SCROLL   = 0x20,
+		ROW_SCRMODE  = 0x40,
+		ROW_SKY      = 0x80,
+	};
+	unsigned visibleRows = 0;
+
+	mPartGrid->clear_layout();
+
+	auto setVisibility = [&config, &visibleRows](Fl_Widget *widget, UDMF_SectorFeature feature,
+												 unsigned row)
+	{
+		if(UDMF_HasSectorFeature(config, feature))
+		{
+			widget->show();
+			visibleRows |= row;
+		}
+		else
+			widget->hide();
+	};
+
+	setVisibility(mPanX[PART_IDX_FLOOR], UDMF_SectorFeature::xpanningfloor, ROW_PAN);
+	setVisibility(mPanY[PART_IDX_FLOOR], UDMF_SectorFeature::ypanningfloor, ROW_PAN);
+	setVisibility(mPanX[PART_IDX_CEIL],  UDMF_SectorFeature::xpanningceiling, ROW_PAN);
+	setVisibility(mPanY[PART_IDX_CEIL],  UDMF_SectorFeature::ypanningceiling, ROW_PAN);
+
+	setVisibility(mPartScaleX[PART_IDX_FLOOR], UDMF_SectorFeature::xscalefloor, ROW_SCALE);
+	setVisibility(mPartScaleY[PART_IDX_FLOOR], UDMF_SectorFeature::yscalefloor, ROW_SCALE);
+	setVisibility(mPartScaleX[PART_IDX_CEIL],  UDMF_SectorFeature::xscaleceiling, ROW_SCALE);
+	setVisibility(mPartScaleY[PART_IDX_CEIL],  UDMF_SectorFeature::yscaleceiling, ROW_SCALE);
+
+	setVisibility(mRotation[PART_IDX_FLOOR], UDMF_SectorFeature::rotationfloor, ROW_ROTATION);
+	setVisibility(mRotation[PART_IDX_CEIL],  UDMF_SectorFeature::rotationceiling, ROW_ROTATION);
+
+	setVisibility(mPartLight[PART_IDX_FLOOR], UDMF_SectorFeature::lightfloor, ROW_LIGHT);
+	setVisibility(mPartLight[PART_IDX_CEIL],  UDMF_SectorFeature::lightceiling, ROW_LIGHT);
+	setVisibility(mPartLightAbsolute[PART_IDX_FLOOR], UDMF_SectorFeature::lightfloorabsolute,
+				  ROW_LIGHT);
+	setVisibility(mPartLightAbsolute[PART_IDX_CEIL], UDMF_SectorFeature::lightceilingabsolute,
+				  ROW_LIGHT);
+
+	setVisibility(mPartScrollX[PART_IDX_FLOOR], UDMF_SectorFeature::xscrollfloor, ROW_SCROLL);
+	setVisibility(mPartScrollY[PART_IDX_FLOOR], UDMF_SectorFeature::yscrollfloor, ROW_SCROLL);
+	setVisibility(mPartScrollX[PART_IDX_CEIL],  UDMF_SectorFeature::xscrollceiling, ROW_SCROLL);
+	setVisibility(mPartScrollY[PART_IDX_CEIL],  UDMF_SectorFeature::yscrollceiling, ROW_SCROLL);
+
+	setVisibility(mScrollMode[PART_IDX_FLOOR], UDMF_SectorFeature::scrollfloormode, ROW_SCRMODE);
+	setVisibility(mScrollMode[PART_IDX_CEIL],  UDMF_SectorFeature::scrollceilingmode, ROW_SCRMODE);
+
+	setVisibility(mSky[PART_IDX_FLOOR], UDMF_SectorFeature::skyfloor, ROW_SKY);
+	setVisibility(mSky[PART_IDX_CEIL],  UDMF_SectorFeature::skyceiling, ROW_SKY);
+
+	if(!visibleRows)
+	{
+		mPartGrid->hide();
+		return;
+	}
+
+	int numRows = 0;
+	if(visibleRows & (ROW_PAN | ROW_SCALE | ROW_ROTATION | ROW_LIGHT | ROW_SCROLL | ROW_SCRMODE |
+					  ROW_SKY))
+	{
+		visibleRows |= ROW_HEADERS;
+		numRows++;
+	}
+	if(visibleRows & ROW_PAN)
+		numRows++;
+	if(visibleRows & ROW_SCALE)
+		numRows++;
+	if(visibleRows & ROW_ROTATION)
+		numRows++;
+	if(visibleRows & ROW_LIGHT)
+		numRows++;
+	if(visibleRows & ROW_SCROLL)
+		numRows++;
+	if(visibleRows & ROW_SCRMODE)
+		numRows++;
+	if(visibleRows & ROW_SKY)
+		numRows++;
+
+	int gridHeight = numRows * 22;
+	if(numRows > 1)
+		gridHeight += (numRows - 1) * 2;
+	mPartGrid->resize(mPartGrid->x(), mPartGrid->y(), mPartGrid->w(), gridHeight);
+	mPartGrid->layout(numRows, 5);
+	mPartGrid->gap(2, 0);
+	mPartGrid->col_gap(2, 6);
+
+	int currentRow = 0;
+	if(visibleRows & ROW_HEADERS)
+	{
+		mPartHeader[PART_IDX_FLOOR]->show();
+		mPartHeader[PART_IDX_CEIL]->show();
+		mPartGrid->widget(mPartHeader[PART_IDX_FLOOR], currentRow, 1, 1, 2);
+		mPartGrid->widget(mPartHeader[PART_IDX_CEIL], currentRow, 3, 1, 2);
+		++currentRow;
+	}
+	if(visibleRows & ROW_PAN)
+	{
+		mPanLabel->show();
+		mPartGrid->widget(mPanLabel, currentRow, 0);
+		mPartGrid->widget(mPanX[PART_IDX_FLOOR], currentRow, 1);
+		mPartGrid->widget(mPanY[PART_IDX_FLOOR], currentRow, 2);
+		mPartGrid->widget(mPanX[PART_IDX_CEIL], currentRow, 3);
+		mPartGrid->widget(mPanY[PART_IDX_CEIL], currentRow, 4);
+		++currentRow;
+	}
+	if(visibleRows & ROW_SCALE)
+	{
+		mPartScaleLabel->show();
+		mPartGrid->widget(mPartScaleLabel, currentRow, 0);
+		mPartGrid->widget(mPartScaleX[PART_IDX_FLOOR], currentRow, 1);
+		mPartGrid->widget(mPartScaleY[PART_IDX_FLOOR], currentRow, 2);
+		mPartGrid->widget(mPartScaleX[PART_IDX_CEIL], currentRow, 3);
+		mPartGrid->widget(mPartScaleY[PART_IDX_CEIL], currentRow, 4);
+		++currentRow;
+	}
+	if(visibleRows & ROW_ROTATION)
+	{
+		mRotLabel->show();
+		mPartGrid->widget(mRotLabel, currentRow, 0);
+		mPartGrid->widget(mRotation[PART_IDX_FLOOR], currentRow, 1, 1, 2);
+		mPartGrid->widget(mRotation[PART_IDX_CEIL], currentRow, 3, 1, 2);
+		++currentRow;
+	}
+	if(visibleRows & ROW_LIGHT)
+	{
+		mPartLightLabel->show();
+		mPartGrid->widget(mPartLightLabel, currentRow, 0);
+		mPartGrid->widget(mPartLight[PART_IDX_FLOOR], currentRow, 1);
+		mPartGrid->widget(mPartLightAbsolute[PART_IDX_FLOOR], currentRow, 2);
+		mPartGrid->widget(mPartLight[PART_IDX_CEIL], currentRow, 3);
+		mPartGrid->widget(mPartLightAbsolute[PART_IDX_CEIL], currentRow, 4);
+		++currentRow;
+	}
+	if(visibleRows & ROW_SCROLL)
+	{
+		mPartScrollLabel->show();
+		mPartGrid->widget(mPartScrollLabel, currentRow, 0);
+		mPartGrid->widget(mPartScrollX[PART_IDX_FLOOR], currentRow, 1);
+		mPartGrid->widget(mPartScrollY[PART_IDX_FLOOR], currentRow, 2);
+		mPartGrid->widget(mPartScrollX[PART_IDX_CEIL], currentRow, 3);
+		mPartGrid->widget(mPartScrollY[PART_IDX_CEIL], currentRow, 4);
+		++currentRow;
+	}
+	if(visibleRows & ROW_SCRMODE)
+	{
+		mScrollModeLabel->show();
+		mPartGrid->widget(mScrollModeLabel, currentRow, 0);
+		mPartGrid->widget(mScrollMode[PART_IDX_FLOOR], currentRow, 1, 1, 2);
+		mPartGrid->widget(mScrollMode[PART_IDX_CEIL], currentRow, 3, 1, 2);
+		++currentRow;
+	}
+	if(visibleRows & ROW_SKY)
+	{
+		mSkyLabel->show();
+		mPartGrid->widget(mSkyLabel, currentRow, 0);
+		mPartGrid->widget(mSky[PART_IDX_FLOOR], currentRow, 1, 1, 2);
+		mPartGrid->widget(mSky[PART_IDX_CEIL], currentRow, 3, 1, 2);
+		++currentRow;
+	}
+
+	mPartGrid->show();
+}
+
+void UI_SectorBox::updateUDMFFields()
+{
+	if(!inst.level.isSector(obj))
+	{
+		for(int i = 0; i < kNumSectorParts; ++i)
+		{
+			mFixUp.setInputValue(mPanX[i], "");
+			mFixUp.setInputValue(mPanY[i], "");
+			mFixUp.setInputValue(mPartScaleX[i], "");
+			mFixUp.setInputValue(mPartScaleY[i], "");
+			mFixUp.setInputValue(mRotation[i], "");
+			mFixUp.setInputValue(mPartLight[i], "");
+			mPartLightAbsolute[i]->value(0);
+			mFixUp.setInputValue(mPartScrollX[i], "");
+			mFixUp.setInputValue(mPartScrollY[i], "");
+			for(int bit = 0; bit < 4; ++bit)
+				mScrollModeItems[i][bit].clear();
+			updateScrollModeLabel(i);
+			mFixUp.setInputValue(mSky[i], "");
+		}
+		udmfHeader->details("");
+		return;
+	}
+
+	const auto &sec = inst.level.sectors[obj];
+
+	mFixUp.setInputValue(mPanX[PART_IDX_FLOOR], SString::printf("%.16g", sec->xpanningfloor).c_str());
+	mFixUp.setInputValue(mPanY[PART_IDX_FLOOR], SString::printf("%.16g", sec->ypanningfloor).c_str());
+	mFixUp.setInputValue(mPanX[PART_IDX_CEIL], SString::printf("%.16g", sec->xpanningceiling).c_str());
+	mFixUp.setInputValue(mPanY[PART_IDX_CEIL], SString::printf("%.16g", sec->ypanningceiling).c_str());
+
+	mFixUp.setInputValue(mPartScaleX[PART_IDX_FLOOR],
+						 SString::printf("%.16g", sec->xscalefloor).c_str());
+	mFixUp.setInputValue(mPartScaleY[PART_IDX_FLOOR],
+						 SString::printf("%.16g", sec->yscalefloor).c_str());
+	mFixUp.setInputValue(mPartScaleX[PART_IDX_CEIL],
+						 SString::printf("%.16g", sec->xscaleceiling).c_str());
+	mFixUp.setInputValue(mPartScaleY[PART_IDX_CEIL],
+						 SString::printf("%.16g", sec->yscaleceiling).c_str());
+
+	mFixUp.setInputValue(mRotation[PART_IDX_FLOOR],
+						 SString::printf("%.16g", sec->rotationfloor).c_str());
+	mFixUp.setInputValue(mRotation[PART_IDX_CEIL],
+						 SString::printf("%.16g", sec->rotationceiling).c_str());
+
+	mFixUp.setInputValue(mPartLight[PART_IDX_FLOOR],
+						 SString::printf("%d", sec->lightfloor).c_str());
+	mFixUp.setInputValue(mPartLight[PART_IDX_CEIL],
+						 SString::printf("%d", sec->lightceiling).c_str());
+	mPartLightAbsolute[PART_IDX_FLOOR]->value(
+		sec->flags & Sector::FLAG_LIGHTFLOORABSOLUTE ? 1 : 0);
+	mPartLightAbsolute[PART_IDX_CEIL]->value(
+		sec->flags & Sector::FLAG_LIGHTCEILINGABSOLUTE ? 1 : 0);
+
+	mFixUp.setInputValue(mPartScrollX[PART_IDX_FLOOR],
+						 SString::printf("%.16g", sec->xscrollfloor).c_str());
+	mFixUp.setInputValue(mPartScrollY[PART_IDX_FLOOR],
+						 SString::printf("%.16g", sec->yscrollfloor).c_str());
+	mFixUp.setInputValue(mPartScrollX[PART_IDX_CEIL],
+						 SString::printf("%.16g", sec->xscrollceiling).c_str());
+	mFixUp.setInputValue(mPartScrollY[PART_IDX_CEIL],
+						 SString::printf("%.16g", sec->yscrollceiling).c_str());
+
+	int scrollModes[kNumSectorParts] = { sec->scrollfloormode, sec->scrollceilingmode };
+	for(int i = 0; i < kNumSectorParts; ++i)
+	{
+		for(int bit = 0; bit < 4; ++bit)
+		{
+			if(scrollModes[i] & (1 << bit))
+				mScrollModeItems[i][bit].set();
+			else
+				mScrollModeItems[i][bit].clear();
+		}
+		updateScrollModeLabel(i);
+	}
+
+	mFixUp.setInputValue(mSky[PART_IDX_FLOOR], sec->SkyFloor().c_str());
+	mFixUp.setInputValue(mSky[PART_IDX_CEIL], sec->SkyCeiling().c_str());
+
+	SString summary;
+	if(sec->xpanningfloor || sec->ypanningfloor || sec->xpanningceiling || sec->ypanningceiling)
+		summary += "⬅️";
+	if(sec->xscalefloor != 1 || sec->yscalefloor != 1 || sec->xscaleceiling != 1 ||
+	   sec->yscaleceiling != 1)
+	{
+		summary += "↔️";
+	}
+	if(sec->rotationfloor || sec->rotationceiling)
+		summary += "🔄";
+	if(sec->lightfloor || sec->lightceiling)
+		summary += "💡";
+	if(sec->xscrollfloor || sec->yscrollfloor || sec->xscrollceiling || sec->yscrollceiling)
+		summary += "⚙️";
+	if(sec->SkyFloor().good() || sec->SkyCeiling().good())
+		summary += "🌄";
+
+	udmfHeader->details(summary);
 }
 
 void UI_SectorBox::udmfCategoryCallback(Fl_Widget *widget, void *data)
@@ -681,6 +1066,161 @@ void UI_SectorBox::multiTagViewCallback()
 		std::set<int> tags = multiTagView->getTags();
 		op.changeSector(*it, &Sector::moreIDs, std::move(tags));
 	}
+}
+
+void UI_SectorBox::udmfFieldCallback(Fl_Widget *w, void *data)
+{
+	auto box = static_cast<UI_SectorBox *>(data);
+
+	if(box->obj < 0 || box->inst.edit.Selected->empty())
+		return;
+
+	struct FieldMapping
+	{
+		Fl_Widget *widget;
+		std::variant<int, Sector::IntAddress, Sector::StringIDAddress, double Sector::*> field;
+		const char *name;
+	};
+	const FieldMapping mapping[] =
+	{
+		{ box->mPanX[PART_IDX_FLOOR], &Sector::xpanningfloor, "floor panning X" },
+		{ box->mPanY[PART_IDX_FLOOR], &Sector::ypanningfloor, "floor panning Y" },
+		{ box->mPanX[PART_IDX_CEIL],  &Sector::xpanningceiling, "ceiling panning X" },
+		{ box->mPanY[PART_IDX_CEIL],  &Sector::ypanningceiling, "ceiling panning Y" },
+		{ box->mPartScaleX[PART_IDX_FLOOR], &Sector::xscalefloor, "floor scale X" },
+		{ box->mPartScaleY[PART_IDX_FLOOR], &Sector::yscalefloor, "floor scale Y" },
+		{ box->mPartScaleX[PART_IDX_CEIL],  &Sector::xscaleceiling, "ceiling scale X" },
+		{ box->mPartScaleY[PART_IDX_CEIL],  &Sector::yscaleceiling, "ceiling scale Y" },
+		{ box->mRotation[PART_IDX_FLOOR], &Sector::rotationfloor, "floor rotation" },
+		{ box->mRotation[PART_IDX_CEIL],  &Sector::rotationceiling, "ceiling rotation" },
+		{ box->mPartLight[PART_IDX_FLOOR], Sector::F_LIGHTFLOOR, "floor light" },
+		{ box->mPartLight[PART_IDX_CEIL],  Sector::F_LIGHTCEILING, "ceiling light" },
+		{ box->mPartLightAbsolute[PART_IDX_FLOOR], Sector::FLAG_LIGHTFLOORABSOLUTE,
+		  "floor light flag" },
+		{ box->mPartLightAbsolute[PART_IDX_CEIL], Sector::FLAG_LIGHTCEILINGABSOLUTE,
+		  "ceiling light flag" },
+		{ box->mPartScrollX[PART_IDX_FLOOR], &Sector::xscrollfloor, "floor scroll X" },
+		{ box->mPartScrollY[PART_IDX_FLOOR], &Sector::yscrollfloor, "floor scroll Y" },
+		{ box->mPartScrollX[PART_IDX_CEIL],  &Sector::xscrollceiling, "ceiling scroll X" },
+		{ box->mPartScrollY[PART_IDX_CEIL],  &Sector::yscrollceiling, "ceiling scroll Y" },
+		{ box->mSky[PART_IDX_FLOOR], Sector::F_SKYFLOOR, "floor sky" },
+		{ box->mSky[PART_IDX_CEIL],  Sector::F_SKYCEILING, "ceiling sky" },
+	};
+
+	const FieldMapping *found = nullptr;
+	for(const FieldMapping &entry : mapping)
+	{
+		if(entry.widget == w)
+		{
+			found = &entry;
+			break;
+		}
+	}
+	assert(found);
+	if(!found)
+		return;
+
+	EditOperation op(box->inst.level.basis);
+	SString message = SString("edited sector ") + found->name + " on";
+	op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
+
+	for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+	{
+		std::visit([&](auto fieldValue)
+		{
+			using FieldType = decltype(fieldValue);
+
+			if constexpr(std::is_same_v<FieldType, int>)	// flag
+			{
+				bool value = static_cast<Fl_Button *>(w)->value() != 0;
+				int oldFlags = box->inst.level.sectors[*it]->flags;
+				int newFlags = value ? oldFlags | fieldValue : oldFlags & ~fieldValue;
+				op.changeSector(*it, Sector::F_FLAGS, newFlags);
+				return;
+			}
+			if constexpr(std::is_same_v<FieldType, Sector::IntAddress>)
+			{
+				int value = atoi(static_cast<UI_DynIntInput *>(w)->value());
+				op.changeSector(*it, fieldValue, value);
+				return;
+			}
+			if constexpr(std::is_same_v<FieldType, Sector::StringIDAddress>)
+			{
+				SString name = NormalizeTex(static_cast<UI_DynInput *>(w)->value());
+				StringID sid = BA_InternaliseString(name);
+				op.changeSector(*it, fieldValue, sid);
+				return;
+			}
+			if constexpr(std::is_same_v<FieldType, double Sector::*>)
+			{
+				double value = atof(static_cast<UI_DynFloatInput *>(w)->value());
+				op.changeSector(*it, fieldValue, value);
+			}
+		}, found->field);
+	}
+}
+
+void UI_SectorBox::scrollModeCallback(Fl_Widget *w, void *data)
+{
+	auto box = static_cast<UI_SectorBox *>(data);
+
+	if(box->obj < 0 || box->inst.edit.Selected->empty())
+		return;
+
+	int partIdx = -1;
+	for(int i = 0; i < kNumSectorParts; ++i)
+	{
+		if(w == box->mScrollMode[i])
+		{
+			partIdx = i;
+			break;
+		}
+	}
+	if(partIdx < 0)
+		return;
+
+	int value = 0;
+	for(int bit = 0; bit < 4; ++bit)
+	{
+		if(box->mScrollModeItems[partIdx][bit].value())
+			value |= (1 << bit);
+	}
+
+	Sector::IntAddress field = (partIdx == PART_IDX_FLOOR) ? Sector::F_SCROLLFLOORMODE
+															: Sector::F_SCROLLCEILINGMODE;
+	const char *name = (partIdx == PART_IDX_FLOOR) ? "floor scroll mode" : "ceiling scroll mode";
+
+	{
+		EditOperation op(box->inst.level.basis);
+		SString message = SString("edited sector ") + name + " on";
+		op.setMessageForSelection(message.c_str(), *box->inst.edit.Selected);
+
+		for(sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+			op.changeSector(*it, field, value);
+	}
+
+	box->updateScrollModeLabel(partIdx);
+
+	// Respawn the menu so user can toggle multiple options
+	box->mScrollMode[partIdx]->popup();
+}
+
+void UI_SectorBox::updateScrollModeLabel(int partIdx)
+{
+	static const char *kAcronyms[] = { "Tex", "Obj", "Plr", "Mon" };
+	SString label;
+	for(int bit = 0; bit < 4; ++bit)
+	{
+		if(mScrollModeItems[partIdx][bit].value())
+		{
+			if(!label.empty())
+				label += ",";
+			label += kAcronyms[bit];
+		}
+	}
+	if(label.empty())
+		label = "None";
+	mScrollMode[partIdx]->copy_label(label.c_str());
 }
 
 void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
@@ -866,6 +1406,8 @@ void UI_SectorBox::UpdateField(std::optional<Basis::EditField> efield)
 	{
 		multiTagView->clearTags();
 	}
+
+	updateUDMFFields();
 }
 
 
