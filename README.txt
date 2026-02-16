@@ -1,4 +1,3 @@
-
 Eureka README
 =============
 
@@ -277,7 +276,7 @@ COPYRIGHT and LICENSE
 
   Eureka DOOM Editor
 
-  Copyright © 2014-2025 Ioan Chera
+  Copyright © 2014-2026 Ioan Chera
   Copyright © 2001-2020 Andrew Apted, et al
   Copyright © 1997-2003 Andre Majorel et al
 
