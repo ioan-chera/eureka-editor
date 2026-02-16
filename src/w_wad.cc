@@ -1103,6 +1103,8 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 //
 void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 {
+	int32_t le32;
+
 	BufferedOutFile sof(path);
 	// Write the header
 	if(kind == WadKind::PWAD)
@@ -1111,13 +1113,15 @@ void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 		sof.write("IWAD", 4);
 
 	int32_t numlumps = (int32_t)directory.size();
-	sof.write(&numlumps, 4);
+	le32 = LE_S32(numlumps);
+	sof.write(&le32, 4);
 
 	int32_t infotableofs = 12;
 	for(const LumpRef &ref : directory)
 		infotableofs += (int32_t)ref.lump->Length();
 
-	sof.write(&infotableofs, 4);
+	le32 = LE_S32(infotableofs);
+	sof.write(&le32, 4);
 	for(const LumpRef &ref : directory)
 	{
 		assert(ref.lump.get() != nullptr);
@@ -1127,10 +1131,14 @@ void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 	infotableofs = 12;
 	for(const LumpRef &ref : directory)
 	{
-		sof.write(&infotableofs, 4);
+		le32 = LE_S32(infotableofs);
+		sof.write(&le32, 4);
+
 		const Lump_c &lump = *ref.lump;
 		numlumps = lump.Length();
-		sof.write(&numlumps, 4);
+		le32 = LE_S32(numlumps);
+		sof.write(&le32, 4);
+
 		infotableofs += numlumps;
 		int64_t nm = lump.getName8();
 		sof.write(&nm, 8);
