@@ -502,7 +502,12 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 	SString arg;
 	TokenWordParse parse(inst.loaded.testingCommandLine, false);
 	while(parse.getNext(arg))
+	{
+		arg.findAndReplace(SString("VIEW_X"), SString::printf("%d", (int)inst.r_view.x));
+		arg.findAndReplace(SString("VIEW_Y"), SString::printf("%d", (int)inst.r_view.y));
+		arg.findAndReplace(SString("VIEW_ANGLE"), SString::printf("%1.2f", inst.r_view.angle));
 		args.push_back(arg);
+	}
 	args.insert(args.begin(), portPath.u8string());
 
 	std::vector<char *> argv;
