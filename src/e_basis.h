@@ -37,6 +37,7 @@
 #include "Vertex.h"
 #include <memory>
 #include <stack>
+#include <variant>
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
 
@@ -138,11 +139,11 @@ private:
 		ObjType objtype = ObjType::things;
 		byte field = 0;
 		int objnum = 0;
-		std::shared_ptr<Thing> thing;
-		std::shared_ptr<Vertex> vertex;
-		std::shared_ptr<Sector> sector;
-		std::shared_ptr<SideDef> sidedef;
-		std::shared_ptr<LineDef> linedef;
+		std::variant<std::shared_ptr<Thing>,
+					 std::shared_ptr<Vertex>,
+					 std::shared_ptr<Sector>,
+					 std::shared_ptr<SideDef>,
+					 std::shared_ptr<LineDef>> object;
 		int value = 0;
 		
 		// For lump changes
@@ -158,11 +159,7 @@ private:
 				&& objtype == other.objtype
 				&& field == other.field
 				&& objnum == other.objnum
-				&& thing == other.thing
-				&& vertex == other.vertex
-				&& sector == other.sector
-				&& sidedef == other.sidedef
-				&& linedef == other.linedef
+				&& object == other.object
 				&& value == other.value
 				&& lumptype == other.lumptype
 				&& lumpData == other.lumpData;

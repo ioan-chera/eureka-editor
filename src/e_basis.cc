@@ -274,27 +274,27 @@ int Basis::addNew(ObjType type)
 	{
 	case ObjType::things:
 		op.objnum = doc.numThings();
-		op.thing = std::make_shared<Thing>();
+		op.object = std::make_shared<Thing>();
 		break;
 
 	case ObjType::vertices:
 		op.objnum = doc.numVertices();
-		op.vertex = std::make_shared<Vertex>();
+		op.object = std::make_shared<Vertex>();
 		break;
 
 	case ObjType::sidedefs:
 		op.objnum = doc.numSidedefs();
-		op.sidedef = std::make_shared<SideDef>();
+		op.object = std::make_shared<SideDef>();
 		break;
 
 	case ObjType::linedefs:
 		op.objnum = doc.numLinedefs();
-		op.linedef = std::make_shared<LineDef>();
+		op.object = std::make_shared<LineDef>();
 		break;
 
 	case ObjType::sectors:
 		op.objnum = doc.numSectors();
-		op.sector = std::make_shared<Sector>();
+		op.object = std::make_shared<Sector>();
 		break;
 
 	default:
@@ -668,23 +668,23 @@ void Basis::EditUnit::rawDelete(Basis &basis)
 	switch(objtype)
 	{
 	case ObjType::things:
-		thing = rawDeleteThing(basis.doc);
+		object = rawDeleteThing(basis.doc);
 		return;
 
 	case ObjType::vertices:
-		vertex = rawDeleteVertex(basis.doc);
+		object = rawDeleteVertex(basis.doc);
 		return;
 
 	case ObjType::sectors:
-		sector = rawDeleteSector(basis.doc);
+		object = rawDeleteSector(basis.doc);
 		return;
 
 	case ObjType::sidedefs:
-		sidedef = rawDeleteSidedef(basis.doc);
+		object = rawDeleteSidedef(basis.doc);
 		return;
 
 	case ObjType::linedefs:
-		linedef = rawDeleteLinedef(basis.doc);
+		object = rawDeleteLinedef(basis.doc);
 		return;
 
 	default:
@@ -821,32 +821,28 @@ void Basis::EditUnit::rawInsert(Basis &basis)
 	{
 	case ObjType::things:
 		rawInsertThing(basis.doc);
-		thing.reset();	// normally already reset
 		break;
 
 	case ObjType::vertices:
 		rawInsertVertex(basis.doc);
-		vertex.reset();
 		break;
 
 	case ObjType::sidedefs:
 		rawInsertSidedef(basis.doc);
-		sidedef.reset();
 		break;
 
 	case ObjType::sectors:
 		rawInsertSector(basis.doc);
-		sector.reset();
 		break;
 
 	case ObjType::linedefs:
 		rawInsertLinedef(basis.doc);
-		linedef.reset();
 		break;
 
 	default:
 		BugError("Basis::EditOperation::rawInsert: bad objtype %u\n", (unsigned)objtype);
 	}
+	std::visit([](auto &&arg) { arg.reset(); }, object);
 }
 
 //
@@ -855,7 +851,8 @@ void Basis::EditUnit::rawInsert(Basis &basis)
 void Basis::EditUnit::rawInsertThing(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numThings());
-	doc.things.insert(doc.things.begin() + objnum, std::move(thing));
+	doc.things.insert(doc.things.begin() + objnum,
+					  std::move(std::get<std::shared_ptr<Thing>>(object)));
 }
 
 //
@@ -864,7 +861,8 @@ void Basis::EditUnit::rawInsertThing(Document &doc)
 void Basis::EditUnit::rawInsertVertex(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numVertices());
-	doc.vertices.insert(doc.vertices.begin() + objnum, std::move(vertex));
+	doc.vertices.insert(doc.vertices.begin() + objnum,
+						std::move(std::get<std::shared_ptr<Vertex>>(object)));
 
 	// fix references in linedefs
 
@@ -889,7 +887,8 @@ void Basis::EditUnit::rawInsertVertex(Document &doc)
 void Basis::EditUnit::rawInsertSector(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numSectors());
-	doc.sectors.insert(doc.sectors.begin() + objnum, std::move(sector));
+	doc.sectors.insert(doc.sectors.begin() + objnum,
+					   std::move(std::get<std::shared_ptr<Sector>>(object)));
 
 	// fix all sidedef references
 
@@ -911,7 +910,8 @@ void Basis::EditUnit::rawInsertSector(Document &doc)
 void Basis::EditUnit::rawInsertSidedef(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numSidedefs());
-	doc.sidedefs.insert(doc.sidedefs.begin() + objnum, std::move(sidedef));
+	doc.sidedefs.insert(doc.sidedefs.begin() + objnum,
+						std::move(std::get<std::shared_ptr<SideDef>>(object)));
 
 	// fix the linedefs references
 
@@ -936,7 +936,8 @@ void Basis::EditUnit::rawInsertSidedef(Document &doc)
 void Basis::EditUnit::rawInsertLinedef(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numLinedefs());
-	doc.linedefs.insert(doc.linedefs.begin() + objnum, std::move(linedef));
+	doc.linedefs.insert(doc.linedefs.begin() + objnum,
+						std::move(std::get<std::shared_ptr<LineDef>>(object)));
 }
 
 //
@@ -966,17 +967,7 @@ void Basis::EditUnit::rawChangeLump(Basis &basis)
 //
 void Basis::EditUnit::deleteFinally()
 {
-	switch(objtype)
-	{
-	case ObjType::things:   thing.reset(); break;
-	case ObjType::vertices: vertex.reset(); break;
-	case ObjType::sectors:  sector.reset(); break;
-	case ObjType::sidedefs: sidedef.reset(); break;
-	case ObjType::linedefs: linedef.reset(); break;
-
-	default:
-		BugError("DeleteFinally: bad objtype %d\n", (int)objtype);
-	}
+	std::visit([](auto &&arg) { arg.reset(); }, object);
 }
 
 //
