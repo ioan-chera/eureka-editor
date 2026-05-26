@@ -23,6 +23,7 @@
 #include "main.h"
 #include "m_config.h"
 #include "m_loadsave.h"
+#include "m_strings.h"
 #include "e_main.h"
 #include "w_wad.h"
 
@@ -32,16 +33,20 @@
 
 
 // config items
-bool config::bsp_on_save	= true;
-bool config::bsp_fast		= false;
-bool config::bsp_warnings	= false;
+bool	config::bsp_on_save			= true;
+bool	config::bsp_fast			= false;
+bool	config::bsp_warnings		= false;
 
-int  config::bsp_split_factor	= DEFAULT_FACTOR;
+int		config::bsp_split_factor	= DEFAULT_FACTOR;
 
-bool config::bsp_gl_nodes		= true;
-bool config::bsp_force_v5		= false;
-bool config::bsp_force_zdoom	= false;
-bool config::bsp_compressed		= false;
+bool	config::bsp_use_external	= false;
+SString config::bsp_external_path	= "";
+SString config::bsp_external_args	= "";
+
+bool	config::bsp_gl_nodes		= true;
+bool	config::bsp_force_v5		= false;
+bool	config::bsp_force_zdoom		= false;
+bool	config::bsp_compressed		= false;
 
 
 #define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
@@ -259,7 +264,6 @@ static void PrepareInfo(nodebuildinfo_t *info)
 	// clear cancelled flag
 	info->cancelled = false;
 }
-
 
 build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 {

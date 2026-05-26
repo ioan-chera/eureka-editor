@@ -47,7 +47,7 @@ enum
 	OptFlag_hide = 1 << 4,
 };
 
-typedef std::variant<bool *, int *, rgb_color_t *, SString *, fs::path *, std::vector<SString> *, 
+typedef std::variant<bool *, int *, rgb_color_t *, SString *, fs::path *, std::vector<SString> *,
 					 std::vector<fs::path> *, std::nullptr_t> ArgData;
 
 struct opt_desc_t
@@ -147,6 +147,10 @@ extern bool bsp_on_save;
 extern bool bsp_fast;
 extern bool bsp_warnings;
 extern int  bsp_split_factor;
+
+extern bool bsp_use_external;
+extern SString bsp_external_path;
+extern SString bsp_external_args;
 
 extern bool bsp_gl_nodes;
 extern bool bsp_force_v5;

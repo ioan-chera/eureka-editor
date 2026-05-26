@@ -616,7 +616,7 @@ private:
 			// Only push a snapshot if something actually changed
 			if(before == after)
 				return;
-			
+
 			Snapshot s;
 			s.before = std::move(before);
 			s.after = std::move(after);
@@ -804,6 +804,10 @@ public:
 	Fl_Check_Button *nod_warn;
 
 	Fl_Choice *nod_factor;
+
+	Fl_Check_Button *nod_use_external;
+	Fl_Input        *nod_external_path;
+	Fl_Input        *nod_external_args;
 
 	Fl_Check_Button *nod_gl_nodes;
 	Fl_Check_Button *nod_force_v5;
@@ -1159,21 +1163,34 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		{ nod_warn = new Fl_Check_Button(50, 140, 220, 30, " Warning messages in the logs");
 		}
 
-		{ Fl_Box* o = new Fl_Box(25, 205, 250, 30, "Advanced BSP Settings");
+		{ Fl_Box* o = new Fl_Box(25, 185, 280, 30, "External Node Builder");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_gl_nodes = new Fl_Check_Button(50, 245, 150, 30, " Build GL-Nodes");
+		{ nod_use_external = new Fl_Check_Button(50, 220, 440, 30, "Use external node builder   (internal uses AJBSP)");
 		}
-		{ nod_force_v5 = new Fl_Check_Button(50, 275, 250, 30, " Force V5 of GL-Nodes");
+		{ nod_external_path = new Fl_Input(100, 250, 400, 30, "Path");
+		  nod_external_path->align(Fl_Align(FL_ALIGN_LEFT));
 		}
-		{ nod_force_zdoom = new Fl_Check_Button(50, 305, 250, 30, " Force ZDoom format of normal nodes");
+		{ nod_external_args = new Fl_Input(100, 280, 400, 30, "Arguments");
+		  nod_external_args->align(Fl_Align(FL_ALIGN_LEFT));
+		}
+
+		{ Fl_Box* o = new Fl_Box(25, 325, 250, 30, "Advanced BSP Settings");
+		  o->labelfont(FL_BOLD);
+		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+		}
+		{ nod_gl_nodes = new Fl_Check_Button(50, 360, 150, 30, " Build GL-Nodes");
+		}
+		{ nod_force_v5 = new Fl_Check_Button(50, 390, 250, 30, " Force V5 of GL-Nodes");
+		}
+		{ nod_force_zdoom = new Fl_Check_Button(50, 420, 250, 30, " Force ZDoom format of normal nodes");
 		}
 		// CURRENTLY HIDDEN -- NOT SURE IT IS WORTH HAVING
-		{ nod_compress = new Fl_Check_Button(50, 335, 250, 30, " Force zlib compression");
+		{ nod_compress = new Fl_Check_Button(50, 450, 250, 30, " Force zlib compression");
 		  nod_compress->hide();
 		}
-		{ nod_factor = new Fl_Choice(160, 345, 180, 30, "Seg split logic: ");
+		{ nod_factor = new Fl_Choice(160, 460, 180, 30, "Seg split logic: ");
 		  nod_factor->add("NORMAL|Minimize Splits|Balance BSP Tree");
 		}
 		o->end();
@@ -1618,6 +1635,10 @@ void UI_Preferences::LoadValues()
 	else
 		nod_factor->value(0);	// NORMAL
 
+	nod_use_external->value(config::bsp_use_external ? 1 : 0);
+	nod_external_path->value(config::bsp_external_path.c_str());
+	nod_external_args->value(config::bsp_external_args.c_str());
+
 	nod_gl_nodes->value(config::bsp_gl_nodes ? 1 : 0);
 	nod_force_v5->value(config::bsp_force_v5 ? 1 : 0);
 	nod_force_zdoom->value(config::bsp_force_zdoom ? 1 : 0);
@@ -1754,6 +1775,10 @@ void UI_Preferences::SaveValues()
 		config::bsp_split_factor = 2;
 	else
 		config::bsp_split_factor = 11;
+
+	config::bsp_use_external = nod_use_external->value() ? true : false;
+	config::bsp_external_path = nod_external_path->value();
+	config::bsp_external_args = nod_external_args->value();
 
 	config::bsp_gl_nodes = nod_gl_nodes->value() ? true : false;
 	config::bsp_force_v5 = nod_force_v5->value() ? true : false;
