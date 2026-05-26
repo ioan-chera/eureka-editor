@@ -1163,34 +1163,34 @@ UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 		{ nod_warn = new Fl_Check_Button(50, 140, 220, 30, " Warning messages in the logs");
 		}
 
-		{ Fl_Box* o = new Fl_Box(25, 185, 280, 30, "External Node Builder");
+		{ Fl_Box* o = new Fl_Box(25, 180, 280, 30, "External Node Builder");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_use_external = new Fl_Check_Button(50, 220, 440, 30, "Use external node builder   (internal uses AJBSP)");
+		{ nod_use_external = new Fl_Check_Button(50, 215, 440, 30, " Use external node builder   (internal uses AJBSP)");
 		}
-		{ nod_external_path = new Fl_Input(100, 250, 400, 30, "Path");
+		{ nod_external_path = new Fl_Input(100, 245, 400, 30, " Path");
 		  nod_external_path->align(Fl_Align(FL_ALIGN_LEFT));
 		}
-		{ nod_external_args = new Fl_Input(100, 280, 400, 30, "Arguments");
+		{ nod_external_args = new Fl_Input(100, 275, 400, 30, " Arguments");
 		  nod_external_args->align(Fl_Align(FL_ALIGN_LEFT));
 		}
 
-		{ Fl_Box* o = new Fl_Box(25, 325, 250, 30, "Advanced BSP Settings");
+		{ Fl_Box* o = new Fl_Box(25, 315, 250, 30, "Advanced BSP Settings");
 		  o->labelfont(FL_BOLD);
 		  o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
 		}
-		{ nod_gl_nodes = new Fl_Check_Button(50, 360, 150, 30, " Build GL-Nodes");
+		{ nod_gl_nodes = new Fl_Check_Button(50, 350, 150, 30, " Build GL-Nodes");
 		}
-		{ nod_force_v5 = new Fl_Check_Button(50, 390, 250, 30, " Force V5 of GL-Nodes");
+		{ nod_force_v5 = new Fl_Check_Button(50, 380, 250, 30, " Force V5 of GL-Nodes");
 		}
-		{ nod_force_zdoom = new Fl_Check_Button(50, 420, 250, 30, " Force ZDoom format of normal nodes");
+		{ nod_force_zdoom = new Fl_Check_Button(50, 410, 250, 30, " Force ZDoom format of normal nodes");
 		}
 		// CURRENTLY HIDDEN -- NOT SURE IT IS WORTH HAVING
-		{ nod_compress = new Fl_Check_Button(50, 450, 250, 30, " Force zlib compression");
+		{ nod_compress = new Fl_Check_Button(50, 440, 250, 30, " Force zlib compression");
 		  nod_compress->hide();
 		}
-		{ nod_factor = new Fl_Choice(160, 460, 180, 30, "Seg split logic: ");
+		{ nod_factor = new Fl_Choice(160, 450, 180, 30, "Seg split logic: ");
 		  nod_factor->add("NORMAL|Minimize Splits|Balance BSP Tree");
 		}
 		o->end();
