@@ -272,6 +272,11 @@ static void PrepareInfo(nodebuildinfo_t *info)
 
 build_result_e Instance::RunExternalBuilder()
 {
+	if (!wad.master.editWad())
+	{
+		GB_PrintMsg("WAD is not writable, not building nodes\n");
+		return BUILD_OK;
+	}
 	gLog.printf("\n");
 
 	SString wad_path = wad.master.editWad()->PathName().u8string();
