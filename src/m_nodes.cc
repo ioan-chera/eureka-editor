@@ -23,6 +23,7 @@
 #include "main.h"
 #include "m_config.h"
 #include "m_loadsave.h"
+#include "m_strings.h"
 #include "e_main.h"
 #include "w_wad.h"
 
@@ -30,18 +31,27 @@
 
 #include "bsp.h"
 
+// needed for external node builder handling, but not on windows
+#ifndef _WIN32
+#include <signal.h>
+#endif
+
 
 // config items
-bool config::bsp_on_save	= true;
-bool config::bsp_fast		= false;
-bool config::bsp_warnings	= false;
+bool	config::bsp_on_save			= true;
+bool	config::bsp_fast			= false;
+bool	config::bsp_warnings		= false;
 
-int  config::bsp_split_factor	= DEFAULT_FACTOR;
+int		config::bsp_split_factor	= DEFAULT_FACTOR;
 
-bool config::bsp_gl_nodes		= true;
-bool config::bsp_force_v5		= false;
-bool config::bsp_force_zdoom	= false;
-bool config::bsp_compressed		= false;
+bool	config::bsp_use_external	= false;
+SString config::bsp_external_path	= "";
+SString config::bsp_external_args	= "";
+
+bool	config::bsp_gl_nodes		= true;
+bool	config::bsp_force_v5		= false;
+bool	config::bsp_force_zdoom		= false;
+bool	config::bsp_compressed		= false;
 
 
 #define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
@@ -260,6 +270,82 @@ static void PrepareInfo(nodebuildinfo_t *info)
 	info->cancelled = false;
 }
 
+build_result_e Instance::RunExternalBuilder()
+{
+	if (!wad.master.editWad())
+	{
+		GB_PrintMsg("WAD is not writable, not building nodes\n");
+		return BUILD_OK;
+	}
+	gLog.printf("\n");
+
+	SString wad_path = wad.master.editWad()->PathName().u8string();
+
+	SString cmd = SString::printf("%s %s \"%s\" 2>&1",
+								  config::bsp_external_path.c_str(),
+								  config::bsp_external_args.c_str(),
+								  wad_path.c_str());
+
+	GB_PrintMsg("Running external node builder: %s\n", cmd.c_str());
+
+#ifndef _WIN32
+	// take child reaping control over from loop in main.cc; not necessary on windows
+	struct sigaction old_sa = {};
+	struct sigaction new_sa = {};
+	new_sa.sa_handler = SIG_DFL;
+	sigaction(SIGCHLD, &new_sa, &old_sa);
+#endif
+
+#ifdef _WIN32
+	FILE *pipe = _popen(cmd.c_str(), "r");
+#else
+	FILE *pipe = popen(cmd.c_str(), "r");
+#endif
+
+	if (!pipe)
+	{
+		GB_PrintMsg("ERROR: Failed to launch external node builder\n");
+#ifndef _WIN32
+		sigaction(SIGCHLD, &old_sa, nullptr);
+#endif
+		return BUILD_BadFile;
+	}
+
+	char buf[256];
+	while(fgets(buf, sizeof(buf), pipe))
+	{
+		GB_PrintMsg("%s", buf);
+		Fl::check();
+
+		if (nodeialog && nodeialog->WantCancel())
+		{
+#ifdef _WIN32
+			_pclose(pipe);
+#else
+			pclose(pipe);
+			sigaction(SIGCHLD, &old_sa, nullptr);
+#endif
+			return BUILD_Cancelled;
+		}
+	}
+
+#ifdef _WIN32
+		int exit_code = _pclose(pipe);
+#else
+		int exit_code = pclose(pipe);
+		sigaction(SIGCHLD, &old_sa, nullptr);
+		if (WIFEXITED(exit_code))
+			exit_code = WEXITSTATUS(exit_code);
+#endif
+
+		if (exit_code != 0)
+		{
+			GB_PrintMsg("ERROR: external node builder exited with code %d\n", exit_code);
+			return BUILD_BadFile;
+		}
+
+		return BUILD_OK;
+}
 
 build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 {
@@ -276,50 +362,68 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 
 	nodeialog->SetProg(0);
 
-	build_result_e ret;
+	build_result_e ret = BUILD_OK;
 
-	// loop over each level in the wad
-	for (int n = 0 ; n < num_levels ; n++)
+	if (config::bsp_use_external)
 	{
-		// load level
 		try
 		{
-			NewDocument newdoc = openDocument(loaded, *wad.master.editWad(), n);
-
-			ret = AJBSP_BuildLevel(info, n, *this, newdoc.doc, newdoc.loading, *wad.master.editWad());
+			wad.master.editWad()->writeToDisk();
 		}
 		catch(const std::runtime_error &e)
 		{
-			GB_PrintMsg("Failed building nodes for level %d: %s\n", n, e.what());
-			continue;
+			GB_PrintMsg("ERROR: could not save %s: %s\n", wad.master.editWad()->PathName().u8string().c_str(), e.what());
+			ret = BUILD_BadFile;
 		}
 
-		// don't fail on maps with overflows
-		// [ Note that 'total_failed_maps' keeps a tally of these ]
-		if (ret == BUILD_LumpOverflow)
-			ret = BUILD_OK;
-
-		if (ret != BUILD_OK)
-			break;
-
-		nodeialog->SetProg(100 * (n + 1) / num_levels);
-
-		Fl::check();
-
-		if (nodeialog->WantCancel())
+		if (ret == BUILD_OK)
+			ret = RunExternalBuilder();
+	}
+	else
+	{
+		// loop over each level in the wad
+		for (int n = 0 ; n < num_levels ; n++)
 		{
-			nb_info->cancelled = true;
-		}
-	}
+			// load level
+			try
+			{
+				NewDocument newdoc = openDocument(loaded, *wad.master.editWad(), n);
 
-	try
-	{
-		wad.master.editWad()->writeToDisk();
-	}
-	catch(const std::runtime_error &e)
-	{
-		GB_PrintMsg("ERROR: could not save %s: %s\n", wad.master.editWad()->PathName().u8string().c_str(), e.what());
-		ret = BUILD_BadFile;
+				ret = AJBSP_BuildLevel(info, n, *this, newdoc.doc, newdoc.loading, *wad.master.editWad());
+			}
+			catch(const std::runtime_error &e)
+			{
+				GB_PrintMsg("Failed building nodes for level %d: %s\n", n, e.what());
+				continue;
+			}
+
+			// don't fail on maps with overflows
+			// [ Note that 'total_failed_maps' keeps a tally of these ]
+			if (ret == BUILD_LumpOverflow)
+				ret = BUILD_OK;
+
+			if (ret != BUILD_OK)
+				break;
+
+			nodeialog->SetProg(100 * (n + 1) / num_levels);
+
+			Fl::check();
+
+			if (nodeialog->WantCancel())
+			{
+				nb_info->cancelled = true;
+			}
+		}
+
+		try
+		{
+			wad.master.editWad()->writeToDisk();
+		}
+		catch(const std::runtime_error &e)
+		{
+			GB_PrintMsg("ERROR: could not save %s: %s\n", wad.master.editWad()->PathName().u8string().c_str(), e.what());
+			ret = BUILD_BadFile;
+		}
 	}
 
 	if (ret == BUILD_OK)
@@ -358,12 +462,17 @@ void Instance::BuildNodesAfterSave(int lev_idx, const LoadingData& loading, Wad_
 
 	PrepareInfo(&nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this, level, loading, wad);
+	build_result_e ret;
+
+	if (config::bsp_use_external)
+		ret = RunExternalBuilder();
+	else
+		ret = AJBSP_BuildLevel(&nb_info, lev_idx, *this, level, loading, wad);
 
 	// TODO : maybe print # of serious/minor warnings
 
 	if (ret != BUILD_OK)
-		gLog.printf("NODES FAILED TO FAILED.\n");
+		gLog.printf("NODES FAILED TO BUILD.\n");
 }
 
 

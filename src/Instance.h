@@ -340,43 +340,43 @@ public:
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 	void Status_Clear() const;
-	
+
 	// GridListener
 	void gridRedrawMap() override
 	{
 		RedrawMap();
 	}
-	
+
 	void gridSetGrid(int grid) override
 	{
 		if (main_win)
 			main_win->info_bar->SetGrid(grid);
 	}
-	
+
 	void gridUpdateSnap() override
 	{
 		if (main_win)
 			main_win->info_bar->UpdateSnap();
 	}
-	
+
 	void gridAdjustPos() override
 	{
 		if (main_win)
 			main_win->scroll->AdjustPos();
 	}
-	
+
 	void gridPointerPos() override
 	{
 		if (main_win)
 			main_win->canvas->PointerPos();
 	}
-	
+
 	void gridSetScale(double scale) override
 	{
 		if (main_win)
 			main_win->info_bar->SetScale(scale);
 	}
-	
+
 	void gridBeep(const char *message) override
 	{
 		Beep("%s", message);
@@ -437,7 +437,7 @@ private:
 
 	// M_LOADSAVE
 	void FreshLevel();
-	
+
 	bool M_ExportMap(bool inhibit_node_build);
 	void Navigate2D();
 	void Project_ApplyChanges(const UI_ProjectSetup::Result &result) noexcept(false);
@@ -447,6 +447,7 @@ private:
 	void SaveLevelAndUpdateWindow(LoadingData& loading, const SString& level, Wad_file &wad, bool inhibit_node_build);
 
 	// M_NODES
+	build_result_e RunExternalBuilder();
 	build_result_e BuildAllNodes(nodebuildinfo_t *info);
 
 	// R_GRID
@@ -509,7 +510,7 @@ public:	// will be private when we encapsulate everything
 	int last_given_file = 0;
 	std::optional<UI_NodeDialog> nodeialog;
 	nodebuildinfo_t *nb_info = nullptr;
-	
+
 	int tagInMemory = 0;
 
 	WadData wad;

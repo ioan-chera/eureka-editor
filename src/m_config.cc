@@ -245,6 +245,30 @@ const opt_desc_t options[] =
 		&config::bsp_split_factor
 	},
 
+	{	"bsp_use_external",
+		0,
+		OptFlag_preference,
+		"Node building: use external node builder",
+		NULL,
+		&config::bsp_use_external
+	},
+
+	{	"bsp_external_path",
+		0,
+		OptFlag_preference,
+		"Node building: location of external node builder",
+		NULL,
+		&config::bsp_external_path,
+	},
+
+	{	"bsp_external_args",
+		0,
+		OptFlag_preference,
+		"Node building: extra arguments for external node builder",
+		NULL,
+		&config::bsp_external_args,
+	},
+
 	{	"bsp_gl_nodes",
 		0,
 		OptFlag_preference,
