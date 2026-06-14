@@ -161,8 +161,8 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 
 	float scale = info.scale;
 
-	float fit_x = iw * scale / (float)nw;
-	float fit_y = ih * scale / (float)nh;
+	float fit_x = static_cast<float>(iw) * scale / (float)nw;
+	float fit_y = static_cast<float>(ih) * scale / (float)nh;
 
 	// shrink if too big
 	if (fit_x > 1.00 || fit_x > 1.00)
@@ -190,8 +190,8 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 			continue;
 		}
 
-		int ix = static_cast<int>(x / scale - (nw / scale - iw) / 2);
-		int iy = static_cast<int>(y / scale - (nh / scale - ih) / 2);
+		int ix = static_cast<int>(static_cast<float>(x) / scale - (static_cast<float>(nw) / scale - static_cast<float>(iw)) / 2);
+		int iy = static_cast<int>(static_cast<float>(y) / scale - (static_cast<float>(nh) / scale - static_cast<float>(ih)) / 2);
 
 		img_pixel_t pix = TRANS_PIXEL;
 

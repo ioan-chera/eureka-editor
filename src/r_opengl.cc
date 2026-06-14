@@ -85,7 +85,7 @@ static float DoomLightToFloat(int light, float dist)
 	if (config::usegamma > 0)
 		level = gammatable[config::usegamma][level];
 
-	return level / 255.0f;
+	return static_cast<float>(level) / 255.0f;
 }
 
 
@@ -626,20 +626,20 @@ public:
 				float ax = poly->mx[0];
 				float ay = poly->my[0];
 				float az = static_cast<float>(plane ? plane->SlopeZ(ax, ay) : z);
-				float atx = ax / img_w;
-				float aty = ay / img_h;
+				float atx = ax / static_cast<float>(img_w);
+				float aty = ay / static_cast<float>(img_h);
 
 				float bx = poly->mx[1];
 				float by = poly->my[1];
 				float bz = static_cast<float>(plane ? plane->SlopeZ(bx, by) : z);
-				float btx = bx / img_w;
-				float bty = by / img_h;
+				float btx = bx / static_cast<float>(img_w);
+				float bty = by / static_cast<float>(img_h);
 
 				float cx = poly->mx[2];
 				float cy = poly->my[2];
 				float cz = static_cast<float>(plane ? plane->SlopeZ(cx, cy) : z);
-				float ctx = cx / img_w;
-				float cty = cy / img_h;
+				float ctx = cx / static_cast<float>(img_w);
+				float cty = cy / static_cast<float>(img_h);
 
 				LightClippedTriangle(ax, ay, az, atx, aty,
 									 bx, by, bz, btx, bty,
@@ -651,8 +651,8 @@ public:
 					float dx = poly->mx[3];
 					float dy = poly->my[3];
 					float dz = static_cast<float>(plane ? plane->SlopeZ(dx, dy) : z);
-					float dtx = dx / img_w;
-					float dty = dy / img_h;
+					float dtx = dx / static_cast<float>(img_w);
+					float dty = dy / static_cast<float>(img_h);
 
 					LightClippedTriangle(ax, ay, az, atx, aty,
 										 cx, cy, cz, ctx, cty,
@@ -673,7 +673,7 @@ public:
 
 					if (img)
 					{
-						glTexCoord2f(px / img_w, py / img_h);
+						glTexCoord2f(px / static_cast<float>(img_w), py / static_cast<float>(img_h));
 					}
 
 					glVertex3f(px, py, pz);
@@ -740,7 +740,7 @@ public:
 
 			if (where == 'W' && (ld->flags & MLF_LowerUnpegged))
 			{
-				tex_top = front->floorh + img_h;
+				tex_top = static_cast<float>(front->floorh) + img_h;
 			}
 
 			if (where == 'L')
@@ -760,14 +760,14 @@ public:
 
 			if (where == 'U' && (0 == (ld->flags & MLF_UpperUnpegged)))
 			{
-				tex_top = back->ceilh + img_h;
+				tex_top = static_cast<float>(back->ceilh) + img_h;
 			}
 
-			tx1 = (tx1 + sd->x_offset) / img_tw;
-			tx2 = (tx2 + sd->x_offset) / img_tw;
+			tx1 = (tx1 + static_cast<float>(sd->x_offset)) / img_tw;
+			tx2 = (tx2 + static_cast<float>(sd->x_offset)) / img_tw;
 
 			tex_top  += (img_th - img_h);
-			tex_top  += sd->y_offset;
+			tex_top  += static_cast<float>(sd->y_offset);
 
 			tex_scale = 1.0f / img_th;
 		}
@@ -836,17 +836,17 @@ public:
 		float tx1 = 0.0;
 		float tx2 = tx1 + ld_length;
 
-		tx1 = (tx1 + sd->x_offset) / img_tw;
-		tx2 = (tx2 + sd->x_offset) / img_tw;
+		tx1 = (tx1 + static_cast<float>(sd->x_offset)) / img_tw;
+		tx2 = (tx2 + static_cast<float>(sd->x_offset)) / img_tw;
 
 		if (ld->flags & MLF_LowerUnpegged)
 		{
-			z1 = z1 + sd->y_offset;
+			z1 = z1 + static_cast<float>(sd->y_offset);
 			z2 = z1 + img_h;
 		}
 		else
 		{
-			z2 = z2 + sd->y_offset;
+			z2 = z2 + static_cast<float>(sd->y_offset);
 			z1 = z2 - img_h;
 		}
 
@@ -906,7 +906,7 @@ public:
 			return;
 
 		// too far away?
-		if (std::min(ty1, ty2) > config::render_far_clip)
+		if (std::min(ty1, ty2) > static_cast<float>(config::render_far_clip))
 			return;
 
 		float angle1 = PointToAngle(tx1, ty1);
@@ -1238,7 +1238,7 @@ public:
 		if (ty < 4)
 			return;
 
-		if (config::render_far_clip > 0 && ty > config::render_far_clip)
+		if (config::render_far_clip > 0 && ty > static_cast<float>(config::render_far_clip))
 			return;
 
 		bool fullbright = false;
@@ -1258,8 +1258,8 @@ public:
 		int offsetX, offsetY;
 		img->getSpriteOffset(offsetX, offsetY);
 
-		float scale_w = img->width() * scale;
-		float scale_h = img->height() * scale;
+		float scale_w = static_cast<float>(img->width()) * scale;
+		float scale_h = static_cast<float>(img->height()) * scale;
 
 		float tx1 = tx - scale_w * 0.5f;
 		float tx2 = tx + scale_w * 0.5f;
@@ -1474,8 +1474,8 @@ public:
 			scale = 0.33f;
 		}
 
-		float scale_w = img->width()  * scale;
-		float scale_h = img->height() * scale;
+		float scale_w = static_cast<float>(img->width())  * scale;
+		float scale_h = static_cast<float>(img->height()) * scale;
 
 		// choose X/Y coordinates so quad faces the camera
 		float x1 = static_cast<float>(tx - inst.r_view.Sin * scale_w * 0.5);
@@ -1670,14 +1670,14 @@ public:
 		// the projection matrix creates the 3D perspective
 		glMatrixMode(GL_PROJECTION);
 
-		float x_slope = 100.0f / config::render_pixel_aspect;
+		float x_slope = 100.0f / static_cast<float>(config::render_pixel_aspect);
 		float y_slope = (float)pixel_h / (float)pixel_w;
 
 		// this matches behavior of S/W renderer.
 		// [ currently it is important since we use the S/W path
 		//   for querying what the mouse is pointing at ]
 		float z_near = x_slope;
-		float z_far  = config::render_far_clip - 8.0f;
+		float z_far  = static_cast<float>(config::render_far_clip) - 8.0f;
 
 		glLoadIdentity();
 		glFrustum(-x_slope, +x_slope, -y_slope, +y_slope, z_near, z_far);

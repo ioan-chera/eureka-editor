@@ -657,7 +657,7 @@ public:
 	{
 		x = x * 2 - inst.r_view.screen_w;
 
-		float ang = static_cast<float>(M_PI/2 + atan(x / inst.r_view.aspect_sw));
+		float ang = static_cast<float>(M_PI/2 + atan(static_cast<float>(x) / inst.r_view.aspect_sw));
 
 		if (ang < 0)
 			ang = 0;
@@ -896,8 +896,8 @@ public:
 			scale = 0.33f;
 		}
 
-		float tx1 = tx - sprite->width() * scale / 2.0f;
-		float tx2 = tx + sprite->width() * scale / 2.0f;
+		float tx1 = tx - static_cast<float>(sprite->width()) * scale / 2.0f;
+		float tx2 = tx + static_cast<float>(sprite->width()) * scale / 2.0f;
 
 		double iz = 1 / ty;
 
@@ -943,12 +943,12 @@ public:
 		{
 			// IOANCH 9/2015: also add z
 			h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - th->h());
-			h1 = static_cast<int>(h2 - sprite->height() * scale);
+			h1 = static_cast<int>(static_cast<float>(h2) - static_cast<float>(sprite->height()) * scale);
 		}
 		else
 		{
 			h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + th->h());
-			h2 = static_cast<int>(h1 + sprite->height() * scale);
+			h2 = static_cast<int>(static_cast<float>(h1) + static_cast<float>(sprite->height()) * scale);
 		}
 
 		// create drawwall structure
@@ -1296,8 +1296,8 @@ public:
 				float scale   = dw->normal;
 				const Img_c *sprite = dw->ceil.img;
 
-				float tx1 = static_cast<float>(tx - sprite->width() * scale / 2.0);
-				float tx2 = static_cast<float>(tx + sprite->width() * scale / 2.0);
+				float tx1 = static_cast<float>(tx - static_cast<float>(sprite->width()) * scale / 2.0);
+				float tx2 = static_cast<float>(tx + static_cast<float>(sprite->width()) * scale / 2.0);
 
 				double iz = 1 / ty;
 
@@ -1309,16 +1309,16 @@ public:
 				if (dw->thingFlags & THINGDEF_CEIL)
 				{
 					h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - T->h());
-					h1 = static_cast<int>(h2 - sprite->height() * scale);
+					h1 = static_cast<int>(static_cast<float>(h2) - static_cast<float>(sprite->height()) * scale);
 				}
 				else
 				{
 					h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + T->h());
-					h2 = static_cast<int>(h1 + sprite->height() * scale);
+					h2 = static_cast<int>(static_cast<float>(h1) + static_cast<float>(sprite->height()) * scale);
 				}
 
-				h1 = static_cast<int>(h1 + dz - 1);
-				h2 = static_cast<int>(h2 + dz + 1);
+				h1 = static_cast<int>(static_cast<float>(h1) + dz - 1);
+				h2 = static_cast<int>(static_cast<float>(h2) + dz + 1);
 
 				y1 = DistToY(iz, h2);
 				y2 = DistToY(iz, h1);
@@ -1493,10 +1493,10 @@ public:
 
 		/* compute texture Y coords */
 
-		float hh = surf.tex_h - YToSecH(y1, dw->cur_iz);
-		float dh = surf.tex_h - YToSecH(y2, dw->cur_iz);
+		float hh = static_cast<float>(surf.tex_h) - YToSecH(y1, dw->cur_iz);
+		float dh = static_cast<float>(surf.tex_h) - YToSecH(y2, dw->cur_iz);
 
-		dh = (dh - hh) / std::max(1, y2 - y1);
+		dh = (dh - hh) / static_cast<float>(std::max(1, y2 - y1));
 		hh += 0.2f;
 
 		src  += tx;
@@ -1660,10 +1660,10 @@ public:
 		if (tx < 0 || tx >= tw)
 			return;
 
-		float hh = dw->ceil.h2 - YToSecH(y1, dw->cur_iz);
-		float dh = dw->ceil.h2 - YToSecH(y2, dw->cur_iz);
+		float hh = static_cast<float>(dw->ceil.h2) - YToSecH(y1, dw->cur_iz);
+		float dh = static_cast<float>(dw->ceil.h2) - YToSecH(y2, dw->cur_iz);
 
-		dh = (dh - hh) / std::max(1, y2 - y1);
+		dh = (dh - hh) / static_cast<float>(std::max(1, y2 - y1));
 
 		int thsec = inst.r_view.thing_sectors[dw->th];
 		int light = inst.level.isSector(thsec) ? inst.level.sectors[thsec]->light : 255;

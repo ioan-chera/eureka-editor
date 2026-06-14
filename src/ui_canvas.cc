@@ -306,8 +306,8 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 		y1 < 8 || y2 > h() - 8)
 		return 1; // too big
 
-	float x_ratio = std::max(4, x2 - x1) / (float)std::max(4, w());
-	float y_ratio = std::max(4, y2 - y1) / (float)std::max(4, h());
+	float x_ratio = static_cast<float>(std::max(4, x2 - x1)) / (float)std::max(4, w());
+	float y_ratio = static_cast<float>(std::max(4, y2 - y1)) / (float)std::max(4, h());
 
 	if (std::max(x_ratio, y_ratio) < 0.25)
 		return -1;  // too small
@@ -1127,11 +1127,11 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 	}
 
 #else // OpenGL
-	int bx1 = sx + (int)floor(-W * scale);
-	int bx2 = sx + (int)ceil ( W * scale);
+	int bx1 = sx + (int)floor(static_cast<float>(-W) * scale);
+	int bx2 = sx + (int)ceil ( static_cast<float>(W) * scale);
 
-	int by1 = sy + (int)floor(-H * scale);
-	int by2 = sy + (int)ceil ( H * scale);
+	int by1 = sy + (int)floor(static_cast<float>(-H) * scale);
+	int by2 = sy + (int)ceil ( static_cast<float>(H) * scale);
 
 	// don't make too small
 	if (bx2 <= bx1) bx2 = bx1 + 1;
@@ -2515,7 +2515,7 @@ void UI_Canvas::RenderSector(int num)
 
 			if (img)
 			{
-				glTexCoord2f(poly->mx[p] / img_w, poly->my[p] / img_h);
+				glTexCoord2f(poly->mx[p] / static_cast<float>(img_w), poly->my[p] / static_cast<float>(img_h));
 			}
 
 			glVertex2i(sx, sy);

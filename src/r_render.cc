@@ -142,7 +142,7 @@ void Render_View_t::CalcAspect()
 {
 	aspect_sw = static_cast<float>(screen_w);	 // things break if these are different
 
-	aspect_sh = screen_w / (config::render_pixel_aspect / 100.0f);
+	aspect_sh = static_cast<float>(screen_w) / (static_cast<float>(config::render_pixel_aspect) / 100.0f);
 }
 
 double Render_View_t::DistToViewPlane(v2double_t map)
@@ -588,8 +588,8 @@ static void AdjustOfs_Delta(Instance &inst, int dx, int dy)
 	float dx_factor, dy_factor;
 	AdjustOfs_CalcDistFactor(inst, dx_factor, dy_factor);
 
-	inst.edit.adjust_dx -= dx * factor * dx_factor;
-	inst.edit.adjust_dy -= dy * factor * dy_factor;
+	inst.edit.adjust_dx -= static_cast<float>(dx) * factor * dx_factor;
+	inst.edit.adjust_dy -= static_cast<float>(dy) * factor * dy_factor;
 
 	inst.RedrawMap();
 }
@@ -781,7 +781,7 @@ void Render3D_ScrollMap(Instance &inst, v2int_t dpos, keycode_t mod)
 	}
 	else  // turn camera
 	{
-		double d_ang = dpos.x * speed * M_PI / 480.0;
+		double d_ang = static_cast<float>(dpos.x) * speed * M_PI / 480.0;
 
 		inst.r_view.SetAngle(static_cast<float>(inst.r_view.angle - d_ang));
 	}
@@ -795,7 +795,7 @@ void Render3D_ScrollMap(Instance &inst, v2int_t dpos, keycode_t mod)
 	}
 	else if (! (config::render_lock_gravity && inst.r_view.gravity))
 	{
-		inst.r_view.z += dpos.y * speed * 0.75;
+		inst.r_view.z += static_cast<float>(dpos.y) * speed * 0.75;
 
 		inst.r_view.gravity = false;
 	}
@@ -808,17 +808,17 @@ void Render3D_ScrollMap(Instance &inst, v2int_t dpos, keycode_t mod)
 static void DragSectors_Update(Instance &inst)
 {
 	float ow = static_cast<float>(inst.main_win->canvas->w());
-	float x_slope = 100.0f / config::render_pixel_aspect;
+	float x_slope = 100.0f / static_cast<float>(config::render_pixel_aspect);
 
 	float factor = static_cast<float>(clamp(20.f, inst.edit.drag_point_dist, 1000.f) / (ow * x_slope * 0.5));
-	float map_dz = -inst.edit.drag_screen_dpos.y * factor;
+	float map_dz = static_cast<float>(-inst.edit.drag_screen_dpos.y) * factor;
 
 	float step = 8.0;  // TODO config item
 
 	if (map_dz > step*0.25)
-		inst.edit.drag_sector_dz = step * (int)ceil(map_dz / step);
+		inst.edit.drag_sector_dz = step * ceilf(map_dz / step);
 	else if (map_dz < step*-0.25)
-		inst.edit.drag_sector_dz = step * (int)floor(map_dz / step);
+		inst.edit.drag_sector_dz = step * floorf(map_dz / step);
 	else
 		inst.edit.drag_sector_dz = 0;
 }
@@ -860,7 +860,7 @@ static void DragThings_Update(Instance &inst)
 	float ow = static_cast<float>(inst.main_win->canvas->w());
 //	float oh = main_win->canvas->h();
 
-	float x_slope = 100.0f / config::render_pixel_aspect;
+	float x_slope = 100.0f / static_cast<float>(config::render_pixel_aspect);
 //	float y_slope = (float)oh / (float)ow;
 
 	float dist = clamp(20.f, inst.edit.drag_point_dist, 1000.f);
@@ -871,7 +871,7 @@ static void DragThings_Update(Instance &inst)
 	if (inst.edit.drag_thing_up_down)
 	{
 		// vertical positioning in Hexen and UDMF formats
-		float map_dz = -inst.edit.drag_screen_dpos.y * y_factor;
+		float map_dz = static_cast<float>(-inst.edit.drag_screen_dpos.y) * y_factor;
 
 		// final result is in drag_cur_x/y/z
 		inst.edit.drag_cur.x = inst.edit.drag_start.x;
@@ -892,7 +892,7 @@ static void DragThings_Update(Instance &inst)
 	double side_vy = -fwd_vx;
 
 	double dx =  inst.edit.drag_screen_dpos.x * static_cast<double>(x_factor);
-	double dy = -inst.edit.drag_screen_dpos.y * y_factor * 2.0;
+	double dy = static_cast<float>(-inst.edit.drag_screen_dpos.y) * y_factor * 2.0;
 
 	// this usually won't happen, but is a reasonable fallback...
 	if (inst.edit.drag_thing_num < 0)

@@ -416,7 +416,7 @@ void Instance::navigationScroll(float *editNav, nav_release_func_t func)
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	*editNav = static_cast<float>(perc * base_size / 100.0 / grid.getScale());
+	*editNav = static_cast<float>(perc * static_cast<float>(base_size) / 100.0 / grid.getScale());
 
 	Nav_SetKey(EXEC_CurKey, func);
 }
@@ -988,7 +988,7 @@ void Instance::CMD_WHEEL_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	speed = static_cast<float>(speed * base_size / 100.0 / grid.getScale());
+	speed = static_cast<float>(speed * static_cast<float>(base_size) / 100.0 / grid.getScale());
 
 	grid.Scroll(delta * speed);
 }

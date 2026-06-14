@@ -113,7 +113,7 @@ struct sector_edge_t
 
 	float CalcX(float y) const
 	{
-		return x1 + (x2 - x1) * (float)(y - y1) / (float)(y2 - y1);
+		return static_cast<float>(x1) + static_cast<float>(x2 - x1) * (float)(y - static_cast<float>(y1)) / (float)(static_cast<float>(y2) - static_cast<float>(y1));
 	}
 
 	struct CMP_Y
@@ -805,7 +805,7 @@ fprintf(stderr, "  active_num:%d  low_y:%d  high_y:%d\n", active_num, low_y, hig
 		}
 
 		// compute a comparison X coordinate for each active edge
-		float mid_y = low_y + (high_y - low_y) * 0.5f;
+		float mid_y = static_cast<float>(low_y) + static_cast<float>(high_y - low_y) * 0.5f;
 
 		for (unsigned int k = 0 ; k < active_edges.size() ; k++)
 		{

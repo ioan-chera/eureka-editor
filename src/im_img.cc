@@ -943,8 +943,8 @@ Img_c Img_c::createLightSprite(const Palette &palette)
 	{
 		byte pix = TRANS_PIXEL;
 
-		float dx = (W - 2*x) / (float)W;
-		float dy = (H - 2*y) / (float)H;
+		float dx = static_cast<float>(W - 2*x) / (float)W;
+		float dy = static_cast<float>(H - 2*y) / (float)H;
 
 		float dist = sqrt((dx) * (dx) + (dy) * (dy));
 
@@ -994,9 +994,9 @@ Img_c Img_c::createMapSpotSprite(const Palette &pal, int base_r, int base_g,
 			float ity = 0.3f + dx / 14.0f;
 			if (ity > 1.0) ity = 1.0;
 
-			int r = static_cast<int>(base_r * ity);
-			int g = static_cast<int>(base_g * ity);
-			int b = static_cast<int>(base_b * ity);
+			int r = static_cast<int>(static_cast<float>(base_r) * ity);
+			int g = static_cast<int>(static_cast<float>(base_g) * ity);
+			int b = static_cast<int>(static_cast<float>(base_b) * ity);
 
 			pix = pal.findPaletteColor(r, g, b);
 		}
