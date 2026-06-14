@@ -97,7 +97,7 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 	catch (const std::runtime_error& e)
 	{
 		gLog.printf("%s\n", e.what());
-		DLG_ShowError(false, "Cannot load %s: %s", filename->u8string().c_str(), e.what());
+		DLG_ShowError(false, "Cannot load %s: %s", reinterpret_cast<const char *>(filename->u8string().c_str()), e.what());
 	}
 }
 
@@ -837,7 +837,7 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		SString short_name = fl_filename_name(global::Pwad_list[k].u8string().c_str());
+		SString short_name = fl_filename_name(reinterpret_cast<const char *>(global::Pwad_list[k].u8string().c_str()));
 
 		short_name = SString::printf("%s%s%d:  %s", (k < 9) ? "  " : "",
 									 (k < 9) ? "&" : "", 1+k, short_name.c_str());

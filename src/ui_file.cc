@@ -587,7 +587,7 @@ void UI_OpenMap::LoadFile()
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
+	chooser.directory(reinterpret_cast<const char *>(inst.Main_FileOpFolder().u8string().c_str()));
 
 	// Show native chooser
 	switch (chooser.show())
@@ -609,7 +609,7 @@ void UI_OpenMap::LoadFile()
 	}
 
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(fs::u8path(chooser.filename()),
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(fs::path(reinterpret_cast<const char8_t *>(chooser.filename())),
 												   WadOpenMode::append);
 
 	if (! wad)
@@ -1038,7 +1038,7 @@ void UI_ProjectSetup::PopulateResources()
 		{
 			result.resources[r] = inst.loaded.resourceList[r];
 
-			res_name[r]->value(fileOrDirName(result.resources[r]).u8string().c_str());
+			res_name[r]->value(reinterpret_cast<const char *>(fileOrDirName(result.resources[r]).u8string().c_str()));
 		}
 	}
 }
@@ -1128,7 +1128,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
+	chooser.directory(reinterpret_cast<const char *>(that->inst.Main_FileOpFolder().u8string().c_str()));
 
 	switch (chooser.show())
 	{
@@ -1145,7 +1145,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	// check that a game definition exists
 
-	SString game = GameNameFromIWAD(fs::u8path(chooser.filename()));
+	SString game = GameNameFromIWAD(fs::path(reinterpret_cast<const char8_t *>(chooser.filename())));
 
 	if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
 			global::install_dir, GAMES_DIR, game))
@@ -1155,7 +1155,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-	global::recent.addIWAD(fs::u8path(chooser.filename()));
+	global::recent.addIWAD(fs::path(reinterpret_cast<const char8_t *>(chooser.filename())));
 	global::recent.save(global::home_dir);
 
 	that->result.game = game;
@@ -1216,7 +1216,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 		chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 		chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh\nDehacked files\t*.deh\nBEX files\t*.bex");
 	}
-	chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
+	chooser.directory(reinterpret_cast<const char *>(that->inst.Main_FileOpFolder().u8string().c_str()));
 
 	switch (chooser.show())
 	{
@@ -1231,9 +1231,9 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 			break;  // OK
 	}
 
-	that->result.resources[r] = fs::u8path(chooser.filename());
+	that->result.resources[r] = fs::path(reinterpret_cast<const char8_t *>(chooser.filename()));
 
-	that->res_name[r]->value(fileOrDirName(that->result.resources[r]).u8string().c_str());
+	that->res_name[r]->value(reinterpret_cast<const char *>(fileOrDirName(that->result.resources[r]).u8string().c_str()));
 }
 
 

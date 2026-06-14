@@ -845,8 +845,8 @@ bool Instance::M_ParseOperationFile()
 	LineFile file(filename);
 	if(!file.isOpen() && !global::old_linux_home_and_cache_dir.empty())
 	{
-		gLog.printf("%s not found. Trying from old Linux path %s/operations.cfg\n", filename.u8string().c_str(),
-				global::old_linux_home_and_cache_dir.u8string().c_str());
+		gLog.printf("%s not found. Trying from old Linux path %s/operations.cfg\n", reinterpret_cast<const char *>(filename.u8string().c_str()),
+					reinterpret_cast<const char *>(global::old_linux_home_and_cache_dir.u8string().c_str()));
 		filename = global::old_linux_home_and_cache_dir / "operations.cfg";
 		file.open(filename);
 	}

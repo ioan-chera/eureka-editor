@@ -324,8 +324,8 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 	if (global::cache_dir.empty())
 		global::cache_dir = global::home_dir;
 
-	gLog.printf("Home  dir: %s\n", global::home_dir.u8string().c_str());
-	gLog.printf("Cache dir: %s\n", global::cache_dir.u8string().c_str());
+	gLog.printf("Home  dir: %s\n", reinterpret_cast<const char *>(global::home_dir.u8string().c_str()));
+	gLog.printf("Cache dir: %s\n", reinterpret_cast<const char *>(global::cache_dir.u8string().c_str()));
 
 	// create cache directory (etc)
 	CreateHomeDirs();
@@ -358,8 +358,8 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 			fs::path filename = global::install_dir / "games" / "doom2.ugh";
 
 			gLog.debugPrintf("Trying install path: %s\n",
-							 global::install_dir.u8string().c_str());
-			gLog.debugPrintf("   looking for file: %s\n", filename.u8string().c_str());
+							 reinterpret_cast<const char *>(global::install_dir.u8string().c_str()));
+			gLog.debugPrintf("   looking for file: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 			bool exists = FileExists(filename);
 
@@ -381,7 +381,7 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 	if (global::install_dir.empty())
 		ThrowException("Unable to find install directory!\n");
 
-	gLog.printf("Install dir: %s\n", global::install_dir.u8string().c_str());
+	gLog.printf("Install dir: %s\n", reinterpret_cast<const char *>(global::install_dir.u8string().c_str()));
 }
 
 
@@ -403,7 +403,7 @@ static bool DetermineIWAD(Instance &inst)
 		SString game = SString(inst.loaded.iwadName.u8string()).asLower();
 
 		// make lowercase
-		inst.loaded.iwadName = fs::u8path(game.get());
+		inst.loaded.iwadName = fs::path(reinterpret_cast<const char8_t *>(game.get().c_str()));
 
 		if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
 				global::install_dir, GAMES_DIR, game))
@@ -425,14 +425,14 @@ static bool DetermineIWAD(Instance &inst)
 			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName, "wad");
 
 		if (! Wad_file::Validate(inst.loaded.iwadName))
-			ThrowException("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.u8string().c_str());
+			ThrowException("IWAD does not exist or is invalid: %s\n", reinterpret_cast<const char *>(inst.loaded.iwadName.u8string().c_str()));
 
 		SString game = GameNameFromIWAD(inst.loaded.iwadName);
 
 		if (! M_CanLoadDefinitions(global::home_dir, global::old_linux_home_and_cache_dir,
 				global::install_dir, GAMES_DIR, game))
 		{
-			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.u8string().c_str());
+			ThrowException("Unknown game '%s' (no definition file)\n", reinterpret_cast<const char *>(inst.loaded.iwadName.u8string().c_str()));
 		}
 
 		global::recent.addIWAD(inst.loaded.iwadName);
@@ -903,7 +903,7 @@ static void readGameInfo(std::unordered_map<SString, SString> &parseVars, Loadin
 	loading.gameName = GameNameFromIWAD(loading.iwadName);
 
 	gLog.printf("Game name: '%s'\n", loading.gameName.c_str());
-	gLog.printf("IWAD file: '%s'\n", loading.iwadName.u8string().c_str());
+	gLog.printf("IWAD file: '%s'\n", reinterpret_cast<const char *>(loading.iwadName.u8string().c_str()));
 
 	readConfiguration(parseVars, "games", loading.gameName, config);
 }
@@ -979,7 +979,7 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 			{
 				std::shared_ptr<Wad_file> wad = Wad_file::readFromDir(resource);
 				if(!wad)
-					gLog.printf("Failed opening directory: %s\n", resource.u8string().c_str());
+					gLog.printf("Failed opening directory: %s\n", reinterpret_cast<const char *>(resource.u8string().c_str()));
 				else
 				{
 					resourceWads.push_back(wad);
@@ -995,17 +995,17 @@ NewResources loadResources(const LoadingData& loading, const WadData &waddata) n
 			if(MatchExtensionNoCase(resource, ".deh") || MatchExtensionNoCase(resource, ".bex"))
 			{
 				if(!dehacked::loadFile(resource, newres.config))
-					gLog.printf("Error loading Dehacked file %s\n", resource.u8string().c_str());
+					gLog.printf("Error loading Dehacked file %s\n", reinterpret_cast<const char *>(resource.u8string().c_str()));
 				continue;
 			}
 			// Otherwise wad
 			if (!Wad_file::Validate(resource))
-				ThrowException("Invalid resource WAD file: %s", resource.u8string().c_str());
+				ThrowException("Invalid resource WAD file: %s", reinterpret_cast<const char *>(resource.u8string().c_str()));
 
 			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
 				WadOpenMode::read);
 			if (!wad)
-				ThrowException("Cannot load resource: %s", resource.u8string().c_str());
+				ThrowException("Cannot load resource: %s", reinterpret_cast<const char *>(resource.u8string().c_str()));
 
 			resourceWads.push_back(wad);
 		}
@@ -1229,7 +1229,7 @@ int EurekaMain(int argc, char *argv[])
 
 		if(!gLog.openFile(global::log_file))
 			gLog.printf("WARNING: failed opening log file '%s'\n",
-						global::log_file.u8string().c_str());
+						reinterpret_cast<const char *>(global::log_file.u8string().c_str()));
 
 
 		// load all the config settings
@@ -1238,8 +1238,8 @@ int EurekaMain(int argc, char *argv[])
 		if(M_ParseConfigFile(global::config_file, options) == -1 &&
 				!global::old_linux_home_and_cache_dir.empty())
 		{
-			gLog.printf("Couldn't find %s, parsing %s\n", global::config_file.u8string().c_str(),
-					(global::old_linux_home_and_cache_dir / "config.cfg").u8string().c_str());
+			gLog.printf("Couldn't find %s, parsing %s\n", reinterpret_cast<const char *>(global::config_file.u8string().c_str()),
+						reinterpret_cast<const char *>((global::old_linux_home_and_cache_dir / "config.cfg").u8string().c_str()));
 			M_ParseConfigFile(global::old_linux_home_and_cache_dir / "config.cfg", options);
 		}
 
@@ -1285,7 +1285,7 @@ int EurekaMain(int argc, char *argv[])
 			std::shared_ptr<Wad_file> editWad = Wad_file::Open(global::Pwad_list[0], WadOpenMode::append);
 			if(!editWad)
 			{
-				ThrowException("Cannot load pwad: %s\n", global::Pwad_list[0].u8string().c_str());
+				ThrowException("Cannot load pwad: %s\n", reinterpret_cast<const char *>(global::Pwad_list[0].u8string().c_str()));
 			}
 
 			// Note: the Main_LoadResources() call will ensure this gets

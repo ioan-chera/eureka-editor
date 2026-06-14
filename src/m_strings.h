@@ -61,6 +61,10 @@ public:
 	{
 	}
 
+	SString(const std::u8string &cpp8string) : data(cpp8string.begin(), cpp8string.end())
+	{
+	}
+
     SString(const char *buffer, int length);
 
 	explicit SString(char c)

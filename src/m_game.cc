@@ -404,7 +404,7 @@ static std::optional<fs::path> FindDefinitionFile(const fs::path &home_dir,
 
 		fs::path filename = base_dir / folder / (name + ".ugh").get();
 
-		gLog.debugPrintf("  trying: %s\n", filename.u8string().c_str());
+		gLog.debugPrintf("  trying: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 		if (FileExists(filename))
 			return filename;
@@ -447,9 +447,9 @@ void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 					   ConfigData &config) noexcept(false)
 {
 	// this is for error messages & debugging
-	fs::path prettyname = folder / fs::u8path((name + ".ugh").get());
+	fs::path prettyname = folder / fs::path(reinterpret_cast<const char8_t *>((name + ".ugh").c_str()));
 
-	gLog.printf("Loading Definitions : %s\n", prettyname.u8string().c_str());
+	gLog.printf("Loading Definitions : %s\n", reinterpret_cast<const char *>(prettyname.u8string().c_str()));
 
 	std::optional<fs::path> filename = FindDefinitionFile(global::home_dir,
 			global::old_linux_home_and_cache_dir, global::install_dir, folder, name);
@@ -457,10 +457,10 @@ void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 	if (!filename)
 	{
 		throw ParseException(SString::printf("Cannot find definition file: %s",
-											 prettyname.u8string().c_str()));
+											 reinterpret_cast<const char *>(prettyname.u8string().c_str())));
 	}
 
-	gLog.debugPrintf("  found at: %s\n", filename->u8string().c_str());
+	gLog.debugPrintf("  found at: %s\n", reinterpret_cast<const char *>(filename->u8string().c_str()));
 
 	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, *filename,
 						  folder, prettyname);
@@ -478,7 +478,7 @@ void parser_state_c::fail(EUR_FORMAT_STRING(const char *format), ...) const
 	SString ss = SString::vprintf(format, ap);
 	va_end(ap);
 
-	SString prefix = SString::printf("%s(%d): ", file().u8string().c_str(), line());
+	SString prefix = SString::printf("%s(%d): ", reinterpret_cast<const char *>(file().u8string().c_str()), line());
 	throw ParseException(prefix + ss);
 }
 
@@ -649,7 +649,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.line_groups.find( info.group) == config.line_groups.end())
 		{
 			gLog.printf("%s(%d): unknown line group '%c'\n",
-					  pst->file().u8string().c_str(), pst->line(),  info.group);
+						reinterpret_cast<const char *>(pst->file().u8string().c_str()), pst->line(),  info.group);
 		}
 		else
 			config.line_types[number] = info;
@@ -821,7 +821,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.thing_groups.find(info.group) == config.thing_groups.end())
 		{
 			gLog.printf("%s(%d): unknown thing group '%c'\n",
-					  pst->file().u8string().c_str(), pst->line(), info.group);
+						reinterpret_cast<const char *>(pst->file().u8string().c_str()), pst->line(), info.group);
 		}
 		else
 		{
@@ -855,7 +855,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
-					  pst->file().u8string().c_str(), pst->line(), group);
+						reinterpret_cast<const char *>(pst->file().u8string().c_str()), pst->line(), group);
 		}
 		else
 			config.texture_categories[name] = group;
@@ -872,7 +872,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
-					  pst->file().u8string().c_str(), pst->line(), group);
+						reinterpret_cast<const char *>(pst->file().u8string().c_str()), pst->line(), group);
 		}
 		else
 			config.flat_categories[name] = group;
@@ -1098,7 +1098,7 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 
 	LineFile file(filename);
 	if (! file.isOpen())
-		throw ParseException(SString::printf("Cannot open %s: %s", filename.u8string().c_str(), GetErrorMessage(errno).c_str()));
+		throw ParseException(SString::printf("Cannot open %s: %s", reinterpret_cast<const char *>(filename.u8string().c_str()), GetErrorMessage(errno).c_str()));
 
 	while (pst->readLine(file))
 	{

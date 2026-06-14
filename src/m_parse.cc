@@ -220,6 +220,6 @@ bool TokenWordParse::getNext(fs::path &path)
 	SString word;
 	bool result = getNext(word);
 	if(result)
-		path = fs::u8path(word.get());
+		path = fs::path(reinterpret_cast<const char8_t *>(word.c_str()));
 	return result;
 }

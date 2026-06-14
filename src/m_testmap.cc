@@ -51,7 +51,7 @@ DirChangeContext::DirChangeContext(const fs::path &path)
 	if(!getcwd(old_dir, sizeof(old_dir)))
 		old_dir[0] = '\0';
 	old_dir[FL_PATH_MAX - 1] = '\0';	// just in case
-	gLog.printf("Changing current dir to: %s\n", path.u8string().c_str());
+	gLog.printf("Changing current dir to: %s\n", reinterpret_cast<const char *>(path.u8string().c_str()));
 	if(!FileChangeDir(path))
 		throw std::runtime_error("Failed changing directory to port location");
 }
@@ -60,7 +60,7 @@ DirChangeContext::~DirChangeContext()
 {
 	// restore previous working directory
 	if(*old_dir)
-		FileChangeDir(fs::u8path(old_dir));
+		FileChangeDir(fs::path(reinterpret_cast<const char8_t *>(old_dir)));
 }
 
 static SString QueryName(const SString &port, const SString &cgame)
@@ -83,10 +83,12 @@ static SString QueryName(const SString &port, const SString &cgame)
 static bool isMacOSAppBundle(const fs::path &path)
 {
 #ifdef __APPLE__
-	CFStringRef pathString = CFStringCreateWithCString(kCFAllocatorDefault, path.u8string().c_str(), kCFStringEncodingUTF8);
+	std::u8string u8path = path.u8string();
+	const char *cpath = reinterpret_cast<const char *>(u8path.c_str());
+	CFStringRef pathString = CFStringCreateWithCString(kCFAllocatorDefault, cpath, kCFStringEncodingUTF8);
 	if(!pathString)
 	{
-		gLog.printf("ERROR: Failed allocating macOS app bundle path CF string: %s\n", path.u8string().c_str());
+		gLog.printf("ERROR: Failed allocating macOS app bundle path CF string: %s\n", cpath);
 		return false;
 	}
 	CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, pathString, kCFURLPOSIXPathStyle, true);
@@ -94,7 +96,7 @@ static bool isMacOSAppBundle(const fs::path &path)
 	CFRelease(pathString);
 	if(!url)
 	{
-		gLog.printf("ERROR: Failed allocating macOS app bundle CF URL: %s\n", path.u8string().c_str());
+		gLog.printf("ERROR: Failed allocating macOS app bundle CF URL: %s\n", cpath);
 
 		return false;
 	}
@@ -103,7 +105,7 @@ static bool isMacOSAppBundle(const fs::path &path)
 	CFRelease(url);
 	if(!bundle)
 	{
-		gLog.printf("Could not load, or invalid macOS app CF bundle: %s\n", path.u8string().c_str());
+		gLog.printf("Could not load, or invalid macOS app CF bundle: %s\n", cpath);
 
 		return false;
 	}
@@ -159,7 +161,7 @@ public:
 		exe_name = newbie;
 
 		// NULL is ok here
-		exe_display->value(exe_name.u8string().c_str());
+		exe_display->value(reinterpret_cast<const char *>(exe_name.u8string().c_str()));
 
 		if (!exe_name.empty() && (FileExists(exe_name) || isMacOSAppBundle(exe_name)))
 			ok_but->activate();
@@ -213,7 +215,7 @@ public:
 
 		// FIXME : if we have an exe_filename already, and folder exists, go there
 		//         [ especially for vanilla -- look in path of Iwad_name ]
-		chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
+		chooser.directory(reinterpret_cast<const char *>(that->inst.Main_FileOpFolder().u8string().c_str()));
 
 		switch (chooser.show())
 		{
@@ -230,7 +232,7 @@ public:
 
 		// we assume the chosen file exists
 
-		that->SetEXE(fs::u8path(chooser.filename()));
+		that->SetEXE(fs::path(reinterpret_cast<const char8_t *>(chooser.filename())));
 	}
 
 public:
@@ -407,7 +409,9 @@ static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 	if (inst.wad.master.gameWad())
 	{
 		args.push_back("-iwad");
-		args.push_back(inst.wad.master.gameWad()->PathName().u8string());
+		std::u8string u8path = inst.wad.master.gameWad()->PathName().u8string();
+		std::string path(u8path.begin(), u8path.end());
+		args.push_back(path);
 	}
 
 	// add any resource wads
@@ -417,7 +421,9 @@ static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 			args.push_back("-merge");
 		else if (!use_merge && !has_file)
 			args.push_back("-file");
-		args.push_back(wad->PathName().u8string());
+		std::u8string u8path = wad->PathName().u8string();
+		std::string path(u8path.begin(), u8path.end());
+		args.push_back(path);
 
 		if (use_merge)
 			use_merge++;
@@ -430,7 +436,9 @@ static void GrabWadNamesArgs(const Instance& inst, std::vector<SString> &args)
 	{
 		if (!has_file)
 			args.push_back("-file");
-		args.push_back(inst.wad.master.editWad()->PathName().u8string());
+		std::u8string u8path = inst.wad.master.editWad()->PathName().u8string();
+		std::string path(u8path.begin(), u8path.end());
+		args.push_back(path);
 	}
 }
 
@@ -488,7 +496,7 @@ static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
 	int ret = system(argString.c_str());
 	if(ret == -1)
 	{
-		ThrowException("Failed system to start %s: %s", portPath.u8string().c_str(),
+		ThrowException("Failed system to start %s: %s", reinterpret_cast<const char *>(portPath.u8string().c_str()),
 					   GetErrorMessage(errno).c_str());
 	}
 }
@@ -523,7 +531,7 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 	if(pid == -1)
 	{
 		// fail
-		ThrowException("Failed forking to start %s: %s", portName.u8string().c_str(),
+		ThrowException("Failed forking to start %s: %s", reinterpret_cast<const char *>(portName.u8string().c_str()),
 					   GetErrorMessage(errno).c_str());
 	}
 	else if(pid == 0)
@@ -532,17 +540,17 @@ static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
 		try
 		{
 			DirChangeContext dirChangeContext(FilenameGetPath(portPath));
-			execvp(portPath.u8string().c_str(), argv.data());
+			execvp(reinterpret_cast<const char *>(portPath.u8string().c_str()), argv.data());
 
 			// on failure
 			int err = errno;
-			gLog.printf("--> Failed starting %s: %s\n", portName.u8string().c_str(), GetErrorMessage(err).c_str());
+			gLog.printf("--> Failed starting %s: %s\n", reinterpret_cast<const char *>(portName.u8string().c_str()), GetErrorMessage(err).c_str());
 
 			_exit(err);
 		}
 		catch(const std::exception &e)
 		{
-			gLog.printf("--> Failed starting %s: %s\n", portName.u8string().c_str(), e.what());
+			gLog.printf("--> Failed starting %s: %s\n", reinterpret_cast<const char *>(portName.u8string().c_str()), e.what());
 			_exit(EXIT_FAILURE);
 		}
 		catch(...)

@@ -124,7 +124,7 @@ std::optional<fs::path> Instance::Project_AskFile() const
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(Main_FileOpFolder().u8string().c_str());
+	chooser.directory(reinterpret_cast<const char *>(Main_FileOpFolder().u8string().c_str()));
 
 	// Show native chooser
 	switch (chooser.show())
@@ -145,11 +145,11 @@ std::optional<fs::path> Instance::Project_AskFile() const
 	}
 
 	// if extension is missing, add ".wad"
-	fs::path filename = fs::u8path(chooser.filename());
+	fs::path filename = fs::path(reinterpret_cast<const char8_t *>(chooser.filename()));
 
 	fs::path extension = filename.extension();
 	if(extension.empty())
-		filename = fs::u8path(filename.u8string() + ".wad");
+		filename = fs::path(filename.u8string() + u8".wad");
 
 	return filename;
 }
@@ -219,7 +219,7 @@ void Instance::CMD_NewProject()
 
 		if(global::recent.hasIwadByPath(*filename))
 		{
-			DLG_Notify("Cannot overwrite a game IWAD: %s", filename.value().u8string().c_str());
+			DLG_Notify("Cannot overwrite a game IWAD: %s", reinterpret_cast<const char *>(filename.value().u8string().c_str()));
 			return;
 		}
 
@@ -237,7 +237,7 @@ void Instance::CMD_NewProject()
 
 		if(FileExists(*filename))
 		{
-			if(!DLG_Confirm({"Cancel", "&Overwrite"}, "Are you sure you want to overwrite %s with a new project?", filename.value().u8string().c_str()))
+			if(!DLG_Confirm({"Cancel", "&Overwrite"}, "Are you sure you want to overwrite %s with a new project?", reinterpret_cast<const char *>(filename.value().u8string().c_str())))
 			{
 				return;
 			}
@@ -251,7 +251,7 @@ void Instance::CMD_NewProject()
 			{
 				if(oldFile->IsIWAD())
 				{
-					DLG_Notify("Overwriting game IWAD files is not allowed: %s", filename->u8string().c_str());
+					DLG_Notify("Overwriting game IWAD files is not allowed: %s", reinterpret_cast<const char *>(filename->u8string().c_str()));
 					return;
 				}
 				M_BackupWad(oldFile.get());
@@ -259,7 +259,7 @@ void Instance::CMD_NewProject()
 		}
 		catch(const std::runtime_error &e)
 		{
-			gLog.printf("Error reading old WAD %s: %s\n", filename->u8string().c_str(), e.what());
+			gLog.printf("Error reading old WAD %s: %s\n", reinterpret_cast<const char *>(filename->u8string().c_str()), e.what());
 		}
 
 
@@ -279,7 +279,7 @@ void Instance::CMD_NewProject()
 			map_name = newres.waddata.master.gameWad()->GetLump(idx)->Name();
 		}
 
-		gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename->u8string().c_str());
+		gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), reinterpret_cast<const char *>(filename->u8string().c_str()));
 
 
 		std::shared_ptr<Wad_file> wad = Wad_file::Open(*filename, WadOpenMode::write);
@@ -1133,7 +1133,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem) noexcept(fa
 		map_name  = wad->GetLump(idx)->Name();
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), reinterpret_cast<const char *>(wad->PathName().u8string().c_str()));
 
 	// These 2 may throw, but it's safe here
 	NewDocument newdoc = gInstance->openDocument(loading, *wad, lev_num);
@@ -1202,7 +1202,7 @@ void Instance::CMD_OpenMap()
 		new_resources = true;
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), reinterpret_cast<const char *>(wad->PathName().u8string().c_str()));
 
 	NewDocument newdoc = { Document(*this), LoadingData(), BadCount() };
 	try
@@ -1212,7 +1212,7 @@ void Instance::CMD_OpenMap()
 	catch (const std::runtime_error& e)
 	{
 		DLG_ShowError(false, "Could not open %s of %s. %s", map_name.c_str(),
-			wad->PathName().u8string().c_str(), e.what());
+					  reinterpret_cast<const char *>(wad->PathName().u8string().c_str()), e.what());
 		return;
 	}
 
@@ -1309,7 +1309,7 @@ void Instance::CMD_GivenFile()
 	catch (const std::runtime_error& e)
 	{
 		gLog.printf("%s\n", e.what());
-		DLG_ShowError(false, "Cannot load given file %s: %s", global::Pwad_list[index].u8string().c_str(), e.what());
+		DLG_ShowError(false, "Cannot load given file %s: %s", reinterpret_cast<const char *>(global::Pwad_list[index].u8string().c_str()), e.what());
 	}
 }
 
@@ -1734,7 +1734,7 @@ bool Instance::M_SaveMap(bool inhibit_node_build)
 
 	M_BackupWad(wad.master.editWad().get());
 
-	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.editWad()->PathName().u8string().c_str());
+	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), reinterpret_cast<const char *>(wad.master.editWad()->PathName().u8string().c_str()));
 
 	try
 	{
@@ -1757,7 +1757,7 @@ bool Instance::M_ExportMap(bool inhibit_node_build)
 	chooser.title("Pick file to export to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(Main_FileOpFolder().u8string().c_str());
+	chooser.directory(reinterpret_cast<const char *>(Main_FileOpFolder().u8string().c_str()));
 
 	// Show native chooser
 	switch (chooser.show())
@@ -1778,11 +1778,11 @@ bool Instance::M_ExportMap(bool inhibit_node_build)
 	}
 
 	// if extension is missing then add ".wad"
-	fs::path filename = fs::u8path(chooser.filename());
+	fs::path filename = fs::path(reinterpret_cast<const char8_t *>(chooser.filename()));
 
 	fs::path extension = filename.extension();
 	if(extension.empty())
-		filename = fs::u8path(filename.u8string() + ".wad");
+		filename = fs::path(filename.u8string() + u8".wad");
 
 	// don't export into a file we currently have open
 	if (wad.master.MasterDir_HaveFilename(filename.u8string()))
@@ -1853,7 +1853,7 @@ bool Instance::M_ExportMap(bool inhibit_node_build)
 	}
 
 
-	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
+	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), reinterpret_cast<const char *>(wad->PathName().u8string().c_str()));
 
 	try
 	{

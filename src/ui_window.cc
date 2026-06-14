@@ -763,7 +763,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	chooser.title("Pick file to save to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.filter("Text files\t*.txt");
-	chooser.directory(viewer->inst.Main_FileOpFolder().u8string().c_str());
+	chooser.directory(reinterpret_cast<const char *>(viewer->inst.Main_FileOpFolder().u8string().c_str()));
 
 	switch (chooser.show())
 	{
@@ -787,7 +787,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	if(!HasExtension(filename.get()))
 		filename += ".txt";
 
-    std::ofstream os(fs::u8path(filename.c_str()), std::ios::trunc);
+    std::ofstream os(fs::path(reinterpret_cast<const char8_t *>(filename.c_str())), std::ios::trunc);
 
 	if (! os.is_open())
 	{

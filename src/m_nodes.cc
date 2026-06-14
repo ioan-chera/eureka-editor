@@ -318,7 +318,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 	}
 	catch(const std::runtime_error &e)
 	{
-		GB_PrintMsg("ERROR: could not save %s: %s\n", wad.master.editWad()->PathName().u8string().c_str(), e.what());
+		GB_PrintMsg("ERROR: could not save %s: %s\n", reinterpret_cast<const char *>(wad.master.editWad()->PathName().u8string().c_str()), e.what());
 		ret = BUILD_BadFile;
 	}
 

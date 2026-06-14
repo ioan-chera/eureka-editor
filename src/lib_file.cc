@@ -238,7 +238,7 @@ bool FileChangeDir(const fs::path &dir_name)
 	}
 	catch(const fs::filesystem_error &e)
 	{
-		gLog.printf("Error changing directory to %s: %s\n", dir_name.u8string().c_str(), e.what());
+		gLog.printf("Error changing directory to %s: %s\n", reinterpret_cast<const char *>(dir_name.u8string().c_str()), e.what());
 		return false;
 	}
 	return true;
@@ -253,7 +253,7 @@ bool FileMakeDir(const fs::path &dir_name)
 	}
 	catch(const fs::filesystem_error &e)
 	{
-		gLog.printf("Error creating directory %s: %s\n", dir_name.u8string().c_str(), e.what());
+		gLog.printf("Error creating directory %s: %s\n", reinterpret_cast<const char *>(dir_name.u8string().c_str()), e.what());
 		return false;
 	}
 }
@@ -266,7 +266,7 @@ bool FileMakeDirs(const fs::path &dir_name)
 	}
 	catch(const fs::filesystem_error &e)
 	{
-		gLog.printf("Error creating directories down to %s: %s\n", dir_name.u8string().c_str(), e.what());
+		gLog.printf("Error creating directories down to %s: %s\n", reinterpret_cast<const char *>(dir_name.u8string().c_str()), e.what());
 		return false;
 	}
 }
@@ -301,7 +301,7 @@ bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data)
 	}
 	catch(const fs::filesystem_error &e)
 	{
-		gLog.printf("Error loading file %s: %s\n", filename.u8string().c_str(), e.what());
+		gLog.printf("Error loading file %s: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()), e.what());
 		return false;
 	}
 	return true;
@@ -411,7 +411,7 @@ fs::path GetExecutablePath(const char *argv0)
 	{
 		// FIXME: will this be _inside_ the .app folder???
 		FilenameStripBase(rawpath);
-		return fs::u8path(rawpath);
+		return fs::path(reinterpret_cast<const char8_t *>(rawpath));
 	}
 #endif
 
@@ -423,7 +423,7 @@ fs::path GetExecutablePath(const char *argv0)
 #endif
 
 	FilenameStripBase(path);
-	return fs::u8path(path.get());
+	return fs::path(reinterpret_cast<const char8_t *>(path.c_str()));
 }
 
 //
@@ -432,7 +432,8 @@ fs::path GetExecutablePath(const char *argv0)
 //
 SString escape(const fs::path &path)
 {
-	std::string str = path.generic_u8string();
+	std::u8string u8str = path.generic_u8string();
+	std::string str(u8str.begin(), u8str.end());
 	return SString(str).spaceEscape();
 }
 

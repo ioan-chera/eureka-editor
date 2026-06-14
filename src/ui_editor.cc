@@ -606,7 +606,7 @@ void UI_TextEditor::InsertFile()
 
 	chooser.title("Pick file to insert");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
+	chooser.directory(reinterpret_cast<const char *>(inst.Main_FileOpFolder().u8string().c_str()));
 
 	switch (chooser.show())
 	{
@@ -628,7 +628,7 @@ void UI_TextEditor::InsertFile()
 
 	SString line;
 
-	fs::path filename = fs::u8path(chooser.filename());
+	fs::path filename = fs::path(reinterpret_cast<const char8_t *>(chooser.filename()));
 
 	// TODO: for WIN32, ideally examine the file and determine
 	//       whether the charset is UTF-8 or CP-1252, based on
@@ -644,7 +644,7 @@ void UI_TextEditor::InsertFile()
 		return;
 	}
 
-	gLog.printf("Reading text from file: %s\n", filename.u8string().c_str());
+	gLog.printf("Reading text from file: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 	int pos = ted->insert_position();
 
@@ -666,7 +666,7 @@ void UI_TextEditor::ExportToFile()
 	chooser.title("Pick file to export to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM);
-	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
+	chooser.directory(reinterpret_cast<const char *>(inst.Main_FileOpFolder().u8string().c_str()));
 
 	switch (chooser.show())
 	{

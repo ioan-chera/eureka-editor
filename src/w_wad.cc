@@ -173,7 +173,7 @@ int64_t Lump_c::getName8() const noexcept
 
 Wad_file::~Wad_file()
 {
-	gLog.printf("Closing WAD file: %s\n", filename.u8string().c_str());
+	gLog.printf("Closing WAD file: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 }
 
 
@@ -185,12 +185,12 @@ std::shared_ptr<Wad_file> Wad_file::Open(const fs::path &filename,
 	if (mode == WadOpenMode::write)
 		return Create(filename, mode);
 
-	gLog.printf("Opening WAD file: %s\n", filename.u8string().c_str());
+	gLog.printf("Opening WAD file: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 	FILE *fp = NULL;
 
 retry:
-	fp = UTF8_fopen(filename.u8string().c_str(), (mode == WadOpenMode::read ? "rb" : "r+b"));
+	fp = UTF8_fopen(reinterpret_cast<const char *>(filename.u8string().c_str()), (mode == WadOpenMode::read ? "rb" : "r+b"));
 
 	if (! fp)
 	{
@@ -216,8 +216,8 @@ retry:
 
 std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
 {
-	gLog.printf("Opening WAD file: %s\n", filename.u8string().c_str());
-	FILE *fp = UTF8_fopen(filename.u8string().c_str(), "rb");
+	gLog.printf("Opening WAD file: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
+	FILE *fp = UTF8_fopen(reinterpret_cast<const char *>(filename.u8string().c_str()), "rb");
 	if(!fp)
 	{
 		gLog.printf("Open failed: %s\n", GetErrorMessage(errno).c_str());
@@ -228,7 +228,7 @@ std::shared_ptr<Wad_file> Wad_file::loadFromFile(const fs::path &filename)
 
 std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 {
-	gLog.printf("Opening WAD folder: %s\n", path.u8string().c_str());
+	gLog.printf("Opening WAD folder: %s\n", reinterpret_cast<const char *>(path.u8string().c_str()));
 
 	// Reading from folder follows this rule (which should be a cross-port standard):
 	// https://eternity.youfailit.net/wiki/ZIP
@@ -260,7 +260,7 @@ std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 		std::vector<uint8_t> data;
 		if(!FileLoad(path, data))
 		{
-			gLog.printf("Failed reading %s\n", path.u8string().c_str());
+			gLog.printf("Failed reading %s\n", reinterpret_cast<const char *>(path.u8string().c_str()));
 			delete lump;
 			return;
 		}
@@ -289,7 +289,7 @@ std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 			}
 			catch(const fs::filesystem_error &e)
 			{
-				gLog.printf("Error opening subfolder %s: %s\n", entry.path().u8string().c_str(), e.what());
+				gLog.printf("Error opening subfolder %s: %s\n", reinterpret_cast<const char *>(entry.path().u8string().c_str()), e.what());
 			}
 			for(const auto &subentry : subiterator)
 			{
@@ -312,7 +312,7 @@ std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 		}
 		else
 		{
-			gLog.printf("Ignoring irregular file path %s\n", entry.path().u8string().c_str());
+			gLog.printf("Ignoring irregular file path %s\n", reinterpret_cast<const char *>(entry.path().u8string().c_str()));
 		}
 	}
 
@@ -324,7 +324,7 @@ std::shared_ptr<Wad_file> Wad_file::readFromDir(const fs::path &path)
 std::shared_ptr<Wad_file> Wad_file::Create(const fs::path &filename,
 										   WadOpenMode mode)
 {
-	gLog.printf("Creating new WAD file: %s\n", filename.u8string().c_str());
+	gLog.printf("Creating new WAD file: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 	return std::shared_ptr<Wad_file>(new Wad_file(filename, mode));
 }
@@ -967,7 +967,7 @@ void Wad_file::writeToDisk() noexcept(false)
 	if(IsReadOnly())
 	{
 		ThrowException("Cannot overwrite a read-only file (%s)!",
-					   filename.u8string().c_str());
+					   reinterpret_cast<const char *>(filename.u8string().c_str()));
 	}
 
 	// Write to our path now
@@ -1214,8 +1214,8 @@ bool Wad_file::Backup(const fs::path &new_filename) const
 	}
 	catch(const std::exception &e)
 	{
-		gLog.printf("Failed backing up %s to %s: %s\n", PathName().u8string().c_str(),
-			new_filename.u8string().c_str(), e.what());
+		gLog.printf("Failed backing up %s to %s: %s\n", reinterpret_cast<const char *>(PathName().u8string().c_str()),
+					reinterpret_cast<const char *>(new_filename.u8string().c_str()), e.what());
 		return false;
 	}
 	return true;

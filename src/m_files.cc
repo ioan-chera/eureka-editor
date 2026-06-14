@@ -91,7 +91,7 @@ void M_ValidateGivenFiles()
 	{
 		if (! Wad_file::Validate(pwad))
 			ThrowException("Given pwad does not exist or is invalid: %s\n",
-						   pwad.u8string().c_str());
+						   reinterpret_cast<const char *>(pwad.u8string().c_str()));
 	}
 }
 
@@ -129,7 +129,7 @@ void RecentKnowledge::parsePortPath(const SString &name, const SString &cpath)
 	// terminate arguments
 	path.erase(0, pos + 1);
 
-	setPortPath(name, fs::u8path(path.get()));
+	setPortPath(name, fs::path(reinterpret_cast<const char8_t *>(path.c_str())));
 	if(gInstance && gInstance->main_win)
 		testmap::updateMenuName(gInstance->main_win->menu_bar, gInstance->loaded);
 
@@ -249,7 +249,7 @@ void RecentKnowledge::parseMiscConfig(std::istream &is)
 			if(Wad_file::Validate(path))
 				files.insert(path, map);
 			else
-				gLog.printf("  no longer exists: %s\n", path.u8string().c_str());
+				gLog.printf("  no longer exists: %s\n", reinterpret_cast<const char *>(path.u8string().c_str()));
 		}
 		else if(keyword == "known_iwad")
 		{
@@ -267,11 +267,11 @@ void RecentKnowledge::parseMiscConfig(std::istream &is)
 			}
 			// ignore plain freedoom.wad (backwards compatibility)
 			if(name.noCaseEqual("freedoom"))
-				gLog.printf("  ignoring for compatibility: %s\n", path.u8string().c_str());
+				gLog.printf("  ignoring for compatibility: %s\n", reinterpret_cast<const char *>(path.u8string().c_str()));
 			else if(Wad_file::Validate(path))
 				known_iwads[name] = path;
 			else
-				gLog.printf("  no longer exists: %s\n", path.u8string().c_str());
+				gLog.printf("  no longer exists: %s\n", reinterpret_cast<const char *>(path.u8string().c_str()));
 		}
 		else if(keyword == "port_path")
 		{
@@ -303,14 +303,14 @@ void RecentKnowledge::load(const fs::path &home_dir, const fs::path &old_home_di
 	std::ifstream is(filename);
 	if(!is.is_open())
 	{
-		gLog.printf("No recent list at: %s\n", filename.u8string().c_str());
+		gLog.printf("No recent list at: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 		if(!old_home_dir.empty())
 		{
 			filename = old_home_dir / "misc.cfg";
 			is.open(filename);
 			if(!is.is_open())
 			{
-				gLog.printf("No recent list at: %s\n", filename.u8string().c_str());
+				gLog.printf("No recent list at: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 				return;
 			}
 		}
@@ -318,7 +318,7 @@ void RecentKnowledge::load(const fs::path &home_dir, const fs::path &old_home_di
 			return;
 	}
 
-	gLog.printf("Reading recent list from: %s\n", filename.u8string().c_str());
+	gLog.printf("Reading recent list from: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 	files.clear();
 	known_iwads.clear();
@@ -334,11 +334,11 @@ void RecentKnowledge::save(const fs::path &home_dir) const
 	std::ofstream os(filename, std::ios::trunc);
 	if(!os.is_open())
 	{
-		gLog.printf("Failed to save recent list to: %s\n", filename.u8string().c_str());
+		gLog.printf("Failed to save recent list to: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 		return;
 	}
 
-	gLog.printf("Writing recent list to: %s\n", filename.u8string().c_str());
+	gLog.printf("Writing recent list to: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 	os << "# Eureka miscellaneous stuff" << std::endl;
 
 	files.Write(os);
@@ -360,7 +360,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 	}
 	catch (const std::runtime_error& e)
 	{
-		DLG_ShowError(false, "Could not open %s of %s: %s", data->map.c_str(), data->file.u8string().c_str(), e.what());
+		DLG_ShowError(false, "Could not open %s of %s: %s", data->map.c_str(), reinterpret_cast<const char *>(data->file.u8string().c_str()), e.what());
 	}
 }
 
@@ -386,14 +386,14 @@ bool Instance::M_TryOpenMostRecent()
 
 	if (! wad)
 	{
-		gLog.printf("Failed to load most recent pwad: %s\n", recentMap.file.u8string().c_str());
+		gLog.printf("Failed to load most recent pwad: %s\n", reinterpret_cast<const char *>(recentMap.file.u8string().c_str()));
 		return false;
 	}
 
 	// make sure at least one level can be loaded
 	if (wad->LevelCount() == 0)
 	{
-		gLog.printf("No levels in most recent pwad: %s\n", recentMap.file.u8string().c_str());
+		gLog.printf("No levels in most recent pwad: %s\n", reinterpret_cast<const char *>(recentMap.file.u8string().c_str()));
 
 		return false;
 	}
@@ -441,7 +441,7 @@ static std::vector<fs::path> parseDoomWadPathEnvVar(const SString &doomwadpath)
 		}
 		else
 			entry = doomwadpath.substr(curpos);
-		result.push_back(fs::u8path(entry.get()));
+		result.push_back(fs::path(reinterpret_cast<const char8_t *>(entry.c_str())));
 
 	} while(pos != std::string::npos);
 	return result;
@@ -449,17 +449,17 @@ static std::vector<fs::path> parseDoomWadPathEnvVar(const SString &doomwadpath)
 
 static fs::path SearchDirForIWAD(const fs::path &dir_name, const SString &game)
 {
-	fs::path name = dir_name / fs::u8path((game + ".wad").get());
+	fs::path name = dir_name / fs::path(reinterpret_cast<const char8_t *>((game + ".wad").c_str()));
 
-	gLog.debugPrintf("  trying: %s\n", name.u8string().c_str());
+	gLog.debugPrintf("  trying: %s\n", reinterpret_cast<const char *>(name.u8string().c_str()));
 
 	if (Wad_file::Validate(name))
 		return name;
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
-	name = dir_name / fs::u8path((game.asUpper() + ".WAD").get());
+	name = dir_name / fs::path(reinterpret_cast<const char8_t *>((game.asUpper() + ".WAD").c_str()));
 
-	gLog.debugPrintf("  trying: %s\n", name.u8string().c_str());
+	gLog.debugPrintf("  trying: %s\n", reinterpret_cast<const char *>(name.u8string().c_str()));
 
 	if (Wad_file::Validate(name))
 		return name;
@@ -501,7 +501,7 @@ static fs::path SearchForIWAD(const fs::path &home_dir, const SString &game)
 	const char *doomwaddir = UTF8_getenv("DOOMWADDIR");
 	if (doomwaddir)
 	{
-		path = SearchDirForIWAD(fs::u8path(doomwaddir), game);
+		path = SearchDirForIWAD(fs::path(reinterpret_cast<const char8_t *>(doomwaddir)), game);
 		if (!path.empty())
 			return path;
 	}
@@ -562,14 +562,14 @@ void RecentKnowledge::lookForIWADs(const fs::path &install_dir, const fs::path &
 		fs::path path = SearchForIWAD(home_dir, game);
 		if (path.empty() && !old_home_dir.empty())
 		{
-			gLog.printf("Couldn't find %s IWAD in %s/iwads, trying %s/iwads\n", game.c_str(), home_dir.u8string().c_str(),
-					old_home_dir.u8string().c_str());
+			gLog.printf("Couldn't find %s IWAD in %s/iwads, trying %s/iwads\n", game.c_str(), reinterpret_cast<const char *>(home_dir.u8string().c_str()),
+						reinterpret_cast<const char *>(old_home_dir.u8string().c_str()));
 			path = SearchForIWAD(old_home_dir, game);
 		}
 
 		if (!path.empty())
 		{
-			gLog.printf("Found '%s' IWAD file: %s\n", game.c_str(), path.u8string().c_str());
+			gLog.printf("Found '%s' IWAD file: %s\n", game.c_str(), reinterpret_cast<const char *>(path.u8string().c_str()));
 
 			addIWAD(path);
 		}
@@ -723,7 +723,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &old_
 		}
 		else if (key == "resource")
 		{
-			fs::path resourcePath = fs::u8path(value.get());
+			fs::path resourcePath = fs::path(reinterpret_cast<const char8_t *>(value.c_str()));
 
 			if(resourcePath.is_relative())
 			{
@@ -734,18 +734,18 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &old_
 			// if not found at expected location, try same place as PWAD
 			if (!fs::exists(resourcePath))
 			{
-				gLog.printf("  file not found: %s\n", resourcePath.u8string().c_str());
+				gLog.printf("  file not found: %s\n", reinterpret_cast<const char *>(resourcePath.u8string().c_str()));
 				fs::path wadDirPath = wad->PathName().parent_path();
 				resourcePath = wadDirPath / resourcePath.filename();
 
-				gLog.printf("  trying: %s\n", resourcePath.u8string().c_str());
+				gLog.printf("  trying: %s\n", reinterpret_cast<const char *>(resourcePath.u8string().c_str()));
 			}
 			// Still doesn't exist? Try IWAD path, if any
 			if (!fs::exists(resourcePath) && new_iwad)
 			{
 				fs::path wadDirPath = new_iwad->parent_path();
 				resourcePath = wadDirPath / resourcePath.filename();
-				gLog.printf("  trying: %s\n", resourcePath.u8string().c_str());
+				gLog.printf("  trying: %s\n", reinterpret_cast<const char *>(resourcePath.u8string().c_str()));
 			}
 
 			if (fs::exists(resourcePath))
@@ -887,7 +887,7 @@ static void backup_scan_file(const fs::path &name, int flags, void *priv_dat)
 
 inline static fs::path Backup_Name(const fs::path &dir_name, int slot)
 {
-	return dir_name / fs::u8path(SString::printf("%d.wad", slot).get());
+	return dir_name / fs::path(reinterpret_cast<const char8_t *>(SString::printf("%d.wad", slot).c_str()));
 }
 
 
@@ -921,7 +921,7 @@ void M_BackupWad(const Wad_file *wad)
 	fs::path filename = global::cache_dir / "backups" / wad->PathName().filename();
 	fs::path dir_name = ReplaceExtension(filename, NULL);
 
-	gLog.debugPrintf("dir_name for backup: '%s'\n", dir_name.u8string().c_str());
+	gLog.debugPrintf("dir_name for backup: '%s'\n", reinterpret_cast<const char *>(dir_name.u8string().c_str()));
 
 	// create the directory if it doesn't already exist
 	// (this will fail if it DOES already exist, but that's OK)
@@ -957,7 +957,7 @@ void M_BackupWad(const Wad_file *wad)
 		}
 		catch(const std::runtime_error &e)
 		{
-			gLog.printf("Failed copying directly %s to %s (%s). Trying to re-save the WAD.\n", wad->PathName().u8string().c_str(), dest_name.u8string().c_str(), e.what());
+			gLog.printf("Failed copying directly %s to %s (%s). Trying to re-save the WAD.\n", reinterpret_cast<const char *>(wad->PathName().u8string().c_str()), reinterpret_cast<const char *>(dest_name.u8string().c_str()), e.what());
 		}
 	}
 	if (!copiedReadOnly && ! wad->Backup(dest_name))
@@ -975,7 +975,7 @@ void M_BackupWad(const Wad_file *wad)
 		Backup_Prune(dir_name, b_low, b_high, wad_size);
 	}
 
-	gLog.printf("Backed up wad to: %s\n", dest_name.u8string().c_str());
+	gLog.printf("Backed up wad to: %s\n", reinterpret_cast<const char *>(dest_name.u8string().c_str()));
 }
 
 bool RecentKnowledge::hasIwadByPath(const fs::path &path) const

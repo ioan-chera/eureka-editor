@@ -700,7 +700,7 @@ static int parse_config_line_from_file(const SString &line, const fs::path &base
 	if(!parse.getNext(value))
 	{
 		gLog.printf("WARNING: %s(%u): bad line, missing option value.\n",
-					basename.u8string().c_str(), lnum);
+					reinterpret_cast<const char *>(basename.u8string().c_str()), lnum);
 		return 0;
 	}
 
@@ -710,7 +710,7 @@ static int parse_config_line_from_file(const SString &line, const fs::path &base
 		if ( !opt->long_name && !opt->short_name)	// end
 		{
 			gLog.printf("WARNING: %s(%u): invalid option '%s', skipping\n",
-						basename.u8string().c_str(), lnum, line.c_str());
+						reinterpret_cast<const char *>(basename.u8string().c_str()), lnum, line.c_str());
 			return 0;
 		}
 
@@ -721,7 +721,7 @@ static int parse_config_line_from_file(const SString &line, const fs::path &base
 		if (opt->flags & OptFlag_pass1)
 		{
 			gLog.printf("WARNING: %s(%u): cannot use option '%s' in config "
-						"files.\n", basename.u8string().c_str(), lnum, line.c_str());
+						"files.\n", reinterpret_cast<const char *>(basename.u8string().c_str()), lnum, line.c_str());
 			return 0;
 		}
 
@@ -746,7 +746,7 @@ static int parse_config_line_from_file(const SString &line, const fs::path &base
 	else if(auto ptr = std::get_if<SString *>(&opt->data_ptr))
 		**ptr = value;
 	else if(auto ptr = std::get_if<fs::path *>(&opt->data_ptr))
-		**ptr = fs::u8path(value.get());
+		**ptr = fs::path(reinterpret_cast<const char8_t *>(value.c_str()));
 	else if(auto ptr = std::get_if<std::vector<SString> *>(&opt->data_ptr))
 	{
 		if(value != "{}")
@@ -760,7 +760,7 @@ static int parse_config_line_from_file(const SString &line, const fs::path &base
 	{
 		if(value != "{}")
 		{
-			fs::path pathvalue = fs::u8path(value.get());
+			fs::path pathvalue = fs::path(reinterpret_cast<const char8_t *>(value.c_str()));
 			do
 				(*ptr)->push_back(pathvalue);
 			while(parse.getNext(pathvalue));
@@ -803,7 +803,7 @@ int M_ParseConfigFile(const fs::path &path, const opt_desc_t *options)
 {
 	std::ifstream is(path);
 
-	gLog.printf("Reading config file: %s\n", path.u8string().c_str());
+	gLog.printf("Reading config file: %s\n", reinterpret_cast<const char *>(path.u8string().c_str()));
 
 	if (!is.is_open())
 	{
@@ -873,7 +873,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		{
 			// this is a loose file, handle it now
 			if (pass == CommandLinePass::normal)
-				Pwad_list.push_back(fs::u8path(argv[0]));
+				Pwad_list.push_back(fs::path(reinterpret_cast<const char8_t *>(argv[0])));
 
 			argv++;
 			argc--;
@@ -992,7 +992,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 			++argv;
 			--argc;
 			if(!ignore)
-				**ptr = fs::u8path(argv[0]);
+				**ptr = fs::path(reinterpret_cast<const char8_t *>(argv[0]));
 		}
 		else if(auto ptr = std::get_if<std::vector<SString> *>(&o->data_ptr))
 			readArgsForList<SString>(ignore, argc, argv, *ptr);
@@ -1097,7 +1097,7 @@ static void writeListToConfig(const std::vector<fs::path> &list, std::ofstream &
 
 int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
 {
-	gLog.printf("Writing config file: %s\n", path.u8string().c_str());
+	gLog.printf("Writing config file: %s\n", reinterpret_cast<const char *>(path.u8string().c_str()));
 
 	std::ofstream os(path, std::ios::trunc);
 
@@ -1167,7 +1167,7 @@ bool Instance::M_LoadUserState()
 	if (! file.isOpen())
 		return false;
 
-	gLog.printf("Loading user state from: %s\n", filename.u8string().c_str());
+	gLog.printf("Loading user state from: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 	SString line;
 
@@ -1224,7 +1224,7 @@ bool Instance::M_SaveUserState() const
 
 	fs::path filename = PersistFilename(crc);
 
-	gLog.printf("Save user state to: %s\n", filename.u8string().c_str());
+	gLog.printf("Save user state to: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 	std::ofstream os(filename, std::ios::trunc);
 

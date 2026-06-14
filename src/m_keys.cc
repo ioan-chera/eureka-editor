@@ -503,7 +503,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 static bool LoadBindingsFromPath(const SString &path, bool required)
 {
-    fs::path filename = fs::u8path(path.get()) / "bindings.cfg";
+    fs::path filename = fs::path(reinterpret_cast<const char8_t *>(path.c_str())) / "bindings.cfg";
 
 	std::ifstream fp(filename);
 	if(!fp.is_open())
@@ -511,10 +511,10 @@ static bool LoadBindingsFromPath(const SString &path, bool required)
 		if (! required)
 			return false;
 
-		ThrowException("Missing key bindings file:\n\n%s\n", filename.u8string().c_str());
+		ThrowException("Missing key bindings file:\n\n%s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 	}
 
-	gLog.printf("Reading key bindings from: %s\n", filename.u8string().c_str());
+	gLog.printf("Reading key bindings from: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 	while (! fp.eof())
 	{
@@ -595,8 +595,8 @@ void M_LoadBindings()
 			!global::old_linux_home_and_cache_dir.empty())
 	{
 		gLog.printf("%s/bindings.cfg not found. Loading bindings from old path %s/bindings.cfg\n",
-				global::home_dir.u8string().c_str(),
-				global::old_linux_home_and_cache_dir.u8string().c_str());
+					reinterpret_cast<const char *>(global::home_dir.u8string().c_str()),
+					reinterpret_cast<const char *>(global::old_linux_home_and_cache_dir.u8string().c_str()));
 		LoadBindingsFromPath(global::old_linux_home_and_cache_dir.u8string(), false);
 	}
 
@@ -612,14 +612,14 @@ void M_SaveBindings()
 	std::ofstream os(filename, std::ios::trunc);
 	if (! os.is_open())
 	{
-		gLog.printf("Failed to save key bindings to: %s\n", filename.u8string().c_str());
+		gLog.printf("Failed to save key bindings to: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 		DLG_Notify("Warning: failed to save key bindings\n"
-		           "(filename: %s)", filename.u8string().c_str());
+		           "(filename: %s)", reinterpret_cast<const char *>(filename.u8string().c_str()));
 		return;
 	}
 
-	gLog.printf("Writing key bindings to: %s\n", filename.u8string().c_str());
+	gLog.printf("Writing key bindings to: %s\n", reinterpret_cast<const char *>(filename.u8string().c_str()));
 
 	os << "# Eureka key bindings (local)\n";
 	os << "# vi:ts=16:noexpandtab\n\n";
