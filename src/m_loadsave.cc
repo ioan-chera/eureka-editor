@@ -661,8 +661,8 @@ void Document::LoadThings(int loading_level, const Wad_file *load_wad)
 
 		auto th = std::make_unique<Thing>();
 
-		th->raw_x = FFixedPoint(LE_S16(raw.x));
-		th->raw_y = FFixedPoint(LE_S16(raw.y));
+		th->xf = LE_S16(raw.x);
+		th->yf = LE_S16(raw.y);
 
 		th->angle   = LE_U16(raw.angle);
 		th->type    = LE_U16(raw.type);
@@ -698,8 +698,8 @@ void Document::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 		auto th = std::make_unique<Thing>();
 
 		th->tid = LE_S16(raw.tid);
-		th->raw_x = FFixedPoint(LE_S16(raw.x));
-		th->raw_y = FFixedPoint(LE_S16(raw.y));
+		th->xf = LE_S16(raw.x);
+		th->yf = LE_S16(raw.y);
 		th->raw_h = FFixedPoint(LE_S16(raw.height));
 
 		th->angle = LE_U16(raw.angle);
@@ -1489,8 +1489,8 @@ void Document::SaveThings(Wad_file &wad) const
 	{
 		raw_thing_t raw{};
 
-		raw.x = LE_S16(static_cast<int>(th->raw_x));
-		raw.y = LE_S16(static_cast<int>(th->raw_y));
+		raw.x = LE_S16(static_cast<int>(round(th->xf)));
+		raw.y = LE_S16(static_cast<int>(round(th->yf)));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);
@@ -1512,8 +1512,8 @@ void Document::SaveThings_Hexen(Wad_file& wad) const
 
 		raw.tid = LE_S16(th->tid);
 
-		raw.x = LE_S16(static_cast<int>(th->raw_x));
-		raw.y = LE_S16(static_cast<int>(th->raw_y));
+		raw.x = LE_S16(static_cast<int>(round(th->xf)));
+		raw.y = LE_S16(static_cast<int>(round(th->yf)));
 		raw.height = LE_S16(static_cast<int>(th->raw_h));
 
 		raw.angle   = LE_U16(th->angle);

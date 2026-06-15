@@ -254,9 +254,9 @@ void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
 void Render3D_NotifyChange(ObjType type, int objnum, Field field)
 {
 	std::visit(overloaded {
-		[objnum, type](int field) {
+		[objnum, type](double Thing::*field) {
 			if (type == ObjType::things &&
-				(field == Thing::F_X || field == Thing::F_Y))
+				(field == &Thing::xf || field == &Thing::yf))
 			{
 				thing_sec_cache::InvalidateThing(objnum);
 			}

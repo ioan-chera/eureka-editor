@@ -52,8 +52,8 @@ int Document::numObjects(ObjType type) const
 
 static void ChecksumThing(crc32_c &crc, const Thing *T)
 {
-	crc += T->raw_x.raw();
-	crc += T->raw_y.raw();
+	crc += FFixedPoint(T->xf).raw();
+	crc += FFixedPoint(T->yf).raw();
 	crc += T->angle;
 	crc += T->type;
 	crc += T->options;

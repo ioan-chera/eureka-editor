@@ -809,16 +809,16 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 	{
 		case ObjType::things:
 		{
-			FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, delta.x);
-			FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, delta.y);
+			double dx = MakeValidCoordF(inst.loaded.levelFormat, delta.x);
+			double dy = MakeValidCoordF(inst.loaded.levelFormat, delta.y);
 			FFixedPoint fdz = MakeValidCoord(inst.loaded.levelFormat, delta.z);
 
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const auto &T = doc.things[*it];
 
-				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
-				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
+				op.changeThing(*it, &Thing::xf, T->xf + dx);
+				op.changeThing(*it, &Thing::yf, T->yf + dy);
 				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz));
 			}
 			break;
@@ -1637,8 +1637,8 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 
 void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const
 {
-	FFixedPoint fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
-	FFixedPoint fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
+	double mx = MakeValidCoordF(inst.loaded.levelFormat, mid_x);
+	double my = MakeValidCoordF(inst.loaded.levelFormat, mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
@@ -1646,14 +1646,14 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 		if (is_vert)
 		{
-			op.changeThing(*it, Thing::F_Y, fix_my * 2 - T->raw_y);
+			op.changeThing(*it, &Thing::yf, my * 2 - T->yf);
 
 			if (T->angle != 0)
 				op.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, fix_mx * 2 - T->raw_x);
+			op.changeThing(*it, &Thing::xf, mx * 2 - T->xf);
 
 			if (T->angle > 180)
 				op.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
@@ -1754,27 +1754,27 @@ void Instance::CMD_Mirror()
 void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list, bool anti_clockwise,
 							 double mid_x, double mid_y) const
 {
-	FFixedPoint fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
-	FFixedPoint fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
+	double mx = MakeValidCoordF(inst.loaded.levelFormat, mid_x);
+	double my = MakeValidCoordF(inst.loaded.levelFormat, mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const auto T = doc.things[*it];
 
-		FFixedPoint old_x = T->raw_x;
-		FFixedPoint old_y = T->raw_y;
+		double old_xf = T->xf;
+		double old_yf = T->yf;
 
 		if (anti_clockwise)
 		{
-			op.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
-			op.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
+			op.changeThing(*it, &Thing::xf, mx - old_yf + my);
+			op.changeThing(*it, &Thing::yf, my + old_xf - mx);
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
-			op.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
+			op.changeThing(*it, &Thing::xf, mx + old_yf - my);
+			op.changeThing(*it, &Thing::yf, my - old_xf + mx);
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
 		}
@@ -1864,8 +1864,8 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+		op.changeThing(*it, &Thing::xf, MakeValidCoordF(inst.loaded.levelFormat, new_x));
+		op.changeThing(*it, &Thing::yf, MakeValidCoordF(inst.loaded.levelFormat, new_y));
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
@@ -2192,8 +2192,8 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
-				op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-				op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+				op.changeThing(*it, &Thing::xf, MakeValidCoordF(inst.loaded.levelFormat, new_x));
+				op.changeThing(*it, &Thing::yf, MakeValidCoordF(inst.loaded.levelFormat, new_y));
 
 				moved.set(*it);
 				break;

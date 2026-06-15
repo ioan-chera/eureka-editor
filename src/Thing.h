@@ -35,9 +35,6 @@ enum class MapFormat
 
 struct Thing
 {
-	FFixedPoint raw_x = {};
-	FFixedPoint raw_y = {};
-
 	int angle = 0;
 	int type = 0;
 	int options = 0;
@@ -48,6 +45,8 @@ struct Thing
 	int tid = 0;
 	int special = 0;
 	int arg1 = 0, arg2 = 0, arg3 = 0, arg4 = 0, arg5 = 0;
+
+	double xf = 0.0, yf = 0.0;
 
 	enum IntAddress
 	{
@@ -61,18 +60,16 @@ struct Thing
 
 	enum FixedPointAddress
 	{
-		F_X,
-		F_Y,
 		F_H = 5,
 	};
 
 	inline double x() const
 	{
-		return static_cast<double>(raw_x);
+		return xf;
 	}
 	inline double y() const
 	{
-		return static_cast<double>(raw_y);
+		return yf;
 	}
 	inline double h() const
 	{

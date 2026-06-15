@@ -1167,8 +1167,8 @@ double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_
 
 		if (move_vertices)
 		{
-			op->changeVertex(along_list[k].vert_num, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-			op->changeVertex(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+			op->changeVertex(along_list[k].vert_num, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
+			op->changeVertex(along_list[k].vert_num, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 		}
 		else
 		{

@@ -115,13 +115,13 @@ static void MoveOverlapThing(EditOperation &op, Instance &inst, int th, int mid_
 
 	float dist = static_cast<float>(8 + 6 * std::min(100, total));
 
-	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, static_cast<double>(vec_x) * dist);
-	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, static_cast<double>(vec_y) * dist);
+	double dx = MakeValidCoordF(inst.loaded.levelFormat, static_cast<double>(vec_x) * dist);
+	double dy = MakeValidCoordF(inst.loaded.levelFormat, static_cast<double>(vec_y) * dist);
 
 	const auto T = inst.level.things[th];
 
-	op.changeThing(th, Thing::F_X, T->raw_x + fdx);
-	op.changeThing(th, Thing::F_Y, T->raw_y + fdy);
+	op.changeThing(th, &Thing::xf, T->xf + dx);
+	op.changeThing(th, &Thing::yf, T->yf + dy);
 }
 
 
@@ -190,8 +190,8 @@ void CMD_TH_Merge(Instance &inst)
 
 	for (sel_iter_c it(*inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, mid.x));
-		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, mid.y));
+		op.changeThing(*it, &Thing::xf, MakeValidCoordF(inst.loaded.levelFormat, mid.x));
+		op.changeThing(*it, &Thing::yf, MakeValidCoordF(inst.loaded.levelFormat, mid.y));
 	}
 }
 

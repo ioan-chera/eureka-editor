@@ -21,11 +21,11 @@
 
 void Thing::SetRawX(MapFormat format, double x)
 {
-	raw_x = MakeValidCoord(format, x);
+	xf = MakeValidCoordF(format, x);
 }
 void Thing::SetRawY(MapFormat format, double y)
 {
-	raw_y = MakeValidCoord(format, y);
+	yf = MakeValidCoordF(format, y);
 }
 void Thing::SetRawH(MapFormat format, double h)
 {

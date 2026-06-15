@@ -89,6 +89,10 @@ constexpr int GEOM_EPSILON_DIVIDER = 1024;
 constexpr double GEOM_EPSILON = 1.0 / GEOM_EPSILON_DIVIDER;
 
 FFixedPoint MakeValidCoord(MapFormat format, double x);
+inline static double MakeValidCoordF(MapFormat format, double x)
+{
+	return format == MapFormat::udmf ? x : round(x);
+}
 bool CoordsMatch(MapFormat format, const v2double_t &v1, const v2double_t &v2);
 
 //

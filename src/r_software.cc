@@ -290,7 +290,7 @@ public:
 			const auto TA = inst.level.things[A->th];
 			const auto TB = inst.level.things[B->th];
 
-			if (TA->raw_x == TB->raw_x && TA->raw_y == TB->raw_y)
+			if (TA->xf == TB->xf && TA->yf == TB->yf)
 				return A->th > B->th;
 		}
 

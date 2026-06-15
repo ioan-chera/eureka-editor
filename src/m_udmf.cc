@@ -105,6 +105,11 @@ public:
 		return MakeValidCoord(MapFormat::udmf, DecodeFloat());
 	}
 
+	double DecodeCoordF() const
+	{
+		return MakeValidCoordF(MapFormat::udmf, DecodeFloat());
+	}
+
 	StringID DecodeTexture() const
 	{
 		SString buffer;
@@ -361,9 +366,13 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 	// TODO strife options
 
 	if (field.Match("x"))
-		T->raw_x = value.DecodeCoord();
+	{
+		T->xf = value.DecodeCoordF();
+	}
 	else if (field.Match("y"))
-		T->raw_y = value.DecodeCoord();
+	{
+		T->yf = value.DecodeCoordF();
+	}
 	else if (field.Match("height"))
 		T->raw_h = value.DecodeCoord();
 	else if (field.Match("type"))

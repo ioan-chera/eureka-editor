@@ -22,8 +22,8 @@
 TEST(Thing, ZeroInit)
 {
 	Thing thing;
-	ASSERT_FALSE(thing.raw_x);
-	ASSERT_FALSE(thing.raw_y);
+	ASSERT_FALSE(thing.xf);
+	ASSERT_FALSE(thing.yf);
 	ASSERT_FALSE(thing.angle);
 	ASSERT_FALSE(thing.type);
 	ASSERT_FALSE(thing.options);
@@ -41,10 +41,10 @@ TEST(Thing, RawToDouble)
 {
 	Thing thing;
 
-	thing.raw_x = FFixedPoint(123.75);
+	thing.xf = 123.75;
 	ASSERT_EQ(thing.x(), 123.75);
 
-	thing.raw_y = FFixedPoint(-234.875);
+	thing.yf = -234.875;
 	ASSERT_EQ(thing.y(), -234.875);
 
 	ASSERT_EQ(thing.xy(), v2double_t(123.75, -234.875));
