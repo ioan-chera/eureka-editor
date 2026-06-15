@@ -77,6 +77,9 @@ enum class LumpType : byte
 	scripts
 };
 
+using Field = std::variant<int, double Thing::*>;
+using Value = std::variant<int, double>;
+
 // E_BASIS
 
 // Geometric epsilon divider (used for BSP building, coordinate matching, etc.)
@@ -137,15 +140,15 @@ private:
 	{
 		EditType action = EditType::none;
 		ObjType objtype = ObjType::things;
-		byte field = 0;
+		Field field = (int)0;
 		int objnum = 0;
 		std::variant<std::shared_ptr<Thing>,
 					 std::shared_ptr<Vertex>,
 					 std::shared_ptr<Sector>,
 					 std::shared_ptr<SideDef>,
 					 std::shared_ptr<LineDef>> object;
-		int value = 0;
-		
+		Value value = (int)0;
+
 		// For lump changes
 		LumpType lumptype = LumpType::header;
 		std::vector<byte> lumpData;
@@ -309,9 +312,10 @@ private:
 	void setMessage(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(2, 3);
 	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
 	int addNew(ObjType type);
-	bool change(ObjType type, int objnum, byte field, int value);
+	bool change(ObjType type, int objnum, Field field, Value value);
 	bool changeThing(int thing, Thing::IntAddress field, int value);
 	bool changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value);
+	bool changeThing(int thing, double Thing::*field, double value);
 	bool changeVertex(int vert, byte field, FFixedPoint value);
 	bool changeSector(int sec, Sector::IntAddress field, int value);
 	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
@@ -367,7 +371,7 @@ public:
 
 	bool change(ObjType type, int objnum, byte field, int value)
 	{
-		return basis.change(type, objnum, field, value);
+		return basis.change(type, objnum, (int)field, value);
 	}
 
 	bool changeThing(int thing, Thing::IntAddress field, int value)
@@ -376,6 +380,11 @@ public:
 	}
 
 	bool changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value)
+	{
+		return basis.changeThing(thing, field, value);
+	}
+
+	bool changeThing(int thing, double Thing::*field, double value)
 	{
 		return basis.changeThing(thing, field, value);
 	}

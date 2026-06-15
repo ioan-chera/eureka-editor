@@ -251,13 +251,18 @@ void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
 		thing_sec_cache::InvalidateAll(doc, true);
 }
 
-void Render3D_NotifyChange(ObjType type, int objnum, int field)
+void Render3D_NotifyChange(ObjType type, int objnum, Field field)
 {
-	if (type == ObjType::things &&
-		(field == Thing::F_X || field == Thing::F_Y))
-	{
-		thing_sec_cache::InvalidateThing(objnum);
-	}
+	std::visit(overloaded {
+		[objnum, type](int field) {
+			if (type == ObjType::things &&
+				(field == Thing::F_X || field == Thing::F_Y))
+			{
+				thing_sec_cache::InvalidateThing(objnum);
+			}
+		},
+		[](auto arg) {}
+	}, field);
 }
 
 void Render3D_NotifyEnd(Instance &inst)

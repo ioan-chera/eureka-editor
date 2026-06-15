@@ -217,12 +217,12 @@ public:
 	bool Editor_ParseUser(const std::vector<SString> &tokens);
 	void Editor_WriteUser(std::ostream &os) const;
 	void MapStuff_NotifyBegin();
-	void MapStuff_NotifyChange(ObjType type, int objnum, int field);
+	void MapStuff_NotifyChange(ObjType type, int objnum, Field field);
 	void MapStuff_NotifyDelete(ObjType type, int objnum);
 	void MapStuff_NotifyEnd();
 	void MapStuff_NotifyInsert(ObjType type, int objnum);
 	void ObjectBox_NotifyBegin();
-	void ObjectBox_NotifyChange(ObjType type, int objnum, int field);
+	void ObjectBox_NotifyChange(ObjType type, int objnum);
 	void ObjectBox_NotifyDelete(ObjType type, int objnum);
 	void ObjectBox_NotifyEnd() const;
 	void ObjectBox_NotifyInsert(ObjType type, int objnum);

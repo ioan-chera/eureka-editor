@@ -162,6 +162,9 @@ struct LoadingData;
 struct NewResources;
 struct WadData;
 
+template<class... Ts>
+struct overloaded : Ts... { using Ts::operator()...; };
+
 NewResources loadResources(const LoadingData& loading, const WadData& waddata) noexcept(false);
 
 /*

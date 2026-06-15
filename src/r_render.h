@@ -110,7 +110,7 @@ void Render3D_DragSectors(Instance &inst);
 void Render3D_NotifyBegin();
 void Render3D_NotifyInsert(ObjType type, int objnum);
 void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum);
-void Render3D_NotifyChange(ObjType type, int objnum, int field);
+void Render3D_NotifyChange(ObjType type, int objnum, Field field);
 void Render3D_NotifyEnd(Instance &inst);
 
 int Render3D_CalcRotation(double viewAngle_rad, int thingAngle_deg);

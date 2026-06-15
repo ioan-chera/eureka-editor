@@ -439,7 +439,7 @@ void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
 	}
 }
 
-void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
+void Instance::MapStuff_NotifyChange(ObjType type, int objnum, Field field)
 {
 	if (type == ObjType::vertices)
 	{
@@ -459,14 +459,19 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		Subdiv_InvalidateAll();
 	}
 
-	if (type == ObjType::sidedefs && field == SideDef::F_SECTOR)
-		Subdiv_InvalidateAll();
+	std::visit(overloaded {
+		[this, type](int field) {
+			if (type == ObjType::sidedefs && field == SideDef::F_SECTOR)
+				Subdiv_InvalidateAll();
 
-	if (type == ObjType::linedefs && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT || field == LineDef::F_START || field == LineDef::F_END))
-		Subdiv_InvalidateAll();
+			if (type == ObjType::linedefs && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT || field == LineDef::F_START || field == LineDef::F_END))
+				Subdiv_InvalidateAll();
 
-	if (type == ObjType::sectors && (field == Sector::F_FLOORH || field == Sector::F_CEILH))
-		Subdiv_InvalidateAll();
+			if (type == ObjType::sectors && (field == Sector::F_FLOORH || field == Sector::F_CEILH))
+				Subdiv_InvalidateAll();
+		},
+		[](auto arg) {}
+	}, field);
 }
 
 void Instance::MapStuff_NotifyEnd()
@@ -524,7 +529,7 @@ void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
 }
 
 
-void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
+void Instance::ObjectBox_NotifyChange(ObjType type, int objnum)
 {
 	if (type != edit.mode || !main_win)
 		return;

@@ -367,7 +367,7 @@ void Basis::del(ObjType type, int objnum)
 // same as before, nothing happens and false is returned.
 // Otherwise returns true.
 //
-bool Basis::change(ObjType type, int objnum, byte field, int value)
+bool Basis::change(ObjType type, int objnum, Field field, Value value)
 {
 	// TODO: optimise, check whether value actually changes
 
@@ -402,6 +402,12 @@ bool Basis::changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint v
 	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
 
 	return change(ObjType::things, thing, field, value.raw());
+}
+bool Basis::changeThing(int thing, double Thing::*field, double value)
+{
+	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
+
+	return change(ObjType::things, thing, field, value);
 }
 
 //
@@ -612,41 +618,54 @@ void Basis::EditUnit::destroy()
 //
 void Basis::EditUnit::rawChange(Basis &basis)
 {
-	int *pos = nullptr;
-	switch(objtype)
-	{
-	case ObjType::things:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
-		pos = reinterpret_cast<int *>(basis.doc.things[objnum].get());
-		break;
-	case ObjType::vertices:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
-		pos = reinterpret_cast<int *>(basis.doc.vertices[objnum].get());
-		break;
-	case ObjType::sectors:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
-		pos = reinterpret_cast<int *>(basis.doc.sectors[objnum].get());
-		break;
-	case ObjType::sidedefs:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
-		pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum].get());
-		break;
-	case ObjType::linedefs:
-		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
-		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum].get());
-		break;
-	default:
-		BugError("Basis::EditOperation::rawChange: bad objtype %u\n", (unsigned)objtype);
-		return; /* NOT REACHED */
-	}
-	// TODO: CHANGE THIS TO A SAFER WAY!
-	std::swap(pos[field], value);
+	std::visit(overloaded {
+		[&basis, this](int field) {
+			int *pos = nullptr;
+			switch(objtype)
+			{
+			case ObjType::things:
+				SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
+				pos = reinterpret_cast<int *>(basis.doc.things[objnum].get());
+				break;
+			case ObjType::vertices:
+				SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
+				pos = reinterpret_cast<int *>(basis.doc.vertices[objnum].get());
+				break;
+			case ObjType::sectors:
+				SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
+				pos = reinterpret_cast<int *>(basis.doc.sectors[objnum].get());
+				break;
+			case ObjType::sidedefs:
+				SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
+				pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum].get());
+				break;
+			case ObjType::linedefs:
+				SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
+				pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum].get());
+				break;
+			default:
+				BugError("Basis::EditOperation::rawChange(field): bad objtype %u\n", (unsigned)objtype);
+				return; /* NOT REACHED */
+			}
+			std::swap(pos[field], std::get<int>(value));
+		},
+		[&basis, this](double Thing::*field) {
+			switch(objtype)
+			{
+			case ObjType::things:
+				std::swap(basis.doc.things[objnum].get()->*field, std::get<double>(value));
+				break;
+			default:
+				BugError("Basis::EditOperation::rawChange(thingDouble): bad objtype %u\n", (unsigned)objtype);
+				break;
+			}
+		}
+	}, field);
 	basis.mDidMakeChanges = true;
 
-	// TODO: their modules
 	basis.inst.MapStuff_NotifyChange(objtype, objnum, field);
 	Render3D_NotifyChange(objtype, objnum, field);
-	basis.inst.ObjectBox_NotifyChange(objtype, objnum, field);
+	basis.inst.ObjectBox_NotifyChange(objtype, objnum);
 }
 
 //
