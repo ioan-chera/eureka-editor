@@ -119,8 +119,6 @@ void Instance::CMD_SEC_Floor()
 		}
 	}
 
-	main_win->sec_box->UpdateField(Sector::F_FLOORH);
-
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
@@ -156,8 +154,6 @@ void Instance::CMD_SEC_Ceil()
 			op.changeSector(*it, Sector::F_CEILH, new_h);
 		}
 	}
-
-	main_win->sec_box->UpdateField(Sector::F_CEILH);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -205,8 +201,6 @@ void SectorModule::sectorsAdjustLight(int delta) const
 			op.changeSector(*it, Sector::F_LIGHT, new_lt);
 		}
 	}
-
-	inst.main_win->sec_box->UpdateField(Sector::F_LIGHT);
 }
 
 
@@ -258,9 +252,6 @@ void Instance::CMD_SEC_SwapFlats()
 			op.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
 		}
 	}
-
-	main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
-	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);

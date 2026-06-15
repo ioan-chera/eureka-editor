@@ -225,9 +225,6 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 			op.changeLinedef(*it, LineDef::F_TYPE, new_type);
 		}
 	}
-
-	// update description
-	box->UpdateField(LineDef::F_TYPE);
 }
 
 
@@ -693,123 +690,108 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_LineBox::UpdateField(int field)
+void UI_LineBox::UpdateField()
 {
-	if (field < 0 || field == LineDef::F_START || field == LineDef::F_END)
+	if(inst.level.isLinedef(obj))
+		CalcLength();
+	else
+		mFixUp.setInputValue(length, "");
+
+	for (int a = 0 ; a < 5 ; a++)
 	{
-		if(inst.level.isLinedef(obj))
-			CalcLength();
-		else
-			mFixUp.setInputValue(length, "");
+		mFixUp.setInputValue(args[a], "");
+		args[a]->tooltip(NULL);
+		args[a]->textcolor(FL_BLACK);
 	}
 
-	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG5))
+	if (inst.level.isLinedef(obj))
 	{
-		for (int a = 0 ; a < 5 ; a++)
+		const auto L = inst.level.linedefs[obj];
+
+		mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
+
+		const linetype_t &info = inst.conf.getLineType(L->type);
+
+		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
-			mFixUp.setInputValue(args[a], "");
-			args[a]->tooltip(NULL);
-			args[a]->textcolor(FL_BLACK);
-		}
-
-		if (inst.level.isLinedef(obj))
-		{
-			const auto L = inst.level.linedefs[obj];
-
-			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
-
-			const linetype_t &info = inst.conf.getLineType(L->type);
-
-			if (inst.loaded.levelFormat != MapFormat::doom)
+			for (int a = 0 ; a < 5 ; a++)
 			{
-				for (int a = 0 ; a < 5 ; a++)
-				{
-					int arg_val = L->Arg(1 + a);
+				int arg_val = L->Arg(1 + a);
 
-					if(arg_val || L->type)
-						mFixUp.setInputValue(args[a], SString(arg_val).c_str());
+				if(arg_val || L->type)
+					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
-					// set the tooltip
-					if (!info.args[a].name.empty())
-						args[a]->copy_tooltip(info.args[a].name.c_str());
-					else
-						args[a]->textcolor(fl_rgb_color(160,160,160));
-				}
+				// set the tooltip
+				if (!info.args[a].name.empty())
+					args[a]->copy_tooltip(info.args[a].name.c_str());
+				else
+					args[a]->textcolor(fl_rgb_color(160,160,160));
 			}
 		}
-		else
-		{
-			mFixUp.setInputValue(length, "");
-			mFixUp.setInputValue(tag, "");
-		}
+	}
+	else
+	{
+		mFixUp.setInputValue(length, "");
+		mFixUp.setInputValue(tag, "");
 	}
 
-	if (field < 0 || field == LineDef::F_RIGHT || field == LineDef::F_LEFT)
+	if (inst.level.isLinedef(obj))
 	{
-		if (inst.level.isLinedef(obj))
-		{
-			const auto L = inst.level.linedefs[obj];
+		const auto L = inst.level.linedefs[obj];
 
-			int right_mask = SolidMask(L.get(), Side::right);
-			int  left_mask = SolidMask(L.get(), Side::left);
+		int right_mask = SolidMask(L.get(), Side::right);
+		int  left_mask = SolidMask(L.get(), Side::left);
 
-			front->SetObj(L->right, right_mask, L->TwoSided());
-			 back->SetObj(L->left,   left_mask, L->TwoSided());
-		}
-		else
-		{
-			front->SetObj(SETOBJ_NO_LINE, 0, false);
-			 back->SetObj(SETOBJ_NO_LINE, 0, false);
-		}
+		front->SetObj(L->right, right_mask, L->TwoSided());
+		 back->SetObj(L->left,   left_mask, L->TwoSided());
+	}
+	else
+	{
+		front->SetObj(SETOBJ_NO_LINE, 0, false);
+		 back->SetObj(SETOBJ_NO_LINE, 0, false);
 	}
 
-	if (field < 0 || field == LineDef::F_TYPE)
+	if (inst.level.isLinedef(obj))
 	{
-		if (inst.level.isLinedef(obj))
+		int type_num = inst.level.linedefs[obj]->type;
+
+		mFixUp.setInputValue(type, SString(type_num).c_str());
+
+		const char *gen_desc = GeneralizedDesc(type_num);
+
+		if (gen_desc)
 		{
-			int type_num = inst.level.linedefs[obj]->type;
-
-			mFixUp.setInputValue(type, SString(type_num).c_str());
-
-			const char *gen_desc = GeneralizedDesc(type_num);
-
-			if (gen_desc)
-			{
-				desc->value(gen_desc);
-			}
-			else
-			{
-				const linetype_t &info = inst.conf.getLineType(type_num);
-				desc->value(info.desc.c_str());
-			}
-
-			inst.main_win->browser->UpdateGenType(type_num);
+			desc->value(gen_desc);
 		}
 		else
 		{
-			mFixUp.setInputValue(type, "");
-			desc->value("");
-			choose->label("Choose");
-
-			inst.main_win->browser->UpdateGenType(0);
+			const linetype_t &info = inst.conf.getLineType(type_num);
+			desc->value(info.desc.c_str());
 		}
+
+		inst.main_win->browser->UpdateGenType(type_num);
+	}
+	else
+	{
+		mFixUp.setInputValue(type, "");
+		desc->value("");
+		choose->label("Choose");
+
+		inst.main_win->browser->UpdateGenType(0);
 	}
 
-	if (field < 0 || field == LineDef::F_FLAGS)
+	if (inst.level.isLinedef(obj))
 	{
-		if (inst.level.isLinedef(obj))
-		{
-			actkind->activate();
+		actkind->activate();
 
-			FlagsFromInt(inst.level.linedefs[obj]->flags);
-		}
-		else
-		{
-			FlagsFromInt(0);
+		FlagsFromInt(inst.level.linedefs[obj]->flags);
+	}
+	else
+	{
+		FlagsFromInt(0);
 
-			actkind->value(getActivationCount());  // show as "??"
-			actkind->deactivate();
-		}
+		actkind->value(getActivationCount());  // show as "??"
+		actkind->deactivate();
 	}
 }
 

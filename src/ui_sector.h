@@ -82,7 +82,7 @@ public:
 public:
 	// call this if the thing was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1) override;
+	void UpdateField() override;
 
 	void UpdateTotal(const Document &doc) noexcept override;
 

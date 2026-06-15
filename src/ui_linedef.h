@@ -65,7 +65,7 @@ public:
 
 	// call this if the linedef was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1) override;
+	void UpdateField() override;
 
 	// call this is the linedef's sides were externally modified.
 	void UpdateSides();

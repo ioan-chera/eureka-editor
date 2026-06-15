@@ -77,8 +77,6 @@ void Instance::CMD_TH_SpinThings()
 		}
 	}
 
-	main_win->thing_box->UpdateField(Thing::F_ANGLE);
-
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }

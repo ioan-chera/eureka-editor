@@ -639,150 +639,127 @@ int UI_ThingBox::CalcOptions() const
 }
 
 
-void UI_ThingBox::UpdateField(int field)
+void UI_ThingBox::UpdateField()
 {
-	if (field < 0 ||
-		field == Thing::F_X ||
-		field == Thing::F_Y ||
-		field == Thing::F_H)
+	if (inst.level.isThing(obj))
 	{
-		if (inst.level.isThing(obj))
-		{
-			const auto T = inst.level.things[obj];
+		const auto T = inst.level.things[obj];
 
-			// @@ FIXME show decimals in UDMF
-			mFixUp.setInputValue(pos_x, SString(static_cast<int>(T->x())).c_str());
-			mFixUp.setInputValue(pos_y, SString(static_cast<int>(T->y())).c_str());
-			mFixUp.setInputValue(pos_z, SString(static_cast<int>(T->h())).c_str());
-		}
-		else
-		{
-			mFixUp.setInputValue(pos_x, "");
-			mFixUp.setInputValue(pos_y, "");
-			mFixUp.setInputValue(pos_z, "");
-		}
+		// @@ FIXME show decimals in UDMF
+		mFixUp.setInputValue(pos_x, SString(static_cast<int>(T->x())).c_str());
+		mFixUp.setInputValue(pos_y, SString(static_cast<int>(T->y())).c_str());
+		mFixUp.setInputValue(pos_z, SString(static_cast<int>(T->h())).c_str());
+	}
+	else
+	{
+		mFixUp.setInputValue(pos_x, "");
+		mFixUp.setInputValue(pos_y, "");
+		mFixUp.setInputValue(pos_z, "");
 	}
 
-	if (field < 0 || field == Thing::F_ANGLE)
-	{
-		if(inst.level.isThing(obj))
-			mFixUp.setInputValue(angle, SString(inst.level.things[obj]->angle).c_str());
-		else
-			mFixUp.setInputValue(angle, "");
-	}
+	if(inst.level.isThing(obj))
+		mFixUp.setInputValue(angle, SString(inst.level.things[obj]->angle).c_str());
+	else
+		mFixUp.setInputValue(angle, "");
 
 	// IOANCH 9/2015
-	if (field < 0 || field == Thing::F_TID)
+	if(inst.level.isThing(obj))
+		mFixUp.setInputValue(tid, SString(inst.level.things[obj]->tid).c_str());
+	else
+		mFixUp.setInputValue(tid, "");
+
+	if (inst.level.isThing(obj))
 	{
-		if(inst.level.isThing(obj))
-			mFixUp.setInputValue(tid, SString(inst.level.things[obj]->tid).c_str());
-		else
-			mFixUp.setInputValue(tid, "");
+		const thingtype_t &info = inst.conf.getThingType(inst.level.things[obj]->type);
+		desc->value(info.desc.c_str());
+		mFixUp.setInputValue(type, SString(inst.level.things[obj]->type).c_str());
+		sprite->GetSprite(inst.level.things[obj]->type, FL_DARK2);
+	}
+	else
+	{
+		mFixUp.setInputValue(type, "");
+		desc ->value("");
+		sprite->Clear();
 	}
 
-	if (field < 0 || field == Thing::F_TYPE)
+	int options;
+	SString optString;
+	if (inst.level.isThing(obj))
 	{
-		if (inst.level.isThing(obj))
-		{
-			const thingtype_t &info = inst.conf.getThingType(inst.level.things[obj]->type);
-			desc->value(info.desc.c_str());
-			mFixUp.setInputValue(type, SString(inst.level.things[obj]->type).c_str());
-			sprite->GetSprite(inst.level.things[obj]->type, FL_DARK2);
-		}
-		else
-		{
-			mFixUp.setInputValue(type, "");
-			desc ->value("");
-			sprite->Clear();
-		}
+		options = inst.level.things[obj]->options;
+		optString = SString(options);
 	}
-
-	if (field < 0 || field == Thing::F_OPTIONS)
+	else
 	{
-		int options;
-		SString optString;
-		if (inst.level.isThing(obj))
-		{
-			options = inst.level.things[obj]->options;
-			optString = SString(options);
-		}
-		else
-		{
-			options = 0;
-			optString = "";
-		}
-		OptionsFromInt(options);
-		mFixUp.setInputValue(flagBox, optString.c_str());
-
-		// Check if anything's out of the fields
-		unsigned mask = 0;
-		for(const thingflag_t &flag : inst.conf.thing_flags)
-			mask |= flag.value;
-		if(options & ~mask)
-			flagBox->color(fl_rgb_color(255, 255, 0));
-		else
-			flagBox->color(flagBoxDefaultColor);
+		options = 0;
+		optString = "";
 	}
+	OptionsFromInt(options);
+	mFixUp.setInputValue(flagBox, optString.c_str());
+
+	// Check if anything's out of the fields
+	unsigned mask = 0;
+	for(const thingflag_t &flag : inst.conf.thing_flags)
+		mask |= flag.value;
+	if(options & ~mask)
+		flagBox->color(fl_rgb_color(255, 255, 0));
+	else
+		flagBox->color(flagBoxDefaultColor);
+
 
 	if (inst.loaded.levelFormat == MapFormat::doom)
 		return;
 
-	if (field < 0 || field == Thing::F_SPECIAL)
+	if (inst.level.isThing(obj) && inst.level.things[obj]->special)
 	{
-		if (inst.level.isThing(obj) && inst.level.things[obj]->special)
-		{
-			const linetype_t &info = inst.conf.getLineType(inst.level.things[obj]->special);
-			spec_desc->value(info.desc.c_str());
-			mFixUp.setInputValue(spec_type, SString(inst.level.things[obj]->special).c_str());
-		}
-		else
-		{
-			mFixUp.setInputValue(spec_type, "");
-			spec_desc->value("");
-		}
+		const linetype_t &info = inst.conf.getLineType(inst.level.things[obj]->special);
+		spec_desc->value(info.desc.c_str());
+		mFixUp.setInputValue(spec_type, SString(inst.level.things[obj]->special).c_str());
+	}
+	else
+	{
+		mFixUp.setInputValue(spec_type, "");
+		spec_desc->value("");
 	}
 
-	if (field < 0 || (field >= Thing::F_ARG1 && field <= Thing::F_ARG5))
+	for (int a = 0 ; a < 5 ; a++)
 	{
+		mFixUp.setInputValue(args[a], "");
+		args[a]->tooltip(NULL);
+		args[a]->textcolor(FL_BLACK);
+	}
+
+	if (inst.level.isThing(obj))
+	{
+		const auto T = inst.level.things[obj];
+
+		const thingtype_t &info = inst.conf.getThingType(T->type);
+		const linetype_t  &spec = inst.conf.getLineType (T->special);
+
+		// set argument values and tooltips
 		for (int a = 0 ; a < 5 ; a++)
 		{
-			mFixUp.setInputValue(args[a], "");
-			args[a]->tooltip(NULL);
-			args[a]->textcolor(FL_BLACK);
-		}
+			int arg_val = T->Arg(1 + a);
 
-		if (inst.level.isThing(obj))
-		{
-			const auto T = inst.level.things[obj];
-
-			const thingtype_t &info = inst.conf.getThingType(T->type);
-			const linetype_t  &spec = inst.conf.getLineType (T->special);
-
-			// set argument values and tooltips
-			for (int a = 0 ; a < 5 ; a++)
+			if (T->special)
 			{
-				int arg_val = T->Arg(1 + a);
+				mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
-				if (T->special)
-				{
+				if (!spec.args[a].name.empty())
+					args[a]->copy_tooltip(spec.args[a].name.c_str());
+				else
+					args[a]->textcolor(fl_rgb_color(160,160,160));
+			}
+			else
+			{
+				// spawn arguments
+				if(arg_val || !info.args[a].empty())
 					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
-					if (!spec.args[a].name.empty())
-						args[a]->copy_tooltip(spec.args[a].name.c_str());
-					else
-						args[a]->textcolor(fl_rgb_color(160,160,160));
-				}
+				if (!info.args[a].empty())
+					args[a]->copy_tooltip(info.args[a].c_str());
 				else
-				{
-					// spawn arguments
-					if(arg_val || !info.args[a].empty())
-						mFixUp.setInputValue(args[a], SString(arg_val).c_str());
-
-					if (!info.args[a].empty())
-						args[a]->copy_tooltip(info.args[a].c_str());
-					else
-						args[a]->textcolor(fl_rgb_color(160,160,160));
-				}
+					args[a]->textcolor(fl_rgb_color(160,160,160));
 			}
 		}
 	}

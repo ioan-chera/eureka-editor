@@ -474,9 +474,6 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 			op.changeSector(*it, Sector::F_TYPE, (old_type & ~mask) | value);
 		}
 	}
-
-	// update the description
-	UpdateField(Sector::F_TYPE);
 }
 
 
@@ -646,108 +643,96 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_SectorBox::UpdateField(int field)
+void UI_SectorBox::UpdateField()
 {
 	const Sector *sector = inst.level.isSector(obj) ? inst.level.sectors[obj].get() : nullptr;
-	if (field < 0 || field == Sector::F_FLOORH || field == Sector::F_CEILH)
+	if (inst.level.isSector(obj))
 	{
-		if (inst.level.isSector(obj))
-		{
-			mFixUp.setInputValue(floor_h, SString(sector->floorh).c_str());
-			mFixUp.setInputValue(ceil_h, SString(sector->ceilh).c_str());
-			mFixUp.setInputValue(headroom, SString(sector->HeadRoom()).c_str());
-		}
-		else
-		{
-			mFixUp.setInputValue(floor_h, "");
-			mFixUp.setInputValue(ceil_h, "");
-			mFixUp.setInputValue(headroom, "");
-		}
+		mFixUp.setInputValue(floor_h, SString(sector->floorh).c_str());
+		mFixUp.setInputValue(ceil_h, SString(sector->ceilh).c_str());
+		mFixUp.setInputValue(headroom, SString(sector->HeadRoom()).c_str());
+	}
+	else
+	{
+		mFixUp.setInputValue(floor_h, "");
+		mFixUp.setInputValue(ceil_h, "");
+		mFixUp.setInputValue(headroom, "");
 	}
 
-	if (field < 0 || field == Sector::F_FLOOR_TEX || field == Sector::F_CEIL_TEX)
+	if (inst.level.isSector(obj))
 	{
-		if (inst.level.isSector(obj))
-		{
-			mFixUp.setInputValue(f_tex, sector->FloorTex().c_str());
-			mFixUp.setInputValue(c_tex, sector->CeilTex().c_str());
+		mFixUp.setInputValue(f_tex, sector->FloorTex().c_str());
+		mFixUp.setInputValue(c_tex, sector->CeilTex().c_str());
 
-			f_pic->GetFlat(sector->FloorTex());
-			c_pic->GetFlat(sector->CeilTex());
+		f_pic->GetFlat(sector->FloorTex());
+		c_pic->GetFlat(sector->CeilTex());
 
-			f_pic->AllowHighlight(true);
-			c_pic->AllowHighlight(true);
-		}
-		else
-		{
-			mFixUp.setInputValue(f_tex, "");
-			mFixUp.setInputValue(c_tex, "");
+		f_pic->AllowHighlight(true);
+		c_pic->AllowHighlight(true);
+	}
+	else
+	{
+		mFixUp.setInputValue(f_tex, "");
+		mFixUp.setInputValue(c_tex, "");
 
-			f_pic->Clear();
-			c_pic->Clear();
+		f_pic->Clear();
+		c_pic->Clear();
 
-			f_pic->AllowHighlight(false);
-			c_pic->AllowHighlight(false);
-		}
+		f_pic->AllowHighlight(false);
+		c_pic->AllowHighlight(false);
 	}
 
-	if (field < 0 || field == Sector::F_TYPE)
+	for(const SectorFlagButton &button : bm_buttons)
 	{
+		if(button.button)
+			button.button->value(0);
+		else if(button.choice)
+			button.choice->value(0);
+	}
+
+	if (inst.level.isSector(obj))
+	{
+		int value = sector->type;
+		int mask  = basicSectorMask;
+
+		mFixUp.setInputValue(type, SString(value & mask).c_str());
+
+		const sectortype_t &info = inst.M_GetSectorType(value & mask);
+		desc->value(info.desc.c_str());
+
 		for(const SectorFlagButton &button : bm_buttons)
 		{
 			if(button.button)
-				button.button->value(0);
+				button.button->value((value & button.info->value) ? 1 : 0);
 			else if(button.choice)
-				button.choice->value(0);
-		}
-
-		if (inst.level.isSector(obj))
-		{
-			int value = sector->type;
-			int mask  = basicSectorMask;
-
-			mFixUp.setInputValue(type, SString(value & mask).c_str());
-
-			const sectortype_t &info = inst.M_GetSectorType(value & mask);
-			desc->value(info.desc.c_str());
-
-			for(const SectorFlagButton &button : bm_buttons)
 			{
-				if(button.button)
-					button.button->value((value & button.info->value) ? 1 : 0);
-				else if(button.choice)
+				int masked = value & button.info->value;
+				for(size_t i = 0; i < button.info->options.size(); ++i)
 				{
-					int masked = value & button.info->value;
-					for(size_t i = 0; i < button.info->options.size(); ++i)
+					if(masked == button.info->options[i].value)
 					{
-						if(masked == button.info->options[i].value)
-						{
-							button.choice->value((int)i);
-							break;
-						}
+						button.choice->value((int)i);
+						break;
 					}
 				}
 			}
 		}
-		else
-		{
-			mFixUp.setInputValue(type, "");
-			desc->value("");
-		}
+	}
+	else
+	{
+		mFixUp.setInputValue(type, "");
+		desc->value("");
 	}
 
-	if (field < 0 || field == Sector::F_LIGHT || field == Sector::F_TAG)
+	if (inst.level.isSector(obj))
 	{
-		if (inst.level.isSector(obj))
-		{
-			mFixUp.setInputValue(light, SString(sector->light).c_str());
-			mFixUp.setInputValue(tag, SString(sector->tag).c_str());
-		}
-		else
-		{
-			mFixUp.setInputValue(light, "");
-			mFixUp.setInputValue(tag, "");
-		}
+		mFixUp.setInputValue(light, SString(sector->light).c_str());
+		mFixUp.setInputValue(tag, SString(sector->tag).c_str());
+	}
+	else
+	{
+		mFixUp.setInputValue(light, "");
+		mFixUp.setInputValue(tag, "");
 	}
 }
 

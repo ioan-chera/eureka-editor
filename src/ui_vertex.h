@@ -42,7 +42,7 @@ public:
 	// FLTK virtual method for handling input events.
 
 	// call this if the vertex was externally changed.
-	void UpdateField(int field = -1) override;
+	void UpdateField() override;
 	void UnselectPics() override
 	{
 	}

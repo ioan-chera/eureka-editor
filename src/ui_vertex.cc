@@ -186,7 +186,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_VertexBox::UpdateField(int)
+void UI_VertexBox::UpdateField()
 {
 	if (inst.level.isVertex(obj))
 	{

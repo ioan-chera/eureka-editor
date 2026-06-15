@@ -119,7 +119,7 @@ public:
 	void SetObj(int _index, int _count);
 	int GetObj() const { return obj; }
 	
-	virtual void UpdateField(int field = -1) = 0;
+	virtual void UpdateField() = 0;
 	virtual void UnselectPics() = 0;
 	virtual void UpdateTotal(const Document &doc) noexcept = 0;
 	virtual void UpdateGameInfo(const LoadingData &loaded, const ConfigData &config) = 0;
