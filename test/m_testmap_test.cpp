@@ -256,8 +256,8 @@ TEST_F(TestMapFixture, TestMapVanillaWithResources)
 	// Now run
 
 	std::vector<std::string> lines = testMapAndGetLines();
-	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-merge",
-		res1Path.u8string(), res2Path.u8string(), "-file", editWadPath.u8string(), "-warp", "14"};
+	std::vector<std::string> expected = {portPath.string(), "-iwad", gameWadPath.string(), "-merge",
+		res1Path.string(), res2Path.string(), "-file", editWadPath.string(), "-warp", "14"};
 	ASSERT_EQ(lines, expected);
 }
 
@@ -274,8 +274,8 @@ TEST_F(TestMapFixture, TestMapPortWithResources)
 	inst.loaded.levelName = "MAP14";
 
 	std::vector<std::string> lines = testMapAndGetLines();
-	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file",
-		res1Path.u8string(), res2Path.u8string(), editWadPath.u8string(), "-warp", "14"};
+	std::vector<std::string> expected = {portPath.string(), "-iwad", gameWadPath.string(), "-file",
+		res1Path.string(), res2Path.string(), editWadPath.string(), "-warp", "14"};
 	ASSERT_EQ(lines, expected);
 }
 
@@ -290,7 +290,7 @@ TEST_F(TestMapFixture, TestMapPortWithoutResources)
 	inst.loaded.levelName = "MAP14";
 
 	std::vector<std::string> lines = testMapAndGetLines();
-	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string(), "-warp", "14"};
+	std::vector<std::string> expected = {portPath.string(), "-iwad", gameWadPath.string(), "-file", editWadPath.string(), "-warp", "14"};
 	ASSERT_EQ(lines, expected);
 }
 
@@ -305,7 +305,7 @@ TEST_F(TestMapFixture, TestMapPortWithoutResourcesDoom1Map)
 	inst.loaded.levelName = "E6M9";
 
 	std::vector<std::string> lines = testMapAndGetLines();
-	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string(), "-warp", "6", "9"};
+	std::vector<std::string> expected = {portPath.string(), "-iwad", gameWadPath.string(), "-file", editWadPath.string(), "-warp", "6", "9"};
 	ASSERT_EQ(lines, expected);
 }
 
@@ -320,7 +320,7 @@ TEST_F(TestMapFixture, TestMapPortWithoutResourcesNonstandardMap)
 	inst.loaded.levelName = "ZOMFG65";
 
 	std::vector<std::string> lines = testMapAndGetLines();
-	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string(), "-warp", "65"};
+	std::vector<std::string> expected = {portPath.string(), "-iwad", gameWadPath.string(), "-file", editWadPath.string(), "-warp", "65"};
 	ASSERT_EQ(lines, expected);
 }
 
@@ -335,7 +335,7 @@ TEST_F(TestMapFixture, TestMapPortWithoutResourcesBadMap)
 	inst.loaded.levelName = "NOTHING";
 
 	std::vector<std::string> lines = testMapAndGetLines();
-	std::vector<std::string> expected = {portPath.u8string(), "-iwad", gameWadPath.u8string(), "-file", editWadPath.u8string()};
+	std::vector<std::string> expected = {portPath.string(), "-iwad", gameWadPath.string(), "-file", editWadPath.string()};
 	ASSERT_EQ(lines, expected);
 }
 

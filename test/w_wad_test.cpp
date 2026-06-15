@@ -36,7 +36,7 @@ class WadFileTest : public TempDirContext
 //
 static void readFromPath(const fs::path &path, std::vector<uint8_t> &data)
 {
-	FILE *f = fopen(path.u8string().c_str(), "rb");
+	FILE *f = fopen(path.string().c_str(), "rb");
 	ASSERT_NE(f, nullptr);
 	uint8_t buffer[4096];
 	data.clear();
@@ -231,7 +231,7 @@ TEST_F(WadFileTest, Validate)
 
 	fs::path path = getSubPath("wad.wad");
 
-	FILE *f = fopen(path.u8string().c_str(), "wb");
+	FILE *f = fopen(path.string().c_str(), "wb");
 	ASSERT_NE(f, nullptr);
 	mDeleteList.push(path);
 	fprintf(f, "abcdefghijklmnopq");
@@ -240,7 +240,7 @@ TEST_F(WadFileTest, Validate)
 	// Will not work: no WAD signature
 	ASSERT_FALSE(Wad_file::Validate(path));
 
-	f = fopen(path.u8string().c_str(), "r+b");
+	f = fopen(path.string().c_str(), "r+b");
 	ASSERT_NE(f, nullptr);
 	ASSERT_EQ(fseek(f, 1, SEEK_SET), 0);
 	fprintf(f, "WAD");	// put WAD on the second char
@@ -250,7 +250,7 @@ TEST_F(WadFileTest, Validate)
 	ASSERT_TRUE(Wad_file::Validate(path));
 
 	// Now have it
-	f = fopen(path.u8string().c_str(), "wb");
+	f = fopen(path.string().c_str(), "wb");
 	ASSERT_NE(f, nullptr);
 	fprintf(f, "%s", "PWAD\0\0\01");
 	ASSERT_EQ(fclose(f), 0);
@@ -526,7 +526,7 @@ TEST_F(WadFileTest, LumpFromFile)
 
 	Lump_c &lump = wad->AddLump("Test");
 
-	FILE *f = fopen(path.u8string().c_str(), "rb");
+	FILE *f = fopen(path.string().c_str(), "rb");
 	ASSERT_TRUE(f);
 	ASSERT_EQ(lump.writeData(f, 32), 12);
 	ASSERT_EQ(fclose(f), 0);

@@ -222,7 +222,7 @@ fs::path ParseEurekaLumpFixture::makeGamesDir()
 void ParseEurekaLumpFixture::makeGame(const fs::path &gamesDir, const char *ughName)
 {
 	fs::path ughPath = gamesDir / ughName;
-	FILE *f = fopen(ughPath.u8string().c_str(), "wb");
+	FILE *f = fopen(ughPath.string().c_str(), "wb");
 	ASSERT_TRUE(f);
 	fclose(f);
 	mDeleteList.push(ughPath);
@@ -347,7 +347,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	ASSERT_TRUE(FileMakeDir(portsDir));
 	mDeleteList.push(portsDir);
 	fs::path tropPath = portsDir / "trop.ugh";
-	FILE *f = fopen(tropPath.u8string().c_str(), "wb");
+	FILE *f = fopen(tropPath.string().c_str(), "wb");
 	ASSERT_TRUE(f);
 	fclose(f);
 	mDeleteList.push(tropPath);
@@ -376,7 +376,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	auto makesubfile = [this](const char *path)
 	{
 		fs::path filepath = getSubPath(path);
-		FILE *f = fopen(filepath.u8string().c_str(), "wb");
+		FILE *f = fopen(filepath.string().c_str(), "wb");
 		ASSERT_TRUE(f);
 		fclose(f);
 		mDeleteList.push(filepath);
@@ -485,7 +485,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	ASSERT_TRUE(wad);
 
 	// Create a parent path resource
-	FILE *f = fopen(getSubPath("res.wad").u8string().c_str(), "wb");
+	FILE *f = fopen(getSubPath("res.wad").string().c_str(), "wb");
 	ASSERT_TRUE(f);
 	fclose(f);
 	mDeleteList.push(getSubPath("res.wad"));
