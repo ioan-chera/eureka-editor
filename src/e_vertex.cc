@@ -1099,8 +1099,8 @@ void Instance::CMD_VT_ShapeLine()
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		op.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(loaded.levelFormat, nx));
-		op.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(loaded.levelFormat, ny));
+		op.changeVertex(along_list[i].vert_num, Vertex::F_X, MakeValidCoord(loaded.levelFormat, nx));
+		op.changeVertex(along_list[i].vert_num, Vertex::F_Y, MakeValidCoord(loaded.levelFormat, ny));
 	}
 }
 

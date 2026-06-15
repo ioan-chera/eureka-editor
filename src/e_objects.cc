@@ -798,8 +798,8 @@ void Instance::moveVertexInGroup(EditOperation &op, const int vertexID, const v2
 		}
 	}
 
-	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + MakeValidCoord(loaded.levelFormat, delta.x));
-	op.changeVertex(vertexID, Thing::F_Y, vertex.raw_y + MakeValidCoord(loaded.levelFormat, delta.y));
+	op.changeVertex(vertexID, Vertex::F_X, vertex.raw_x + MakeValidCoord(loaded.levelFormat, delta.x));
+	op.changeVertex(vertexID, Vertex::F_Y, vertex.raw_y + MakeValidCoord(loaded.levelFormat, delta.y));
 }
 
 void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
@@ -1002,8 +1002,8 @@ static void singleDragVertex(Instance &inst, const int vertexID, const v2double_
 	}
 
 	const Vertex &vertex = *inst.level.vertices[vertexID];
-	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + MakeValidCoord(inst.loaded.levelFormat, delta.x));
-	op.changeVertex(vertexID, Thing::F_Y, vertex.raw_y + MakeValidCoord(inst.loaded.levelFormat, delta.y));
+	op.changeVertex(vertexID, Vertex::F_X, vertex.raw_x + MakeValidCoord(inst.loaded.levelFormat, delta.x));
+	op.changeVertex(vertexID, Vertex::F_Y, vertex.raw_y + MakeValidCoord(inst.loaded.levelFormat, delta.y));
 
 	if (did_split_line >= 0)
 		op.setMessage("split linedef #%d", did_split_line);
