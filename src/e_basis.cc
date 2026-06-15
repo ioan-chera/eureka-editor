@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -396,12 +397,6 @@ bool Basis::changeThing(int thing, Thing::IntAddress field, int value)
 		inst.recent_things.insert_number(value);
 
 	return change(ObjType::things, thing, field, value);
-}
-bool Basis::changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value)
-{
-	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
-
-	return change(ObjType::things, thing, field, value.raw());
 }
 bool Basis::changeThing(int thing, double Thing::*field, double value)
 {

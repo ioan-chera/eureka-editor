@@ -29,5 +29,5 @@ void Thing::SetRawY(MapFormat format, double y)
 }
 void Thing::SetRawH(MapFormat format, double h)
 {
-	raw_h = MakeValidCoord(format, h);
+	hf = MakeValidCoordF(format, h);
 }

@@ -466,7 +466,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
 
-	int new_h = atoi(box->pos_z->value());
+	double new_h = atof(box->pos_z->value());
 
 	if (!box->inst.edit.Selected->empty())
 	{
@@ -474,7 +474,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
-			op.changeThing(*it, Thing::F_H, FFixedPoint(new_h));
+			op.changeThing(*it, &Thing::hf, MakeValidCoordF(box->inst.loaded.levelFormat, new_h));
 	}
 }
 
@@ -650,7 +650,8 @@ void UI_ThingBox::UpdateField()
 		mFixUp.setInputValue(pos_x, text);
 		snprintf(text, sizeof(text), "%.16g", T->y());
 		mFixUp.setInputValue(pos_y, text);
-		mFixUp.setInputValue(pos_z, SString(static_cast<int>(T->h())).c_str());
+		snprintf(text, sizeof(text), "%.16g", T->h());
+		mFixUp.setInputValue(pos_z, text);
 	}
 	else
 	{
@@ -853,11 +854,13 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 		{
 			pos_x->type(FL_FLOAT_INPUT);
 			pos_y->type(FL_FLOAT_INPUT);
+			pos_z->type(FL_FLOAT_INPUT);
 		}
 		else
 		{
 			pos_x->type(FL_INT_INPUT);
 			pos_y->type(FL_INT_INPUT);
+			pos_z->type(FL_INT_INPUT);
 		}
 	}
 	else

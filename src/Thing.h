@@ -39,28 +39,21 @@ struct Thing
 	int type = 0;
 	int options = 0;
 
-	// Hexen stuff
-	FFixedPoint raw_h = {};
-
 	int tid = 0;
 	int special = 0;
 	int arg1 = 0, arg2 = 0, arg3 = 0, arg4 = 0, arg5 = 0;
 
 	double xf = 0.0, yf = 0.0;
+	double hf = 0.0;
 
 	enum IntAddress
 	{
-		F_ANGLE = 2,
+		F_ANGLE,
 		F_TYPE,
 		F_OPTIONS,
-		F_TID = 6,
+		F_TID,
 		F_SPECIAL,
 		F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5,
-	};
-
-	enum FixedPointAddress
-	{
-		F_H = 5,
 	};
 
 	inline double x() const
@@ -73,7 +66,7 @@ struct Thing
 	}
 	inline double h() const
 	{
-		return static_cast<double>(raw_h);
+		return hf;
 	}
 	inline v2double_t xy() const
 	{

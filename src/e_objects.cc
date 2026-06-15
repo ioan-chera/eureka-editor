@@ -811,7 +811,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 		{
 			double dx = MakeValidCoordF(inst.loaded.levelFormat, delta.x);
 			double dy = MakeValidCoordF(inst.loaded.levelFormat, delta.y);
-			FFixedPoint fdz = MakeValidCoord(inst.loaded.levelFormat, delta.z);
+			double dz = MakeValidCoordF(inst.loaded.levelFormat, delta.z);
 
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
@@ -819,7 +819,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
 
 				op.changeThing(*it, &Thing::xf, T->xf + dx);
 				op.changeThing(*it, &Thing::yf, T->yf + dy);
-				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz));
+				op.changeThing(*it, &Thing::hf, std::max(0.0, T->hf + dz));
 			}
 			break;
 		}

@@ -366,15 +366,11 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 	// TODO strife options
 
 	if (field.Match("x"))
-	{
 		T->xf = value.DecodeCoordF();
-	}
 	else if (field.Match("y"))
-	{
 		T->yf = value.DecodeCoordF();
-	}
 	else if (field.Match("height"))
-		T->raw_h = value.DecodeCoord();
+		T->hf = value.DecodeCoordF();
 	else if (field.Match("type"))
 		T->type = value.DecodeInt();
 	else if (field.Match("angle"))
@@ -733,8 +729,8 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		lump->Printf("x = %.16g;\n", th->x());
 		lump->Printf("y = %.16g;\n", th->y());
 
-		if (th->raw_h != FFixedPoint{})
-			lump->Printf("height = %1.3f;\n", th->h());
+		if (th->hf)
+			lump->Printf("height = %.16g;\n", th->h());
 
 		lump->Printf("angle = %d;\n", th->angle);
 		lump->Printf("type = %d;\n", th->type);
