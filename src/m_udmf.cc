@@ -730,8 +730,8 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 
 		const auto th = inst.level.things[i];
 
-		lump->Printf("x = %1.3f;\n", th->x());
-		lump->Printf("y = %1.3f;\n", th->y());
+		lump->Printf("x = %.16g;\n", th->x());
+		lump->Printf("y = %.16g;\n", th->y());
 
 		if (th->raw_h != FFixedPoint{})
 			lump->Printf("height = %1.3f;\n", th->h());
