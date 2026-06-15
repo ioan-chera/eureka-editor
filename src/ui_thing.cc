@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2007-2018 Andrew Apted
-//  Copyright (C)      2015 Ioan Chera
+//  Copyright (C) 2015-2026 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -433,7 +433,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
 
-	int new_x = atoi(box->pos_x->value());
+	double new_x = atof(box->pos_x->value());
 
 	if (!box->inst.edit.Selected->empty())
 	{
@@ -450,7 +450,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
 
-	int new_y = atoi(box->pos_y->value());
+	double new_y = atof(box->pos_y->value());
 
 	if (!box->inst.edit.Selected->empty())
 	{
@@ -645,9 +645,11 @@ void UI_ThingBox::UpdateField()
 	{
 		const auto T = inst.level.things[obj];
 
-		// @@ FIXME show decimals in UDMF
-		mFixUp.setInputValue(pos_x, SString(static_cast<int>(T->x())).c_str());
-		mFixUp.setInputValue(pos_y, SString(static_cast<int>(T->y())).c_str());
+		char text[128];
+		snprintf(text, sizeof(text), "%.16g", T->x());
+		mFixUp.setInputValue(pos_x, text);
+		snprintf(text, sizeof(text), "%.16g", T->y());
+		mFixUp.setInputValue(pos_y, text);
 		mFixUp.setInputValue(pos_z, SString(static_cast<int>(T->h())).c_str());
 	}
 	else
@@ -846,6 +848,17 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 
 		for (int a = 0 ; a < 5 ; a++)
 			args[a]->show();
+
+		if(loaded.levelFormat == MapFormat::udmf)
+		{
+			pos_x->type(FL_FLOAT_INPUT);
+			pos_y->type(FL_FLOAT_INPUT);
+		}
+		else
+		{
+			pos_x->type(FL_INT_INPUT);
+			pos_y->type(FL_INT_INPUT);
+		}
 	}
 	else
 	{
@@ -860,6 +873,8 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 		for (int a = 0 ; a < 5 ; a++)
 			args[a]->hide();
 
+		pos_x->type(FL_INT_INPUT);
+		pos_y->type(FL_INT_INPUT);
 	}
 
 	redraw();
