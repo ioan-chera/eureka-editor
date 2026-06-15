@@ -199,9 +199,6 @@ struct Editor_State_t
 	struct { float x1, y1, x2, y2; } adjust_bbox;
 };
 
-void Selection_NotifyChange(ObjType type, int objnum, int field);
-
-
 void DumpSelection (selection_c * list);
 
 void ConvertSelection(const Document &doc, const selection_c & src, selection_c & dest);

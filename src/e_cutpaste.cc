@@ -210,13 +210,6 @@ void Clipboard_NotifyDelete(ObjType type, int objnum)
 	clip_board->DeleteRealSector(objnum);
 }
 
-
-void Clipboard_NotifyChange(ObjType type, int objnum, int field)
-{
-	// field changes never affect the clipboard
-}
-
-
 //----------------------------------------------------------------------
 //  Texture Clipboard
 //----------------------------------------------------------------------

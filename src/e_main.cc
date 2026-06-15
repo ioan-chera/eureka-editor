@@ -599,13 +599,6 @@ void Instance::Selection_NotifyDelete(ObjType type, int objnum)
 	}
 }
 
-
-void Selection_NotifyChange(ObjType type, int objnum, int field)
-{
-	// field changes never affect the current selection
-}
-
-
 void Instance::Selection_NotifyEnd()
 {
 	if (invalidated_selection)

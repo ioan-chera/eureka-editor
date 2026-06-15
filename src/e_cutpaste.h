@@ -46,7 +46,6 @@ void Clipboard_ClearLocals();
 void Clipboard_NotifyBegin();
 void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum);
 void Clipboard_NotifyDelete(ObjType type, int objnum);
-void Clipboard_NotifyChange(ObjType type, int objnum, int field);
 void Clipboard_NotifyEnd();
 
 void UnusedVertices(const Document &doc, const selection_c &lines, selection_c &result);
