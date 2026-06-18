@@ -22,18 +22,18 @@
 TEST(Vertex, ZeroInit)
 {
 	Vertex vertex;
-	ASSERT_FALSE(vertex.raw_x);
-	ASSERT_FALSE(vertex.raw_y);
+	ASSERT_FALSE(vertex.xf);
+	ASSERT_FALSE(vertex.yf);
 }
 
 TEST(Vertex, RawToDouble)
 {
 	Vertex vertex;
 
-	vertex.raw_x = FFixedPoint(123.75);
+	vertex.xf = 123.75;
 	ASSERT_EQ(vertex.x(), 123.75);
 
-	vertex.raw_y = FFixedPoint(-234.875);
+	vertex.yf = -234.875;
 	ASSERT_EQ(vertex.y(), -234.875);
 
 	ASSERT_EQ(vertex.xy(), v2double_t(123.75, -234.875));
@@ -75,18 +75,18 @@ TEST(Vertex, SetRawXY)
 TEST(Vertex, Equality)
 {
 	Vertex vertex;
-	vertex.raw_x = FFixedPoint(1.5);
-	vertex.raw_y = FFixedPoint(-2.75);
+	vertex.xf = 1.5;
+	vertex.yf = -2.75;
 
-	ASSERT_TRUE(vertex.Matches(FFixedPoint(1.5), FFixedPoint(-2.75)));
-	ASSERT_FALSE(vertex.Matches(FFixedPoint(1.5), FFixedPoint(-2.74)));
+	ASSERT_TRUE(vertex.Matches(1.5, -2.75));
+	ASSERT_FALSE(vertex.Matches(1.5, -2.74));
 
 	Vertex vertex2;
-	vertex2.raw_x = FFixedPoint(1.5);
-	vertex2.raw_y = FFixedPoint(-2.75);
+	vertex2.xf = 1.5;
+	vertex2.yf = -2.75;
 	Vertex vertex3;
-	vertex3.raw_x = FFixedPoint(2);
-	vertex3.raw_y = FFixedPoint(-2.75);
+	vertex3.xf = 2;
+	vertex3.yf = -2.75;
 
 	ASSERT_EQ(vertex, vertex2);
 	ASSERT_NE(vertex, vertex3);

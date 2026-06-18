@@ -1348,13 +1348,13 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 	double dx = abs(new_len) * cos(angle);
 	double dy = abs(new_len) * sin(angle);
 
-	int idx = iround(dx);
-	int idy = iround(dy);
+	double idx = round(dx);
+	double idy = round(dy);
 
 	if (idx == 0 && idy == 0)
 	{
-		if (dx < 0) idx = (int)floor(dx); else idx = (int)ceil(dx);
-		if (dy < 0) idy = (int)floor(dy); else idy = (int)ceil(dy);
+		if (dx < 0) idx = floor(dx); else idx = ceil(dx);
+		if (dy < 0) idy = floor(dy); else idy = ceil(dy);
 	}
 
 	if (idx == 0 && idy == 0)
@@ -1362,13 +1362,13 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 
 	if (new_len < 0)
 	{
-		op.changeVertex(L->start, Vertex::F_X, doc.getEnd(*L).raw_x - FFixedPoint(idx));
-		op.changeVertex(L->start, Vertex::F_Y, doc.getEnd(*L).raw_y - FFixedPoint(idy));
+		op.changeVertex(L->start, &Vertex::xf, doc.getEnd(*L).xf - idx);
+		op.changeVertex(L->start, &Vertex::yf, doc.getEnd(*L).yf - idy);
 	}
 	else
 	{
-		op.changeVertex(L->end, Vertex::F_X, doc.getStart(*L).raw_x + FFixedPoint(idx));
-		op.changeVertex(L->end, Vertex::F_Y, doc.getStart(*L).raw_y + FFixedPoint(idy));
+		op.changeVertex(L->end, &Vertex::xf, doc.getStart(*L).xf + idx);
+		op.changeVertex(L->end, &Vertex::yf, doc.getStart(*L).yf + idy);
 	}
 }
 

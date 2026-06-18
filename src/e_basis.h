@@ -77,7 +77,7 @@ enum class LumpType : byte
 	scripts
 };
 
-using Field = std::variant<int, double Thing::*>;
+using Field = std::variant<int, double Thing::*, double Vertex::*>;
 using Value = std::variant<int, double>;
 
 // E_BASIS
@@ -319,7 +319,7 @@ private:
 	bool change(ObjType type, int objnum, Field field, Value value);
 	bool changeThing(int thing, Thing::IntAddress field, int value);
 	bool changeThing(int thing, double Thing::*field, double value);
-	bool changeVertex(int vert, byte field, FFixedPoint value);
+	bool changeVertex(int vert, double Vertex::*field, double value);
 	bool changeSector(int sec, Sector::IntAddress field, int value);
 	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
@@ -387,7 +387,7 @@ public:
 		return basis.changeThing(thing, field, value);
 	}
 
-	bool changeVertex(int vert, byte field, FFixedPoint value)
+	bool changeVertex(int vert, double Vertex::*field, double value)
 	{
 		return basis.changeVertex(vert, field, value);
 	}

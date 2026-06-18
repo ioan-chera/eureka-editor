@@ -46,20 +46,20 @@ void ECutPasteFixture::addArea()
 	Vertex *vertex;
 
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(0);
-	vertex->raw_y = FFixedPoint(0);
+	vertex->xf = 0;
+	vertex->yf = 0;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(0);
-	vertex->raw_y = FFixedPoint(256);
+	vertex->xf = 0;
+	vertex->yf = 256;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(256);
-	vertex->raw_y = FFixedPoint(256);
+	vertex->xf = 256;
+	vertex->yf = 256;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(256);
-	vertex->raw_y = FFixedPoint(0);
+	vertex->xf = 256;
+	vertex->yf = 0;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 
 	Sector *sector;
@@ -131,20 +131,20 @@ void ECutPasteFixture::addSecondArea()
 	Vertex *vertex;
 
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(320);
-	vertex->raw_y = FFixedPoint(192);
+	vertex->xf = 320;
+	vertex->yf = 192;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(320);
-	vertex->raw_y = FFixedPoint(256);
+	vertex->xf = 320;
+	vertex->yf = 256;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(384);
-	vertex->raw_y = FFixedPoint(256);
+	vertex->xf = 384;
+	vertex->yf = 256;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(384);
-	vertex->raw_y = FFixedPoint(192);
+	vertex->xf = 384;
+	vertex->yf = 192;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 
 	Sector *sector;

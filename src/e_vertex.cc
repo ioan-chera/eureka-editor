@@ -47,7 +47,7 @@
 #include <algorithm>
 
 
-int VertexModule::findExact(FFixedPoint fx, FFixedPoint fy) const
+int VertexModule::findExact(double fx, double fy) const
 {
 	for (int i = 0 ; i < doc.numVertices() ; i++)
 	{
@@ -491,8 +491,8 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 			}
 			else
 			{
-				op.changeVertex(v_num, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-				op.changeVertex(v_num, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+				op.changeVertex(v_num, &Vertex::xf, MakeValidCoordF(inst.loaded.levelFormat, new_x));
+				op.changeVertex(v_num, &Vertex::yf, MakeValidCoordF(inst.loaded.levelFormat, new_y));
 			}
 
 			which++;
@@ -893,8 +893,8 @@ void Instance::commandSectorDisconnect()
 		{
 			const auto V = level.vertices[*it];
 
-			op.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(loaded.levelFormat, move_dx));
-			op.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(loaded.levelFormat, move_dy));
+			op.changeVertex(*it, &Vertex::xf, V->xf + MakeValidCoordF(loaded.levelFormat, move_dx));
+			op.changeVertex(*it, &Vertex::yf, V->yf + MakeValidCoordF(loaded.levelFormat, move_dy));
 		}
 	}
 
@@ -1099,8 +1099,8 @@ void Instance::CMD_VT_ShapeLine()
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		op.changeVertex(along_list[i].vert_num, Vertex::F_X, MakeValidCoord(loaded.levelFormat, nx));
-		op.changeVertex(along_list[i].vert_num, Vertex::F_Y, MakeValidCoord(loaded.levelFormat, ny));
+		op.changeVertex(along_list[i].vert_num, &Vertex::xf, MakeValidCoordF(loaded.levelFormat, nx));
+		op.changeVertex(along_list[i].vert_num, &Vertex::yf, MakeValidCoordF(loaded.levelFormat, ny));
 	}
 }
 
@@ -1167,8 +1167,8 @@ double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_
 
 		if (move_vertices)
 		{
-			op->changeVertex(along_list[k].vert_num, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-			op->changeVertex(along_list[k].vert_num, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+			op->changeVertex(along_list[k].vert_num, &Vertex::xf, MakeValidCoordF(inst.loaded.levelFormat, new_x));
+			op->changeVertex(along_list[k].vert_num, &Vertex::yf, MakeValidCoordF(inst.loaded.levelFormat, new_y));
 		}
 		else
 		{

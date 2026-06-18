@@ -52,7 +52,7 @@ void EObjectsFixture::moveMouse(const v2double_t &pos)
 // Helpful vertex comparator so we sort our data
 static bool vertexCompare(const Vertex *v1, const Vertex *v2)
 {
-	return v1->raw_x == v2->raw_x ? v1->raw_y < v2->raw_y : v1->raw_x < v2->raw_x;
+	return v1->xf == v2->xf ? v1->yf < v2->yf : v1->xf < v2->xf;
 };
 
 /* To test:
@@ -73,15 +73,15 @@ static bool vertexCompare(const Vertex *v1, const Vertex *v2)
 TEST_F(EObjectsFixture, DragWallLineToCancelSurroundingLines)
 {
 	// Each line shall be 64 units long
-	static const FFixedPoint vertexCoordinates[8][2] = {
-		{ FFixedPoint(-64), FFixedPoint(0) },
-		{ FFixedPoint(0), FFixedPoint(0) },
-		{ FFixedPoint(0), FFixedPoint(64) },
-		{ FFixedPoint(64), FFixedPoint(64) },
-		{ FFixedPoint(64), FFixedPoint(0) },
-		{ FFixedPoint(128), FFixedPoint(0) },
-		{ FFixedPoint(128), FFixedPoint(-64) },
-		{ FFixedPoint(-64), FFixedPoint(-64) },
+	static const double vertexCoordinates[8][2] = {
+		{ -64, 0 },
+		{ 0,   0 },
+		{ 0,   64 },
+		{ 64,  64 },
+		{ 64,  0 },
+		{ 128, 0 },
+		{ 128, -64 },
+		{ -64, -64 },
 	};
 
 	Document &doc = inst.level;
@@ -89,8 +89,8 @@ TEST_F(EObjectsFixture, DragWallLineToCancelSurroundingLines)
 	for(size_t i = 0; i < 8; ++i)
 	{
 		auto vertex = std::make_unique<Vertex>();
-		vertex->raw_x = vertexCoordinates[i][0];
-		vertex->raw_y = vertexCoordinates[i][1];
+		vertex->xf = vertexCoordinates[i][0];
+		vertex->yf = vertexCoordinates[i][1];
 		doc.vertices.push_back(std::move(vertex));
 	}
 
@@ -169,17 +169,17 @@ TEST_F(EObjectsFixture, DragWallLineToCancelSurroundingLines)
 //
 TEST_F(EObjectsFixture, DragLineToEliminateSector)
 {
-	static const FFixedPoint vertexCoordinates[10][2] = {
-		{ FFixedPoint(-64), FFixedPoint(0) },
-		{ FFixedPoint(-64), FFixedPoint(64) },
-		{ FFixedPoint(0), FFixedPoint(64) },
-		{ FFixedPoint(0), FFixedPoint(0) },
-		{ FFixedPoint(64), FFixedPoint(0) },
-		{ FFixedPoint(64), FFixedPoint(64) },
-		{ FFixedPoint(128), FFixedPoint(64) },
-		{ FFixedPoint(128), FFixedPoint(0) },
-		{ FFixedPoint(128), FFixedPoint(-64) },
-		{ FFixedPoint(-64), FFixedPoint(-64) },
+	static const double vertexCoordinates[10][2] = {
+		{ (-64), (0) },
+		{ (-64), (64) },
+		{ (0),   (64) },
+		{ (0),   (0) },
+		{ (64),  (0) },
+		{ (64),  (64) },
+		{ (128), (64) },
+		{ (128), (0) },
+		{ (128), (-64) },
+		{ (-64), (-64) },
 	};
 
 	Document &doc = inst.level;
@@ -187,8 +187,8 @@ TEST_F(EObjectsFixture, DragLineToEliminateSector)
 	for(size_t i = 0; i < 10; ++i)
 	{
 		auto vertex = std::make_unique<Vertex>();
-		vertex->raw_x = vertexCoordinates[i][0];
-		vertex->raw_y = vertexCoordinates[i][1];
+		vertex->xf = vertexCoordinates[i][0];
+		vertex->yf = vertexCoordinates[i][1];
 		doc.vertices.push_back(std::move(vertex));
 	}
 
@@ -538,12 +538,12 @@ TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 	 0   3
 	 4
 	*/
-	static const FFixedPoint vertexCoordinates[5][2] = {
-		{ FFixedPoint(0), FFixedPoint(0) },
-		{ FFixedPoint(32), FFixedPoint(64) },
-		{ FFixedPoint(96), FFixedPoint(64) },
-		{ FFixedPoint(128), FFixedPoint(0) },
-		{ FFixedPoint(0), FFixedPoint(-64) },
+	static const double vertexCoordinates[5][2] = {
+		{ (0),   (0) },
+		{ (32),  (64) },
+		{ (96),  (64) },
+		{ (128), (0) },
+		{ (0),   (-64) },
 	};
 
 	Document &doc = inst.level;
@@ -552,8 +552,8 @@ TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 	for(size_t i = 0; i < 5; ++i)
 	{
 		auto vertex = std::make_shared<Vertex>();
-		vertex->raw_x = vertexCoordinates[i][0];
-		vertex->raw_y = vertexCoordinates[i][1];
+		vertex->xf = vertexCoordinates[i][0];
+		vertex->yf = vertexCoordinates[i][1];
 		doc.vertices.push_back(std::move(vertex));
 	}
 
@@ -693,21 +693,21 @@ TEST_F(EObjectsFixture, DragLineToSplitLineAndEliminateSector)
 
 TEST_F(EObjectsFixture, AvoidAccidentalDegeneration)
 {
-   static const FFixedPoint vertexCoordinates[12][2] = {
-	   { FFixedPoint(-256), FFixedPoint(256) },
-	   { FFixedPoint(-256), FFixedPoint(768) },
-	   { FFixedPoint(256), FFixedPoint(768) },
-	   { FFixedPoint(-64), FFixedPoint(256) },
+   static const double vertexCoordinates[12][2] = {
+	   { (-256), (256) },
+	   { (-256), (768) },
+	   { (256),  (768) },
+	   { (-64),  (256) },
 
-	   { FFixedPoint(-64), FFixedPoint(448) },
-	   { FFixedPoint(256), FFixedPoint(512) },
-	   { FFixedPoint(0), FFixedPoint(256) },
-	   { FFixedPoint(0), FFixedPoint(448) },
+	   { (-64),  (448) },
+	   { (256),  (512) },
+	   { (0),    (256) },
+	   { (0),    (448) },
 
-	   { FFixedPoint(256), FFixedPoint(448) },
-	   { FFixedPoint(64), FFixedPoint(256) },
-	   { FFixedPoint(64), FFixedPoint(384) },
-	   { FFixedPoint(256), FFixedPoint(384) },
+	   { (256),  (448) },
+	   { (64),   (256) },
+	   { (64),   (384) },
+	   { (256),  (384) },
    };
 
 	Document &doc = inst.level;
@@ -717,8 +717,8 @@ TEST_F(EObjectsFixture, AvoidAccidentalDegeneration)
 	for(size_t i = 0; i < 12; ++i)
 	{
 		auto vertex = std::make_shared<Vertex>();
-		vertex->raw_x = vertexCoordinates[i][0];
-		vertex->raw_y = vertexCoordinates[i][1];
+		vertex->xf = vertexCoordinates[i][0];
+		vertex->yf = vertexCoordinates[i][1];
 		doc.vertices.push_back(std::move(vertex));
 	}
 

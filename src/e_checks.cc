@@ -318,7 +318,7 @@ struct vertex_X_CMP_pred
 		const auto V1 = doc.vertices[A];
 		const auto V2 = doc.vertices[B];
 
-		return V1->raw_x < V2->raw_x;
+		return V1->xf < V2->xf;
 	}
 };
 
@@ -348,9 +348,9 @@ void Vertex_FindOverlaps(selection_c& sel, const Document &doc)
 
 	for (int k = 0 ; k < doc.numVertices(); k++)
 	{
-		for (int n = k + 1 ; n < doc.numVertices() && VERT_N->raw_x == VERT_K->raw_x ; n++)
+		for (int n = k + 1 ; n < doc.numVertices() && VERT_N->xf == VERT_K->xf ; n++)
 		{
-			if (VERT_N->raw_y == VERT_K->raw_y)
+			if (VERT_N->yf == VERT_K->yf)
 			{
 				sel.set(sorted_list[k]);
 			}
@@ -2419,8 +2419,8 @@ struct linedef_minx_CMP_pred
 		const auto AL = doc.linedefs[A];
 		const auto BL = doc.linedefs[B];
 
-		FFixedPoint A_x = std::min(doc.getStart(*AL).raw_x, doc.getEnd(*AL).raw_x);
-		FFixedPoint B_x = std::min(doc.getStart(*BL).raw_x, doc.getEnd(*BL).raw_x);
+		double A_x = std::min(doc.getStart(*AL).xf, doc.getEnd(*AL).xf);
+		double B_x = std::min(doc.getStart(*BL).xf, doc.getEnd(*BL).xf);
 
 		return A_x < B_x;
 	}
@@ -2521,14 +2521,14 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 	// the algorithm in LineDefs_FindCrossings() ensures that A and B
 	// already overlap on the X axis.  hence only check Y axis here.
 
-	if (std::min(doc.getStart(*AL).raw_y, doc.getEnd(*AL).raw_y) >
-		std::max(doc.getStart(*BL).raw_y, doc.getEnd(*BL).raw_y))
+	if (std::min(doc.getStart(*AL).yf, doc.getEnd(*AL).yf) >
+		std::max(doc.getStart(*BL).yf, doc.getEnd(*BL).yf))
 	{
 		return 0;
 	}
 
-	if (std::min(doc.getStart(*BL).raw_y, doc.getEnd(*BL).raw_y) >
-		std::max(doc.getStart(*AL).raw_y, doc.getEnd(*AL).raw_y))
+	if (std::min(doc.getStart(*BL).yf, doc.getEnd(*BL).yf) >
+		std::max(doc.getStart(*AL).yf, doc.getEnd(*AL).yf))
 	{
 		return 0;
 	}
@@ -2635,7 +2635,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 
 		const auto L1 = doc.linedefs[n2];
 
-		FFixedPoint max_x = std::max(doc.getStart(*L1).raw_x, doc.getEnd(*L1).raw_x);
+		double max_x = std::max(doc.getStart(*L1).xf, doc.getEnd(*L1).xf);
 
 		for (int k = n + 1 ; k < doc.numLinedefs(); k++)
 		{
@@ -2643,7 +2643,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 
 			const auto L2 = doc.linedefs[k2];
 
-			FFixedPoint min_x = std::min(doc.getStart(*L2).raw_x, doc.getEnd(*L2).raw_x);
+			double min_x = std::min(doc.getStart(*L2).xf, doc.getEnd(*L2).xf);
 
 			// stop when all remaining linedefs are to the right of L1
 			if (min_x > max_x)

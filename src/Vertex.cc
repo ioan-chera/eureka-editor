@@ -21,9 +21,9 @@
 // these handle rounding to integer in non-UDMF mode
 void Vertex::SetRawX(MapFormat format, double x)
 {
-    raw_x = MakeValidCoord(format, x);
+    xf = MakeValidCoordF(format, x);
 }
 void Vertex::SetRawY(MapFormat format, double y)
 {
-    raw_y = MakeValidCoord(format, y);
+    yf = MakeValidCoordF(format, y);
 }

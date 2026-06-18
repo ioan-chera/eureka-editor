@@ -451,7 +451,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		// if no highlight, look for a vertex at snapped coord
 		if (new_vert < 0 && inst.grid.snaps() && ! (inst.edit.action == EditorAction::drawLine))
-			new_vert = doc.vertmod.findExact(FFixedPoint(newpos.x), FFixedPoint(newpos.y));
+			new_vert = doc.vertmod.findExact(newpos.x, newpos.y);
 
 		//
 		// handle a highlighted/snapped vertex.
@@ -502,7 +502,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 	// would we create a new vertex on top of an existing one?
 	if (new_vert < 0 && old_vert >= 0 &&
-		doc.vertices[old_vert]->Matches(MakeValidCoord(inst.loaded.levelFormat, newpos.x), MakeValidCoord(inst.loaded.levelFormat, newpos.y)))
+		doc.vertices[old_vert]->Matches(MakeValidCoordF(inst.loaded.levelFormat, newpos.x), MakeValidCoordF(inst.loaded.levelFormat, newpos.y)))
 	{
 		inst.edit.Selected->set(old_vert);
 		return;
@@ -758,8 +758,8 @@ void Instance::moveVertexInGroup(EditOperation &op, const int vertexID, const v2
 
 	// When moving multiple vertices, we don't get the hovering highlight to decide whether to snap a nearby vertex or
 	// not, so only merge if really overlapping
-	int vertexIDToMerge = level.vertmod.findExact(MakeValidCoord(loaded.levelFormat, dest.x),
-												  MakeValidCoord(loaded.levelFormat, dest.y));
+	int vertexIDToMerge = level.vertmod.findExact(MakeValidCoordF(loaded.levelFormat, dest.x),
+												  MakeValidCoordF(loaded.levelFormat, dest.y));
 	if(vertexIDToMerge >= 0 && vertexIDToMerge != vertexID && !movingGroup.get(vertexIDToMerge))
 	{
 		// Vertex merging
@@ -798,8 +798,8 @@ void Instance::moveVertexInGroup(EditOperation &op, const int vertexID, const v2
 		}
 	}
 
-	op.changeVertex(vertexID, Vertex::F_X, vertex.raw_x + MakeValidCoord(loaded.levelFormat, delta.x));
-	op.changeVertex(vertexID, Vertex::F_Y, vertex.raw_y + MakeValidCoord(loaded.levelFormat, delta.y));
+	op.changeVertex(vertexID, &Vertex::xf, vertex.xf + MakeValidCoordF(loaded.levelFormat, delta.x));
+	op.changeVertex(vertexID, &Vertex::yf, vertex.yf + MakeValidCoordF(loaded.levelFormat, delta.y));
 }
 
 void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
@@ -944,8 +944,8 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 	*newV = *doc.vertices[vertID];
 
 	// Move it to the actual destination
-	newV->raw_x += MakeValidCoord(inst.loaded.levelFormat, delta.x);
-	newV->raw_y += MakeValidCoord(inst.loaded.levelFormat, delta.y);
+	newV->xf += MakeValidCoordF(inst.loaded.levelFormat, delta.x);
+	newV->yf += MakeValidCoordF(inst.loaded.levelFormat, delta.y);
 
 	doc.linemod.splitLinedefAtVertex(op, splitLineID, newVID);
 
@@ -1002,8 +1002,8 @@ static void singleDragVertex(Instance &inst, const int vertexID, const v2double_
 	}
 
 	const Vertex &vertex = *inst.level.vertices[vertexID];
-	op.changeVertex(vertexID, Vertex::F_X, vertex.raw_x + MakeValidCoord(inst.loaded.levelFormat, delta.x));
-	op.changeVertex(vertexID, Vertex::F_Y, vertex.raw_y + MakeValidCoord(inst.loaded.levelFormat, delta.y));
+	op.changeVertex(vertexID, &Vertex::xf, vertex.xf + MakeValidCoordF(inst.loaded.levelFormat, delta.x));
+	op.changeVertex(vertexID, &Vertex::yf, vertex.yf + MakeValidCoordF(inst.loaded.levelFormat, delta.y));
 
 	if (did_split_line >= 0)
 		op.setMessage("split linedef #%d", did_split_line);
@@ -1666,8 +1666,8 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const
 {
-	FFixedPoint fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
-	FFixedPoint fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
+	double fix_mx = MakeValidCoordF(inst.loaded.levelFormat, mid_x);
+	double fix_my = MakeValidCoordF(inst.loaded.levelFormat, mid_y);
 
 	selection_c verts(ObjType::vertices);
 	ConvertSelection(doc, list, verts);
@@ -1677,9 +1677,9 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 		const auto V = doc.vertices[*it];
 
 		if (is_vert)
-			op.changeVertex(*it, Vertex::F_Y, fix_my * 2 - V->raw_y);
+			op.changeVertex(*it, &Vertex::yf, fix_my * 2 - V->yf);
 		else
-			op.changeVertex(*it, Vertex::F_X, fix_mx * 2 - V->raw_x);
+			op.changeVertex(*it, &Vertex::xf, fix_mx * 2 - V->xf);
 	}
 
 	// flip linedefs too !!
@@ -1824,25 +1824,25 @@ void Instance::CMD_Rotate90()
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(level, *edit.Selected, verts);
 
-			FFixedPoint fix_mx = MakeValidCoord(loaded.levelFormat, mid.x);
-			FFixedPoint fix_my = MakeValidCoord(loaded.levelFormat, mid.y);
+			double fix_mx = MakeValidCoordF(loaded.levelFormat, mid.x);
+			double fix_my = MakeValidCoordF(loaded.levelFormat, mid.y);
 
 			for (sel_iter_c it(verts) ; !it.done() ; it.next())
 			{
 				const auto V = level.vertices[*it];
 
-				FFixedPoint old_x = V->raw_x;
-				FFixedPoint old_y = V->raw_y;
+				double old_x = V->xf;
+				double old_y = V->yf;
 
 				if (anti_clockwise)
 				{
-					op.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-					op.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+					op.changeVertex(*it, &Vertex::xf, fix_mx - old_y + fix_my);
+					op.changeVertex(*it, &Vertex::yf, fix_my + old_x - fix_mx);
 				}
 				else
 				{
-					op.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-					op.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+					op.changeVertex(*it, &Vertex::xf, fix_mx + old_y - fix_my);
+					op.changeVertex(*it, &Vertex::yf, fix_my - old_x + fix_mx);
 				}
 			}
 		}
@@ -1893,8 +1893,8 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &lis
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-		op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+		op.changeVertex(*it, &Vertex::xf, MakeValidCoordF(inst.loaded.levelFormat, new_x));
+		op.changeVertex(*it, &Vertex::yf, MakeValidCoordF(inst.loaded.levelFormat, new_y));
 	}
 }
 
@@ -2294,8 +2294,8 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-				op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+				op.changeVertex(*it, &Vertex::xf, MakeValidCoordF(inst.loaded.levelFormat, new_x));
+				op.changeVertex(*it, &Vertex::yf, MakeValidCoordF(inst.loaded.levelFormat, new_y));
 
 				moved.set(*it);
 				break;

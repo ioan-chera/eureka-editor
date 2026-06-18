@@ -408,12 +408,11 @@ bool Basis::changeThing(int thing, double Thing::*field, double value)
 //
 // Change vertex
 //
-bool Basis::changeVertex(int vert, byte field, FFixedPoint value)
+bool Basis::changeVertex(int vert, double Vertex::*field, double value)
 {
 	SYS_ASSERT(vert >= 0 && vert < doc.numVertices());
-	SYS_ASSERT(field <= Vertex::F_Y);
 
-	return change(ObjType::vertices, vert, field, value.raw());
+	return change(ObjType::vertices, vert, field, value);
 }
 
 //
@@ -653,6 +652,17 @@ void Basis::EditUnit::rawChange(Basis &basis)
 			default:
 				BugError("Basis::EditOperation::rawChange(thingDouble): bad objtype %u\n", (unsigned)objtype);
 				break;
+			}
+		},
+		[&basis, this](double Vertex::*field) {
+			switch(objtype)
+			{
+				case ObjType::vertices:
+					std::swap(basis.doc.vertices[objnum].get()->*field, std::get<double>(value));
+					break;
+				default:
+					BugError("Basis::EditOperation::rawChange(vertexDouble): bad objtype %u\n", (unsigned)objtype);
+					break;
 			}
 		}
 	}, field);

@@ -417,9 +417,9 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 static void UDMF_ParseVertexField(const Document &doc, Vertex *V, const Udmf_Token& field, const Udmf_Token& value)
 {
 	if (field.Match("x"))
-		V->raw_x = value.DecodeCoord();
+		V->xf = value.DecodeCoordF();
 	else if (field.Match("y"))
-		V->raw_y = value.DecodeCoord();
+		V->yf = value.DecodeCoordF();
 	else
 	{
 		gLog.debugPrintf("vertex #%d: unknown field '%s'\n", doc.numVertices()-1, field.c_str());

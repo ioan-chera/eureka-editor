@@ -25,12 +25,12 @@ TEST(ELinedef, MoveCoordOntoLinedef)
 	Instance inst;
 	Vertex* vertex;
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(0);
-	vertex->raw_y = FFixedPoint(0);
+	vertex->xf = 0;
+	vertex->yf = 0;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 	vertex = new Vertex;
-	vertex->raw_x = FFixedPoint(64);
-	vertex->raw_y = FFixedPoint(64);
+	vertex->xf = 64;
+	vertex->yf = 64;
 	inst.level.vertices.push_back(std::shared_ptr<Vertex>(vertex));
 
 

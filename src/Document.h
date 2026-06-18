@@ -176,7 +176,7 @@ public:
 		return side == Side::right ? getRight(line) : side == Side::left ? getLeft(line) : nullptr;
 	}
 	double calcLength(const LineDef &line) const;
-	bool touchesCoord(const LineDef &line, FFixedPoint tx, FFixedPoint ty) const;
+	bool touchesCoord(const LineDef &line, double tx, double ty) const;
 	bool touchesSector(const LineDef &line, int secNum) const;
 	bool isZeroLength(const LineDef &line) const;
 	bool isSelfRef(const LineDef &line) const;

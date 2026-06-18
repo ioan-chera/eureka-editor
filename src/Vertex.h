@@ -27,18 +27,15 @@ class Instance;
 
 struct Vertex
 {
-	FFixedPoint raw_x = {};
-	FFixedPoint raw_y = {};
-
-	enum { F_X, F_Y };
+	double xf = 0.0, yf = 0.0;
 
 	inline double x() const noexcept
 	{
-		return static_cast<double>(raw_x);
+		return xf;
 	}
 	inline double y() const noexcept
 	{
-		return static_cast<double>(raw_y);
+		return yf;
 	}
 	inline v2double_t xy() const noexcept
 	{
@@ -55,18 +52,18 @@ struct Vertex
 		SetRawY(format, pos.y);
 	}
 
-	bool Matches(FFixedPoint ox, FFixedPoint oy) const
+	bool Matches(double ox, double oy) const
 	{
-		return (raw_x == ox) && (raw_y == oy);
+		return (xf == ox) && (yf == oy);
 	}
 
 	bool operator == (const Vertex &other) const
 	{
-		return raw_x == other.raw_x && raw_y == other.raw_y;
+		return xf == other.xf && yf == other.yf;
 	}
 	bool operator != (const Vertex &other) const
 	{
-		return raw_x != other.raw_x || raw_y != other.raw_y;
+		return xf != other.xf || yf != other.yf;
 	}
 };
 

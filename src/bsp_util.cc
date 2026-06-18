@@ -443,21 +443,21 @@ void LevelData::DetectPolyobjSectors()
 
 /* ----- analysis routines ----------------------------- */
 
-static FFixedPoint VertexCompare(const Document &doc, const void *p1, const void *p2)
+static double VertexCompare(const Document &doc, const void *p1, const void *p2)
 {
 	int vert1 = static_cast<const uint16_t *>(p1)[0];
 	int vert2 = static_cast<const uint16_t *>(p2)[0];
 
 	if (vert1 == vert2)
-		return FFixedPoint{};
+		return 0;
 
 	const auto A = doc.vertices[vert1];
 	const auto B = doc.vertices[vert2];
 
-	if (A->raw_x != B->raw_x)
-		return A->raw_x - B->raw_x;
+	if (A->xf != B->xf)
+		return A->xf - B->xf;
 
-	return A->raw_y - B->raw_y;
+	return A->yf - B->yf;
 }
 
 
@@ -474,13 +474,13 @@ void LevelData::DetectOverlappingVertices() const
 
 	std::sort(array, array + (int)vertices.size(), [this](uint16_t left, uint16_t right)
 		{
-			return VertexCompare(doc, &left, &right).raw() < 0;
+			return VertexCompare(doc, &left, &right) < 0;
 		});
 
 	// now mark them off
 	for (i=0 ; i < (int)vertices.size() - 1 ; i++)
 	{
-		if (VertexCompare(doc, array + i, array + i + 1).raw() == 0)
+		if (VertexCompare(doc, array + i, array + i + 1) == 0)
 		{
 			// found an overlap!
 
@@ -500,18 +500,18 @@ static inline int LineVertexLowest(const Document &doc, const LineDef *L)
 	// returns the "lowest" vertex (normally the left-most, but if the
 	// line is vertical, then the bottom-most) => 0 for start, 1 for end.
 
-	return ( doc.getStart(*L).raw_x <  doc.getEnd(*L).raw_x ||
-			(doc.getStart(*L).raw_x == doc.getEnd(*L).raw_x &&
-			 doc.getStart(*L).raw_y <  doc.getEnd(*L).raw_y)) ? 0 : 1;
+	return ( doc.getStart(*L).xf <  doc.getEnd(*L).xf ||
+			(doc.getStart(*L).xf == doc.getEnd(*L).xf &&
+			 doc.getStart(*L).yf <  doc.getEnd(*L).yf)) ? 0 : 1;
 }
 
-static FFixedPoint LineStartCompare(const Document &doc, const void *p1, const void *p2)
+static double LineStartCompare(const Document &doc, const void *p1, const void *p2)
 {
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
 
 	if (line1 == line2)
-		return FFixedPoint();
+		return 0;
 
 	const auto A = doc.linedefs[line1];
 	const auto B = doc.linedefs[line2];
@@ -520,19 +520,19 @@ static FFixedPoint LineStartCompare(const Document &doc, const void *p1, const v
 	const Vertex *C = LineVertexLowest(doc, A.get()) ? &doc.getEnd(*A) : &doc.getStart(*A);
 	const Vertex *D = LineVertexLowest(doc, B.get()) ? &doc.getEnd(*B) : &doc.getStart(*B);
 
-	if (C->raw_x != D->raw_x)
-		return C->raw_x - D->raw_x;
+	if (C->xf != D->xf)
+		return C->xf - D->xf;
 
-	return C->raw_y - D->raw_y;
+	return C->yf - D->yf;
 }
 
-static FFixedPoint LineEndCompare(const Document &doc, const void *p1, const void *p2)
+static double LineEndCompare(const Document &doc, const void *p1, const void *p2)
 {
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
 
 	if (line1 == line2)
-		return FFixedPoint{};
+		return 0;
 
 	const auto A = doc.linedefs[line1];
 	const auto B = doc.linedefs[line2];
@@ -541,10 +541,10 @@ static FFixedPoint LineEndCompare(const Document &doc, const void *p1, const voi
 	const Vertex * C = LineVertexLowest(doc, A.get()) ? &doc.getStart(*A) : &doc.getEnd(*A);
 	const Vertex * D = LineVertexLowest(doc, B.get()) ? &doc.getStart(*B) : &doc.getEnd(*B);
 
-	if (C->raw_x != D->raw_x)
-		return C->raw_x - D->raw_x;
+	if (C->xf != D->xf)
+		return C->xf - D->xf;
 
-	return C->raw_y - D->raw_y;
+	return C->yf - D->yf;
 }
 
 
@@ -565,7 +565,7 @@ void DetectOverlappingLines(const Document &doc)
 
 	std::sort(array, array + doc.numLinedefs(), [&doc](int left, int right)
 		{
-			return LineStartCompare(doc, &left, &right).raw() < 0;
+			return LineStartCompare(doc, &left, &right) < 0;
 		});
 
 	for (i=0 ; i < doc.numLinedefs() - 1 ; i++)
@@ -574,10 +574,10 @@ void DetectOverlappingLines(const Document &doc)
 
 		for (j = i+1 ; j < doc.numLinedefs(); j++)
 		{
-			if (LineStartCompare(doc, array + i, array + j).raw() != 0)
+			if (LineStartCompare(doc, array + i, array + j) != 0)
 				break;
 
-			if (LineEndCompare(doc, array + i, array + j).raw() == 0)
+			if (LineEndCompare(doc, array + i, array + j) == 0)
 			{
 				// found an overlap !
 

@@ -203,7 +203,7 @@ void Instance::UpdateDrawLine()
 	// when drawing mode, highlight a vertex at the snap position
 	if (grid.snaps() && edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
-		int near_vert = level.vertmod.findExact(FFixedPoint(newpos.x), FFixedPoint(newpos.y));
+		int near_vert = level.vertmod.findExact(newpos.x, newpos.y);
 		if (near_vert >= 0)
 		{
 			edit.highlight = Objid(ObjType::vertices, near_vert);
@@ -283,8 +283,8 @@ void Instance::UpdateHighlight()
 
 			grid.RatioSnapXY(vpos, S->xy());
 
-			if (MakeValidCoord(loaded.levelFormat, vpos.x) != V->raw_x ||
-				MakeValidCoord(loaded.levelFormat, vpos.y) != V->raw_y)
+			if (MakeValidCoordF(loaded.levelFormat, vpos.x) != V->xf ||
+				MakeValidCoordF(loaded.levelFormat, vpos.y) != V->yf)
 			{
 				edit.highlight.clear();
 			}

@@ -458,8 +458,8 @@ void Document::LoadVertices(int loading_level, const Wad_file *load_wad)
 
 		auto vert = std::make_unique<Vertex>();
 
-		vert->raw_x = FFixedPoint(LE_S16(raw.x));
-		vert->raw_y = FFixedPoint(LE_S16(raw.y));
+		vert->xf = LE_S16(raw.x);
+		vert->yf = LE_S16(raw.y);
 
 		vertices.push_back(std::move(vert));
 	}
@@ -541,11 +541,11 @@ void Document::CreateFallbackVertices()
 	auto v1 = std::make_unique<Vertex>();
 	auto v2 = std::make_unique<Vertex>();
 
-	v1->raw_x = FFixedPoint(-777);
-	v1->raw_y = FFixedPoint(-777);
+	v1->xf = -777;
+	v1->yf = -777;
 
-	v2->raw_x = FFixedPoint(555);
-	v2->raw_y = FFixedPoint(555);
+	v2->xf = 555;
+	v2->yf = 555;
 
 	vertices.push_back(std::move(v1));
 	vertices.push_back(std::move(v2));
@@ -1450,8 +1450,8 @@ void Document::SaveVertices(Wad_file &wad) const
 	{
 		raw_vertex_t raw{};
 
-		raw.x = LE_S16(static_cast<int>(vert->raw_x));
-		raw.y = LE_S16(static_cast<int>(vert->raw_y));
+		raw.x = LE_S16(static_cast<int>(round(vert->xf)));
+		raw.y = LE_S16(static_cast<int>(round(vert->yf)));
 
 		lump.Write(&raw, sizeof(raw));
 	}

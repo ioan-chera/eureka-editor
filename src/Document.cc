@@ -61,8 +61,8 @@ static void ChecksumThing(crc32_c &crc, const Thing *T)
 
 static void ChecksumVertex(crc32_c &crc, const Vertex *V)
 {
-	crc += V->raw_x.raw();
-	crc += V->raw_y.raw();
+	crc += FFixedPoint(V->xf).raw();
+	crc += FFixedPoint(V->yf).raw();
 }
 
 static void ChecksumSector(crc32_c &crc, const Sector *sector)
@@ -179,7 +179,7 @@ double Document::calcLength(const LineDef &line) const
 	return hypot(dx, dy);
 }
 
-bool Document::touchesCoord(const LineDef &line, FFixedPoint tx, FFixedPoint ty) const
+bool Document::touchesCoord(const LineDef &line, double tx, double ty) const
 {
 	return getStart(line).Matches(tx, ty) || getEnd(line).Matches(tx, ty);
 }
@@ -195,7 +195,7 @@ bool Document::touchesSector(const LineDef &line, int secNum) const
 
 bool Document::isZeroLength(const LineDef &line) const
 {
-	return (getStart(line).raw_x == getEnd(line).raw_x) && (getStart(line).raw_y == getEnd(line).raw_y);
+	return (getStart(line).xf == getEnd(line).xf) && (getStart(line).yf == getEnd(line).yf);
 }
 
 bool Document::isSelfRef(const LineDef &line) const
@@ -206,12 +206,12 @@ bool Document::isSelfRef(const LineDef &line) const
 
 bool Document::isHorizontal(const LineDef &line) const
 {
-	return (getStart(line).raw_y == getEnd(line).raw_y);
+	return (getStart(line).yf == getEnd(line).yf);
 }
 
 bool Document::isVertical(const LineDef &line) const
 {
-	return (getStart(line).raw_x == getEnd(line).raw_x);
+	return (getStart(line).xf == getEnd(line).xf);
 }
 
 void Document::clear()
