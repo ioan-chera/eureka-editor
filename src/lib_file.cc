@@ -372,7 +372,7 @@ fs::path GetExecutablePath(const char *argv0)
 		{
 			SString retpath = WideToUTF8(wpath);
 			FilenameStripBase(retpath);
-			return fs::u8path(retpath.get());
+			return fs::path(reinterpret_cast<const char8_t *>(retpath.c_str()));
 		}
 	}
 
@@ -388,7 +388,7 @@ fs::path GetExecutablePath(const char *argv0)
 		if (access(rawpath, 0) == 0)  // sanity check
 		{
 			FilenameStripBase(rawpath);
-			return fs::u8path(rawpath);
+			return fs::path(rawpath);
 		}
 	}
 

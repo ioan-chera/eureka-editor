@@ -370,7 +370,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	eureka.Printf("resource bogus/subpath.wad\n");
 	eureka.Printf("resource iwadpath.wad\n");
 	eureka.Printf("resource nopath.wad\n");
-	eureka.Printf("resource %s\n", getSubPath(fs::path("abs") / "abspath.wad").u8string().c_str());
+	eureka.Printf("resource %s\n", (const char *)getSubPath(fs::path("abs") / "abspath.wad").u8string().c_str());
 	eureka.Printf("resource \n");	// add something else to check how we go
 
 	auto makesubfile = [this](const char *path)
@@ -818,7 +818,7 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 				readPortPaths[name] = path;
 			}
 			else
-				readPortPaths[name] = fs::u8path(path.u8string().substr(1));
+				readPortPaths[name] = fs::path(path.u8string().substr(1));
 			continue;
 		}
 	}

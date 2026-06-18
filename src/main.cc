@@ -300,11 +300,11 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 			char path[FL_PATH_MAX + 4];
 			const char *envpath = getenv(envname);
 			if(envpath && *envpath)
-				return fs::u8path(envpath) / "eureka";
+				return fs::path(envpath) / "eureka";
 
 			// Fall back
 			if(fl_filename_expand(path, fallback))
-				return fs::u8path(path);
+				return fs::path(path);
 
 			return fs::path();	// empty, as before
 		};

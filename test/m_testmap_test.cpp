@@ -81,7 +81,7 @@ void TestMapFixture::writeShellScript(const fs::path &path)
 	stream << "done" << std::endl;
 	stream << "echo done > " << SString(finishMarkPath.u8string()).spaceEscape(true) << std::endl;
 	stream.close();
-	int r = chmod(path.u8string().c_str(), S_IRWXU);
+	int r = chmod(path.string().c_str(), S_IRWXU);
 	ASSERT_FALSE(r);
 }
 #endif

@@ -22,7 +22,7 @@ jobs:
         arch: [x86_64, arm64]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.0
       - name: Generate project
         run: cmake -B build -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
       - name: Build
@@ -54,7 +54,7 @@ jobs:
         run: |
           hdiutil create -volname "Eureka Doom Editor" -srcfolder dmg_temp -ov -format UDZO "Eureka-Doom-Editor-${{ matrix.arch }}.dmg"
       - name: Publish
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: EurekaEditor-macOS-${{ matrix.arch }}
           path: Eureka-Doom-Editor-${{ matrix.arch }}.dmg
