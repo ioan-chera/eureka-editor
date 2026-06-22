@@ -238,11 +238,11 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 	// support hexadecimal
 	int new_type = (int)strtol(box->type->value(), NULL, 0);
 
-	const char *gen_desc = box->GeneralizedDesc(new_type);
+	std::string gen_desc = M_GeneralizedLineDescription(box->inst.conf, new_type);
 
-	if (gen_desc)
+	if (!gen_desc.empty())
 	{
-		box->desc->value(gen_desc);
+		box->desc->value(gen_desc.c_str());
 	}
 	else
 	{
@@ -764,11 +764,11 @@ void UI_LineBox::UpdateField()
 
 		mFixUp.setInputValue(type, SString(type_num).c_str());
 
-		const char *gen_desc = GeneralizedDesc(type_num);
+		std::string gen_desc = M_GeneralizedLineDescription(inst.conf, type_num);
 
-		if (gen_desc)
+		if (!gen_desc.empty())
 		{
-			desc->value(gen_desc);
+			desc->value(gen_desc.c_str());
 		}
 		else
 		{
@@ -1074,34 +1074,6 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	}
 
 	redraw();
-}
-
-
-const char * UI_LineBox::GeneralizedDesc(int type_num)
-{
-	if (! inst.conf.features.gen_types)
-		return NULL;
-
-	static char desc_buffer[256];
-
-	for (int i = 0 ; i < inst.conf.num_gen_linetypes ; i++)
-	{
-		const generalized_linetype_t *info = &inst.conf.gen_linetypes[i];
-
-		if (type_num >= info->base && type_num < (info->base + info->length))
-		{
-			// grab trigger name (we assume it is first field)
-			if (info->fields.size() < 1 || info->fields[0].keywords.size() < 8)
-				return NULL;
-
-			const char *trigger = info->fields[0].keywords[type_num & 7].c_str();
-
-			snprintf(desc_buffer, sizeof(desc_buffer), "%s GENTYPE: %s", trigger, info->name.c_str());
-			return desc_buffer;
-		}
-	}
-
-	return NULL;  // not a generalized linetype
 }
 
 //--- editor settings ---

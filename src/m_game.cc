@@ -413,6 +413,29 @@ static std::optional<fs::path> FindDefinitionFile(const fs::path &home_dir,
 	return {};
 }
 
+std::string M_GeneralizedLineDescription(const ConfigData &config, int type)
+{
+	if (! config.features.gen_types)
+		return "";
+
+	for (int i = 0 ; i < config.num_gen_linetypes ; i++)
+	{
+		const generalized_linetype_t &info = config.gen_linetypes[i];
+
+		if (type >= info.base && type < info.base + info.length)
+		{
+			// grab trigger name (we assume it is first field)
+			if (info.fields.size() < 1 || info.fields[0].keywords.size() < 8)
+				return "";
+
+			const SString &trigger = info.fields[0].keywords[type & 7].c_str();
+
+			return std::format("{} GENTYPE: {}", trigger.get(), info.name.get());
+		}
+	}
+
+	return "";  // not a generalized linetype
+}
 
 bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &old_home_dir,
 		const fs::path &install_dir, const fs::path &folder, const SString &name)

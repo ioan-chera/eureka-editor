@@ -105,8 +105,6 @@ private:
 
 	void checkSidesDirtyFields();
 
-	const char *GeneralizedDesc(int type_num);
-
 	static void    type_callback(Fl_Widget *, void *);
 	static void dyntype_callback(Fl_Widget *, void *);
 
