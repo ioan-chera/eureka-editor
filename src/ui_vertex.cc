@@ -109,7 +109,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 {
 	UI_VertexBox *box = (UI_VertexBox *)data;
 
-	int new_x = atoi(box->pos_x->value());
+	double new_x = atof(box->pos_x->value());
 
 	if (!box->inst.edit.Selected->empty())
 	{
@@ -127,7 +127,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 {
 	UI_VertexBox *box = (UI_VertexBox *)data;
 
-	int new_y = atoi(box->pos_y->value());
+	double new_y = atof(box->pos_y->value());
 
 	if (!box->inst.edit.Selected->empty())
 	{
@@ -190,9 +190,11 @@ void UI_VertexBox::UpdateField()
 {
 	if (inst.level.isVertex(obj))
 	{
-		// @@ FIXME show decimals in UDMF
-		mFixUp.setInputValue(pos_x, SString(static_cast<int>(inst.level.vertices[obj]->x())).c_str());
-		mFixUp.setInputValue(pos_y, SString(static_cast<int>(inst.level.vertices[obj]->y())).c_str());
+		char text[128];
+		snprintf(text, sizeof(text), "%.16g", inst.level.vertices[obj]->x());
+		mFixUp.setInputValue(pos_x, text);
+		snprintf(text, sizeof(text), "%.16g", inst.level.vertices[obj]->y());
+		mFixUp.setInputValue(pos_y, text);
 	}
 	else
 	{
@@ -201,6 +203,19 @@ void UI_VertexBox::UpdateField()
 	}
 }
 
+void UI_VertexBox::UpdateGameInfo(const LoadingData &loading, const ConfigData &config)
+{
+	if(loading.levelFormat == MapFormat::udmf)
+	{
+		pos_x->type(FL_FLOAT_INPUT);
+		pos_y->type(FL_FLOAT_INPUT);
+	}
+	else
+	{
+		pos_x->type(FL_INT_INPUT);
+		pos_y->type(FL_INT_INPUT);
+	}
+}
 
 void UI_VertexBox::UpdateTotal(const Document &doc) noexcept
 {
