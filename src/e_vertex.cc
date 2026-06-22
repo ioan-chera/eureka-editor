@@ -135,11 +135,11 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 
 	if (same_left)
 	{
-		op.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+		op.changeLinedef(ld2, &LineDef::left, L1->right);
 	}
 	else if (same_right)
 	{
-		op.changeLinedef(ld2, LineDef::F_RIGHT, L1->left);
+		op.changeLinedef(ld2, &LineDef::right, L1->left);
 	}
 	else
 	{
@@ -174,7 +174,7 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 		new_flags |=  MLF_Blocking;
 	}
 
-	op.changeLinedef(ld2, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld2, &LineDef::flags, new_flags);
 }
 
 
@@ -238,10 +238,10 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 		// [ to-be-deleted lines will get start == end, that is OK ]
 
 		if (L->start == v1)
-			op.changeLinedef(n, LineDef::F_START, v2);
+			op.changeLinedef(n, &LineDef::start, v2);
 
 		if (L->end == v1)
-			op.changeLinedef(n, LineDef::F_END, v2);
+			op.changeLinedef(n, &LineDef::end, v2);
 
 		if (L->start == v2 && L->end == v2)
 			del_lines.set(n);
@@ -485,9 +485,9 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 				doc.vertices[new_v]->SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
 				if (L->start == v_num)
-					op.changeLinedef(n, LineDef::F_START, new_v);
+					op.changeLinedef(n, &LineDef::start, new_v);
 				else
-					op.changeLinedef(n, LineDef::F_END, new_v);
+					op.changeLinedef(n, &LineDef::end, new_v);
 			}
 			else
 			{
@@ -584,10 +584,10 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 		const auto L2 = doc.linedefs[*it];
 
 		if (L2->start == v_num)
-			op.changeLinedef(*it, LineDef::F_START, new_v);
+			op.changeLinedef(*it, &LineDef::start, new_v);
 
 		if (L2->end == v_num)
-			op.changeLinedef(*it, LineDef::F_END, new_v);
+			op.changeLinedef(*it, &LineDef::end, new_v);
 	}
 
 	*seen_one = true;
@@ -717,7 +717,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 		doc.linemod.flipLinedef(op, ld_num);
 	}
 
-	op.changeLinedef(ld_num, LineDef::F_LEFT, -1);
+	op.changeLinedef(ld_num, &LineDef::left, -1);
 
 
 	// determine new flags
@@ -727,7 +727,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
 
-	op.changeLinedef(ld_num, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld_num, &LineDef::flags, new_flags);
 
 	L2->flags = L1->flags;
 
@@ -874,10 +874,10 @@ void Instance::commandSectorDisconnect()
 			else
 			{
 				if (start2 >= 0)
-					op.changeLinedef(n, LineDef::F_START, start2);
+					op.changeLinedef(n, &LineDef::start, start2);
 
 				if (end2 >= 0)
-					op.changeLinedef(n, LineDef::F_END, end2);
+					op.changeLinedef(n, &LineDef::end, end2);
 			}
 		}
 

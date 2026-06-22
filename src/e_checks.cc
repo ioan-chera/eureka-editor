@@ -388,10 +388,10 @@ static void Vertex_MergeOne(EditOperation &op, int idx, selection_c& merge_verts
 			const auto L = doc.linedefs[ld];
 
 			if (L->start == idx)
-				op.changeLinedef(ld, LineDef::F_START, n);
+				op.changeLinedef(ld, &LineDef::start, n);
 
 			if (L->end == idx)
-				op.changeLinedef(ld, LineDef::F_END, n);
+				op.changeLinedef(ld, &LineDef::end, n);
 		}
 
 		return;
@@ -1058,17 +1058,17 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 			// handle it when first linedef uses sidedef on both sides
 			if (doc.linedefs[first]->left == doc.linedefs[first]->right)
 			{
-				op.changeLinedef(first, LineDef::F_LEFT, copySidedef(op, sd));
+				op.changeLinedef(first, &LineDef::left, copySidedef(op, sd));
 			}
 
 			// duplicate any remaining references
 			for (int ld = first + 1 ; ld < doc.numLinedefs(); ld++)
 			{
 				if (doc.linedefs[ld]->left == sd)
-					op.changeLinedef(ld, LineDef::F_LEFT, copySidedef(op, sd));
+					op.changeLinedef(ld, &LineDef::left, copySidedef(op, sd));
 
 				if (doc.linedefs[ld]->right == sd)
-					op.changeLinedef(ld, LineDef::F_RIGHT, copySidedef(op, sd));
+					op.changeLinedef(ld, &LineDef::right, copySidedef(op, sd));
 			}
 		}
 
@@ -2169,7 +2169,7 @@ static void LineDefs_FixManualDoors(Instance &inst)
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
 		{
-			op.changeLinedef(n, LineDef::F_TYPE, 0);
+			op.changeLinedef(n, &LineDef::type, 0);
 		}
 	}
 }
@@ -2213,7 +2213,7 @@ static void LineDefs_FixLackImpass(Document &doc)
 		{
 			int new_flags = L->flags | MLF_Blocking;
 
-			op.changeLinedef(n, LineDef::F_FLAGS, new_flags);
+			op.changeLinedef(n, &LineDef::flags, new_flags);
 		}
 	}
 }
@@ -2257,10 +2257,10 @@ static void LineDefs_FixBad2SFlag(Document &doc)
 		const auto L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
-			op.changeLinedef(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
+			op.changeLinedef(n, &LineDef::flags, L->flags & ~MLF_TwoSided);
 
 		if (L->TwoSided() && ! (L->flags & MLF_TwoSided))
-			op.changeLinedef(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
+			op.changeLinedef(n, &LineDef::flags, L->flags | MLF_TwoSided);
 	}
 }
 
@@ -2352,7 +2352,7 @@ static void LineDefs_ClearUnknown(Instance &inst)
 	op.setMessage("cleared unknown line types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
-		op.changeLinedef(*it, LineDef::F_TYPE, 0);
+		op.changeLinedef(*it, &LineDef::type, 0);
 }
 
 
@@ -3004,7 +3004,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 		{
 			if (inst.edit.mode == ObjType::linedefs)
 			{
-				op.changeLinedef(*it, LineDef::F_TAG, new_tag);
+				op.changeLinedef(*it, &LineDef::tag, new_tag);
 				changed = true;
 			}
 			else if (inst.edit.mode == ObjType::sectors)

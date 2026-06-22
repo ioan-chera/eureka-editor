@@ -520,7 +520,7 @@ void LinedefModule::doAlignY(EditOperation &op, const Objid& cur, const Objid& a
 
 	if (new_flags != L->flags)
 	{
-		op.changeLinedef(cur.num, LineDef::F_FLAGS, new_flags);
+		op.changeLinedef(cur.num, &LineDef::flags, new_flags);
 	}
 }
 
@@ -801,8 +801,8 @@ void LinedefModule::flipLine_verts(EditOperation &op, int ld) const
 	int old_start = doc.linedefs[ld]->start;
 	int old_end   = doc.linedefs[ld]->end;
 
-	op.changeLinedef(ld, LineDef::F_START, old_end);
-	op.changeLinedef(ld, LineDef::F_END, old_start);
+	op.changeLinedef(ld, &LineDef::start, old_end);
+	op.changeLinedef(ld, &LineDef::end, old_start);
 }
 
 //
@@ -813,8 +813,8 @@ void LinedefModule::flipLine_sides(EditOperation &op, int ld) const
 	int old_right = doc.linedefs[ld]->right;
 	int old_left  = doc.linedefs[ld]->left;
 
-	op.changeLinedef(ld, LineDef::F_RIGHT, old_left);
-	op.changeLinedef(ld, LineDef::F_LEFT, old_right);
+	op.changeLinedef(ld, &LineDef::right, old_left);
+	op.changeLinedef(ld, &LineDef::left, old_right);
 }
 
 
@@ -940,7 +940,7 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 	int orig_length = iround(doc.calcLength(*L));
 
 	// update vertex on original line
-	op.changeLinedef(ld, LineDef::F_END, new_v);
+	op.changeLinedef(ld, &LineDef::end, new_v);
 
 	// compute lengths (to update sidedef X offsets)
 	int new_length  = iround(doc.calcLength(*L));
@@ -1054,7 +1054,7 @@ void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int 
 	new_flags |=  MLF_TwoSided;
 	new_flags &= ~MLF_Blocking;
 
-	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld, &LineDef::flags, new_flags);
 
 	// TODO: make this a global pseudo-constant
 	StringID null_tex = BA_InternaliseString("-");
@@ -1091,7 +1091,7 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 	new_flags |=  MLF_TwoSided;
 	new_flags &= ~MLF_Blocking;
 
-	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld, &LineDef::flags, new_flags);
 
 	// TODO: make this a global pseudo-constant
 	StringID null_tex = BA_InternaliseString("-");
@@ -1137,9 +1137,9 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 	int other_sd = (ld_side == Side::right) ? L->left : L->right;
 
 	if (ld_side == Side::right)
-		op.changeLinedef(ld, LineDef::F_RIGHT, -1);
+		op.changeLinedef(ld, &LineDef::right, -1);
 	else
-		op.changeLinedef(ld, LineDef::F_LEFT, -1);
+		op.changeLinedef(ld, &LineDef::left, -1);
 
 	if (other_sd < 0)
 		return;
@@ -1156,7 +1156,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
 
-	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld, &LineDef::flags, new_flags);
 
 	// FIXME: if sidedef is shared, either don't modify it _OR_ duplicate it
 
@@ -1217,8 +1217,8 @@ void Instance::commandLinedefMergeTwo()
 
 	// ld2 steals the sidedef from ld1
 
-	op.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
-	op.changeLinedef(ld1, LineDef::F_RIGHT, -1);
+	op.changeLinedef(ld2, &LineDef::left, L1->right);
+	op.changeLinedef(ld1, &LineDef::right, -1);
 
 	level.linemod.mergedSecondSidedef(op, ld2);
 
@@ -1232,14 +1232,14 @@ void Instance::commandLinedefMergeTwo()
 		const auto L = level.linedefs[n];
 
 		if (L->start == L1->start)
-			op.changeLinedef(n, LineDef::F_START, L2->end);
+			op.changeLinedef(n, &LineDef::start, L2->end);
 		else if (L->start == L1->end)
-			op.changeLinedef(n, LineDef::F_START, L2->start);
+			op.changeLinedef(n, &LineDef::start, L2->start);
 
 		if (L->end == L1->start)
-			op.changeLinedef(n, LineDef::F_END, L2->end);
+			op.changeLinedef(n, &LineDef::end, L2->end);
 		else if (L->end == L1->end)
-			op.changeLinedef(n, LineDef::F_END, L2->start);
+			op.changeLinedef(n, &LineDef::end, L2->start);
 	}
 
 	// delete ld1 and any unused vertices

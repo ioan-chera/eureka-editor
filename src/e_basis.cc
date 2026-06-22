@@ -333,10 +333,10 @@ void Basis::del(ObjType type, int objnum)
 			const auto L = doc.linedefs[n];
 
 			if(L->right == objnum)
-				changeLinedef(n, LineDef::F_RIGHT, -1);
+				changeLinedef(n, &LineDef::right, -1);
 
 			if(L->left == objnum)
-				changeLinedef(n, LineDef::F_LEFT, -1);
+				changeLinedef(n, &LineDef::left, -1);
 		}
 	}
 	else if(type == ObjType::vertices)
@@ -454,10 +454,9 @@ bool Basis::changeSidedef(int side, SideDef::StringIDAddress field, StringID val
 //
 // Change linedef
 //
-bool Basis::changeLinedef(int line, byte field, int value)
+bool Basis::changeLinedef(int line, int LineDef::*field, int value)
 {
 	SYS_ASSERT(line >= 0 && line < doc.numLinedefs());
-	SYS_ASSERT(field <= LineDef::F_ARG5);
 
 	return change(ObjType::linedefs, line, field, value);
 }
@@ -662,6 +661,17 @@ void Basis::EditUnit::rawChange(Basis &basis)
 					break;
 				default:
 					BugError("Basis::EditOperation::rawChange(vertexDouble): bad objtype %u\n", (unsigned)objtype);
+					break;
+			}
+		},
+		[&basis, this](int LineDef::*field) {
+			switch(objtype)
+			{
+				case ObjType::linedefs:
+					std::swap(basis.doc.linedefs[objnum].get()->*field, std::get<int>(value));
+					break;
+				default:
+					BugError("Basis::EditOperation::rawChange(linedefInt): bad objtype %u\n", (unsigned)objtype);
 					break;
 			}
 		}

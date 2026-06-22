@@ -1769,7 +1769,7 @@ void UI_FindAndReplace::Replace_LineType(EditOperation &op, int idx)
 {
 	int new_type = atoi(rep_value->value());
 
-	op.changeLinedef(idx, LineDef::F_TYPE, new_type);
+	op.changeLinedef(idx, &LineDef::type, new_type);
 }
 
 

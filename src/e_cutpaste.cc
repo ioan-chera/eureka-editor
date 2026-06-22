@@ -1081,9 +1081,9 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	op.setMessage("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)
-		op.changeLinedef(ld1, LineDef::F_START, v2);
+		op.changeLinedef(ld1, &LineDef::start, v2);
 	else
-		op.changeLinedef(ld1, LineDef::F_END, v2);
+		op.changeLinedef(ld1, &LineDef::end, v2);
 
 	// NOT-DO: update X offsets on existing linedef
 

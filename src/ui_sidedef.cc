@@ -280,7 +280,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 
 	// iterate over selected linedefs
 
-	int field = box->is_front ? LineDef::F_RIGHT : LineDef::F_LEFT;
+	int LineDef::*field = box->is_front ? &LineDef::right : &LineDef::left;
 
 	{
 		EditOperation op(box->inst.level.basis);
@@ -316,7 +316,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			box->inst.level.sidedefs[sd]->SetDefaults(box->inst.conf, other >= 0);
 			box->inst.level.sidedefs[sd]->sector = new_sec;
 
-			op.changeLinedef(*it, static_cast<byte>(field), sd);
+			op.changeLinedef(*it, field, sd);
 
 			if (other >= 0)
 				box->inst.level.linemod.addSecondSidedef(op, *it, sd, other);

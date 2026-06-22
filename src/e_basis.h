@@ -77,7 +77,7 @@ enum class LumpType : byte
 	scripts
 };
 
-using Field = std::variant<int, double Thing::*, double Vertex::*>;
+using Field = std::variant<int, int LineDef::*, double Thing::*, double Vertex::*>;
 using Value = std::variant<int, double>;
 
 // E_BASIS
@@ -324,7 +324,7 @@ private:
 	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
-	bool changeLinedef(int line, byte field, int value);
+	bool changeLinedef(int line, int LineDef::*field, int value);
 	void changeLump(LumpType lumpType, std::vector<byte> &&newData);
 	void del(ObjType type, int objnum);
 	void end();
@@ -410,7 +410,7 @@ public:
 		return basis.changeSidedef(side, field, value);
 	}
 
-	bool changeLinedef(int line, byte field, int value)
+	bool changeLinedef(int line, int LineDef::*field, int value)
 	{
 		return basis.changeLinedef(line, field, value);
 	}

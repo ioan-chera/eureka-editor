@@ -1076,9 +1076,9 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 	SD->sector = new_sec;
 
 	if (side == Side::right)
-		op.changeLinedef(ld, LineDef::F_RIGHT, new_sd);
+		op.changeLinedef(ld, &LineDef::right, new_sd);
 	else
-		op.changeLinedef(ld, LineDef::F_LEFT, new_sd);
+		op.changeLinedef(ld, &LineDef::left, new_sd);
 
 	// if we're adding a second side to the linedef, clear out some
 	// of the properties that aren't needed anymore: middle texture,

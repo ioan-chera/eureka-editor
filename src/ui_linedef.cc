@@ -222,7 +222,7 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(*box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			op.changeLinedef(*it, LineDef::F_TYPE, new_type);
+			op.changeLinedef(*it, &LineDef::type, new_type);
 		}
 	}
 }
@@ -308,7 +308,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		    is_null_tex(inst.level.getRight(*L)->MidTex()) &&
 		    is_null_tex(inst.level.getLeft(*L)->MidTex()) )
 		{
-			op.changeLinedef(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
+			op.changeLinedef(ld, &LineDef::flags, L->flags | MLF_LowerUnpegged);
 		}
 
 		op.changeSidedef(L->left,  SideDef::F_MID_TEX, new_tex);
@@ -626,7 +626,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
-			op.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
+			op.changeLinedef(*it, &LineDef::flags, (L->flags & ~mask) | (new_flags & mask));
 		}
 	}
 }
@@ -641,6 +641,14 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 	int arg_idx = l_f_c->mask;
 	int new_value = atoi(box->args[arg_idx]->value());
 
+	static int LineDef::*const fields[] = {
+		&LineDef::tag,
+		&LineDef::arg2,
+		&LineDef::arg3,
+		&LineDef::arg4,
+		&LineDef::arg5
+	};
+
 	new_value = clamp(0, new_value, 255);
 
 	if (! box->inst.edit.Selected->empty())
@@ -650,8 +658,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeLinedef(*it, static_cast<byte>(LineDef::F_TAG + arg_idx),
-                                                new_value);
+			op.changeLinedef(*it, fields[arg_idx], new_value);
 		}
 	}
 }

@@ -1193,15 +1193,15 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		}
 	}
 
-	op.changeLinedef(dest_line, LineDef::F_FLAGS, flags);
+	op.changeLinedef(dest_line, &LineDef::flags, flags);
 
-	op.changeLinedef(dest_line, LineDef::F_TYPE, L1->type);
-	op.changeLinedef(dest_line, LineDef::F_TAG,  L1->tag);
+	op.changeLinedef(dest_line, &LineDef::type, L1->type);
+	op.changeLinedef(dest_line, &LineDef::tag,  L1->tag);
 
-	op.changeLinedef(dest_line, LineDef::F_ARG2, L1->arg2);
-	op.changeLinedef(dest_line, LineDef::F_ARG3, L1->arg3);
-	op.changeLinedef(dest_line, LineDef::F_ARG4, L1->arg4);
-	op.changeLinedef(dest_line, LineDef::F_ARG5, L1->arg5);
+	op.changeLinedef(dest_line, &LineDef::arg2, L1->arg2);
+	op.changeLinedef(dest_line, &LineDef::arg3, L1->arg3);
+	op.changeLinedef(dest_line, &LineDef::arg4, L1->arg4);
+	op.changeLinedef(dest_line, &LineDef::arg5, L1->arg5);
 }
 
 
@@ -1693,8 +1693,8 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 		int start = L->start;
 		int end   = L->end;
 
-		op.changeLinedef(*it, LineDef::F_START, end);
-		op.changeLinedef(*it, LineDef::F_END, start);
+		op.changeLinedef(*it, &LineDef::start, end);
+		op.changeLinedef(*it, &LineDef::end, start);
 	}
 }
 
