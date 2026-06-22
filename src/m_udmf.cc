@@ -100,11 +100,6 @@ public:
 		return string;
 	}
 
-	FFixedPoint DecodeCoord() const
-	{
-		return MakeValidCoord(MapFormat::udmf, DecodeFloat());
-	}
-
 	double DecodeCoordF() const
 	{
 		return MakeValidCoordF(MapFormat::udmf, DecodeFloat());
