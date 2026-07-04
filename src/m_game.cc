@@ -710,6 +710,24 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			const char *flag = argv[2];
 			if(y_stricmp(flag, "fakeheights") == 0)
 				it->second.flags |= linetype_t::flagFakeHeights;
+			else if(y_stricmp(flag, "3dFloorSimple") == 0)
+				it->second.flags |= linetype_t::flag3dFloorSimple;
+			else if(y_stricmp(flag, "3dFloorUpper") == 0)
+				it->second.flags |= linetype_t::flag3dFloorUpper;
+			else if(y_stricmp(flag, "3dFloorLower") == 0)
+				it->second.flags |= linetype_t::flag3dFloorLower;
+			else if(y_stricmp(flag, "3dFloorBottom") == 0)
+				it->second.flags |= linetype_t::flag3dFloorBottom;
+			else if(y_stricmp(flag, "3dFloorBottomTranslucent") == 0)
+				it->second.flags |= linetype_t::flag3dFloorBottomTranslucent;
+			else if(y_stricmp(flag, "3dFloorTranslucent") == 0)
+				it->second.flags |= linetype_t::flag3dFloorTranslucent;
+			else if(y_stricmp(flag, "3dFloorTop") == 0)
+				it->second.flags |= linetype_t::flag3dFloorTop;
+			else if(y_stricmp(flag, "3dFloorTopTranslucent") == 0)
+				it->second.flags |= linetype_t::flag3dFloorTopTranslucent;
+			else if(y_stricmp(flag, "3dFloorParameterized") == 0)
+				it->second.flags |= linetype_t::flag3dFloorParameterized;
 			else
 				pst->log("unknown special handling '%s' for %d\n", flag, number);
 		}

@@ -247,48 +247,27 @@ void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 	int flags = -1;
 	int sec_tag = L->tag;
 
-	// EDGE style
-	if (inst.loaded.levelFormat == MapFormat::doom && (inst.conf.features.extra_floors & 1))
+	const linetype_t &type = inst.conf.getLineType(L->type);
+	unsigned specflags = type.flags;
+
+	if(specflags & linetype_t::flag3dFloorSimple)
+		flags = 0;
+	else if(specflags & linetype_t::flag3dFloorLower)
+		flags = EXFL_LOWER;
+	else if(specflags & linetype_t::flag3dFloorUpper)
+		flags = EXFL_UPPER;
+	else if(specflags & linetype_t::flag3dFloorBottom)
+		flags = EXFL_BOTTOM;
+	else if(specflags & linetype_t::flag3dFloorBottomTranslucent)
+		flags = EXFL_BOTTOM | EXFL_TRANSLUC;
+	else if(specflags & linetype_t::flag3dFloorTranslucent)
+		flags = EXFL_TRANSLUC;
+	else if(specflags & linetype_t::flag3dFloorTop)
+		flags = EXFL_TOP;
+	else if(specflags & linetype_t::flag3dFloorTopTranslucent)
+		flags = EXFL_TOP | EXFL_TRANSLUC;
+	else if(specflags & linetype_t::flag3dFloorParameterized)
 	{
-		switch (L->type)
-		{
-		case 400: flags = 0; break;
-		case 401: flags = EXFL_UPPER; break;
-		case 402: flags = EXFL_LOWER; break;
-		case 403: flags = EXFL_BOTTOM; break; // liquid
-		case 413: flags = EXFL_BOTTOM; break; // thin and solid
-
-		case 404: case 405: case 406: case 407: case 408:  // liquid
-		case 414: case 415: case 416: case 417:  // thin and solid
-			flags = EXFL_BOTTOM | EXFL_TRANSLUC;
-			break;
-
-		default: break;
-		}
-	}
-
-	// Legacy style
-	if (inst.loaded.levelFormat == MapFormat::doom && (inst.conf.features.extra_floors & 2))
-	{
-		switch (L->type)
-		{
-		case 281: flags = 0; break;
-		case 289: flags = 0; break;
-		case 300: flags = EXFL_TRANSLUC; break;
-		case 301: flags = EXFL_TOP | EXFL_TRANSLUC; break;
-		case 304: flags = EXFL_TOP; break;
-		case 306: flags = EXFL_TOP | EXFL_TRANSLUC; break; // invisible floor
-
-		default: break;
-		}
-	}
-
-	// ZDoom style
-	if (inst.loaded.levelFormat != MapFormat::doom && (inst.conf.features.extra_floors & 4))
-	{
-		if (L->type != 160)
-			return;
-
 		flags = 0;
 
 		if ((L->arg2 & 3) == 0)

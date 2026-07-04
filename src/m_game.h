@@ -93,6 +93,15 @@ struct linetype_t
 	enum
 	{
 		flagFakeHeights = 1,
+		flag3dFloorSimple = 2,
+		flag3dFloorUpper = 4,
+		flag3dFloorLower = 8,
+		flag3dFloorBottom = 16,
+		flag3dFloorBottomTranslucent = 32,
+		flag3dFloorTranslucent = 64,
+		flag3dFloorTop = 128,
+		flag3dFloorTopTranslucent = 256,
+		flag3dFloorParameterized = 512,
 	};
 
     bool isPolyObjectSpecial() const;

@@ -84,6 +84,10 @@ line 400 y "-- EDGE: 3D Floor"          :tag
 line 401 y "-- EDGE: 3D Floor /upper"   :tag
 line 402 y "-- EDGE: 3D Floor /lower"   :tag
 
+specialHandling 400 3dFloorSimple
+specialHandling 401 3dFloorUpper
+specialHandling 402 3dFloorLower
+
 line 403 y "-- EDGE: Liquid"            :tag
 line 404 y "-- EDGE: Liquid 80%"        :tag
 line 405 y "-- EDGE: Liquid 60%"        :tag
@@ -91,11 +95,24 @@ line 406 y "-- EDGE: Liquid 40%"        :tag
 line 407 y "-- EDGE: Liquid 20%"        :tag
 line 408 y "-- EDGE: Liquid  0%"        :tag
 
+specialHandling 403 3dFloorBottom
+specialHandling 404 3dFloorBottomTranslucent
+specialHandling 405 3dFloorBottomTranslucent
+specialHandling 406 3dFloorBottomTranslucent
+specialHandling 407 3dFloorBottomTranslucent
+specialHandling 408 3dFloorBottomTranslucent
+
 line 413 y "-- EDGE: Thin 3D floor"     :tag
 line 414 y "-- EDGE: Thin 3D floor 80%" :tag
 line 415 y "-- EDGE: Thin 3D floor 60%" :tag
 line 416 y "-- EDGE: Thin 3D floor 40%" :tag
 line 417 y "-- EDGE: Thin 3D floor 20%" :tag
+
+specialHandling 413 3dFloorBottom
+specialHandling 414 3dFloorBottomTranslucent
+specialHandling 415 3dFloorBottomTranslucent
+specialHandling 416 3dFloorBottomTranslucent
+specialHandling 417 3dFloorBottomTranslucent
 
 line 422 a "-- EDGE: Scroll right"
 line 423 a "-- EDGE: Scroll up"

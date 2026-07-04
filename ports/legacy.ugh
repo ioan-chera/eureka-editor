@@ -100,9 +100,14 @@ line 283 r "-- LEG: Fog sheet"  :tag
 line 281 y "-- LEG: Floor Solid shadow" :tag
 line 289 y "-- LEG: Floor Solid"        :tag
 
+specialHandling 281 3dFloorSimple
+specialHandling 289 3dFloorSimple
+
 line 300 y "-- LEG: Floor Trans #U" :tag
 # side1 upper texture: #aaa ( or texture name ) Alpha
 # where: aaa= alpha (0..255)
+
+specialHandling 300 3dFloorTranslucent
 
 line 301 y "-- LEG: 3d Water Translu #U"    :tag
 # side1 upper texture: #aaaf ( or texture name ) Alpha
@@ -110,11 +115,15 @@ line 301 y "-- LEG: 3d Water Translu #U"    :tag
 # aaa= alpha (0..255)
 # f= fog effect (letter 'A'..'F')
 
+specialHandling 301 3dFloorTopTranslucent
+
 line 304 y "-- LEG: 3d Water Opaque #U" :tag
 # side1 upper texture: #aaaf ( or texture name ) Alpha inside water
 # where:
 # aaa= alpha (0..255)
 # f= fog effect (letter 'A'..'F')
+
+specialHandling 304 3dFloorTop
 
 line 302 y "-- LEG: 3d Fog #U"  :tag
 # side1 upper texture: #aaaf ( or texture name ) Alpha inside water
@@ -135,6 +144,8 @@ line 302 y "-- LEG: 3d Fog #U"  :tag
 line 303 y "-- LEG: 3d Ceiling Light"   :tag
 line 305 y "-- LEG: 3d Light Slab"      :tag
 line 306 y "-- LEG: Floor Invisible"    :tag
+
+specialHandling 306 3dFloorTopTranslucent
 
 # not in DoomLegacy
 line 271 - "-- (Unsupported)"
