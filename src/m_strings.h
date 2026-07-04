@@ -80,6 +80,7 @@ public:
 	{
 	}
 
+	// NOTE: do not use std::format, as it requires some recent versions of Mac
 	static SString printf(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(1, 2);
 	static SString vprintf(const char *format, va_list ap);
 

@@ -413,7 +413,7 @@ static std::optional<fs::path> FindDefinitionFile(const fs::path &home_dir,
 	return {};
 }
 
-std::string M_GeneralizedLineDescription(const ConfigData &config, int type)
+SString M_GeneralizedLineDescription(const ConfigData &config, int type)
 {
 	if (! config.features.gen_types)
 		return "";
@@ -430,7 +430,7 @@ std::string M_GeneralizedLineDescription(const ConfigData &config, int type)
 
 			const SString &trigger = info.fields[0].keywords[type & 7].c_str();
 
-			return std::format("{} GENTYPE: {}", trigger.get(), info.name.get());
+			return trigger + " GENTYPE: " + info.name;
 		}
 	}
 

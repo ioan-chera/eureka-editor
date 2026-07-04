@@ -358,7 +358,7 @@ struct generalized_linetype_t
 	std::vector<generalized_field_t> fields;
 };
 
-std::string M_GeneralizedLineDescription(const ConfigData &config, int type);
+SString M_GeneralizedLineDescription(const ConfigData &config, int type);
 
 //------------------------------------------------------------------------
 

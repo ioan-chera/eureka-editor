@@ -238,7 +238,7 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 	// support hexadecimal
 	int new_type = (int)strtol(box->type->value(), NULL, 0);
 
-	std::string gen_desc = M_GeneralizedLineDescription(box->inst.conf, new_type);
+	SString gen_desc = M_GeneralizedLineDescription(box->inst.conf, new_type);
 
 	if (!gen_desc.empty())
 	{
@@ -764,7 +764,7 @@ void UI_LineBox::UpdateField()
 
 		mFixUp.setInputValue(type, SString(type_num).c_str());
 
-		std::string gen_desc = M_GeneralizedLineDescription(inst.conf, type_num);
+		SString gen_desc = M_GeneralizedLineDescription(inst.conf, type_num);
 
 		if (!gen_desc.empty())
 		{
