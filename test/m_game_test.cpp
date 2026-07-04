@@ -186,3 +186,88 @@ TEST_F(MGameFixture, ParseDefinitionFileThingFlags)
 	ASSERT_EQ(config.thing_flags[1].defaultSet, thingflag_t::DefaultMode::onOpposite);
 	ASSERT_EQ(config.thing_flags[1].label, "friend");
 }
+
+//
+// Generalized line description tests
+//
+
+TEST(MGame, DisabledGeneralizedTypesGivesNothing)
+{
+	ConfigData config = {};
+	ASSERT_TRUE(M_GeneralizedLineDescription(config, 123).empty());
+}
+
+TEST(MGame, EmptyGeneralizedInfoFields)
+{
+	ConfigData config = {
+		.features = { .gen_types = 1 },
+		.num_gen_linetypes = 1,
+		.gen_linetypes = {
+			{
+				.base = 100,
+				.length = 100,
+				.fields{}
+			}
+		}
+	};
+	ASSERT_TRUE(M_GeneralizedLineDescription(config, 123).empty());
+}
+
+TEST(MGame, InsufficientGeneralizedTriggerFields)
+{
+	ConfigData config = {
+		.features = { .gen_types = 1 },
+		.num_gen_linetypes = 1,
+		.gen_linetypes = {
+			{
+				.base = 100,
+				.length = 100,
+				.fields = {
+					{ .keywords = {"W1", "WR", "S1", "SR", "G1", "GR", "DR"} }	// D1 missing
+				}
+			}
+		}
+	};
+	ASSERT_TRUE(M_GeneralizedLineDescription(config, 123).empty());
+}
+
+TEST(MGame, GeneralizedHappyPath)
+{
+	ConfigData config = {
+		.features = { .gen_types = 1 },
+		.num_gen_linetypes = 1,
+		.gen_linetypes = {
+			{
+				.base = 100,
+				.length = 100,
+				.name = "SomeType",
+				.fields = {
+					{ .keywords = {"W1", "WR", "S1", "SR", "G1", "GR", "D1", "DR"} }
+				}
+			}
+		}
+	};
+	// 0x7b = 0x01111011 => 3 => SR
+	ASSERT_EQ(M_GeneralizedLineDescription(config, 123), "SR GENTYPE: SomeType");
+}
+
+TEST(MGame, NotAGeneralizedType)
+{
+	ConfigData config = {
+		.features = { .gen_types = 1 },
+		.num_gen_linetypes = 1,
+		.gen_linetypes = {
+			{
+				.base = 100,
+				.length = 100,
+				.name = "SomeType",
+				.fields = {
+					{ .keywords = {"W1", "WR", "S1", "SR", "G1", "GR", "D1", "DR"} }
+				}
+			}
+		}
+	};
+
+	ASSERT_TRUE(M_GeneralizedLineDescription(config, 23).empty());
+	ASSERT_TRUE(M_GeneralizedLineDescription(config, 201).empty());
+}
