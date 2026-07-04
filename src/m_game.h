@@ -34,6 +34,8 @@
 #include <unordered_map>
 
 #include <filesystem>
+
+#define UNKNOWN_TYPE_STRING "UNKNOWN TYPE"
 namespace fs = std::filesystem;
 
 struct ConfigData;

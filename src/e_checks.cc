@@ -3188,7 +3188,7 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const auto L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -3199,16 +3199,22 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 		// use type description to determine if a tag is needed
 		// e.g. D1, DR, --, and lowercase first letter all mean "no tag".
 
-		// TODO: boom generalized manual doors (etc??)
 		const linetype_t &info = inst.conf.getLineType(L->type);
 
-		if(info.desc.empty())
+		SString desc = info.desc;
+		if(desc.empty())
 		{
 			gLog.printf("WARNING: invalid empty description for line type %d\n", L->type);
 			continue;
 		}
-		
-		char first = info.desc[0];
+		if(desc == UNKNOWN_TYPE_STRING)
+		{
+			desc = M_GeneralizedLineDescription(inst.conf, L->type);
+			if(desc.empty())
+				desc = UNKNOWN_TYPE_STRING;
+		}
+
+		char first = desc[0];
 
 		if (first == 'D' || first == '-' || ('a' <= first && first <= 'z'))
 			continue;

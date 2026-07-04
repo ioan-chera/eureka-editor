@@ -74,9 +74,9 @@ TEST(MGame, ConfigDataGetThingType)
 
 	ASSERT_EQ(config.getThingType(111), type);
 	ASSERT_EQ(config.getThingType(222), type2);
-	ASSERT_EQ(config.getThingType(1).desc, "UNKNOWN TYPE");
-	ASSERT_EQ(config.getThingType(0).desc, "UNKNOWN TYPE");
-	ASSERT_EQ(config.getThingType(-1).desc, "UNKNOWN TYPE");
+	ASSERT_EQ(config.getThingType(1).desc, UNKNOWN_TYPE_STRING);
+	ASSERT_EQ(config.getThingType(0).desc, UNKNOWN_TYPE_STRING);
+	ASSERT_EQ(config.getThingType(-1).desc, UNKNOWN_TYPE_STRING);
 }
 
 TEST_F(MGameFixture, MCollectKnownDefs)

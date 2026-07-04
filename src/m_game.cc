@@ -1500,7 +1500,7 @@ const sectortype_t &Instance::M_GetSectorType(int type) const
 
 	static sectortype_t dummy_type =
 	{
-		"UNKNOWN TYPE"
+		UNKNOWN_TYPE_STRING
 	};
 
 	return dummy_type;
@@ -1518,7 +1518,7 @@ const linetype_t &ConfigData::getLineType(int type) const
 
 	static const linetype_t dummy_type =
 	{
-		0, "UNKNOWN TYPE"
+		0, UNKNOWN_TYPE_STRING
 	};
 
 	return dummy_type;
@@ -1534,7 +1534,7 @@ const thingtype_t &ConfigData::getThingType(int type) const
 	static thingtype_t dummy_type =
 	{
 		0, 0, UNKNOWN_THING_RADIUS, 1.0f,
-		"UNKNOWN TYPE", "NULL",
+		UNKNOWN_TYPE_STRING, "NULL",
 		UNKNOWN_THING_COLOR
 	};
 
