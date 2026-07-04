@@ -3112,7 +3112,26 @@ static void Tags_FindUnmatchedSectors(selection_c& secs, const Instance &inst)
 		if (inst.conf.features.tag_666 != Tag666Rules::disabled && (tag == 666 || tag == 667))
 			continue;
 
-		if (! LD_tag_exists(tag, inst.level))
+		bool found = false;
+		for (int lineIndex = 0; lineIndex < inst.level.numLinedefs(); ++lineIndex)
+		{
+			SpecialTagInfo info{};
+			const auto &linedef = inst.level.linedefs[lineIndex];
+			if(!getSpecialTagInfo(ObjType::linedefs, lineIndex, linedef->type, linedef.get(), inst.conf, info))
+			{
+				continue;
+			}
+			for(int i = 0; i < info.numtags; ++i)
+				if(info.tags[i] == tag)
+				{
+					found = true;
+					break;
+				}
+			if(found)
+				break;
+
+		}
+		if (! found)
 			secs.set(s);
 	}
 }
