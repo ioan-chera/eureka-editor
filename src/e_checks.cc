@@ -3193,14 +3193,21 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 		if (L->type <= 0)
 			continue;
 
-		if (L->tag > 0)
-			continue;
-
 		// use type description to determine if a tag is needed
 		// e.g. D1, DR, --, and lowercase first letter all mean "no tag".
 
-		const linetype_t &info = inst.conf.getLineType(L->type);
+		SpecialTagInfo tagInfo{};
+		if(getSpecialTagInfo(ObjType::linedefs, n, L->type, L.get(), inst.conf, tagInfo))
+		{
+			bool skip = false;
+			for(int i = 0; i < tagInfo.numtags; ++i)
+				if(tagInfo.tags[i] >= 1)
+					skip = true;
+			if(skip)
+				continue;
+		}
 
+		const linetype_t &info = inst.conf.getLineType(L->type);
 		SString desc = info.desc;
 		if(desc.empty())
 		{
