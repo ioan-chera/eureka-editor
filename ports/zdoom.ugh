@@ -470,6 +470,8 @@ special 159 r "Sector_SetPlaneReflection (OpenGL)"  :tag  floor  ceiling
 special 208 r "TranslucentLine"        :line_id  opacity  additive?  extra_flags
 special 209 r "Transfer_Heights"       :tag  flags
 
+specialHandling 209 fakeHeights
+
 # Scripting
 special  80 k "ACS_Execute"             script  map  param1  param2  param3
 special  83 k "ACS_LockedExecute"       script  map  param1  param2  lock
@@ -596,6 +598,8 @@ line 337 r "-- ZD: Line Horizon"
 line 280 r "-- ZD: Transfer Heights /swim" :tag
 line 350 r "-- ZD: Transfer_Heights"       :tag
 line 351 r "-- ZD: Transfer_Heights /clip" :tag
+
+specialHandling 280 fakeHeights
 
 line 284 r "-- LEG: Translucent 50%"            :line_id
 line 285 r "-- LEG: Translucent 75%"            :line_id

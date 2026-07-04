@@ -168,6 +168,8 @@ line 226 - "-- BOOM: Point force"   :tag
 line 242 - "-- BOOM: Deep water"    :tag
 line 260 - "-- BOOM: Translucent"   :line_id
 
+specialHandling 242 fakeHeights
+
 line 227 v "W1 BOOM: Elevator up"   :tag
 line 228 v "WR BOOM: Elevator up"   :tag
 line 229 v "S1 BOOM: Elevator up"   :tag

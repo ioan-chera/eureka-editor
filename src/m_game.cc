@@ -111,6 +111,7 @@ public:
 	}
 
 	void fail(EUR_FORMAT_STRING(const char *format), ...) const EUR_PRINTF(2, 3);
+	void log(EUR_FORMAT_STRING(const char *format), ...) const EUR_PRINTF(2, 3);
 
 private:
 	// filename for error messages (lacks the directory)
@@ -505,6 +506,17 @@ void parser_state_c::fail(EUR_FORMAT_STRING(const char *format), ...) const
 	throw ParseException(prefix + ss);
 }
 
+void parser_state_c::log(EUR_FORMAT_STRING(const char *format), ...) const
+{
+	va_list ap;
+	va_start(ap, format);
+	SString ss = SString::vprintf(format, ap);
+	va_end(ap);
+
+	SString prefix = SString::printf("%s(%d): ", reinterpret_cast<const char *>(file().u8string().c_str()), line());
+	gLog.printf("%s", (prefix + ss).c_str());
+}
+
 static const char *const bad_arg_count_fail = "directive \"%s\" takes %d parameters";
 
 
@@ -683,6 +695,24 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		}
 		else
 			config.line_types[number] = info;
+	}
+	else if(y_stricmp(argv[0], "specialhandling") == 0)
+	{
+		if(nargs < 2)
+			pst->fail(bad_arg_count_fail, argv[0], 2);
+
+		int number = atoi(argv[1]);
+		auto it = config.line_types.find(number);
+		if(it == config.line_types.end())
+			pst->log("missing line type for special handling: %d\n", number);
+		else
+		{
+			const char *flag = argv[2];
+			if(y_stricmp(flag, "fakeheights") == 0)
+				it->second.flags |= linetype_t::flagFakeHeights;
+			else
+				pst->log("unknown special handling '%s' for %d\n", flag, number);
+		}
 	}
 
 	else if (y_stricmp(argv[0], "sector") == 0)

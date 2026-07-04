@@ -90,11 +90,17 @@ struct SpecialArg
 // line <number> <group> <description>  [ arg1 .. arg5 ]
 struct linetype_t
 {
+	enum
+	{
+		flagFakeHeights = 1,
+	};
+
     bool isPolyObjectSpecial() const;
 
 	char group;
 	SString desc;
 	SpecialArg args[5];
+	unsigned flags;
 };
 
 

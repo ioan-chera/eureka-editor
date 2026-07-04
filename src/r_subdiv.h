@@ -197,7 +197,7 @@ public:
 	
 private:
 	void Rebuild();
-	void CheckBoom242(const LineDef *L);
+	void CheckBoom242(const LineDef &L, int ld_num);
 	void CheckExtraFloor(const LineDef *L, int ld_num);
 	void CheckLineSlope(const LineDef *L);
 	void CheckPlaneCopy(const LineDef *L);

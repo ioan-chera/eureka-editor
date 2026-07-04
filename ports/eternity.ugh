@@ -550,6 +550,8 @@ special 211 r "Transfer_CeilingLight"   :tag
 special  57 r "Sector_SetPortal"        :tag  portal_type  plane  misc  opacity
 special 209 r "Transfer_Heights"        :tag
 
+specialHandling 209 fakeHeights
+
 # Scripting
 special  80 k "ACS_Execute"             script  map  param1  param2  param3
 special  83 k "ACS_LockedExecute"       script  map  param1  param2  lock

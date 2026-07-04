@@ -79,6 +79,7 @@ line 287 r "-- LEG: Translucent FIRE"   :line_id
 line 288 r "-- LEG: Translucent FX1 "   :line_id
 
 line 280 r "-- LEG: Swim Water" :tag
+specialHandling 280 fakeHeights
 
 line 282 r "-- LEG: Gen Colormap #UML"  :tag
 # side1 upper texture: #rrggbba ( or texture name ) Color

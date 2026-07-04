@@ -175,7 +175,7 @@ void sector_info_cache_c::Rebuild()
 	{
 		const auto L = inst.level.linedefs[n];
 
-		CheckBoom242(L.get());
+		CheckBoom242(*L.get(), n);
 		CheckExtraFloor(L.get(), n);
 		CheckLineSlope(L.get());
 
@@ -211,23 +211,30 @@ void sector_info_cache_c::Rebuild()
 	}
 }
 
-void sector_info_cache_c::CheckBoom242(const LineDef *L)
+void sector_info_cache_c::CheckBoom242(const LineDef &L, int ld_num)
 {
-	if (inst.conf.features.gen_types && (L->type == 242 || L->type == 280))
-	{ /* ok */ }
-	else if (inst.loaded.levelFormat != MapFormat::doom && L->type == 209)
-	{ /* ok */ }
-	else
+	const linetype_t &type = inst.conf.getLineType(L.type);
+	if(!(type.flags & linetype_t::flagFakeHeights))
 		return;
 
-	if (L->tag <= 0 || L->right < 0)
+	// get the first tag
+	SpecialTagInfo tagInfo{};
+	if(!getSpecialTagInfo(ObjType::linedefs, ld_num, L.type, &L, inst.conf, tagInfo) ||
+	   tagInfo.numtags <= 0 || tagInfo.tags[0] <= 0)
+	{
+		return;
+	}
+
+	if (L.right < 0)
 		return;
 
-	int dummy_sec = inst.level.getRight(*L)->sector;
+	int tag = tagInfo.tags[0];
+
+	int dummy_sec = inst.level.getRight(L)->sector;
 
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (inst.level.sectors[n]->tag == L->tag)
+		if (inst.level.sectors[n]->tag == tag)
 			infos[n].floors.heightsec = dummy_sec;
 	}
 }
