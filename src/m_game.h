@@ -77,8 +77,14 @@ enum class SpecialArgType
 //
 struct SpecialArg
 {
+	enum
+	{
+		shouldNotBeZero = 1	// for tags, TIDs in vanilla Hexen. Doom format ignores this.
+	};
+
     SString name;
     SpecialArgType type = SpecialArgType::generic;
+	unsigned flags;
 };
 
 // line <number> <group> <description>  [ arg1 .. arg5 ]

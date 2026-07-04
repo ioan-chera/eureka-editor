@@ -544,19 +544,26 @@ static bool parseArg(const char *text, SpecialArg &arg)
     const char *type = pos + 1;
     // Either use whatever's before the colon, or the type name if empty.
     arg.name = pos == text ? type : SString(text, (int)(pos - text));
-    if(!strcmp(type, "tag"))
+	size_t typeLength = strlen(type);
+	if(typeLength >= 1 && type[typeLength - 1] == '!')
+	{
+		arg.flags |= SpecialArg::shouldNotBeZero;
+		--typeLength;
+	}
+
+    if(!strncmp(type, "tag", typeLength))
         arg.type = SpecialArgType::tag;
-    else if(!strcmp(type, "tag_hi"))
+    else if(!strncmp(type, "tag_hi", typeLength))
         arg.type = SpecialArgType::tag_hi;
-    else if(!strcmp(type, "line_id"))
+    else if(!strncmp(type, "line_id", typeLength))
         arg.type = SpecialArgType::line_id;
-    else if(!strcmp(type, "self_line_id"))
+    else if(!strncmp(type, "self_line_id", typeLength))
         arg.type = SpecialArgType::self_line_id;
-    else if(!strcmp(type, "self_line_id_hi"))
+    else if(!strncmp(type, "self_line_id_hi", typeLength))
         arg.type = SpecialArgType::self_line_id_hi;
-    else if(!strcmp(type, "tid"))
+    else if(!strncmp(type, "tid", typeLength))
         arg.type = SpecialArgType::tid;
-    else if(!strcmp(type, "po"))
+    else if(!strncmp(type, "po", typeLength))
         arg.type = SpecialArgType::po;
     else    // error
         return false;

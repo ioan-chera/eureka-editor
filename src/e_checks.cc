@@ -3193,19 +3193,16 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 		if (L->type <= 0)
 			continue;
 
+		// FOR DOOM FORMAT:
 		// use type description to determine if a tag is needed
 		// e.g. D1, DR, --, and lowercase first letter all mean "no tag".
-
-		SpecialTagInfo tagInfo{};
-		if(getSpecialTagInfo(ObjType::linedefs, n, L->type, L.get(), inst.conf, tagInfo))
+		if(inst.loaded.levelFormat == MapFormat::doom)
 		{
-			bool skip = false;
-			for(int i = 0; i < tagInfo.numtags; ++i)
-				if(tagInfo.tags[i] >= 1)
-					skip = true;
-			if(skip)
+			if(L->tag >= 1)
 				continue;
 		}
+
+		// FOR HEXEN AND UDMF FORMATS: look in the special arg information
 
 		const linetype_t &info = inst.conf.getLineType(L->type);
 		SString desc = info.desc;
@@ -3214,17 +3211,38 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 			gLog.printf("WARNING: invalid empty description for line type %d\n", L->type);
 			continue;
 		}
+		bool isGeneralized = false;
 		if(desc == UNKNOWN_TYPE_STRING)
 		{
 			desc = M_GeneralizedLineDescription(inst.conf, L->type);
 			if(desc.empty())
 				desc = UNKNOWN_TYPE_STRING;
+			else
+				isGeneralized = true;
 		}
 
-		char first = desc[0];
+		if(inst.loaded.levelFormat == MapFormat::doom || isGeneralized)
+		{
+			char first = desc[0];
 
-		if (first == 'D' || first == '-' || ('a' <= first && first <= 'z'))
-			continue;
+			if (first == 'D' || first == '-' || ('a' <= first && first <= 'z'))
+				continue;
+		}
+		else
+		{
+			bool foundZero = false;
+			for(size_t i = 0; i < lengthof(info.args); ++i)
+			{
+				const SpecialArg &arg = info.args[i];
+				if(arg.flags & SpecialArg::shouldNotBeZero && L->Arg((int)(i + 1)) <= 0)
+				{
+					foundZero = true;
+					break;
+				}
+			}
+			if(!foundZero)
+				continue;
+		}
 
 		lines.set(n);
 	}
