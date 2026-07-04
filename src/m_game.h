@@ -102,6 +102,15 @@ struct linetype_t
 		flag3dFloorTop = 128,
 		flag3dFloorTopTranslucent = 256,
 		flag3dFloorParameterized = 512,
+		flagSlope01 = 1024,
+		flagSlope02 = 2048,
+		flagSlope10 = 4096,
+		flagSlope11 = 8192,
+		flagSlope12 = 16384,
+		flagSlope20 = 32768,
+		flagSlope21 = 65536,
+		flagSlope22 = 131072,
+		flagSlopeParameterized = 262144,
 	};
 
     bool isPolyObjectSpecial() const;

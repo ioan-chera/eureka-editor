@@ -74,6 +74,14 @@ line 345 s "-- ODAMEX: Slope C2 + F2"
 line 346 s "-- ODAMEX: Slope C1 + F2"
 line 347 s "-- ODAMEX: Slope C2 + F1"
 
+specialHandling 340 slope10
+specialHandling 341 slope01
+specialHandling 342 slope11
+specialHandling 343 slope20
+specialHandling 344 slope02
+specialHandling 345 slope22
+specialHandling 346 slope21
+specialHandling 347 slope12
 
 #---- ODAMEX SECTOR TYPES ----------
 

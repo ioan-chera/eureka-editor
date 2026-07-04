@@ -728,6 +728,24 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 				it->second.flags |= linetype_t::flag3dFloorTopTranslucent;
 			else if(y_stricmp(flag, "3dFloorParameterized") == 0)
 				it->second.flags |= linetype_t::flag3dFloorParameterized;
+			else if(y_stricmp(flag, "Slope01") == 0)
+				it->second.flags |= linetype_t::flagSlope01;
+			else if(y_stricmp(flag, "Slope02") == 0)
+				it->second.flags |= linetype_t::flagSlope02;
+			else if(y_stricmp(flag, "Slope10") == 0)
+				it->second.flags |= linetype_t::flagSlope10;
+			else if(y_stricmp(flag, "Slope11") == 0)
+				it->second.flags |= linetype_t::flagSlope11;
+			else if(y_stricmp(flag, "Slope12") == 0)
+				it->second.flags |= linetype_t::flagSlope12;
+			else if(y_stricmp(flag, "Slope20") == 0)
+				it->second.flags |= linetype_t::flagSlope20;
+			else if(y_stricmp(flag, "Slope21") == 0)
+				it->second.flags |= linetype_t::flagSlope21;
+			else if(y_stricmp(flag, "Slope22") == 0)
+				it->second.flags |= linetype_t::flagSlope22;
+			else if(y_stricmp(flag, "SlopeParameterized") == 0)
+				it->second.flags |= linetype_t::flagSlopeParameterized;
 			else
 				pst->log("unknown special handling '%s' for %d\n", flag, number);
 		}

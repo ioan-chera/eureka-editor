@@ -300,58 +300,25 @@ void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 
 void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 {
-	// EDGE style
-	if (inst.loaded.levelFormat == MapFormat::doom && (inst.conf.features.slopes & 1))
-	{
-		switch (L->type)
-		{
-		case 567: PlaneAlign(L, 2, 0); break;
-		case 568: PlaneAlign(L, 0, 2); break;
-		case 569: PlaneAlign(L, 2, 2); break;
-		default: break;
-		}
-	}
-
-	// Eternity style
-	if (inst.loaded.levelFormat == MapFormat::doom && (inst.conf.features.slopes & 2))
-	{
-		switch (L->type)
-		{
-		case 386: PlaneAlign(L, 1, 0); break;
-		case 387: PlaneAlign(L, 0, 1); break;
-		case 388: PlaneAlign(L, 1, 1); break;
-		case 389: PlaneAlign(L, 2, 0); break;
-		case 390: PlaneAlign(L, 0, 2); break;
-		case 391: PlaneAlign(L, 2, 2); break;
-		case 392: PlaneAlign(L, 2, 1); break;
-		case 393: PlaneAlign(L, 1, 2); break;
-		default: break;
-		}
-	}
-
-	// Odamex and ZDoom style
-	if (inst.loaded.levelFormat == MapFormat::doom && (inst.conf.features.slopes & 4))
-	{
-		switch (L->type)
-		{
-		case 340: PlaneAlign(L, 1, 0); break;
-		case 341: PlaneAlign(L, 0, 1); break;
-		case 342: PlaneAlign(L, 1, 1); break;
-		case 343: PlaneAlign(L, 2, 0); break;
-		case 344: PlaneAlign(L, 0, 2); break;
-		case 345: PlaneAlign(L, 2, 2); break;
-		case 346: PlaneAlign(L, 2, 1); break;
-		case 347: PlaneAlign(L, 1, 2); break;
-		default: break;
-		}
-	}
-
-	// ZDoom (in hexen format)
-	if (inst.loaded.levelFormat != MapFormat::doom && (inst.conf.features.slopes & 8))
-	{
-		if (L->type == 181)
-			PlaneAlign(L, L->tag, L->arg2);
-	}
+	const linetype_t &type = inst.conf.getLineType(L->type);
+	if(type.flags & linetype_t::flagSlope01)
+		PlaneAlign(L, 0, 1);
+	else if(type.flags & linetype_t::flagSlope02)
+		PlaneAlign(L, 0, 2);
+	else if(type.flags & linetype_t::flagSlope10)
+		PlaneAlign(L, 1, 0);
+	else if(type.flags & linetype_t::flagSlope11)
+		PlaneAlign(L, 1, 1);
+	else if(type.flags & linetype_t::flagSlope12)
+		PlaneAlign(L, 1, 2);
+	else if(type.flags & linetype_t::flagSlope20)
+		PlaneAlign(L, 2, 0);
+	else if(type.flags & linetype_t::flagSlope21)
+		PlaneAlign(L, 2, 1);
+	else if(type.flags & linetype_t::flagSlope22)
+		PlaneAlign(L, 2, 2);
+	else if(type.flags & linetype_t::flagSlopeParameterized)
+		PlaneAlign(L, L->tag, L->arg2);
 }
 
 void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)

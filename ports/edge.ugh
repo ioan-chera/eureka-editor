@@ -133,6 +133,9 @@ line 567 s "-- EDGE: Slope Floor"
 line 568 s "-- EDGE: Slope Ceiling"
 line 569 s "-- EDGE: Slope F + C"
 
+specialHandling 567 slope20
+specialHandling 568 slope02
+specialHandling 569 slope22
 
 line 442 w "DR Sliding door LEFT /mon"
 line 443 w "DR Sliding door LEFT"
