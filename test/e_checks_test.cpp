@@ -40,6 +40,7 @@
 TEST(EChecks, FindFreeTag)
 {
 	Instance inst;
+	inst.loaded.levelFormat = MapFormat::doom;
 
 	// Check with empty level
 	ASSERT_EQ(findFreeTag(inst, false), 0);
