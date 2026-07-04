@@ -3062,7 +3062,7 @@ void Instance::CMD_ApplyTag()
 	{
 		Beep("No last tag");
 	}
-	else if (new_tag > 32767)
+	else if (new_tag > 32767 && loaded.levelFormat != MapFormat::udmf)
 	{
 		Beep("Out of tag numbers");
 	}
@@ -4650,7 +4650,21 @@ int findFreeTag(const Instance &inst, bool forsector)
 	};
 
 	for(int i = 0; i < doc.numLinedefs(); ++i)
-		addtag(doc.linedefs[i]->tag);
+	{
+		if(inst.loaded.levelFormat == MapFormat::doom)
+		{
+			addtag(doc.linedefs[i]->tag);
+			continue;
+		}
+
+		SpecialTagInfo tagInfo{};
+		if(!getSpecialTagInfo(ObjType::linedefs, i, doc.linedefs[i]->type, doc.linedefs[i].get(), inst.conf, tagInfo))
+		{
+			continue;
+		}
+		for(int i = 0; i < tagInfo.numtags; ++i)
+			addtag(tagInfo.tags[i]);
+	}
 	for(int i = 0; i < doc.numSectors(); ++i)
 		addtag(doc.sectors[i]->tag);
 

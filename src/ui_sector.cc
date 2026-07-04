@@ -559,7 +559,7 @@ void UI_SectorBox::FreshTag()
 
 	int new_tag = findFreeTag(inst, true);
 
-	if (new_tag > 32767)
+	if (new_tag > 32767 && inst.loaded.levelFormat != MapFormat::udmf)
 	{
 		inst.Beep("Out of tag numbers");
 		return;
