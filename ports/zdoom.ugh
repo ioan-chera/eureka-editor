@@ -349,6 +349,7 @@ special 219 s "Sector_SetFriction"         :tag  friction
 special 220 s "Sector_SetCurrent"          :tag  strength  angle  use_line_angle?
 special 227 s "PointPush_SetForce"         :tag  :tid  strength  use_line_angle?
 
+specialHandling 118 slopeCopyParameterized
 specialHandling 160 3dFloorParameterized
 specialHandling 181 slopeParameterized
 

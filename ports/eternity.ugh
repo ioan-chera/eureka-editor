@@ -465,6 +465,7 @@ special 219 s "Sector_SetFriction"         :tag
 special 220 s "Sector_SetCurrent"          :tag  force  angle  flags
 special 227 s "PointPush_SetForce"         :tag  :tid  force  use_line_angle?
 
+specialHandling 118 slopeCopyParameterized
 specialHandling 181 slopeParameterized
 
 # Lighting
@@ -631,6 +632,9 @@ specialHandling 390 slope02
 specialHandling 391 slope22
 specialHandling 392 slope21
 specialHandling 393 slope12
+specialHandling 394 slopeCopyFloor
+specialHandling 395 slopeCopyCeiling
+specialHandling 396 slopeCopyBoth
 
 line 280 n "WR EE: Exec Script"
 line 273 n "WR EE: Exec Script /1way"

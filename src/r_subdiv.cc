@@ -317,23 +317,24 @@ void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 
 void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)
 {
-	// Eternity style
-	if (inst.loaded.levelFormat == MapFormat::doom && (inst.conf.features.slopes & 2))
+	const linetype_t &type = inst.conf.getLineType(L->type);
+	const auto *copyInfo = std::get_if<linetype_t::SlopeCopyInfo>(&type.specialHandling);
+	if(!copyInfo)
+		return;
+	switch(*copyInfo)
 	{
-		switch (L->type)
-		{
-		case 394: PlaneCopy(L, L->tag, 0, 0, 0, 0); break;
-		case 395: PlaneCopy(L, 0, L->tag, 0, 0, 0); break;
-		case 396: PlaneCopy(L, L->tag, L->tag, 0, 0, 0); break;
-		default: break;
-		}
-	}
-
-	// ZDoom (in hexen format)
-	if (inst.loaded.levelFormat != MapFormat::doom && (inst.conf.features.slopes & 8))
-	{
-		if (L->type == 118)
+		case linetype_t::SlopeCopyInfo::floor:
+			PlaneCopy(L, L->tag, 0, 0, 0, 0);
+			break;
+		case linetype_t::SlopeCopyInfo::ceiling:
+			PlaneCopy(L, 0, L->tag, 0, 0, 0);
+			break;
+		case linetype_t::SlopeCopyInfo::both:
+			PlaneCopy(L, L->tag, L->tag, 0, 0, 0);
+			break;
+		case linetype_t::SlopeCopyInfo::parameterized:
 			PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
+			break;
 	}
 }
 

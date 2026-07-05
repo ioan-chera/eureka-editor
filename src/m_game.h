@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -33,6 +34,7 @@
 #include <map>
 #include <optional>
 #include <unordered_map>
+#include <variant>
 
 #include <filesystem>
 
@@ -111,13 +113,21 @@ struct linetype_t
 		Part floor;
 		Part ceiling;
 	};
+	enum class SlopeCopyInfo
+	{
+		floor,
+		ceiling,
+		both,
+		parameterized
+	};
 
     bool isPolyObjectSpecial() const;
 
 	char group;
 	SString desc;
 	SpecialArg args[5];
-	std::variant<SimpleInfo, Floor3DInfo, SlopeInfo> specialHandling = SimpleInfo::none;
+	std::variant<SimpleInfo, Floor3DInfo, SlopeInfo, SlopeCopyInfo> specialHandling =
+			SimpleInfo::none;
 };
 
 

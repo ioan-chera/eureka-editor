@@ -750,6 +750,14 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 				it->second.specialHandling = linetype_t::SlopeInfo{back, back};
 			else if(y_stricmp(flag, "SlopeParameterized") == 0)
 				it->second.specialHandling = linetype_t::SlopeInfo{disabledOrParameterized, disabledOrParameterized};
+			else if(y_stricmp(flag, "SlopeCopyFloor") == 0)
+				it->second.specialHandling = linetype_t::SlopeCopyInfo::floor;
+			else if(y_stricmp(flag, "SlopeCopyCeiling") == 0)
+				it->second.specialHandling = linetype_t::SlopeCopyInfo::ceiling;
+			else if(y_stricmp(flag, "SlopeCopyBoth") == 0)
+				it->second.specialHandling = linetype_t::SlopeCopyInfo::both;
+			else if(y_stricmp(flag, "SlopeCopyParameterized") == 0)
+				it->second.specialHandling = linetype_t::SlopeCopyInfo::parameterized;
 			else
 				pst->log("unknown special handling '%s' for %d\n", flag, number);
 		}
