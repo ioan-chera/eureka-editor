@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2006-2020 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -214,7 +215,8 @@ void sector_info_cache_c::Rebuild()
 void sector_info_cache_c::CheckBoom242(const LineDef &L, int ld_num)
 {
 	const linetype_t &type = inst.conf.getLineType(L.type);
-	if(!(type.flags & linetype_t::flagFakeHeights))
+	const auto *simpleInfo = std::get_if<linetype_t::SimpleInfo>(&type.specialHandling);
+	if(!simpleInfo || *simpleInfo != linetype_t::SimpleInfo::fakeHeights)
 		return;
 
 	// get the first tag
@@ -248,25 +250,12 @@ void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 	int sec_tag = L->tag;
 
 	const linetype_t &type = inst.conf.getLineType(L->type);
-	unsigned specflags = type.flags;
-
-	if(specflags & linetype_t::flag3dFloorSimple)
-		flags = 0;
-	else if(specflags & linetype_t::flag3dFloorLower)
-		flags = EXFL_LOWER;
-	else if(specflags & linetype_t::flag3dFloorUpper)
-		flags = EXFL_UPPER;
-	else if(specflags & linetype_t::flag3dFloorBottom)
-		flags = EXFL_BOTTOM;
-	else if(specflags & linetype_t::flag3dFloorBottomTranslucent)
-		flags = EXFL_BOTTOM | EXFL_TRANSLUC;
-	else if(specflags & linetype_t::flag3dFloorTranslucent)
-		flags = EXFL_TRANSLUC;
-	else if(specflags & linetype_t::flag3dFloorTop)
-		flags = EXFL_TOP;
-	else if(specflags & linetype_t::flag3dFloorTopTranslucent)
-		flags = EXFL_TOP | EXFL_TRANSLUC;
-	else if(specflags & linetype_t::flag3dFloorParameterized)
+	const auto *floor3DInfo = std::get_if<linetype_t::Floor3DInfo>(&type.specialHandling);
+	if(!floor3DInfo)
+		return;
+	if(floor3DInfo->exFloorFlags)
+		flags = *floor3DInfo->exFloorFlags;
+	else
 	{
 		flags = 0;
 
@@ -301,24 +290,29 @@ void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 {
 	const linetype_t &type = inst.conf.getLineType(L->type);
-	if(type.flags & linetype_t::flagSlope01)
-		PlaneAlign(L, 0, 1);
-	else if(type.flags & linetype_t::flagSlope02)
-		PlaneAlign(L, 0, 2);
-	else if(type.flags & linetype_t::flagSlope10)
-		PlaneAlign(L, 1, 0);
-	else if(type.flags & linetype_t::flagSlope11)
-		PlaneAlign(L, 1, 1);
-	else if(type.flags & linetype_t::flagSlope12)
-		PlaneAlign(L, 1, 2);
-	else if(type.flags & linetype_t::flagSlope20)
-		PlaneAlign(L, 2, 0);
-	else if(type.flags & linetype_t::flagSlope21)
-		PlaneAlign(L, 2, 1);
-	else if(type.flags & linetype_t::flagSlope22)
-		PlaneAlign(L, 2, 2);
-	else if(type.flags & linetype_t::flagSlopeParameterized)
+	const auto *slopeInfo = std::get_if<linetype_t::SlopeInfo>(&type.specialHandling);
+	if(!slopeInfo)
+		return;
+
+	auto partToNumber = [](linetype_t::SlopeInfo::Part part) {
+		switch(part)
+		{
+			case linetype_t::SlopeInfo::Part::disabledOrParameterized:
+			default:
+				return 0;
+			case linetype_t::SlopeInfo::Part::front:
+				return 1;
+			case linetype_t::SlopeInfo::Part::back:
+				return 2;
+		}
+	};
+
+	int p1 = partToNumber(slopeInfo->floor);
+	int p2 = partToNumber(slopeInfo->ceiling);
+	if(!p1 && !p2)
 		PlaneAlign(L, L->tag, L->arg2);
+	else
+		PlaneAlign(L, p1, p2);
 }
 
 void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)

@@ -90,27 +90,25 @@ struct SpecialArg
 // line <number> <group> <description>  [ arg1 .. arg5 ]
 struct linetype_t
 {
-	enum
+	enum class SimpleInfo
 	{
-		flagFakeHeights = 1,
-		flag3dFloorSimple = 2,
-		flag3dFloorUpper = 4,
-		flag3dFloorLower = 8,
-		flag3dFloorBottom = 16,
-		flag3dFloorBottomTranslucent = 32,
-		flag3dFloorTranslucent = 64,
-		flag3dFloorTop = 128,
-		flag3dFloorTopTranslucent = 256,
-		flag3dFloorParameterized = 512,
-		flagSlope01 = 1024,
-		flagSlope02 = 2048,
-		flagSlope10 = 4096,
-		flagSlope11 = 8192,
-		flagSlope12 = 16384,
-		flagSlope20 = 32768,
-		flagSlope21 = 65536,
-		flagSlope22 = 131072,
-		flagSlopeParameterized = 262144,
+		none,
+		fakeHeights,
+	};
+	struct Floor3DInfo
+	{
+		std::optional<unsigned> exFloorFlags;	// EXFL_ flags from r_subdiv. Unset if parameterized
+	};
+	struct SlopeInfo
+	{
+		enum class Part
+		{
+			disabledOrParameterized,	// if both set to this, it's parameterized. If one, disabled
+			front,
+			back,
+		};
+		Part floor;
+		Part ceiling;
 	};
 
     bool isPolyObjectSpecial() const;
@@ -118,7 +116,7 @@ struct linetype_t
 	char group;
 	SString desc;
 	SpecialArg args[5];
-	unsigned flags;
+	std::variant<SimpleInfo, Floor3DInfo, SlopeInfo> specialHandling = SimpleInfo::none;
 };
 
 

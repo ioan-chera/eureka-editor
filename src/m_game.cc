@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -708,44 +709,47 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		else
 		{
 			const char *flag = argv[2];
+			using linetype_t::SlopeInfo::Part::disabledOrParameterized;
+			using linetype_t::SlopeInfo::Part::front;
+			using linetype_t::SlopeInfo::Part::back;
 			if(y_stricmp(flag, "fakeheights") == 0)
-				it->second.flags |= linetype_t::flagFakeHeights;
+				it->second.specialHandling = linetype_t::SimpleInfo::fakeHeights;
 			else if(y_stricmp(flag, "3dFloorSimple") == 0)
-				it->second.flags |= linetype_t::flag3dFloorSimple;
+				it->second.specialHandling = linetype_t::Floor3DInfo{0};
 			else if(y_stricmp(flag, "3dFloorUpper") == 0)
-				it->second.flags |= linetype_t::flag3dFloorUpper;
+				it->second.specialHandling = linetype_t::Floor3DInfo{EXFL_UPPER};
 			else if(y_stricmp(flag, "3dFloorLower") == 0)
-				it->second.flags |= linetype_t::flag3dFloorLower;
+				it->second.specialHandling = linetype_t::Floor3DInfo{EXFL_LOWER};
 			else if(y_stricmp(flag, "3dFloorBottom") == 0)
-				it->second.flags |= linetype_t::flag3dFloorBottom;
+				it->second.specialHandling = linetype_t::Floor3DInfo{EXFL_BOTTOM};
 			else if(y_stricmp(flag, "3dFloorBottomTranslucent") == 0)
-				it->second.flags |= linetype_t::flag3dFloorBottomTranslucent;
+				it->second.specialHandling = linetype_t::Floor3DInfo{EXFL_BOTTOM | EXFL_TRANSLUC};
 			else if(y_stricmp(flag, "3dFloorTranslucent") == 0)
-				it->second.flags |= linetype_t::flag3dFloorTranslucent;
+				it->second.specialHandling = linetype_t::Floor3DInfo{EXFL_TRANSLUC};
 			else if(y_stricmp(flag, "3dFloorTop") == 0)
-				it->second.flags |= linetype_t::flag3dFloorTop;
+				it->second.specialHandling = linetype_t::Floor3DInfo{EXFL_TOP};
 			else if(y_stricmp(flag, "3dFloorTopTranslucent") == 0)
-				it->second.flags |= linetype_t::flag3dFloorTopTranslucent;
+				it->second.specialHandling = linetype_t::Floor3DInfo{EXFL_TOP | EXFL_TRANSLUC};
 			else if(y_stricmp(flag, "3dFloorParameterized") == 0)
-				it->second.flags |= linetype_t::flag3dFloorParameterized;
+				it->second.specialHandling = linetype_t::Floor3DInfo{std::nullopt};
 			else if(y_stricmp(flag, "Slope01") == 0)
-				it->second.flags |= linetype_t::flagSlope01;
+				it->second.specialHandling = linetype_t::SlopeInfo{disabledOrParameterized, front};
 			else if(y_stricmp(flag, "Slope02") == 0)
-				it->second.flags |= linetype_t::flagSlope02;
+				it->second.specialHandling = linetype_t::SlopeInfo{disabledOrParameterized, back};
 			else if(y_stricmp(flag, "Slope10") == 0)
-				it->second.flags |= linetype_t::flagSlope10;
+				it->second.specialHandling = linetype_t::SlopeInfo{front, disabledOrParameterized};
 			else if(y_stricmp(flag, "Slope11") == 0)
-				it->second.flags |= linetype_t::flagSlope11;
+				it->second.specialHandling = linetype_t::SlopeInfo{front, front};
 			else if(y_stricmp(flag, "Slope12") == 0)
-				it->second.flags |= linetype_t::flagSlope12;
+				it->second.specialHandling = linetype_t::SlopeInfo{front, back};
 			else if(y_stricmp(flag, "Slope20") == 0)
-				it->second.flags |= linetype_t::flagSlope20;
+				it->second.specialHandling = linetype_t::SlopeInfo{back, disabledOrParameterized};
 			else if(y_stricmp(flag, "Slope21") == 0)
-				it->second.flags |= linetype_t::flagSlope21;
+				it->second.specialHandling = linetype_t::SlopeInfo{back, front};
 			else if(y_stricmp(flag, "Slope22") == 0)
-				it->second.flags |= linetype_t::flagSlope22;
+				it->second.specialHandling = linetype_t::SlopeInfo{back, back};
 			else if(y_stricmp(flag, "SlopeParameterized") == 0)
-				it->second.flags |= linetype_t::flagSlopeParameterized;
+				it->second.specialHandling = linetype_t::SlopeInfo{disabledOrParameterized, disabledOrParameterized};
 			else
 				pst->log("unknown special handling '%s' for %d\n", flag, number);
 		}
