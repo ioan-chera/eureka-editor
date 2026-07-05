@@ -3010,7 +3010,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 		{
 			if (inst.edit.mode == ObjType::linedefs)
 			{
-				op.changeLinedef(*it, &LineDef::tag, new_tag);
+				op.changeLinedef(*it, inst.loaded.levelFormat == MapFormat::udmf ? &LineDef::lineid : &LineDef::tag, new_tag);
 				changed = true;
 			}
 			else if (inst.edit.mode == ObjType::sectors)
@@ -3021,7 +3021,12 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 		}
 	}
 	if(changed)
-		inst.tagInMemory = new_tag;
+	{
+		if(inst.loaded.levelFormat == MapFormat::udmf && inst.edit.mode == ObjType::linedefs)
+			inst.lineIDInMemory = new_tag;
+		else
+			inst.tagInMemory = new_tag;
+	}
 }
 
 
@@ -3060,9 +3065,9 @@ void Instance::CMD_ApplyTag()
 
 	int new_tag;
 	if(do_last)
-		new_tag = tagInMemory;
+		new_tag = edit.mode == ObjType::linedefs && loaded.levelFormat == MapFormat::udmf ? lineIDInMemory : tagInMemory;
 	else
-		new_tag = findFreeTag(*this, edit.mode == ObjType::sectors);
+		new_tag = findFreeTag(*this, edit.mode);
 
 	if (new_tag <= 0)
 	{
@@ -3488,7 +3493,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		    inst.edit.Selected->notempty())
 		{
 			// always assume sector beastmark tags here
-			dialog.fresh_tag = findFreeTag(inst, true);
+			dialog.fresh_tag = findFreeTag(inst, ObjType::sectors);
 
 			dialog.AddGap(10);
 			dialog.AddLine("Apply a fresh tag to the selection", 0, 250, "Apply",
@@ -4660,7 +4665,7 @@ void Debug_CheckUnusedStuff(Document &doc)
 //
 // Finds a free tag. Doesn't care about limits at this point
 //
-int findFreeTag(const Instance &inst, bool forsector)
+int findFreeTag(const Instance &inst, ObjType type)
 {
 	std::unordered_set<int> tags;
 	int freetag = 0;
@@ -4682,18 +4687,30 @@ int findFreeTag(const Instance &inst, bool forsector)
 			continue;
 		}
 
-		SpecialTagInfo tagInfo{};
-		if(!getSpecialTagInfo(ObjType::linedefs, i, doc.linedefs[i]->type, doc.linedefs[i].get(), inst.conf, tagInfo))
+		switch(type)
 		{
-			continue;
+			case ObjType::linedefs:
+				addtag(doc.linedefs[i]->lineid);
+				break;
+			case ObjType::sectors:
+			{
+				SpecialTagInfo tagInfo{};
+				if(!getSpecialTagInfo(ObjType::linedefs, i, doc.linedefs[i]->type, doc.linedefs[i].get(), inst.conf, tagInfo))
+				{
+					continue;
+				}
+				for(int i = 0; i < tagInfo.numtags; ++i)
+					addtag(tagInfo.tags[i]);
+				break;
+			}
+			default:
+				break;
 		}
-		for(int i = 0; i < tagInfo.numtags; ++i)
-			addtag(tagInfo.tags[i]);
 	}
 	for(int i = 0; i < doc.numSectors(); ++i)
 		addtag(doc.sectors[i]->tag);
 
-	while(tags.count(freetag) || (forsector &&
+	while(tags.count(freetag) || (type == ObjType::sectors &&
 								  inst.conf.features.tag_666 != Tag666Rules::disabled &&
 								  (freetag == 666 || freetag == 667)))
 	{

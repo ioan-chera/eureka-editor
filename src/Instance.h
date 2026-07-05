@@ -511,6 +511,7 @@ public:	// will be private when we encapsulate everything
 	nodebuildinfo_t *nb_info = nullptr;
 	
 	int tagInMemory = 0;
+	int lineIDInMemory = 0;
 
 	WadData wad;
 

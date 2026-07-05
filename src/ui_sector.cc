@@ -547,7 +547,8 @@ void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 
 	int new_tag = atoi(box->tag->value());
 
-	new_tag = clamp(-32767, new_tag, 32767);
+	if(box->inst.loaded.levelFormat != MapFormat::udmf)
+		new_tag = clamp(-32767, new_tag, 32767);
 
 	if (!box->inst.edit.Selected->empty())
 		box->inst.level.checks.tagsApplyNewValue(new_tag);
@@ -557,7 +558,7 @@ void UI_SectorBox::FreshTag()
 {
 	mFixUp.checkDirtyFields();
 
-	int new_tag = findFreeTag(inst, true);
+	int new_tag = findFreeTag(inst, ObjType::sectors);
 
 	if (new_tag > 32767 && inst.loaded.levelFormat != MapFormat::udmf)
 	{
