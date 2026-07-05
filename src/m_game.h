@@ -31,6 +31,7 @@
 #include "m_strings.h"
 #include <initializer_list>
 #include <map>
+#include <optional>
 #include <unordered_map>
 
 #include <filesystem>
