@@ -2958,10 +2958,16 @@ void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 
 	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		int tag = doc.linedefs[i]->tag;
+		const auto &L = doc.linedefs[i];
 
-		if (tag > 0)
+		SpecialTagInfo tagInfo{};
+		if(!getSpecialTagInfo(ObjType::linedefs, i, L->type, L.get(), inst.conf, tagInfo))
+			continue;
+		for(int i = 0; i < tagInfo.numtags; ++i)
 		{
+			int tag = tagInfo.tags[i];
+			if(tag <= 0)
+				continue;
 			*min_tag = std::min(*min_tag, tag);
 			*max_tag = std::max(*max_tag, tag);
 		}
