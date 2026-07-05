@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2015-2020 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -46,18 +47,13 @@ class number_group_c
 #define NUMBER_GROUP_MAX	40
 
 private:
-	int size;
+	int size = 0;
 
-	int ranges[NUMBER_GROUP_MAX][2];
+	int ranges[NUMBER_GROUP_MAX][2] = {};
 
-	bool everything;
+	bool everything = false;
 
 public:
-	number_group_c() : size(0), everything(false)
-	{ }
-
-	~number_group_c()
-	{ }
 
 	void clear()
 	{
@@ -119,7 +115,7 @@ public:
 
 		for (;;)
 		{
-			// support an asterix to mean everything
+			// support an asterisk to mean everything
 			// (useful when using filters)
 			if (*str == '*')
 			{
@@ -1474,12 +1470,34 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 	return true;
 }
 
+bool UI_FindAndReplace::filterLineByTags(int idx) const
+{
+	const auto &L = inst.level.linedefs[idx];
+	SpecialTagInfo tagInfo{};
+	bool haveTags = getSpecialTagInfo(ObjType::linedefs, idx, L->type, L.get(), inst.conf, tagInfo);
+
+	if(haveTags)
+	{
+		bool found = false;
+		for(int tag : tagInfo.getAllTags())
+			if(Filter_Tag(tag))
+				return true;
+		if(!found)
+			return false;
+	}
+	else if(!Filter_Tag(0))	// TODO: line ID!
+		return false;
+	return true;
+}
 
 bool UI_FindAndReplace::Match_LineDef(int idx)
 {
 	const auto L = inst.level.linedefs[idx];
 
-	if (! Filter_Tag(L->tag) || ! Filter_Sides(L.get()))
+	if(!Filter_Sides(L.get()))
+		return false;
+
+	if(!filterLineByTags(idx))
 		return false;
 
 	const char *pattern = find_match->value();
@@ -1549,7 +1567,10 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 	if (! find_numbers->get(L->type))
 		return false;
 
-	if (! Filter_Tag(L->tag) || ! Filter_Sides(L.get()))
+	if(! Filter_Sides(L.get()))
+		return false;
+
+	if(!filterLineByTags(idx))
 		return false;
 
 	return true;
@@ -1584,7 +1605,7 @@ bool UI_FindAndReplace::Filter_PrevSel(int idx)
 }
 
 
-bool UI_FindAndReplace::Filter_Tag(int tag)
+bool UI_FindAndReplace::Filter_Tag(int tag) const
 {
 	if (! filter_toggle->value())
 		return true;

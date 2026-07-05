@@ -185,13 +185,14 @@ private:
 	// specialized functions for each search modality
 
 	bool Match_Thing(int idx);
+	bool filterLineByTags(int idx) const;
 	bool Match_LineDef(int idx);
 	bool Match_LineType(int idx);
 	bool Match_Sector(int idx);
 	bool Match_SectorType(int idx);
 
 	// return 'true' for pass, 'false' to reject
-	bool Filter_Tag(int tag);
+	bool Filter_Tag(int tag) const;
 	bool Filter_Sides(const LineDef *L);
 	bool Filter_PrevSel(int idx);
 

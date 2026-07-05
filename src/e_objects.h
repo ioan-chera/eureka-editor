@@ -31,6 +31,8 @@
 #include "m_vector.h"
 #include "objid.h"
 
+#include <vector>
+
 class EditOperation;
 class selection_c;
 struct ConfigData;
@@ -129,6 +131,7 @@ enum transform_keyword_e
 struct SpecialTagInfo
 {
 	bool hasNonZeroTargets() const;
+	std::vector<int> getAllTags() const;
 
     ObjType type;
     int objnum;

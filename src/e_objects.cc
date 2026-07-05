@@ -2377,6 +2377,20 @@ bool SpecialTagInfo::hasNonZeroTargets() const
 	return false;
 }
 
+std::vector<int> SpecialTagInfo::getAllTags() const
+{
+	std::vector<int> result;
+	result.reserve(numtags + numtids + numlineids + numpo + 1);
+
+	result.insert(result.end(), tags, tags + numtags);
+	result.insert(result.end(), tids, tids + numtids);
+	result.insert(result.end(), lineids, lineids + numlineids);
+	result.insert(result.end(), po, po + numpo);
+	result.insert(result.end(), selflineid);
+
+	return result;
+}
+
 //
 // Get the tag info here. Returns true if available and sets the output argument.
 //
