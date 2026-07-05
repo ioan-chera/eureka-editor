@@ -98,6 +98,7 @@ static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
 	crc += L->arg3;
 	crc += L->arg4;
 	crc += L->arg5;
+	crc += L->lineid;
 
 	ChecksumVertex(crc, &doc.getStart(*L));
 	ChecksumVertex(crc, &doc.getEnd(*L));

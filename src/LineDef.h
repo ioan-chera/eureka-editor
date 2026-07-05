@@ -40,6 +40,8 @@ public:
 	int arg4 = 0;
 	int arg5 = 0;
 
+	int lineid = 0;
+
 public:
 	bool TouchesVertex(int v_num) const
 	{
