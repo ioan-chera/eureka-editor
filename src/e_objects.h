@@ -128,6 +128,8 @@ enum transform_keyword_e
 //
 struct SpecialTagInfo
 {
+	bool hasNonZeroTargets() const;
+
     ObjType type;
     int objnum;
 

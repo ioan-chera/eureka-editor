@@ -772,8 +772,12 @@ void UI_Canvas::DrawLinedefs()
 					col = RED;
 				else if (L->type != 0)
 				{
-					if (L->tag != 0)
+					SpecialTagInfo tagInfo{};
+					if(getSpecialTagInfo(ObjType::linedefs, n, L->type, L.get(), inst.conf,
+										 tagInfo) && tagInfo.hasNonZeroTargets())
+					{
 						col = LIGHTMAGENTA;
+					}
 					else
 						col = LIGHTGREEN;
 				}

@@ -2356,6 +2356,27 @@ void Instance::CMD_Quantize()
 	edit.error_mode = true;
 }
 
+bool SpecialTagInfo::hasNonZeroTargets() const
+{
+	if(numtags)
+		for(int tag : tags)
+			if(tag >= 1)
+				return true;
+	if(numtids)
+		for(int tid : tids)
+			if(tid >= 1)
+				return true;
+	if(numlineids)
+		for(int lineid : lineids)
+			if(lineid >= 1)
+				return true;
+	if(numpo)
+		for(int ipo : po)
+			if(ipo >= 1)
+				return true;
+	return false;
+}
+
 //
 // Get the tag info here. Returns true if available and sets the output argument.
 //
