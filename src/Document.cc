@@ -93,7 +93,7 @@ static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
 {
 	crc += L->flags;
 	crc += L->type;
-	crc += L->tag;
+	crc += L->arg1;
 	crc += L->arg2;
 	crc += L->arg3;
 	crc += L->arg4;

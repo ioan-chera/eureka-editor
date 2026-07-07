@@ -1654,10 +1654,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                 const LineDef &line = *inst.level.linedefs[m];
                 if(inst.loaded.levelFormat == MapFormat::doom)
                 {
-                    if(line.tag > 0)
+                    if(line.arg1 > 0)
                     {
                         for(int i = 0; i < info.numlineids; ++i)
-                            if(line.tag == info.lineids[i])
+                            if(line.arg1 == info.lineids[i])
                             {
                                 DrawHighlight(ObjType::linedefs, m);
 								DrawConnection(info.type, info.objnum, ObjType::linedefs, m);
@@ -1776,7 +1776,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
             highlightTaggedItems(info);
         if(inst.loaded.levelFormat == MapFormat::doom)
         {
-            highlightTaggingTriggers(line->tag, &SpecialTagInfo::lineids,
+            highlightTaggingTriggers(line->arg1, &SpecialTagInfo::lineids,
                                      &SpecialTagInfo::numlineids, objtype, objnum);
         }
         else

@@ -243,11 +243,11 @@ void sector_info_cache_c::CheckBoom242(const LineDef &L, int ld_num)
 
 void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 {
-	if (L->tag <= 0 || L->right < 0)
+	if (L->arg1 <= 0 || L->right < 0)
 		return;
 
 	int flags = -1;
-	int sec_tag = L->tag;
+	int sec_tag = L->arg1;
 
 	const linetype_t &type = inst.conf.getLineType(L->type);
 	const auto *floor3DInfo = std::get_if<linetype_t::Floor3DInfo>(&type.specialHandling);
@@ -310,7 +310,7 @@ void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 	int p1 = partToNumber(slopeInfo->floor);
 	int p2 = partToNumber(slopeInfo->ceiling);
 	if(!p1 && !p2)
-		PlaneAlign(L, L->tag, L->arg2);
+		PlaneAlign(L, L->arg1, L->arg2);
 	else
 		PlaneAlign(L, p1, p2);
 }
@@ -324,16 +324,16 @@ void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)
 	switch(*copyInfo)
 	{
 		case linetype_t::SlopeCopyInfo::floor:
-			PlaneCopy(L, L->tag, 0, 0, 0, 0);
+			PlaneCopy(L, L->arg1, 0, 0, 0, 0);
 			break;
 		case linetype_t::SlopeCopyInfo::ceiling:
-			PlaneCopy(L, 0, L->tag, 0, 0, 0);
+			PlaneCopy(L, 0, L->arg1, 0, 0, 0);
 			break;
 		case linetype_t::SlopeCopyInfo::both:
-			PlaneCopy(L, L->tag, L->tag, 0, 0, 0);
+			PlaneCopy(L, L->arg1, L->arg1, 0, 0, 0);
 			break;
 		case linetype_t::SlopeCopyInfo::parameterized:
-			PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
+			PlaneCopy(L, L->arg1, L->arg2, L->arg3, L->arg4, L->arg5);
 			break;
 	}
 }

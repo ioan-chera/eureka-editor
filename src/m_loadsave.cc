@@ -792,7 +792,7 @@ void Document::LoadLineDefs(int loading_level, const Wad_file *load_wad, const C
 
 		ld->flags = LE_U16(raw.flags);
 		ld->type  = LE_U16(raw.type);
-		ld->tag   = LE_S16(raw.tag);
+		ld->arg1   = LE_S16(raw.tag);
 
 		ld->right = LE_U16(raw.right);
 		ld->left  = LE_U16(raw.left);
@@ -840,7 +840,7 @@ void Document::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad, c
 
 		ld->flags = LE_U16(raw.flags);
 		ld->type = raw.type;
-		ld->tag  = raw.args[0];
+		ld->arg1  = raw.args[0];
 		ld->arg2 = raw.args[1];
 		ld->arg3 = raw.args[2];
 		ld->arg4 = raw.args[3];
@@ -1567,7 +1567,7 @@ void Document::SaveLineDefs(Wad_file &wad) const
 
 		raw.flags = LE_U16(ld->flags);
 		raw.type  = LE_U16(ld->type);
-		raw.tag   = LE_S16(ld->tag);
+		raw.tag   = LE_S16(ld->arg1);
 
 		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
 		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
@@ -1592,7 +1592,7 @@ void Document::SaveLineDefs_Hexen(Wad_file &wad) const
 		raw.flags = LE_U16(ld->flags);
 		raw.type  = static_cast<uint8_t>(ld->type);
 
-		raw.args[0] = static_cast<uint8_t>(ld->tag);
+		raw.args[0] = static_cast<uint8_t>(ld->arg1);
 		raw.args[1] = static_cast<uint8_t>(ld->arg2);
 		raw.args[2] = static_cast<uint8_t>(ld->arg3);
 		raw.args[3] = static_cast<uint8_t>(ld->arg4);

@@ -1841,7 +1841,7 @@ void LevelData::LoadLevel()
 		// init some fake flags
 		L->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
-		int preciousTag = format == MapFormat::udmf ? L->lineid : L->tag;
+		int preciousTag = format == MapFormat::udmf ? L->lineid : L->arg1;
 
 		if (preciousTag >= 900 && preciousTag < 1000)
 			L->flags |= MLF_IS_PRECIOUS;

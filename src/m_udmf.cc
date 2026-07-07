@@ -445,7 +445,7 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 		LD->type = value.DecodeInt();
 
 	else if (field.Match("arg0"))
-		LD->tag = value.DecodeInt();
+		LD->arg1 = value.DecodeInt();
 	else if (field.Match("arg1"))
 		LD->arg2 = value.DecodeInt();
 	else if (field.Match("arg2"))
@@ -795,8 +795,8 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		if (ld->type != 0)
 			lump->Printf("special = %d;\n", ld->type);
 
-		if (ld->tag != 0)
-			lump->Printf("arg0 = %d;\n", ld->tag);
+		if (ld->arg1 != 0)
+			lump->Printf("arg0 = %d;\n", ld->arg1);
 		if (ld->arg2 != 0)
 			lump->Printf("arg1 = %d;\n", ld->arg2);
 		if (ld->arg3 != 0)

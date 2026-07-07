@@ -3010,7 +3010,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 		{
 			if (inst.edit.mode == ObjType::linedefs)
 			{
-				op.changeLinedef(*it, inst.loaded.levelFormat == MapFormat::udmf ? &LineDef::lineid : &LineDef::tag, new_tag);
+				op.changeLinedef(*it, inst.loaded.levelFormat == MapFormat::udmf ? &LineDef::lineid : &LineDef::arg1, new_tag);
 				changed = true;
 			}
 			else if (inst.edit.mode == ObjType::sectors)
@@ -3261,7 +3261,7 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 		// e.g. D1, DR, --, and lowercase first letter all mean "no tag".
 		if(inst.loaded.levelFormat == MapFormat::doom)
 		{
-			if(L->tag >= 1)
+			if(L->arg1 >= 1)
 				continue;
 		}
 
@@ -4716,7 +4716,7 @@ int findFreeTag(const Instance &inst, ObjType type)
 	{
 		if(inst.loaded.levelFormat == MapFormat::doom)
 		{
-			addtag(doc.linedefs[i]->tag);
+			addtag(doc.linedefs[i]->arg1);
 			continue;
 		}
 

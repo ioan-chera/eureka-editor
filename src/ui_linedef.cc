@@ -642,7 +642,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 	int new_value = atoi(box->args[arg_idx]->value());
 
 	static int LineDef::*const fields[] = {
-		&LineDef::tag,
+		&LineDef::arg1,
 		&LineDef::arg2,
 		&LineDef::arg3,
 		&LineDef::arg4,
@@ -715,7 +715,7 @@ void UI_LineBox::UpdateField()
 	{
 		const auto L = inst.level.linedefs[obj];
 
-		mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
+		mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->arg1).c_str());
 
 		const linetype_t &info = inst.conf.getLineType(L->type);
 

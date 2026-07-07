@@ -32,7 +32,7 @@ public:
 
 	int flags = 0;
 	int type = 0;
-	int tag = 0;
+	int arg1 = 0;
 
 	// Hexen stuff  [NOTE: tag is 'arg1']
 	int arg2 = 0;
@@ -76,7 +76,7 @@ public:
 
 	int Arg(int which /* 1..5 */) const
 	{
-		if (which == 1) return tag;
+		if (which == 1) return arg1;
 		if (which == 2) return arg2;
 		if (which == 3) return arg3;
 		if (which == 4) return arg4;
