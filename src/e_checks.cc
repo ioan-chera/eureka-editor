@@ -3087,10 +3087,10 @@ void Instance::CMD_ApplyTag()
 }
 
 
-static bool LD_tag_exists(int tag, const Document &doc)
+static bool LD_id_exists(int lineid, const Document &doc)
 {
 	for (const auto &linedef : doc.linedefs)
-		if (linedef->tag == tag)
+		if (linedef->lineid == lineid)
 			return true;
 
 	return false;
@@ -3156,9 +3156,6 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc, 
 	{
 		const auto L = doc.linedefs[n];
 
-		if (L->tag <= 0)
-			continue;
-
 		if (L->type <= 0)
 			continue;
 
@@ -3170,7 +3167,7 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc, 
 		
 		for(int i = 0; i < info.numtags; ++i)
 		{
-			if(!SEC_tag_exists(info.tags[i], doc))
+			if(info.tags[i] && !SEC_tag_exists(info.tags[i], doc))
 			{
 				lines.set(n);
 				goto nextline;
@@ -3178,7 +3175,7 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc, 
 		}
 		for(int i = 0; i < info.numlineids; ++i)
 		{
-			if(!LD_tag_exists(info.lineids[i], doc))
+			if(info.lineids[i] && !LD_id_exists(info.lineids[i], doc))
 			{
 				lines.set(n);
 				goto nextline;
