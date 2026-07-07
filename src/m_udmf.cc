@@ -455,6 +455,9 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 	else if (field.Match("arg4"))
 		LD->arg5 = value.DecodeInt();
 
+	else if (field.Match("id"))
+		LD->lineid = value.DecodeInt();
+
 	else if (field.Match("blocking"))
 		LD->flags |= MLF_Blocking;
 	else if (field.Match("blockmonsters"))
@@ -802,6 +805,9 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 			lump->Printf("arg3 = %d;\n", ld->arg4);
 		if (ld->arg5 != 0)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
+
+		if (ld->lineid != 0)
+			lump->Printf("id = %d;\n", ld->lineid);
 
 		// linedef flags
 		WrFlag(lump, ld->flags, "blocking",      MLF_Blocking);

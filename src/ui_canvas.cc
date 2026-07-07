@@ -1664,22 +1664,28 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
                             }
                     }
                 }
-                else if(inst.loaded.levelFormat == MapFormat::hexen)
+                else
                 {
                     SpecialTagInfo linfo;
+					int lineid = 0;
                     if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, &line, inst.conf, linfo)
                        || linfo.selflineid <= 0)
                     {
-                        continue;
+						// This is the normal UDMF case: lineid is "id", not from 121
+						if(inst.loaded.levelFormat == MapFormat::udmf && line.lineid >= 1)
+							lineid = line.lineid;
+						else 
+							continue;
                     }
+					else
+						lineid = linfo.selflineid;
                     for(int i = 0; i < info.numlineids; ++i)
-                        if(linfo.selflineid == info.lineids[i])
+                        if(lineid == info.lineids[i])
 						{
 							DrawHighlight(ObjType::linedefs, m);
 							DrawConnection(info.type, info.objnum, ObjType::linedefs, m);
 						}
                 }
-                // TODO: also handle UDMF.
             }
         }
 
@@ -1775,14 +1781,16 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum, bool thickLines)
         }
         else
         {
-            if(!gotInfo)
-                return;
-            // TODO: also UDMF line ID
-            if(inst.loaded.levelFormat == MapFormat::hexen && info.selflineid > 0)
+            if(gotInfo && info.selflineid > 0)
             {
                 highlightTaggingTriggers(info.selflineid, &SpecialTagInfo::lineids,
                                          &SpecialTagInfo::numlineids, objtype, objnum);
             }
+			else if(inst.loaded.levelFormat == MapFormat::udmf)
+			{
+				highlightTaggingTriggers(line->lineid, &SpecialTagInfo::lineids,
+                                         &SpecialTagInfo::numlineids, objtype, objnum);
+			}
         }
     }
     else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
