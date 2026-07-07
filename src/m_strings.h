@@ -374,6 +374,7 @@ public:
 	size_t findDigit() const;
 
 	SString spaceEscape(bool backslash = false) const;
+	void findAndReplace(const SString& target, const SString& replacement);
 
 private:
 	std::string data;
