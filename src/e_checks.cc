@@ -3167,7 +3167,7 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc, 
 		
 		for(int i = 0; i < info.numtags; ++i)
 		{
-			if(info.tags[i] && !SEC_tag_exists(info.tags[i], doc))
+			if(info.tags[i] >= 1 && !SEC_tag_exists(info.tags[i], doc))
 			{
 				lines.set(n);
 				goto nextline;
@@ -3175,7 +3175,43 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc, 
 		}
 		for(int i = 0; i < info.numlineids; ++i)
 		{
-			if(info.lineids[i] && !LD_id_exists(info.lineids[i], doc))
+			if(info.lineids[i] >= 1 && !LD_id_exists(info.lineids[i], doc))
+			{
+				lines.set(n);
+				goto nextline;
+			}
+		}
+		for(int i = 0; i < info.numtids; ++i)
+		{
+			if(info.tids[i] <= 0)
+				continue;
+			bool found = false;
+			for(const auto &thing : doc.things)
+				if(thing->tid == info.tids[i])
+				{
+					found = true;
+					break;
+				}
+			if(!found)
+			{
+				lines.set(n);
+				goto nextline;
+			}
+		}
+		for(int i = 0; i < info.numpo; ++i)
+		{
+			if(info.po[i] <= 0)
+				continue;
+			bool found = false;
+			for(const auto &thing : doc.things)
+			{
+				const thingtype_t *type = get(config.thing_types, thing->type);
+				if(!type || !(type->flags & THINGDEF_POLYSPOT) || thing->angle != info.po[i])
+					continue;
+				found = true;
+				break;
+			}
+			if(!found)
 			{
 				lines.set(n);
 				goto nextline;
@@ -3436,10 +3472,10 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		Tags_FindUnmatchedLineDefs(sel, doc, inst.conf);
 
 		if (sel.empty())
-			dialog.AddLine("No tagged linedefs w/o a matching sector");
+			dialog.AddLine("No action linedefs w/o a matching target");
 		else
 		{
-			check_buffer = SString::printf("%d tagged linedefs w/o a matching sector", sel.count_obj());
+			check_buffer = SString::printf("%d action linedefs w/o a matching target", sel.count_obj());
 
 			dialog.AddLine(check_buffer, 2, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_line);
