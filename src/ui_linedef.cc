@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -155,19 +156,18 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	length->callback(length_callback, this);
 	length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-
+	int argWidth = (which->w() - 4 * ARG_PADDING) / 5;
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		args[a] = new UI_DynIntInput(type->x() + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
+		args[a] = new UI_DynIntInput(which->x() + (argWidth + ARG_PADDING) * a, Y, argWidth, TYPE_INPUT_HEIGHT);
 		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
+		args[a]->align(FL_ALIGN_BOTTOM);
+		args[a]->labelsize(10);
 	}
 
-	args[0]->label("Args: ");
-
-
-	Y += tag->h() + 10;
+	Y += tag->h() + 15;
 
 
 	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X+10, Y, 64, 24, "Flags: ");
@@ -707,8 +707,9 @@ void UI_LineBox::UpdateField()
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		mFixUp.setInputValue(args[a], "");
-		args[a]->tooltip(NULL);
+		args[a]->label("");
 		args[a]->textcolor(FL_BLACK);
+		args[a]->redraw_label();
 	}
 
 	if (inst.level.isLinedef(obj))
@@ -721,6 +722,7 @@ void UI_LineBox::UpdateField()
 
 		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
+			bool changedArgLabels =  false;
 			for (int a = 0 ; a < 5 ; a++)
 			{
 				int arg_val = L->Arg(1 + a);
@@ -730,10 +732,23 @@ void UI_LineBox::UpdateField()
 
 				// set the tooltip
 				if (!info.args[a].name.empty())
-					args[a]->copy_tooltip(info.args[a].name.c_str());
+				{
+					SString argName = info.args[a].name;
+					for(char &c : argName)
+						if(c == '_')
+							c = ' ';
+					args[a]->copy_label(argName.c_str());
+					changedArgLabels = true;
+				}
 				else
+				{
+					args[a]->label("");
 					args[a]->textcolor(fl_rgb_color(160,160,160));
+					changedArgLabels = true;
+				}
 			}
+			if(changedArgLabels)
+				redraw();
 		}
 	}
 	else
