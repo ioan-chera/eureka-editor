@@ -704,12 +704,13 @@ void UI_LineBox::UpdateField()
 	else
 		mFixUp.setInputValue(length, "");
 
+	SString oldLabels[5];
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		mFixUp.setInputValue(args[a], "");
+		oldLabels[a] = args[a]->label();
 		args[a]->label("");
 		args[a]->textcolor(FL_BLACK);
-		args[a]->redraw_label();
 	}
 
 	if (inst.level.isLinedef(obj))
@@ -722,7 +723,6 @@ void UI_LineBox::UpdateField()
 
 		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
-			bool changedArgLabels =  false;
 			for (int a = 0 ; a < 5 ; a++)
 			{
 				int arg_val = L->Arg(1 + a);
@@ -738,17 +738,13 @@ void UI_LineBox::UpdateField()
 						if(c == '_')
 							c = ' ';
 					args[a]->copy_label(argName.c_str());
-					changedArgLabels = true;
 				}
 				else
 				{
 					args[a]->label("");
 					args[a]->textcolor(fl_rgb_color(160,160,160));
-					changedArgLabels = true;
 				}
 			}
-			if(changedArgLabels)
-				redraw();
 		}
 	}
 	else
@@ -756,6 +752,13 @@ void UI_LineBox::UpdateField()
 		mFixUp.setInputValue(length, "");
 		mFixUp.setInputValue(tag, "");
 	}
+
+	for(int a = 0; a < 5; ++a)
+		if(args[a]->visible() && oldLabels[a] != args[a]->label())
+		{
+			redraw();
+			break;
+		}
 
 	if (inst.level.isLinedef(obj))
 	{

@@ -4,8 +4,8 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2007-2018 Andrew Apted
 //  Copyright (C) 2015-2026 Ioan Chera
+//  Copyright (C) 2007-2018 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -31,6 +31,36 @@
 #include "w_rawdef.h"
 
 #include <assert.h>
+
+enum
+{
+	SPACING_BELOW_NOMBRE = 4,
+
+	TYPE_INPUT_X = 70,
+	TYPE_INPUT_WIDTH = 70,
+	TYPE_INPUT_HEIGHT = 24,
+
+	CHOOSE_BUTTON_WDITH = 80,
+
+	DESC_WIDTH_REDUCTION = 78,
+
+	Y_SPACING = 4,
+
+	SPRITE_SIZE = 100,
+	SPRITE_RIGHT_MARGIN = 20,
+	SPRITE_Y_MARGIN = 10,
+
+	COORD_Y_SPACING = 28,
+
+	BELOW_SPRITE_SPACING = 5,
+
+	TID_INPUT_WIDTH = 64,
+
+	ANGLE_WIDTH_REDUCTION = 75,
+	ANGLE_SPACING = 17,
+
+	ARG_PADDING = 4,
+};
 
 
 extern const char *const arrow_0_xpm[];
@@ -70,38 +100,38 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 	H -= 10;
 
 
-	which = new UI_Nombre(X+6, Y, W-12, 28, "Thing");
+	which = new UI_Nombre(X+NOMBRE_INSET, Y, W-2*NOMBRE_INSET, NOMBRE_HEIGHT, "Thing");
 
-	Y = Y + which->h() + 4;
+	Y = Y + which->h() + SPACING_BELOW_NOMBRE;
 
 
-	type = new UI_DynInput(X+70, Y, 70, 24, "Type: ");
+	type = new UI_DynInput(X+TYPE_INPUT_X, Y, TYPE_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
 	type->callback2(dyntype_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	type->type(FL_INT_INPUT);
 
-	choose = new Fl_Button(X+W/2, Y, 80, 24, "Choose");
+	choose = new Fl_Button(X+W/2, Y, CHOOSE_BUTTON_WDITH, TYPE_INPUT_HEIGHT, "Choose");
 	choose->callback(button_callback, this);
 
-	Y = Y + type->h() + 4;
+	Y = Y + type->h() + Y_SPACING;
 
-	desc = new Fl_Output(X+70, Y, W-78, 24, "Desc: ");
+	desc = new Fl_Output(X+TYPE_INPUT_X, Y, W-DESC_WIDTH_REDUCTION, TYPE_INPUT_HEIGHT, "Desc: ");
 	desc->align(FL_ALIGN_LEFT);
 
-	Y = Y + desc->h() + 4;
+	Y = Y + desc->h() + Y_SPACING;
 
 
-	sprite = new UI_Pic(inst, X + W - 120, Y + 10, 100,100, "Sprite");
+	sprite = new UI_Pic(inst, X + W - SPRITE_SIZE - SPRITE_RIGHT_MARGIN, Y + SPRITE_Y_MARGIN, SPRITE_SIZE,SPRITE_SIZE, "Sprite");
 	sprite->callback(button_callback, this);
 
 
-	Y = Y + 10;
+	Y = Y + SPRITE_Y_MARGIN;
 
-	pos_x = new UI_DynIntInput(X+70, Y, 70, 24, "x: ");
-	pos_y = new UI_DynIntInput(X+70, Y + 28, 70, 24, "y: ");
-	pos_z = new UI_DynIntInput(X+70, Y + 28*2, 70, 24, "z: ");
+	pos_x = new UI_DynIntInput(X+TYPE_INPUT_X, Y, TYPE_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "x: ");
+	pos_y = new UI_DynIntInput(X+TYPE_INPUT_X, Y + COORD_Y_SPACING, TYPE_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "y: ");
+	pos_z = new UI_DynIntInput(X+TYPE_INPUT_X, Y + COORD_Y_SPACING*2, TYPE_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "z: ");
 	pos_z->hide();
 
 	pos_x->align(FL_ALIGN_LEFT);
@@ -116,26 +146,26 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 	pos_y->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	pos_z->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y = Y + 105;
+	Y = Y + SPRITE_SIZE + BELOW_SPRITE_SPACING;
 
 
 	// IOANCH 9/2015: TID
-	tid = new UI_DynIntInput(X+70, Y, 64, 24, "TID: ");
+	tid = new UI_DynIntInput(X+TYPE_INPUT_X, Y, TID_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "TID: ");
 	tid->align(FL_ALIGN_LEFT);
 	tid->callback(tid_callback, this);
 	tid->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	Y = Y + tid->h() + 4;
+	Y = Y + tid->h() + Y_SPACING;
 
 
-	angle = new UI_DynIntInput(X+70, Y, 64, 24, "Angle: ");
+	angle = new UI_DynIntInput(X+TYPE_INPUT_X, Y, TID_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "Angle: ");
 	angle->align(FL_ALIGN_LEFT);
 	angle->callback(angle_callback, this);
 	angle->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
-	int ang_mx = X + W - 75;
-	int ang_my = Y + 17;
+	int ang_mx = X + W - ANGLE_WIDTH_REDUCTION;
+	int ang_my = Y + ANGLE_SPACING;
 
 	for (int i = 0 ; i < 8 ; i++)
 	{
@@ -144,7 +174,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 		int x = static_cast<int>(ang_mx + dist * cos(i * 45 * M_PI / 180.0));
 		int y = static_cast<int>(ang_my - dist * sin(i * 45 * M_PI / 180.0));
 
-		ang_buts[i] = new Fl_Button(x - 9, y - 9, 24, 24, 0);
+		ang_buts[i] = new Fl_Button(x - 9, y - 9, 24, TYPE_INPUT_HEIGHT, 0);
 
 		ang_buts[i]->image(new Fl_Pixmap(arrow_pixmaps[i]));
 		ang_buts[i]->align(FL_ALIGN_CENTER);
@@ -154,7 +184,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	Y = Y + 46;
 
-	flagBox = new UI_DynIntInput(X+70, Y, 64, 24, "Options: ");
+	flagBox = new UI_DynIntInput(X+70, Y, 64, TYPE_INPUT_HEIGHT, "Options: ");
 	flagBox->align(FL_ALIGN_LEFT);
 	flagBox->callback(flags_callback, this);
 	flagBox->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -170,7 +200,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 	Y = Y + 45;
 
 
-	exfloor = new UI_DynIntInput(X+84, Y, 64, 24, "3D Floor: ");
+	exfloor = new UI_DynIntInput(X+84, Y, 64, TYPE_INPUT_HEIGHT, "3D Floor: ");
 	exfloor->align(FL_ALIGN_LEFT);
 	exfloor->callback(option_callback, new thing_opt_CB_data_c(this, MTF_EXFLOOR_MASK));
 	exfloor->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -197,7 +227,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	// Hexen thing specials
 
-	spec_type = new UI_DynInput(X+74, Y, 64, 24, "Special: ");
+	spec_type = new UI_DynInput(X+74, Y, 64, TYPE_INPUT_HEIGHT, "Special: ");
 	spec_type->align(FL_ALIGN_LEFT);
 	spec_type->callback(spec_callback, this);
 	spec_type->callback2(dynspec_callback, this);
@@ -205,27 +235,28 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 	spec_type->type(FL_INT_INPUT);
 	spec_type->hide();
 
-	spec_choose = new Fl_Button(X+W/2+24, Y, 80, 24, "Choose");
+	spec_choose = new Fl_Button(X+W/2+24, Y, 80, TYPE_INPUT_HEIGHT, "Choose");
 	spec_choose->callback(button_callback, this);
 	spec_choose->hide();
 
 	Y = Y + spec_type->h() + 2;
 
-	spec_desc = new Fl_Output(X+74, Y, W-86, 24, "Desc: ");
+	spec_desc = new Fl_Output(X+74, Y, W-86, TYPE_INPUT_HEIGHT, "Desc: ");
 	spec_desc->align(FL_ALIGN_LEFT);
 	spec_desc->hide();
 
 	Y = Y + spec_desc->h() + 2;
 
+	int argWidth = (which->w() - 4 * ARG_PADDING) / 5;
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		args[a] = new UI_DynIntInput(X+74+43*a, Y, 39, 24);
+		args[a] = new UI_DynIntInput(which->x() + (argWidth + ARG_PADDING) * a, Y, argWidth, TYPE_INPUT_HEIGHT);
 		args[a]->callback(args_callback, new thing_opt_CB_data_c(this, a));
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
+		args[a]->align(FL_ALIGN_BOTTOM);
+		args[a]->labelsize(10);
 	}
-
-	args[0]->label("Args: ");
 
 	mFixUp.loadFields({type, angle, flagBox, tid, exfloor, pos_x, pos_y, pos_z, spec_type,
 					  args[0], args[1], args[2], args[3], args[4]});
@@ -725,10 +756,12 @@ void UI_ThingBox::UpdateField()
 		spec_desc->value("");
 	}
 
+	SString oldLabels[5];
 	for (int a = 0 ; a < 5 ; a++)
 	{
 		mFixUp.setInputValue(args[a], "");
-		args[a]->tooltip(NULL);
+		oldLabels[a] = args[a]->label();
+		args[a]->label("");
 		args[a]->textcolor(FL_BLACK);
 	}
 
@@ -738,6 +771,15 @@ void UI_ThingBox::UpdateField()
 
 		const thingtype_t &info = inst.conf.getThingType(T->type);
 		const linetype_t  &spec = inst.conf.getLineType (T->special);
+
+		auto argLabel = [](const SString &name)
+		{
+			SString argName = name;
+			for(char &c : argName)
+				if(c == '_')
+					c = ' ';
+			return argName;
+		};
 
 		// set argument values and tooltips
 		for (int a = 0 ; a < 5 ; a++)
@@ -749,7 +791,7 @@ void UI_ThingBox::UpdateField()
 				mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
 				if (!spec.args[a].name.empty())
-					args[a]->copy_tooltip(spec.args[a].name.c_str());
+					args[a]->copy_label(argLabel(spec.args[a].name).c_str());
 				else
 					args[a]->textcolor(fl_rgb_color(160,160,160));
 			}
@@ -760,12 +802,19 @@ void UI_ThingBox::UpdateField()
 					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
 				if (!info.args[a].empty())
-					args[a]->copy_tooltip(info.args[a].c_str());
+					args[a]->copy_label(argLabel(info.args[a]).c_str());
 				else
 					args[a]->textcolor(fl_rgb_color(160,160,160));
 			}
 		}
 	}
+
+	for(int a = 0; a < 5; ++a)
+		if(oldLabels[a] != args[a]->label())
+		{
+			redraw();
+			break;
+		}
 }
 
 
