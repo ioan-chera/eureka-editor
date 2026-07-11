@@ -187,6 +187,14 @@ private:
 	void *mData2 = nullptr;
 };
 
+struct UISpan
+{
+	int start;
+	int width;
+};
+
+UISpan UI_GetFlexSpan(const Fl_Flex &flex, int start, int count);
+
 #endif  /* __EUREKA_UI_MISC_H__ */
 
 //--- editor settings ---

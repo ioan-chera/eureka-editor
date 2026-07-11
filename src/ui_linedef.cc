@@ -147,12 +147,12 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	desc = new Fl_Output(type->x(), Y, W - type->x(), TYPE_INPUT_HEIGHT);
 	desc->align(FL_ALIGN_LEFT);
 
-
 	actkind = new Fl_Choice(type->x(), Y, SPAC_WIDTH, TYPE_INPUT_HEIGHT);
 	// this order must match the SPAC_XXX constants
 	actkind->add(getActivationMenuString());
 	actkind->value(getActivationCount());
 	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
+	actkind->textsize(12);
 	actkind->deactivate();
 	actkind->hide();
 
@@ -196,6 +196,10 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	}
 	argFlex->end();
 	argFlex->hide();
+
+	UISpan span = UI_GetFlexSpan(*argFlex, 1, 1);
+	actkind->resize(span.start, actkind->y(), span.width, actkind->h());
+	udmfActivation->resize(span.start, udmfActivation->y(), span.width, udmfActivation->h());
 
 	Y += tag->h() + 15;
 
@@ -1061,7 +1065,8 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			actkind->hide();
 			udmfActivation->show();
 		}
-		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
+		UISpan span = UI_GetFlexSpan(*argFlex, 2, 3);
+		desc->resize(span.start, desc->y(), span.width, desc->h());
 	}
 	else
 	{

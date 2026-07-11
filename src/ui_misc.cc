@@ -27,6 +27,8 @@
 
 #include "main.h"
 
+#include "FL/Fl_Flex.H"
+
 #include <assert.h>
 
 UI_MoveDialog::UI_MoveDialog(Instance &inst, bool want_dz) :
@@ -495,6 +497,19 @@ int UI_DynIntInput::handle(int event)
 	}
 
 	return res;
+}
+
+UISpan UI_GetFlexSpan(const Fl_Flex &flex, int start, int count)
+{
+	int subwidgets = flex.children();
+	int gap = flex.gap();
+	int origin = flex.horizontal() ? flex.x() : flex.y();
+	int fullsize = flex.horizontal() ? flex.w() : flex.h();
+	double elementsize = static_cast<double>(fullsize - gap * (subwidgets - 1)) / subwidgets;
+	return {
+		.start = iround(origin + start * (elementsize + gap)),
+		.width = iround(count * elementsize + (count - 1) * gap)
+	};
 }
 
 //--- editor settings ---
