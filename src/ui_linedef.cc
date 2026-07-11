@@ -88,13 +88,26 @@ public:
 	{ }
 };
 
-
 //
 // UI_LineBox Constructor
 //
 UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
     MapItemBox(inst, X, Y, W, H, label)
 {
+	static const UDMFActivation kBaseUDMFActivations[] =
+	{
+		{ MLF_UDMF_playercross,   "Player crosses",  'W' },
+		{ MLF_UDMF_playeruse,     "Player uses",     'S' },
+		{ MLF_UDMF_monstercross,  "Monster crosses", 'M' },
+		{ MLF_UDMF_monsteruse,    "Monster uses",    'N' },
+		{ MLF_UDMF_impact,        "Impact",          'G' },
+		{ MLF_UDMF_playerpush,    "Player pushes",   'P' },
+		{ MLF_UDMF_monsterpush,   "Monster pushes",  'Q' },
+		{ MLF_UDMF_missilecross,  "Missile crosses", 'X' },
+		{ MLF_UDMF_repeatspecial, "Repeatable",      'R' },
+	};
+
+
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
 	const int Y0 = Y;
@@ -141,6 +154,20 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
 	actkind->deactivate();
 	actkind->hide();
+
+	udmfActivation = new Fl_Menu_Button(type->x(), Y, SPAC_WIDTH, TYPE_INPUT_HEIGHT);
+	udmfActivations.assign(kBaseUDMFActivations, kBaseUDMFActivations + lengthof(kBaseUDMFActivations));
+	udmfActivationItems.reserve(lengthof(kBaseUDMFActivations));
+	for(const UDMFActivation &activation : kBaseUDMFActivations)
+	{
+		udmfActivationItems.push_back({.text = activation.label, .flags = FL_MENU_TOGGLE});
+	}
+	udmfActivationItems.push_back({ 0 });
+	udmfActivation->menu(udmfActivationItems.data());
+	udmfActivation->callback(udmfActivation_callback, this);
+	udmfActivation->deactivate();
+	udmfActivation->labelsize(10);
+	udmfActivation->hide();
 
 	Y += desc->h() + INPUT_SPACING;
 
@@ -695,6 +722,36 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_LineBox::udmfActivation_callback(Fl_Widget *w, void *data)
+{
+	UI_LineBox *box = (UI_LineBox *)data;
+
+	if (box->inst.edit.Selected->empty())
+		return;
+
+	auto button = static_cast<Fl_Menu_Button *>(w);
+	int index = button->value();
+	bool selected = !!(box->udmfActivationItems[index].flags & FL_MENU_VALUE);
+
+	box->mFixUp.checkDirtyFields();
+
+	{
+		EditOperation op(box->inst.level.basis);
+		op.setMessageForSelection("edited activation of", *box->inst.edit.Selected);
+		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+		{
+			unsigned udmfFlags = box->inst.level.linedefs[*it]->udmfFlags;
+			if(selected)
+				op.changeLinedef(*it, &LineDef::udmfFlags, udmfFlags | box->udmfActivations[index].flag);
+			else
+				op.changeLinedef(*it, &LineDef::udmfFlags, udmfFlags & ~box->udmfActivations[index].flag);
+		}
+	}
+
+	button->popup();
+}
+
+
 //------------------------------------------------------------------------
 
 void UI_LineBox::UpdateField()
@@ -808,15 +865,36 @@ void UI_LineBox::UpdateField()
 	if (inst.level.isLinedef(obj))
 	{
 		actkind->activate();
+		udmfActivation->activate();
 
-		FlagsFromInt(inst.level.linedefs[obj]->flags);
+		const auto &L = inst.level.linedefs[obj];
+
+		FlagsFromInt(L->flags);
+
+		SString acronym;
+		for(size_t i = 0; i < udmfActivations.size(); ++i)
+		{
+			const UDMFActivation &activation = udmfActivations[i];
+			if(L->udmfFlags & activation.flag)
+			{
+				udmfActivationItems[i].flags |= FL_MENU_VALUE;
+				acronym.push_back(activation.letter);
+			}
+			else
+				udmfActivationItems[i].flags &= ~FL_MENU_VALUE;
+		}
+		udmfActivation->copy_label(acronym.c_str());
 	}
 	else
 	{
 		FlagsFromInt(0);
+		for(Fl_Menu_Item &item : udmfActivationItems)
+			item.flags &= ~FL_MENU_VALUE;
 
 		actkind->value(getActivationCount());  // show as "??"
 		actkind->deactivate();
+		udmfActivation->deactivate();
+		udmfActivation->label("");
 	}
 }
 
@@ -966,10 +1044,19 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		length->hide();
 		gen->hide();
 
-		actkind->clear();
-		actkind->add(getActivationMenuString());
+		if(loaded.levelFormat == MapFormat::hexen)
+		{
+			udmfActivation->hide();
+			actkind->clear();
+			actkind->add(getActivationMenuString());
 
-		actkind->show();
+			actkind->show();
+		}
+		else	// UDMF
+		{
+			actkind->hide();
+			udmfActivation->show();
+		}
 		desc->resize(type->x() + 65, desc->y(), w()-78-65, desc->h());
 	}
 	else
@@ -978,6 +1065,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		length->show();
 
 		actkind->hide();
+		udmfActivation->hide();
 		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 
 		if (config.features.gen_types)

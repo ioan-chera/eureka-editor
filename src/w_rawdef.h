@@ -447,6 +447,18 @@ enum zdoom_lineflag_e
 	MLF_ZDoom_BlockEverything = 0x8000,
 };
 
+enum udmf_lineflag_e
+{
+	MLF_UDMF_playercross   = 0x00000001,
+	MLF_UDMF_playeruse     = 0x00000002,
+	MLF_UDMF_monstercross  = 0x00000004,
+	MLF_UDMF_monsteruse    = 0x00000008,
+	MLF_UDMF_impact        = 0x00000010,
+	MLF_UDMF_playerpush    = 0x00000020,
+	MLF_UDMF_monsterpush   = 0x00000040,
+	MLF_UDMF_missilecross  = 0x00000080,
+	MLF_UDMF_repeatspecial = 0x00000100,
+};
 
 #define BOOM_GENLINE_FIRST	0x2f80
 #define BOOM_GENLINE_LAST	0x7fff

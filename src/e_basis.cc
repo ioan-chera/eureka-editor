@@ -460,6 +460,12 @@ bool Basis::changeLinedef(int line, int LineDef::*field, int value)
 
 	return change(ObjType::linedefs, line, field, value);
 }
+bool Basis::changeLinedef(int line, unsigned LineDef::*field, unsigned value)
+{
+	SYS_ASSERT(line >= 0 && line < doc.numLinedefs());
+
+	return change(ObjType::linedefs, line, field, value);
+}
 
 //
 // Change lump data
@@ -672,6 +678,17 @@ void Basis::EditUnit::rawChange(Basis &basis)
 					break;
 				default:
 					BugError("Basis::EditOperation::rawChange(linedefInt): bad objtype %u\n", (unsigned)objtype);
+					break;
+			}
+		},
+		[&basis, this](unsigned LineDef::*field) {
+			switch(objtype)
+			{
+				case ObjType::linedefs:
+					std::swap(basis.doc.linedefs[objnum].get()->*field, std::get<unsigned>(value));
+					break;
+				default:
+					BugError("Basis::EditOperation::rawChange(linedefUnsigned): bad objtype %u\n", (unsigned)objtype);
 					break;
 			}
 		}

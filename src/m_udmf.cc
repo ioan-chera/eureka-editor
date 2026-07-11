@@ -480,6 +480,25 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 	else if (field.Match("passuse"))
 		LD->flags |= MLF_Boom_PassThru;
 
+	else if (field.Match("playercross"))
+		LD->udmfFlags |= MLF_UDMF_playercross;
+	else if (field.Match("playeruse"))
+		LD->udmfFlags |= MLF_UDMF_playeruse;
+	else if (field.Match("monstercross"))
+		LD->udmfFlags |= MLF_UDMF_monstercross;
+	else if (field.Match("monsteruse"))
+		LD->udmfFlags |= MLF_UDMF_monsteruse;
+	else if (field.Match("impact"))
+		LD->udmfFlags |= MLF_UDMF_impact;
+	else if (field.Match("playerpush"))
+		LD->udmfFlags |= MLF_UDMF_playerpush;
+	else if (field.Match("monsterpush"))
+		LD->udmfFlags |= MLF_UDMF_monsterpush;
+	else if (field.Match("missilecross"))
+		LD->udmfFlags |= MLF_UDMF_missilecross;
+	else if (field.Match("repeatspecial"))
+		LD->udmfFlags |= MLF_UDMF_repeatspecial;
+
 	else
 	{
 		gLog.debugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
@@ -702,7 +721,8 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Docum
 
 //----------------------------------------------------------------------
 
-static inline void WrFlag(Lump_c *lump, int flags, const char *name, int mask)
+template<typename T, typename U>
+static inline void WrFlag(Lump_c *lump, T flags, const char *name, U mask)
 {
 	if ((flags & mask) != 0)
 	{
@@ -819,6 +839,16 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		WrFlag(lump, ld->flags, "blocksound",    MLF_SoundBlock);
 		WrFlag(lump, ld->flags, "dontdraw",      MLF_DontDraw);
 		WrFlag(lump, ld->flags, "mapped",        MLF_Mapped);
+
+		WrFlag(lump, ld->udmfFlags, "playercross",   MLF_UDMF_playercross);
+		WrFlag(lump, ld->udmfFlags, "playeruse",     MLF_UDMF_playeruse);
+		WrFlag(lump, ld->udmfFlags, "monstercross",  MLF_UDMF_monstercross);
+		WrFlag(lump, ld->udmfFlags, "monsteruse",    MLF_UDMF_monsteruse);
+		WrFlag(lump, ld->udmfFlags, "impact",        MLF_UDMF_impact);
+		WrFlag(lump, ld->udmfFlags, "playerpush",    MLF_UDMF_playerpush);
+		WrFlag(lump, ld->udmfFlags, "monsterpush",   MLF_UDMF_monsterpush);
+		WrFlag(lump, ld->udmfFlags, "missilecross",  MLF_UDMF_missilecross);
+		WrFlag(lump, ld->udmfFlags, "repeatspecial", MLF_UDMF_repeatspecial);
 
 		if (inst.conf.features.pass_through)
 			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);

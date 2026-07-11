@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -77,8 +78,14 @@ enum class LumpType : byte
 	scripts
 };
 
-using Field = std::variant<int, int LineDef::*, double Thing::*, double Vertex::*>;
-using Value = std::variant<int, double>;
+using Field = std::variant<
+	int,
+	int      LineDef::*,
+	unsigned LineDef::*,
+	double   Thing::*,
+	double   Vertex::*
+>;
+using Value = std::variant<int, unsigned, double>;
 
 // E_BASIS
 
@@ -325,6 +332,7 @@ private:
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeLinedef(int line, int LineDef::*field, int value);
+	bool changeLinedef(int line, unsigned LineDef::*field, unsigned value);
 	void changeLump(LumpType lumpType, std::vector<byte> &&newData);
 	void del(ObjType type, int objnum);
 	void end();
@@ -410,7 +418,8 @@ public:
 		return basis.changeSidedef(side, field, value);
 	}
 
-	bool changeLinedef(int line, int LineDef::*field, int value)
+	template<typename T>
+	bool changeLinedef(int line, T LineDef::*field, T value)
 	{
 		return basis.changeLinedef(line, field, value);
 	}

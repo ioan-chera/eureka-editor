@@ -31,11 +31,23 @@ struct lineflag_t; // forward declaration
 class UI_LineBox : public MapItemBox
 {
 private:
+
+	struct UDMFActivation
+	{
+		unsigned flag;
+		const char *label;
+		char letter;
+	};
+
 	UI_DynInput  *type;
 	Fl_Button    *choose;
 	Fl_Button    *gen;
 
+	std::vector<UDMFActivation> udmfActivations;
+	std::vector<Fl_Menu_Item>   udmfActivationItems;
+
 	Fl_Output    *desc;
+	Fl_Menu_Button *udmfActivation;
 	Fl_Choice    *actkind;
 
 	UI_DynIntInput *length;
@@ -113,6 +125,8 @@ private:
 	static void   args_callback(Fl_Widget *, void *);
 	static void length_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
+
+	static void udmfActivation_callback(Fl_Widget *, void *);
 };
 
 #endif  /* __EUREKA_UI_LINEDEF_H__ */

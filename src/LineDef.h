@@ -31,6 +31,7 @@ public:
 	int left = -1;
 
 	int flags = 0;
+	unsigned udmfFlags = 0;
 	int type = 0;
 	int arg1 = 0;
 

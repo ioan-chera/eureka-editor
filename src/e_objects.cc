@@ -1194,6 +1194,7 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 	}
 
 	op.changeLinedef(dest_line, &LineDef::flags, flags);
+	op.changeLinedef(dest_line, &LineDef::udmfFlags, L1->udmfFlags);
 
 	op.changeLinedef(dest_line, &LineDef::type, L1->type);
 	op.changeLinedef(dest_line, &LineDef::arg1,  L1->arg1);

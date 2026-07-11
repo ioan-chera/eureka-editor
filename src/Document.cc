@@ -92,6 +92,7 @@ static void ChecksumSideDef(crc32_c &crc, const SideDef *S, const Document &doc)
 static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
 {
 	crc += L->flags;
+	crc += L->udmfFlags;
 	crc += L->type;
 	crc += L->arg1;
 	crc += L->arg2;
