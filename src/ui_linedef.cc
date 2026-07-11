@@ -38,6 +38,8 @@
 #include "w_rawdef.h"
 #include "w_rawdef.h"
 
+#include "FL/Fl_Flex.H"
+
 #include <algorithm>
 
 
@@ -72,7 +74,6 @@ enum
 
 	TAG_WIDTH = 64,
 	ARG_WIDTH = 42,
-	ARG_PADDING = 5,
 };
 
 
@@ -183,16 +184,18 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	length->callback(length_callback, this);
 	length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	int argWidth = (which->w() - 4 * ARG_PADDING) / 5;
+	argFlex = new Fl_Flex(which->x(), Y, which->w(), TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
+	argFlex->gap(INPUT_SPACING);
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		args[a] = new UI_DynIntInput(which->x() + (argWidth + ARG_PADDING) * a, Y, argWidth, TYPE_INPUT_HEIGHT);
+		args[a] = new UI_DynIntInput(0, 0, 0, 0);
 		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-		args[a]->hide();
 		args[a]->align(FL_ALIGN_BOTTOM);
 		args[a]->labelsize(10);
 	}
+	argFlex->end();
+	argFlex->hide();
 
 	Y += tag->h() + 15;
 
@@ -810,12 +813,13 @@ void UI_LineBox::UpdateField()
 		mFixUp.setInputValue(tag, "");
 	}
 
-	for(int a = 0; a < 5; ++a)
-		if(args[a]->visible() && oldLabels[a] != args[a]->label())
-		{
-			redraw();
-			break;
-		}
+	if(argFlex->visible())
+		for(int a = 0; a < 5; ++a)
+			if(oldLabels[a] != args[a]->label())
+			{
+				redraw();
+				break;
+			}
 
 	if (inst.level.isLinedef(obj))
 	{
@@ -1171,13 +1175,10 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	back->redraw();
 
 	// Show Hexen/UDMF args when needed
-	for (int a = 0 ; a < 5 ; a++)
-	{
-		if (loaded.levelFormat != MapFormat::doom)
-			args[a]->show();
-		else
-			args[a]->hide();
-	}
+	if (loaded.levelFormat != MapFormat::doom)
+		argFlex->show();
+	else
+		argFlex->hide();
 
 	redraw();
 }

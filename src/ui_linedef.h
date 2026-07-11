@@ -24,6 +24,7 @@
 #include "e_cutpaste.h"
 #include "ui_panelinput.h"
 
+class Fl_Flex;
 class UI_DynIntInput;
 struct LoadingData;
 struct lineflag_t; // forward declaration
@@ -52,6 +53,8 @@ private:
 
 	UI_DynIntInput *length;
 	UI_DynIntInput *tag;
+
+	Fl_Flex *argFlex;
 	UI_DynIntInput *args[5];
 
 	UI_SideBox *front;
