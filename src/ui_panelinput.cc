@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -25,25 +26,36 @@
 //------------------------------------------------------------------------
 
 #include "ui_panelinput.h"
+
+#include "LineDef.h"
+#include "m_game.h"
+#include "ui_misc.h"
 #include "ui_nombre.h"
+
+#include "FL/Fl.H"
+#include "FL/fl_draw.H"
+#include "FL/Fl_Flex.H"
 
 //
 // Given a list of fields, assigns secondary callbacks
 //
+void PanelFieldFixUp::loadField(ICallback2 *field)
+{
+	if(field->getMainCallback())
+		mOriginalCallbacks[field] = { field->getMainCallback(), field->getMainUserData() };
+	field->setMainCallback(clearDirtyCallback, this);
+	if(field->callback2())
+		mOriginalCallbacks2[field] = { field->callback2(), field->user_data2() };
+	field->callback2(setDirtyCallback, this);
+
+	mAsCallback2[field->asWidget()] = field;
+	mAsWidget[field] = field->asWidget();
+}
+
 void PanelFieldFixUp::loadFields(std::initializer_list<ICallback2 *> fields)
 {
 	for(ICallback2 *field : fields)
-	{
-		if(field->getMainCallback())
-			mOriginalCallbacks[field] = { field->getMainCallback(), field->getMainUserData() };
-		field->setMainCallback(clearDirtyCallback, this);
-		if(field->callback2())
-			mOriginalCallbacks2[field] = { field->callback2(), field->user_data2() };
-		field->callback2(setDirtyCallback, this);
-
-		mAsCallback2[field->asWidget()] = field;
-		mAsWidget[field] = field->asWidget();
-	}
+		loadField(field);
 }
 
 //
@@ -115,4 +127,92 @@ void MapItemBox::SetObj(int _index, int _count)
 		UnselectPics();
 
 	redraw();
+}
+
+
+UI_ArgsBox::UI_ArgsBox(int X, int Y) : Fl_Flex(X, Y, PANEL_WIDTH - 2 * NOMBRE_INSET -
+											   2 * PANEL_INSET,
+												(fl_font(FL_HELVETICA, 12),
+												 TYPE_INPUT_HEIGHT + fl_height()),
+											   Fl_Flex::HORIZONTAL)
+{
+	margin(0, 0, 0, h() - TYPE_INPUT_HEIGHT);
+	gap(INPUT_SPACING);
+	for(size_t i = 0; i < lengthof(args); ++i)
+	{
+		args[i] = new UI_DynIntInput(0, 0, 0, 0);
+		args[i]->callback(argsCallback, this);
+		args[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+		args[i]->align(FL_ALIGN_BOTTOM);
+		args[i]->labelsize(12);
+	}
+	end();
+}
+
+void UI_ArgsBox::loadFields(PanelFieldFixUp &fixUp) const
+{
+	for(UI_DynIntInput *input : args)
+		fixUp.loadField(input);
+}
+
+void UI_ArgsBox::trackLabels()
+{
+	for(size_t i = 0; i < lengthof(args); ++i)
+		argLabels[i] = args[i]->label();
+}
+
+void UI_ArgsBox::clear(PanelFieldFixUp &fixUp)
+{
+	for(UI_DynIntInput *input : args)
+	{
+		fixUp.setInputValue(input, "");
+		input->label("");
+		input->textcolor(FL_BLACK);
+	}
+}
+
+void UI_ArgsBox::populate(PanelFieldFixUp &fixUp, const ConfigData &config, const LineDef &linedef)
+{
+	const linetype_t &info = config.getLineType(linedef.type);
+	for(size_t i = 0; i < lengthof(args); ++i)
+	{
+		int argVal = linedef.Arg(static_cast<int>(i + 1));
+		if(argVal || linedef.type)
+			fixUp.setInputValue(args[i], SString(argVal).c_str());
+		if(info.args[i].name.empty())
+		{
+			args[i]->label("");
+			args[i]->textcolor(fl_rgb_color(160, 160, 160));
+		}
+		else
+		{
+			SString argName = info.args[i].name;
+			for(char &c : argName)
+				if(c == '_')
+					c = ' ';
+			args[i]->copy_label(argName.c_str());
+		}
+	}
+}
+
+bool UI_ArgsBox::labelsChanged() const
+{
+	for(size_t i = 0; i < lengthof(args); ++i)
+		if(argLabels[i] != args[i]->label())
+			return true;
+	return false;
+}
+
+void UI_ArgsBox::argsCallback(Fl_Widget *widget, void *context)
+{
+	auto self = static_cast<UI_ArgsBox *>(context);
+	if(!self->callbackFunction)
+		return;
+	for(size_t i = 0; i < lengthof(args); ++i)
+	{
+		if(self->args[i] != widget)
+			continue;
+		self->callbackFunction(static_cast<int>(i), atoi(self->args[i]->value()));
+		break;
+	}
 }

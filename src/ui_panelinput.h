@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -27,12 +28,18 @@
 #ifndef __EUREKA_UI_PANELINPUT_H__
 #define __EUREKA_UI_PANELINPUT_H__
 
+#include "m_strings.h"
+
+#include "FL/Fl_Flex.H"
 #include "FL/Fl_Group.H"
 #include "FL/Fl_Input.H"
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
 class Instance;
+class LineDef;
+class UI_DynIntInput;
 class UI_Nombre;
 struct ConfigData;
 struct Document;
@@ -41,7 +48,11 @@ struct LoadingData;
 enum
 {
 	NOMBRE_INSET = 6,
-	NOMBRE_HEIGHT = 28
+	NOMBRE_HEIGHT = 28,
+	PANEL_WIDTH = 308,
+	TYPE_INPUT_HEIGHT = 24,
+	INPUT_SPACING = 2,
+	PANEL_INSET = 6
 };
 
 //
@@ -75,6 +86,7 @@ Fl_Widget *asWidget() override { return static_cast<Fl_Widget *>(this); }
 class PanelFieldFixUp
 {
 public:
+	void loadField(ICallback2 *field);
 	void loadFields(std::initializer_list<ICallback2 *> fields);
 
 	// Call it before starting basis
@@ -132,6 +144,35 @@ protected:
 	UI_Nombre *which = nullptr;
 	
 	PanelFieldFixUp	mFixUp;
+};
+
+class UI_ArgsBox : public Fl_Flex
+{
+public:
+	using Callback = std::function<void(int index, int value)>;
+
+	UI_ArgsBox(int X, int Y);
+
+	void loadFields(PanelFieldFixUp &fixUp) const;
+
+	void trackLabels();
+	void clear(PanelFieldFixUp &fixUp);
+	void populate(PanelFieldFixUp &fixUp, const ConfigData &config, const LineDef &linedef);
+	bool labelsChanged() const;
+
+	void setCallbackFunction(Callback callback)
+	{
+		callbackFunction = std::move(callback);
+	}
+
+private:
+	static void argsCallback(Fl_Widget *widget, void *context);
+
+	UI_DynIntInput *args[5];
+
+	SString argLabels[5];
+
+	Callback callbackFunction;
 };
 
 #endif

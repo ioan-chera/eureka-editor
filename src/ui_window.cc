@@ -63,11 +63,9 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	int cy = 0;
 	int ey = h();
 
-	panel_W = 308;
-
 	/* ---- Menu bar ---- */
 	{
-		menu_bar = menu::create(0, 0, w()-3 - panel_W, 31, &mInstance);
+		menu_bar = menu::create(0, 0, w()-3 - PANEL_WIDTH, 31, &mInstance);
 		add(menu_bar);
 		testmap::updateMenuName(menu_bar, inst.loaded);
 
@@ -85,7 +83,7 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 
 	int browser_W = MIN_BROWSER_W + 66;
 
-	int cw = w() - panel_W - browser_W;
+	int cw = w() - PANEL_WIDTH - browser_W;
 	int ch = ey - cy;
 
 	scroll = new UI_CanvasScroll(mInstance, 0, cy, cw, ch);
@@ -94,9 +92,9 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	canvas = scroll->canvas;
 	status_bar = scroll->status;
 
-	browser = new UI_Browser(inst, w() - panel_W - browser_W, cy, browser_W, ey - cy);
+	browser = new UI_Browser(inst, w() - PANEL_WIDTH - browser_W, cy, browser_W, ey - cy);
 
-	tile = new UI_Tile(0, cy, w() - panel_W, ey - cy, NULL, scroll, browser);
+	tile = new UI_Tile(0, cy, w() - PANEL_WIDTH, ey - cy, NULL, scroll, browser);
 	add(tile);
 
 	resizable(tile);
@@ -105,26 +103,26 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	int BY = 0;     // cy+2
 	int BH = ey-4;  // ey-BY-2
 
-	thing_box = new UI_ThingBox(inst, w() - panel_W, BY, panel_W, BH);
+	thing_box = new UI_ThingBox(inst, w() - PANEL_WIDTH, BY, PANEL_WIDTH, BH);
 	thing_box->hide();
 	add(thing_box);
 
-	line_box = new UI_LineBox(inst, w() - panel_W, BY, panel_W, BH);
+	line_box = new UI_LineBox(inst, w() - PANEL_WIDTH, BY, PANEL_WIDTH, BH);
 	line_box->hide();
 	add(line_box);
 
-	sec_box = new UI_SectorBox(inst, w() - panel_W, BY, panel_W, BH);
+	sec_box = new UI_SectorBox(inst, w() - PANEL_WIDTH, BY, PANEL_WIDTH, BH);
 	sec_box->hide();
 	add(sec_box);
 
-	vert_box = new UI_VertexBox(inst, w() - panel_W, BY, panel_W, BH);
+	vert_box = new UI_VertexBox(inst, w() - PANEL_WIDTH, BY, PANEL_WIDTH, BH);
 	add(vert_box);
 
-	props_box = new UI_DefaultProps(inst, w() - panel_W, BY, panel_W, BH);
+	props_box = new UI_DefaultProps(inst, w() - PANEL_WIDTH, BY, PANEL_WIDTH, BH);
 	props_box->hide();
 	add(props_box);
 
-	find_box = new UI_FindAndReplace(inst, w() - panel_W, BY, panel_W, BH);
+	find_box = new UI_FindAndReplace(inst, w() - PANEL_WIDTH, BY, PANEL_WIDTH, BH);
 	find_box->hide();
 	add(find_box);
 	

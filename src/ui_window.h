@@ -64,8 +64,6 @@ public:
 
 	Fl_Sys_Menu_Bar *menu_bar;
 
-	int panel_W;
-
 	UI_Tile * tile;
 
 	UI_CanvasScroll *scroll;

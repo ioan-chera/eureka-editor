@@ -25,6 +25,7 @@
 #include "ui_panelinput.h"
 
 class Fl_Flex;
+class UI_ArgsBox;
 class UI_DynIntInput;
 struct LoadingData;
 struct lineflag_t; // forward declaration
@@ -54,8 +55,7 @@ private:
 	UI_DynIntInput *length;
 	UI_DynIntInput *tag;
 
-	Fl_Flex *argFlex;
-	UI_DynIntInput *args[5];
+	UI_ArgsBox *argsBox;
 
 	UI_SideBox *front;
 	UI_SideBox *back;
@@ -125,7 +125,7 @@ private:
 
 	static void    tag_callback(Fl_Widget *, void *);
 	static void  flags_callback(Fl_Widget *, void *);
-	static void   args_callback(Fl_Widget *, void *);
+	void argsCallback(int index, int value);
 	static void length_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
 

@@ -48,24 +48,19 @@
 
 enum
 {
-	INSET_LEFT = 6,
 	INSET_TOP = 6,
-	INSET_RIGHT = 6,
 	INSET_BOTTOM = 5,
 
 	SPACING_BELOW_NOMBRE = 4,
 
 	TYPE_INPUT_X = 58,
 	TYPE_INPUT_WIDTH = 75,
-	TYPE_INPUT_HEIGHT = 24,
 
 	BUTTON_SPACING = 10,
 	CHOOSE_BUTTON_WIDTH = 80,
 
 	GEN_BUTTON_WIDTH = 55,
 	GEN_BUTTON_RIGHT_PADDING = 10,
-
-	INPUT_SPACING = 2,
 
 	DESC_INSET = 10,
 	DESC_WIDTH = 48,
@@ -114,10 +109,10 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	const int Y0 = Y;
 	const int X0 = X;
 
-	X += INSET_LEFT;
+	X += PANEL_INSET;
 	Y += INSET_TOP;
 
-	W -= INSET_LEFT + INSET_RIGHT;
+	W -= 2 * PANEL_INSET;
 	H -= INSET_TOP + INSET_BOTTOM;
 
 
@@ -184,20 +179,11 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	length->callback(length_callback, this);
 	length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	argFlex = new Fl_Flex(which->x(), Y, which->w(), TYPE_INPUT_HEIGHT, Fl_Flex::HORIZONTAL);
-	argFlex->gap(INPUT_SPACING);
-	for (int a = 0 ; a < 5 ; a++)
-	{
-		args[a] = new UI_DynIntInput(0, 0, 0, 0);
-		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
-		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-		args[a]->align(FL_ALIGN_BOTTOM);
-		args[a]->labelsize(10);
-	}
-	argFlex->end();
-	argFlex->hide();
+	argsBox = new UI_ArgsBox(which->x(), Y);
+	argsBox->setCallbackFunction(std::bind_front(&UI_LineBox::argsCallback, this));
+	argsBox->hide();
 
-	UISpan span = UI_GetFlexSpan(*argFlex, 1, 1);
+	UISpan span = UI_GetFlexSpan(*argsBox, 1, 1);
 	actkind->resize(span.start, actkind->y(), span.width, actkind->h());
 	udmfActivation->resize(span.start, udmfActivation->y(), span.width, udmfActivation->h());
 
@@ -234,7 +220,8 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	Y += back->h();
 
-	mFixUp.loadFields({type, length, tag, args[0], args[1], args[2], args[3], args[4]});
+	mFixUp.loadFields({type, length, tag});
+	argsBox->loadFields(mFixUp);
 
 	end();
 
@@ -666,15 +653,8 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_LineBox::args_callback(Fl_Widget *w, void *data)
+void UI_LineBox::argsCallback(int index, int value)
 {
-	line_flag_CB_data_c *l_f_c = (line_flag_CB_data_c *)data;
-
-	UI_LineBox *box = l_f_c->parent;
-
-	int arg_idx = l_f_c->mask;
-	int new_value = atoi(box->args[arg_idx]->value());
-
 	static int LineDef::*const fields[] = {
 		&LineDef::arg1,
 		&LineDef::arg2,
@@ -683,16 +663,17 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 		&LineDef::arg5
 	};
 
-	new_value = clamp(0, new_value, 255);
+	if(inst.loaded.levelFormat != MapFormat::udmf)
+		value = clamp(0, value, 255);
 
-	if (! box->inst.edit.Selected->empty())
+	if (! inst.edit.Selected->empty())
 	{
-		EditOperation op(box->inst.level.basis);
-		op.setMessageForSelection("edited args of", *box->inst.edit.Selected);
+		EditOperation op(inst.level.basis);
+		op.setMessageForSelection("edited args of", *inst.edit.Selected);
 
-		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeLinedef(*it, fields[arg_idx], new_value);
+			op.changeLinedef(*it, fields[index], value);
 		}
 	}
 }
@@ -768,14 +749,8 @@ void UI_LineBox::UpdateField()
 	else
 		mFixUp.setInputValue(length, "");
 
-	SString oldLabels[5];
-	for (int a = 0 ; a < 5 ; a++)
-	{
-		mFixUp.setInputValue(args[a], "");
-		oldLabels[a] = args[a]->label();
-		args[a]->label("");
-		args[a]->textcolor(FL_BLACK);
-	}
+	argsBox->trackLabels();
+	argsBox->clear(mFixUp);
 
 	if (inst.level.isLinedef(obj))
 	{
@@ -783,33 +758,8 @@ void UI_LineBox::UpdateField()
 
 		mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->arg1).c_str());
 
-		const linetype_t &info = inst.conf.getLineType(L->type);
-
 		if (inst.loaded.levelFormat != MapFormat::doom)
-		{
-			for (int a = 0 ; a < 5 ; a++)
-			{
-				int arg_val = L->Arg(1 + a);
-
-				if(arg_val || L->type)
-					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
-
-				// set the tooltip
-				if (!info.args[a].name.empty())
-				{
-					SString argName = info.args[a].name;
-					for(char &c : argName)
-						if(c == '_')
-							c = ' ';
-					args[a]->copy_label(argName.c_str());
-				}
-				else
-				{
-					args[a]->label("");
-					args[a]->textcolor(fl_rgb_color(160,160,160));
-				}
-			}
-		}
+			argsBox->populate(mFixUp, inst.conf, *L);
 	}
 	else
 	{
@@ -817,13 +767,8 @@ void UI_LineBox::UpdateField()
 		mFixUp.setInputValue(tag, "");
 	}
 
-	if(argFlex->visible())
-		for(int a = 0; a < 5; ++a)
-			if(oldLabels[a] != args[a]->label())
-			{
-				redraw();
-				break;
-			}
+	if(argsBox->visible() && argsBox->labelsChanged())
+		redraw();
 
 	if (inst.level.isLinedef(obj))
 	{
@@ -1065,7 +1010,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			actkind->hide();
 			udmfActivation->show();
 		}
-		UISpan span = UI_GetFlexSpan(*argFlex, 2, 3);
+		UISpan span = UI_GetFlexSpan(*argsBox, 2, 3);
 		desc->resize(span.start, desc->y(), span.width, desc->h());
 	}
 	else
@@ -1181,9 +1126,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 	// Show Hexen/UDMF args when needed
 	if (loaded.levelFormat != MapFormat::doom)
-		argFlex->show();
+		argsBox->show();
 	else
-		argFlex->hide();
+		argsBox->hide();
 
 	redraw();
 }
