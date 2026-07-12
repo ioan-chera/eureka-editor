@@ -233,13 +233,8 @@ private:
 
 	UI_Generalized_Box *gen_box;
 
-	enum
-	{
-		ACTIVE_GENERALIZED = 5
-	};
-
  	// currently active browser box (may be hidden though)
-	int active = 2;
+	BrowserMode active = BrowserMode::things;
 
 	Instance &inst;
 
@@ -249,7 +244,7 @@ public:
 public:
 	void Populate();
 
-	void SetActive(int new_active);
+	void SetActive(BrowserMode new_active);
 
 	BrowserMode GetMode() const;
 	void ChangeMode(BrowserMode new_mode);

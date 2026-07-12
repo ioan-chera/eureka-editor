@@ -1622,7 +1622,7 @@ UI_Browser::UI_Browser(Instance &inst, int X, int Y, int W, int H, const char *l
 	{
 		browsers[i] = new UI_Browser_Box(inst, X, Y, W, H, mode_titles[i], modes[i]);
 
-		if (i != active)
+		if (i != (int)active)
 			browsers[i]->hide();
 	}
 
@@ -1648,16 +1648,16 @@ void UI_Browser::Populate()
 	SString letters;
 
 	SString tex_cats = inst.M_TextureCategoryString(letters, false);
-	browsers[0]->SetCategories(tex_cats, letters);
+	browsers[(int)BrowserMode::textures]->SetCategories(tex_cats, letters);
 
 	SString flat_cats = inst.M_TextureCategoryString(letters, true);
-	browsers[1]->SetCategories(flat_cats, letters);
+	browsers[(int)BrowserMode::flats]->SetCategories(flat_cats, letters);
 
 	SString thing_cats = inst.M_ThingCategoryString(letters);
-	browsers[2]->SetCategories(thing_cats, letters);
+	browsers[(int)BrowserMode::things]->SetCategories(thing_cats, letters);
 
 	SString line_cats = inst.M_LineCategoryString(letters);
-	browsers[3]->SetCategories(line_cats, letters);
+	browsers[(int)BrowserMode::lineTypes]->SetCategories(line_cats, letters);
 
 	// TODO: sector_cats
 
@@ -1665,29 +1665,29 @@ void UI_Browser::Populate()
 }
 
 
-void UI_Browser::SetActive(int new_active)
+void UI_Browser::SetActive(BrowserMode new_active)
 {
 	if (new_active == active)
 		return;
 
-	if (active < ACTIVE_GENERALIZED)
-		browsers[active]->hide();
+	if (active != BrowserMode::generalized)
+		browsers[(int)active]->hide();
 	else
 		gen_box->hide();
 
 	active = new_active;
 
-	if (active < ACTIVE_GENERALIZED)
+	if (active != BrowserMode::generalized)
 	{
-		browsers[active]->show();
-		browsers[active]->RecentUpdate();
+		browsers[(int)active]->show();
+		browsers[(int)active]->RecentUpdate();
 	}
 	else
 	{
 		gen_box->show();
 	}
 
-	if (new_active == ACTIVE_GENERALIZED)
+	if (new_active == BrowserMode::generalized)
 		inst.main_win->tile->MinimiseRight();
 }
 
@@ -1696,11 +1696,11 @@ BrowserMode UI_Browser::GetMode() const
 {
 	switch (active)
 	{
-		case 0:  return BrowserMode::textures;
-		case 1:  return BrowserMode::flats;
-		case 2:  return BrowserMode::things;
-		case 3:  return BrowserMode::lineTypes;
-		case 4:  return BrowserMode::sectorTypes;
+		case BrowserMode::textures:  return BrowserMode::textures;
+		case BrowserMode::flats:  return BrowserMode::flats;
+		case BrowserMode::things:  return BrowserMode::things;
+		case BrowserMode::lineTypes:  return BrowserMode::lineTypes;
+		case BrowserMode::sectorTypes:  return BrowserMode::sectorTypes;
 		default: return BrowserMode::generalized;
 	}
 }
@@ -1711,18 +1711,7 @@ void UI_Browser::ChangeMode(BrowserMode new_mode)
 	if (config::browser_combine_tex && new_mode == BrowserMode::flats)
 		new_mode = BrowserMode::textures;
 
-	switch (new_mode)
-	{
-		case BrowserMode::textures: SetActive(0); break;  // TEXTURES
-		case BrowserMode::flats: SetActive(1); break;  // FLATS
-		case BrowserMode::things: SetActive(2); break;  // THINGS (Objects)
-		case BrowserMode::lineTypes: SetActive(3); break;  // LINE TYPES
-		case BrowserMode::sectorTypes: SetActive(4); break;  // SECTOR TYPES
-
-		case BrowserMode::generalized: SetActive(ACTIVE_GENERALIZED); break;
-
-		default: break;
-	}
+	SetActive(new_mode);
 }
 
 
@@ -1733,19 +1722,19 @@ void UI_Browser::NewEditMode(ObjType edit_mode)
 		case ObjType::linedefs:
 			// if on LINE TYPES, stay there
 			// otherwise go to TEXTURES
-			if (! (active == 3 || active == ACTIVE_GENERALIZED))
-				SetActive(0);
+			if (active != BrowserMode::lineTypes && active != BrowserMode::generalized)
+				SetActive(BrowserMode::textures);
 			break;
 
 		case ObjType::sectors:
 			// if on SECTOR TYPES, stay there
 			// otherwise go to FLATS
-			if (active != 4)
-				SetActive(config::browser_combine_tex ? 0 : 1);
+			if (active != BrowserMode::sectorTypes)
+				SetActive(config::browser_combine_tex ? BrowserMode::textures : BrowserMode::flats);
 			break;
 
 		case ObjType::things:
-			SetActive(2);
+			SetActive(BrowserMode::things);
 			break;
 
 		default:
@@ -1757,36 +1746,36 @@ void UI_Browser::NewEditMode(ObjType edit_mode)
 
 void UI_Browser::JumpToTex(const char *tex_name)
 {
-	if (active < ACTIVE_GENERALIZED)
+	if (active != BrowserMode::generalized)
 	{
-		browsers[active]->JumpToTex(tex_name);
+		browsers[(int)active]->JumpToTex(tex_name);
 	}
 }
 
 
 void UI_Browser::JumpToValue(int value)
 {
-	if (active < ACTIVE_GENERALIZED)
+	if (active != BrowserMode::generalized)
 	{
-		browsers[active]->JumpToValue(value);
+		browsers[(int)active]->JumpToValue(value);
 	}
 }
 
 
 void UI_Browser::CycleCategory(int dir)
 {
-	if (active < ACTIVE_GENERALIZED)
+	if (active != BrowserMode::generalized)
 	{
-		browsers[active]->CycleCategory(dir);
+		browsers[(int)active]->CycleCategory(dir);
 	}
 }
 
 
 void UI_Browser::ClearSearchBox()
 {
-	if (active < ACTIVE_GENERALIZED)
+	if (active != BrowserMode::generalized)
 	{
-		browsers[active]->ClearSearchBox();
+		browsers[(int)active]->ClearSearchBox();
 	}
 
 	// idea : reset generalized info
@@ -1795,18 +1784,18 @@ void UI_Browser::ClearSearchBox()
 
 void UI_Browser::Scroll(int delta)
 {
-	if (active < ACTIVE_GENERALIZED)
+	if (active != BrowserMode::generalized)
 	{
-		browsers[active]->Scroll(delta);
+		browsers[(int)active]->Scroll(delta);
 	}
 }
 
 
 void UI_Browser::RecentUpdate()
 {
-	if (active < ACTIVE_GENERALIZED)
+	if (active != BrowserMode::generalized)
 	{
-		UI_Browser_Box *box = browsers[active];
+		UI_Browser_Box *box = browsers[(int)active];
 
 		box->RecentUpdate();
 	}
@@ -1823,9 +1812,9 @@ void UI_Browser::ToggleRecent(bool force_recent)
 		force_recent = true;
 	}
 
-	if (active < ACTIVE_GENERALIZED)
+	if (active != BrowserMode::generalized)
 	{
-		browsers[active]->ToggleRecent(force_recent);
+		browsers[(int)active]->ToggleRecent(force_recent);
 	}
 }
 
@@ -1933,8 +1922,8 @@ bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 
 void UI_Browser::WriteUser(std::ostream &os)
 {
-	os << "\nopen_browser " << (!visible() ? '-' : active >= ACTIVE_GENERALIZED ? 'G' :
-								browserModeToChar(browsers[active]->GetKind())) << '\n';
+	os << "\nopen_browser " << (!visible() ? '-' : active == BrowserMode::generalized ? 'G' :
+								browserModeToChar(browsers[(int)active]->GetKind())) << '\n';
 	for(int i = 0; i < 5; i++)
 	{
 		browsers[i]->WriteUser(os);

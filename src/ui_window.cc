@@ -192,7 +192,7 @@ void UI_MainWindow::BrowserMode(::BrowserMode kind)
 	if (is_visible && kind == ::BrowserMode::toggle)
 		kind = ::BrowserMode::hide;
 
-	bool want_visible = (kind != ::BrowserMode::hide) ? true : false;
+	bool want_visible = kind != ::BrowserMode::hide;
 
 	if (is_visible != want_visible)
 	{
@@ -206,7 +206,7 @@ void UI_MainWindow::BrowserMode(::BrowserMode kind)
 //??		UnselectPics();
 	}
 
-	if (kind != ::BrowserMode::hide && kind != ::BrowserMode::toggle)
+	if (kind != ::BrowserMode::hide && kind != ::BrowserMode::toggle && kind != ::BrowserMode::invalid)
 	{
 		browser->ChangeMode(kind);
 	}
