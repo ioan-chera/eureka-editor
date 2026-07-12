@@ -167,6 +167,7 @@ public:
 
 private:
 	static void argsCallback(Fl_Widget *widget, void *context);
+	void setLabel(int index, const SString &text);
 
 	UI_DynIntInput *args[5];
 

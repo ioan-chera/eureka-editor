@@ -36,6 +36,12 @@
 #include "FL/fl_draw.H"
 #include "FL/Fl_Flex.H"
 
+enum
+{
+	ARG_DEFAULT_LABEL_SIZE = 12,
+	ARG_SHRUNKEN_LABEL_SIZE = 10,
+};
+
 //
 // Given a list of fields, assigns secondary callbacks
 //
@@ -132,7 +138,7 @@ void MapItemBox::SetObj(int _index, int _count)
 
 UI_ArgsBox::UI_ArgsBox(int X, int Y) : Fl_Flex(X, Y, PANEL_WIDTH - 2 * NOMBRE_INSET -
 											   2 * PANEL_INSET,
-												(fl_font(FL_HELVETICA, 12),
+												(fl_font(FL_HELVETICA, ARG_DEFAULT_LABEL_SIZE),
 												 TYPE_INPUT_HEIGHT + fl_height()),
 											   Fl_Flex::HORIZONTAL)
 {
@@ -144,7 +150,7 @@ UI_ArgsBox::UI_ArgsBox(int X, int Y) : Fl_Flex(X, Y, PANEL_WIDTH - 2 * NOMBRE_IN
 		args[i]->callback(argsCallback, this);
 		args[i]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[i]->align(FL_ALIGN_BOTTOM);
-		args[i]->labelsize(12);
+		args[i]->labelsize(ARG_DEFAULT_LABEL_SIZE);
 	}
 	end();
 }
@@ -185,13 +191,7 @@ void UI_ArgsBox::populate(PanelFieldFixUp &fixUp, const ConfigData &config, cons
 			args[i]->textcolor(fl_rgb_color(160, 160, 160));
 		}
 		else
-		{
-			SString argName = info.args[i].name;
-			for(char &c : argName)
-				if(c == '_')
-					c = ' ';
-			args[i]->copy_label(argName.c_str());
-		}
+			setLabel((int)i, info.args[i].name);
 	}
 }
 
@@ -215,4 +215,19 @@ void UI_ArgsBox::argsCallback(Fl_Widget *widget, void *context)
 		self->callbackFunction(static_cast<int>(i), atoi(self->args[i]->value()));
 		break;
 	}
+}
+
+void UI_ArgsBox::setLabel(int index, const SString &text)
+{
+	SString argName = text;
+	for(char &c : argName)
+		if(c == '_')
+			c = ' ';
+	UI_DynIntInput *input = args[index];
+	fl_font(FL_HELVETICA, ARG_DEFAULT_LABEL_SIZE);
+	if(fl_width(argName.c_str()) > input->w())
+		input->labelsize(ARG_SHRUNKEN_LABEL_SIZE);
+	else
+		input->labelsize(ARG_DEFAULT_LABEL_SIZE);
+	input->copy_label(argName.c_str());
 }
