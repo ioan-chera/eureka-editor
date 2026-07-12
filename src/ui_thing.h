@@ -83,7 +83,7 @@ private:
 	UI_DynInput  *spec_type;
 	Fl_Button    *spec_choose;
 	Fl_Output    *spec_desc;
-	UI_DynIntInput *args[5];
+	UI_ArgsBox *argsBox;
 
 public:
 	UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
@@ -126,7 +126,7 @@ private:
 
 	static void    spec_callback(Fl_Widget *w, void *data);
 	static void dynspec_callback(Fl_Widget *w, void *data);
-	static void    args_callback(Fl_Widget *w, void *data);
+	void    argsCallback(int index, int value);
 };
 
 #endif  /* __EUREKA_UI_THING_H__ */

@@ -246,19 +246,11 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	Y = Y + spec_desc->h() + 2;
 
-	int argWidth = (which->w() - 4 * ARG_PADDING) / 5;
-	for (int a = 0 ; a < 5 ; a++)
-	{
-		args[a] = new UI_DynIntInput(which->x() + (argWidth + ARG_PADDING) * a, Y, argWidth, TYPE_INPUT_HEIGHT);
-		args[a]->callback(args_callback, new thing_opt_CB_data_c(this, a));
-		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
-		args[a]->hide();
-		args[a]->align(FL_ALIGN_BOTTOM);
-		args[a]->labelsize(10);
-	}
+	argsBox = new UI_ArgsBox(which->x(), Y);
+	argsBox->setCallbackFunction(std::bind_front(&UI_ThingBox::argsCallback, this));
 
-	mFixUp.loadFields({type, angle, flagBox, tid, exfloor, pos_x, pos_y, pos_z, spec_type,
-					  args[0], args[1], args[2], args[3], args[4]});
+	mFixUp.loadFields({type, angle, flagBox, tid, exfloor, pos_x, pos_y, pos_z, spec_type});
+	argsBox->loadFields(mFixUp);
 
 	end();
 
@@ -570,28 +562,22 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
+void UI_ThingBox::argsCallback(int index, int value)
 {
-	thing_opt_CB_data_c *ocb = (thing_opt_CB_data_c *)data;
+	assert(index >= 0 && index <= 4);
 
-	UI_ThingBox *box = ocb->parent;
+	if(inst.loaded.levelFormat != MapFormat::udmf)
+		value = clamp(0, value, 255);
 
-	int arg_idx = ocb->mask;
-	int new_value = atoi(box->args[arg_idx]->value());
-
-	assert(arg_idx >= 0 && arg_idx <= 4);
-
-	new_value = clamp(0, new_value, 255);
-
-	if (!box->inst.edit.Selected->empty())
+	if (!inst.edit.Selected->empty())
 	{
-		EditOperation op(box->inst.level.basis);
-		op.setMessageForSelection("edited args of", *box->inst.edit.Selected);
+		EditOperation op(inst.level.basis);
+		op.setMessageForSelection("edited args of", *inst.edit.Selected);
 
-		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(*inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeThing(*it, static_cast<Thing::IntAddress>(Thing::F_ARG1 + arg_idx),
-                                              new_value);
+			op.changeThing(*it, static_cast<Thing::IntAddress>(Thing::F_ARG1 + index),
+                                              value);
 		}
 	}
 }
@@ -755,65 +741,17 @@ void UI_ThingBox::UpdateField()
 		spec_desc->value("");
 	}
 
-	SString oldLabels[5];
-	for (int a = 0 ; a < 5 ; a++)
-	{
-		mFixUp.setInputValue(args[a], "");
-		oldLabels[a] = args[a]->label();
-		args[a]->label("");
-		args[a]->textcolor(FL_BLACK);
-	}
+	argsBox->trackLabels();
+	argsBox->clear(mFixUp);
 
 	if (inst.level.isThing(obj))
 	{
 		const auto T = inst.level.things[obj];
-
-		const thingtype_t &info = inst.conf.getThingType(T->type);
-		const linetype_t  &spec = inst.conf.getLineType (T->special);
-
-		auto argLabel = [](const SString &name)
-		{
-			SString argName = name;
-			for(char &c : argName)
-				if(c == '_')
-					c = ' ';
-			return argName;
-		};
-
-		// set argument values and tooltips
-		for (int a = 0 ; a < 5 ; a++)
-		{
-			int arg_val = T->Arg(1 + a);
-
-			if (T->special)
-			{
-				mFixUp.setInputValue(args[a], SString(arg_val).c_str());
-
-				if (!spec.args[a].name.empty())
-					args[a]->copy_label(argLabel(spec.args[a].name).c_str());
-				else
-					args[a]->textcolor(fl_rgb_color(160,160,160));
-			}
-			else
-			{
-				// spawn arguments
-				if(arg_val || !info.args[a].empty())
-					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
-
-				if (!info.args[a].empty())
-					args[a]->copy_label(argLabel(info.args[a]).c_str());
-				else
-					args[a]->textcolor(fl_rgb_color(160,160,160));
-			}
-		}
+		argsBox->populate(mFixUp, inst.conf, *T);
 	}
 
-	for(int a = 0; a < 5; ++a)
-		if(oldLabels[a] != args[a]->label())
-		{
-			redraw();
-			break;
-		}
+	if(argsBox->labelsChanged())
+		redraw();
 }
 
 
@@ -880,8 +818,7 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 	Y += spec_type->h() + 2;
 	spec_desc->Fl_Widget::position(spec_desc->x(), Y);
 	Y += spec_desc->h() + 2;
-	for (int a = 0; a < 5; a++)
-		args[a]->Fl_Widget::position(args[a]->x(), Y);
+	argsBox->position(argsBox->x(), Y);
 
 	/* map format stuff */
 
@@ -894,9 +831,7 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 		spec_type  ->show();
 		spec_choose->show();
 		spec_desc  ->show();
-
-		for (int a = 0 ; a < 5 ; a++)
-			args[a]->show();
+		argsBox->show();
 
 		if(loaded.levelFormat == MapFormat::udmf)
 		{
@@ -921,8 +856,7 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 		spec_choose->hide();
 		spec_desc  ->hide();
 
-		for (int a = 0 ; a < 5 ; a++)
-			args[a]->hide();
+		argsBox->hide();
 
 		pos_x->type(FL_INT_INPUT);
 		pos_y->type(FL_INT_INPUT);

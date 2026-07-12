@@ -29,6 +29,7 @@
 
 #include "LineDef.h"
 #include "m_game.h"
+#include "Thing.h"
 #include "ui_misc.h"
 #include "ui_nombre.h"
 
@@ -192,6 +193,40 @@ void UI_ArgsBox::populate(PanelFieldFixUp &fixUp, const ConfigData &config, cons
 		}
 		else
 			setLabel((int)i, info.args[i].name);
+	}
+}
+
+void UI_ArgsBox::populate(PanelFieldFixUp &fixUp, const ConfigData &config, const Thing &thing)
+{
+	const thingtype_t &info = config.getThingType(thing.type);
+	const linetype_t &spec = config.getLineType(thing.special);
+	for(size_t i = 0; i < lengthof(args); ++i)
+	{
+		int argVal = thing.Arg(1 + static_cast<int>(i));
+		if(thing.special)
+		{
+			fixUp.setInputValue(args[i], SString(argVal).c_str());
+			if(spec.args[i].name.empty())
+			{
+				args[i]->label("");
+				args[i]->textcolor(fl_rgb_color(160, 160, 160));
+			}
+			else
+				setLabel((int)i, spec.args[i].name);
+		}
+		else
+		{
+			// spawn args
+			if(argVal || !info.args[i].empty())
+				fixUp.setInputValue(args[i], SString(argVal).c_str());
+			if(info.args[i].empty())
+			{
+				args[i]->label("");
+				args[i]->textcolor(fl_rgb_color(160, 160, 160));
+			}
+			else
+				setLabel((int)i, info.args[i]);
+		}
 	}
 }
 

@@ -44,6 +44,7 @@ class UI_Nombre;
 struct ConfigData;
 struct Document;
 struct LoadingData;
+struct Thing;
 
 enum
 {
@@ -158,6 +159,7 @@ public:
 	void trackLabels();
 	void clear(PanelFieldFixUp &fixUp);
 	void populate(PanelFieldFixUp &fixUp, const ConfigData &config, const LineDef &linedef);
+	void populate(PanelFieldFixUp &fixUp, const ConfigData &config, const Thing &thing);
 	bool labelsChanged() const;
 
 	void setCallbackFunction(Callback callback)
