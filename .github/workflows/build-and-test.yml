@@ -12,7 +12,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04]
         compiler: [{cc: "gcc", cxx: "g++"}, {cc: "clang", cxx: "clang++"}]
-        use-installed-deps: [OFF, ON]
 
     runs-on: ${{ matrix.os }}
 
@@ -28,8 +27,9 @@ jobs:
         export CC=$(which ${{ matrix.compiler.cc }})
         export CXX=$(which ${{ matrix.compiler.cxx }})
         mkdir build
-        cmake -Bbuild -DUSE_SYSTEM_FLTK=${{ matrix.use-installed-deps }} \
-                      -DUSE_SYSTEM_GOOGLE_TEST=${{ matrix.use-installed-deps }}
+        # This used to be parameterized OFF/ON, but now we need FLTK v1.4 which may be unavailable as system
+        cmake -Bbuild -DUSE_SYSTEM_FLTK=OFF \
+                      -DUSE_SYSTEM_GOOGLE_TEST=OFF
     - name: Build
       run: |
         make -C build -j$(nproc)
