@@ -1907,7 +1907,10 @@ bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "open_browser" && tokens.size() >= 2)
 	{
-		inst.main_win->BrowserMode(charToBrowserMode(tokens[1][0]));
+		BrowserMode mode = charToBrowserMode(tokens[1][0]);
+		if(mode == BrowserMode::invalid)
+			return false;
+		inst.main_win->BrowserMode(mode);
 		return true;
 	}
 
