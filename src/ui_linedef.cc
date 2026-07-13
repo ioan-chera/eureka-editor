@@ -804,6 +804,7 @@ void UI_LineBox::UpdateField()
 			desc->value(info.desc.c_str());
 		}
 
+		inst.main_win->browser->UpdateLineTypeHighlight(type_num);
 		inst.main_win->browser->UpdateGenType(type_num);
 	}
 	else

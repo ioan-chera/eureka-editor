@@ -109,9 +109,6 @@ public:
 		Fl_Button(X, Y, W, H, L)
 	{ }
 
-	virtual ~Browser_Button()
-	{ }
-
 	int handle(int event)
 	{
 		if (event == FL_FOCUS)
@@ -1144,6 +1141,32 @@ void UI_Browser_Box::JumpToValue(int value)
 }
 
 
+void UI_Browser_Box::HighlightValue(int value)
+{
+	if(isGraphicsMode(kind))
+		return;
+
+	for (int i = 0 ; i < scroll->Children() ; i++)
+	{
+		Browser_Item *item = (Browser_Item *)scroll->Child(i);
+
+		if (item->number == value)
+		{
+			if(item->button->color() != FL_DARK2)
+			{
+				item->button->color(FL_DARK2);
+				item->redraw();
+			}
+		}
+		else if(item->button->color() != FL_BACKGROUND_COLOR)
+		{
+			item->button->color(FL_BACKGROUND_COLOR);
+			item->redraw();
+		}
+	}
+}
+
+
 void UI_Browser_Box::Scroll(int delta)
 {
 	scroll->Scroll(delta);
@@ -1816,6 +1839,18 @@ void UI_Browser::ToggleRecent(bool force_recent)
 	{
 		browsers[(int)active]->ToggleRecent(force_recent);
 	}
+}
+
+
+void UI_Browser::UpdateLineTypeHighlight(int line_type)
+{
+	browsers[(int)BrowserMode::lineTypes]->HighlightValue(line_type);
+}
+
+
+void UI_Browser::UpdateSectorHighlight(int line_type)
+{
+	browsers[(int)BrowserMode::sectorTypes]->HighlightValue(line_type);
 }
 
 

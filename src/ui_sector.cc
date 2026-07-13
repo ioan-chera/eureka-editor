@@ -718,6 +718,7 @@ void UI_SectorBox::UpdateField()
 				}
 			}
 		}
+		inst.main_win->browser->UpdateSectorHighlight(value & mask);
 	}
 	else
 	{

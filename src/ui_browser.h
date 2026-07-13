@@ -143,6 +143,7 @@ public:
 	// ensure the given texture or type/special is visible
 	void JumpToTex(const char *tex_name);
 	void JumpToValue(int value);
+	void HighlightValue(int value);
 
 	void RecentUpdate();
 
@@ -264,6 +265,9 @@ public:
 
 	// recently used textures (etc) has changed
 	void RecentUpdate();
+
+	void UpdateLineTypeHighlight(int line_type);
+	void UpdateSectorHighlight(int sector_type);
 
 	// for the generalized box
 	void UpdateGenType(int line_type);
