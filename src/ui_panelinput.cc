@@ -156,6 +156,13 @@ UI_ArgsBox::UI_ArgsBox(int X, int Y) : Fl_Flex(X, Y, PANEL_WIDTH - 2 * NOMBRE_IN
 	end();
 }
 
+UI_ArgsBox::~UI_ArgsBox()
+{
+	for(UI_DynIntInput *input : args)
+		if(!input->parent())
+			delete input;
+}
+
 void UI_ArgsBox::loadFields(PanelFieldFixUp &fixUp) const
 {
 	for(UI_DynIntInput *input : args)

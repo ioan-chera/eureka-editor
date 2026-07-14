@@ -153,6 +153,7 @@ public:
 	using Callback = std::function<void(int index, int value)>;
 
 	UI_ArgsBox(int X, int Y);
+	~UI_ArgsBox();
 
 	void loadFields(PanelFieldFixUp &fixUp) const;
 
