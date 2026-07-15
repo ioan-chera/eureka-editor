@@ -147,36 +147,4 @@ protected:
 	PanelFieldFixUp	mFixUp;
 };
 
-class UI_ArgsBox : public Fl_Flex
-{
-public:
-	using Callback = std::function<void(int index, int value)>;
-
-	UI_ArgsBox(int X, int Y);
-	~UI_ArgsBox();
-
-	void loadFields(PanelFieldFixUp &fixUp) const;
-
-	void trackLabels();
-	void clear(PanelFieldFixUp &fixUp);
-	void populate(PanelFieldFixUp &fixUp, const ConfigData &config, const LineDef &linedef);
-	void populate(PanelFieldFixUp &fixUp, const ConfigData &config, const Thing &thing);
-	bool labelsChanged() const;
-
-	void setCallbackFunction(Callback callback)
-	{
-		callbackFunction = std::move(callback);
-	}
-
-private:
-	static void argsCallback(Fl_Widget *widget, void *context);
-	void setLabel(int index, const SString &text);
-
-	UI_DynIntInput *args[5];
-
-	SString argLabels[5];
-
-	Callback callbackFunction;
-};
-
 #endif

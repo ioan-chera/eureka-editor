@@ -26,6 +26,7 @@
 #include "ui_panelinput.h"
 
 class Sticker;
+class UI_ArgsBox;
 class UI_DynIntInput;
 class UI_ThingBox;
 struct thingflag_t;

@@ -23,6 +23,7 @@
 #include "Instance.h"
 
 #include "main.h"
+#include "ui_args.h"
 #include "ui_misc.h"
 #include "ui_window.h"
 
@@ -35,7 +36,6 @@
 #include "m_game.h"
 #include "Sector.h"
 #include "SideDef.h"
-#include "w_rawdef.h"
 #include "w_rawdef.h"
 
 #include "FL/Fl_Flex.H"
