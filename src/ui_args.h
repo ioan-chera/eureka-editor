@@ -24,14 +24,25 @@
 #include "m_strings.h"
 
 #include "FL/Fl_Flex.H"
+#include "FL/Fl_Group.H"
 
 #include <functional>
 
+class Fl_Menu_Button;
 class LineDef;
 class PanelFieldFixUp;
 class UI_DynIntInput;
 struct ConfigData;
 struct Thing;
+
+class UI_ArgField : public Fl_Group
+{
+public:
+	UI_ArgField(int X, int Y, int W, int H);
+private:
+	UI_DynIntInput *input;
+	Fl_Menu_Button *button;
+};
 
 class UI_ArgsBox : public Fl_Flex
 {

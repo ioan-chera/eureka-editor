@@ -28,12 +28,27 @@
 #include "ui_panelinput.h"
 
 #include "FL/fl_draw.H"
+#include "FL/Fl_Menu_Button.H"
 
 enum
 {
 	ARG_DEFAULT_LABEL_SIZE = 12,
 	ARG_SHRUNKEN_LABEL_SIZE = 10,
 };
+
+UI_ArgField::UI_ArgField(int X, int Y, int W, int H) : Fl_Group(X, Y, W, H)
+{
+	input = new UI_DynIntInput(X, Y, W, H);
+	input->callback([](Fl_Widget *widget, void *userData)
+	{
+		auto field = static_cast<UI_ArgField *>(userData);
+		field->do_callback(FL_REASON_CHANGED);
+	}, this);
+	input->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
+
+	const int width = 3 * TYPE_INPUT_HEIGHT / 4;
+	button = new Fl_Menu_Button(X + W - width, Y, width, H);
+}
 
 UI_ArgsBox::UI_ArgsBox(int X, int Y) : Fl_Flex(X, Y, PANEL_WIDTH - 2 * NOMBRE_INSET -
 											   2 * PANEL_INSET,
