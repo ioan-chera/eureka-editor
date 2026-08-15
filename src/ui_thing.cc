@@ -851,12 +851,14 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 			pos_x->type(FL_FLOAT_INPUT);
 			pos_y->type(FL_FLOAT_INPUT);
 			pos_z->type(FL_FLOAT_INPUT);
+			flagBox->hide();	// no numeric options in UDMF
 		}
 		else
 		{
 			pos_x->type(FL_INT_INPUT);
 			pos_y->type(FL_INT_INPUT);
 			pos_z->type(FL_INT_INPUT);
+			flagBox->show();
 		}
 	}
 	else
@@ -869,6 +871,7 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 
 		pos_x->type(FL_INT_INPUT);
 		pos_y->type(FL_INT_INPUT);
+		flagBox->show();
 	}
 
 	redraw();
