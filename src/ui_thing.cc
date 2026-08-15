@@ -800,12 +800,9 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 		{
 			return a->row < b->row;
 		});
-		const int W = w() - 12;
-		const int AX = x() + optionStartX + W / 3 + 4;
-		const int BX = x() + optionStartX + 2 * W / 3 - 20;
-		const int xpos[3] = { x() + optionStartX + 28, AX + 28, BX + 28 };
-
-		const int FW = W / 3 - 12;
+		const int FW = (which->w() - optionStartX) / 3;
+		const int startPos = which->x() + optionStartX;
+		const int xpos[3] = { startPos, startPos + FW, startPos + 2 * FW };
 
 		int currow = 0;
 		begin();
