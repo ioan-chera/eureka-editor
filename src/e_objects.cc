@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -140,7 +141,7 @@ void ObjectsModule::insertThing() const
 		EditOperation op(doc.basis);
 
 		new_t = op.addNew(ObjType::things);
-		auto T = doc.things[new_t];
+		auto &T = doc.things[new_t];
 
 		if(model >= 0)
 			*T = *doc.things[model];
@@ -150,7 +151,13 @@ void ObjectsModule::insertThing() const
 
 			for(const thingflag_t &flag : inst.conf.thing_flags)
 				if(flag.defaultSet == thingflag_t::DefaultMode::on)
-					T->options |= flag.value;
+				{
+					if(flag.isUDMF)
+						T->udmfflags |= flag.value;
+					else
+						T->options |= flag.value;
+				}
+			E_AddUDMFSkillsNewThing(*T);
 		}
 
 		T->SetRawX(inst.loaded.levelFormat, inst.grid.SnapX(inst.edit.map.x));
@@ -1037,6 +1044,7 @@ void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, in
 
 	op.changeThing(dest_thing, &Thing::type,    T->type);
 	op.changeThing(dest_thing, &Thing::options, T->options);
+	op.changeThing(dest_thing, &Thing::udmfflags, T->udmfflags);
 //	BA_ChangeTH(dest_thing, &Thing::angle,   T->angle);
 
 	op.changeThing(dest_thing, &Thing::tid,     T->tid);

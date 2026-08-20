@@ -57,6 +57,7 @@ static void ChecksumThing(crc32_c &crc, const Thing *T)
 	crc += T->angle;
 	crc += T->type;
 	crc += T->options;
+	crc += T->udmfflags;
 }
 
 static void ChecksumVertex(crc32_c &crc, const Vertex *V)

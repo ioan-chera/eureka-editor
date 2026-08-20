@@ -127,3 +127,18 @@ TEST_F(DocumentFixture, CRC)
 	doc.getLevelChecksum(crc3);
 	ASSERT_EQ(crc.getPath(), crc3.getPath());
 }
+
+TEST_F(DocumentFixture, ThingCRCIncludesUDMFFlags)
+{
+	doc.things.push_back(std::make_shared<Thing>());
+	doc.things.push_back(std::make_shared<Thing>());
+	doc.things.push_back(std::make_shared<Thing>());
+	crc32_c crc;
+	doc.getLevelChecksum(crc);
+
+	crc32_c crc2;
+	doc.things.back()->udmfflags |= 2;
+	doc.getLevelChecksum(crc2);
+
+	ASSERT_NE(crc.getPath(), crc2.getPath());
+}

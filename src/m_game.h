@@ -181,6 +181,7 @@ struct thingflag_t
 	int column;
 	SString label;
 	DefaultMode defaultSet;
+	bool isUDMF;
 	int value;
 };
 

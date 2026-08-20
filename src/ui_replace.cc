@@ -278,6 +278,11 @@ enum
 
 #define HIDE_BG  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
 
+enum
+{
+	SKILL_FILTER_TOP = 444,
+	SKILL_FILTER_HEIGHT = 30,
+};
 
 UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
@@ -414,9 +419,11 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 			tag_input->callback(tag_input_callback, this);
 
 			// thing stuff
-			o_easy   = new UI_TripleCheckButton(X+105, Y+444, 28, 26, "easy: ");
-			o_medium = new UI_TripleCheckButton(X+105, Y+474, 28, 26, "medium: ");
-			o_hard   = new UI_TripleCheckButton(X+105, Y+504, 28, 26, "hard: ");
+			o_udmfskill1 = new UI_TripleCheckButton(X+105, Y+SKILL_FILTER_TOP, 28, 26, "easiest: ");
+			o_easy   = new UI_TripleCheckButton(X+105, Y+SKILL_FILTER_TOP+SKILL_FILTER_HEIGHT, 28, 26, "easy: ");
+			o_medium = new UI_TripleCheckButton(X+105, Y+SKILL_FILTER_TOP+SKILL_FILTER_HEIGHT*2, 28, 26, "medium: ");
+			o_hard   = new UI_TripleCheckButton(X+105, Y+SKILL_FILTER_TOP+SKILL_FILTER_HEIGHT*3, 28, 26, "hard: ");
+			o_udmfskill5 = new UI_TripleCheckButton(X+105, Y+SKILL_FILTER_TOP+SKILL_FILTER_HEIGHT*4, 28, 26, "hardest: ");
 
 			o_sp     = new UI_TripleCheckButton(X+220, Y+444, 28, 26, "sp: ");
 			o_coop   = new UI_TripleCheckButton(X+220, Y+474, 28, 26, "coop: ");
@@ -483,7 +490,10 @@ void UI_FindAndReplace::ensureInitWhatFilters()
 		return;
 	initializedWhatWidgets = true;
 
-	whatDefs[What_things].filterWidgets = { o_easy, o_medium, o_hard, o_sp, o_coop, o_dm };
+	whatDefs[What_things].filterWidgets =
+	{
+		o_udmfskill1, o_easy, o_medium, o_hard, o_udmfskill5, o_sp, o_coop, o_dm
+	};
 	whatDefs[What_lineTextures].filterWidgets =
 	{
 		o_lowers, o_uppers, o_rails, o_one_sided, o_two_sided
@@ -516,10 +526,27 @@ void UI_FindAndReplace::UpdateWhatFilters()
 		widget->show();
 
 	// vanilla DOOM : always hide SP and COOP flags
-	if (x == What_things && ! inst.conf.features.coop_dm_flags && inst.loaded.levelFormat == MapFormat::doom)
+	if (x == What_things)
 	{
-		  o_sp->hide();
-		o_coop->hide();
+		if (! inst.conf.features.coop_dm_flags && inst.loaded.levelFormat == MapFormat::doom)
+		{
+			o_sp->hide();
+			o_coop->hide();
+		}
+		if(inst.loaded.levelFormat != MapFormat::udmf)
+		{
+			o_udmfskill1->hide();
+			o_easy->position(o_easy->x(), y() + SKILL_FILTER_TOP);
+			o_medium->position(o_easy->x(), y() + SKILL_FILTER_TOP + SKILL_FILTER_HEIGHT);
+			o_hard->position(o_easy->x(), y() + SKILL_FILTER_TOP + SKILL_FILTER_HEIGHT * 2);
+			o_udmfskill5->hide();
+		}
+		else
+		{
+			o_easy->position(o_easy->x(), y() + SKILL_FILTER_TOP + SKILL_FILTER_HEIGHT);
+			o_medium->position(o_easy->x(), y() + SKILL_FILTER_TOP + SKILL_FILTER_HEIGHT * 2);
+			o_hard->position(o_easy->x(), y() + SKILL_FILTER_TOP + SKILL_FILTER_HEIGHT * 3);
+		}
 	}
 }
 
@@ -635,9 +662,11 @@ void UI_FindAndReplace::ResetFilters()
 	restrict_to_sel->value(0);
 
 	// thing filters
+	o_udmfskill1->value(0);
 	o_easy  ->value(0);
 	o_medium->value(0);
 	o_hard  ->value(0);
+	o_udmfskill5->value(0);
 
 	o_sp  ->value(0);
 	o_coop->value(0);
@@ -1463,8 +1492,10 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 	// skill/mode flag filter
 	if ((T->options & options_mask) != options_value)
 		return false;
+	if ((T->udmfflags & udmfflags_mask) != udmfflags_value)
+		return false;
 
-	if (inst.loaded.levelFormat == MapFormat::hexen && ! Filter_Tag(T->tid))
+	if (inst.loaded.levelFormat != MapFormat::doom && ! Filter_Tag(T->tid))
 		return false;
 
 	return true;
@@ -1637,6 +1668,7 @@ void UI_FindAndReplace::ComputeFlagMask()
 {
 	options_mask  = 0;
 	options_value = 0;
+	udmfflags_mask = udmfflags_value = 0;
 
 	if (! filter_toggle->value())
 	{
@@ -1652,9 +1684,19 @@ void UI_FindAndReplace::ComputeFlagMask()
 			options_value |= (flag);  \
 	}
 
+#define UDMFFLAG_FROM_WIDGET(w, mul, flag) \
+	if ((w)->value() != 0)	\
+	{	\
+		udmfflags_mask |= (flag);	\
+		if ((w)->value() * (mul) > 0)	\
+			udmfflags_value |= (flag);	\
+	}
+
+	UDMFFLAG_FROM_WIDGET(o_udmfskill1, 1, MTF_UDMF_skill1);
 	FLAG_FROM_WIDGET(  o_easy, 1, MTF_Easy);
 	FLAG_FROM_WIDGET(o_medium, 1, MTF_Medium);
 	FLAG_FROM_WIDGET(  o_hard, 1, MTF_Hard);
+	UDMFFLAG_FROM_WIDGET(o_udmfskill5, 1, MTF_UDMF_skill5);
 
 	if (inst.conf.features.coop_dm_flags)
 	{

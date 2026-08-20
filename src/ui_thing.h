@@ -37,10 +37,11 @@ public:
 	UI_ThingBox *parent;
 
 	int mask;
+	bool isUDMF;
 
 public:
-	thing_opt_CB_data_c(UI_ThingBox *_parent, int _mask) :
-		parent(_parent), mask(_mask)
+	thing_opt_CB_data_c(UI_ThingBox *_parent, int _mask, bool _isUDMF) :
+		parent(_parent), mask(_mask), isUDMF(_isUDMF)
 	{ }
 
 };
@@ -105,13 +106,19 @@ public:
 	void UnselectPics() override;
 
 private:
+	struct ThingOption
+	{
+		int classic;
+		int udmf;
+	};
+
 	void SetThingType(int new_type);
 	void SetSpecialType(int new_type);
 
 	void AdjustExtraFloor(int dir);
 
-	int  CalcOptions() const;
-	void OptionsFromInt(int options);
+	ThingOption CalcOptions() const;
+	void OptionsFromInt(ThingOption options);
 
 private:
 	static void       x_callback(Fl_Widget *w, void *data);

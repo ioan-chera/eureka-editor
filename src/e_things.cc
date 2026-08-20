@@ -195,6 +195,13 @@ void CMD_TH_Merge(Instance &inst)
 	}
 }
 
+void E_AddUDMFSkillsNewThing(Thing &thing)
+{
+	if(thing.options & MTF_Easy)
+		thing.udmfflags |= MTF_UDMF_skill1;
+	if(thing.options & MTF_Hard)
+		thing.udmfflags |= MTF_UDMF_skill5;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

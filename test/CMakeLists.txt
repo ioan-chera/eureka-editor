@@ -79,10 +79,12 @@ add_executable(
     m_files_test.cpp
     m_game_test.cpp
     m_keys_test.cpp
+    m_loadsave_test.cpp
     m_parse_test.cpp
     m_select_test.cpp
     m_streams_test.cpp
     m_testmap_test.cpp
+    m_udmf_test.cpp
     main_test.cpp
     r_grid_test.cpp
 	SafeOutFileTest.cpp

@@ -517,6 +517,8 @@ void UI_MainWindow::UpdateGameInfo(const LoadingData &loading, const ConfigData 
 {
 	for(MapItemBox *box : mapItemBoxes)
 		box->UpdateGameInfo(loading, config);
+	if(find_box)
+		find_box->UpdateWhatFilters();
 }
 
 

@@ -41,6 +41,9 @@ endif
 
 if $MAP_FORMAT is DOOM
   thingflag 4 2 dormant off 0x200
+else
+  thingflag -1 0 easiest on skill1
+  thingflag 3 0 hardest on skill5
 endif
 
 map_formats DOOM UDMF

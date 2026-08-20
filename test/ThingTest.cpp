@@ -27,6 +27,7 @@ TEST(Thing, ZeroInit)
 	ASSERT_FALSE(thing.angle);
 	ASSERT_FALSE(thing.type);
 	ASSERT_FALSE(thing.options);
+	ASSERT_FALSE(thing.udmfflags);
 	ASSERT_FALSE(thing.hf);
 	ASSERT_FALSE(thing.tid);
 	ASSERT_FALSE(thing.special);

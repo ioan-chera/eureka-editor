@@ -34,6 +34,7 @@
 #include "e_basis.h"
 #include "e_checks.h"
 #include "e_main.h"  // CalculateLevelBounds()
+#include "e_things.h"
 #include "LineDef.h"
 #include "m_config.h"
 #include "m_files.h"
@@ -667,6 +668,7 @@ void Document::LoadThings(int loading_level, const Wad_file *load_wad)
 		th->angle   = LE_U16(raw.angle);
 		th->type    = LE_U16(raw.type);
 		th->options = LE_U16(raw.options);
+		E_AddUDMFSkillsNewThing(*th);
 
 		things.push_back(std::move(th));
 	}
@@ -705,6 +707,7 @@ void Document::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 		th->angle = LE_U16(raw.angle);
 		th->type = LE_U16(raw.type);
 		th->options = LE_U16(raw.options);
+		E_AddUDMFSkillsNewThing(*th);
 
 		th->special = raw.special;
 		th->arg1 = raw.args[0];

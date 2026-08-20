@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -41,6 +42,7 @@
 #define MAX_RADIUS  128
 
 class Instance;
+struct Thing;
 
 
 /*
@@ -62,6 +64,7 @@ int calc_new_angle(int angle, int diff);
 void CMD_TH_Disconnect(Instance &inst);
 void CMD_TH_Merge(Instance &inst);
 
+void E_AddUDMFSkillsNewThing(Thing &thing);
 
 #endif  /* __EUREKA_E_THINGS_H__ */
 

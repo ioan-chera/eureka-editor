@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2021 Ioan Chera
+//  Copyright (C) 2021-2026 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -27,6 +27,9 @@
 #include "m_select.h"
 #include "Sector.h"
 #include "ui_window.h"
+#include "w_rawdef.h"
+
+#include "FL/Fl.H"
 
 //==============================================================================
 //
@@ -277,4 +280,222 @@ TEST(EChecks, TagsApplyNewValue)
 			ASSERT_EQ(sector->tag, 0);
 
 	ASSERT_EQ(inst.tagInMemory, 1);	// changed again
+}
+
+static Fl_Window *findThingWindow()
+{
+	Fl_Window *foundWindow = nullptr;
+	for(Fl_Window *window = Fl::first_window(); window; window = Fl::next_window(window))
+	{
+		if(!strcmp(window->label(), "Check : Things"))
+		{
+			foundWindow = window;
+			break;
+		}
+	}
+
+	return foundWindow;
+}
+
+struct WidgetLookup
+{
+	const Fl_Group *parent;
+	int labelIndex;
+};
+
+static WidgetLookup checkDialogAndAssertMessage(Fl_Window *foundWindow, const char *message)
+{
+	EXPECT_GE(foundWindow->children(), 2);
+	const Fl_Group *group = static_cast<const Fl_Group *>(foundWindow->child(1));	// HARD ASSUMPTION, WILL CRASH OTHERWISE
+	EXPECT_TRUE(group);
+
+	int foundItem = -1;
+	for(int i = 0; i < group->children(); ++i)
+	{
+		const Fl_Widget *widget = group->child(i);
+		EXPECT_TRUE(widget);
+
+		if(widget->label() && strstr(widget->label(), message))
+		{
+			foundItem = i;
+			break;
+		}
+	}
+	EXPECT_GE(foundItem, 0);
+	return {.parent = group, .labelIndex = foundItem};
+}
+
+class EThingChecks : public ::testing::Test
+{
+protected:
+	void SetUp() override;
+	void TearDown() override;
+
+	Instance inst;
+	int numUnspawnableThings = 0;
+};
+
+void EThingChecks::SetUp()
+{
+}
+
+void EThingChecks::TearDown()
+{
+}
+
+static void initForThings(Instance &inst)
+{
+	inst.edit.mode = ObjType::things;
+	inst.edit.Selected.emplace(ObjType::things);
+}
+
+static constexpr double uiTimeout = 0.3;
+
+TEST(EChecks, ThingsFindDudsUDMFUsesNewSkills)
+{
+	Instance inst;
+	initForThings(inst);
+	inst.loaded.levelFormat = MapFormat::udmf;
+
+	// Only test with one thing, because we can't determine which are, so make it binary
+	inst.level.things.push_back(std::make_shared<Thing>());
+
+	// Put some valid non-player type to ensure skills
+	auto &thing = inst.level.things[0];
+	thing->type = 3004;
+	thing->udmfflags = MTF_UDMF_skill5;
+	thing->options = MTF_Hexen_SP | MTF_Hexen_Fighter;
+
+	Fl::add_timeout(uiTimeout, [](void *data){
+		Fl_Window *window = findThingWindow();
+		checkDialogAndAssertMessage(window, "No unspawnable things");
+		window->do_callback();
+	}, this);
+
+	inst.EXEC_Param[0] = "things";
+	inst.CMD_MapCheck();
+}
+
+TEST(EChecks, ThingsFindDudsDoomDoesNotUseNewSkillsAndFixAddsThem)
+{
+	Instance inst;
+	initForThings(inst);
+	inst.loaded.levelFormat = MapFormat::hexen;
+
+	// Only test with one thing, because we can't determine which are, so make it binary
+	inst.level.things.push_back(std::make_shared<Thing>());
+
+	// Put some valid non-player type to ensure skills
+	auto &thing = inst.level.things[0];
+	thing->type = 3004;
+	thing->udmfflags = MTF_UDMF_skill5;
+	thing->options = MTF_Hexen_SP | MTF_Hexen_Fighter;
+
+	Fl::add_timeout(uiTimeout, [](void *data){
+		Fl_Window *window = findThingWindow();
+		WidgetLookup lookup = checkDialogAndAssertMessage(window, "1 unspawnable things");
+		for(int i = lookup.labelIndex; i < lookup.parent->children(); ++i)
+		{
+			Fl_Widget *button = lookup.parent->child(i);
+			if(button && button->label() && !strcmp(button->label(), "Fix"))
+			{
+				// Run the fix duds command
+				static_cast<Fl_Button *>(button)->do_callback();
+				auto inst = static_cast<Instance *>(data);
+				EXPECT_EQ(inst->level.things[0]->options, MTF_Easy | MTF_Medium | MTF_Hard | MTF_Hexen_SP | MTF_Hexen_Fighter);
+				// UDMF left alone
+				EXPECT_EQ(inst->level.things[0]->udmfflags, MTF_UDMF_skill5);
+				break;
+			}
+		}
+		Fl::add_timeout(uiTimeout, [](void *data) {
+			static_cast<Fl_Window *>(data)->do_callback();
+		}, window);
+	}, &inst);
+
+	inst.EXEC_Param[0] = "things";
+	inst.CMD_MapCheck();
+}
+
+TEST(EChecks, ThingsFindDudsUDMFForNoSkillsAndFixAddsThemAll)
+{
+	Instance inst;
+	initForThings(inst);
+	inst.loaded.levelFormat = MapFormat::udmf;
+
+	inst.level.things.push_back(std::make_shared<Thing>());
+	auto &thing = inst.level.things[0];
+	thing->type = 3004;
+	thing->options = MTF_Hexen_SP | MTF_Hexen_Fighter;
+	Fl::add_timeout(uiTimeout, [](void *data){
+		Fl_Window *window = findThingWindow();
+		WidgetLookup lookup = checkDialogAndAssertMessage(window, "1 unspawnable things");
+		for(int i = lookup.labelIndex; i < lookup.parent->children(); ++i)
+		{
+			Fl_Widget *button = lookup.parent->child(i);
+			if(button && button->label() && !strcmp(button->label(), "Fix"))
+			{
+				// Run the fix duds command
+				static_cast<Fl_Button *>(button)->do_callback();
+				auto inst = static_cast<Instance *>(data);
+				EXPECT_EQ(inst->level.things[0]->options, MTF_Easy | MTF_Medium | MTF_Hard | MTF_Hexen_SP | MTF_Hexen_Fighter);
+				EXPECT_EQ(inst->level.things[0]->udmfflags, MTF_UDMF_skill1 | MTF_UDMF_skill5);
+				break;
+			}
+		}
+		Fl::add_timeout(uiTimeout, [](void *data) {
+			static_cast<Fl_Window *>(data)->do_callback();
+		}, window);
+	}, &inst);
+
+	inst.EXEC_Param[0] = "things";
+	inst.CMD_MapCheck();
+
+}
+
+TEST(EChecks, ThingStuckInThing)
+{
+	Instance inst;
+	initForThings(inst);
+	inst.loaded.levelFormat = MapFormat::udmf;
+
+	inst.level.things.push_back(std::make_shared<Thing>());
+	inst.level.things.push_back(std::make_shared<Thing>());
+	inst.level.things.push_back(std::make_shared<Thing>());
+
+	for(const auto &T : inst.level.things)
+	{
+		T->type = 3004;
+		T->udmfflags = MTF_UDMF_skill1;
+		T->options = MTF_Hexen_Fighter | MTF_Hexen_SP;
+	}
+
+	inst.level.things[0]->SetRawXY(MapFormat::udmf, {10, 20});
+	inst.level.things[1]->SetRawXY(MapFormat::udmf, {14, 25});
+	inst.level.things[2]->SetRawXY(MapFormat::udmf, {50, 20});
+
+	inst.conf.thing_types[3004] = {
+		.group = 'm',
+		.radius = (short)10,
+		.scale = 1.0f,
+	};
+
+	Fl::add_timeout(uiTimeout, [](void *data){
+		Fl_Window *window = findThingWindow();
+		checkDialogAndAssertMessage(window, "1 stuck actors");
+		window->do_callback();
+	}, nullptr);
+
+	inst.EXEC_Param[0] = "things";
+	inst.CMD_MapCheck();
+
+	// Now test Doom: should not be stuck now
+	inst.loaded.levelFormat = MapFormat::hexen;
+	Fl::add_timeout(uiTimeout, [](void *data){
+		Fl_Window *window = findThingWindow();
+		checkDialogAndAssertMessage(window, "No stuck actors");
+		window->do_callback();
+	}, nullptr);
+	inst.EXEC_Param[0] = "things";
+	inst.CMD_MapCheck();
 }

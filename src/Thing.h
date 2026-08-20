@@ -38,6 +38,7 @@ struct Thing
 	int angle = 0;
 	int type = 0;
 	int options = 0;
+	int udmfflags = 0;
 
 	int tid = 0;
 	int special = 0;

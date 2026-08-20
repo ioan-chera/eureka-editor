@@ -1194,3 +1194,67 @@ TEST_F(EObjectsFixture, DrawClockwiseInsideOctagonFromVertex)
 	ASSERT_GT(innerSectorRefs, 0);
 }
 
+TEST_F(EObjectsFixture, InsertingAddsAllOnFlagsIncludingUDMF)
+{
+	inst.loaded.levelFormat = MapFormat::doom;
+	inst.edit.mode = ObjType::things;
+
+	inst.conf.thing_flags.push_back({
+		.row = 0,
+		.column = 0,
+		.label = "easiest",
+		.defaultSet = thingflag_t::DefaultMode::on,
+		.isUDMF = true,
+		.value = MTF_UDMF_skill1,
+	});
+	inst.conf.thing_flags.push_back({
+		.row = 1,
+		.column = 0,
+		.label = "normalest",
+		.defaultSet = thingflag_t::DefaultMode::on,
+		.isUDMF = false ,
+		.value = MTF_Medium,
+	});
+	inst.conf.thing_flags.push_back({
+		.row = 2,
+		.column = 0,
+		.label = "hardest",
+		.defaultSet = thingflag_t::DefaultMode::on,
+		.isUDMF = true,
+		.value = MTF_UDMF_skill5,
+	});
+
+	inst.CMD_ObjectInsert();
+
+	EXPECT_EQ(inst.level.numThings(), 1);
+	EXPECT_EQ(inst.level.things[0]->options, MTF_Medium);
+	EXPECT_EQ(inst.level.things[0]->udmfflags, MTF_UDMF_skill1 | MTF_UDMF_skill5);
+
+}
+
+TEST_F(EObjectsFixture, InsertingWillAddUDMFSkillsIfAdjacentDoomOnesAreDefined)
+{
+	inst.loaded.levelFormat = MapFormat::doom;
+	inst.edit.mode = ObjType::things;
+	inst.conf.thing_flags.push_back({
+		.row = 0,
+		.column = 0,
+		.label = "easy",
+		.defaultSet = thingflag_t::DefaultMode::on,
+		.isUDMF = false ,
+		.value = MTF_Easy,
+	});
+	inst.conf.thing_flags.push_back({
+		.row = 0,
+		.column = 1,
+		.label = "medium",
+		.defaultSet = thingflag_t::DefaultMode::on,
+		.isUDMF = false ,
+		.value = MTF_Medium,
+	});
+
+	inst.CMD_ObjectInsert();
+	EXPECT_EQ(inst.level.numThings(), 1);
+	EXPECT_EQ(inst.level.things[0]->options, MTF_Easy | MTF_Medium);
+	EXPECT_EQ(inst.level.things[0]->udmfflags, MTF_UDMF_skill1);
+}

@@ -1534,6 +1534,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 			continue;
 
 		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		int udmfskills = T->udmfflags & (MTF_UDMF_skill1 | MTF_UDMF_skill5);
 		int modes   = 1;
 		int classes = 1;
 
@@ -1551,7 +1552,8 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 		}
 
-		if (skills == 0 || modes == 0 || classes == 0)
+		if ((skills == 0 && (inst.loaded.levelFormat != MapFormat::udmf || udmfskills == 0)) ||
+			modes == 0 || classes == 0)
 		{
 			if (! TH_always_spawned(inst, T->type))
 				list.set(n);
@@ -1571,7 +1573,7 @@ static void Things_ShowDuds(Instance &inst)
 }
 
 
-void Things_FixDuds(Instance &inst)
+static void Things_FixDuds(Instance &inst)
 {
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed unspawnable things");
@@ -1587,13 +1589,19 @@ void Things_FixDuds(Instance &inst)
 			continue;
 
 		int new_options = T->options;
+		int new_udmfflags = T->udmfflags;
 
 		int skills  = T->options & (MTF_Easy | MTF_Medium | MTF_Hard);
+		int udmfskills = T->udmfflags & (MTF_UDMF_skill1 | MTF_UDMF_skill5);
 		int modes   = 1;
 		int classes = 1;
 
-		if (skills == 0)
+		if (skills == 0 && (inst.loaded.levelFormat != MapFormat::udmf || udmfskills == 0))
+		{
 			new_options |= MTF_Easy | MTF_Medium | MTF_Hard;
+			if(inst.loaded.levelFormat == MapFormat::udmf)
+				new_udmfflags |= MTF_UDMF_skill1 | MTF_UDMF_skill5;
+		}
 
 		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
@@ -1622,6 +1630,10 @@ void Things_FixDuds(Instance &inst)
 		{
 			op.changeThing(n, &Thing::options, new_options);
 		}
+		if (new_udmfflags != T->udmfflags)
+		{
+			op.changeThing(n, &Thing::udmfflags, new_udmfflags);
+		}
 	}
 }
 
@@ -1633,7 +1645,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 {
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const auto T = inst.level.things[n];
+		const auto &T = inst.level.things[n];
 
 		const thingtype_t &info = inst.conf.getThingType(T->type);
 
@@ -1704,34 +1716,60 @@ static bool ThingStuckInThing(const Instance &inst, const Thing *T1, const thing
 	// check skill bits, except for players
 	int opt1 = T1->options;
 	int opt2 = T2->options;
+	int udmf1 = T1->udmfflags;
+	int udmf2 = T2->udmfflags;
 
+	static const int skillflags = MTF_Easy | MTF_Medium | MTF_Hard;
 	if (inst.loaded.levelFormat != MapFormat::doom)
 	{
-		if (info1->group == 'p') opt1 |= 0x7E7;
-		if (info2->group == 'p') opt2 |= 0x7E7;
+		const int classflags = MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
+		const int modeflags = MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
+		const int allflags = skillflags | classflags | modeflags;
+		static const int udmfskillflags = MTF_UDMF_skill1 | MTF_UDMF_skill5;
+		if (info1->group == 'p')
+		{
+			opt1 |= allflags;
+			udmf1 |= udmfskillflags;
+		}
+		if (info2->group == 'p')
+		{
+			opt2 |= allflags;
+			udmf2 |= udmfskillflags;
+		}
 
 		// check skill bits
-		if ((opt1 & opt2 & 0x07) == 0) return false;
+		if ((opt1 & opt2 & skillflags) == 0)
+		{
+			if (inst.loaded.levelFormat == MapFormat::udmf)
+			{
+				if((udmf1 & udmf2 & udmfskillflags) == 0)
+					return false;
+			}
+			else
+				return false;
+		}
 
 		// check class bits
-		if ((opt1 & opt2 & 0xE0) == 0) return false;
+		if ((opt1 & opt2 & classflags) == 0) return false;
 
 		// check game mode
-		if ((opt1 & opt2 & 0x700) == 0) return false;
+		if ((opt1 & opt2 & modeflags) == 0) return false;
 	}
 	else
 	{
 		// invert game-mode bits (MTF_Not_COOP etc)
-		opt1 ^= 0x70; opt2 ^= 0x70;
+		const int modeflags = MTF_Not_DM | MTF_Not_SP | MTF_Not_COOP;
+		opt1 ^= modeflags;
+		opt2 ^= modeflags;
 
-		if (info1->group == 'p') opt1 |= 0x77;
-		if (info2->group == 'p') opt2 |= 0x77;
+		if (info1->group == 'p') opt1 |= modeflags | skillflags;
+		if (info2->group == 'p') opt2 |= modeflags | skillflags;
 
 		// check skill bits
-		if ((opt1 & opt2 & 0x07) == 0) return false;
+		if ((opt1 & opt2 & skillflags) == 0) return false;
 
 		// check game mode
-		if ((opt1 & opt2 & 0x70) == 0) return false;
+		if ((opt1 & opt2 & modeflags) == 0) return false;
 	}
 
 	return true;
@@ -1803,7 +1841,7 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 
 	for (int n = 0 ; n < (int)blockers.size() ; n++)
 	{
-		const auto T = inst.level.things[blockers[n]];
+		const auto &T = inst.level.things[blockers[n]];
 
 		const thingtype_t &info = inst.conf.getThingType(T->type);
 
@@ -1812,7 +1850,7 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 
 		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
-			const auto T2 = inst.level.things[blockers[n2]];
+			const auto &T2 = inst.level.things[blockers[n2]];
 
 			const thingtype_t &info2 = inst.conf.getThingType(T2->type);
 
@@ -1906,6 +1944,7 @@ private:
 	Instance &inst;
 };
 
+#define EN_DASH "\xe2\x80\x93"
 
 CheckResult ChecksModule::checkThings(int min_severity) const
 {
@@ -1963,7 +2002,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		Things_FindDuds(inst, sel);
 
 		if (sel.empty())
-			dialog->AddLine("No unspawnable things -- skill flags are OK");
+			dialog->AddLine("No unspawnable things " EN_DASH " skill flags are OK");
 		else
 		{
 			check_message = SString::printf("%d unspawnable things", sel.count_obj());
@@ -2003,19 +2042,19 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		}
 		else if (dm_num < inst.conf.miscInfo.min_dm_starts)
 		{
-			check_message = SString::printf("Found %d deathmatch starts -- need at least %d", dm_num,
+			check_message = SString::printf("Found %d deathmatch starts " EN_DASH " need at least %d", dm_num,
 				inst.conf.miscInfo.min_dm_starts);
 			dialog->AddLine(check_message, 1);
 		}
 		else if (dm_num > inst.conf.miscInfo.max_dm_starts)
 		{
-			check_message = SString::printf("Found %d deathmatch starts -- maximum is %d", dm_num,
+			check_message = SString::printf("Found %d deathmatch starts " EN_DASH " maximum is %d", dm_num,
 				inst.conf.miscInfo.max_dm_starts);
 			dialog->AddLine(check_message, 2);
 		}
 		else
 		{
-			check_message = SString::printf("Found %d deathmatch starts -- OK", dm_num);
+			check_message = SString::printf("Found %d deathmatch starts " EN_DASH " OK", dm_num);
 			dialog->AddLine(check_message);
 		}
 

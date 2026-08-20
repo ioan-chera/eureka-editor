@@ -22,6 +22,7 @@
 
 #include "Instance.h"
 #include "m_game.h"
+#include "w_rawdef.h"
 
 class MGameFixture : public TempDirContext
 {
@@ -164,6 +165,8 @@ TEST_F(MGameFixture, ParseDefinitionFileThingFlags)
 	stream << "thingflag 2 1 ambush  off 0x04" << std::endl;
 	stream << "thingflag 3 1 friend  on-opposite 0x08" << std::endl;
 	stream << "thingflag 2 1 doppel  on 0x10" << std::endl;
+	stream << "thingflag 4 0 easiest on skill1" << std::endl;
+	stream << "thingflag 4 1 hardest on skill5" << std::endl;
 
 	stream.close();
 
@@ -171,7 +174,7 @@ TEST_F(MGameFixture, ParseDefinitionFileThingFlags)
 
 	M_ParseDefinitionFile(parseVars, purpose, &config, filename);
 
-	ASSERT_EQ(config.thing_flags.size(), 2);
+	ASSERT_EQ(config.thing_flags.size(), 4);
 
 	// Also test that the same position gets overwritten
 	ASSERT_EQ(config.thing_flags[0].row, 2);
@@ -179,12 +182,30 @@ TEST_F(MGameFixture, ParseDefinitionFileThingFlags)
 	ASSERT_EQ(config.thing_flags[0].value, 16);
 	ASSERT_EQ(config.thing_flags[0].defaultSet, thingflag_t::DefaultMode::on);
 	ASSERT_EQ(config.thing_flags[0].label, "doppel");
+	ASSERT_FALSE(config.thing_flags[0].isUDMF);
 
 	ASSERT_EQ(config.thing_flags[1].row, 3);
 	ASSERT_EQ(config.thing_flags[1].column, 1);
 	ASSERT_EQ(config.thing_flags[1].value, 8);
 	ASSERT_EQ(config.thing_flags[1].defaultSet, thingflag_t::DefaultMode::onOpposite);
 	ASSERT_EQ(config.thing_flags[1].label, "friend");
+	ASSERT_FALSE(config.thing_flags[1].isUDMF);
+
+	// Test UDMF flags
+	ASSERT_EQ(config.thing_flags[2].row, 4);
+	ASSERT_EQ(config.thing_flags[2].column, 0);
+	ASSERT_EQ(config.thing_flags[2].value, MTF_UDMF_skill1);
+	ASSERT_EQ(config.thing_flags[2].defaultSet, thingflag_t::DefaultMode::on);
+	ASSERT_EQ(config.thing_flags[2].label, "easiest");
+	ASSERT_TRUE(config.thing_flags[2].isUDMF);
+
+	ASSERT_EQ(config.thing_flags[3].row, 4);
+	ASSERT_EQ(config.thing_flags[3].column, 1);
+	ASSERT_EQ(config.thing_flags[3].value, MTF_UDMF_skill5);
+	ASSERT_EQ(config.thing_flags[3].defaultSet, thingflag_t::DefaultMode::on);
+	ASSERT_EQ(config.thing_flags[3].label, "hardest");
+	ASSERT_TRUE(config.thing_flags[3].isUDMF);
+
 }
 
 //

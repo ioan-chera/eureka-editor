@@ -202,7 +202,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	exfloor = new UI_DynIntInput(X+84, Y, 64, TYPE_INPUT_HEIGHT, "3D Floor: ");
 	exfloor->align(FL_ALIGN_LEFT);
-	exfloor->callback(option_callback, new thing_opt_CB_data_c(this, MTF_EXFLOOR_MASK));
+	exfloor->callback(option_callback, new thing_opt_CB_data_c(this, MTF_EXFLOOR_MASK, false));
 	exfloor->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	efl_down = new Fl_Button(X+165, Y+1, 30, 22, "-");
@@ -413,6 +413,22 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 	}
 }
 
+static void updateUDMFSkillWhenChangingNonUDMF(const Document &doc, int thingIndex, int newFlags,
+											   EditOperation &op)
+{
+	const auto &T = doc.things[thingIndex];
+	int oldFlags = T->options;
+	if(newFlags & ~oldFlags & MTF_Easy && !(T->udmfflags & MTF_UDMF_skill1))
+		op.changeThing(thingIndex, &Thing::udmfflags, T->udmfflags | MTF_UDMF_skill1);
+	else if(oldFlags & ~newFlags & MTF_Easy && T->udmfflags & MTF_UDMF_skill1)
+		op.changeThing(thingIndex, &Thing::udmfflags, T->udmfflags & ~MTF_UDMF_skill1);
+	if(newFlags & ~oldFlags & MTF_Hard && !(T->udmfflags & MTF_UDMF_skill5))
+		op.changeThing(thingIndex, &Thing::udmfflags, T->udmfflags | MTF_UDMF_skill5);
+	else if(oldFlags & ~newFlags & MTF_Hard && T->udmfflags & MTF_UDMF_skill5)
+		op.changeThing(thingIndex, &Thing::udmfflags, T->udmfflags & ~MTF_UDMF_skill5);
+}
+
+// NOTE: not UDMF specific
 void UI_ThingBox::flags_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
@@ -426,6 +442,9 @@ void UI_ThingBox::flags_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
+			if(box->inst.loaded.levelFormat != MapFormat::udmf)
+				updateUDMFSkillWhenChangingNonUDMF(box->inst.level, *it, new_flags, op);
+			
 			op.changeThing(*it, &Thing::options, new_flags);
 		}
 	}
@@ -509,7 +528,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 	UI_ThingBox *box = ocb->parent;
 
 	int mask = ocb->mask;
-	int new_opts = box->CalcOptions();
+	ThingOption new_opts = box->CalcOptions();
 
 	if (!box->inst.edit.Selected->empty())
 	{
@@ -519,11 +538,33 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(*box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const auto T = box->inst.level.things[*it];
+			const auto &T = box->inst.level.things[*it];
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
-			op.changeThing(*it, &Thing::options, (T->options & ~mask) | (new_opts & mask));
+			if(ocb->isUDMF)
+				op.changeThing(*it, &Thing::udmfflags, (T->udmfflags & ~mask) | (new_opts.udmf & mask));
+			else
+			{
+				if(box->inst.loaded.levelFormat != MapFormat::udmf)
+				{
+					if(mask & MTF_Easy)
+					{
+						if(new_opts.classic & MTF_Easy && !(T->udmfflags & MTF_UDMF_skill1))
+							op.changeThing(*it, &Thing::udmfflags, T->udmfflags | MTF_UDMF_skill1);
+						else if(!(new_opts.classic & MTF_Easy) && T->udmfflags & MTF_UDMF_skill1)
+							op.changeThing(*it, &Thing::udmfflags, T->udmfflags & ~MTF_UDMF_skill1);
+					}
+					if(mask & MTF_Hard)
+					{
+						if(new_opts.classic & MTF_Hard && !(T->udmfflags & MTF_UDMF_skill5))
+							op.changeThing(*it, &Thing::udmfflags, T->udmfflags | MTF_UDMF_skill5);
+						else if(!(new_opts.classic & MTF_Hard) && T->udmfflags & MTF_UDMF_skill5)
+							op.changeThing(*it, &Thing::udmfflags, T->udmfflags & ~MTF_UDMF_skill5);
+					}
+				}
+				op.changeThing(*it, &Thing::options, (T->options & ~mask) | (new_opts.classic & mask));
+			}
 		}
 	}
 }
@@ -617,46 +658,57 @@ void UI_ThingBox::AdjustExtraFloor(int dir)
 	else
 		mFixUp.setInputValue(exfloor, "");
 
-	thing_opt_CB_data_c ocb(this, MTF_EXFLOOR_MASK);
+	thing_opt_CB_data_c ocb(this, MTF_EXFLOOR_MASK, false);
 
 	option_callback(this, &ocb);
 }
 
 
-void UI_ThingBox::OptionsFromInt(int options)
+void UI_ThingBox::OptionsFromInt(ThingOption options)
 {
 	for(const FlagButton &button : flagButtons)
 	{
 		auto data = static_cast<const thing_opt_CB_data_c *>(button.button->user_data());
 		if(button.info->defaultSet == thingflag_t::DefaultMode::onOpposite)
-			button.button->value((options & data->mask) ? 0 : 1);
+			button.button->value(((data->isUDMF ? options.udmf : options.classic) & data->mask) ? 0 : 1);
 		else
-			button.button->value((options & data->mask) ? 1 : 0);
+			button.button->value(((data->isUDMF ? options.udmf : options.classic) & data->mask) ? 1 : 0);
 	}
 
 	if (inst.loaded.levelFormat == MapFormat::doom)
 	{
-		if(options & MTF_EXFLOOR_MASK)
-			mFixUp.setInputValue(exfloor, SString((options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT).c_str());
+		if(options.classic & MTF_EXFLOOR_MASK)
+			mFixUp.setInputValue(exfloor, SString((options.classic & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT).c_str());
 		else
 			mFixUp.setInputValue(exfloor, "");
 	}
 }
 
 
-int UI_ThingBox::CalcOptions() const
+
+UI_ThingBox::ThingOption UI_ThingBox::CalcOptions() const
 {
-	int options = 0;
+	ThingOption options{};
 
 	for(const FlagButton &button : flagButtons)
 	{
 		if(button.info->defaultSet == thingflag_t::DefaultMode::onOpposite)
 		{
 			if(!button.button->value())
-				options |= button.info->value;
+			{
+				if(button.info->isUDMF)
+					options.udmf |= button.info->value;
+				else
+					options.classic |= button.info->value;
+			}
 		}
 		else if(button.button->value())
-			options |= button.info->value;
+		{
+			if(button.info->isUDMF)
+				options.udmf |= button.info->value;
+			else
+				options.classic |= button.info->value;
+		}
 
 	}
 
@@ -722,16 +774,17 @@ void UI_ThingBox::UpdateField()
 		sprite->Clear();
 	}
 
-	int options;
+	ThingOption options;
 	SString optString;
 	if (inst.level.isThing(obj))
 	{
-		options = inst.level.things[obj]->options;
-		optString = SString(options);
+		options.classic = inst.level.things[obj]->options;
+		options.udmf = inst.level.things[obj]->udmfflags;
+		optString = SString(options.classic);
 	}
 	else
 	{
-		options = 0;
+		options.classic = options.udmf = 0;
 		optString = "";
 	}
 	OptionsFromInt(options);
@@ -741,7 +794,7 @@ void UI_ThingBox::UpdateField()
 	unsigned mask = 0;
 	for(const thingflag_t &flag : inst.conf.thing_flags)
 		mask |= flag.value;
-	if(options & ~mask)
+	if(options.classic & ~mask)
 		flagBox->color(fl_rgb_color(255, 255, 0));
 	else
 		flagBox->color(flagBoxDefaultColor);
@@ -818,7 +871,7 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 			flagButton.button = std::make_unique<Fl_Check_Button>(xpos[col], Y, FW, 22,
 																  flag->label.c_str());
 			flagButton.button->value(flag->defaultSet != thingflag_t::DefaultMode::off ? 1 : 0);
-			flagButton.data = std::make_unique<thing_opt_CB_data_c>(this, flag->value);
+			flagButton.data = std::make_unique<thing_opt_CB_data_c>(this, flag->value, flag->isUDMF);
 			flagButton.button->callback(option_callback, flagButton.data.get());
 			flagButton.info = flag;
 			flagButtons.push_back(std::move(flagButton));

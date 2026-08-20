@@ -28,6 +28,7 @@
 #include "Instance.h"
 #include "m_parse.h"
 #include "m_streams.h"
+#include "w_rawdef.h"
 #include <assert.h>
 
 #define MAX_TOKENS  30   /* tokens per line */
@@ -835,7 +836,18 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 			flag.defaultSet = thingflag_t::DefaultMode::onOpposite;
 		else
 			pst->fail("invalid default setting \"%s\", expected off, on or on-opposite", argv[4]);
-		flag.value = (int)strtol(argv[5], nullptr, 0);
+		char *endptr = nullptr;
+		flag.value = (int)strtol(argv[5], &endptr, 0);
+		if(endptr && safe_isalnum(*endptr))
+		{
+			flag.isUDMF = true;
+			if(!y_stricmp(argv[5], "skill1"))
+				flag.value = MTF_UDMF_skill1;
+			else if(!y_stricmp(argv[5], "skill5"))
+				flag.value = MTF_UDMF_skill5;
+			else
+				pst->fail("invalid UDMF thing flag \"%s\"", argv[5]);
+		}
 
 		// Check if we already have one in the same location, and replace it if so (needed for
 		// ports like BOOM which overwrite vanilla flags)

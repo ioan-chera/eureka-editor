@@ -46,9 +46,11 @@ endif
 if $MAP_FORMAT not DOOM
   # Need to clear from base game, since ZDoom has its full common set of flags
   clear thingflags
+  thingflag -1 0 easiest on skill1
   thingflag 0 0 easy    on  0x0001
   thingflag 1 0 medium  on  0x0002
   thingflag 2 0 hard    on  0x0004
+  thingflag 3 0 hardest on  skill5
   thingflag 0 1 sp      on  0x0100
   thingflag 1 1 coop    on  0x0200
   thingflag 2 1 dm      on  0x0400

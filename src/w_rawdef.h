@@ -516,6 +516,12 @@ enum thing_option_e
 	MTF_Reserved  = 256,
 };
 
+enum thing_udmf_option_e
+{
+	MTF_UDMF_skill1 = 1,
+	MTF_UDMF_skill5 = 2,
+};
+
 #define MTF_EXFLOOR_MASK    0x3C00
 #define MTF_EXFLOOR_SHIFT   10
 

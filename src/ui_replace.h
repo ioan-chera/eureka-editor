@@ -106,9 +106,11 @@ private:
 	selection_c *previous_sel;
 
 	// thing stuff
+	UI_TripleCheckButton *o_udmfskill1;
 	UI_TripleCheckButton *o_easy;
 	UI_TripleCheckButton *o_medium;
 	UI_TripleCheckButton *o_hard;
+	UI_TripleCheckButton *o_udmfskill5;
 
 	UI_TripleCheckButton *o_sp;
 	UI_TripleCheckButton *o_coop;
@@ -116,6 +118,8 @@ private:
 
 	int options_mask;
 	int options_value;
+	int udmfflags_mask;
+	int udmfflags_value;
 
 	// sector filters
 	Fl_Check_Button *o_floors;
@@ -147,6 +151,8 @@ public:
 	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
+	void UpdateWhatFilters();
+
 private:
 	void ensureInitWhatFilters();
 
@@ -156,7 +162,6 @@ private:
 	bool WhatFromEditMode();
 
 	void UpdateWhatColor();
-	void UpdateWhatFilters();
 	void ComputeFlagMask();
 
 	void UnselectPics();

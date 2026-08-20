@@ -385,23 +385,26 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 		T->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		T->arg5 = value.DecodeInt();
-
+	else if (field.Match("skill1"))
+		T->udmfflags |= MTF_UDMF_skill1;
 	else if (field.Match("skill2"))
 		T->options |= MTF_Easy;
 	else if (field.Match("skill3"))
 		T->options |= MTF_Medium;
 	else if (field.Match("skill4"))
 		T->options |= MTF_Hard;
+	else if (field.Match("skill5"))
+		T->udmfflags |= MTF_UDMF_skill5;
 	else if (field.Match("ambush"))
 		T->options |= MTF_Ambush;
 	else if (field.Match("friend"))
 		T->options |= MTF_Friend;
 	else if (field.Match("single"))
-		T->options &= ~MTF_Not_SP;
+		T->options |= MTF_Hexen_SP;
 	else if (field.Match("coop"))
-		T->options &= ~MTF_Not_COOP;
+		T->options |= MTF_Hexen_COOP;
 	else if (field.Match("dm"))
-		T->options &= ~MTF_Not_DM;
+		T->options |= MTF_Hexen_DM;
 
 	else
 	{
@@ -566,7 +569,6 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 	{
 		kind = Objid(ObjType::things, 1);
 		auto addedThing = std::make_unique<Thing>();
-		addedThing->options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
 		doc.things.push_back(std::move(addedThing));
 		new_T = doc.things.back().get();
 	}
@@ -750,19 +752,20 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		if (th->hf)
 			lump->Printf("height = %.16g;\n", th->h());
 
-		lump->Printf("angle = %d;\n", th->angle);
+		if (th->angle)
+			lump->Printf("angle = %d;\n", th->angle);
 		lump->Printf("type = %d;\n", th->type);
 
 		// thing options
-		WrFlag(lump, th->options, "skill1", MTF_Easy);
+		WrFlag(lump, th->udmfflags, "skill1", MTF_UDMF_skill1);
 		WrFlag(lump, th->options, "skill2", MTF_Easy);
 		WrFlag(lump, th->options, "skill3", MTF_Medium);
 		WrFlag(lump, th->options, "skill4", MTF_Hard);
-		WrFlag(lump, th->options, "skill5", MTF_Hard);
+		WrFlag(lump, th->udmfflags, "skill5", MTF_UDMF_skill5);
 
-		WrFlag(lump, ~ th->options, "single", MTF_Not_SP);
-		WrFlag(lump, ~ th->options, "coop",   MTF_Not_COOP);
-		WrFlag(lump, ~ th->options, "dm",     MTF_Not_DM);
+		WrFlag(lump, th->options, "single", MTF_Hexen_SP);
+		WrFlag(lump, th->options, "coop",   MTF_Hexen_COOP);
+		WrFlag(lump, th->options, "dm",     MTF_Hexen_DM);
 
 		WrFlag(lump, th->options, "ambush", MTF_Ambush);
 
