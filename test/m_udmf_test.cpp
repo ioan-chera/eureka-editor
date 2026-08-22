@@ -36,8 +36,10 @@ TEST(MUdmf, LoadUDMFThenWrite)
 	textmap->Printf("namespace = \"Doom\";\n");
 	textmap->Printf("thing { x = 0; y = 0; type = 100; skill1 = true; }\n");
 	textmap->Printf("thing { x = 0; y = 0; angle = 0; type = 100; skill2 = true; }\n");
-	textmap->Printf("thing { x = 0; y = 0; angle = 30; type = 100; skill3 = true; }\n");
-	textmap->Printf("thing { x = 0; y = 0; type = 100; skill4 = true; }\n");
+	textmap->Printf("thing { x = 0; y = 0; angle = 30; type = 100; skill3 = true; dormant = true; "
+					" class1 = true; class3 = true; }\n");
+	textmap->Printf("thing { x = 0; y = 0; type = 100; skill4 = true; single = true; "
+					"coop = true; }\n");
 	textmap->Printf("thing { x = 0; y = 0; type = 100; skill5 = true; }\n");
 	textmap->Printf("vertex { x = 0; y = 0; }\n");
 	textmap->Printf("vertex { x = 100; y = 0; }\n");
@@ -60,9 +62,11 @@ TEST(MUdmf, LoadUDMFThenWrite)
 	ASSERT_EQ(inst.level.things[1]->udmfflags, 0);
 	ASSERT_EQ(inst.level.things[1]->options, MTF_Easy);
 	ASSERT_EQ(inst.level.things[2]->udmfflags, 0);
-	ASSERT_EQ(inst.level.things[2]->options, MTF_Medium);
+	ASSERT_EQ(inst.level.things[2]->options, (int)MTF_Medium |
+			  (int)(MTF_Hexen_Dormant | MTF_Hexen_Fighter | MTF_Hexen_Mage));
 	ASSERT_EQ(inst.level.things[3]->udmfflags, 0);
-	ASSERT_EQ(inst.level.things[3]->options, MTF_Hard);
+	ASSERT_EQ(inst.level.things[3]->options, (int)MTF_Hard |
+			  (int)(MTF_Hexen_SP | MTF_Hexen_COOP));
 	ASSERT_EQ(inst.level.things[4]->udmfflags, MTF_UDMF_skill5);
 	ASSERT_EQ(inst.level.things[4]->options, 0);
 
@@ -107,6 +111,9 @@ y = 0;
 angle = 30;
 type = 100;
 skill3 = true;
+dormant = true;
+class1 = true;
+class3 = true;
 }
 
 thing // 3
@@ -115,6 +122,8 @@ x = 0;
 y = 0;
 type = 100;
 skill4 = true;
+single = true;
+coop = true;
 }
 
 thing // 4

@@ -420,10 +420,18 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 		T->options |= MTF_Medium;
 	else if (field.Match("skill4"))
 		T->options |= MTF_Hard;
+	else if (field.Match("class1"))
+		T->options |= MTF_Hexen_Fighter;
+	else if (field.Match("class2"))
+		T->options |= MTF_Hexen_Cleric;
+	else if (field.Match("class3"))
+		T->options |= MTF_Hexen_Mage;
 	else if (field.Match("ambush"))
 		T->options |= MTF_Ambush;
 	else if (field.Match("friend"))
 		T->options |= MTF_Friend;
+	else if (field.Match("dormant"))
+		T->options |= MTF_Hexen_Dormant;
 	else if (field.Match("single"))
 		T->options |= MTF_Hexen_SP;
 	else if (field.Match("coop"))
@@ -792,6 +800,12 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		WrFlag(lump, th->options, "skill2", MTF_Easy);
 		WrFlag(lump, th->options, "skill3", MTF_Medium);
 		WrFlag(lump, th->options, "skill4", MTF_Hard);
+
+		WrFlag(lump, th->options, "dormant", MTF_Hexen_Dormant);
+
+		WrFlag(lump, th->options, "class1",  MTF_Hexen_Fighter);
+		WrFlag(lump, th->options, "class2",  MTF_Hexen_Cleric);
+		WrFlag(lump, th->options, "class3",  MTF_Hexen_Mage);
 
 		WrFlag(lump, th->options, "single", MTF_Hexen_SP);
 		WrFlag(lump, th->options, "coop",   MTF_Hexen_COOP);
