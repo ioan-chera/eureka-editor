@@ -69,6 +69,8 @@ enum
 
 	TAG_WIDTH = 64,
 	ARG_WIDTH = 42,
+
+	FLAGS_SECTION_HEADER_HEIGHT = 23,
 };
 
 
@@ -189,23 +191,21 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	Y += tag->h() + 15;
 
+	// Height will be adjusted
+	flagsSection = new Fl_Group(X, Y, W, 100);
 
-	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X+10, Y, 64, 24, "Flags: ");
+	Fl_Box *flags = new Fl_Box(FL_FLAT_BOX, X+10, Y, 64, FLAGS_SECTION_HEADER_HEIGHT + 1, "Flags: ");
 	flags->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-
 
 	f_automap = new Fl_Choice(X+W-118, Y, 104, 22, "Vis: ");
 	f_automap->add("Normal|Invisible|Mapped|Secret|MapSecret");
 	f_automap->value(0);
 	f_automap->callback(flags_callback, new line_flag_CB_data_c(this, MLF_ALL_AUTOMAP));
 
+	flagsSection->end();
+	flagsSection->resizable(nullptr);
 
-	Y += flags->h() - 1;
-
-	// Remember where to place dynamic linedef flags
-	flagsStartX = X - X0;
-	flagsStartY = Y - Y0;
-	flagsAreaW = W;
+	Y += FLAGS_SECTION_HEADER_HEIGHT;
 
 	// Leave space; dynamic flags will be created in UpdateGameInfo and side boxes moved accordingly
 	Y += 29;
@@ -1034,7 +1034,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		this->remove(btn.button.get());
 	flagButtons.clear();
 
-	int Y = y() + flagsStartY;
+	int Y = flagsSection->y() + FLAGS_SECTION_HEADER_HEIGHT;
 	if(!config.line_flags.empty())
 	{
 		// Build slots from sequential flags, supporting optional pairing (pairIndex 0/1)
@@ -1068,8 +1068,8 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		}
 
 		const int FW = 110;
-		const int leftX = x() + flagsStartX + 28;
-		const int rightX = x() + flagsStartX + flagsAreaW - 120;
+		const int leftX = flagsSection->x() + 28;
+		const int rightX = flagsSection->x() + flagsSection->w() - 120;
 		const int rowH = 19;
 
 		const int total = (int)slots.size();
@@ -1078,7 +1078,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		int yLeft = Y;
 		int yRight = Y;
 
-		begin();
+		flagsSection->begin();
 		for(int idx = 0; idx < total; ++idx)
 		{
 			const Slot &s = slots[idx];
@@ -1108,7 +1108,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			}
 			curY += rowH;
 		}
-		end();
+		flagsSection->end();
 
 		Y = (yLeft > yRight ? yLeft : yRight) + 29;
 	}
@@ -1117,6 +1117,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		// keep some spacing if no flags defined
 		Y += 29;
 	}
+	flagsSection->size(flagsSection->w(), Y - flagsSection->y());
 
 	// Reposition side boxes under the generated flags
 	front->Fl_Widget::position(front->x(), Y);

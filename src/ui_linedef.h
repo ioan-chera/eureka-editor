@@ -61,6 +61,7 @@ private:
 	UI_SideBox *back;
 
 	// Flags
+	Fl_Group *flagsSection;
 	Fl_Choice *f_automap;
 
 	// Dynamic linedef flags (configured via .ugh)
@@ -71,9 +72,6 @@ private:
 		const struct lineflag_t *info;
 	};
 	std::vector<LineFlagButton> flagButtons;
-	int flagsStartX = 0;
-	int flagsStartY = 0;
-	int flagsAreaW = 0;
 
 public:
 	UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr);
