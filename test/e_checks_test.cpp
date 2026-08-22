@@ -280,6 +280,26 @@ TEST(EChecks, TagsApplyNewValue)
 			ASSERT_EQ(sector->tag, 0);
 
 	ASSERT_EQ(inst.tagInMemory, 1);	// changed again
+
+	// Now work under UDMF
+	inst.loaded.levelFormat = MapFormat::udmf;
+	inst.edit.mode = ObjType::linedefs;
+	inst.edit.Selected.emplace(ObjType::linedefs);
+	inst.edit.Selected->set(1);
+	inst.edit.Selected->set(2);
+	inst.level.checks.tagsApplyNewValue(42);
+	for(const auto &line : inst.level.linedefs)
+		if(line == inst.level.linedefs[1] || line == inst.level.linedefs[2])
+		{
+			ASSERT_EQ(line->lineid, 42);
+			ASSERT_EQ(line->arg1, 1);	// arg1 left alone
+		}
+		else
+		{
+			ASSERT_EQ(line->lineid, 0);
+			ASSERT_EQ(line->arg1, 0);
+		}
+	ASSERT_EQ(inst.lineIDInMemory, 42);
 }
 
 static Fl_Window *findThingWindow()

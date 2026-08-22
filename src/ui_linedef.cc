@@ -46,6 +46,8 @@
 #define MLF_ALL_AUTOMAP  \
 	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
 
+#define TAG_LABEL "Tag: "
+
 enum
 {
 	INSET_TOP = 6,
@@ -70,6 +72,7 @@ enum
 	TAG_WIDTH = 64,
 	ARG_WIDTH = 42,
 
+	SPACING_BEFORE_FLAGS = 15,
 	FLAGS_SECTION_HEADER_HEIGHT = 23,
 };
 
@@ -107,9 +110,6 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
-
-	const int Y0 = Y;
-	const int X0 = X;
 
 	X += PANEL_INSET;
 	Y += INSET_TOP;
@@ -170,7 +170,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	Y += desc->h() + INPUT_SPACING;
 
 
-	tag = new UI_DynIntInput(type->x(), Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Tag: ");
+	tag = new UI_DynIntInput(type->x(), Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, TAG_LABEL);
 	tag->align(FL_ALIGN_LEFT);
 	tag->callback(tag_callback, this);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -189,7 +189,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	actkind->resize(span.start, actkind->y(), span.width, actkind->h());
 	udmfActivation->resize(span.start, udmfActivation->y(), span.width, udmfActivation->h());
 
-	Y += tag->h() + 15;
+	Y += tag->h() + SPACING_BEFORE_FLAGS;
 
 	// Height will be adjusted
 	flagsSection = new Fl_Group(X, Y, W, 100);
@@ -994,22 +994,36 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 
 	if (loaded.levelFormat != MapFormat::doom)
 	{
-		tag->hide();
-		length->hide();
 		gen->hide();
 
 		if(loaded.levelFormat == MapFormat::hexen)
 		{
+			tag->hide();
+			length->hide();
 			udmfActivation->hide();
 			actkind->clear();
 			actkind->add(getActivationMenuString());
 
 			actkind->show();
+
+			argsBox->position(argsBox->x(), desc->y() + desc->h() + INPUT_SPACING);
+			// Do not use argsBox height as it also includes the text space
+			flagsSection->position(flagsSection->x(), argsBox->y() + TYPE_INPUT_HEIGHT +
+								   SPACING_BEFORE_FLAGS);
 		}
 		else	// UDMF
 		{
 			actkind->hide();
 			udmfActivation->show();
+
+			// Tag and length return in UDMF, tag being line-ID now
+			tag->show();
+			tag->label("ID: ");
+
+			length->show();
+			argsBox->position(argsBox->x(), tag->y() + tag->h() + INPUT_SPACING);
+			flagsSection->position(flagsSection->x(), argsBox->y() + TYPE_INPUT_HEIGHT +
+								   SPACING_BEFORE_FLAGS);
 		}
 		UISpan span = UI_GetFlexSpan(*argsBox, 2, 3);
 		desc->resize(span.start, desc->y(), span.width, desc->h());
@@ -1017,7 +1031,9 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 	else
 	{
 		tag->show();
+		tag->label(TAG_LABEL);
 		length->show();
+		flagsSection->position(flagsSection->x(), tag->y() + tag->h() + SPACING_BEFORE_FLAGS);
 
 		actkind->hide();
 		udmfActivation->hide();

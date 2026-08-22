@@ -370,11 +370,10 @@ void UI_ArgField::optionCallback(Fl_Widget *widget, void *context)
 		field->button->popup();
 }
 
-UI_ArgsBox::UI_ArgsBox(int X, int Y, PanelFieldFixUp &fixUp, const Document &doc) : Fl_Flex(X, Y, PANEL_WIDTH - 2 * NOMBRE_INSET -
-											   2 * PANEL_INSET,
-												(fl_font(FL_HELVETICA, ARG_DEFAULT_LABEL_SIZE),
-												 TYPE_INPUT_HEIGHT + fl_height()),
-											   Fl_Flex::HORIZONTAL), doc(doc)
+UI_ArgsBox::UI_ArgsBox(int X, int Y, PanelFieldFixUp &fixUp, const Document &doc) :
+		Fl_Flex(X, Y, PANEL_WIDTH - 2 * NOMBRE_INSET - 2 * PANEL_INSET,
+				(fl_font(FL_HELVETICA, ARG_DEFAULT_LABEL_SIZE), TYPE_INPUT_HEIGHT + fl_height()),
+				Fl_Flex::HORIZONTAL), doc(doc)
 {
 	margin(0, 0, 0, h() - TYPE_INPUT_HEIGHT);
 	gap(INPUT_SPACING);
