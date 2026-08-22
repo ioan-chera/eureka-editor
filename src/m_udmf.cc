@@ -333,6 +333,7 @@ const UDMFLineStringMapping udmfLineStringMapping[] =
 	UDMF_LINE_STRING_MAPPING(playeruse),
 	UDMF_LINE_STRING_MAPPING(repeatspecial),
 	UDMF_LINE_STRING_MAPPING(translucent),
+	UDMF_LINE_STRING_MAPPING(transparent),
 	{}	// terminator!
 };
 

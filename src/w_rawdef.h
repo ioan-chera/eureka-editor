@@ -462,6 +462,7 @@ enum udmf_lineflag_e
 	MLF_UDMF_passuse       = 0x00000400,
 	MLF_UDMF_jumpover      = 0x00000800,
 	MLF_UDMF_blockfloaters = 0x00001000,
+	MLF_UDMF_transparent   = 0x00002000,
 };
 
 struct UDMFLineStringMapping

@@ -81,7 +81,8 @@ if $MAP_FORMAT not DOOM
   lineflag "impassable"  0x0001
   lineflag "block mons"  0x0002
   lineflag "sound block" 0x0040
-  lineflag "translucency" translucent
+  lineflag ""             translucent pair 0
+  lineflag "translucency" transparent pair 1
   lineflag "jump over"    jumpover
   lineflag "block flyers" blockfloaters
   lineflag "pass thru"    passuse
