@@ -552,6 +552,10 @@ enum hexen_option_e
 	MTF_Hexen_SP		= 256,
 	MTF_Hexen_COOP		= 512,
 	MTF_Hexen_DM		= 1024,
+
+	// ZDoom extension
+	MTF_Hexen_StrifeAlly = 0x2000,
+	MTF_Hexen_Standing   = 0x4000,
 };
 
 

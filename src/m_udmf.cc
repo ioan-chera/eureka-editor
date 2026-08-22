@@ -438,6 +438,10 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 		T->options |= MTF_Hexen_COOP;
 	else if (field.Match("dm"))
 		T->options |= MTF_Hexen_DM;
+	else if (field.Match("strifeally"))
+		T->options |= MTF_Hexen_StrifeAlly;
+	else if (field.Match("standing"))
+		T->options |= MTF_Hexen_Standing;
 
 	else
 	{
@@ -810,6 +814,9 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		WrFlag(lump, th->options, "single", MTF_Hexen_SP);
 		WrFlag(lump, th->options, "coop",   MTF_Hexen_COOP);
 		WrFlag(lump, th->options, "dm",     MTF_Hexen_DM);
+
+		WrFlag(lump, th->options, "strifeally", MTF_Hexen_StrifeAlly);
+		WrFlag(lump, th->options, "standing", MTF_Hexen_Standing);
 
 		WrFlag(lump, th->options, "ambush", MTF_Ambush);
 
