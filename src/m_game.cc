@@ -841,11 +841,17 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if(endptr && safe_isalnum(*endptr))
 		{
 			flag.isUDMF = true;
-			if(!y_stricmp(argv[5], "skill1"))
-				flag.value = MTF_UDMF_skill1;
-			else if(!y_stricmp(argv[5], "skill5"))
-				flag.value = MTF_UDMF_skill5;
-			else
+			bool found = false;
+			for(const UDMFThingStringMapping *mapping = udmfThingStringMapping; mapping->name; ++mapping)
+			{
+				if(!y_stricmp(argv[5], mapping->name))
+				{
+					flag.value = mapping->value;
+					found = true;
+					break;
+				}
+			}
+			if(!found)
 				pst->fail("invalid UDMF thing flag \"%s\"", argv[5]);
 		}
 
@@ -876,7 +882,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		{
 			flag.isUDMF = true;
 			bool found = false;
-			for(const UDMFStringMapping *mapping = udmfStringMapping; mapping->name; ++mapping)
+			for(const UDMFLineStringMapping *mapping = udmfLineStringMapping; mapping->name; ++mapping)
 				if(!y_stricmp(argv[2], mapping->name))
 				{
 					flag.value = mapping->value;

@@ -464,7 +464,7 @@ enum udmf_lineflag_e
 	MLF_UDMF_blockfloaters = 0x00001000,
 };
 
-struct UDMFStringMapping
+struct UDMFLineStringMapping
 {
 	const char *name;
 	udmf_lineflag_e value;
@@ -532,6 +532,12 @@ enum thing_udmf_option_e
 	MTF_UDMF_skill5 = 2,
 };
 
+struct UDMFThingStringMapping
+{
+	const char *name;
+	thing_udmf_option_e value;
+};
+
 #define MTF_EXFLOOR_MASK    0x3C00
 #define MTF_EXFLOOR_SHIFT   10
 
@@ -559,7 +565,8 @@ enum strife_option_e
 	MTF_Strife_AltVis	= 512,
 };
 
-extern const UDMFStringMapping udmfStringMapping[];
+extern const UDMFLineStringMapping udmfLineStringMapping[];
+extern const UDMFThingStringMapping udmfThingStringMapping[];
 
 #endif  /* __EUREKA_W_RAWDEF_H__ */
 

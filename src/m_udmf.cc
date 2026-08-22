@@ -316,24 +316,33 @@ public:
 	}
 };
 
-#define UDMF_STRING_MAPPING(a) { #a, MLF_UDMF_ ## a }
+#define UDMF_LINE_STRING_MAPPING(a) { #a, MLF_UDMF_ ## a }
 
-const UDMFStringMapping udmfStringMapping[] =
+const UDMFLineStringMapping udmfLineStringMapping[] =
 {
-	UDMF_STRING_MAPPING(blockfloaters),
-	UDMF_STRING_MAPPING(impact),
-	UDMF_STRING_MAPPING(jumpover),
-	UDMF_STRING_MAPPING(missilecross),
-	UDMF_STRING_MAPPING(monstercross),
-	UDMF_STRING_MAPPING(monsterpush),
-	UDMF_STRING_MAPPING(monsteruse),
-	UDMF_STRING_MAPPING(passuse),
-	UDMF_STRING_MAPPING(playercross),
-	UDMF_STRING_MAPPING(playerpush),
-	UDMF_STRING_MAPPING(playeruse),
-	UDMF_STRING_MAPPING(repeatspecial),
-	UDMF_STRING_MAPPING(translucent),
+	UDMF_LINE_STRING_MAPPING(blockfloaters),
+	UDMF_LINE_STRING_MAPPING(impact),
+	UDMF_LINE_STRING_MAPPING(jumpover),
+	UDMF_LINE_STRING_MAPPING(missilecross),
+	UDMF_LINE_STRING_MAPPING(monstercross),
+	UDMF_LINE_STRING_MAPPING(monsterpush),
+	UDMF_LINE_STRING_MAPPING(monsteruse),
+	UDMF_LINE_STRING_MAPPING(passuse),
+	UDMF_LINE_STRING_MAPPING(playercross),
+	UDMF_LINE_STRING_MAPPING(playerpush),
+	UDMF_LINE_STRING_MAPPING(playeruse),
+	UDMF_LINE_STRING_MAPPING(repeatspecial),
+	UDMF_LINE_STRING_MAPPING(translucent),
 	{}	// terminator!
+};
+
+#define UDMF_THING_STRING_MAPPING(a) { #a, MTF_UDMF_ ## a }
+
+const UDMFThingStringMapping udmfThingStringMapping[] =
+{
+	UDMF_THING_STRING_MAPPING(skill1),
+	UDMF_THING_STRING_MAPPING(skill5),
+	{}
 };
 
 
@@ -405,16 +414,12 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 		T->arg4 = value.DecodeInt();
 	else if (field.Match("arg4"))
 		T->arg5 = value.DecodeInt();
-	else if (field.Match("skill1"))
-		T->udmfflags |= MTF_UDMF_skill1;
 	else if (field.Match("skill2"))
 		T->options |= MTF_Easy;
 	else if (field.Match("skill3"))
 		T->options |= MTF_Medium;
 	else if (field.Match("skill4"))
 		T->options |= MTF_Hard;
-	else if (field.Match("skill5"))
-		T->udmfflags |= MTF_UDMF_skill5;
 	else if (field.Match("ambush"))
 		T->options |= MTF_Ambush;
 	else if (field.Match("friend"))
@@ -428,7 +433,18 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 
 	else
 	{
-		gLog.debugPrintf("thing #%d: unknown field '%s'\n", doc.numThings()-1, field.c_str());
+		bool found = false;
+		for(const UDMFThingStringMapping *mapping = udmfThingStringMapping; mapping->name; ++mapping)
+		{
+			if(field.Match(mapping->name))
+			{
+				T->udmfflags |= mapping->value;
+				found = true;
+				break;
+			}
+		}
+		if(!found)
+			gLog.debugPrintf("thing #%d: unknown field '%s'\n", doc.numThings()-1, field.c_str());
 	}
 }
 
@@ -507,7 +523,7 @@ static void UDMF_ParseLinedefField(const Instance &inst, const Document &doc, Li
 	else
 	{
 		bool found = false;
-		for(const UDMFStringMapping *mapping = &udmfStringMapping[0]; mapping->name; ++mapping)
+		for(const UDMFLineStringMapping *mapping = &udmfLineStringMapping[0]; mapping->name; ++mapping)
 		{
 			if(field.Match(mapping->name))
 			{
@@ -773,17 +789,20 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		lump->Printf("type = %d;\n", th->type);
 
 		// thing options
-		WrFlag(lump, th->udmfflags, "skill1", MTF_UDMF_skill1);
 		WrFlag(lump, th->options, "skill2", MTF_Easy);
 		WrFlag(lump, th->options, "skill3", MTF_Medium);
 		WrFlag(lump, th->options, "skill4", MTF_Hard);
-		WrFlag(lump, th->udmfflags, "skill5", MTF_UDMF_skill5);
 
 		WrFlag(lump, th->options, "single", MTF_Hexen_SP);
 		WrFlag(lump, th->options, "coop",   MTF_Hexen_COOP);
 		WrFlag(lump, th->options, "dm",     MTF_Hexen_DM);
 
 		WrFlag(lump, th->options, "ambush", MTF_Ambush);
+
+		for(const UDMFThingStringMapping *mapping = udmfThingStringMapping; mapping->name; ++mapping)
+		{
+			WrFlag(lump, th->udmfflags, mapping->name, mapping->value);
+		}
 
 		if (inst.conf.features.friend_flag)
 			WrFlag(lump, th->options, "friend", MTF_Friend);
@@ -862,7 +881,7 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		if(inst.conf.features.pass_through)
 			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
 
-		for(const UDMFStringMapping *mapping = &udmfStringMapping[0]; mapping->name; ++mapping)
+		for(const UDMFLineStringMapping *mapping = &udmfLineStringMapping[0]; mapping->name; ++mapping)
 		{
 			if(!y_stricmp(mapping->name, "passuse") && inst.conf.features.pass_through)
 				continue;
