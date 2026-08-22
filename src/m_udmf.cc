@@ -320,7 +320,9 @@ public:
 
 const UDMFStringMapping udmfStringMapping[] =
 {
+	UDMF_STRING_MAPPING(blockfloaters),
 	UDMF_STRING_MAPPING(impact),
+	UDMF_STRING_MAPPING(jumpover),
 	UDMF_STRING_MAPPING(missilecross),
 	UDMF_STRING_MAPPING(monstercross),
 	UDMF_STRING_MAPPING(monsterpush),

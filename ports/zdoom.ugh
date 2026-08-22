@@ -83,6 +83,8 @@ if $MAP_FORMAT not DOOM
   lineflag "sound block" 0x0040
   if $MAP_FORMAT is UDMF
     lineflag "translucency" translucent
+    lineflag "jump over"    jumpover
+    lineflag "block flyers" blockfloaters
     lineflag "pass thru"    passuse
   endif
   lineflag "mons activate" 0x2000
