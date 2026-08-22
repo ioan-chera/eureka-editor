@@ -351,7 +351,6 @@ static const FeatureMapping skFeatureMappings[] =
 	MAPPING(tx_start),
 	MAPPING(coop_dm_flags),
 	MAPPING(friend_flag),
-	MAPPING(pass_through),
 	{ "3d_midtex", &port_features_t::midtex_3d },
 	MAPPING(strife_flags),
 	MAPPING(medusa_fixed),
@@ -870,7 +869,22 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 
 		lineflag_t flag = {};
 		flag.label = argv[1];
-		flag.value = (int)strtol(argv[2], nullptr, 0);
+		char *endptr = nullptr;
+		flag.value = (int)strtol(argv[2], &endptr, 0);
+		if(endptr && safe_isalnum(*endptr))
+		{
+			flag.isUDMF = true;
+			bool found = false;
+			for(const UDMFStringMapping *mapping = udmfStringMapping; mapping->name; ++mapping)
+				if(!y_stricmp(argv[2], mapping->name))
+				{
+					flag.value = mapping->value;
+					found = true;
+					break;
+				}
+			if(!found)
+				pst->fail("invalid UDMF line flag \"%s\"", argv[2]);
+		}
 		flag.pairIndex = -1;
 		// Optional: pair <index>
 		if(nargs >= 4 && !y_stricmp(argv[3], "pair"))
@@ -885,7 +899,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		bool foundExisting = false;
 		for(lineflag_t &existingflag : config.line_flags)
 		{
-			if(existingflag.value == flag.value)
+			if(existingflag.value == flag.value && existingflag.isUDMF == flag.isUDMF)
 			{
 				existingflag = flag;
 				foundExisting = true;

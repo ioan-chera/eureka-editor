@@ -81,11 +81,11 @@ class line_flag_CB_data_c
 {
 public:
 	UI_LineBox *parent;
-
+	bool isUDMF;
 	int mask;
 
-	line_flag_CB_data_c(UI_LineBox *_parent, int _mask) :
-		parent(_parent), mask(_mask)
+	line_flag_CB_data_c(UI_LineBox *_parent, bool _isUDMF, int _mask) :
+		parent(_parent), isUDMF(_isUDMF), mask(_mask)
 	{ }
 };
 
@@ -148,7 +148,8 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	// this order must match the SPAC_XXX constants
 	actkind->add(getActivationMenuString());
 	actkind->value(getActivationCount());
-	actkind->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Activation | MLF_Repeatable));
+	actkind->callback(flags_callback, new line_flag_CB_data_c(this, false,
+															  MLF_Activation | MLF_Repeatable));
 	actkind->textsize(12);
 	actkind->deactivate();
 	actkind->hide();
@@ -200,7 +201,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	f_automap = new Fl_Choice(X+W-118, Y, 104, 22, "Vis: ");
 	f_automap->add("Normal|Invisible|Mapped|Secret|MapSecret");
 	f_automap->value(0);
-	f_automap->callback(flags_callback, new line_flag_CB_data_c(this, MLF_ALL_AUTOMAP));
+	f_automap->callback(flags_callback, new line_flag_CB_data_c(this, false, MLF_ALL_AUTOMAP));
 
 	flagsSection->end();
 	flagsSection->resizable(nullptr);
@@ -630,8 +631,9 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 	UI_LineBox *box = l_f_c->parent;
 
+	bool isUDMF = l_f_c->isUDMF;
 	int mask = l_f_c->mask;
-	int new_flags = box->CalcFlags();
+	CompoundFlags new_flags = box->CalcFlags();
 
 	if (! box->inst.edit.Selected->empty())
 	{
@@ -647,7 +649,16 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
-			op.changeLinedef(*it, &LineDef::flags, (L->flags & ~mask) | (new_flags & mask));
+			if(isUDMF)
+			{
+				op.changeLinedef(*it, &LineDef::udmfFlags, (L->udmfFlags & ~mask) |
+								 (new_flags.udmf & mask));
+			}
+			else
+			{
+				op.changeLinedef(*it, &LineDef::flags, (L->flags & ~mask) |
+								 (new_flags.classic & mask));
+			}
 		}
 	}
 }
@@ -756,7 +767,10 @@ void UI_LineBox::UpdateField()
 	{
 		const auto L = inst.level.linedefs[obj];
 
-		mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->arg1).c_str());
+		if(inst.loaded.levelFormat == MapFormat::udmf)
+			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->lineid).c_str());
+		else
+			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->arg1).c_str());
 
 		if (inst.loaded.levelFormat != MapFormat::doom)
 			argsBox->populate(mFixUp, inst.conf, *L);
@@ -823,7 +837,7 @@ void UI_LineBox::UpdateField()
 
 		const auto &L = inst.level.linedefs[obj];
 
-		FlagsFromInt(L->flags);
+		FlagsFromInt(L->flags, L->udmfFlags);
 
 		SString acronym;
 		for(size_t i = 0; i < udmfActivations.size(); ++i)
@@ -841,7 +855,7 @@ void UI_LineBox::UpdateField()
 	}
 	else
 	{
-		FlagsFromInt(0);
+		FlagsFromInt(0, 0);
 		for(Fl_Menu_Item &item : udmfActivationItems)
 			item.flags &= ~FL_MENU_VALUE;
 
@@ -882,7 +896,7 @@ void UI_LineBox::CalcLength()
 }
 
 
-void UI_LineBox::FlagsFromInt(int lineflags)
+void UI_LineBox::FlagsFromInt(int lineflags, unsigned udmfflags)
 {
 	// compute activation
 	if (inst.loaded.levelFormat != MapFormat::doom)
@@ -911,16 +925,20 @@ void UI_LineBox::FlagsFromInt(int lineflags)
 
 	// Set dynamic line flag buttons
 	for(const auto &btn : flagButtons)
-	{
 		if(btn.button)
-			btn.button->value((lineflags & btn.info->value) ? 1 : 0);
-	}
+		{
+			if(btn.info->isUDMF)
+				btn.button->value((udmfflags & btn.info->value) ? 1 : 0);
+			else
+				btn.button->value((lineflags & btn.info->value) ? 1 : 0);
+		}
 }
 
 
-int UI_LineBox::CalcFlags() const
+UI_LineBox::CompoundFlags UI_LineBox::CalcFlags() const
 {
 	int lineflags = 0;
+	unsigned udmfflags = 0;
 
 	switch (f_automap->value())
 	{
@@ -944,10 +962,15 @@ int UI_LineBox::CalcFlags() const
 	for(const auto &btn : flagButtons)
 	{
 		if(btn.button && btn.button->value())
-			lineflags |= btn.info->value;
+		{
+			if(btn.info->isUDMF)
+				udmfflags |= btn.info->value;
+			else
+				lineflags |= btn.info->value;
+		}
 	}
 
-	return lineflags;
+	return { .classic = lineflags, .udmf = udmfflags };
 }
 
 
@@ -1107,7 +1130,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				LineFlagButton fb;
 				fb.button = std::make_unique<Fl_Check_Button>(baseX, curY + 2, FW, 20, s.a->label.c_str());
 				fb.button->labelsize(12);
-				fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->value);
+				fb.data = std::make_unique<line_flag_CB_data_c>(this, s.a->isUDMF, s.a->value);
 				fb.button->callback(flags_callback, fb.data.get());
 				fb.info = s.a;
 				flagButtons.push_back(std::move(fb));
@@ -1117,7 +1140,7 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 				LineFlagButton fb2;
 				fb2.button = std::make_unique<Fl_Check_Button>(baseX + 16, curY + 2, FW, 20, s.b->label.c_str());
 				fb2.button->labelsize(12);
-				fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->value);
+				fb2.data = std::make_unique<line_flag_CB_data_c>(this, s.b->isUDMF, s.b->value);
 				fb2.button->callback(flags_callback, fb2.data.get());
 				fb2.info = s.b;
 				flagButtons.push_back(std::move(fb2));

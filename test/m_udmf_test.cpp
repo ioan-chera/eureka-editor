@@ -22,7 +22,7 @@
 #include "gtest/gtest.h"
 
 
-TEST(MUdmf, LoadUDMFThingsThenWrite)
+TEST(MUdmf, LoadUDMFThenWrite)
 {
 	std::shared_ptr<Wad_file> wad = Wad_file::Open("wad.wad", WadOpenMode::write);
 	ASSERT_TRUE(wad);
@@ -39,6 +39,12 @@ TEST(MUdmf, LoadUDMFThingsThenWrite)
 	textmap->Printf("thing { x = 0; y = 0; angle = 30; type = 100; skill3 = true; }\n");
 	textmap->Printf("thing { x = 0; y = 0; type = 100; skill4 = true; }\n");
 	textmap->Printf("thing { x = 0; y = 0; type = 100; skill5 = true; }\n");
+	textmap->Printf("vertex { x = 0; y = 0; }\n");
+	textmap->Printf("vertex { x = 100; y = 0; }\n");
+	textmap->Printf("sector { heightceiling = 100; texturefloor = \"FLAT10\"; textureceiling = \"FLAT10\"; }\n");
+	textmap->Printf("sidedef { sector = 0; }\n");
+	textmap->Printf("linedef { v1 = 0; v2 = 1; sidefront = 0; blocking = true; twosided = true; "
+					"passuse = true; translucent = true; }\n");
 
 	Instance inst;
 	inst.loaded.levelFormat = MapFormat::udmf;
@@ -59,6 +65,15 @@ TEST(MUdmf, LoadUDMFThingsThenWrite)
 	ASSERT_EQ(inst.level.things[3]->options, MTF_Hard);
 	ASSERT_EQ(inst.level.things[4]->udmfflags, MTF_UDMF_skill5);
 	ASSERT_EQ(inst.level.things[4]->options, 0);
+
+	ASSERT_EQ(inst.level.numSectors(), 1);
+	ASSERT_EQ(inst.level.sectors[0]->floorh, 0);
+	ASSERT_EQ(inst.level.sectors[0]->ceilh, 100);
+
+	ASSERT_EQ(inst.level.numLinedefs(), 1);
+	ASSERT_EQ(inst.level.linedefs[0]->lineid, -1);
+	ASSERT_EQ(inst.level.linedefs[0]->flags, MLF_Blocking | MLF_TwoSided);
+	ASSERT_EQ(inst.level.linedefs[0]->udmfFlags, MLF_UDMF_passuse | MLF_UDMF_translucent);
 
 	// Now write it
 	inst.UDMF_SaveLevel(inst.loaded, *wad);
@@ -108,6 +123,41 @@ x = 0;
 y = 0;
 type = 100;
 skill5 = true;
+}
+
+vertex // 0
+{
+x = 0;
+y = 0;
+}
+
+vertex // 1
+{
+x = 100;
+y = 0;
+}
+
+sector // 0
+{
+heightceiling = 100;
+texturefloor = "FLAT10";
+textureceiling = "FLAT10";
+}
+
+sidedef // 0
+{
+sector = 0;
+}
+
+linedef // 0
+{
+v1 = 0;
+v2 = 1;
+sidefront = 0;
+blocking = true;
+twosided = true;
+passuse = true;
+translucent = true;
 }
 
 )DATA");

@@ -316,6 +316,24 @@ public:
 	}
 };
 
+#define UDMF_STRING_MAPPING(a) { #a, MLF_UDMF_ ## a }
+
+const UDMFStringMapping udmfStringMapping[] =
+{
+	UDMF_STRING_MAPPING(impact),
+	UDMF_STRING_MAPPING(missilecross),
+	UDMF_STRING_MAPPING(monstercross),
+	UDMF_STRING_MAPPING(monsterpush),
+	UDMF_STRING_MAPPING(monsteruse),
+	UDMF_STRING_MAPPING(passuse),
+	UDMF_STRING_MAPPING(playercross),
+	UDMF_STRING_MAPPING(playerpush),
+	UDMF_STRING_MAPPING(playeruse),
+	UDMF_STRING_MAPPING(repeatspecial),
+	UDMF_STRING_MAPPING(translucent),
+	{}	// terminator!
+};
+
 
 static void UDMF_ParseGlobalVar(LoadingData &loading, Udmf_Parser& parser, const Udmf_Token& name)
 {
@@ -405,9 +423,9 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 		T->options |= MTF_Hexen_COOP;
 	else if (field.Match("dm"))
 		T->options |= MTF_Hexen_DM;
-
 	else
 	{
+		
 		gLog.debugPrintf("thing #%d: unknown field '%s'\n", doc.numThings()-1, field.c_str());
 	}
 }
@@ -480,31 +498,23 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 	else if (field.Match("mapped"))
 		LD->flags |= MLF_Mapped;
 
-	else if (field.Match("passuse"))
-		LD->flags |= MLF_Boom_PassThru;
-
-	else if (field.Match("playercross"))
-		LD->udmfFlags |= MLF_UDMF_playercross;
-	else if (field.Match("playeruse"))
-		LD->udmfFlags |= MLF_UDMF_playeruse;
-	else if (field.Match("monstercross"))
-		LD->udmfFlags |= MLF_UDMF_monstercross;
-	else if (field.Match("monsteruse"))
-		LD->udmfFlags |= MLF_UDMF_monsteruse;
-	else if (field.Match("impact"))
-		LD->udmfFlags |= MLF_UDMF_impact;
-	else if (field.Match("playerpush"))
-		LD->udmfFlags |= MLF_UDMF_playerpush;
-	else if (field.Match("monsterpush"))
-		LD->udmfFlags |= MLF_UDMF_monsterpush;
-	else if (field.Match("missilecross"))
-		LD->udmfFlags |= MLF_UDMF_missilecross;
-	else if (field.Match("repeatspecial"))
-		LD->udmfFlags |= MLF_UDMF_repeatspecial;
-
 	else
 	{
-		gLog.debugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
+		bool found = false;
+		for(const UDMFStringMapping *mapping = &udmfStringMapping[0]; mapping->name; ++mapping)
+		{
+			if(field.Match(mapping->name))
+			{
+				LD->udmfFlags |= mapping->value;
+				found = true;
+				break;
+			}
+		}
+		if(!found)
+		{
+			gLog.debugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1,
+							 field.c_str());
+		}
 	}
 }
 
@@ -791,8 +801,8 @@ static void UDMF_WriteVertices(const Document &doc, Lump_c *lump)
 
 		const auto vert = doc.vertices[i];
 
-		lump->Printf("x = %1.3f;\n", vert->x());
-		lump->Printf("y = %1.3f;\n", vert->y());
+		lump->Printf("x = %.16g;\n", vert->x());
+		lump->Printf("y = %.16g;\n", vert->y());
 
 		lump->Printf("}\n\n");
 	}
@@ -829,7 +839,7 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		if (ld->arg5 != 0)
 			lump->Printf("arg4 = %d;\n", ld->arg5);
 
-		if (ld->lineid != 0)
+		if (ld->lineid != -1)
 			lump->Printf("id = %d;\n", ld->lineid);
 
 		// linedef flags
@@ -843,18 +853,8 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		WrFlag(lump, ld->flags, "dontdraw",      MLF_DontDraw);
 		WrFlag(lump, ld->flags, "mapped",        MLF_Mapped);
 
-		WrFlag(lump, ld->udmfFlags, "playercross",   MLF_UDMF_playercross);
-		WrFlag(lump, ld->udmfFlags, "playeruse",     MLF_UDMF_playeruse);
-		WrFlag(lump, ld->udmfFlags, "monstercross",  MLF_UDMF_monstercross);
-		WrFlag(lump, ld->udmfFlags, "monsteruse",    MLF_UDMF_monsteruse);
-		WrFlag(lump, ld->udmfFlags, "impact",        MLF_UDMF_impact);
-		WrFlag(lump, ld->udmfFlags, "playerpush",    MLF_UDMF_playerpush);
-		WrFlag(lump, ld->udmfFlags, "monsterpush",   MLF_UDMF_monsterpush);
-		WrFlag(lump, ld->udmfFlags, "missilecross",  MLF_UDMF_missilecross);
-		WrFlag(lump, ld->udmfFlags, "repeatspecial", MLF_UDMF_repeatspecial);
-
-		if (inst.conf.features.pass_through)
-			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
+		for(const UDMFStringMapping *mapping = &udmfStringMapping[0]; mapping->name; ++mapping)
+			WrFlag(lump, ld->udmfFlags, mapping->name, mapping->value);
 
 		if (inst.conf.features.midtex_3d)
 			WrFlag(lump, ld->flags, "midtex3d", MLF_Eternity_3DMidTex);
@@ -907,15 +907,18 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 
 		const auto sec = doc.sectors[i];
 
-		lump->Printf("heightfloor = %d;\n", sec->floorh);
-		lump->Printf("heightceiling = %d;\n", sec->ceilh);
+		if(sec->floorh)
+			lump->Printf("heightfloor = %d;\n", sec->floorh);
+		if(sec->ceilh)
+			lump->Printf("heightceiling = %d;\n", sec->ceilh);
 
 		// use NormalizeTex to ensure no double quote
 
 		lump->Printf("texturefloor = \"%s\";\n", NormalizeTex(sec->FloorTex()).c_str());
 		lump->Printf("textureceiling = \"%s\";\n", NormalizeTex(sec->CeilTex()).c_str());
 
-		lump->Printf("lightlevel = %d;\n", sec->light);
+		if(sec->light != 160)
+			lump->Printf("lightlevel = %d;\n", sec->light);
 		if (sec->type != 0)
 			lump->Printf("special = %d;\n", sec->type);
 		if (sec->tag != 0)
@@ -932,9 +935,9 @@ void Instance::UDMF_SaveLevel(const LoadingData& loading, Wad_file& wad) const
 	UDMF_WriteInfo(loading, &lump);
 	UDMF_WriteThings(*this, &lump);
 	UDMF_WriteVertices(level, &lump);
-	UDMF_WriteLineDefs(*this, &lump);
-	UDMF_WriteSideDefs(level, &lump);
 	UDMF_WriteSectors(level, &lump);
+	UDMF_WriteSideDefs(level, &lump);
+	UDMF_WriteLineDefs(*this, &lump);
 
 	wad.AddLump("ENDMAP");
 }

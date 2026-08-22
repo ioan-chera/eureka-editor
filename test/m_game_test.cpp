@@ -205,7 +205,55 @@ TEST_F(MGameFixture, ParseDefinitionFileThingFlags)
 	ASSERT_EQ(config.thing_flags[3].defaultSet, thingflag_t::DefaultMode::on);
 	ASSERT_EQ(config.thing_flags[3].label, "hardest");
 	ASSERT_TRUE(config.thing_flags[3].isUDMF);
+}
 
+TEST_F(MGameFixture, ParseDefinitionFileLineFlags)
+{
+	std::unordered_map<SString, SString> parseVars;
+	ParsePurpose purpose = ParsePurpose::normal;
+	fs::path filename = getSubPath("test.ugh");
+
+	std::ofstream stream(filename);
+	ASSERT_TRUE(stream.is_open());
+	mDeleteList.push(filename);
+
+	stream << "lineflag impassable 0x1" << std::endl;
+	stream << "lineflag two-sided 0x2" << std::endl;
+	stream << "lineflag see-through translucent" << std::endl;
+	stream << "lineflag passthru 0x4" << std::endl;
+	stream << "lineflag \"\" 0x8 pair 0" << std::endl;
+	stream << "lineflag translucent 0x10 pair 1" << std::endl;
+	stream.close();
+
+	ConfigData config;
+
+	M_ParseDefinitionFile(parseVars, purpose, &config, filename);
+
+	ASSERT_EQ(config.line_flags.size(), 6);
+
+	ASSERT_EQ(config.line_flags[0].label, "impassable");
+	ASSERT_FALSE(config.line_flags[0].isUDMF);
+	ASSERT_EQ(config.line_flags[0].value, 1);
+
+	ASSERT_EQ(config.line_flags[1].label, "two-sided");
+	ASSERT_FALSE(config.line_flags[1].isUDMF);
+	ASSERT_EQ(config.line_flags[1].value, 2);
+
+	ASSERT_EQ(config.line_flags[2].label, "see-through");
+	ASSERT_TRUE(config.line_flags[2].isUDMF);
+	ASSERT_EQ(config.line_flags[2].value, MLF_UDMF_translucent);
+
+	ASSERT_EQ(config.line_flags[3].label, "passthru");
+	ASSERT_FALSE(config.line_flags[3].isUDMF);
+	ASSERT_EQ(config.line_flags[3].value, 4);
+
+	ASSERT_EQ(config.line_flags[4].label, "");
+	ASSERT_FALSE(config.line_flags[4].isUDMF);
+	ASSERT_EQ(config.line_flags[4].value, 8);
+
+	ASSERT_EQ(config.line_flags[5].label, "translucent");
+	ASSERT_FALSE(config.line_flags[5].isUDMF);
+	ASSERT_EQ(config.line_flags[5].value, 16);
 }
 
 //

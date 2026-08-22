@@ -99,13 +99,19 @@ public:
 	}
 
 private:
+	struct CompoundFlags
+	{
+		int classic;
+		unsigned udmf;
+	};
+
 	int getActivationCount() const;
 	const char *getActivationMenuString() const;
 
 	void CalcLength();
 
-	int  CalcFlags() const;
-	void FlagsFromInt(int flags);
+	CompoundFlags CalcFlags() const;
+	void FlagsFromInt(int flags, unsigned udmfflags);
 
 	void CB_Copy(int uiparts);
 	void CB_Paste(int uiparts, StringID new_tex);

@@ -29,7 +29,7 @@ struct Sector
 	int ceilh = 0;
 	StringID floor_tex;
 	StringID ceil_tex;
-	int light = 0;
+	int light = 160;
 	int type = 0;
 	int tag = 0;
 

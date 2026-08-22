@@ -458,6 +458,14 @@ enum udmf_lineflag_e
 	MLF_UDMF_monsterpush   = 0x00000040,
 	MLF_UDMF_missilecross  = 0x00000080,
 	MLF_UDMF_repeatspecial = 0x00000100,
+	MLF_UDMF_translucent   = 0x00000200,
+	MLF_UDMF_passuse       = 0x00000400,
+};
+
+struct UDMFStringMapping
+{
+	const char *name;
+	udmf_lineflag_e value;
 };
 
 #define BOOM_GENLINE_FIRST	0x2f80
@@ -548,6 +556,8 @@ enum strife_option_e
 	MTF_Strife_Shadow	= 256,
 	MTF_Strife_AltVis	= 512,
 };
+
+extern const UDMFStringMapping udmfStringMapping[];
 
 #endif  /* __EUREKA_W_RAWDEF_H__ */
 

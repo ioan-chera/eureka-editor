@@ -296,7 +296,7 @@ TEST(EChecks, TagsApplyNewValue)
 		}
 		else
 		{
-			ASSERT_EQ(line->lineid, 0);
+			ASSERT_EQ(line->lineid, -1);
 			ASSERT_EQ(line->arg1, 0);
 		}
 	ASSERT_EQ(inst.lineIDInMemory, 42);

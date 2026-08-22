@@ -194,6 +194,7 @@ struct thingflag_t
 struct lineflag_t
 {
 	SString label;
+	bool isUDMF = false;
 	int value = 0;
 	int pairIndex = -1; // -1 normal, 0/1 for paired mini-checkboxes within same slot
 };
@@ -301,7 +302,6 @@ struct port_features_t
 	int coop_dm_flags;	// MTF_NOT_COOP and MTF_NOT_DM for things
 	int friend_flag;	// MTF_FRIEND thing flag from MBF
 
-	int pass_through;	// Boom's MTF_PASSTHRU line flag
 	int midtex_3d;		// Eternity's ML_3DMIDTEX line flag
 	int strife_flags;	// Strife flags
 
