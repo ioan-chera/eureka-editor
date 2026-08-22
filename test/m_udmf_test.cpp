@@ -163,3 +163,65 @@ translucent = true;
 )DATA");
 }
 
+
+TEST(MUdmf, UseUDMFPassUseIfConfigured)
+{
+	std::shared_ptr<Wad_file> wad = Wad_file::Open("wad.wad", WadOpenMode::write);
+	ASSERT_TRUE(wad);
+	wad->AddLevel("MAP01");
+	wad->AddLump("TEXTMAP");
+	wad->AddLump("ENDMAP");
+
+	Lump_c *textmap = wad->GetLump(1);
+	ASSERT_TRUE(textmap);
+
+	textmap->Printf("namespace = \"Doom\";\n");
+	textmap->Printf("vertex { x = 0; y = 0; }\n");
+	textmap->Printf("vertex { x = 100; y = 0; }\n");
+	textmap->Printf("vertex { x = 100; y = 100; }\n");
+	textmap->Printf("sector { texturefloor = \"FLAT10\"; textureceiling = \"FLAT10\"; }\n");
+	textmap->Printf("sidedef { sector = 0; }\n");
+	textmap->Printf("linedef { v1 = 0; v2 = 1; sidefront = 0; passuse = true; }\n");
+	textmap->Printf("linedef { v1 = 1; v2 = 2; sidefront = 0; passuse = false; }\n");
+
+	Instance inst;
+	inst.loaded.levelFormat = MapFormat::udmf;
+	inst.conf.features.pass_through = 1;
+	BadCount bad = {};
+	inst.UDMF_LoadLevel(0, wad.get(), inst.level, inst.loaded, bad);
+	ASSERT_FALSE(bad.linedef_count);
+	ASSERT_FALSE(bad.sector_refs);
+	ASSERT_FALSE(bad.sidedef_refs);
+
+	ASSERT_EQ(inst.level.numLinedefs(), 2);
+	ASSERT_EQ(inst.level.linedefs[0]->flags, MLF_Boom_PassThru);
+	ASSERT_EQ(inst.level.linedefs[1]->flags, 0);
+
+	inst.level.linedefs[0]->udmfFlags |= MLF_UDMF_passuse;	// test that it won't get written twice
+	inst.level.linedefs[1]->udmfFlags |= MLF_UDMF_passuse;	// or even used at all
+
+	inst.UDMF_SaveLevel(inst.loaded, *wad);
+	ASSERT_EQ(wad->NumLumps(), 5);
+	Lump_c *outTextmap = wad->GetLump(3);
+	ASSERT_TRUE(outTextmap);
+
+	static const char ending[] = R"DATA(linedef // 0
+{
+v1 = 0;
+v2 = 1;
+sidefront = 0;
+passuse = true;
+}
+
+linedef // 1
+{
+v1 = 1;
+v2 = 2;
+sidefront = 0;
+}
+
+)DATA";
+
+	std::string data(outTextmap->getData().begin(), outTextmap->getData().end());
+	ASSERT_EQ(data.find(ending), data.length() - strlen(ending));
+}

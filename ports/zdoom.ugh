@@ -74,6 +74,7 @@ if $MAP_FORMAT not DOOM
   thingflag 5 2 alt-vis off 0x1000
 
   clear lineflags
+  feature pass_through  0
   lineflag "two sided"   0x0004
   lineflag "upper unpeg" 0x0008
   lineflag "lower unpeg" 0x0010

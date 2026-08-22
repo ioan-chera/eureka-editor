@@ -948,6 +948,7 @@ static void readPortInfo(std::unordered_map<SString, SString> &parseVars, Loadin
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (config.features.strife_flags)
 	{
+		config.features.pass_through = 0;
 		config.features.coop_dm_flags = 0;
 		config.features.friend_flag = 0;
 	}

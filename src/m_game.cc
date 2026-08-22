@@ -351,6 +351,7 @@ static const FeatureMapping skFeatureMappings[] =
 	MAPPING(tx_start),
 	MAPPING(coop_dm_flags),
 	MAPPING(friend_flag),
+	MAPPING(pass_through),
 	{ "3d_midtex", &port_features_t::midtex_3d },
 	MAPPING(strife_flags),
 	MAPPING(medusa_fixed),

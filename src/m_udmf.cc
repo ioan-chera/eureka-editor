@@ -423,9 +423,9 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, const Udmf_Token
 		T->options |= MTF_Hexen_COOP;
 	else if (field.Match("dm"))
 		T->options |= MTF_Hexen_DM;
+
 	else
 	{
-		
 		gLog.debugPrintf("thing #%d: unknown field '%s'\n", doc.numThings()-1, field.c_str());
 	}
 }
@@ -442,7 +442,8 @@ static void UDMF_ParseVertexField(const Document &doc, Vertex *V, const Udmf_Tok
 	}
 }
 
-static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_Token& field, const Udmf_Token& value)
+static void UDMF_ParseLinedefField(const Instance &inst, const Document &doc, LineDef *LD,
+								   const Udmf_Token& field, const Udmf_Token& value)
 {
 	// Note: vertex and sidedef numbers are validated later on
 
@@ -497,6 +498,9 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, const Udmf_
 		LD->flags |= MLF_DontDraw;
 	else if (field.Match("mapped"))
 		LD->flags |= MLF_Mapped;
+
+	else if (field.Match("passuse") && inst.conf.features.pass_through)
+		LD->flags |= MLF_Boom_PassThru;
 
 	else
 	{
@@ -564,7 +568,7 @@ static void UDMF_ParseSectorField(const Document &doc, Sector *S, const Udmf_Tok
 	}
 }
 
-static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Token& name)
+static void UDMF_ParseObject(const Instance &inst, Document &doc, Udmf_Parser& parser, const Udmf_Token& name)
 {
 	// create a new object of the specified type
 	Objid kind;
@@ -655,7 +659,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, const Udmf_Toke
 			UDMF_ParseVertexField(doc, new_V, tok, value);
 
 		if (new_LD)
-			UDMF_ParseLinedefField(doc, new_LD, tok, value);
+			UDMF_ParseLinedefField(inst, doc, new_LD, tok, value);
 
 		if (new_SD)
 			UDMF_ParseSidedefField(doc, new_SD, tok, value);
@@ -718,7 +722,7 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad, Docum
 		}
 		if (tok2.Match("{"))
 		{
-			UDMF_ParseObject(doc, *parser, tok);
+			UDMF_ParseObject(*this, doc, *parser, tok);
 			continue;
 		}
 
@@ -853,8 +857,15 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		WrFlag(lump, ld->flags, "dontdraw",      MLF_DontDraw);
 		WrFlag(lump, ld->flags, "mapped",        MLF_Mapped);
 
+		if(inst.conf.features.pass_through)
+			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
+
 		for(const UDMFStringMapping *mapping = &udmfStringMapping[0]; mapping->name; ++mapping)
+		{
+			if(!y_stricmp(mapping->name, "passuse") && inst.conf.features.pass_through)
+				continue;
 			WrFlag(lump, ld->udmfFlags, mapping->name, mapping->value);
+		}
 
 		if (inst.conf.features.midtex_3d)
 			WrFlag(lump, ld->flags, "midtex3d", MLF_Eternity_3DMidTex);
