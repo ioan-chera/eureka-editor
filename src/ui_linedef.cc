@@ -1086,11 +1086,13 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 		slots.reserve(config.line_flags.size());
 		for(size_t i = 0; i < config.line_flags.size(); ++i)
 		{
-			const lineflag_t *f = &config.line_flags[i];
-			if(f->pairIndex == 0 && i + 1 < config.line_flags.size() && config.line_flags[i + 1].pairIndex == 1)
+			const lineflag_t *flag = &config.line_flags[i];
+			if(loaded.levelFormat != MapFormat::udmf && flag->isUDMF)
+				continue;
+			if(flag->pairIndex == 0 && i + 1 < config.line_flags.size() && config.line_flags[i + 1].pairIndex == 1)
 			{
 				Slot s;
-				s.a = f;
+				s.a = flag;
 				s.b = &config.line_flags[i + 1];
 				slots.push_back(s);
 				++i; // consume the pair
@@ -1098,10 +1100,10 @@ void UI_LineBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &con
 			else
 			{
 				Slot s;
-				if(f->pairIndex == 1)
-					s.b = f;
+				if(flag->pairIndex == 1)
+					s.b = flag;
 				else
-					s.a = f;
+					s.a = flag;
 				slots.push_back(s);
 			}
 		}

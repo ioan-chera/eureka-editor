@@ -846,7 +846,8 @@ void UI_ThingBox::UpdateGameInfo(const LoadingData &loaded, const ConfigData &co
 	{
 		std::vector<const thingflag_t *> rowSortedFlags;
 		for(const thingflag_t &flag : config.thing_flags)
-			rowSortedFlags.push_back(&flag);
+			if(loaded.levelFormat == MapFormat::udmf || !flag.isUDMF)
+				rowSortedFlags.push_back(&flag);
 		// We need to sort by row, because we increment Y this way
 		std::sort(rowSortedFlags.begin(), rowSortedFlags.end(), [](const thingflag_t *a,
 																   const thingflag_t *b)

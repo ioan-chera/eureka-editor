@@ -81,12 +81,10 @@ if $MAP_FORMAT not DOOM
   lineflag "impassable"  0x0001
   lineflag "block mons"  0x0002
   lineflag "sound block" 0x0040
-  if $MAP_FORMAT is UDMF
-    lineflag "translucency" translucent
-    lineflag "jump over"    jumpover
-    lineflag "block flyers" blockfloaters
-    lineflag "pass thru"    passuse
-  endif
+  lineflag "translucency" translucent
+  lineflag "jump over"    jumpover
+  lineflag "block flyers" blockfloaters
+  lineflag "pass thru"    passuse
   lineflag "mons activate" 0x2000
   lineflag "block players" 0x4000
   lineflag "block all"     0x8000
