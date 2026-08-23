@@ -536,6 +536,12 @@ static void UDMF_ParseLinedefField(const Instance &inst, const Document &doc, Li
 
 	else if (field.Match("passuse") && inst.conf.features.pass_through)
 		LD->flags |= MLF_Boom_PassThru;
+	else if (field.Match("monsteractivate"))
+		LD->flags |= MLF_ZDoom_MonCanActivate;
+	else if (field.Match("blockplayers"))
+		LD->flags |= MLF_ZDoom_BlockPlayers;
+	else if (field.Match("blockeverything"))
+		LD->flags |= MLF_ZDoom_BlockEverything;
 
 	else
 	{
@@ -908,6 +914,10 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 
 		if(inst.conf.features.pass_through)
 			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
+
+		WrFlag(lump, ld->flags, "monsteractivate", MLF_ZDoom_MonCanActivate);
+		WrFlag(lump, ld->flags, "blockplayers", MLF_ZDoom_BlockPlayers);
+		WrFlag(lump, ld->flags, "blockeverything", MLF_ZDoom_BlockEverything);
 
 		for(const UDMFLineStringMapping *mapping = &udmfLineStringMapping[0]; mapping->name; ++mapping)
 		{
