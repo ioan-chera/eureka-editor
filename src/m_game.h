@@ -324,6 +324,9 @@ struct port_features_t
 
 	// for Hexen format, allows the extra 2 player-use-passthru activations
 	int player_use_passthru_activation;
+
+	// vertex zfloor, zceiling
+	int udmf_vertex_slopes;
 };
 
 //

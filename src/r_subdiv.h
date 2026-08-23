@@ -202,6 +202,7 @@ private:
 	void CheckLineSlope(const LineDef *L);
 	void CheckPlaneCopy(const LineDef *L);
 	void CheckSlopeThing(const Thing *T);
+	void CheckSlopeVertices();
 	void CheckSlopeCopyThing(const Thing *T);
 	void PlaneAlign(const LineDef *L, int floor_mode, int ceil_mode);
 	void PlaneAlignPart(const LineDef *L, Side side, int plane);

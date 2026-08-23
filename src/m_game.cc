@@ -364,6 +364,7 @@ static const FeatureMapping skFeatureMappings[] =
 	MAPPING(extra_floors),
 	MAPPING(slopes),
 	MAPPING(player_use_passthru_activation),
+	MAPPING(udmf_vertex_slopes),
 #undef MAPPING
 };
 

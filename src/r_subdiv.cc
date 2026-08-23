@@ -205,6 +205,7 @@ void sector_info_cache_c::Rebuild()
 	{
 		CheckSlopeCopyThing(thing.get());
 	}
+	CheckSlopeVertices();
 
 	for (const auto &linedef : inst.level.linedefs)
 	{
@@ -351,6 +352,112 @@ void sector_info_cache_c::CheckSlopeThing(const Thing *T)
 		case 9502: PlaneTiltByThing(T, 0); break;
 		case 9503: PlaneTiltByThing(T, 1); break;
 		default: break;
+		}
+	}
+}
+
+void sector_info_cache_c::CheckSlopeVertices()
+{
+	if(inst.loaded.levelFormat != MapFormat::udmf || !inst.conf.features.udmf_vertex_slopes)
+		return;
+
+	struct SectorInfo
+	{
+		void addVertex(int index)
+		{
+			if(numvertices >= 4)
+				return;
+			for(int i = 0; i < numvertices; ++i)
+				if(vertices[i] == index)
+					return;
+			if(++numvertices <= 3)
+				vertices[numvertices - 1] = index;
+		}
+
+		int numvertices = 0;
+		int vertices[3] = {};
+	};
+
+	std::vector<SectorInfo> sectorInfos;
+	sectorInfos.resize(inst.level.numSectors());
+
+	for(const auto &L : inst.level.linedefs)
+	{
+		int sector = inst.level.getSectorID(*L, Side::right);
+		if(sector >= 0 && sector < inst.level.numSectors())
+		{
+			sectorInfos[sector].addVertex(L->start);
+			sectorInfos[sector].addVertex(L->end);
+		}
+		sector = inst.level.getSectorID(*L, Side::left);
+		if(sector >= 0 && sector < inst.level.numSectors())
+		{
+			sectorInfos[sector].addVertex(L->start);
+			sectorInfos[sector].addVertex(L->end);
+		}
+	}
+	for(int i = 0; i < inst.level.numSectors(); ++i)
+	{
+		if(sectorInfos[i].numvertices != 3)
+			continue;
+		double zf[3];
+		double zc[3];
+		bool slopedfloor = false, slopedceiling = false;
+		const auto &S = inst.level.sectors[i];
+		const Vertex *v[3] = {};
+		for(int j = 0; j < 3; ++j)
+		{
+			v[j] = inst.level.vertices[sectorInfos[i].vertices[j]].get();
+
+			if(v[j]->zfloor.has_value())
+			{
+				slopedfloor = true;
+				zf[j] = *v[j]->zfloor;
+			}
+			else
+				zf[j] = S->floorh;
+			if(v[j]->zceiling.has_value())
+			{
+				slopedceiling = true;
+				zc[j] = *v[j]->zceiling;
+			}
+			else
+				zc[j] = S->ceilh;
+		}
+		struct WorkSet
+		{
+			const bool &sloped;
+			const double *zs;
+			slope_plane_c sector_3dfloors_c::*plane;
+		} wss[2] = { { slopedfloor, zf, &sector_3dfloors_c::f_plane },
+			{ slopedceiling, zc, &sector_3dfloors_c::c_plane } };
+		for(WorkSet &ws : wss)
+		{
+			if(!ws.sloped)
+				continue;
+			// Cramer's rule
+			/*
+			 xm * x1 + ym * y1 + zadd = z1
+			 xm * x2 + ym * y2 + zadd = z2
+			 xm * x3 + ym * y3 + zadd = z3
+			 */
+			const double det = v[0]->xf * v[1]->yf + v[1]->xf * v[2]->yf +
+					v[2]->xf * v[0]->yf - v[2]->xf * v[1]->yf - v[0]->xf * v[2]->yf -
+					v[1]->xf * v[0]->yf;
+			if(!det)
+				continue;
+			(infos[i].floors.*ws.plane).sloped = true;
+			const double detx = ws.zs[0] * v[1]->yf + ws.zs[1] * v[2]->yf + ws.zs[2] * v[0]->yf -
+					ws.zs[2] * v[1]->yf - ws.zs[0] * v[2]->yf - ws.zs[1] * v[0]->yf;
+			(infos[i].floors.*ws.plane).xm = static_cast<float>(detx / det);
+			const double dety = v[0]->xf * ws.zs[1] + v[1]->xf * ws.zs[2] +
+					v[2]->xf * ws.zs[0] - v[2]->xf * ws.zs[1] - v[0]->xf * ws.zs[2] -
+					v[1]->xf * ws.zs[0];
+			(infos[i].floors.*ws.plane).ym = static_cast<float>(dety / det);
+			const double detz = v[0]->xf * v[1]->yf * ws.zs[2] + v[1]->xf * v[2]->yf * ws.zs[0] +
+					v[2]->xf * v[0]->yf * ws.zs[1] - v[2]->xf * v[1]->yf * ws.zs[0] -
+					v[0]->xf * v[2]->yf * ws.zs[1] - v[1]->xf * v[0]->yf * ws.zs[2];
+			(infos[i].floors.*ws.plane).zadd = static_cast<float>(detz / det);
 		}
 	}
 }

@@ -28,6 +28,8 @@
 #define __EUREKA_E_VERTEX_H__
 
 #include "DocumentModule.h"
+#include "e_sector.h"
+#include <optional>
 
 struct vert_along_t;
 
@@ -44,6 +46,9 @@ public:
 	int howManyLinedefs(int v_num) const;
 	void mergeList(EditOperation &op, selection_c &list, selection_c *deletedResultList) const;
 	bool tryFixDangler(int v_num) const;
+
+	bool hasTriangleSectors(int v_num) const;
+	std::optional<int> getTriangleSectorTipHeight(int v_num, SectorSurface surface) const;
 
 private:
 	void mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v, selection_c &del_lines) const;

@@ -105,7 +105,7 @@ feature mix_textures_flats 1
 feature neg_patch_offsets 1
 feature extra_floors 7
 feature slopes 28
-
+feature udmf_vertex_slopes 1
 
 #---- ZDOOM THINGS ------------
 

@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2007-2015 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
@@ -36,6 +37,17 @@ public:
 	Fl_Button *move_up;
 	Fl_Button *move_down;
 
+	Fl_Group *slopeControls;
+
+	UI_DynInput *ceil_h;
+	UI_DynInput *floor_h;
+
+	Fl_Button *clear_ceiling;
+	Fl_Button *clear_floor;
+
+	Fl_Button *ce_down, *ce_up;
+	Fl_Button *fl_down, *fl_up;
+
 	UI_VertexBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 
 	int handle(int event) override;
@@ -54,6 +66,9 @@ private:
 	static void x_callback(Fl_Widget *, void *);
 	static void y_callback(Fl_Widget *, void *);
 	static void button_callback(Fl_Widget *, void *);
+	static void slope_adjust_button_callback(Fl_Widget *, void *);
+	static void slope_height_callback(Fl_Widget *, void *);
+	static void slope_clear_button_callback(Fl_Widget *, void *);
 };
 
 

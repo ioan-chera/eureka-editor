@@ -235,8 +235,11 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 	int f_h = atoi(box->floor_h->value());
 	int c_h = atoi(box->ceil_h->value());
 
-	f_h = clamp(-32767, f_h, 32767);
-	c_h = clamp(-32767, c_h, 32767);
+	if(box->inst.loaded.levelFormat != MapFormat::udmf)
+	{
+		f_h = clamp(-32767, f_h, 32767);
+		c_h = clamp(-32767, c_h, 32767);
+	}
 
 	if (! box->inst.edit.Selected->empty())
 	{

@@ -45,7 +45,8 @@
 #include "w_rawdef.h"
 
 #include <algorithm>
-
+#include <unordered_set>
+#include <vector>
 
 int VertexModule::findExact(double fx, double fy) const
 {
@@ -423,6 +424,88 @@ bool VertexModule::tryFixDangler(int v_num) const
 	return false;
 }
 
+bool VertexModule::hasTriangleSectors(int v_num) const
+{
+	std::vector<int> otherVertices;
+	std::unordered_set<int64_t> pair;
+	static_assert(sizeof(int64_t) == 2 * sizeof(int));
+	for(const auto &L : doc.linedefs)
+	{
+		pair.insert((int64_t)L->start | ((int64_t)L->end << 32));
+		if(L->TouchesVertex(v_num))
+		{
+			int other_v = L->OtherVertex(v_num);
+			if(other_v != v_num)
+				otherVertices.push_back(other_v);
+		}
+	}
+	for(size_t i = 0; i < otherVertices.size() - 1; ++i)
+	{
+		for(size_t j = i + 1; j < otherVertices.size(); ++j)
+		{
+			int64_t v1index = otherVertices[i];
+			int64_t v2index = otherVertices[j];
+			if(pair.contains(v1index | v2index << 32) || pair.contains(v2index | v1index << 32))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+std::optional<int> VertexModule::getTriangleSectorTipHeight(int v_num, SectorSurface surface) const
+{
+	struct SectorInfo
+	{
+		int lineCount = 0;
+		std::unordered_set<int> vertices;
+	};
+	std::vector<SectorInfo> infos;
+	infos.resize(doc.numSectors());
+	for(const auto &L : doc.linedefs)
+	{
+		int alreadySector = -1;
+		for(Side part : { Side::right, Side::left })
+		{
+			int side = L->WhatSideDef(part);
+			if(side >= 0 && side < doc.numSidedefs())
+			{
+				int sector = doc.sidedefs[side]->sector;
+
+				// Avoid two-sided lines referencing same sector on both sides counting twice
+				if(sector >= 0 && sector < doc.numSectors() && sector != alreadySector)
+				{
+					++infos[sector].lineCount;
+					infos[sector].vertices.insert(L->start);
+					infos[sector].vertices.insert(L->end);
+				}
+				alreadySector = sector;
+			}
+		}
+	}
+
+	std::optional<int> extremum;
+	for(int i = 0; i < doc.numSectors(); ++i)
+	{
+		const SectorInfo &info = infos[i];
+		if(info.lineCount != 3 || !info.vertices.contains(v_num))
+			continue;
+		switch(surface)
+		{
+			case SectorSurface::floor:
+				if(!extremum.has_value() || doc.sectors[i]->floorh > extremum)
+					extremum = doc.sectors[i]->floorh;
+				break;
+			case SectorSurface::ceiling:
+			default:
+				if(!extremum.has_value() || doc.sectors[i]->ceilh < extremum)
+					extremum = doc.sectors[i]->ceilh;
+				break;
+		}
+	}
+	return extremum;
+}
 
 void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y) const
 {

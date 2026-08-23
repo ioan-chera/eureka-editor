@@ -84,9 +84,10 @@ using Field = std::variant<
 	unsigned LineDef::*,
 	int      Thing::*,
 	double   Thing::*,
-	double   Vertex::*
+	double   Vertex::*,
+	std::optional<double> Vertex::*
 >;
-using Value = std::variant<int, unsigned, double>;
+using Value = std::variant<int, unsigned, double, std::optional<double>>;
 
 // E_BASIS
 
@@ -328,6 +329,7 @@ private:
 	bool changeThing(int thing, int Thing::*field, int value);
 	bool changeThing(int thing, double Thing::*field, double value);
 	bool changeVertex(int vert, double Vertex::*field, double value);
+	bool changeVertex(int vert, std::optional<double> Vertex::*field, std::optional<double> value);
 	bool changeSector(int sec, Sector::IntAddress field, int value);
 	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
@@ -397,6 +399,11 @@ public:
 	}
 
 	bool changeVertex(int vert, double Vertex::*field, double value)
+	{
+		return basis.changeVertex(vert, field, value);
+	}
+
+	bool changeVertex(int vert, std::optional<double> Vertex::*field, std::optional<double> value)
 	{
 		return basis.changeVertex(vert, field, value);
 	}

@@ -414,6 +414,12 @@ bool Basis::changeVertex(int vert, double Vertex::*field, double value)
 
 	return change(ObjType::vertices, vert, field, value);
 }
+bool Basis::changeVertex(int vert, std::optional<double> Vertex::*field, std::optional<double> value)
+{
+	SYS_ASSERT(vert >= 0 && vert < doc.numVertices());
+
+	return change(ObjType::vertices, vert, field, value);
+}
 
 //
 // Change sector
@@ -678,6 +684,17 @@ void Basis::EditUnit::rawChange(Basis &basis)
 					break;
 				default:
 					BugError("Basis::EditOperation::rawChange(vertexDouble): bad objtype %u\n", (unsigned)objtype);
+					break;
+			}
+		},
+		[&basis, this](std::optional<double> Vertex::*field) {
+			switch(objtype)
+			{
+				case ObjType::vertices:
+					std::swap(basis.doc.vertices[objnum].get()->*field, std::get<std::optional<double>>(value));
+					break;
+				default:
+					BugError("Basis::EditOperation::rawChange(vertexOptionalDouble): bad objtype %u\n", (unsigned)objtype);
 					break;
 			}
 		},

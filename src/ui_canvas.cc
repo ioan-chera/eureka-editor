@@ -681,7 +681,10 @@ void UI_Canvas::DrawVertices()
 {
 	const int r = vertex_radius(inst.grid.getScale());
 
-	RenderColor(FL_GREEN);
+	const bool vertexSlopes = inst.loaded.levelFormat == MapFormat::udmf &&
+			inst.conf.features.udmf_vertex_slopes;
+	if(!vertexSlopes)
+		RenderColor(FL_GREEN);
 
 	for (const auto &vertex : inst.level.vertices)
 	{
@@ -690,6 +693,13 @@ void UI_Canvas::DrawVertices()
 
 		if (Vis(x, y, r))
 		{
+			if(vertexSlopes)
+			{
+				if(vertex->zfloor || vertex->zceiling)
+					RenderColor(FL_MAGENTA);
+				else
+					RenderColor(FL_GREEN);
+			}
 			DrawVertex(x, y, r);
 		}
 	}

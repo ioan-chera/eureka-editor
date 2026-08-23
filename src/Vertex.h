@@ -23,11 +23,16 @@
 #include "FixedPoint.h"
 #include "m_vector.h"
 
+#include <optional>
+
 class Instance;
 
 struct Vertex
 {
 	double xf = 0.0, yf = 0.0;
+
+	std::optional<double> zfloor;
+	std::optional<double> zceiling;
 
 	inline double x() const noexcept
 	{
@@ -64,6 +69,11 @@ struct Vertex
 	bool operator != (const Vertex &other) const
 	{
 		return xf != other.xf || yf != other.yf;
+	}
+
+	bool hasSlope() const noexcept
+	{
+		return zfloor.has_value() || zceiling.has_value();
 	}
 };
 

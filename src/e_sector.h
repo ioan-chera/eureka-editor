@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2016 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -28,6 +29,12 @@
 #define __EUREKA_E_SECTOR_H__
 
 #include "DocumentModule.h"
+
+enum class SectorSurface
+{
+	floor,
+	ceiling
+};
 
 class lineloop_c
 {
