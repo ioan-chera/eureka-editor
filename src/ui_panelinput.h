@@ -33,6 +33,7 @@
 #include "FL/Fl_Flex.H"
 #include "FL/Fl_Group.H"
 #include "FL/Fl_Input.H"
+#include "FL/Fl_Scroll.H"
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
@@ -122,13 +123,11 @@ private:
 };
 
 
-class MapItemBox : public Fl_Group
+class MapItemBox : public Fl_Scroll
 {
 public:
-	MapItemBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr) : Fl_Group(X, Y, W, H, label), inst(inst)
-	{
-	}
-	
+	MapItemBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr);
+
 	void SetObj(int _index, int _count);
 	int GetObj() const { return obj; }
 	

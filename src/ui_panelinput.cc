@@ -96,6 +96,14 @@ void PanelFieldFixUp::setDirtyCallback(Fl_Widget *widget, void *data)
 		it->second.callback(widget, it->second.data);
 }
 
+MapItemBox::MapItemBox(Instance &inst, int X, int Y, int W, int H, const char *label) : Fl_Scroll(X, Y, W, H, label), inst(inst)
+{
+	new Fl_Box(X, 0, W, 6);	// use it to ensure padding
+
+	scrollbar_size(3 * Fl::scrollbar_size() / 4);
+	type(Fl_Scroll::VERTICAL);
+}
+
 //
 // Clear-callback for this
 //
