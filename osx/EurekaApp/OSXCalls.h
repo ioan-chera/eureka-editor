@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -52,6 +53,9 @@ void OSX_SetWindowRepresentedFile(void *window, const char *filename, const char
 
 // Marks the NSWindow as edited or not, showing the unsaved indicator on macOS.
 void OSX_SetWindowDocumentEdited(void *window, bool edited);
+
+void OSX_RunMacBundle(const fs::path &appPath, const SString &testingCommandLine,
+					  const std::vector<SString> &args);
 
 #endif /* defined(__Eureka_Doom_Editor__OSXCalls__) */
 

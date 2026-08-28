@@ -4,6 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
+//  Copyright (C) 2026      Ioan Chera
 //  Copyright (C) 2001-2013 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -30,6 +31,7 @@
 
 #ifdef __APPLE__
 
+#include "m_parse.h"
 #include "m_strings.h"
 #import <Cocoa/Cocoa.h>
 #include "OSXCalls.h"
@@ -116,5 +118,27 @@ void OSX_SetWindowDocumentEdited(void *window, bool edited)
    }
 }
 
+void OSX_RunMacBundle(const fs::path &appPath, const SString &testingCommandLine,
+                      const std::vector<SString> &args)
+{
+    @autoreleasepool
+    {
+        auto configuration = [NSWorkspaceOpenConfiguration configuration];
+        TokenWordParse parse(testingCommandLine, false);
+        NSMutableArray<NSString *> *array = [NSMutableArray array];
+        SString arg;
+        while(parse.getNext(arg))
+            [array addObject:[NSString stringWithUTF8String:arg.c_str()]];
+        for(const SString &arg : args)
+            [array addObject:[NSString stringWithUTF8String:arg.c_str()]];
+        configuration.arguments = array;
+
+        auto url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:appPath.c_str()]];
+        [[NSWorkspace sharedWorkspace] openApplicationAtURL:url configuration:configuration completionHandler:^(NSRunningApplication * _Nullable app, NSError * _Nullable error)
+         {
+            // TODO: log or do something here
+        }];
+    }
+}
 
 #endif

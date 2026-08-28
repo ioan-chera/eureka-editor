@@ -32,6 +32,8 @@
 #include "ui_menu.h"
 #include "ui_window.h"
 
+#include "OSXCalls.h"
+
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #endif
@@ -490,15 +492,7 @@ static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
 	GrabWadNamesArgs(inst, args);
 	CalcWarpString(inst.loaded.levelName, args);
 
-	SString argString = SString("/usr/bin/open -a ") + SString(portPath.u8string()).spaceEscape(true) + " --args " + inst.loaded.testingCommandLine + " " + buildArgString(args, true);
-	logArgs(argString);
-
-	int ret = system(argString.c_str());
-	if(ret == -1)
-	{
-		ThrowException("Failed system to start %s: %s", reinterpret_cast<const char *>(portPath.u8string().c_str()),
-					   GetErrorMessage(errno).c_str());
-	}
+	OSX_RunMacBundle(portPath, inst.loaded.testingCommandLine, args);
 }
 
 static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
