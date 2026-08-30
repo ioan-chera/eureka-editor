@@ -37,6 +37,7 @@
 #include "Thing.h"
 #include "Vertex.h"
 #include <memory>
+#include <optional>
 #include <stack>
 #include <variant>
 

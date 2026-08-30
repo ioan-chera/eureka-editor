@@ -32,9 +32,8 @@
 #include "ui_menu.h"
 #include "ui_window.h"
 
-#include "OSXCalls.h"
-
 #ifdef __APPLE__
+#include "OSXCalls.h"
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
@@ -469,9 +468,24 @@ static void showTestMapError(Instance *inst, const SString &message)
 	DLG_ShowError(false, "Could not start map for testing: %s", message.c_str());
 }
 
-static void setStatusForFireAndForgetLaunching(Instance &inst)
+static void setStatusForFireAndForgetLaunching(const Instance &inst)
 {
 	inst.Status_Set("Started the game");
+}
+
+static SString makeSanitized(const SString &commandLine)
+{
+	TokenWordParse parse(commandLine, false);
+	SString arg;
+	SString result;
+	while(parse.getNext(arg))
+	{
+		if(!result.empty())
+			result.push_back(' ');
+		
+		result += arg.spaceEscape();
+	}
+	return result;
 }
 
 #ifdef _WIN32
@@ -482,7 +496,7 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 	GrabWadNamesArgs(inst, args);
 	CalcWarpString(inst.loaded.levelName, args);
 
-	SString argString = inst.loaded.testingCommandLine + " " + buildArgString(args, false);
+	SString argString = makeSanitized(inst.loaded.testingCommandLine) + " " + buildArgString(args, false);
 	logArgs(argString);
 	std::wstring argsWide = UTF8ToWide(argString.c_str());
 
@@ -498,7 +512,7 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 }
 #else
 
-static void testMapOnMacBundle(Instance &inst, const fs::path& portPath)
+static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
