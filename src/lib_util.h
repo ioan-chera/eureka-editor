@@ -88,6 +88,8 @@ const V *get(const std::map<K, V> &map, const K &key)
  */
 #define IDENT_SET "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
+#define EN_DASH "\xe2\x80\x93"
+
 #endif  /* __EUREKA_YUTIL_H__ */
 
 //--- editor settings ---

@@ -611,6 +611,7 @@ int x11_check_focus_change(void *xevent, void *data)
 
 static void Main_SetupFLTK()
 {
+	Fl::lock();	// Single necessary lock to be able to use multithreading
 	Fl::visual(FL_DOUBLE | FL_RGB);
 
 #ifndef NO_OPENGL

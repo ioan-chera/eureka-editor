@@ -1944,8 +1944,6 @@ private:
 	Instance &inst;
 };
 
-#define EN_DASH "\xe2\x80\x93"
-
 CheckResult ChecksModule::checkThings(int min_severity) const
 {
 	UI_Check_Things *dialog = new UI_Check_Things(min_severity > 0, inst);

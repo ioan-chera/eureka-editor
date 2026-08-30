@@ -119,7 +119,9 @@ void OSX_SetWindowDocumentEdited(void *window, bool edited)
 }
 
 void OSX_RunMacBundle(const fs::path &appPath, const SString &testingCommandLine,
-                      const std::vector<SString> &args)
+                      const std::vector<SString> &args,
+                      std::function<void(const SString &description,
+                                            const SString &failureReason)> errorCallback)
 {
     @autoreleasepool
     {
@@ -133,10 +135,20 @@ void OSX_RunMacBundle(const fs::path &appPath, const SString &testingCommandLine
             [array addObject:[NSString stringWithUTF8String:arg.c_str()]];
         configuration.arguments = array;
 
+        // Needed to avoid macOS specific alerts, as we show them ourselves.
+        configuration.promptsUserIfNeeded = NO;
+
         auto url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:appPath.c_str()]];
-        [[NSWorkspace sharedWorkspace] openApplicationAtURL:url configuration:configuration completionHandler:^(NSRunningApplication * _Nullable app, NSError * _Nullable error)
+        [[NSWorkspace sharedWorkspace] openApplicationAtURL:url configuration:configuration
+                                        completionHandler:^(NSRunningApplication * _Nullable app,
+                                                            NSError * _Nullable error)
          {
-            // TODO: log or do something here
+            if(!app && error && errorCallback)
+            {
+                const SString description = [error.localizedDescription UTF8String];
+                const SString failureReason = [error.localizedFailureReason UTF8String];
+                errorCallback(description, failureReason);
+            }
         }];
     }
 }

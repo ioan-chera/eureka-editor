@@ -462,6 +462,18 @@ static void logArgs(const SString& args)
 	gLog.printf("--> %s\n", args.c_str());
 }
 
+static void showTestMapError(Instance *inst, const SString &message)
+{
+	if(inst)
+		inst->Status_Set("Failed testing map");
+	DLG_ShowError(false, "Could not start map for testing: %s", message.c_str());
+}
+
+static void setStatusForFireAndForgetLaunching(Instance &inst)
+{
+	inst.Status_Set("Started the game");
+}
+
 #ifdef _WIN32
 // On Windows the process is started as if user ran it individually
 static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
@@ -482,17 +494,37 @@ static void testMapOnWindows(const Instance &inst, const fs::path& portPath)
 		ThrowException("Failed starting %s: error %s\n\n%s", portPath.u8string().c_str(),
 			GetShellExecuteErrorMessage(result).c_str(), GetWindowsErrorMessage(error).c_str());
 	}
-	inst.Status_Set("Started the game");
+	setStatusForFireAndForgetLaunching(inst);
 }
 #else
 
-static void testMapOnMacBundle(const Instance &inst, const fs::path& portPath)
+static void testMapOnMacBundle(Instance &inst, const fs::path& portPath)
 {
 	std::vector<SString> args;
 	GrabWadNamesArgs(inst, args);
 	CalcWarpString(inst.loaded.levelName, args);
 
-	OSX_RunMacBundle(portPath, inst.loaded.testingCommandLine, args);
+	OSX_RunMacBundle(portPath, inst.loaded.testingCommandLine, args,
+					 [](const SString &description, const SString &failureReason)
+	{
+		struct Context
+		{
+			SString description, failureReason;
+		};
+
+		auto context = new Context { description, failureReason };
+		Fl::awake([](void *data)
+		{
+			auto context = static_cast<const Context *>(data);
+			// Can't just pass inst, as we don't know if it still exists asynchronously without
+			// overengineering. Plan is to have multiple instances, maybe when we can identify them
+			// by unique ID it will be safe.
+			showTestMapError(nullptr, context->description + "\n\n" + context->failureReason);
+			delete context;
+		}, context);
+	});
+
+	setStatusForFireAndForgetLaunching(inst);
 }
 
 static void testMapOnPOSIX(const Instance &inst, const fs::path& portPath)
@@ -640,8 +672,7 @@ void Instance::CMD_TestMap()
 	}
 	catch(const std::runtime_error &e)
 	{
-		Status_Set("Failed testing map");
-		DLG_ShowError(false, "Could not start map for testing: %s", e.what());
+		showTestMapError(this, e.what());
 	}
 
 }

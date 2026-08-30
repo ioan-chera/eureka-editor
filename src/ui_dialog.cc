@@ -274,7 +274,7 @@ void DLG_ShowError(bool fatal, EUR_FORMAT_STRING(const char *msg), ...)
 
 	gLog.printf("Error: %s\n", dialog_buffer.c_str());
 	DialogShowAndRun(MessageBoxIcon::exclamation, dialog_buffer, fatal ?
-					 "Eureka - Fatal Error" : "Eureka - Error", linkTitle,
+					 "Eureka " EN_DASH " Fatal Error" : "Eureka " EN_DASH " Error", linkTitle,
 					 linkURL);
 }
 
@@ -294,7 +294,7 @@ void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
-	DialogShowAndRun(MessageBoxIcon::information, dialog_buffer, "Eureka - Notification");
+	DialogShowAndRun(MessageBoxIcon::information, dialog_buffer, "Eureka " EN_DASH " Notification");
 }
 
 std::function<int(const std::vector<SString> &buttons, const char *msg,
@@ -314,7 +314,7 @@ int DLG_Confirm(const std::vector<SString>& buttons, EUR_FORMAT_STRING(const cha
 	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
-	return DialogShowAndRun(MessageBoxIcon::question, dialog_buffer, "Eureka - Confirmation",
+	return DialogShowAndRun(MessageBoxIcon::question, dialog_buffer, "Eureka " EN_DASH " Confirmation",
 							NULL, NULL, &buttons);
 }
 

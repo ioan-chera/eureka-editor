@@ -35,6 +35,7 @@
 #define __Eureka_Doom_Editor__OSXCalls__
 
 #include <filesystem>
+#include <functional>
 namespace fs = std::filesystem;
 
 class SString;
@@ -55,7 +56,9 @@ void OSX_SetWindowRepresentedFile(void *window, const char *filename, const char
 void OSX_SetWindowDocumentEdited(void *window, bool edited);
 
 void OSX_RunMacBundle(const fs::path &appPath, const SString &testingCommandLine,
-					  const std::vector<SString> &args);
+					  const std::vector<SString> &args,
+					  std::function<void(const SString &description,
+											const SString &failureReason)> errorCallback);
 
 #endif /* defined(__Eureka_Doom_Editor__OSXCalls__) */
 
